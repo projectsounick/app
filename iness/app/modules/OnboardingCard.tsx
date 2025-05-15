@@ -1,0 +1,119 @@
+import React, { useEffect, useRef } from "react";
+import {
+  Animated,
+  Dimensions,
+  TouchableOpacity,
+  Text,
+  View,
+} from "react-native";
+import { OnboardingCardInterface } from "../interfaces/onboardingInterface";
+import theme from "../Theme/globalTheme";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+
+export default function OnboardingCard({
+  index,
+  option,
+  state,
+  updateState,
+  height,
+  icon,
+  description,
+  style,
+}: OnboardingCardInterface) {
+  const isSelected = Array.isArray(state)
+    ? state.includes(option)
+    : state === option;
+
+  const translateY = useRef(new Animated.Value(40)).current;
+  const opacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(translateY, {
+      toValue: 0,
+      duration: 500,
+      delay: index * 100, // staggered delay
+      useNativeDriver: true,
+    }).start();
+
+    Animated.timing(opacity, {
+      toValue: 1,
+      duration: 500,
+      delay: index * 100,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  return (
+    <Animated.View
+      style={{
+        transform: [{ translateY }],
+        opacity,
+      }}
+    >
+      <TouchableOpacity
+        onPress={() => updateState(option)}
+        activeOpacity={0.9}
+        style={{
+          backgroundColor: "#fff",
+          height,
+          marginBottom: 18,
+          borderWidth: isSelected ? 2 : 0,
+          borderColor: isSelected ? theme.colors.secondPrimary : "transparent",
+          borderRadius: 12,
+          flexDirection: icon || description ? "row" : "column", // if no icon/desc, make it column
+          alignItems: "center",
+          justifyContent: icon || description ? "flex-start" : "center", // center if no icon/desc
+          paddingHorizontal: 12,
+
+          elevation: 3,
+        }}
+      >
+        {/* Icon if exists */}
+        {icon && (
+          <MaterialCommunityIcons
+            name={icon}
+            size={28}
+            color={theme.colors.secondPrimary}
+            style={{
+              marginRight: 12,
+            }}
+          />
+        )}
+
+        {/* Label + Description */}
+        <View
+          style={{
+            flex: 1,
+            alignItems: icon || description ? "flex-start" : "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              fontSize: style ? style.fontSize : theme.fontSizes.large,
+              fontWeight: "600",
+              color: theme.colors.dark,
+              textAlign: icon || description ? "left" : "center",
+            }}
+          >
+            {option}
+          </Text>
+
+          {description && (
+            <Text
+              style={{
+                marginTop: 4,
+                fontSize: 14,
+                color: theme.colors.grey,
+                fontWeight: "400",
+                textAlign: "left",
+              }}
+            >
+              {description}
+            </Text>
+          )}
+        </View>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+}

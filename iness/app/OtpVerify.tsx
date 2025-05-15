@@ -1,0 +1,260 @@
+import React, { useRef, useState } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
+  ImageBackground,
+} from "react-native";
+import theme from "./Theme/globalTheme";
+import AnimatedSubmitButton from "./modules/AnimatedSubmitButton";
+import useServiceWithSnackbar from "@/hooks/usePostDataHook";
+import { userService } from "./services/user.service";
+import CustomSnackbar from "./modules/Snackbar";
+import { useNavigation } from "@react-navigation/native";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import { ActivityIndicator } from "react-native-paper";
+/// Main functional component for the OTP input screen ///// -----------------------------------/
+const OTPInputScreen = () => {
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const navigation = useNavigation<any>();
+  const [otpResendLoading, setOtpResendLoading] = useState(false);
+  const inputRefs = useRef<Array<TextInput | null>>([]);
+
+  /// Custom hook to handle the service call and snackbar visibility---/
+  const {
+    loading,
+    data,
+    callService,
+    snackbarVisible,
+    snackbarMessage,
+    setSnackbarVisible,
+    setSnackbarMessage,
+  } = useServiceWithSnackbar(userService.verifyLoginOtp);
+  const handleChange = (text: string, index: number) => {
+    if (/^\d$/.test(text)) {
+      const newOtp = [...otp];
+      newOtp[index] = text;
+      setOtp(newOtp);
+      if (index < 5 && inputRefs.current[index + 1]) {
+        inputRefs.current[index + 1]?.focus();
+      }
+    } else if (text === "") {
+      const newOtp = [...otp];
+      newOtp[index] = "";
+      setOtp(newOtp);
+    }
+  };
+
+  const handleKeyPress = (e: any, index: number) => {
+    if (e.nativeEvent.key === "Backspace" && otp[index] === "") {
+      if (index > 0 && inputRefs.current[index - 1]) {
+        inputRefs.current[index - 1]?.focus();
+      }
+    }
+  };
+
+  //// Function to handle the submission of the OTP data---------------------/
+  const handleSubmit = async () => {
+    let userAsyncStorageResponse =
+      await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+
+    //// Check if the phone number exists in AsyncStorage
+    if (
+      !userAsyncStorageResponse ||
+      userAsyncStorageResponse.exists === false
+    ) {
+      setSnackbarVisible(true);
+      setSnackbarMessage("Phone number not found. Please try again.");
+      return;
+    }
+
+    const fullOtp = otp.join("");
+    if (fullOtp.length === 6) {
+      try {
+        let requestBody = {
+          phoneNumber: userAsyncStorageResponse.data.phoneNumber,
+          otp: fullOtp,
+        };
+        const response = await callService(requestBody);
+        console.log("this is response");
+        console.log(response);
+
+        if (response?.success) {
+          /// Store user data in AsyncStorage
+          await asyncStorageUtils.storeUserInAsyncStorage(response.data);
+
+          setSnackbarVisible(true);
+          setSnackbarMessage("OTP verified successfully!");
+          let { onboarding } = response.data;
+
+          if (onboarding) {
+            setOtp(["", "", "", "", "", ""]);
+            //// When onboarding is true we will directly redirect him to secondsplashscreen
+            navigation.navigate("secondsplashscreen"); // Uncomment to navigate on success
+          } else {
+            setOtp(["", "", "", "", "", ""]);
+            //// when onboarding is false we will redirect him to onboarding screen
+            navigation.navigate("Onboarding"); // Uncomment to navigate on success
+          }
+        } else {
+          setSnackbarVisible(true);
+          setSnackbarMessage("Invalid OTP. Please try again.");
+        }
+      } catch (error) {
+        console.error("Error verifying OTP:", error);
+        setSnackbarVisible(true);
+        setSnackbarMessage("Error verifying OTP. Please try again.");
+      }
+    } else {
+      setSnackbarVisible(true);
+      setSnackbarMessage("Please enter a valid OTP.");
+    }
+  };
+
+  /// Function to handle the "Resend OTP" button press---------/
+  const handleResendOtp = async () => {
+    try {
+      setOtpResendLoading(true);
+      /// Fetching the phone number from AsyncStorage---/
+      const userData = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
+        "user"
+      );
+      if (!userData || userData.exists === false) {
+        setSnackbarVisible(true);
+        setSnackbarMessage("Phone number not found. Please try again.");
+        return;
+      }
+      let response = await callService(userData.data.phoneNumber);
+
+      if (response?.success) {
+        setSnackbarVisible(true);
+        setSnackbarMessage("OTP resent successfully!");
+      }
+    } catch (error) {
+      setSnackbarVisible(true);
+      setSnackbarMessage("Error resending OTP. Please try again.");
+    } finally {
+      setOtpResendLoading(false);
+    }
+  };
+  return (
+    <ImageBackground
+      source={require("../assets/images/onboardingBackground.jpg")}
+      style={{ flex: 1 }}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={{ flex: 1 }}
+      >
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "space-between",
+            paddingVertical: 60,
+          }}
+        >
+          {/* Top Content */}
+          <View style={{ alignItems: "center", gap: theme.spacing.lg }}>
+            <View
+              style={{
+                alignItems: "flex-start",
+
+                width: "90%",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: theme.fontSizes.large,
+                  fontWeight: theme.fontWeights.bold,
+                  color: theme.colors.dark,
+                  marginBottom: 4,
+                }}
+              >
+                Enter OTP
+              </Text>
+              <Text
+                style={{
+                  fontSize: theme.fontSizes.small,
+                  color: theme.colors.gray, // or a lighter color
+                }}
+              >
+                An OTP has been sent to your mobile number
+              </Text>
+            </View>
+            {/* OTP Boxes */}
+            <View style={{ flexDirection: "row", gap: 10 }}>
+              {otp.map((digit, index) => (
+                <TextInput
+                  key={index}
+                  ref={(ref) => (inputRefs.current[index] = ref)}
+                  value={digit}
+                  onChangeText={(text) => handleChange(text, index)}
+                  onKeyPress={(e) => handleKeyPress(e, index)}
+                  keyboardType="numeric"
+                  maxLength={1}
+                  style={{
+                    width: 50,
+                    height: 60,
+                    borderWidth: 1,
+                    borderColor: theme.colors.normal,
+                    borderRadius: 10,
+                    textAlign: "center",
+                    fontSize: 24,
+                    color: theme.colors.dark,
+                    backgroundColor: "#f9f9f9",
+                  }}
+                />
+              ))}
+            </View>
+            {/* Haven’t received? Resend */}
+            <TouchableOpacity
+              onPress={handleResendOtp}
+              disabled={otpResendLoading}
+              // disable while loading
+              style={{ cursor: "pointer" }}
+            >
+              {otpResendLoading ? (
+                <ActivityIndicator
+                  size="small"
+                  color={theme.colors.dark}
+                  style={{ marginTop: theme.spacing.sm }}
+                />
+              ) : (
+                <Text
+                  style={{
+                    color: theme.colors.dark,
+                    cursor: "pointer",
+                    fontSize: theme.fontSizes.small,
+                    marginTop: theme.spacing.sm,
+                  }}
+                >
+                  Haven’t received?{" "}
+                  <Text style={{ fontWeight: "bold" }}>Resend</Text>
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {/* Submit Button at Bottom */}
+          <AnimatedSubmitButton
+            onPress={handleSubmit}
+            title="Login"
+            loading={loading}
+          />
+        </View>
+      </KeyboardAvoidingView>
+      <CustomSnackbar
+        visible={snackbarVisible}
+        message={snackbarMessage}
+        bgColor={theme.colors.primary}
+        onDismiss={() => setSnackbarVisible(false)}
+      />
+    </ImageBackground>
+  );
+};
+
+export default OTPInputScreen;
