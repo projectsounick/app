@@ -136,10 +136,6 @@ export default function SupportScreen() {
     }, 100);
   }, [data]);
 
-  useEffect(() => {
-    console.log("this is selectedimage");
-    console.log(selectedImage);
-  }, [selectedImage]);
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: "#fff" }}

@@ -17,6 +17,7 @@ import CustomSnackbar from "./modules/Snackbar";
 import { useNavigation } from "@react-navigation/native";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { ActivityIndicator } from "react-native-paper";
+import { registerForPushNotificationsAsync } from "@/utils/notificationUtils";
 /// Main functional component for the OTP input screen ///// -----------------------------------/
 const OTPInputScreen = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -75,12 +76,18 @@ const OTPInputScreen = () => {
     const fullOtp = otp.join("");
     if (fullOtp.length === 6) {
       try {
+        //// Calling the fcmToken getting tuils funciton to get the fcmToken ------------------/
+        const fcmToken = await registerForPushNotificationsAsync();
+
         let requestBody = {
           phoneNumber: userAsyncStorageResponse.data.phoneNumber,
           otp: fullOtp,
+          fcmToken: fcmToken,
         };
+
         const response = await callService(requestBody);
         console.log("this is response");
+
         console.log(response);
 
         if (response?.success) {

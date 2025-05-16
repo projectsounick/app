@@ -1,15 +1,28 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 
 import { Image } from "react-native";
-import { Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import theme from "../Theme/globalTheme";
 
 ////// Main functional component for the Small header ----------------------------/
 export default function SmallHeader({ title }: any) {
   const router = useRouter();
-  console.log(title);
 
+  const [profilePic, setProfilePic] = useState<string | null>(null);
+  useEffect(() => {
+    async function getLoggedUser() {
+      const user = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
+        "user"
+      );
+      if (user.exists) {
+        setProfilePic(user.data.profilePic);
+      }
+    }
+    getLoggedUser();
+  }, []);
   return (
     <View
       style={{
@@ -33,15 +46,26 @@ export default function SmallHeader({ title }: any) {
           width: "33%",
         }}
       >
-        <Image
-          source={require("../../assets/images/favicon.png")}
+        <TouchableOpacity
           style={{
-            width: 30,
-            height: 30,
-            borderRadius: 20,
-            marginRight: 2,
+            width: 35,
+            height: 35,
+            borderRadius: 35,
+            backgroundColor: theme.colors.cardLight,
+            justifyContent: "center",
+            alignItems: "center",
           }}
-        />
+          onPress={() => router.push("/dashboard/profile")}
+        >
+          {profilePic ? (
+            <Image
+              source={{ uri: profilePic }}
+              style={{ width: 30, height: 30, borderRadius: 20 }}
+            />
+          ) : (
+            <Ionicons name="person" size={25} color={theme.colors.text} />
+          )}
+        </TouchableOpacity>
         <View>
           <View
             style={{
@@ -63,7 +87,7 @@ export default function SmallHeader({ title }: any) {
           style={{
             color: "white",
             fontWeight: "bold",
-            fontSize: 22,
+            fontSize: theme.fontSizes.regularSmall,
             textAlign: "center",
           }}
         >

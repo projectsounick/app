@@ -11,6 +11,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const { width } = Dimensions.get("window");
 import theme from "../Theme/globalTheme";
+import { LinearGradient } from "expo-linear-gradient";
 const plansData = [
   {
     offer: "Corporate Wellness Program | 50% Off",
@@ -27,9 +28,11 @@ const plansData = [
 
 export default function SliderCard() {
   return (
-    <View
+    <LinearGradient
+      colors={["#9C56F6", "#3A1B63"]}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
       style={{
-        backgroundColor: "rgba(58, 27, 99, 1)",
         height: 200,
         paddingVertical: 16,
         paddingHorizontal: 12,
@@ -166,6 +169,6 @@ export default function SliderCard() {
           </View>
         ))}
       </ScrollView>
-    </View>
+    </LinearGradient>
   );
 }

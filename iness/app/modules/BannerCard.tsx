@@ -4,19 +4,25 @@ import { BannerCardProps } from "../interfaces/moduleInterfaces";
 import theme from "../Theme/globalTheme";
 import Icon from "react-native-vector-icons/Feather";
 import { router } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 const BannerCard = ({ cardData }: BannerCardProps) => {
   const {
     title,
     subtitle,
     buttonText,
     icon,
+    params,
     imageSource,
     backgroundColor,
     textColor = "#FFFFFF",
+    redirectionPageName,
   } = cardData;
 
   return (
-    <View
+    <LinearGradient
+      colors={backgroundColor}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
       style={{
         borderRadius: 12,
         paddingHorizontal: 12,
@@ -24,7 +30,6 @@ const BannerCard = ({ cardData }: BannerCardProps) => {
         height: 142,
         justifyContent: "center",
         overflow: "hidden",
-        backgroundColor: backgroundColor,
       }}
     >
       {/* Simulated gradient layers */}
@@ -82,7 +87,14 @@ const BannerCard = ({ cardData }: BannerCardProps) => {
               height: 31,
               borderRadius: 15,
             }}
-            onPress={() => router.push("/dashboard/track")}
+            onPress={() =>
+              router.push({
+                pathname: redirectionPageName,
+                params: {
+                  type: params, // or whatever param you need
+                },
+              })
+            }
           >
             <Text style={{ color: "#000", fontWeight: "bold", fontSize: 13 }}>
               {buttonText}
@@ -97,7 +109,7 @@ const BannerCard = ({ cardData }: BannerCardProps) => {
           resizeMode="cover"
         />
       </View>
-    </View>
+    </LinearGradient>
   );
 };
 

@@ -7,14 +7,18 @@ import BottomNavBar from "@/app/modules/BottomNavBar";
 import { demoCartItems } from "@/utils/staticDataUtils";
 import CartItemList from "@/app/Components/Cart/CartItemCard";
 import CartCheckoutCard from "@/app/Components/Cart/CartCheckoutCard";
+import NormalHeader from "@/app/modules/NormalHeader";
+import BackHeader from "@/app/modules/BackHeader";
 
 ///// Main functional component for the cart screen -------------------------/
 export default function CartScreen() {
+  console.log("cart screen got loaded");
+
   const router = useRouter();
   const pathname = usePathname();
   const [cartItems, setCartItems] = useState(demoCartItems);
   const handleAdd = () => {
-    console.log("Add button clicked!");
+    router.replace("/dashboard/tabs/equip");
   };
   /// Function for chaning the address ------------------------/
   function onChangeAddress() {}
@@ -26,6 +30,7 @@ export default function CartScreen() {
       {/* Header + Content */}
       <View style={{ flex: 1, backgroundColor: "#fff" }}>
         <SmallHeader title="Cart" />
+        <BackHeader />
         <View style={{ padding: 20, flex: 1, backgroundColor: "#fff" }}>
           <CartItemList items={cartItems} onAddItem={handleAdd} />
         </View>
@@ -36,8 +41,6 @@ export default function CartScreen() {
         totalAmount={2000}
         address={"Howrah kolkata"}
       />
-      {/* Custom Bottom Tab Bar */}
-      <BottomNavBar router={router} pathname={pathname} />
     </>
   );
 }

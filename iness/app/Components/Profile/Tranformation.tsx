@@ -108,18 +108,21 @@ export default function TransformationCard() {
           </View>
         ) : (
           <View style={{ flexDirection: "row" }}>
-            {[1, 2, 3].map((i) => (
-              <Image
-                key={i}
-                source={require("../../../assets/images/favicon.png")}
-                style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 8,
-                  marginRight: 8,
-                }}
-              />
-            ))}
+            {data.length > 0
+              ? data.slice(0, 5).map((item: any, i: number) => (
+                  <Image
+                    key={i}
+                    source={{ uri: item.url }}
+                    style={{
+                      width: 50,
+                      height: 50,
+                      borderRadius: 8,
+                      marginRight: 8,
+                    }}
+                    resizeMode="cover"
+                  />
+                ))
+              : null}
           </View>
         )}
 

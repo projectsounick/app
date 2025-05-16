@@ -1,11 +1,11 @@
-import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity, Modal, TextInput } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 interface CartCheckoutSummaryProps {
   totalAmount: number;
   address: string;
-  onChangeAddress: () => void;
+  onChangeAddress: (newAddress: string) => void;
   onPlaceOrder: () => void;
 }
 
@@ -15,6 +15,16 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
   onChangeAddress,
   onPlaceOrder,
 }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newAddress, setNewAddress] = useState(address);
+
+  const handleSubmitAddress = () => {
+    if (newAddress.trim()) {
+      onChangeAddress(newAddress);
+      setModalVisible(false);
+    }
+  };
+
   return (
     <View
       style={{
@@ -37,7 +47,7 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
             {address}
           </Text>
         </View>
-        <TouchableOpacity onPress={onChangeAddress}>
+        <TouchableOpacity onPress={() => setModalVisible(true)}>
           <Text style={{ color: "#A4F77F", fontWeight: "600", fontSize: 12 }}>
             Change
           </Text>
@@ -89,6 +99,75 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Address Change Modal */}
+      <Modal visible={modalVisible} transparent animationType="slide">
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#fff",
+              width: "85%",
+              borderRadius: 16,
+              padding: 20,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "bold",
+                marginBottom: 10,
+                color: "#2D0140",
+              }}
+            >
+              Enter New Address
+            </Text>
+            <TextInput
+              placeholder="Your address..."
+              value={newAddress}
+              onChangeText={setNewAddress}
+              multiline
+              placeholderTextColor="#999"
+              style={{
+                height: 80,
+                borderColor: "#ccc",
+                borderWidth: 1,
+                borderRadius: 10,
+                paddingHorizontal: 12,
+                paddingTop: 10,
+                marginBottom: 16,
+                color: "#000",
+              }}
+            />
+            <TouchableOpacity
+              onPress={handleSubmitAddress}
+              style={{
+                backgroundColor: "#A4F77F",
+                paddingVertical: 10,
+                borderRadius: 10,
+                alignItems: "center",
+                marginBottom: 10,
+              }}
+            >
+              <Text style={{ color: "#2D0140", fontWeight: "bold" }}>
+                Submit
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              style={{ alignItems: "center", paddingVertical: 6 }}
+            >
+              <Text style={{ color: "#555" }}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };

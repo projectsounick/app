@@ -8,6 +8,7 @@ interface UserData {
   workoutPreferences: string[];
   activityLevel: string;
   phoneNumber: string;
+  assignedCoupons: string[];
   _id: string;
 }
 

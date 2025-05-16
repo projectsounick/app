@@ -1,43 +1,19 @@
 import React, { useRef } from "react";
 import { View, Text, Image, Animated, Dimensions } from "react-native";
 
-const { width } = Dimensions.get("window");
 import theme from "@/app/Theme/globalTheme";
+import withAnimatedHeader from "@/app/Hoc/MainHeader";
+import NameHeader from "@/app/Components/HeaderSubComponents/NameHeader";
+
+//// Main functional component for the equipscreen ------------------------/
+const MainHeader = withAnimatedHeader(NameHeader);
 export default function EquipScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
-
-  const headerHeight = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [200, 0],
-    extrapolate: "clamp",
-  });
-
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [1, 0],
-    extrapolate: "clamp",
-  });
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       {/* Header */}
-      <Animated.View
-        style={{
-          height: headerHeight,
-          opacity: headerOpacity,
-          backgroundColor: "#6C1B9B",
-          paddingHorizontal: 20,
-          paddingTop: 40,
-          justifyContent: "center",
-        }}
-      >
-        <Text style={{ fontSize: 20, fontWeight: "bold", color: "white" }}>
-          Namaste Sunny! 🙏
-        </Text>
-        <Text style={{ color: "white", marginTop: 4 }}>
-          Get ready to crush your fitness goals today.
-        </Text>
-      </Animated.View>
+      <MainHeader scrollY={scrollY} title="Equip" />
 
       {/* Coming Soon Content */}
       <View
@@ -46,6 +22,7 @@ export default function EquipScreen() {
           alignItems: "center",
           justifyContent: "center",
           padding: 20,
+          marginTop: 40,
         }}
       >
         <View

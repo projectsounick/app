@@ -15,9 +15,11 @@ interface CustomSnackbarProps {
 }
 interface BannerCardProps {
   cardData: {
+    params?: string;
     title: string;
-    backgroundColor: string;
+    backgroundColor: any;
     subtitle: string;
+    redirectionPageName: any;
     buttonText: string;
     icon: string;
     imageSource: ImageSourcePropType;
