@@ -17,9 +17,9 @@ export const trackingCardData = {
   buttonText: "Track Now",
   redirectionPageName: "/dashboard/track",
   icon: "target",
-  backgroundColor: ["#E1CAFF", "#FFFFFF"],
+  backgroundColor: ["#9C56F6", "#3A1B63"],
   imageSource: require("../assets/images/track.png"), // your local image
-  textColor: theme.colors.dark, // optional, any hex
+  textColor: theme.colors.text, // optional, any hex
 };
 // cardsData.ts
 export const onlineSessionCardData = {

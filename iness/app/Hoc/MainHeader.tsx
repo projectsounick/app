@@ -5,10 +5,12 @@ import { Animated, View, StyleSheet, ScrollView } from "react-native";
 
 import { Text, TouchableOpacity, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import { Ionicons } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import theme from "../Theme/globalTheme";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
 
 interface AnimatedHeaderProps {
   scrollY: Animated.Value;
@@ -16,7 +18,10 @@ interface AnimatedHeaderProps {
 }
 
 const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
+  /// Getting the stored cart data for the ------------------/
+
   const ComponentWithHeader = (props: AnimatedHeaderProps): ReactElement => {
+    const cartItems = useSelector((state: RootState) => state.cart.cartItems);
     // Use scrollY from props if provided; otherwise, create a new one
     const scrollY = props.scrollY || useRef(new Animated.Value(0)).current;
     const title = props.title;
@@ -59,9 +64,8 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
         }}
       >
         <LinearGradient
-          colors={["#844ACF", "#432569"]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
+          colors={["#140A21", "#522987"]}
+          start={{ x: 0, y: 0 }}
           style={{
             borderBottomLeftRadius: 30,
             borderBottomRightRadius: 30,
@@ -119,14 +123,63 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
             </Text>
 
             {/* Right Side */}
-            <View style={{ flexDirection: "row", gap: 12 }}>
-              <TouchableOpacity onPress={() => router.push("/dashboard/cart")}>
-                <Ionicons name="cart-outline" size={24} color="#fff" />
-              </TouchableOpacity>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                gap: 12,
+                width: "33%",
+                justifyContent: "flex-end",
+              }}
+            >
+              {/* Cart */}
               <TouchableOpacity
+                style={{
+                  backgroundColor: "#411D6E",
+                  borderRadius: 20,
+                  padding: 8,
+                  position: "relative",
+                }}
+                onPress={() => router.push("/dashboard/cart")}
+              >
+                <Feather name="shopping-cart" size={16} color="white" />
+                {cartItems && cartItems.length > 0 ? (
+                  <View
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: 4,
+                      backgroundColor: "red",
+                      position: "absolute",
+                      top: 6,
+                      right: 6,
+                    }}
+                  />
+                ) : null}
+              </TouchableOpacity>
+
+              {/* Bell */}
+              <TouchableOpacity
+                style={{
+                  backgroundColor: "#411D6E",
+                  borderRadius: 20,
+                  padding: 8,
+                  position: "relative",
+                }}
                 onPress={() => router.push("/dashboard/notification")}
               >
-                <Ionicons name="notifications-outline" size={24} color="#fff" />
+                <Feather name="bell" size={16} color="#FFFA67" />
+                <View
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: "red",
+                    position: "absolute",
+                    top: 6,
+                    right: 6,
+                  }}
+                />
               </TouchableOpacity>
             </View>
           </View>

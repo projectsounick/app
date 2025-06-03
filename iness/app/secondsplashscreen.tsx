@@ -24,7 +24,6 @@ const SecondSplashScreen = () => {
       let response = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
         "user"
       );
-      console.log(response);
 
       // Animate Circle Progress
       Animated.timing(progress, {

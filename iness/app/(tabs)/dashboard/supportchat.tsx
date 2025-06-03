@@ -81,7 +81,6 @@ export default function SupportScreen() {
 
           uploadedUrls = await Promise.all(uploadPromises);
         } catch (err: any) {
-          console.log(err.message);
           setSnackbarVisible(true);
           setSnackbarMessage("Some server error has happend,try again");
           return;
@@ -96,7 +95,6 @@ export default function SupportScreen() {
       };
       //// Uploading the message to the backend ----------------------------/
       const uploadMessageResponse = await chatService.addSupportMessage(data);
-      console.log(uploadMessageResponse);
 
       if (uploadMessageResponse.success) {
         setData((prev: any) => [...prev, data]);
@@ -108,8 +106,6 @@ export default function SupportScreen() {
         setSnackbarMessage("Unable to send the message,try again");
       }
     } catch (error: any) {
-      console.log(error.message);
-
       setSnackbarVisible(true);
       setSnackbarMessage(error.message);
     } finally {

@@ -1,0 +1,63 @@
+import { ApiResponseInterface } from "../interfaces/otherInterfaces";
+import { config } from "../shared/config";
+import { fetchWrapper } from "../helpers/fetchWrapper";
+import { ChatMessage } from "../interfaces/chatInterface";
+import { AddCartItemsApiCallInterface } from "../interfaces/cartInterface";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+const baseUrl = `${config.apiUrl}/api`;
+///// Exporting cartService functions --------------------------------------/
+export const cartService = {
+  getCartItems,
+  addCartItems,
+  deleteCartItems,
+  updateCartItems,
+};
+
+//// Funciton for updating the user in using backend then storing in AsyncStorage----/
+async function getCartItems(): Promise<ApiResponseInterface> {
+  try {
+    const loggedUser = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
+      "user"
+    );
+    if (!loggedUser.exists) {
+      throw new Error("Some error has happened,try again");
+    }
+    let userId = loggedUser.data._id;
+    let isDeleted = false;
+    return fetchWrapper.get(
+      `${baseUrl}/get-cart?userId=${userId}&isDeleted=${isDeleted}`
+    );
+  } catch (error: any) {
+    throw new Error("Error updating user: " + error.message);
+  }
+}
+//// Funciton for deleting the cart items
+async function deleteCartItems(
+  cartItemId: string
+): Promise<ApiResponseInterface> {
+  try {
+    return fetchWrapper.delete(`${baseUrl}/delete-cart/${cartItemId}`);
+  } catch (error: any) {
+    throw new Error("Error updating user: " + error.message);
+  }
+}
+
+async function addCartItems(
+  data: AddCartItemsApiCallInterface
+): Promise<ApiResponseInterface> {
+  try {
+    return fetchWrapper.post(`${baseUrl}/add-cart`, { ...data });
+  } catch (error: any) {
+    throw new Error("Error updating user: " + error.message);
+  }
+}
+async function updateCartItems(
+  cartItemId: string,
+  action: string
+): Promise<ApiResponseInterface> {
+  try {
+    return fetchWrapper.put(`${baseUrl}/update-cart/${cartItemId}`, { action });
+  } catch (error: any) {
+    throw new Error("Error updating user: " + error.message);
+  }
+}

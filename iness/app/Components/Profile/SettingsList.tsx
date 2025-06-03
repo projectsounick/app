@@ -8,10 +8,6 @@ const handleCoupons = () => {
   router.push("/dashboard/coupon");
 };
 
-const handleSettings = () => {
-  console.log("Navigate to Settings");
-};
-
 const handlePolicy = () => {
   router.push("/dashboard/policy");
 };
@@ -26,6 +22,9 @@ const handleSupport = () => {
 const handleCalculator = () => {
   router.push("/dashboard/calculator");
 };
+const handlePreferences = () => {
+  router.push("/dashboard/preferences");
+};
 const settings = [
   { icon: "pricetags-outline", label: "Coupons", onPress: handleCoupons },
   // { icon: "settings-outline", label: "Settings", onPress: handleSettings },
@@ -39,6 +38,12 @@ const settings = [
     label: "Calculator",
     onPress: handleCalculator,
   },
+  {
+    icon: "settings-outline",
+    label: "Preferences",
+    onPress: handlePreferences,
+  },
+
   { icon: "document-text-outline", label: "Policy", onPress: handlePolicy },
   { icon: "log-out-outline", label: "Logout", onPress: handleLogout },
 ];

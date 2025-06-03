@@ -44,9 +44,9 @@ export default function DashboardLayout() {
         }}
       />
       <Tabs.Screen
-        name="equip"
+        name="store"
         options={{
-          tabBarLabel: "Equip",
+          tabBarLabel: "Store",
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="kettlebell" size={28} color={color} />
           ),

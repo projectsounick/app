@@ -115,8 +115,6 @@ export default function ProfileCard() {
   };
 
   const handleEditUserPage = () => {
-    console.log("called");
-
     router.push("/dashboard/profileedit");
   };
   return (

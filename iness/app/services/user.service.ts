@@ -16,8 +16,6 @@ export const userService = {
 //// Function for sending the otp to the user ---------------/
 async function sendLoginOtp(number: string): Promise<ApiResponseInterface> {
   try {
-    console.log("called till here");
-
     let response = await fetchWrapper.post(`${baseUrl}/user-app-login`, {
       phoneNumber: number,
     });
@@ -32,13 +30,18 @@ async function sendLoginOtp(number: string): Promise<ApiResponseInterface> {
 async function verifyLoginOtp(data: {
   phoneNumber: string;
   otp: string;
+  expoPushToken: string;
 }): Promise<ApiResponseInterface> {
   try {
+    console.log("this is data");
+
+    console.log(data);
+
     let response = await fetchWrapper.post(`${baseUrl}/user-otp-verify`, {
       phoneNumber: data.phoneNumber,
       otp: data.otp,
+      expoPushToken: data.expoPushToken,
     });
-    console.log("this is response", response);
 
     return response;
   } catch (error: any) {

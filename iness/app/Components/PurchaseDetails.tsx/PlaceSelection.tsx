@@ -10,6 +10,7 @@ interface Props {
   addressMap: { [key: string]: string }; // separate address for each place
   onAddressChange: (place: string, text: string) => void;
   onChooseLocation?: () => void;
+  preferences: boolean;
 }
 
 const PlaceSelectionSection: React.FC<Props> = ({
@@ -18,6 +19,7 @@ const PlaceSelectionSection: React.FC<Props> = ({
   addressMap,
   onAddressChange,
   onChooseLocation,
+  preferences,
 }) => {
   return (
     <View
@@ -91,12 +93,17 @@ const PlaceSelectionSection: React.FC<Props> = ({
           value={addressMap[place] || ""}
           onChangeText={(text) => onAddressChange(place, text)}
           placeholder={`Enter ${place} Address`}
+          editable={!preferences} // <-- disable input
           style={{
             flex: 1,
             fontSize: 14,
-            color: "#000",
+            color: preferences ? "#888" : "#000", // grayed out text when disabled
+            backgroundColor: preferences ? "#f0f0f0" : "#fff", // optional: light gray background
+            padding: 8, // optional for better UX
+            borderRadius: 6, // optional for UI consistency
           }}
         />
+
         <Icon name="edit" size={18} color="#888" />
       </View>
     </View>

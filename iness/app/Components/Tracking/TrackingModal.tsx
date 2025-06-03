@@ -60,7 +60,6 @@ const TrackerModal = ({
       onSubmit(type, Number(val));
       onClose();
     } else {
-      console.log("empty");
     }
   };
 

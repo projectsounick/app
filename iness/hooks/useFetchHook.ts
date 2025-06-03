@@ -17,7 +17,6 @@ function useGetDataHook(
     setError(null);
     try {
       const response = await fetchFunction(overrideParams ?? params);
-      console.log("fetch response:", response);
 
       if (response.success) {
         setData(response.data);

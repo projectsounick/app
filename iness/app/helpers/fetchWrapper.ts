@@ -68,8 +68,6 @@ async function post<T extends object>(url: string, body: T) {
 
     return response; // now returning JS object
   } catch (error: any) {
-    console.log("went till here", error);
-
     throw new Error(`Some error has happened try again later ${error.message}`);
   }
 }
@@ -90,11 +88,13 @@ async function put<T extends object>(url: string, body: T) {
 }
 
 // prefixed with underscore because 'delete' is a reserved word
-function _delete(url: string) {
+async function _delete(url: string) {
+  const authHeader = await getAuthHeader();
   const requestOptions: RequestInit = {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
+      ...authHeader,
     },
   };
 

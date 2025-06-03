@@ -1,22 +1,23 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { useRouter, usePathname } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+
 import SmallHeader from "@/app/modules/SmallHeader";
-import BottomNavBar from "@/app/modules/BottomNavBar";
-import { demoCartItems } from "@/utils/staticDataUtils";
+
 import CartItemList from "@/app/Components/Cart/CartItemCard";
 import CartCheckoutCard from "@/app/Components/Cart/CartCheckoutCard";
-import NormalHeader from "@/app/modules/NormalHeader";
+
 import BackHeader from "@/app/modules/BackHeader";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
 
 ///// Main functional component for the cart screen -------------------------/
 export default function CartScreen() {
-  console.log("cart screen got loaded");
+  //// getting the cart values from the store -------------------------/
+  const cartItems = useSelector((state: RootState) => state.cart.cartItems);
 
   const router = useRouter();
-  const pathname = usePathname();
-  const [cartItems, setCartItems] = useState(demoCartItems);
+
   const handleAdd = () => {
     router.replace("/dashboard/tabs/equip");
   };
@@ -36,9 +37,9 @@ export default function CartScreen() {
         </View>
       </View>
       <CartCheckoutCard
+        cartItems={cartItems}
         onChangeAddress={onChangeAddress}
         onPlaceOrder={onplaceOrder}
-        totalAmount={2000}
         address={"Howrah kolkata"}
       />
     </>

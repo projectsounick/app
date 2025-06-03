@@ -21,7 +21,14 @@ export default function ProfileScreen() {
       resizeMode="cover"
     >
       <View style={{ flex: 1 }}>
-        <ScrollView style={{ flex: 1, padding: 16 }}>
+        <ScrollView
+          style={{ flex: 1 }}
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingTop: 16,
+            paddingBottom: 20, // <-- ensures enough space for last card
+          }}
+        >
           {/* Header */}
           <NormalHeader screenName="Profile" />
           <ProfileCard />
@@ -32,33 +39,6 @@ export default function ProfileScreen() {
           {/* Settings Options */}
           <SettingsList />
         </ScrollView>
-
-        {/* Version Text */}
-        <View
-          style={{
-            position: "absolute",
-            bottom: 10,
-            alignSelf: "center",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <MaterialCommunityIcons
-            name="information-outline"
-            size={16}
-            color={theme.colors.dark}
-            style={{ marginRight: 4 }}
-          />
-          <Text
-            style={{
-              color: theme.colors.dark,
-              fontSize: theme.fontWeights.regularSmall,
-            }}
-          >
-            Version 1.0.0
-          </Text>
-        </View>
       </View>
     </ImageBackground>
   );

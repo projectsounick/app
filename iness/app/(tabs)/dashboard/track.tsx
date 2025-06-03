@@ -8,21 +8,29 @@ import {
 } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { Ionicons } from "@expo/vector-icons";
-
+import { useDispatch, useSelector } from "react-redux";
 import NormalHeader from "@/app/modules/NormalHeader";
 import TrackerModal from "@/app/Components/Tracking/TrackingModal";
 import theme from "@/app/Theme/globalTheme";
 import { trackService } from "@/app/services/track.service";
 import { ActivityIndicator, Snackbar } from "react-native-paper"; // install react-native-paper or use your existing Snackbar
-import { TrackingData } from "@/app/interfaces/podcastsInterface";
+import { TrackingData } from "@/app/interfaces/trackInterface";
 import CustomSnackbar from "@/app/modules/Snackbar";
+import {
+  setCurrentDateTrackData,
+  setTotalTrackData,
+  updateTrackingField,
+} from "@/Slices/trackSlice";
+import { RootState } from "@/store";
 
 export default function WellnessDashboard() {
-  const [data, setData] = useState<TrackingData>({
-    steps: null,
-    sleep: null,
-    water: null,
-  });
+  const totalTrackData = useSelector(
+    (state: RootState) => state.track.totalTrackData
+  );
+  const currentDayTrackData = useSelector(
+    (state: RootState) => state.track.currentDateTrackData
+  );
+  const dispatch = useDispatch();
   const [distanceDetails, setDistanceDetails] = useState({
     calorie: 0,
     coveredDistance: 0,
@@ -45,18 +53,14 @@ export default function WellnessDashboard() {
     setModalVisible(false);
   };
 
-  const addData = () => {
-    setModalVisible(false);
-  };
-
   const goalSteps = 10000;
   const goalSleep = 12;
   const progressSteps = Math.min(
-    ((data.steps?.steps || 0) / goalSteps) * 100,
+    ((currentDayTrackData.steps?.steps || 0) / goalSteps) * 100,
     100
   );
   const progressSleep = Math.min(
-    ((data.sleep?.sleepDuration || 0) / goalSleep) * 100,
+    ((currentDayTrackData.sleep?.sleepDuration || 0) / goalSleep) * 100,
     100
   );
 
@@ -89,10 +93,12 @@ export default function WellnessDashboard() {
       );
 
       if (response.success && response.data) {
-        setData((prev) => ({
-          ...prev,
-          [type]: response.data, // replace the full object
-        }));
+        dispatch(
+          updateTrackingField({
+            type: type, // e.g., "steps", "sleep", "water"
+            data: response.data, // must include `_id`
+          })
+        );
       } else {
         setSnackbarMsg("Some error has happened, try again");
         setSnackbarVisible(true);
@@ -104,40 +110,83 @@ export default function WellnessDashboard() {
       setUpdateDataLoading(false);
     }
   }
+  const normalizeDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString("en-CA");
 
   //// Useeffect function for loading the data ------------------------------------/
-  useEffect(() => {
-    const fetchData = async () => {
-      setDataLoading(true);
-      try {
-        const today = new Date();
-        const formatDate = (d: Date) => d.toISOString().split("T")[0];
-        const startDate = formatDate(today);
-        const endDate = formatDate(today);
+  const fetchData = async () => {
+    setDataLoading(true);
+    try {
+      const today = new Date();
 
-        const [stepsRes, sleepRes, waterRes] = await Promise.all([
-          trackService.getTrackingData("walk", startDate, endDate),
-          trackService.getTrackingData("sleep", startDate, endDate),
-          trackService.getTrackingData("water", startDate, endDate),
-        ]);
+      const formatDate = (d: Date) => d.toLocaleDateString("en-CA"); // e.g., "2025-05-18"
 
-        if (stepsRes.success && sleepRes.success && waterRes.success) {
-          setData({
-            steps: stepsRes.data[0] || null,
-            sleep: sleepRes.data[0] || null,
-            water: waterRes.data[0] || null,
-          });
-          setSnackbarVisible(false);
-        }
-      } catch (error) {
-        console.error("Error fetching tracking data:", error);
-        setSnackbarMsg("Failed to load tracking data.");
-        setSnackbarVisible(true);
-      } finally {
-        setDataLoading(false);
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const startDate = formatDate(startOfMonth);
+      const endDate = formatDate(today);
+
+      const [stepsRes, sleepRes, waterRes] = await Promise.all([
+        trackService.getTrackingData("walk", startDate, endDate),
+        trackService.getTrackingData("sleep", startDate, endDate),
+        trackService.getTrackingData("water", startDate, endDate),
+      ]);
+
+      if (stepsRes.success && sleepRes.success && waterRes.success) {
+        const stepsData = stepsRes.data || [];
+        const sleepData = sleepRes.data || [];
+        const waterData = waterRes.data || [];
+
+        // Generate total data for each date (merge by date)
+        const dateMap: { [date: string]: TrackingData } = {};
+        stepsData.forEach((item: any) => {
+          const date = normalizeDate(item.date); // ✅ Normalize
+          if (!dateMap[date])
+            dateMap[date] = { steps: null, sleep: null, water: null };
+          dateMap[date].steps = item;
+        });
+
+        sleepData.forEach((item: any) => {
+          const date = normalizeDate(item.date); // ✅ Normalize
+          if (!dateMap[date])
+            dateMap[date] = { steps: null, sleep: null, water: null };
+          dateMap[date].sleep = item;
+        });
+
+        waterData.forEach((item: any) => {
+          const date = normalizeDate(item.date); // ✅ Normalize
+          if (!dateMap[date])
+            dateMap[date] = { steps: null, sleep: null, water: null };
+          dateMap[date].water = item;
+        });
+        // Convert the map to an array sorted by date
+        const totalTrackArray: TrackingData[] = Object.values(dateMap).sort(
+          (a, b) => {
+            const dateA = a.steps?.date || a.sleep?.date || a.water?.date || "";
+            const dateB = b.steps?.date || b.sleep?.date || b.water?.date || "";
+            return new Date(dateA).getTime() - new Date(dateB).getTime();
+          }
+        );
+
+        const todayStr = formatDate(today); // "YYYY-MM-DD"
+        const todayData = dateMap[todayStr] || {
+          steps: null,
+          sleep: null,
+          water: null,
+        };
+
+        // Update Redux store
+        dispatch(setTotalTrackData(totalTrackArray));
+        dispatch(setCurrentDateTrackData(todayData));
+        setSnackbarVisible(false);
       }
-    };
-
+    } catch (error: any) {
+      setSnackbarMsg("Failed to load tracking data.");
+      setSnackbarVisible(true);
+    } finally {
+      setDataLoading(false);
+    }
+  };
+  useEffect(() => {
     fetchData();
   }, []);
   return (
@@ -147,7 +196,9 @@ export default function WellnessDashboard() {
       resizeMode="cover"
     >
       <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 80 }}>
-        <NormalHeader screenName="Track" />
+        <NormalHeader screenName="Track" rightIcon={true} />
+        {/* History Icon Button */}
+
         {dataLoading ? (
           <View
             style={{
@@ -197,8 +248,10 @@ export default function WellnessDashboard() {
                             textAlign: "center",
                           }}
                         >
-                          {data.steps?.steps
-                            ? `${(data.steps.steps / 1000).toFixed(0)}K`
+                          {currentDayTrackData.steps?.steps
+                            ? `${(
+                                currentDayTrackData.steps.steps / 1000
+                              ).toFixed(0)}K`
                             : "0K"}
                         </Text>
                         <Text
@@ -294,17 +347,21 @@ export default function WellnessDashboard() {
             {[
               {
                 label: "Steps",
-                value: `${data.steps?.steps || 0}/10000`,
+                value: `${currentDayTrackData.steps?.steps || 0}/10000`,
                 key: "steps",
               },
               {
                 label: "Sleep",
-                value: `${data.sleep?.sleepDuration || 0}/12 hrs`,
+                value: `${
+                  currentDayTrackData.sleep?.sleepDuration || 0
+                }/12 hrs`,
                 key: "sleep",
               },
               {
                 label: "Water",
-                value: `${data.water?.waterIntake || 0}/10 glasses`,
+                value: `${
+                  currentDayTrackData.water?.waterIntake || 0
+                }/10 glasses`,
                 key: "water",
               },
             ].map((tracker, i) => (

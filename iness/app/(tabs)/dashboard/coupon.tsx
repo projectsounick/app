@@ -41,8 +41,6 @@ export default function CouponScreen() {
         if (loggedUser.exists) {
           let couponIds = loggedUser.data.assignedCoupons;
           const couponRespone = await couponService.getAllCoupons(couponIds);
-          console.log("this is couponsresponse");
-          console.log(couponRespone);
 
           if (couponRespone.success) {
             setCoupons(couponRespone.data);

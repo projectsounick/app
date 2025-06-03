@@ -14,7 +14,6 @@ async function storeUserInAsyncStorage(userData: any) {
   try {
     const jsonValue = JSON.stringify(userData);
     await AsyncStorage.setItem("user", jsonValue);
-    console.log("User data saved successfully.");
   } catch (e) {
     console.error("Error saving user data to AsyncStorage:", e);
   }
@@ -61,7 +60,6 @@ async function updateUserDataInAsyncStorage(updates: Partial<UserData>) {
     const user: UserData = existing ? JSON.parse(existing) : {};
     const updated = { ...user, ...updates };
     let response = await AsyncStorage.setItem("user", JSON.stringify(updated));
-    console.log("updated", updated);
   } catch (error) {
     throw new Error("some error has occurred , try again later");
   }

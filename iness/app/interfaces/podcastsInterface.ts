@@ -53,20 +53,16 @@ interface MediaVideoModalProps {
     podcastLink: string;
   };
 }
-
-interface TrackingData {
-  steps: { steps: number; date: string; userId: string } | null;
-  sleep: { sleepDuration: number; date: string; userId: string } | null;
-  water: { waterIntake: number; date: string; userId: string } | null;
+interface MediaState {
+  mediaItems: PodcastInterface[];
 }
-
 export type {
   PodcastInteractions,
   PodcastInterface,
   PodcastVideoCardPropsInterface,
   MediaVideoModalProps,
+  MediaState,
   Comment,
-  TrackingData,
   MediaComponentModalProps,
   PodcastUpdateCallArgumentsInterface,
 };

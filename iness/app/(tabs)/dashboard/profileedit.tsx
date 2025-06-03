@@ -86,7 +86,7 @@ const DropdownModal = ({
 //// Main functional component for the user data update screen ---------------------------/
 export default function EditOnboardingScreen() {
   const [editFields, setEditFields] = useState<{ [key: string]: boolean }>({});
-  const [formValues, setFormValues] = useState<Partial<UserData>>({});
+  const [formValues, setFormValues] = useState<any>({});
   const [originalValues, setOriginalValues] = useState<Partial<UserData>>({});
   const [dropdownVisible, setDropdownVisible] = useState<keyof UserData | null>(
     null
@@ -132,7 +132,7 @@ export default function EditOnboardingScreen() {
   };
 
   const handleChange = (field: keyof UserData, value: string) => {
-    setFormValues((prev) => ({ ...prev, [field]: value }));
+    setFormValues((prev: any) => ({ ...prev, [field]: value }));
   };
   const handleUpdate = async () => {
     try {

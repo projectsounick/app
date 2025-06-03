@@ -13,19 +13,20 @@ import CustomSnackbar from "@/app/modules/Snackbar";
 import { UserData } from "@/app/interfaces/UserInterface";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import FullScreenLoader from "@/app/modules/FullScreenLoader";
+import useFetchStoreDataHook from "@/hooks/useStoreFetchHook";
 ///// Main funcitonal component for the Media Screen ---------------------------/
 export default function MediaScreen() {
   const {
-    data,
+    data: mediaItems,
     loading,
     error,
-    fetchData,
     snackbarVisible,
     snackbarMessage,
-    setSnackbarVisible,
     setSnackbarMessage,
+    setSnackbarVisible,
     setData,
-  } = useGetDataHook(podCastService.getPodcasts);
+  } = useFetchStoreDataHook("media", podCastService.getPodcasts);
+
   const [loggedUser, setLoggedUser] = useState<UserData | null>(null);
   const [updateLoader, setUpdateLoader] = useState(false);
   //// Useeffect for fetching from the asyncstorage -------------/
@@ -48,8 +49,8 @@ export default function MediaScreen() {
       const response = await podCastService.updatePodcasts(data);
       if (response.success) {
         // Replace the updated podcast in local state
-        setData((prevData: PodcastInterface[]) =>
-          prevData.map((podcast) =>
+        setData(
+          mediaItems.map((podcast: PodcastInterface) =>
             podcast._id === response.data._id ? response.data : podcast
           )
         );
@@ -76,10 +77,10 @@ export default function MediaScreen() {
             <SimmerSkeletonCard />
             <SimmerSkeletonCard />
           </>
-        ) : data.length === 0 && loggedUser ? (
+        ) : mediaItems.length === 0 && loggedUser ? (
           <Text>No podcast available. We will be uploading soon.</Text>
         ) : (
-          data.map((item: PodcastInterface, index: number) => (
+          mediaItems.map((item: PodcastInterface, index: number) => (
             <VideoCard
               key={index}
               podcast={item}

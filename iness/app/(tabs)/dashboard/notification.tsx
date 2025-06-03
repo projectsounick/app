@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -10,44 +10,30 @@ import {
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import theme from "@/app/Theme/globalTheme";
+import { getStoredNotifications } from "@/utils/notificationUtils";
+import { Divider } from "react-native-paper";
 
 interface NotificationItem {
-  id: number;
-  title: string;
-  description: string;
-  time: string;
+  title: string | null;
+  body: string | null;
+  data: any;
+  receivedAt: string;
 }
-
-const notifications: NotificationItem[] = [
-  {
-    id: 1,
-    title: "Workout Reminder",
-    description: "Don't forget your 5 PM session today!",
-    time: "2 hours ago",
-  },
-  {
-    id: 2,
-    title: "Meal Plan Updated",
-    description: "Your new meal plan for the week is now available.",
-    time: "5 hours ago",
-  },
-  {
-    id: 3,
-    title: "New Message",
-    description: "Coach John sent you a new message.",
-    time: "Yesterday",
-  },
-  {
-    id: 4,
-    title: "Progress Update",
-    description: "Your weekly progress has been posted.",
-    time: "2 days ago",
-  },
-];
 
 export default function NotificationScreen() {
   const router = useRouter();
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
+  /// function for fetching the notificaitons ---------------------------/
+  async function fetchNotificationsFromLocal() {
+    const response = await getStoredNotifications();
+    if (response) {
+      setNotifications(response);
+    }
+  }
+  useEffect(() => {
+    fetchNotificationsFromLocal();
+  }, []);
   return (
     <ImageBackground
       source={require("../../../assets/images/basicBackground.jpeg")} // ✅ replace with your background
@@ -104,59 +90,52 @@ export default function NotificationScreen() {
         <ScrollView
           contentContainerStyle={{
             paddingBottom: 100,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "flex-start",
-            alignItems: "center",
+            paddingTop: 2,
+            paddingHorizontal: 16,
           }}
           showsVerticalScrollIndicator={false}
         >
-          {notifications.map((item) => (
-            <View
-              key={item.id}
+          {notifications.length === 0 ? (
+            <Text
               style={{
-                backgroundColor: "#FFF",
-                borderRadius: 16,
-                padding: 16,
-                marginBottom: 16,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                width: "98%",
-                shadowRadius: 6,
-                elevation: 4,
+                color: "#888",
+                fontSize: 16,
+                textAlign: "center",
+                marginTop: 40,
               }}
             >
-              <Text
-                style={{
-                  color: theme.colors.secondPrimary,
-                  fontSize: 17,
-                  fontWeight: "bold",
-                  marginBottom: 6,
-                }}
-              >
-                {item.title}
-              </Text>
-              <Text
-                style={{
-                  color: "#444",
-                  fontSize: 15,
-                  marginBottom: 8,
-                }}
-              >
-                {item.description}
-              </Text>
-              <Text
-                style={{
-                  color: "#888",
-                  fontSize: 12,
-                  textAlign: "right",
-                }}
-              >
-                {item.time}
-              </Text>
-            </View>
-          ))}
+              No notifications available.
+            </Text>
+          ) : (
+            notifications.map((item, index) => (
+              <View key={index}>
+                <View>
+                  <Text
+                    style={{
+                      color: theme.colors.secondPrimary,
+                      fontSize: 16,
+                      fontWeight: "600",
+                      marginBottom: 4,
+                    }}
+                  >
+                    {item.title}
+                  </Text>
+                  <Text
+                    style={{ color: "#444", fontSize: 14, marginBottom: 4 }}
+                  >
+                    {item.body}
+                  </Text>
+                  <Text style={{ color: "#888", fontSize: 12 }}>
+                    {new Date(item.receivedAt).toLocaleString()}
+                  </Text>
+                </View>
+
+                <Divider
+                  style={{ backgroundColor: "#ddd", height: 1, marginTop: 8 }}
+                />
+              </View>
+            ))
+          )}
         </ScrollView>
       </View>
     </ImageBackground>

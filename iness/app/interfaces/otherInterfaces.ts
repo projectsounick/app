@@ -1,3 +1,6 @@
+import { PlanInterface } from "./planInterface";
+import { PodcastInterface } from "./podcastsInterface";
+
 interface ApiResponseInterface<T = any> {
   message: string;
   success: boolean;
@@ -19,5 +22,14 @@ interface CouponInterface {
   createdAt?: string;
   updatedAt?: string;
 }
+interface totalStoreStateInterface {
+  mediaItems: PodcastInterface[];
+  plans: PlanInterface;
+}
 interface StorageAccountDetailsInterface {}
-export type { ApiResponseInterface, AsyncStorageCheckResult, CouponInterface };
+export type {
+  ApiResponseInterface,
+  AsyncStorageCheckResult,
+  CouponInterface,
+  totalStoreStateInterface,
+};

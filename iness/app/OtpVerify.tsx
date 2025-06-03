@@ -18,6 +18,7 @@ import { useNavigation } from "@react-navigation/native";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { ActivityIndicator } from "react-native-paper";
 import { registerForPushNotificationsAsync } from "@/utils/notificationUtils";
+import NormalHeader from "./modules/NormalHeader";
 /// Main functional component for the OTP input screen ///// -----------------------------------/
 const OTPInputScreen = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -77,18 +78,18 @@ const OTPInputScreen = () => {
     if (fullOtp.length === 6) {
       try {
         //// Calling the fcmToken getting tuils funciton to get the fcmToken ------------------/
-        const fcmToken = await registerForPushNotificationsAsync();
+        const pushToken = await registerForPushNotificationsAsync();
+        console.log("this is push token");
+
+        console.log(pushToken);
 
         let requestBody = {
           phoneNumber: userAsyncStorageResponse.data.phoneNumber,
           otp: fullOtp,
-          fcmToken: fcmToken,
+          expoPushToken: pushToken,
         };
 
         const response = await callService(requestBody);
-        console.log("this is response");
-
-        console.log(response);
 
         if (response?.success) {
           /// Store user data in AsyncStorage
@@ -173,16 +174,7 @@ const OTPInputScreen = () => {
                 width: "90%",
               }}
             >
-              <Text
-                style={{
-                  fontSize: theme.fontSizes.large,
-                  fontWeight: theme.fontWeights.bold,
-                  color: theme.colors.dark,
-                  marginBottom: 4,
-                }}
-              >
-                Enter OTP
-              </Text>
+              <NormalHeader screenName="Enter OTP" />
               <Text
                 style={{
                   fontSize: theme.fontSizes.small,

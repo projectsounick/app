@@ -1,11 +1,17 @@
-import React, { useEffect } from "react";
-import { View, Text, ImageBackground, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Text,
+  ImageBackground,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
 import theme from "./Theme/globalTheme";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import { checkAndNavigateToStoredScreen } from "@/utils/checkScreenRedirection";
 import AnimatedSubmitButton from "./modules/AnimatedSubmitButton";
-
+import LottieView from "lottie-react-native";
 // Define the navigation types
 type RootStackParamList = {
   Home: undefined;
@@ -13,15 +19,49 @@ type RootStackParamList = {
   Onboarding: undefined; // Add any other screens here as needed
   OtpVerify: undefined;
 };
-
+const { width, height } = Dimensions.get("window");
 type NavigationProp = StackNavigationProp<RootStackParamList, "Home">;
 ///// Main functional component for the Home screen ///// -----------------------------------/
 const HomeScreen = () => {
   const navigation = useNavigation<NavigationProp>();
+  const [showSplash, setShowSplash] = useState(true);
+
   useEffect(() => {
-    /// Check if the user is already logged in and navigate accordingly---/
-    checkAndNavigateToStoredScreen<RootStackParamList>(navigation);
+    const timer = setTimeout(() => {
+      setShowSplash(false);
+      checkAndNavigateToStoredScreen<RootStackParamList>(navigation);
+    }, 3000); // Match your splash animation duration
+
+    return () => clearTimeout(timer);
   }, []);
+
+  if (showSplash) {
+    return (
+      <View
+        style={{
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: "#fff",
+          padding: 0,
+          margin: 0,
+        }}
+      >
+        <LottieView
+          source={require("../assets/splash.json")}
+          autoPlay
+          loop={false}
+          resizeMode="cover"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width,
+            height,
+          }}
+        />
+      </View>
+    );
+  }
 
   //// Function to handle the button press---/
   const handlePress = () => {

@@ -10,9 +10,14 @@ import Icon from "react-native-vector-icons/Feather";
 interface Props {
   selectedDate: Date;
   onDateChange: (date: Date) => void;
+  preferences: boolean;
 }
 
-const ChooseDateSection: React.FC<Props> = ({ selectedDate, onDateChange }) => {
+const ChooseDateSection: React.FC<Props> = ({
+  selectedDate,
+  onDateChange,
+  preferences,
+}) => {
   const [isPickerVisible, setPickerVisible] = useState(false);
 
   const showDatePicker = () => setPickerVisible(true);
@@ -64,11 +69,13 @@ const ChooseDateSection: React.FC<Props> = ({ selectedDate, onDateChange }) => {
         <TouchableOpacity
           onPress={showDatePicker}
           style={{
-            backgroundColor: "#8B5CF6",
+            backgroundColor: preferences ? "#A78BFA" : "#8B5CF6", // lighter shade when disabled
             paddingVertical: 6,
             paddingHorizontal: 14,
             borderRadius: 20,
+            opacity: preferences ? 0.6 : 1, // optional: also dim the button when disabled
           }}
+          disabled={preferences}
         >
           <Text style={{ color: "#fff", fontWeight: "600" }}>Change</Text>
         </TouchableOpacity>

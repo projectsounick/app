@@ -23,8 +23,6 @@ async function updateTrackingData(
   date: any,
   type: string
 ): Promise<ApiResponseInterface> {
-  console.log("update data is called");
-
   const url = `${baseUrl}/create-tracking/${type}`;
   return await fetchWrapper.post(url, { value, date });
 }

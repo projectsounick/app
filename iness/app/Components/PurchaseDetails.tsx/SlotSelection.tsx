@@ -5,7 +5,7 @@ import Icon from "react-native-vector-icons/Feather";
 
 interface Props {
   slots: string[];
-  selectedSlot: string;
+  selectedSlot: string | null;
   onSelectSlot: (slot: string) => void;
 }
 
@@ -57,7 +57,8 @@ const SlotSelectionSection: React.FC<Props> = ({
             key={index}
             onPress={() => onSelectSlot(slot)}
             style={{
-              backgroundColor: selectedSlot === slot ? "#D1FAE5" : "#F3F4F6",
+              backgroundColor:
+                selectedSlot === slot ? theme.colors.primary : "#F3F4F6",
               paddingVertical: 8,
               paddingHorizontal: 14,
               borderRadius: 20,

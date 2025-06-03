@@ -22,6 +22,7 @@ import AnimatedSubmitButton from "./modules/AnimatedSubmitButton";
 import CustomSnackbar from "./modules/Snackbar";
 import { useNavigation } from "@react-navigation/native";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import NormalHeader from "./modules/NormalHeader";
 
 //// Main functional component for the Login screen ///// -----------------------------------/
 const Login = () => {
@@ -88,16 +89,7 @@ const Login = () => {
         >
           {/* Top Content */}
           <View>
-            <Text
-              style={{
-                fontSize: theme.fontSizes.large,
-                fontWeight: theme.fontWeights.bold,
-                color: theme.colors.dark,
-                marginBottom: theme.spacing.sm,
-              }}
-            >
-              Your contact number
-            </Text>
+            <NormalHeader screenName="Your Contact Number" />
 
             <Text
               style={{
@@ -107,8 +99,7 @@ const Login = () => {
                 marginBottom: theme.spacing.lg,
               }}
             >
-              For enhanced security and exclusive promotions, please provide
-              your phone number. Your privacy is our priority.
+              please provide your phone number. Your privacy is our priority.
             </Text>
 
             <Formik

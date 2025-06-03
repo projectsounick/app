@@ -1,22 +1,27 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Modal, TextInput } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { CartItem } from "@/app/interfaces/cartInterface";
 
 interface CartCheckoutSummaryProps {
-  totalAmount: number;
   address: string;
+  cartItems: CartItem[];
   onChangeAddress: (newAddress: string) => void;
   onPlaceOrder: () => void;
 }
 
 const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
-  totalAmount,
   address,
+  cartItems,
   onChangeAddress,
   onPlaceOrder,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newAddress, setNewAddress] = useState(address);
+  const totalAmount = cartItems.reduce(
+    (sum, item) => sum + item.price * item.quantity,
+    0
+  );
 
   const handleSubmitAddress = () => {
     if (newAddress.trim()) {
@@ -77,15 +82,17 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
         {/* Place Order */}
         <TouchableOpacity
           onPress={onPlaceOrder}
+          disabled={cartItems.length === 0}
           style={{
             flex: 1,
-            backgroundColor: "#A4F77F",
+            backgroundColor: cartItems.length === 0 ? "#cccccc" : "#A4F77F",
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
             paddingHorizontal: 16,
             borderRadius: 12,
             height: 48,
+            opacity: cartItems.length === 0 ? 0.6 : 1, // visual cue
           }}
         >
           <View>

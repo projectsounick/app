@@ -10,6 +10,11 @@ interface UserData {
   phoneNumber: string;
   assignedCoupons: string[];
   _id: string;
+  preferences?: {
+    date: string;
+    slot: string;
+    address: string;
+  };
 }
 
 export type { UserData };
