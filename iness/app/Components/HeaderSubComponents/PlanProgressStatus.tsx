@@ -1,83 +1,66 @@
-import React from "react";
-import { View, Text } from "react-native";
+import { setPlanTab } from "@/Slices/planSlice";
+import { RootState } from "@/store";
+import React, { useState } from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+import { State } from "react-native-gesture-handler";
+import { useDispatch, useSelector } from "react-redux";
 
 const PlansStatusCard = () => {
-  const pending = 3;
+  const current = 3;
   const completed = 3;
-  const total = pending + completed;
+  const dispatch = useDispatch();
+  const planTab = useSelector((state: RootState) => state.plan.planTab);
+  const renderCard = (
+    type: "current" | "completed",
+    label: string,
+    count: number
+  ) => {
+    const isSelected = planTab === type;
+    return (
+      <TouchableOpacity
+        onPress={() => dispatch(setPlanTab(type))}
+        style={{
+          flex: 1,
+          backgroundColor: isSelected ? "#7B61FF" : "#ECE9FD",
+          paddingVertical: 10,
+          borderRadius: 10,
+          marginHorizontal: 6,
+          justifyContent: "center",
+          alignItems: "center",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.1,
+          shadowRadius: 2,
+          elevation: 2,
+        }}
+      >
+        <Text
+          style={{
+            color: isSelected ? "#fff" : "#7B61FF",
+            fontSize: 13,
+            fontWeight: "600",
+            marginBottom: 2,
+          }}
+        >
+          {label}
+        </Text>
+        <Text
+          style={{
+            fontSize: 20,
+            fontWeight: "bold",
+            color: isSelected ? "#fff" : "#7B61FF",
+          }}
+        >
+          {count}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
 
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        height: 69,
-
-        marginTop: 16,
-      }}
-    >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#A259FF",
-          padding: 6,
-          borderRadius: 12,
-          marginHorizontal: 4,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Text
-          style={{
-            color: "#fff",
-            fontSize: 14,
-            fontWeight: "500",
-            marginBottom: 4,
-          }}
-        >
-          Plans Pending
-        </Text>
-        <Text
-          style={{
-            fontSize: 22,
-            fontWeight: "bold",
-            color: "#fff",
-          }}
-        >
-          {pending}
-        </Text>
-      </View>
-
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#A259FF",
-          padding: 6,
-          borderRadius: 12,
-          marginHorizontal: 4,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Text
-          style={{
-            color: "#fff",
-            fontSize: 14,
-            fontWeight: "500",
-            marginBottom: 4,
-          }}
-        >
-          Plans completed
-        </Text>
-        <Text
-          style={{
-            fontSize: 22,
-            fontWeight: "bold",
-            color: "#fff",
-          }}
-        >
-          {completed}
-        </Text>
-      </View>
+    <View style={{ flexDirection: "row", marginTop: 16, height: 64 }}>
+      {renderCard("current", "Current Plans", current)}
+      {renderCard("completed", "Plans Completed", completed)}
     </View>
   );
 };

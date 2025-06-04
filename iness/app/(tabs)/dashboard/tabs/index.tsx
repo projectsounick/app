@@ -50,6 +50,10 @@ const YourComponent = () => {
         sliceKey: "dietPlan" as SliceKey,
         fetchFunction: planService.getDietPlans,
       },
+      {
+        sliceKey: "activePlans" as SliceKey,
+        fetchFunction: planService.getActivePlans,
+      },
     ],
     []
   );

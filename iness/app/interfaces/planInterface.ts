@@ -58,6 +58,16 @@ interface PlanInterface {
   planItems: PlanItemFormValues[];
   dietPlanDetails?: DietPlanDetails; // <-- added here
 }
+interface SinglePlanItemPlanInterface {
+  _id?: string;
+  title: string;
+  descItems: string[];
+  imgUrl: string;
+  planType: PlanType;
+  isActive: boolean;
+  planItems: PlanItemFormValues;
+  dietPlanDetails?: DietPlanDetails; // <-- added here
+}
 
 interface DietPlan extends Document {
   _id: string;
@@ -72,7 +82,20 @@ interface DietPlan extends Document {
   createdAt: Date;
   updatedAt?: Date;
 }
-
+interface ActivePlans {
+  _id: string;
+  userId: string;
+  trainerId?: string;
+  isActive: boolean;
+  planStartDate: string;
+  planEndDate: string;
+  totalSessions?: number;
+  remainingSessions?: number;
+  plan?: SinglePlanItemPlanInterface;
+  dietPlanDetails?: DietPlan;
+  createdAt?: string;
+  updatedAt?: string;
+}
 export type {
   PlanSideBarPropsInterface,
   PlanType,
@@ -81,6 +104,7 @@ export type {
   PlanTypesProps,
   planState,
   PlanItemFormValues,
+  ActivePlans,
   PlanInterface,
   DietPlan,
 };

@@ -5,6 +5,10 @@ import {
   TouchableOpacity,
   Dimensions,
   ImageBackground,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import theme from "./Theme/globalTheme";
@@ -22,6 +26,10 @@ import useServiceWithSnackbar from "@/hooks/usePostDataHook";
 import { userService } from "./services/user.service";
 import CustomSnackbar from "./modules/Snackbar";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import OnboardingWeight from "@/components/Onboarding/OnboardingWeight";
+import OnboardingHeading from "./modules/OnboardingHeading";
+import OnboardingHeight from "@/components/Onboarding/OnboardingHeight";
+import OnboardingDOB from "@/components/Onboarding/OnboardingDOB";
 
 //// Main functional component for the Onboarding screen ///// -----------------------------------/
 const OnboardingScreen = () => {
@@ -81,10 +89,16 @@ const OnboardingScreen = () => {
       case 1:
         return <OnboardingSex onNext={handleNext} onBack={handleBack} />;
       case 2:
+        return <OnboardingWeight onNext={handleNext} onBack={handleBack} />;
+      case 3:
+        return <OnboardingHeight onNext={handleNext} />;
+      case 4:
+        return <OnboardingDOB onNext={handleNext} />;
+      case 5:
         return (
           <OnboardingPrimaryGoal onNext={handleNext} onBack={handleBack} />
         );
-      case 3:
+      case 6:
         return (
           <OnboardingtimeCommitment
             onNext={handleNext}
@@ -92,11 +106,11 @@ const OnboardingScreen = () => {
             loading={loading}
           />
         );
-      case 4:
+      case 7:
         return <PreferredWorkoutTime onNext={handleNext} onBack={handleBack} />;
-      case 5:
+      case 8:
         return <WorkoutPreferences onNext={handleNext} onBack={handleBack} />;
-      case 6:
+      case 9:
         return <ActivityLevel onNext={handleNext} onBack={handleBack} />;
       default:
         return null;
@@ -108,68 +122,76 @@ const OnboardingScreen = () => {
     (Dimensions.get("window").width - 90); // adjusted to fit beside back button
 
   return (
-    <ImageBackground
-      source={require("../assets/images/onboardingBackground.jpg")}
+    <KeyboardAvoidingView
       style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0} // Adjust as needed
     >
-      <View style={{ flex: 1, paddingTop: 60, paddingHorizontal: 20 }}>
-        {/* Row with Back Button + Progress Bar */}
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 30,
-          }}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ImageBackground
+          source={require("../assets/images/onboardingBackground.jpg")}
+          style={{ flex: 1 }}
         >
-          {/* Back Button */}
-          {currentStep > 0 && (
-            <TouchableOpacity
-              onPress={handleBack}
-              style={{
-                backgroundColor: "#000",
-                width: 50,
-                height: 50,
-                borderRadius: 25,
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 10,
-              }}
-            >
-              <Ionicons name="arrow-back" size={24} color="#fff" />
-            </TouchableOpacity>
-          )}
-
-          {/* Progress Bar */}
-          <View
-            style={{
-              flex: 1,
-              height: 6,
-              backgroundColor: "#eee",
-              borderRadius: 5,
-              overflow: "hidden",
-            }}
-          >
+          <View style={{ flex: 1, paddingTop: 60, paddingHorizontal: 20 }}>
+            {/* Row with Back Button + Progress Bar */}
             <View
               style={{
-                height: 6,
-                width: progressWidth,
-                backgroundColor: theme.colors.secondPrimary,
-                borderRadius: 5,
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 30,
               }}
-            />
-          </View>
-        </View>
+            >
+              {currentStep > 0 && (
+                <TouchableOpacity
+                  onPress={handleBack}
+                  style={{
+                    backgroundColor: "#000",
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 10,
+                  }}
+                >
+                  <Ionicons name="arrow-back" size={24} color="#fff" />
+                </TouchableOpacity>
+              )}
 
-        {/* Step Content */}
-        <View style={{ flex: 1 }}>{renderStepComponent(loading)}</View>
-      </View>
-      <CustomSnackbar
-        visible={snackbarVisible}
-        message={snackbarMessage}
-        bgColor={theme.colors.primary}
-        onDismiss={() => setSnackbarVisible(false)}
-      />
-    </ImageBackground>
+              {/* Progress Bar */}
+              <View
+                style={{
+                  flex: 1,
+                  height: 6,
+                  backgroundColor: "#eee",
+                  borderRadius: 5,
+                  overflow: "hidden",
+                }}
+              >
+                <View
+                  style={{
+                    height: 6,
+                    width: progressWidth,
+                    backgroundColor: theme.colors.secondPrimary,
+                    borderRadius: 5,
+                  }}
+                />
+              </View>
+            </View>
+
+            {/* Step Content (your OnboardingName component) */}
+            <View style={{ flex: 1 }}>{renderStepComponent(loading)}</View>
+          </View>
+
+          <CustomSnackbar
+            visible={snackbarVisible}
+            message={snackbarMessage}
+            bgColor={theme.colors.primary}
+            onDismiss={() => setSnackbarVisible(false)}
+          />
+        </ImageBackground>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 

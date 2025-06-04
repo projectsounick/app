@@ -42,15 +42,22 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
 
     useEffect(() => {
       async function fetchData() {
+        console.log("called");
+
         const response = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
           "user"
         );
+        console.log(typeof response.exists);
+
         if (response.exists) {
+          console.log(response.data.weight);
+
           setUserData(response.data);
         }
       }
       fetchData();
     }, []);
+
     return (
       <Animated.View
         style={{
@@ -104,7 +111,11 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
                   <Ionicons name="person" size={25} color={theme.colors.text} />
                 )}
               </TouchableOpacity>
-              <Text style={{ color: "#fff", marginLeft: 8 }}>↑ 79 kgs</Text>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <Text style={{ color: "#fff", marginLeft: 8 }}>
+                  {parseInt(userData?.weight)} kgs
+                </Text>
+              </View>
             </View>
 
             {/* Title in absolute center */}

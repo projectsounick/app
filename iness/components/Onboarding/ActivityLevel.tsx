@@ -54,7 +54,7 @@ const ActivityLevel = ({
       <ScrollView showsVerticalScrollIndicator={false}>
         <OnboardingHeading>
           {" "}
-          How would you {"\n"} describe a typical day {"\n"} for you?
+          Describe a typical day {"\n"} for you?
         </OnboardingHeading>
         {activityLevelOptions.map(
           ({ label, icon, description }: any, index) => (

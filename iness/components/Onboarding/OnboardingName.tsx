@@ -6,6 +6,9 @@ import {
   ImageBackground,
   KeyboardAvoidingView,
   Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
 } from "react-native";
 import theme from "@/app/Theme/globalTheme";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
@@ -36,22 +39,28 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
 
   return (
     <KeyboardAvoidingView
-      style={{
-        flex: 1,
-        justifyContent: "space-between",
-        padding: theme.spacing.lg,
-      }}
+      style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
+      keyboardVerticalOffset={60}
     >
-      {/* Centered Top Section */}
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center", // Vertically center
-        }}
-      >
-        <View>
-          <View style={{ display: "flex", height: "50%" }}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "space-between",
+            paddingHorizontal: 20,
+            paddingVertical: 40,
+          }}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Centered Content */}
+          <View
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              flexGrow: 1,
+            }}
+          >
             <View
               style={{
                 position: "relative",
@@ -61,9 +70,9 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
                 borderRadius: 10,
                 marginBottom: theme.spacing.md,
                 padding: 26,
+                width: "100%",
               }}
             >
-              {/* Top border: fades from solid on left → transparent at 50% */}
               <LinearGradient
                 colors={["#DDD", "transparent"]}
                 start={{ x: 0, y: 0 }}
@@ -77,8 +86,6 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
                   borderTopLeftRadius: 10,
                 }}
               />
-
-              {/* Bottom border: same fade */}
               <LinearGradient
                 colors={["#DDD", "transparent"]}
                 start={{ x: 0, y: 0 }}
@@ -92,8 +99,6 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
                   borderBottomLeftRadius: 10,
                 }}
               />
-
-              {/* Your content */}
               <Text
                 style={{
                   fontSize: 24,
@@ -106,34 +111,36 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
                 What should we call you?
               </Text>
             </View>
-          </View>
-          <TextInput
-            value={name}
-            onChangeText={setName}
-            placeholder="Enter your name"
-            placeholderTextColor={theme.colors.mutedText}
-            style={{
-              borderWidth: 1,
-              borderColor: theme.colors.normal,
-              borderRadius: 8,
-              padding: 12,
-              backgroundColor: "#fff",
-              color: "#000",
-              fontSize: 16,
-              width: "100%", // Full width
-            }}
-          />
-        </View>
-      </View>
 
-      {/* Bottom Button */}
-      <View style={{ marginBottom: theme.spacing.xl }}>
-        <AnimatedSubmitButton
-          loading={false}
-          onPress={handleNext}
-          title="Next"
-        />
-      </View>
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              placeholder="Enter your name"
+              placeholderTextColor={theme.colors.mutedText}
+              style={{
+                borderWidth: 1,
+                borderColor: theme.colors.normal,
+                borderRadius: 8,
+                padding: 12,
+                backgroundColor: "#fff",
+                color: "#000",
+                fontSize: 16,
+                width: "100%",
+              }}
+              returnKeyType="done"
+            />
+          </View>
+
+          {/* Bottom Button */}
+          <View style={{ marginTop: 40 }}>
+            <AnimatedSubmitButton
+              loading={false}
+              onPress={handleNext}
+              title="Next"
+            />
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 };

@@ -1,5 +1,5 @@
 import { setMediaItems } from "./Slices/mediaSlice";
-import { setPlans } from "./Slices/planSlice";
+import { setActivePlans, setPlans } from "./Slices/planSlice";
 import { setCart } from "./Slices/cartSlice";
 import { setdietPlans } from "./Slices/dietPlanSlice";
 export const sliceConfig = {
@@ -18,6 +18,10 @@ export const sliceConfig = {
   dietPlan: {
     selectorKey: "dietPlan",
     setAction: setdietPlans,
+  },
+  activePlans: {
+    selectorKey: "plans",
+    setAction: setActivePlans,
   },
 } as const;
 

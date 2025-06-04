@@ -1,6 +1,7 @@
 import PlanProgressStatus from "@/app/Components/HeaderSubComponents/PlanProgressStatus";
 import CurrentPlans from "@/app/Components/Train/CurrentPlans";
 import withAnimatedHeader from "@/app/Hoc/MainHeader";
+import { RootState } from "@/store";
 import React, { useRef } from "react";
 import {
   View,
@@ -10,12 +11,13 @@ import {
   TouchableOpacity,
   Dimensions,
 } from "react-native";
+import { useSelector } from "react-redux";
 
 const HEADER_HEIGHT = 180;
 const MainHeader = withAnimatedHeader(PlanProgressStatus);
 export default function TrainScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
-
+  const selectedTab = useSelector((state: RootState) => state.plan.planTab);
   return (
     <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <MainHeader scrollY={scrollY} title="Train" />
@@ -35,7 +37,11 @@ export default function TrainScreen() {
         scrollEventThrottle={16}
       >
         {/* Card 1 */}
-        <CurrentPlans />
+        {selectedTab === "current" ? (
+          <CurrentPlans isActive={true} />
+        ) : (
+          <CurrentPlans isActive={false} />
+        )}
       </Animated.ScrollView>
     </View>
   );
