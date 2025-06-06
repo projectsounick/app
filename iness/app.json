@@ -13,6 +13,15 @@
       "supportsTablet": true
     },
     "android": {
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": {
+            "scheme": "myapp"
+          },
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
+      ],
       "useNextNotificationsApi": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",

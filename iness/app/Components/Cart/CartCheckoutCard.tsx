@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Modal, TextInput } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { CartItem } from "@/app/interfaces/cartInterface";
+import AnimatedDots from "./LoadingDots";
 
 interface CartCheckoutSummaryProps {
   address: string;
   cartItems: CartItem[];
   onChangeAddress: (newAddress: string) => void;
   onPlaceOrder: () => void;
+  loading: any;
 }
 
 const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
@@ -15,11 +17,12 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
   cartItems,
   onChangeAddress,
   onPlaceOrder,
+  loading,
 }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [newAddress, setNewAddress] = useState(address);
   const totalAmount = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
+    (sum, item: any) => sum + item?.price * item.quantity,
     0
   );
 
@@ -95,15 +98,23 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
             opacity: cartItems.length === 0 ? 0.6 : 1, // visual cue
           }}
         >
-          <View>
-            <Text style={{ color: "#000", fontSize: 11 }}>Total</Text>
-            <Text style={{ color: "#000", fontWeight: "bold", fontSize: 16 }}>
-              ₹{totalAmount}
-            </Text>
-          </View>
-          <Text style={{ color: "#000", fontWeight: "bold" }}>
-            Place Order ➔
-          </Text>
+          {loading ? (
+            <AnimatedDots />
+          ) : (
+            <>
+              <View>
+                <Text style={{ color: "#000", fontSize: 11 }}>Total</Text>
+                <Text
+                  style={{ color: "#000", fontWeight: "bold", fontSize: 16 }}
+                >
+                  ₹{totalAmount}
+                </Text>
+              </View>
+              <Text style={{ color: "#000", fontWeight: "bold" }}>
+                Place Order ➔
+              </Text>
+            </>
+          )}
         </TouchableOpacity>
       </View>
 

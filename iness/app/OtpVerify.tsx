@@ -79,12 +79,9 @@ const OTPInputScreen = () => {
       try {
         //// Calling the fcmToken getting tuils funciton to get the fcmToken ------------------/
         const pushToken = await registerForPushNotificationsAsync();
-        console.log("this is push token");
-
-        console.log(pushToken);
 
         let requestBody = {
-          phoneNumber: userAsyncStorageResponse.data.phoneNumber,
+          email: userAsyncStorageResponse.data.email,
           otp: fullOtp,
           expoPushToken: pushToken,
         };
@@ -133,10 +130,10 @@ const OTPInputScreen = () => {
       );
       if (!userData || userData.exists === false) {
         setSnackbarVisible(true);
-        setSnackbarMessage("Phone number not found. Please try again.");
+        setSnackbarMessage("Email not found. Please try again.");
         return;
       }
-      let response = await callService(userData.data.phoneNumber);
+      let response = await callService(userData.data.email);
 
       if (response?.success) {
         setSnackbarVisible(true);
@@ -181,7 +178,7 @@ const OTPInputScreen = () => {
                   color: theme.colors.gray, // or a lighter color
                 }}
               >
-                An OTP has been sent to your mobile number
+                An OTP has been sent to your email
               </Text>
             </View>
             {/* OTP Boxes */}

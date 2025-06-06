@@ -6,6 +6,7 @@ interface UserData {
   goal: string;
   preferredWorkoutTime: string;
   workoutPreferences: string[];
+  dob: Date;
   activityLevel: string;
   weight: string;
   height: string;

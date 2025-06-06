@@ -65,7 +65,7 @@ interface SinglePlanItemPlanInterface {
   imgUrl: string;
   planType: PlanType;
   isActive: boolean;
-  planItems: PlanItemFormValues;
+  planItem: PlanItemFormValues;
   dietPlanDetails?: DietPlanDetails; // <-- added here
 }
 

@@ -5,6 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { RootState } from "@/store";
 import { ActivePlans } from "@/app/interfaces/planInterface";
 import { Feather } from "@expo/vector-icons";
+import { router } from "expo-router";
 
 interface CurrentPlansProps {
   isActive: boolean;
@@ -156,6 +157,16 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                     alignSelf: "flex-start",
                     marginTop: 10,
                     opacity: isActive ? 1 : 1,
+                  }}
+                  onPress={() => {
+                    if (isActive) {
+                    } else {
+                      /// plan is not active redirect to completedplan----/
+                      router.push({
+                        pathname: "/dashboard/completedplan",
+                        params: { id: plan._id },
+                      });
+                    }
                   }}
                 >
                   <Text

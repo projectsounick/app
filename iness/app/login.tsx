@@ -48,11 +48,11 @@ const Login = () => {
     setCountry(selectedCountry);
   };
   /// Function to handle the submission of the login data---/
-  async function submitLoginData(phoneNumber: string) {
-    const formattedPhoneNumber = `+${
-      country?.callingCode?.[0] || "91"
-    }${phoneNumber}`;
-    let response = await callService(formattedPhoneNumber);
+  async function submitLoginData(email: string) {
+    // const formattedPhoneNumber = `+${
+    //   country?.callingCode?.[0] || "91"
+    // }${phoneNumber}`;
+    let response = await callService(email);
 
     if (response?.success) {
       /// Store the screen name in AsyncStorage---/
@@ -83,13 +83,13 @@ const Login = () => {
             flex: 1, // Ensures the View takes up the full available space
             justifyContent: "space-between", // Adds space between top content and the button
             alignItems: "center",
-            paddingTop: "20%",
+            paddingTop: "10%",
             paddingBottom: "10%",
           }}
         >
           {/* Top Content */}
           <View>
-            <NormalHeader screenName="Your Contact Number" />
+            <NormalHeader screenName="Your Email" />
 
             <Text
               style={{
@@ -99,15 +99,15 @@ const Login = () => {
                 marginBottom: theme.spacing.lg,
               }}
             >
-              please provide your phone number. Your privacy is our priority.
+              please provide your Email. Your privacy is our priority.
             </Text>
 
             <Formik
               innerRef={formikRef}
-              initialValues={{ phoneNumber: "" }}
+              initialValues={{ email: "" }}
               validationSchema={validationSchemaForLogin}
               onSubmit={(values) => {
-                submitLoginData(values.phoneNumber);
+                submitLoginData(values.email);
               }}
             >
               {({
@@ -133,7 +133,7 @@ const Login = () => {
                       marginBottom: theme.spacing.sm,
                     }}
                   >
-                    <CountryPicker
+                    {/* <CountryPicker
                       countryCode={countryCode}
                       withFilter
                       withFlag
@@ -143,14 +143,15 @@ const Login = () => {
                     />
                     <Text style={{ marginRight: 8, fontSize: 16 }}>
                       +{country?.callingCode?.[0] || "91"}
-                    </Text>
+                    </Text> */}
                     <TextInput
-                      placeholder="Enter phone number"
-                      keyboardType="numeric"
-                      maxLength={10}
-                      value={values.phoneNumber}
-                      onChangeText={handleChange("phoneNumber")}
-                      onBlur={handleBlur("phoneNumber")}
+                      placeholder="Enter email"
+                      value={values.email}
+                      onChangeText={(text) =>
+                        handleChange("email")(text.toLowerCase())
+                      }
+                      onBlur={handleBlur("email")}
+                      autoCapitalize="none"
                       style={{
                         flex: 1,
                         fontSize: 16,
@@ -160,7 +161,7 @@ const Login = () => {
                   </View>
 
                   {/* Error */}
-                  {errors.phoneNumber && touched.phoneNumber && (
+                  {errors.email && touched.email && (
                     <Text
                       style={{
                         color: "red",
@@ -170,7 +171,7 @@ const Login = () => {
                         marginLeft: 4,
                       }}
                     >
-                      {errors.phoneNumber}
+                      {errors.email}
                     </Text>
                   )}
                 </>

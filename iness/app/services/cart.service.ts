@@ -11,6 +11,7 @@ export const cartService = {
   addCartItems,
   deleteCartItems,
   updateCartItems,
+  getPhonePeUrl,
 };
 
 //// Funciton for updating the user in using backend then storing in AsyncStorage----/
@@ -60,4 +61,9 @@ async function updateCartItems(
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }
+}
+
+//// Funciton for checking out the user cart details and getting the phonepe url ---------------/
+async function getPhonePeUrl() {
+  return fetchWrapper.post(`${baseUrl}/checkout-cart`, {});
 }
