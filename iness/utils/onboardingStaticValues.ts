@@ -15,7 +15,12 @@ export const onboardingPreferredWorkoutTimeOptions = [
 //// Onboarding steps ------------------------------------------------/
 export const onboardingSteps = [
   "Name",
+  "Phone Number",
+
   "Sex",
+  "Weight",
+  "Height",
+  "DOB",
   "Primary Goal",
   "Time Commitment",
   "Preffered Workout Time",

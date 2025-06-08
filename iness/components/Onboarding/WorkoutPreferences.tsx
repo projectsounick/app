@@ -60,8 +60,8 @@ const WorkoutPreferences = ({
     >
       <ScrollView showsVerticalScrollIndicator={false}>
         <OnboardingHeading>
-          What type of workout {"\n"}
-          do you enjoy the most?
+          Favourite type of{"\n"}
+          workout?
         </OnboardingHeading>
 
         {workoutPreferenceOptions.map(({ label, icon }, index) => (

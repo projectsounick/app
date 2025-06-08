@@ -103,6 +103,13 @@ export default function TrackingGraphPage() {
     else if (selectedTab === "Steps") dataset = filterMonthData(stepsData);
     else if (selectedTab === "Water") dataset = filterMonthData(waterData);
 
+    if (dataset.length === 0) {
+      return {
+        labels: ["No data"],
+        datasets: [{ data: [0] }],
+      };
+    }
+
     const labels = dataset.map((d) => dayjs(d.date).format("D"));
     const values = dataset.map((d) => d.value);
 
@@ -129,7 +136,7 @@ export default function TrackingGraphPage() {
   }, [selectedTab, monthOffset]);
   return (
     <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpeg")} // Replace with your image
+      source={require("../../../assets/images/basicBackground.jpg")} // Replace with your image
       resizeMode="cover"
       style={{ flex: 1 }}
     >
@@ -242,54 +249,71 @@ export default function TrackingGraphPage() {
           >
             Here are your {selectedTab.toLowerCase()} tracking records
           </Text>
+          {getSelectedData().length === 0 && (
+            <Animated.View style={{ opacity: fadeAnim }}>
+              <Text
+                style={{
+                  textAlign: "center",
+                  color: "#6C1B9B",
+                  marginTop: 8,
+                  fontWeight: "bold",
+                }}
+              >
+                No data available for this date
+              </Text>
+            </Animated.View>
+          )}
+          {getSelectedData().length > 0 ? (
+            <View style={{ maxHeight: 300 }}>
+              <ScrollView>
+                {getSelectedData().map((item, index) => (
+                  <View
+                    key={index}
+                    style={{
+                      backgroundColor: theme.colors.cardLight,
+                      padding: 12,
+                      marginBottom: 8,
+                      borderRadius: 10,
+                      borderColor: theme.colors.cardLight,
+                      borderWidth: 1,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <Ionicons
+                        name={
+                          selectedTab === "Sleep"
+                            ? "moon"
+                            : selectedTab === "Steps"
+                            ? "walk"
+                            : "water"
+                        }
+                        size={20}
+                        color="#6C1B9B"
+                        style={{ marginRight: 8 }}
+                      />
+                      <Text style={{ color: "#6C1B9B", fontWeight: "bold" }}>
+                        {dayjs(item.date).format("MMM D, YYYY")}
+                      </Text>
+                    </View>
 
-          {/* Scrollable Cards */}
-          <View style={{ maxHeight: 300 }}>
-            <ScrollView>
-              {getSelectedData().map((item, index) => (
-                <View
-                  key={index}
-                  style={{
-                    backgroundColor: theme.colors.cardLight,
-                    padding: 12,
-                    marginBottom: 8,
-                    borderRadius: 10,
-                    borderColor: theme.colors.cardLight,
-                    borderWidth: 1,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Ionicons
-                      name={
-                        selectedTab === "Sleep"
-                          ? "moon"
-                          : selectedTab === "Steps"
-                          ? "walk"
-                          : "water"
-                      }
-                      size={20}
-                      color="#6C1B9B"
-                      style={{ marginRight: 8 }}
-                    />
-                    <Text style={{ color: "#6C1B9B", fontWeight: "bold" }}>
-                      {dayjs(item.date).format("MMM D, YYYY")}
+                    <Text style={{ fontSize: 16, fontWeight: "600" }}>
+                      {selectedTab === "Sleep"
+                        ? `${item.value} hrs`
+                        : selectedTab === "Steps"
+                        ? `${item.value} steps`
+                        : `${item.value} ml`}
                     </Text>
                   </View>
-
-                  <Text style={{ fontSize: 16, fontWeight: "600" }}>
-                    {selectedTab === "Sleep"
-                      ? `${item.value} hrs`
-                      : selectedTab === "Steps"
-                      ? `${item.value} steps`
-                      : `${item.value} ml`}
-                  </Text>
-                </View>
-              ))}
-            </ScrollView>
-          </View>
+                ))}
+              </ScrollView>
+            </View>
+          ) : null}
+          {/* Scrollable Cards */}
         </View>
       </ScrollView>
     </ImageBackground>

@@ -133,7 +133,7 @@ const BookSessionDetailsScreen = () => {
   }, []);
   return (
     <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpeg")} // Adjust path as needed
+      source={require("../../../assets/images/basicBackground.jpg")} // Adjust path as needed
       style={{ flex: 1 }}
       resizeMode="cover"
     >

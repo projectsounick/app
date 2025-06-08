@@ -6,8 +6,12 @@ import { State } from "react-native-gesture-handler";
 import { useDispatch, useSelector } from "react-redux";
 
 const PlansStatusCard = () => {
-  const current = 3;
-  const completed = 3;
+  const current = useSelector(
+    (state: RootState) => state.plan.activePlans.length
+  );
+  const completed = useSelector(
+    (state: RootState) => state.plan.completedPlans.length
+  );
   const dispatch = useDispatch();
   const planTab = useSelector((state: RootState) => state.plan.planTab);
   const renderCard = (

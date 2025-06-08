@@ -104,6 +104,8 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                     marginBottom: 6,
                     color: "white",
                   }}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
                 >
                   {title}
                 </Text>
@@ -160,6 +162,20 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                   }}
                   onPress={() => {
                     if (isActive) {
+                      if (plan.plan) {
+                        /// it is a whole plan---/
+                        /// it is a diet plan---/
+                        router.push({
+                          pathname: "/dashboard/fullPlanDetails",
+                          params: { id: plan._id },
+                        });
+                      } else {
+                        /// it is a diet plan---/
+                        router.push({
+                          pathname: "/dashboard/dietplan",
+                          params: { id: plan._id },
+                        });
+                      }
                     } else {
                       /// plan is not active redirect to completedplan----/
                       router.push({

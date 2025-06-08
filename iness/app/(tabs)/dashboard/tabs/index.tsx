@@ -33,6 +33,8 @@ const HEADER_HEIGHT = 180;
 const MainHeader = withAnimatedHeader(NameHeader);
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
+  console.log("logged");
+
   const scrollY = new Animated.Value(0);
   //// Fetching the plan data -----------------------------/
 
@@ -106,8 +108,8 @@ const YourComponent = () => {
             <SliderCard />
             <BannerCard cardData={trackingCardData} />
             <BannerCard cardData={bookSessionCardData} />
-
-            <FeatureCarousel />
+            {/* 
+            <FeatureCarousel /> */}
           </>
         )}
       </Animated.ScrollView>

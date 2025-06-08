@@ -1,5 +1,3 @@
-// components/currentPlanPricingSelector.tsx
-
 import React, { useEffect, useRef } from "react";
 import {
   View,
@@ -7,16 +5,14 @@ import {
   Text,
   ScrollView,
   Animated,
+  Linking,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
-import { DietPlan } from "@/app/interfaces/planInterface";
 
 interface Props {
   screenWidth: number;
-
   cartLoading: boolean;
   currentPlan: any;
   selectedPlanItem: string;
@@ -25,11 +21,11 @@ interface Props {
   addingIntoToCart: (type: string) => void;
   theme: any;
   bottomSectionHeight: any;
+  showBottomBar: boolean;
 }
 
 const DietPlanInfo: React.FC<Props> = ({
   screenWidth,
-
   cartLoading,
   currentPlan,
   selectedPlanItem,
@@ -38,8 +34,12 @@ const DietPlanInfo: React.FC<Props> = ({
   addingIntoToCart,
   theme,
   bottomSectionHeight,
+  showBottomBar,
 }) => {
   const translateY = useRef(new Animated.Value(100)).current;
+
+  const planDetails = currentPlan?.dietPlanDetails ?? currentPlan;
+
   useEffect(() => {
     Animated.timing(translateY, {
       toValue: 0,
@@ -47,19 +47,17 @@ const DietPlanInfo: React.FC<Props> = ({
       useNativeDriver: true,
     }).start();
   }, []);
+
   return (
     <>
-      {/* Main Scrollable Section */}
       <View style={{ flex: 1, backgroundColor: "#fff", paddingHorizontal: 20 }}>
         <ScrollView
           contentContainerStyle={{
             paddingTop: 20,
-            paddingBottom: bottomSectionHeight + 20, // 20 for safe spacing
+            paddingBottom: bottomSectionHeight + 20,
           }}
           showsVerticalScrollIndicator={false}
         >
-          {/* Overview */}
-          {/* Overview */}
           <Text
             style={{
               fontSize: 20,
@@ -78,132 +76,175 @@ const DietPlanInfo: React.FC<Props> = ({
               marginBottom: 20,
             }}
           >
-            {currentPlan?.desc}
+            {planDetails?.desc}
           </Text>
-          <View>
-            <Text
-              style={{ fontSize: 18, fontWeight: "bold", marginBottom: 12 }}
-            >
-              What it provides.
-            </Text>
-            {currentPlan?.descItems.map((item: string, idx: number) => (
-              <View
-                key={idx}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 10,
-                }}
+
+          {/* Desc Items */}
+          {planDetails?.descItems && (
+            <View>
+              <Text
+                style={{ fontSize: 18, fontWeight: "bold", marginBottom: 12 }}
               >
-                <Ionicons name="checkmark-circle" size={18} color="#22C55E" />
-                <Text style={{ marginLeft: 8, fontSize: 14 }}>{item}</Text>
+                What it provides.
+              </Text>
+              {planDetails.descItems.map((item: string, idx: number) => (
+                <View
+                  key={idx}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 10,
+                  }}
+                >
+                  <Ionicons name="checkmark-circle" size={18} color="#22C55E" />
+                  <Text style={{ marginLeft: 8, fontSize: 14 }}>{item}</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
+          {/* Diet Plan Download Button */}
+          {currentPlan?.dietPlanDetails && currentPlan?.dietPlanUrl && (
+            <TouchableOpacity
+              onPress={() => Linking.openURL(currentPlan.dietPlanUrl)}
+              activeOpacity={0.9}
+              style={{
+                backgroundColor: theme.colors.cardLight,
+                padding: 16,
+                borderRadius: 16,
+                marginTop: 24,
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <MaterialCommunityIcons
+                  name="food-apple"
+                  size={24}
+                  color="#7C3AED"
+                />
+                <Text
+                  style={{
+                    marginLeft: 10,
+                    fontSize: 16,
+                    fontWeight: "600",
+                    color: "#4B5563",
+                  }}
+                >
+                  Download your diet plan
+                </Text>
               </View>
-            ))}
-          </View>
+              <Ionicons
+                name="cloud-download-outline"
+                size={24}
+                color="#4B5563"
+              />
+            </TouchableOpacity>
+          )}
         </ScrollView>
       </View>
 
-      {/* Fixed Bottom Section - Full Width Gradient */}
-      <Animated.View
-        style={{
-          position: "absolute",
-          bottom: 0,
-          left: 0,
-          width: screenWidth,
-          transform: [{ translateY }],
-        }}
-        onLayout={(event) => {
-          setBottomSectionHeight(event.nativeEvent.layout.height);
-        }}
-      >
-        <LinearGradient
-          colors={["#140A21", "#522987"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+      {/* Bottom Bar */}
+      {showBottomBar && (
+        <Animated.View
           style={{
-            padding: 20,
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            width: screenWidth,
+            transform: [{ translateY }],
           }}
+          onLayout={(event) =>
+            setBottomSectionHeight(event.nativeEvent.layout.height)
+          }
         >
-          {/* Pricing Cards */}
-          <View
+          <LinearGradient
+            colors={["#140A21", "#522987"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
             style={{
-              flexDirection: "row",
-              justifyContent: "center",
-              width: 310,
-              gap: 10,
+              padding: 20,
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              flexDirection: "column",
+              alignItems: "center",
             }}
           >
-            <TouchableOpacity
-              onPress={() => {
-                setSelectedPlanItem(currentPlan._id);
-              }}
-              activeOpacity={0.8}
+            <View
               style={{
-                width: "100%",
-                flex: 1,
-                backgroundColor:
-                  selectedPlanItem === currentPlan._id ? "#E0E7FF" : "#F3F4F6",
-                borderWidth: selectedPlanItem === currentPlan._id ? 2 : 0,
-                borderColor:
-                  selectedPlanItem === currentPlan._id
-                    ? "#8B5CF6"
-                    : "transparent",
-                borderRadius: 16,
-                padding: 12,
-                alignItems: "center",
+                flexDirection: "row",
+                justifyContent: "center",
+                width: 310,
+                gap: 10,
               }}
             >
-              <View
+              <TouchableOpacity
+                onPress={() => {
+                  setSelectedPlanItem(currentPlan._id);
+                }}
+                activeOpacity={0.8}
                 style={{
-                  width: "100%",
-                  flexDirection: "row",
-                  justifyContent: "space-between",
+                  flex: 1,
+                  backgroundColor:
+                    selectedPlanItem === currentPlan._id
+                      ? "#E0E7FF"
+                      : "#F3F4F6",
+                  borderWidth: selectedPlanItem === currentPlan._id ? 2 : 0,
+                  borderColor:
+                    selectedPlanItem === currentPlan._id
+                      ? "#8B5CF6"
+                      : "transparent",
+                  borderRadius: 16,
+                  padding: 12,
                   alignItems: "center",
                 }}
               >
-                <Text style={{ fontSize: 14, fontWeight: "600" }}>
-                  {currentPlan.duration} {currentPlan.durationType}
-                </Text>
-
                 <View
                   style={{
-                    backgroundColor: "#9333EA",
-                    borderRadius: 999,
-                    padding: 2,
+                    width: "100%",
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                   }}
                 >
-                  <Ionicons name="checkmark" size={14} color="white" />
+                  <Text style={{ fontSize: 14, fontWeight: "600" }}>
+                    {planDetails.duration} {planDetails.durationType}
+                  </Text>
+                  <View
+                    style={{
+                      backgroundColor: "#9333EA",
+                      borderRadius: 999,
+                      padding: 2,
+                    }}
+                  >
+                    <Ionicons name="checkmark" size={14} color="white" />
+                  </View>
                 </View>
-              </View>
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "700",
-                  marginVertical: 4,
-                  textAlign: "left",
-                  width: "100%",
-                }}
-              >
-                ₹ {currentPlan.price}
-              </Text>
-            </TouchableOpacity>
-          </View>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: "700",
+                    marginVertical: 4,
+                    textAlign: "left",
+                    width: "100%",
+                  }}
+                >
+                  ₹ {planDetails.price}
+                </Text>
+              </TouchableOpacity>
+            </View>
 
-          <AnimatedSubmitButton
-            loading={cartLoading}
-            title="Add to cart"
-            onPress={() => {
-              addingIntoToCart("dietplan");
-            }}
-          />
-        </LinearGradient>
-      </Animated.View>
+            <AnimatedSubmitButton
+              loading={cartLoading}
+              title="Add to cart"
+              onPress={() => {
+                addingIntoToCart("dietplan");
+              }}
+            />
+          </LinearGradient>
+        </Animated.View>
+      )}
     </>
   );
 };

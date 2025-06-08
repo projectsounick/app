@@ -56,10 +56,15 @@ async function storeScreenName(
 /// Function to update user data in AsyncStorage
 async function updateUserDataInAsyncStorage(updates: Partial<UserData>) {
   try {
+    console.log(updates);
+
     const existing = await AsyncStorage.getItem("user");
     const user: UserData = existing ? JSON.parse(existing) : {};
     const updated = { ...user, ...updates };
+    console.log(updated);
+
     let response = await AsyncStorage.setItem("user", JSON.stringify(updated));
+    console.log(response);
   } catch (error) {
     throw new Error("some error has occurred , try again later");
   }

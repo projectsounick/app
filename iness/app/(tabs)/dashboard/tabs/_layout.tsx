@@ -48,7 +48,7 @@ export default function DashboardLayout() {
         options={{
           tabBarLabel: "Store",
           tabBarIcon: ({ color }) => (
-            <MaterialCommunityIcons name="kettlebell" size={28} color={color} />
+            <MaterialCommunityIcons name="store" size={28} color={color} />
           ),
         }}
       />

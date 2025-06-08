@@ -11,7 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import NormalHeader from "@/app/modules/NormalHeader";
 import theme from "@/app/Theme/globalTheme";
-const backgroundImg = require("../../../assets/images/basicBackground.jpeg");
+const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 
 export default function CalculatorScreen() {
   const [height, setHeight] = useState("");

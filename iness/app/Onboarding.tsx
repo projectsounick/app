@@ -10,7 +10,7 @@ import {
   Keyboard,
   Platform,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import theme from "./Theme/globalTheme";
 import OnboardingName from "@/components/Onboarding/OnboardingName";
 import OnboardingSex from "@/components/Onboarding/OnboardingSex";
@@ -30,6 +30,7 @@ import OnboardingWeight from "@/components/Onboarding/OnboardingWeight";
 import OnboardingHeading from "./modules/OnboardingHeading";
 import OnboardingHeight from "@/components/Onboarding/OnboardingHeight";
 import OnboardingDOB from "@/components/Onboarding/OnboardingDOB";
+import OnboardingphoneNumber from "@/components/Onboarding/OnboardingPhoneNumber";
 
 //// Main functional component for the Onboarding screen ///// -----------------------------------/
 const OnboardingScreen = () => {
@@ -52,16 +53,15 @@ const OnboardingScreen = () => {
       /// So this is the final step of the onboarding process
       /// we will make an api call to the backend will save user data will
       /// move the user to dashboard screen
-      const userData = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
-        "user"
-      );
+      const userData =
+        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
       if (userData && userData.exists) {
         //// Adding onboarding ==> true to the user data
         let data = userData.data;
         data.onboarding = true;
         //// Function for update
 
-        const { _id, role, __v, jwtToken, phoneNumber, ...cleanData } = data;
+        const { _id, role, __v, jwtToken, ...cleanData } = data;
         let response = await userService.updateUser(cleanData);
 
         if (response.success) {
@@ -87,18 +87,20 @@ const OnboardingScreen = () => {
       case 0:
         return <OnboardingName onNext={handleNext} />;
       case 1:
-        return <OnboardingSex onNext={handleNext} onBack={handleBack} />;
+        return <OnboardingphoneNumber onNext={handleNext} />;
       case 2:
-        return <OnboardingWeight onNext={handleNext} onBack={handleBack} />;
+        return <OnboardingSex onNext={handleNext} onBack={handleBack} />;
       case 3:
-        return <OnboardingHeight onNext={handleNext} />;
+        return <OnboardingWeight onNext={handleNext} onBack={handleBack} />;
       case 4:
-        return <OnboardingDOB onNext={handleNext} />;
+        return <OnboardingHeight onNext={handleNext} />;
       case 5:
+        return <OnboardingDOB onNext={handleNext} />;
+      case 6:
         return (
           <OnboardingPrimaryGoal onNext={handleNext} onBack={handleBack} />
         );
-      case 6:
+      case 7:
         return (
           <OnboardingtimeCommitment
             onNext={handleNext}
@@ -106,11 +108,11 @@ const OnboardingScreen = () => {
             loading={loading}
           />
         );
-      case 7:
-        return <PreferredWorkoutTime onNext={handleNext} onBack={handleBack} />;
       case 8:
-        return <WorkoutPreferences onNext={handleNext} onBack={handleBack} />;
+        return <PreferredWorkoutTime onNext={handleNext} onBack={handleBack} />;
       case 9:
+        return <WorkoutPreferences onNext={handleNext} onBack={handleBack} />;
+      case 10:
         return <ActivityLevel onNext={handleNext} onBack={handleBack} />;
       default:
         return null;

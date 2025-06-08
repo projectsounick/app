@@ -135,7 +135,7 @@ export default function TransformationImage() {
 
   return (
     <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpeg")} // ✅ replace with your background
+      source={require("../../../assets/images/basicBackground.jpg")} // ✅ replace with your background
       style={{ flex: 1 }}
       resizeMode="cover"
     >

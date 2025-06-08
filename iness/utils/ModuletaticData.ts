@@ -1,6 +1,6 @@
 import theme from "../app/Theme/globalTheme";
 export const bookSessionCardData = {
-  title: "Book a session with our fitness expert.",
+  title: "Book a session ",
   subtitle: "Get answers to all questions about your goals.",
   buttonText: "Book Session",
   icon: "clock",

@@ -191,7 +191,7 @@ export default function WellnessDashboard() {
   }, []);
   return (
     <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpeg")}
+      source={require("../../../assets/images/basicBackground.jpg")}
       style={{ flex: 1 }}
       resizeMode="cover"
     >

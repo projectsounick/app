@@ -78,7 +78,7 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
         >
           <Text style={{ color: "#fff", fontSize: 10 }}>Pay Using</Text>
           <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 14 }}>
-            PayTM
+            Phone Pe
           </Text>
         </TouchableOpacity>
 

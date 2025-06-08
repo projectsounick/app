@@ -4,135 +4,116 @@ import {
   Text,
   Animated,
   TouchableOpacity,
-  Dimensions,
   ImageBackground,
+  Linking,
+  Alert,
 } from "react-native";
-import Svg, { Circle } from "react-native-svg";
-import LottieView from "lottie-react-native";
-import { Ionicons } from "@expo/vector-icons";
-import theme from "@/app/Theme/globalTheme";
-import SmallHeader from "@/app/modules/SmallHeader";
-import { useRouter } from "expo-router";
-import BackHeader from "@/app/modules/BackHeader";
+import { LinearGradient } from "expo-linear-gradient";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { ActivityIndicator } from "react-native-paper";
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-const { width } = Dimensions.get("window");
+import SmallHeader from "@/app/modules/SmallHeader";
+import BackHeader from "@/app/modules/BackHeader";
+import { cartService } from "@/app/services/cart.service";
+import theme from "@/app/Theme/globalTheme";
+import { paymentService } from "@/app/services/payment.service";
+import { planService } from "@/app/services/plan.service";
+import { useDispatch } from "react-redux";
+import { setActivePlans } from "@/Slices/planSlice";
 
 const PaymentSuccessScreen = () => {
-  const progress = useRef(new Animated.Value(0)).current;
+  const { orderId } = useLocalSearchParams();
+  const router = useRouter();
+
   const slideUpAnim = useRef(new Animated.Value(50)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
-  const [showConfetti, setShowConfetti] = useState(false);
-  const [showContent, setShowContent] = useState(false);
-
-  const router = useRouter();
-  const CIRCLE_RADIUS = 80;
-  const CIRCLE_LENGTH = 2 * Math.PI * CIRCLE_RADIUS;
-
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [recEiptLoading, setReceiptLoading] = useState(false);
   useEffect(() => {
-    Animated.timing(progress, {
-      toValue: 1,
-      duration: 2000,
-      useNativeDriver: true,
-    }).start(() => {
-      setShowConfetti(true);
-      setTimeout(() => {
-        setShowConfetti(false);
-        setShowContent(true);
-      }, 2000);
-    });
+    fetchOrderStatus();
+    Animated.parallel([
+      Animated.timing(slideUpAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+    ]).start();
   }, []);
-
-  useEffect(() => {
-    if (showContent) {
-      Animated.parallel([
-        Animated.timing(slideUpAnim, {
-          toValue: 0,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }),
-      ]).start();
+  const dispatch = useDispatch();
+  async function fetchOrderStatus() {
+    try {
+      setLoading(true);
+      const response = await cartService.getOrderStatus(orderId);
+      if (response.success) {
+        setMessage("Thank you! Payment successful.");
+        const response = await planService.getActivePlans();
+        if (response.success) {
+          dispatch(setActivePlans(response.data));
+        }
+      }
+    } catch (error) {
+      setMessage("Unable to process the payment");
+    } finally {
+      setLoading(false);
     }
-  }, [showContent]);
+  }
+  async function fetchReceipt(orderId: any) {
+    try {
+      setReceiptLoading(true);
+      const response = await paymentService.getReciptData(orderId);
 
-  const strokeDashoffset = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [CIRCLE_LENGTH, 0],
-  });
-
+      if (response.success && response.receipt) {
+        const supported = await Linking.canOpenURL(response.receipt);
+        if (supported) {
+          await Linking.openURL(response.receipt);
+        } else {
+          Alert.alert("Can't open the receipt link.");
+        }
+      } else {
+        setMessage("Receipt not available.");
+      }
+    } catch (error) {
+      console.error(error);
+      setMessage("Unable to open receipt.");
+    } finally {
+      setReceiptLoading(false);
+    }
+  }
   return (
     <ImageBackground
       style={{ flex: 1 }}
-      source={require("../../../assets/images/basicBackground.jpeg")}
+      source={require("../../../assets/images/basicBackground.jpg")}
     >
-      {/* Animated Circle */}
-      {!showContent && (
-        <View
-          style={{
-            position: "absolute",
-            top: "40%",
-            left: "50%",
-            transform: [{ translateX: -100 }],
-          }}
-        >
-          <Svg
-            height="200"
-            width="200"
-            style={{ transform: [{ rotate: "-90deg" }] }}
+      <View style={{ flex: 1 }}>
+        <SmallHeader title="Payment" />
+        <BackHeader />
+
+        {loading ? (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
-            <AnimatedCircle
-              cx="100"
-              cy="100"
-              r={CIRCLE_RADIUS}
-              stroke={theme.colors.primary}
-              strokeWidth="10"
-              fill="none"
-              strokeDasharray={CIRCLE_LENGTH}
-              strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
-            />
-          </Svg>
-        </View>
-      )}
-
-      {/* Confetti Animation */}
-      {!showContent && (
-        <LottieView
-          source={require("../../../assets/splash.json")}
-          autoPlay
-          loop={false}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            width: "100%",
-            height: "100%",
-            zIndex: 10,
-          }}
-          resizeMode="cover"
-        />
-      )}
-
-      {/* Main Content */}
-      {showContent && (
-        <View style={{ flex: 1 }}>
-          <SmallHeader title="Payment" />
-          <BackHeader />
-          <View style={{ marginTop: 40, alignItems: "center" }}>
-            {/* Thank You Box */}
+            <ActivityIndicator />
+          </View>
+        ) : (
+          <View style={{ marginTop: 20, alignItems: "center", gap: 20 }}>
+            {/* Thank You Message Box */}
             <View
               style={{
                 backgroundColor: "#E6FFF0",
-                borderColor: "green",
-                borderWidth: 1.5,
+                borderColor: "rgba(225, 255, 239, 1)",
+                width: "90%",
+                borderWidth: 1,
                 borderRadius: 100,
                 paddingVertical: 14,
                 paddingHorizontal: 24,
@@ -141,47 +122,139 @@ const PaymentSuccessScreen = () => {
               <Text
                 style={{
                   fontSize: 16,
-                  color: "green",
+                  color: "rgba(18, 106, 59, 1)",
                   fontWeight: "600",
                   textAlign: "center",
                 }}
               >
-                Thank you! Payment successful.
+                {message}
               </Text>
             </View>
 
-            {/* Animated Button */}
-            <Animated.View
+            {/* Receipt Download Card */}
+            <TouchableOpacity
+              onPress={() => {
+                // TODO: Implement actual receipt download
+                fetchReceipt(orderId);
+              }}
+              activeOpacity={0.8}
               style={{
-                marginTop: 32,
-                transform: [{ translateY: slideUpAnim }],
-                opacity: opacityAnim,
-                width: "80%",
+                width: "90%",
+                borderRadius: 20,
+                backgroundColor: "#fff",
+                padding: 20,
+                flexDirection: "row",
+                alignItems: "center",
+                elevation: 5,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 6,
               }}
             >
-              <TouchableOpacity
-                onPress={() => router.push("/(tabs)/dashboard/tabs")}
-                style={{
-                  backgroundColor: theme.colors.primary,
-                  paddingVertical: 14,
-                  borderRadius: 30,
-                  alignItems: "center",
-                }}
-              >
-                <Text
+              {recEiptLoading ? (
+                <View
                   style={{
-                    color: theme.colors.dark,
-                    fontSize: 16,
-                    fontWeight: "600",
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
                 >
-                  See your plans
+                  <ActivityIndicator color={theme.colors.secondPriamy} />
+                </View>
+              ) : (
+                <View
+                  style={{
+                    backgroundColor: "#E6FFF0",
+                    borderRadius: 50,
+                    padding: 12,
+                    marginRight: 16,
+                  }}
+                >
+                  <Text style={{ fontSize: 20 }}>📄</Text>
+                </View>
+              )}
+
+              <View>
+                <Text
+                  style={{ fontSize: 16, fontWeight: "600", color: "#222" }}
+                >
+                  Download your receipt
                 </Text>
-              </TouchableOpacity>
-            </Animated.View>
+                <Text style={{ fontSize: 12, color: "#666" }}>
+                  Tap to get your payment receipt
+                </Text>
+              </View>
+            </TouchableOpacity>
           </View>
-        </View>
-      )}
+        )}
+
+        {/* Bottom CTA with Gradient */}
+        <Animated.View
+          style={{
+            position: "absolute",
+            bottom: 0,
+            width: "100%",
+            transform: [{ translateY: slideUpAnim }],
+            opacity: opacityAnim,
+          }}
+        >
+          <LinearGradient
+            colors={["#140A21", "#522987"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={{
+              paddingVertical: 20,
+              alignItems: "center",
+              borderTopLeftRadius: 25,
+              borderTopRightRadius: 25,
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => router.replace("/(tabs)/dashboard/tabs/train")}
+              style={{
+                backgroundColor: theme.colors.primary, // Green button
+                paddingVertical: 14,
+                paddingHorizontal: 30,
+                borderRadius: 30,
+                alignItems: "center",
+                width: "80%",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+                elevation: 5,
+              }}
+            >
+              <Text
+                style={{
+                  color: "#000",
+                  fontSize: 16,
+                  fontWeight: "600",
+                }}
+              >
+                See my plans
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => router.replace("/(tabs)/dashboard/tabs")}
+              style={{ marginTop: 12 }}
+            >
+              <Text
+                style={{
+                  color: theme.colors.primary,
+                  fontSize: 14,
+                  fontWeight: "500",
+                }}
+              >
+                Continue exploring
+              </Text>
+            </TouchableOpacity>
+          </LinearGradient>
+        </Animated.View>
+      </View>
     </ImageBackground>
   );
 };

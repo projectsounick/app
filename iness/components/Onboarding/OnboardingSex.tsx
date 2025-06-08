@@ -33,7 +33,7 @@ const OnboardingSex = ({
   const handleNext = async () => {
     try {
       if (sex) {
-        await asyncStorageUtils.updateUserDataInAsyncStorage({
+        let res = await asyncStorageUtils.updateUserDataInAsyncStorage({
           sex,
         });
 

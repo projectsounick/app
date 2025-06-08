@@ -12,6 +12,7 @@ export const cartService = {
   deleteCartItems,
   updateCartItems,
   getPhonePeUrl,
+  getOrderStatus,
 };
 
 //// Funciton for updating the user in using backend then storing in AsyncStorage----/
@@ -32,6 +33,7 @@ async function getCartItems(): Promise<ApiResponseInterface> {
     throw new Error("Error updating user: " + error.message);
   }
 }
+
 //// Funciton for deleting the cart items
 async function deleteCartItems(
   cartItemId: string
@@ -66,4 +68,13 @@ async function updateCartItems(
 //// Funciton for checking out the user cart details and getting the phonepe url ---------------/
 async function getPhonePeUrl() {
   return fetchWrapper.post(`${baseUrl}/checkout-cart`, {});
+}
+
+//// funciton for getting the order status -----------------------------------/
+async function getOrderStatus(orderId: any) {
+  try {
+    return fetchWrapper.get(`${baseUrl}/get-order-status/${orderId}`);
+  } catch (error: any) {
+    throw new Error("Error updating user: " + error.message);
+  }
 }

@@ -12,10 +12,10 @@ const { width } = Dimensions.get("window");
 
 const featureData = [
   {
-    image: require("../../assets/images/featureCard1.png"), // Path to the image
+    image: require("../../assets/images/featureCard1.jpg"), // Path to the image
   },
   {
-    image: require("../../assets/images/featureCard2.png"), // Path to the image
+    image: require("../../assets/images/featureCard2.jpg"), // Path to the image
   },
   {
     image: require("../../assets/images/featureCard3.png"), // Path to the image
@@ -41,7 +41,7 @@ const FeatureCarousel = () => {
 
   return (
     <ImageBackground
-      source={require("../../assets/images/carrauselBackground.png")}
+      source={require("../../assets/images/carrauselBackground.jpg")}
       style={{
         flex: 1,
         alignItems: "center",

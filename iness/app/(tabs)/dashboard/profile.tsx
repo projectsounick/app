@@ -16,7 +16,7 @@ import TransformationImageModal from "@/app/Components/Profile/TransformationMod
 export default function ProfileScreen() {
   return (
     <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpeg")}
+      source={require("../../../assets/images/basicBackground.jpg")}
       style={{ flex: 1 }}
       resizeMode="cover"
     >

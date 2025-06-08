@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   ImageBackground,
+  Modal,
+  Image,
+  Dimensions,
 } from "react-native";
-import Icon from "react-native-vector-icons/Feather";
 import { useNavigation } from "@react-navigation/native";
 import BannerCard from "@/app/modules/BannerCard";
 import {
@@ -15,20 +17,72 @@ import {
 } from "@/utils/ModuletaticData";
 import SmallHeader from "@/app/modules/SmallHeader";
 import BackHeader from "@/app/modules/BackHeader";
+import Icon from "react-native-vector-icons/Ionicons"; // for arrow icon
 
-//// Main funcitonal component for the session booking -------------------------------/
+const { width } = Dimensions.get("window");
+
 const BookSessionScreen = () => {
   const navigation = useNavigation();
+  const [showModal, setShowModal] = useState(true);
 
   return (
-    <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpeg")}
-      resizeMode="cover"
-      style={{
-        flex: 1,
-      }}
-    >
-      {/* Custom Header */}
+    <View style={{ flex: 1 }}>
+      {/* Modal */}
+      <Modal visible={showModal} transparent animationType="fade">
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "center",
+            alignItems: "center",
+            paddingHorizontal: 30,
+          }}
+        >
+          <ImageBackground
+            style={{
+              backgroundColor: "#fff",
+              borderRadius: 20,
+              padding: 25,
+              alignItems: "center",
+              width: width * 0.8,
+            }}
+            source={require("../../../assets/images/carrauselBackground.jpg")}
+          >
+            <Text
+              style={{
+                fontSize: 20,
+                fontWeight: "bold",
+                color: "#333",
+                marginBottom: 20,
+              }}
+            >
+              Coming Soon!
+            </Text>
+
+            <TouchableOpacity
+              onPress={() => navigation.goBack()}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                paddingVertical: 10,
+                paddingHorizontal: 20,
+                backgroundColor: "#f0f0f0",
+                borderRadius: 10,
+              }}
+            >
+              <Icon
+                name="arrow-back"
+                size={20}
+                color="#333"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={{ fontSize: 16, color: "#333" }}>Go Back</Text>
+            </TouchableOpacity>
+          </ImageBackground>
+        </View>
+      </Modal>
+
+      {/* Header and Content */}
       <SmallHeader title="Sessions" />
       <BackHeader />
 
@@ -63,7 +117,7 @@ const BookSessionScreen = () => {
         <View style={{ height: 16 }} />
         <BannerCard cardData={offlineSessionCardData} />
       </ScrollView>
-    </ImageBackground>
+    </View>
   );
 };
 

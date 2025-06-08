@@ -79,9 +79,10 @@ const OnboardingWeight = ({
   const handleNext = async () => {
     const weight = `${weightInt}.${weightDecimal}`;
 
-    await asyncStorageUtils.updateUserDataInAsyncStorage({
+    let response = await asyncStorageUtils.updateUserDataInAsyncStorage({
       weight,
     });
+    console.log(response);
 
     onNext();
   };

@@ -98,7 +98,7 @@ export default function SliderCard() {
           >
             <View
               style={{
-                width: "90%",
+                width: "95%",
                 display: "flex",
                 flexDirection: "row",
                 justifyContent: "space-between",
@@ -114,17 +114,19 @@ export default function SliderCard() {
                   flexDirection: "column",
                   justifyContent: "space-between",
                   alignItems: "flex-start",
+
                   height: "90%",
+                  width: "60%",
                 }}
               >
                 <Text
                   style={{
                     fontWeight: theme.fontWeights.bold,
-                    fontSize: theme.fontSizes.regular,
+                    fontSize: 14,
                     marginBottom: 6,
                     color: theme.colors.dark,
                   }}
-                  numberOfLines={2}
+                  numberOfLines={1}
                   ellipsizeMode="tail"
                 >
                   {item.title}
@@ -161,6 +163,7 @@ export default function SliderCard() {
                   height: "90%",
                   justifyContent: "center",
                   alignItems: "center",
+                  width: "40%",
                 }}
               >
                 <ImageWithLoader uri={item.imgUrl} />

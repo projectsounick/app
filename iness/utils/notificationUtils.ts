@@ -1,38 +1,37 @@
-// utils/notifications.ts
-import * as Device from "expo-device";
 import * as Notifications from "expo-notifications";
+import Constants from "expo-constants";
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Get token and request permission
-export async function registerForPushNotificationsAsync(): Promise<
-  string | null
-> {
-  const { status: existingStatus } = await Notifications.getPermissionsAsync();
-  let finalStatus = existingStatus;
+export async function registerForPushNotificationsAsync() {
+  let token;
 
-  if (existingStatus !== "granted") {
-    const { status } = await Notifications.requestPermissionsAsync();
-    finalStatus = status;
-  }
+  if (Constants.isDevice) {
+    const { status: existingStatus } =
+      await Notifications.getPermissionsAsync();
+    let finalStatus = existingStatus;
 
-  if (finalStatus !== "granted") {
-    alert("Permission not granted!");
-    return null;
-  }
+    if (existingStatus !== "granted") {
+      const { status } = await Notifications.requestPermissionsAsync();
+      finalStatus = status;
+    }
 
-  const tokenData = await Notifications.getExpoPushTokenAsync({
-    projectId: "d80cbfa4-17b7-44ae-9955-a47743e5be15", // Replace with your real ID
-  });
+    if (finalStatus !== "granted") {
+      alert("Failed to get push token for push notification!");
+      return;
+    }
 
-  const token = tokenData.data;
+    token = (await Notifications.getExpoPushTokenAsync()).data;
+    console.log("Expo push token:", token);
 
-  // Android: set notification channel
-  if (Platform.OS === "android") {
-    await Notifications.setNotificationChannelAsync("default", {
-      name: "default",
-      importance: Notifications.AndroidImportance.MAX,
-    });
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("default", {
+        name: "default",
+        importance: Notifications.AndroidImportance.MAX,
+      });
+    }
+  } else {
+    alert("Must use physical device for Push Notifications");
   }
 
   return token;

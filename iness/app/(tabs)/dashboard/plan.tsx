@@ -16,6 +16,7 @@ import SmallHeader from "@/app/modules/SmallHeader";
 import { router } from "expo-router";
 import { setCurrentPlan } from "@/Slices/planSlice";
 import PlanCard from "@/app/modules/PlanCard";
+import BackHeader from "@/app/modules/BackHeader";
 
 const { width } = Dimensions.get("window");
 
@@ -38,7 +39,8 @@ export default function SliderCard() {
   return (
     <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <SmallHeader title="Plans" />
-      <ScrollView contentContainerStyle={{ paddingVertical: 16 }}>
+      <BackHeader />
+      <ScrollView contentContainerStyle={{ paddingVertical: 2 }}>
         {Object.entries(groupedPlans).map(
           ([typeTitle, planGroup], index: any) => (
             <View

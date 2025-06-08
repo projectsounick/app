@@ -14,7 +14,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { UserData } from "@/app/interfaces/UserInterface";
 import NormalHeader from "@/app/modules/NormalHeader";
 import theme from "@/app/Theme/globalTheme";
-const backgroundImage = require("../../../assets/images/basicBackground.jpeg");
+const backgroundImage = require("../../../assets/images/basicBackground.jpg");
 
 // Option imports
 import {

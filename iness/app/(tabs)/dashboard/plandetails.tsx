@@ -124,6 +124,7 @@ const WorkoutPlanScreen = () => {
       ) : (
         <DietPlanInfo
           screenWidth={screenWidth}
+          showBottomBar={true}
           cartLoading={cartLoading}
           currentPlan={currentPlan}
           selectedPlanItem={selectedPlanItem}
