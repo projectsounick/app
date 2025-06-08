@@ -31,6 +31,7 @@ import OnboardingHeading from "./modules/OnboardingHeading";
 import OnboardingHeight from "@/components/Onboarding/OnboardingHeight";
 import OnboardingDOB from "@/components/Onboarding/OnboardingDOB";
 import OnboardingphoneNumber from "@/components/Onboarding/OnboardingPhoneNumber";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 //// Main functional component for the Onboarding screen ///// -----------------------------------/
 const OnboardingScreen = () => {
@@ -53,8 +54,9 @@ const OnboardingScreen = () => {
       /// So this is the final step of the onboarding process
       /// we will make an api call to the backend will save user data will
       /// move the user to dashboard screen
-      const userData =
-        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+      const userData = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
+        "user"
+      );
       if (userData && userData.exists) {
         //// Adding onboarding ==> true to the user data
         let data = userData.data;
@@ -124,76 +126,82 @@ const OnboardingScreen = () => {
     (Dimensions.get("window").width - 90); // adjusted to fit beside back button
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 60 : 0} // Adjust as needed
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right"]}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ImageBackground
-          source={require("../assets/images/onboardingBackground.jpg")}
+      <ImageBackground
+        source={require("../assets/images/onboardingBackground.jpg")}
+        style={{ flex: 1 }}
+      >
+        <KeyboardAvoidingView
           style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
-          <View style={{ flex: 1, paddingTop: 60, paddingHorizontal: 20 }}>
-            {/* Row with Back Button + Progress Bar */}
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: 30,
-              }}
-            >
-              {currentStep > 0 && (
-                <TouchableOpacity
-                  onPress={handleBack}
-                  style={{
-                    backgroundColor: "#000",
-                    width: 50,
-                    height: 50,
-                    borderRadius: 25,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginRight: 10,
-                  }}
-                >
-                  <Ionicons name="arrow-back" size={24} color="#fff" />
-                </TouchableOpacity>
-              )}
-
-              {/* Progress Bar */}
-              <View
-                style={{
-                  flex: 1,
-                  height: 6,
-                  backgroundColor: "#eee",
-                  borderRadius: 5,
-                  overflow: "hidden",
-                }}
-              >
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <>
+              <View style={{ flex: 1, paddingTop: 60, paddingHorizontal: 20 }}>
+                {/* Row with Back Button + Progress Bar */}
                 <View
                   style={{
-                    height: 6,
-                    width: progressWidth,
-                    backgroundColor: theme.colors.secondPrimary,
-                    borderRadius: 5,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 30,
                   }}
-                />
+                >
+                  {currentStep > 0 && (
+                    <TouchableOpacity
+                      onPress={handleBack}
+                      style={{
+                        backgroundColor: "#000",
+                        width: 50,
+                        height: 50,
+                        borderRadius: 25,
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginRight: 10,
+                      }}
+                    >
+                      <Ionicons name="arrow-back" size={24} color="#fff" />
+                    </TouchableOpacity>
+                  )}
+
+                  {/* Progress Bar */}
+                  <View
+                    style={{
+                      flex: 1,
+                      height: 6,
+                      backgroundColor: "#eee",
+                      borderRadius: 5,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <View
+                      style={{
+                        height: 6,
+                        width: progressWidth,
+                        backgroundColor: theme.colors.secondPrimary,
+                        borderRadius: 5,
+                      }}
+                    />
+                  </View>
+                </View>
+
+                {/* Step Content (your OnboardingName component) */}
+                <View style={{ flex: 1 }}>{renderStepComponent(loading)}</View>
               </View>
-            </View>
 
-            {/* Step Content (your OnboardingName component) */}
-            <View style={{ flex: 1 }}>{renderStepComponent(loading)}</View>
-          </View>
-
-          <CustomSnackbar
-            visible={snackbarVisible}
-            message={snackbarMessage}
-            bgColor={theme.colors.primary}
-            onDismiss={() => setSnackbarVisible(false)}
-          />
-        </ImageBackground>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+              <CustomSnackbar
+                visible={snackbarVisible}
+                message={snackbarMessage}
+                bgColor={theme.colors.primary}
+                onDismiss={() => setSnackbarVisible(false)}
+              />
+            </>
+          </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
+      </ImageBackground>
+    </SafeAreaView>
   );
 };
 

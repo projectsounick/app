@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, ScrollView, ImageBackground } from "react-native";
 import NormalHeader from "@/app/modules/NormalHeader";
 import theme from "@/app/Theme/globalTheme";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 ////// Main functional component for the policy screen ---------------------------------/
 export default function PolicyScreen() {
@@ -48,38 +49,45 @@ export default function PolicyScreen() {
         backgroundColor: "#000",
       }}
     >
-      <View style={{ paddingTop: 30, paddingLeft: 20 }}>
-        <NormalHeader screenName="Policies" />
-      </View>
-
-      <ScrollView
-        style={{ flex: 1, padding: 20 }}
-        showsVerticalScrollIndicator={false}
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+        edges={["top", "left", "right"]}
       >
-        {policies.map((policy, index) => (
-          <View
-            key={index}
-            style={{
-              backgroundColor: theme.colors.cardLight,
-              padding: 15,
-              borderRadius: 12,
-              marginBottom: index === policies.length ? 25 : 15,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.1,
-              shadowRadius: 2,
-              elevation: 2,
-            }}
-          >
-            <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 8 }}>
-              {policy.title}
-            </Text>
-            <Text style={{ fontSize: 14, color: "#444", lineHeight: 20 }}>
-              {policy.content}
-            </Text>
-          </View>
-        ))}
-      </ScrollView>
+        <View style={{ paddingTop: 30, paddingLeft: 20 }}>
+          <NormalHeader screenName="Policies" />
+        </View>
+
+        <ScrollView
+          style={{ flex: 1, padding: 20 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {policies.map((policy, index) => (
+            <View
+              key={index}
+              style={{
+                backgroundColor: theme.colors.cardLight,
+                padding: 15,
+                borderRadius: 12,
+                marginBottom: index === policies.length ? 25 : 15,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+                elevation: 2,
+              }}
+            >
+              <Text
+                style={{ fontSize: 18, fontWeight: "bold", marginBottom: 8 }}
+              >
+                {policy.title}
+              </Text>
+              <Text style={{ fontSize: 14, color: "#444", lineHeight: 20 }}>
+                {policy.content}
+              </Text>
+            </View>
+          ))}
+        </ScrollView>
+      </SafeAreaView>
     </ImageBackground>
   );
 }

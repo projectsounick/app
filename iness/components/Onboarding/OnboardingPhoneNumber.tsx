@@ -36,8 +36,9 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
   };
   useEffect(() => {
     const loadUserData = async () => {
-      const user: any =
-        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+      const user: any = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
+        "user"
+      );
 
       if (user.exists && user?.phoneNumber) {
         const raw = user.phoneNumber.replace("+", ""); // e.g., '919876543210'
@@ -121,6 +122,18 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
                 paddingHorizontal: theme.spacing.md,
                 paddingVertical: 6,
                 width: "100%",
+
+                // Add border for iOS visibility
+                borderWidth: 1,
+                borderColor: "#ccc", // light gray or your preferred border color
+
+                // Shadow for iOS (optional)
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+
+                // elevation for Android
                 elevation: 2,
                 marginBottom: theme.spacing.sm,
               }}

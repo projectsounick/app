@@ -1,16 +1,14 @@
 ////// Main functional component for the profile screen --------------------------------------/
 import { View, Text, Image, ScrollView, TouchableOpacity } from "react-native";
 
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import TransformationCard from "@/app/Components/Profile/Tranformation";
 import SettingsList from "@/app/Components/Profile/SettingsList";
 import ProfileCard from "@/app/Components/Profile/DescriptionCard";
 
 import { ImageBackground } from "react-native";
 import NormalHeader from "@/app/modules/NormalHeader";
-import theme from "@/app/Theme/globalTheme";
-import { useState } from "react";
-import TransformationImageModal from "@/app/Components/Profile/TransformationModal";
+
+import { SafeAreaView } from "react-native-safe-area-context";
 
 //// Main funcitonal component for the Profile screen -------------------------/
 export default function ProfileScreen() {
@@ -20,7 +18,10 @@ export default function ProfileScreen() {
       style={{ flex: 1 }}
       resizeMode="cover"
     >
-      <View style={{ flex: 1 }}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+        edges={["top", "left", "right"]}
+      >
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
@@ -39,7 +40,7 @@ export default function ProfileScreen() {
           {/* Settings Options */}
           <SettingsList />
         </ScrollView>
-      </View>
+      </SafeAreaView>
     </ImageBackground>
   );
 }

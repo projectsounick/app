@@ -16,6 +16,7 @@ import { RootState } from "@/store";
 import NormalHeader from "@/app/modules/NormalHeader";
 
 import theme from "@/app/Theme/globalTheme";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -140,182 +141,195 @@ export default function TrackingGraphPage() {
       resizeMode="cover"
       style={{ flex: 1 }}
     >
-      <ScrollView style={{ flex: 1 }}>
-        <View style={{ paddingLeft: 20, paddingTop: 20 }}>
-          <NormalHeader screenName="Tracking Graphs" />
-        </View>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+        edges={["top", "left", "right"]}
+      >
+        <ScrollView style={{ flex: 1 }}>
+          <View style={{ paddingLeft: 20, paddingTop: 20 }}>
+            <NormalHeader screenName="Tracking Graphs" />
+          </View>
 
-        <View style={{ padding: 16 }}>
-          {/* Tabs */}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              marginBottom: 16,
-            }}
-          >
-            {tabNames.map((tab) => {
-              const isSelected = selectedTab === tab;
-              return (
-                <TouchableOpacity
-                  key={tab}
-                  onPress={() => setSelectedTab(tab)}
-                  style={{
-                    paddingVertical: 8,
-                    paddingHorizontal: 20,
-                    borderBottomWidth: 2,
-                    borderBottomColor: isSelected ? "#6C1B9B" : "transparent",
-                    transform: [{ scale: isSelected ? 1.05 : 1 }],
-                  }}
-                >
-                  <Text
+          <View style={{ padding: 16 }}>
+            {/* Tabs */}
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: 16,
+              }}
+            >
+              {tabNames.map((tab) => {
+                const isSelected = selectedTab === tab;
+                return (
+                  <TouchableOpacity
+                    key={tab}
+                    onPress={() => setSelectedTab(tab)}
                     style={{
-                      color: isSelected ? "#6C1B9B" : theme.colors.normal, // lighter when unselected
-                      fontWeight: "bold",
-                      fontSize: 16,
+                      paddingVertical: 8,
+                      paddingHorizontal: 20,
+                      borderBottomWidth: 2,
+                      borderBottomColor: isSelected ? "#6C1B9B" : "transparent",
+                      transform: [{ scale: isSelected ? 1.05 : 1 }],
                     }}
                   >
-                    {tab}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
+                    <Text
+                      style={{
+                        color: isSelected ? "#6C1B9B" : theme.colors.normal, // lighter when unselected
+                        fontWeight: "bold",
+                        fontSize: 16,
+                      }}
+                    >
+                      {tab}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
 
-          {/* Month Switcher */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              marginBottom: 16,
-            }}
-          >
-            <TouchableOpacity
-              onPress={() => setMonthOffset((prev) => prev - 1)}
+            {/* Month Switcher */}
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 16,
+              }}
             >
-              <Ionicons name="chevron-back-outline" size={24} color="#6C1B9B" />
-            </TouchableOpacity>
-            <Text
-              style={{ fontSize: 16, fontWeight: "bold", marginHorizontal: 16 }}
-            >
-              {currentMonth.format("MMMM YYYY")}
-            </Text>
-            <TouchableOpacity
-              onPress={() => setMonthOffset((prev) => prev + 1)}
-            >
-              <Ionicons
-                name="chevron-forward-outline"
-                size={24}
-                color="#6C1B9B"
-              />
-            </TouchableOpacity>
-          </View>
-
-          {/* Chart with Gradient and Border */}
-          <View
-            style={{
-              borderWidth: 1,
-              backgroundColor: theme.colors.text,
-              borderColor: theme.colors.secondPrimary,
-              borderRadius: 16,
-              padding: 10,
-              alignItems: "center",
-              marginBottom: 24,
-            }}
-          >
-            <Animated.View style={{ opacity: fadeAnim }}>
-              <LineChart
-                data={getGraphData()}
-                width={screenWidth - 64}
-                height={220}
-                chartConfig={chartConfig}
-                bezier
-                withShadow={false}
-                style={{ borderRadius: 16 }}
-              />
-            </Animated.View>
-          </View>
-
-          {/* Title above cards */}
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "bold",
-              marginBottom: 16,
-              color: theme.colors.dark,
-              textAlign: "center",
-            }}
-          >
-            Here are your {selectedTab.toLowerCase()} tracking records
-          </Text>
-          {getSelectedData().length === 0 && (
-            <Animated.View style={{ opacity: fadeAnim }}>
+              <TouchableOpacity
+                onPress={() => setMonthOffset((prev) => prev - 1)}
+              >
+                <Ionicons
+                  name="chevron-back-outline"
+                  size={24}
+                  color="#6C1B9B"
+                />
+              </TouchableOpacity>
               <Text
                 style={{
-                  textAlign: "center",
-                  color: "#6C1B9B",
-                  marginTop: 8,
+                  fontSize: 16,
                   fontWeight: "bold",
+                  marginHorizontal: 16,
                 }}
               >
-                No data available for this date
+                {currentMonth.format("MMMM YYYY")}
               </Text>
-            </Animated.View>
-          )}
-          {getSelectedData().length > 0 ? (
-            <View style={{ maxHeight: 300 }}>
-              <ScrollView>
-                {getSelectedData().map((item, index) => (
-                  <View
-                    key={index}
-                    style={{
-                      backgroundColor: theme.colors.cardLight,
-                      padding: 12,
-                      marginBottom: 8,
-                      borderRadius: 10,
-                      borderColor: theme.colors.cardLight,
-                      borderWidth: 1,
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                  >
+              <TouchableOpacity
+                onPress={() => setMonthOffset((prev) => prev + 1)}
+              >
+                <Ionicons
+                  name="chevron-forward-outline"
+                  size={24}
+                  color="#6C1B9B"
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* Chart with Gradient and Border */}
+            <View
+              style={{
+                borderWidth: 1,
+                backgroundColor: theme.colors.text,
+                borderColor: theme.colors.secondPrimary,
+                borderRadius: 16,
+                padding: 10,
+                alignItems: "center",
+                marginBottom: 24,
+              }}
+            >
+              <Animated.View style={{ opacity: fadeAnim }}>
+                <LineChart
+                  data={getGraphData()}
+                  width={screenWidth - 64}
+                  height={220}
+                  chartConfig={chartConfig}
+                  bezier
+                  withShadow={false}
+                  style={{ borderRadius: 16 }}
+                />
+              </Animated.View>
+            </View>
+
+            {/* Title above cards */}
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "bold",
+                marginBottom: 16,
+                color: theme.colors.dark,
+                textAlign: "center",
+              }}
+            >
+              Here are your {selectedTab.toLowerCase()} tracking records
+            </Text>
+            {getSelectedData().length === 0 && (
+              <Animated.View style={{ opacity: fadeAnim }}>
+                <Text
+                  style={{
+                    textAlign: "center",
+                    color: "#6C1B9B",
+                    marginTop: 8,
+                    fontWeight: "bold",
+                  }}
+                >
+                  No data available for this date
+                </Text>
+              </Animated.View>
+            )}
+            {getSelectedData().length > 0 ? (
+              <View style={{ maxHeight: 300 }}>
+                <ScrollView>
+                  {getSelectedData().map((item, index) => (
                     <View
-                      style={{ flexDirection: "row", alignItems: "center" }}
+                      key={index}
+                      style={{
+                        backgroundColor: theme.colors.cardLight,
+                        padding: 12,
+                        marginBottom: 8,
+                        borderRadius: 10,
+                        borderColor: theme.colors.cardLight,
+                        borderWidth: 1,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                      }}
                     >
-                      <Ionicons
-                        name={
-                          selectedTab === "Sleep"
-                            ? "moon"
-                            : selectedTab === "Steps"
-                            ? "walk"
-                            : "water"
-                        }
-                        size={20}
-                        color="#6C1B9B"
-                        style={{ marginRight: 8 }}
-                      />
-                      <Text style={{ color: "#6C1B9B", fontWeight: "bold" }}>
-                        {dayjs(item.date).format("MMM D, YYYY")}
+                      <View
+                        style={{ flexDirection: "row", alignItems: "center" }}
+                      >
+                        <Ionicons
+                          name={
+                            selectedTab === "Sleep"
+                              ? "moon"
+                              : selectedTab === "Steps"
+                              ? "walk"
+                              : "water"
+                          }
+                          size={20}
+                          color="#6C1B9B"
+                          style={{ marginRight: 8 }}
+                        />
+                        <Text style={{ color: "#6C1B9B", fontWeight: "bold" }}>
+                          {dayjs(item.date).format("MMM D, YYYY")}
+                        </Text>
+                      </View>
+
+                      <Text style={{ fontSize: 16, fontWeight: "600" }}>
+                        {selectedTab === "Sleep"
+                          ? `${item.value} hrs`
+                          : selectedTab === "Steps"
+                          ? `${item.value} steps`
+                          : `${item.value} ml`}
                       </Text>
                     </View>
-
-                    <Text style={{ fontSize: 16, fontWeight: "600" }}>
-                      {selectedTab === "Sleep"
-                        ? `${item.value} hrs`
-                        : selectedTab === "Steps"
-                        ? `${item.value} steps`
-                        : `${item.value} ml`}
-                    </Text>
-                  </View>
-                ))}
-              </ScrollView>
-            </View>
-          ) : null}
-          {/* Scrollable Cards */}
-        </View>
-      </ScrollView>
+                  ))}
+                </ScrollView>
+              </View>
+            ) : null}
+            {/* Scrollable Cards */}
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     </ImageBackground>
   );
 }

@@ -13,6 +13,7 @@ import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { userService } from "@/app/services/user.service";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { notificationService } from "@/app/services/notification.service";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 ///// Main functional component for the Book session details screen --------------/
 const BookSessionDetailsScreen = () => {
@@ -137,11 +138,14 @@ const BookSessionDetailsScreen = () => {
       style={{ flex: 1 }}
       resizeMode="cover"
     >
-      <View style={{ flex: 1 }}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+        edges={["top", "left", "right"]}
+      >
         <View style={{ paddingLeft: 20, paddingTop: 20 }}>
           <NormalHeader screenName="Preferences" />
         </View>
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 20 }}>
           <ChooseDateSection
             selectedDate={selectedDate}
             onDateChange={setSelectedDate}
@@ -181,7 +185,7 @@ const BookSessionDetailsScreen = () => {
           title={preferences ? "Request to Change" : "Add"}
           onPress={handleUpdate}
         />
-      </View>
+      </SafeAreaView>
       <CustomSnackbar
         visible={snackbarOpen}
         message={snackbarMessage}

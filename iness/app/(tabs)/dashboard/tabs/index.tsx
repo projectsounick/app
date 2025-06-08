@@ -24,16 +24,15 @@ import { planService } from "@/app/services/plan.service";
 import { cartService } from "@/app/services/cart.service";
 import { CircularProgress } from "react-native-circular-progress";
 import { ActivityIndicator } from "react-native-paper";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
-function Demo() {
-  return null;
-}
-
-const HEADER_HEIGHT = 180;
 const MainHeader = withAnimatedHeader(NameHeader);
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
-  console.log("logged");
+  const headerHeight = 180;
 
   const scrollY = new Animated.Value(0);
   //// Fetching the plan data -----------------------------/
@@ -71,14 +70,17 @@ const YourComponent = () => {
   } = useFetchMultipleStoreDataHook(configs);
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right"]}
+    >
       {/* Animated Header */}
       <MainHeader scrollY={scrollY} title="Home" />
       {/* Scrollable Content */}
       <Animated.ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
-          paddingTop: HEADER_HEIGHT + 20, // Reserve space under the header
+          paddingTop: headerHeight, // ← dynamic and safe
           paddingBottom: 10,
           paddingHorizontal: 16, // ✅ Add horizontal spacing here
         }}
@@ -108,12 +110,12 @@ const YourComponent = () => {
             <SliderCard />
             <BannerCard cardData={trackingCardData} />
             <BannerCard cardData={bookSessionCardData} />
-            {/* 
-            <FeatureCarousel /> */}
+
+            <FeatureCarousel />
           </>
         )}
       </Animated.ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

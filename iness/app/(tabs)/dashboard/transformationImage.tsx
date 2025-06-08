@@ -23,6 +23,7 @@ import { uploadToAzureFromExpo } from "@/utils/azureUtils";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { formatDateTime } from "@/utils/otherUtils";
 import ImageViewerModal from "@/app/modules/ImageModel";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 ///// Main functional component for uploading the User transformation images -------/
 export default function TransformationImage() {
@@ -139,12 +140,9 @@ export default function TransformationImage() {
       style={{ flex: 1 }}
       resizeMode="cover"
     >
-      <View
-        style={{
-          flex: 1,
-
-          justifyContent: "space-between",
-        }}
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+        edges={["top", "left", "right"]}
       >
         <View style={{ paddingTop: 20, paddingLeft: 20 }}>
           <NormalHeader screenName="Transformation" />
@@ -237,7 +235,7 @@ export default function TransformationImage() {
           onClose={() => setModalVisible(false)}
           imageUrl={selectedImage}
         />
-      </View>
+      </SafeAreaView>
       <CustomSnackbar
         visible={snackbarVisible}
         message={snackbarMessage}

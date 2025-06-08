@@ -18,6 +18,7 @@ import {
 import SmallHeader from "@/app/modules/SmallHeader";
 import BackHeader from "@/app/modules/BackHeader";
 import Icon from "react-native-vector-icons/Ionicons"; // for arrow icon
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
@@ -26,7 +27,10 @@ const BookSessionScreen = () => {
   const [showModal, setShowModal] = useState(true);
 
   return (
-    <View style={{ flex: 1 }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right"]}
+    >
       {/* Modal */}
       <Modal visible={showModal} transparent animationType="fade">
         <View
@@ -117,7 +121,7 @@ const BookSessionScreen = () => {
         <View style={{ height: 16 }} />
         <BannerCard cardData={offlineSessionCardData} />
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

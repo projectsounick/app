@@ -60,12 +60,18 @@ export default function OnboardingCard({
           borderWidth: isSelected ? 2 : 0,
           borderColor: isSelected ? theme.colors.secondPrimary : "transparent",
           borderRadius: 12,
-          flexDirection: icon || description ? "row" : "column", // if no icon/desc, make it column
+          flexDirection: icon || description ? "row" : "column",
           alignItems: "center",
-          justifyContent: icon || description ? "flex-start" : "center", // center if no icon/desc
+          justifyContent: icon || description ? "flex-start" : "center",
           paddingHorizontal: 12,
 
-          elevation: 3,
+          elevation: 3, // Android shadow
+
+          // iOS shadow:
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
         }}
       >
         {/* Icon if exists */}

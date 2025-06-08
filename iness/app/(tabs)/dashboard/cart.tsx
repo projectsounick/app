@@ -11,6 +11,7 @@ import BackHeader from "@/app/modules/BackHeader";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { cartService } from "@/app/services/cart.service";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 ///// Main functional component for the cart screen -------------------------/
 export default function CartScreen() {
@@ -45,20 +46,25 @@ export default function CartScreen() {
   return (
     <>
       {/* Header + Content */}
-      <View style={{ flex: 1, backgroundColor: "#fff" }}>
-        <SmallHeader title="Cart" />
-        <BackHeader />
-        <View style={{ padding: 20, flex: 1, backgroundColor: "#fff" }}>
-          <CartItemList items={cartItems} onAddItem={handleAdd} />
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+        edges={["top", "left", "right"]}
+      >
+        <View style={{ flex: 1, backgroundColor: "#fff" }}>
+          <SmallHeader title="Cart" />
+          <BackHeader />
+          <View style={{ padding: 20, flex: 1, backgroundColor: "#fff" }}>
+            <CartItemList items={cartItems} onAddItem={handleAdd} />
+          </View>
         </View>
-      </View>
-      <CartCheckoutCard
-        cartItems={cartItems}
-        onChangeAddress={onChangeAddress}
-        onPlaceOrder={onplaceOrder}
-        address={"Howrah kolkata"}
-        loading={loading}
-      />
+        <CartCheckoutCard
+          cartItems={cartItems}
+          onChangeAddress={onChangeAddress}
+          onPlaceOrder={onplaceOrder}
+          address={"Howrah kolkata"}
+          loading={loading}
+        />
+      </SafeAreaView>
     </>
   );
 }

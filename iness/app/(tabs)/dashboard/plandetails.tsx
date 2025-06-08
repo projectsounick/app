@@ -15,6 +15,7 @@ import { cartService } from "@/app/services/cart.service";
 import PlansInfo from "@/app/Components/Plans/PlansInfo";
 
 import DietPlanInfo from "@/app/Components/Plans/DietPlanInfo";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const WorkoutPlanScreen = () => {
   /// Getting the current selected plan from the store ----------------/
@@ -99,7 +100,10 @@ const WorkoutPlanScreen = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right"]}
+    >
       <SmallHeader
         title="Overview"
         bottomComponent={
@@ -141,7 +145,7 @@ const WorkoutPlanScreen = () => {
         onDismiss={() => setSnackbarOpen(false)}
         bgColor={theme.colors.primary}
       />
-    </View>
+    </SafeAreaView>
   );
 };
 

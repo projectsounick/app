@@ -20,6 +20,7 @@ import { paymentService } from "@/app/services/payment.service";
 import { planService } from "@/app/services/plan.service";
 import { useDispatch } from "react-redux";
 import { setActivePlans } from "@/Slices/planSlice";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const PaymentSuccessScreen = () => {
   const { orderId } = useLocalSearchParams();
@@ -91,7 +92,10 @@ const PaymentSuccessScreen = () => {
       style={{ flex: 1 }}
       source={require("../../../assets/images/basicBackground.jpg")}
     >
-      <View style={{ flex: 1 }}>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+        edges={["top", "left", "right"]}
+      >
         <SmallHeader title="Payment" />
         <BackHeader />
 
@@ -254,7 +258,7 @@ const PaymentSuccessScreen = () => {
             </TouchableOpacity>
           </LinearGradient>
         </Animated.View>
-      </View>
+      </SafeAreaView>
     </ImageBackground>
   );
 };

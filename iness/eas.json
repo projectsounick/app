@@ -8,6 +8,10 @@
       "distribution": "internal"
     },
     "preview": {},
-    "production": {}
+    "production": {
+      "android": {
+        "buildType": "app-bundle"
+      }
+    }
   }
 }

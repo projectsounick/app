@@ -7,16 +7,16 @@ import {
   Dimensions,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
+
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import theme from "@/app/Theme/globalTheme";
-import { ImageWithLoader } from "@/app/modules/ImageWithLoader";
+
 import SmallHeader from "@/app/modules/SmallHeader";
-import { router } from "expo-router";
-import { setCurrentPlan } from "@/Slices/planSlice";
+
 import PlanCard from "@/app/modules/PlanCard";
 import BackHeader from "@/app/modules/BackHeader";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width } = Dimensions.get("window");
 
@@ -37,7 +37,10 @@ export default function SliderCard() {
   const icons: any = ["food-apple", "weight-lifter", "run", "heart-pulse"];
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right"]}
+    >
       <SmallHeader title="Plans" />
       <BackHeader />
       <ScrollView contentContainerStyle={{ paddingVertical: 2 }}>
@@ -187,6 +190,6 @@ export default function SliderCard() {
           </View>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 }

@@ -11,6 +11,7 @@ import theme from "../Theme/globalTheme";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 interface AnimatedHeaderProps {
   scrollY: Animated.Value;
@@ -57,7 +58,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
       }
       fetchData();
     }, []);
-
+    const insets = useSafeAreaInsets();
     return (
       <Animated.View
         style={{
@@ -77,7 +78,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
             borderBottomLeftRadius: 30,
             borderBottomRightRadius: 30,
             paddingHorizontal: 20,
-            paddingTop: 20,
+            paddingTop: 10 + insets.top, // <-- add safe area inset here
             paddingBottom: 25,
           }}
         >
@@ -101,6 +102,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
                   alignItems: "center",
                 }}
                 onPress={() => router.push("/dashboard/profile")}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }} // 👈 Adds more tappable space
               >
                 {userData?.profilePic ? (
                   <Image

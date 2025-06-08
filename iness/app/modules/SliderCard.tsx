@@ -27,7 +27,7 @@ export default function SliderCard() {
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
       style={{
-        height: 200,
+        height: 220,
         paddingVertical: 16,
         paddingHorizontal: 12,
         borderRadius: 12,
@@ -62,6 +62,7 @@ export default function SliderCard() {
               fontSize: theme.fontSizes.regularSmall,
               fontWeight: theme.fontWeights.regular,
               color: theme.colors.text,
+              marginTop: 8,
             }}
           >
             Tailored plans for your personalized lifestyles.
@@ -75,7 +76,11 @@ export default function SliderCard() {
       </View>
 
       {/* Horizontal Scrollable Cards */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ marginTop: 8 }}
+      >
         {plans.map((item: PlanInterface, index) => (
           <View
             key={index}

@@ -86,8 +86,8 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={{ flex: 1, paddingHorizontal: 24, paddingVertical: 60 }}
     >
-      <View style={{ flex: 1, justifyContent: "space-between" }}>
-        <View style={{ alignItems: "center", marginBottom: 40 }}>
+      <View style={{ flex: 1, justifyContent: "space-evenly" }}>
+        <View style={{ alignItems: "center" }}>
           <Text
             style={{
               fontSize: 26,

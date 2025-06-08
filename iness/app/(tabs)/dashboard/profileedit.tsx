@@ -28,6 +28,7 @@ import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { userService } from "@/app/services/user.service";
 import CustomSnackbar from "@/app/modules/Snackbar";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 // Custom dropdown modal
 const DropdownModal = ({
@@ -281,32 +282,40 @@ export default function EditOnboardingScreen() {
 
   return (
     <ImageBackground source={backgroundImage} style={{ flex: 1 }}>
-      <View style={{ paddingTop: 20, paddingLeft: 20 }}>
-        <NormalHeader screenName="Profile Details" />
-      </View>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {renderEditableField("Name", "name")}
-        {renderEditableField("Sex", "sex")}
-        {renderEditableField("Primary Goal", "goal")}
-        {renderEditableField("Time Commitment", "timeCommitment")}
-        {renderEditableField("Preferred Workout Time", "preferredWorkoutTime")}
-        {renderEditableField("Workout Preferences", "workoutPreferences")}
-        {renderEditableField("Activity Level", "activityLevel")}
-
-        <View style={{ marginTop: 30, alignItems: "center" }}>
-          <AnimatedSubmitButton
-            loading={loading}
-            onPress={handleUpdate}
-            title="Update"
-          />
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+        edges={["top", "left", "right"]}
+      >
+        <View style={{ paddingTop: 20, paddingLeft: 20 }}>
+          <NormalHeader screenName="Profile Details" />
         </View>
-      </ScrollView>
-      <CustomSnackbar
-        onDismiss={() => setSnackbarVisible(false)}
-        visible={snackbarVisible}
-        message={snackbarMessage}
-        bgColor={theme.colors.primary}
-      />
+        <ScrollView contentContainerStyle={{ padding: 16 }}>
+          {renderEditableField("Name", "name")}
+          {renderEditableField("Sex", "sex")}
+          {renderEditableField("Primary Goal", "goal")}
+          {renderEditableField("Time Commitment", "timeCommitment")}
+          {renderEditableField(
+            "Preferred Workout Time",
+            "preferredWorkoutTime"
+          )}
+          {renderEditableField("Workout Preferences", "workoutPreferences")}
+          {renderEditableField("Activity Level", "activityLevel")}
+
+          <View style={{ marginTop: 30, alignItems: "center" }}>
+            <AnimatedSubmitButton
+              loading={loading}
+              onPress={handleUpdate}
+              title="Update"
+            />
+          </View>
+        </ScrollView>
+        <CustomSnackbar
+          onDismiss={() => setSnackbarVisible(false)}
+          visible={snackbarVisible}
+          message={snackbarMessage}
+          bgColor={theme.colors.primary}
+        />
+      </SafeAreaView>
     </ImageBackground>
   );
 }

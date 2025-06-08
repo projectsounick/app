@@ -14,6 +14,7 @@ import { UserData } from "@/app/interfaces/UserInterface";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import FullScreenLoader from "@/app/modules/FullScreenLoader";
 import useFetchStoreDataHook from "@/hooks/useStoreFetchHook";
+import { SafeAreaView } from "react-native-safe-area-context";
 ///// Main funcitonal component for the Media Screen ---------------------------/
 export default function MediaScreen() {
   const {
@@ -66,7 +67,10 @@ export default function MediaScreen() {
     }
   }
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right"]}
+    >
       <SmallHeader title="Iness TV" />
       <ScrollView
         contentContainerStyle={{ padding: 20 }}
@@ -98,6 +102,6 @@ export default function MediaScreen() {
         onDismiss={() => setSnackbarVisible(false)}
       />
       {updateLoader && <FullScreenLoader />}
-    </View>
+    </SafeAreaView>
   );
 }

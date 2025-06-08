@@ -12,6 +12,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import theme from "@/app/Theme/globalTheme";
 import { getStoredNotifications } from "@/utils/notificationUtils";
 import { Divider } from "react-native-paper";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 interface NotificationItem {
   title: string | null;
@@ -41,13 +42,9 @@ export default function NotificationScreen() {
       resizeMode="cover"
     >
       {/* Overlay for contrast */}
-      <View
-        style={{
-          flex: 1,
-
-          paddingHorizontal: 16,
-          paddingTop: 20,
-        }}
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+        edges={["top", "left", "right"]}
       >
         {/* Header */}
         <View
@@ -55,6 +52,7 @@ export default function NotificationScreen() {
             flexDirection: "row",
             alignItems: "center",
             marginBottom: 24,
+            paddingLeft: 20,
           }}
         >
           <TouchableOpacity
@@ -137,7 +135,7 @@ export default function NotificationScreen() {
             ))
           )}
         </ScrollView>
-      </View>
+      </SafeAreaView>
     </ImageBackground>
   );
 }

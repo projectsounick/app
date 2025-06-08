@@ -22,6 +22,11 @@ import { ActivityIndicator } from "react-native-paper";
 import { uploadToAzureFromExpo } from "@/utils/azureUtils"; // make sure this util exists and works
 import { userService } from "@/app/services/user.service";
 import ImageViewerModal from "@/app/modules/ImageModel";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 
 export default function SupportScreen() {
   const [inputText, setInputText] = useState("");
@@ -93,8 +98,19 @@ export default function SupportScreen() {
         attachments: uploadedUrls,
         date: new Date().toDateString(),
       };
+      let loggedUser = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
+        "user"
+      );
+      let userId;
+      if (loggedUser.exists) {
+        userId = loggedUser.data._id;
+      }
+
       //// Uploading the message to the backend ----------------------------/
-      const uploadMessageResponse = await chatService.addSupportMessage(data);
+      const uploadMessageResponse = await chatService.addSupportMessage(
+        data,
+        userId
+      );
 
       if (uploadMessageResponse.success) {
         setData((prev: any) => [...prev, data]);
@@ -131,163 +147,174 @@ export default function SupportScreen() {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
   }, [data]);
+  const insets = useSafeAreaInsets();
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: "#fff" }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      keyboardVerticalOffset={90}
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right"]}
     >
-      <View style={{ paddingTop: 20, paddingLeft: 20 }}>
-        <NormalHeader screenName="Support" />
-      </View>
-
-      <ImageBackground
-        source={require("../../../assets/images/basicBackground.jpg")}
-        style={{ flex: 1 }}
-        resizeMode="cover"
+      <KeyboardAvoidingView
+        style={{ flex: 1, backgroundColor: "#fff" }}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        {loading ? (
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
-            <ActivityIndicator color={theme.colors.secondPrimary} size={25} />
-          </View>
-        ) : (
-          <FlatList
-            data={data}
-            keyExtractor={(_, index) => index.toString()}
-            renderItem={({ item }) => (
-              <ChatMessage
-                item={item}
-                setSelectedImage={setSelectedImage}
-                setImageModalVisible={setImageModalVisible}
-              />
-            )}
-            ref={flatListRef}
-            contentContainerStyle={{
-              padding: 16,
-              paddingBottom: 80,
-              flexGrow: 1,
-              justifyContent: data.length === 0 ? "center" : "flex-start",
-              alignItems: data.length === 0 ? "center" : undefined,
-            }}
-            ListEmptyComponent={
-              <View style={{ alignItems: "center", paddingHorizontal: 20 }}>
-                <Text
-                  style={{
-                    color: theme.colors.dark,
-                    fontSize: theme.fontSizes.medium,
-                    textAlign: "center",
-                  }}
-                >
-                  No conversation available.
-                </Text>
-                <Text
-                  style={{
-                    color: theme.colors.dark,
-                    fontSize: theme.fontSizes.medium,
-                    textAlign: "center",
-                    marginTop: 6,
-                  }}
-                >
-                  Start a conversation now.
-                </Text>
-              </View>
-            }
-            onContentSizeChange={() =>
-              flatListRef.current?.scrollToEnd({ animated: true })
-            }
-          />
-        )}
-      </ImageBackground>
+        <View style={{ paddingTop: 20, paddingLeft: 20 }}>
+          <NormalHeader screenName="Support" />
+        </View>
 
-      {/* Input & Attachments */}
-      <View
-        style={{
-          position: "absolute",
-          bottom: 0,
-          width: "100%",
-          padding: 10,
-          borderTopWidth: 1,
-          borderTopColor: "#eee",
-          backgroundColor: "#fff",
-        }}
-      >
-        {selectedAttachments.length > 0 && (
-          <View
-            style={{ flexDirection: "row", marginBottom: 10, flexWrap: "wrap" }}
-          >
-            {selectedAttachments.map((uri, index) => (
-              <Image
-                key={index}
-                source={{ uri }}
-                style={{
-                  width: 60,
-                  height: 60,
-                  marginRight: 6,
-                  borderRadius: 6,
-                  marginBottom: 6,
-                }}
-              />
-            ))}
-          </View>
-        )}
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <TouchableOpacity onPress={handleAttachment}>
-            <Ionicons
-              name="attach"
-              size={24}
-              color="#6C1B9B"
-              style={{ marginRight: 10 }}
-            />
-          </TouchableOpacity>
-          <TextInput
-            style={{
-              flex: 1,
-              backgroundColor: theme.colors.cardLight,
-              borderWidth: 1,
-              borderColor: theme.colors.secondPrimary,
-              padding: 10,
-              borderRadius: 20,
-              fontSize: 14,
-            }}
-            placeholder="Type your message..."
-            value={inputText}
-            onChangeText={setInputText}
-            editable={!messageSendingLoader}
-          />
-          {messageSendingLoader ? (
+        <ImageBackground
+          source={require("../../../assets/images/basicBackground.jpg")}
+          style={{ flex: 1 }}
+          resizeMode="cover"
+        >
+          {loading ? (
             <View
               style={{
-                display: "flex",
-                flexDirection: "row",
+                flex: 1,
                 justifyContent: "center",
                 alignItems: "center",
               }}
             >
-              <ActivityIndicator color={theme.colors.secondPrimary} />
+              <ActivityIndicator color={theme.colors.secondPrimary} size={25} />
             </View>
           ) : (
-            <TouchableOpacity onPress={handleSend}>
+            <FlatList
+              data={data}
+              keyExtractor={(_, index) => index.toString()}
+              renderItem={({ item }) => (
+                <ChatMessage
+                  item={item}
+                  setSelectedImage={setSelectedImage}
+                  setImageModalVisible={setImageModalVisible}
+                />
+              )}
+              ref={flatListRef}
+              contentContainerStyle={{
+                padding: 16,
+                paddingBottom: 80,
+                flexGrow: 1,
+                justifyContent: data.length === 0 ? "center" : "flex-start",
+                alignItems: data.length === 0 ? "center" : undefined,
+              }}
+              ListEmptyComponent={
+                <View style={{ alignItems: "center", paddingHorizontal: 20 }}>
+                  <Text
+                    style={{
+                      color: theme.colors.dark,
+                      fontSize: theme.fontSizes.medium,
+                      textAlign: "center",
+                    }}
+                  >
+                    No conversation available.
+                  </Text>
+                  <Text
+                    style={{
+                      color: theme.colors.dark,
+                      fontSize: theme.fontSizes.medium,
+                      textAlign: "center",
+                      marginTop: 6,
+                    }}
+                  >
+                    Start a conversation now.
+                  </Text>
+                </View>
+              }
+              onContentSizeChange={() =>
+                flatListRef.current?.scrollToEnd({ animated: true })
+              }
+            />
+          )}
+        </ImageBackground>
+
+        {/* Input & Attachments */}
+        <View
+          style={{
+            width: "100%",
+            padding: 20,
+            borderTopWidth: 1,
+            borderTopColor: "#eee",
+            backgroundColor: "#fff",
+          }}
+        >
+          {selectedAttachments.length > 0 && (
+            <View
+              style={{
+                flexDirection: "row",
+                marginBottom: 10,
+                flexWrap: "wrap",
+              }}
+            >
+              {selectedAttachments.map((uri, index) => (
+                <Image
+                  key={index}
+                  source={{ uri }}
+                  style={{
+                    width: 60,
+                    height: 60,
+                    marginRight: 6,
+                    borderRadius: 6,
+                    marginBottom: 6,
+                  }}
+                />
+              ))}
+            </View>
+          )}
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <TouchableOpacity onPress={handleAttachment}>
               <Ionicons
-                name="send"
+                name="attach"
                 size={24}
                 color="#6C1B9B"
-                style={{ marginLeft: 10 }}
+                style={{ marginRight: 10 }}
               />
             </TouchableOpacity>
-          )}
+            <TextInput
+              style={{
+                flex: 1,
+                backgroundColor: theme.colors.cardLight,
+                borderWidth: 1,
+                borderColor: theme.colors.secondPrimary,
+                padding: 10,
+                borderRadius: 20,
+                fontSize: 14,
+              }}
+              placeholder="Type your message..."
+              value={inputText}
+              onChangeText={setInputText}
+              editable={!messageSendingLoader}
+            />
+            {messageSendingLoader ? (
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "row",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <ActivityIndicator color={theme.colors.secondPrimary} />
+              </View>
+            ) : (
+              <TouchableOpacity onPress={handleSend}>
+                <Ionicons
+                  name="send"
+                  size={24}
+                  color="#6C1B9B"
+                  style={{ marginLeft: 10 }}
+                />
+              </TouchableOpacity>
+            )}
+          </View>
         </View>
-      </View>
-      {/* Image modal for showing the image when user clicks on it */}
-      {selectedImage != null ? (
-        <ImageViewerModal
-          visible={imageModalVisible}
-          onClose={() => setImageModalVisible(false)}
-          imageUrl={selectedImage}
-        />
-      ) : null}
-    </KeyboardAvoidingView>
+        {/* Image modal for showing the image when user clicks on it */}
+        {selectedImage != null ? (
+          <ImageViewerModal
+            visible={imageModalVisible}
+            onClose={() => setImageModalVisible(false)}
+            imageUrl={selectedImage}
+          />
+        ) : null}
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }

@@ -22,6 +22,7 @@ import {
   updateTrackingField,
 } from "@/Slices/trackSlice";
 import { RootState } from "@/store";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function WellnessDashboard() {
   const totalTrackData = useSelector(
@@ -195,221 +196,234 @@ export default function WellnessDashboard() {
       style={{ flex: 1 }}
       resizeMode="cover"
     >
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 80 }}>
-        <NormalHeader screenName="Track" rightIcon={true} />
-        {/* History Icon Button */}
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+        edges={["top", "left", "right"]}
+      >
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 80 }}>
+          <NormalHeader screenName="Track" rightIcon={true} />
+          {/* History Icon Button */}
 
-        {dataLoading ? (
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              height: "100%",
-            }}
-          >
-            <ActivityIndicator color={theme.colors.secondPrimary} size={20} />
-          </View>
-        ) : (
-          <>
-            {/* Progress Circle */}
+          {dataLoading ? (
             <View
               style={{
-                alignItems: "center",
+                display: "flex",
+                flexDirection: "row",
                 justifyContent: "center",
-                marginVertical: 20,
+                alignItems: "center",
+                height: "100%",
               }}
             >
-              <AnimatedCircularProgress
-                size={200}
-                width={14}
-                fill={progressSleep}
-                tintColor="#C3FF77"
-                backgroundColor="#eaeaea"
-                duration={1200}
-              >
-                {() => (
-                  <AnimatedCircularProgress
-                    size={140}
-                    width={12}
-                    fill={progressSteps}
-                    tintColor="#6C1B9B"
-                    backgroundColor="#f0f0f0"
-                    duration={1200}
-                  >
-                    {() => (
-                      <View>
-                        <Text
-                          style={{
-                            fontSize: 28,
-                            fontWeight: "bold",
-                            color: "#6C1B9B",
-                            textAlign: "center",
-                          }}
-                        >
-                          {currentDayTrackData.steps?.steps
-                            ? `${(
-                                currentDayTrackData.steps.steps / 1000
-                              ).toFixed(0)}K`
-                            : "0K"}
-                        </Text>
-                        <Text
-                          style={{
-                            fontSize: 14,
-                            color: "#666",
-                            textAlign: "center",
-                          }}
-                        >
-                          {(progressSteps / 10).toFixed(1)}/10
-                        </Text>
-                      </View>
-                    )}
-                  </AnimatedCircularProgress>
-                )}
-              </AnimatedCircularProgress>
-
+              <ActivityIndicator color={theme.colors.secondPrimary} size={20} />
+            </View>
+          ) : (
+            <>
+              {/* Progress Circle */}
               <View
                 style={{
-                  flexDirection: "row",
-                  justifyContent: "space-around",
-                  width: "60%",
-                  marginTop: 16,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginVertical: 20,
                 }}
               >
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  {/* Sleep */}
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      marginRight: 20,
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 12,
-                        height: 12,
-                        backgroundColor: theme.colors.primary,
-                        marginRight: 6,
-                      }}
-                    />
-                    <Text style={{ fontSize: 16, color: "#666" }}>Sleep</Text>
-                  </View>
+                <AnimatedCircularProgress
+                  size={200}
+                  width={14}
+                  fill={progressSleep}
+                  tintColor="#C3FF77"
+                  backgroundColor="#eaeaea"
+                  duration={1200}
+                >
+                  {() => (
+                    <AnimatedCircularProgress
+                      size={140}
+                      width={12}
+                      fill={progressSteps}
+                      tintColor="#6C1B9B"
+                      backgroundColor="#f0f0f0"
+                      duration={1200}
+                    >
+                      {() => (
+                        <View>
+                          <Text
+                            style={{
+                              fontSize: 28,
+                              fontWeight: "bold",
+                              color: "#6C1B9B",
+                              textAlign: "center",
+                            }}
+                          >
+                            {currentDayTrackData.steps?.steps
+                              ? `${(
+                                  currentDayTrackData.steps.steps / 1000
+                                ).toFixed(0)}K`
+                              : "0K"}
+                          </Text>
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              color: "#666",
+                              textAlign: "center",
+                            }}
+                          >
+                            {(progressSteps / 10).toFixed(1)}/10
+                          </Text>
+                        </View>
+                      )}
+                    </AnimatedCircularProgress>
+                  )}
+                </AnimatedCircularProgress>
 
-                  {/* Steps */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-around",
+                    width: "60%",
+                    marginTop: 16,
+                  }}
+                >
                   <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    {/* Sleep */}
                     <View
                       style={{
-                        width: 12,
-                        height: 12,
-                        backgroundColor: theme.colors.secondPrimary,
-                        marginRight: 6,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginRight: 20,
                       }}
-                    />
-                    <Text style={{ fontSize: 16, color: "#666" }}>Steps</Text>
+                    >
+                      <View
+                        style={{
+                          width: 12,
+                          height: 12,
+                          backgroundColor: theme.colors.primary,
+                          marginRight: 6,
+                        }}
+                      />
+                      <Text style={{ fontSize: 16, color: "#666" }}>Sleep</Text>
+                    </View>
+
+                    {/* Steps */}
+                    <View
+                      style={{ flexDirection: "row", alignItems: "center" }}
+                    >
+                      <View
+                        style={{
+                          width: 12,
+                          height: 12,
+                          backgroundColor: theme.colors.secondPrimary,
+                          marginRight: 6,
+                        }}
+                      />
+                      <Text style={{ fontSize: 16, color: "#666" }}>Steps</Text>
+                    </View>
                   </View>
                 </View>
               </View>
-            </View>
 
-            {/* Summary */}
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom: 20,
-                backgroundColor: theme.colors.cardLight,
-                paddingTop: 10,
-                paddingBottom: 10,
-                borderRadius: 14,
-              }}
-            >
-              {[
-                { label: "Cal", value: 486 },
-                { label: "Distance", value: "9.2km" },
-                { label: "Minutes", value: "30:40" },
-              ].map((item, i) => (
-                <View key={i} style={{ alignItems: "center", flex: 1 }}>
-                  <Text
-                    style={{ fontWeight: "bold", fontSize: 16, color: "#333" }}
-                  >
-                    {item.value}
-                  </Text>
-                  <Text style={{ color: "#999", fontSize: 12 }}>
-                    {item.label}
-                  </Text>
-                </View>
-              ))}
-            </View>
-
-            {/* Tracker Cards */}
-            {[
-              {
-                label: "Steps",
-                value: `${currentDayTrackData.steps?.steps || 0}/10000`,
-                key: "steps",
-              },
-              {
-                label: "Sleep",
-                value: `${
-                  currentDayTrackData.sleep?.sleepDuration || 0
-                }/12 hrs`,
-                key: "sleep",
-              },
-              {
-                label: "Water",
-                value: `${
-                  currentDayTrackData.water?.waterIntake || 0
-                }/10 glasses`,
-                key: "water",
-              },
-            ].map((tracker, i) => (
+              {/* Summary */}
               <View
-                key={i}
                 style={{
-                  backgroundColor: theme.colors.cardLight,
-                  padding: 16,
-                  marginBottom: 12,
-                  borderRadius: 14,
                   flexDirection: "row",
                   justifyContent: "space-between",
-                  alignItems: "center",
+                  marginBottom: 20,
+                  backgroundColor: theme.colors.cardLight,
+                  paddingTop: 10,
+                  paddingBottom: 10,
+                  borderRadius: 14,
                 }}
               >
-                <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-                  {tracker.label}
-                </Text>
-                <Text style={{ fontSize: 14, color: "#666" }}>
-                  {tracker.value}
-                </Text>
-                <TouchableOpacity onPress={() => openModal(tracker.key as any)}>
-                  <Ionicons name="add-circle" size={28} color="#6C1B9B" />
-                </TouchableOpacity>
+                {[
+                  { label: "Cal", value: 486 },
+                  { label: "Distance", value: "9.2km" },
+                  { label: "Minutes", value: "30:40" },
+                ].map((item, i) => (
+                  <View key={i} style={{ alignItems: "center", flex: 1 }}>
+                    <Text
+                      style={{
+                        fontWeight: "bold",
+                        fontSize: 16,
+                        color: "#333",
+                      }}
+                    >
+                      {item.value}
+                    </Text>
+                    <Text style={{ color: "#999", fontSize: 12 }}>
+                      {item.label}
+                    </Text>
+                  </View>
+                ))}
               </View>
-            ))}
-          </>
-        )}
 
-        {modalVisible ? (
-          <TrackerModal
-            visible={modalVisible}
-            onClose={onClose}
-            type={openModalFor}
-            onSubmit={updateTrackingData}
-            dataLoading={dataLoading}
-          />
-        ) : null}
+              {/* Tracker Cards */}
+              {[
+                {
+                  label: "Steps",
+                  value: `${currentDayTrackData.steps?.steps || 0}/10000`,
+                  key: "steps",
+                },
+                {
+                  label: "Sleep",
+                  value: `${
+                    currentDayTrackData.sleep?.sleepDuration || 0
+                  }/12 hrs`,
+                  key: "sleep",
+                },
+                {
+                  label: "Water",
+                  value: `${
+                    currentDayTrackData.water?.waterIntake || 0
+                  }/10 glasses`,
+                  key: "water",
+                },
+              ].map((tracker, i) => (
+                <View
+                  key={i}
+                  style={{
+                    backgroundColor: theme.colors.cardLight,
+                    padding: 16,
+                    marginBottom: 12,
+                    borderRadius: 14,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                    {tracker.label}
+                  </Text>
+                  <Text style={{ fontSize: 14, color: "#666" }}>
+                    {tracker.value}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => openModal(tracker.key as any)}
+                  >
+                    <Ionicons name="add-circle" size={28} color="#6C1B9B" />
+                  </TouchableOpacity>
+                </View>
+              ))}
+            </>
+          )}
 
-        {snackbarVisible ? (
-          <CustomSnackbar
-            visible={snackbarVisible}
-            onDismiss={() => setSnackbarVisible(false)}
-            bgColor={theme.colors.primary}
-            message={snackbarMsg}
-          />
-        ) : null}
-      </ScrollView>
+          {modalVisible ? (
+            <TrackerModal
+              visible={modalVisible}
+              onClose={onClose}
+              type={openModalFor}
+              onSubmit={updateTrackingData}
+              dataLoading={dataLoading}
+            />
+          ) : null}
+
+          {snackbarVisible ? (
+            <CustomSnackbar
+              visible={snackbarVisible}
+              onDismiss={() => setSnackbarVisible(false)}
+              bgColor={theme.colors.primary}
+              message={snackbarMsg}
+            />
+          ) : null}
+        </ScrollView>
+      </SafeAreaView>
     </ImageBackground>
   );
 }

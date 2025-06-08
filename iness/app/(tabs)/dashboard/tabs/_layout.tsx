@@ -1,7 +1,10 @@
 import { Tabs } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function DashboardLayout() {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tabs
       screenOptions={{
@@ -13,10 +16,10 @@ export default function DashboardLayout() {
         tabBarInactiveTintColor: "#888",
         tabBarStyle: {
           backgroundColor: "#19002E",
-          paddingBottom: 6,
+          paddingBottom: 2 + insets.bottom, // add safe area bottom inset here
           paddingTop: 6,
           borderTopWidth: 0,
-          height: 70,
+          height: 60 + insets.bottom, // increase height accordingly
         },
         headerShown: false,
       }}
