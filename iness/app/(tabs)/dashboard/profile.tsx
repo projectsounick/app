@@ -13,25 +13,27 @@ import { SafeAreaView } from "react-native-safe-area-context";
 //// Main funcitonal component for the Profile screen -------------------------/
 export default function ProfileScreen() {
   return (
-    <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpg")}
-      style={{ flex: 1 }}
-      resizeMode="cover"
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right", "bottom"]}
     >
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-        edges={["top", "left", "right"]}
+      <ImageBackground
+        source={require("../../../assets/images/basicBackground.jpg")}
+        style={{ flex: 1 }}
+        resizeMode="cover"
       >
+        <View style={{ paddingLeft: 20, paddingTop: 20 }}>
+          {/* Header */}
+          <NormalHeader screenName="Profile" />
+        </View>
         <ScrollView
           style={{ flex: 1 }}
           contentContainerStyle={{
             paddingHorizontal: 16,
-            paddingTop: 16,
+
             paddingBottom: 20, // <-- ensures enough space for last card
           }}
         >
-          {/* Header */}
-          <NormalHeader screenName="Profile" />
           <ProfileCard />
 
           {/* Transformation Image Upload Card */}
@@ -40,7 +42,7 @@ export default function ProfileScreen() {
           {/* Settings Options */}
           <SettingsList />
         </ScrollView>
-      </SafeAreaView>
-    </ImageBackground>
+      </ImageBackground>
+    </SafeAreaView>
   );
 }

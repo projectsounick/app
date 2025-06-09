@@ -88,13 +88,13 @@ const PaymentSuccessScreen = () => {
     }
   }
   return (
-    <ImageBackground
-      style={{ flex: 1 }}
-      source={require("../../../assets/images/basicBackground.jpg")}
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right", "bottom"]}
     >
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-        edges={["top", "left", "right"]}
+      <ImageBackground
+        style={{ flex: 1 }}
+        source={require("../../../assets/images/basicBackground.jpg")}
       >
         <SmallHeader title="Payment" />
         <BackHeader />
@@ -258,8 +258,8 @@ const PaymentSuccessScreen = () => {
             </TouchableOpacity>
           </LinearGradient>
         </Animated.View>
-      </SafeAreaView>
-    </ImageBackground>
+      </ImageBackground>
+    </SafeAreaView>
   );
 };
 

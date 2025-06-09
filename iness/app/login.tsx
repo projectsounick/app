@@ -156,7 +156,7 @@ const Login = () => {
                           alignItems: "center",
                           height: 48,
                           borderColor: "#ccc",
-                          borderWidth: 1,
+                          borderWidth: Platform.OS === "android" ? 0 : 1, // remove border on Android
                           borderRadius: 8,
                           paddingHorizontal: 12,
                           backgroundColor: "#fff",
@@ -173,6 +173,7 @@ const Login = () => {
                           placeholder="Enter email"
                           placeholderTextColor="#888"
                           value={values.email}
+                          underlineColorAndroid="transparent" // 👈 Add this line
                           onChangeText={(text) =>
                             handleChange("email")(text.toLowerCase())
                           }
@@ -181,7 +182,13 @@ const Login = () => {
                           style={{
                             flex: 1,
                             fontSize: 16,
-                            color: theme.colors.dark,
+                            color: "#000", // replace with theme.colors.dark if needed
+                            backgroundColor: "transparent",
+                            borderWidth: 0,
+                            borderBottomWidth: 0,
+                            paddingVertical: 0,
+                            includeFontPadding: false,
+                            textAlignVertical: "center", // important for Android alignment
                           }}
                         />
                       </View>

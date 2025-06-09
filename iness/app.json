@@ -13,7 +13,9 @@
     "ios": {
       "supportsTablet": true
     },
+
     "android": {
+      "googleServicesFile": "android/app/google-services.json",
       "intentFilters": [
         {
           "action": "VIEW",
@@ -42,9 +44,7 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/logonew.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "imageWidth": 200
         }
       ],
       "expo-video",

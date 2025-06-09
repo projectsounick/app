@@ -12,6 +12,7 @@ import { useNavigation } from "@react-navigation/native";
 import { checkAndNavigateToStoredScreen } from "@/utils/checkScreenRedirection";
 import AnimatedSubmitButton from "./modules/AnimatedSubmitButton";
 import LottieView from "lottie-react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 // Define the navigation types
 type RootStackParamList = {
   Home: undefined;
@@ -68,102 +69,107 @@ const HomeScreen = () => {
     navigation.navigate("login");
   };
   return (
-    <ImageBackground
-      source={require("../assets/images/getstartedBackground.jpg")}
-      style={{
-        flex: 1,
-        paddingHorizontal: theme.spacing.md,
-        paddingVertical: theme.spacing.lg,
-      }}
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right"]}
     >
-      {/* Centered "INESS" */}
-      <View
+      <ImageBackground
+        source={require("../assets/images/getstartedBackground.jpg")}
         style={{
           flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
+          paddingHorizontal: theme.spacing.md,
+          paddingVertical: theme.spacing.lg,
         }}
       >
-        <Text
-          allowFontScaling={false}
+        {/* Centered "INESS" */}
+        <View
           style={{
-            color: theme.colors.text,
-            fontSize: theme.fontSizes.large,
-            fontFamily: theme.fonts.heading,
-            fontWeight: theme.fontWeights.medium as any,
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
           }}
         >
-          INESS
-        </Text>
-      </View>
+          <Text
+            allowFontScaling={false}
+            style={{
+              color: theme.colors.text,
+              fontSize: theme.fontSizes.large,
+              fontFamily: theme.fonts.heading,
+              fontWeight: theme.fontWeights.medium as any,
+            }}
+          >
+            INESS
+          </Text>
+        </View>
 
-      {/* Bottom section */}
-      <View
-        style={{
-          alignItems: "center",
-          marginBottom: theme.spacing.lg,
-        }}
-      >
-        {/* Title */}
-        <Text
-          allowFontScaling={false}
+        {/* Bottom section */}
+        <View
           style={{
-            fontSize: theme.fontSizes.xl,
-            fontWeight: theme.fontWeights.bold as any,
-            color: theme.colors.text,
-            fontFamily: theme.fonts.heading,
+            alignItems: "center",
+            marginBottom: theme.spacing.lg,
           }}
         >
-          MAKING
-        </Text>
-        <Text
-          allowFontScaling={false}
-          style={{
-            fontSize: theme.fontSizes.xl,
-            fontWeight: theme.fontWeights.bold as any,
-            color: theme.colors.text,
-            fontFamily: theme.fonts.heading,
-          }}
-        >
-          PEOPLE FIT.
-        </Text>
+          {/* Title */}
+          <Text
+            allowFontScaling={false}
+            style={{
+              fontSize: theme.fontSizes.xl,
+              fontWeight: theme.fontWeights.bold as any,
+              color: theme.colors.text,
+              fontFamily: theme.fonts.heading,
+            }}
+          >
+            MAKING
+          </Text>
+          <Text
+            allowFontScaling={false}
+            style={{
+              fontSize: theme.fontSizes.xl,
+              fontWeight: theme.fontWeights.bold as any,
+              color: theme.colors.text,
+              fontFamily: theme.fonts.heading,
+            }}
+          >
+            PEOPLE FIT.
+          </Text>
 
-        {/* Subtitle */}
-        <Text
-          allowFontScaling={false}
-          style={{
-            fontSize: theme.fontSizes.regular,
-            color: theme.colors.text,
-            fontFamily: theme.fonts.body,
-            marginTop: theme.spacing.sm,
-          }}
-        >
-          No Matter The Lifestyle
-        </Text>
+          {/* Subtitle */}
+          <Text
+            allowFontScaling={false}
+            style={{
+              fontSize: theme.fontSizes.regular,
+              color: theme.colors.text,
+              fontFamily: theme.fonts.body,
+              marginTop: theme.spacing.sm,
+            }}
+          >
+            No Matter The Lifestyle
+          </Text>
 
-        {/* Footer text */}
-        <Text
-          allowFontScaling={false}
-          style={{
-            fontSize: theme.fontSizes.small,
-            color: theme.colors.mutedText,
-            fontFamily: theme.fonts.body,
-            textAlign: "center",
-            marginTop: theme.spacing.md,
-          }}
-        >
-          Personal Coaching | Programs | Fitness Store | Tracking
-        </Text>
+          {/* Footer text */}
+          <Text
+            allowFontScaling={false}
+            style={{
+              fontSize: theme.fontSizes.small,
+              color: theme.colors.mutedText,
+              fontFamily: theme.fonts.body,
+              textAlign: "center",
+              marginTop: theme.spacing.md,
+            }}
+          >
+            Personal Coaching | Programs | Fitness Store | Tracking
+          </Text>
 
-        {/* Button */}
-        {/* Next Button */}
-        <AnimatedSubmitButton
-          loading={false}
-          onPress={handlePress}
-          title="Login"
-        />
-      </View>
-    </ImageBackground>
+          {/* Button */}
+          {/* Next Button */}
+          <AnimatedSubmitButton
+            loading={false}
+            onPress={handlePress}
+            title="Login"
+          />
+        </View>
+      </ImageBackground>
+    </SafeAreaView>
   );
 };
 

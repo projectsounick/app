@@ -44,7 +44,7 @@ export default function NotificationScreen() {
       {/* Overlay for contrast */}
       <SafeAreaView
         style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-        edges={["top", "left", "right"]}
+        edges={["top", "left", "right", "bottom"]}
       >
         {/* Header */}
         <View
@@ -53,6 +53,7 @@ export default function NotificationScreen() {
             alignItems: "center",
             marginBottom: 24,
             paddingLeft: 20,
+            paddingTop: 20,
           }}
         >
           <TouchableOpacity

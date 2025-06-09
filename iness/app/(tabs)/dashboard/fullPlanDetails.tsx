@@ -20,6 +20,7 @@ import { RootState } from "@/store";
 import { ActivePlans } from "@/app/interfaces/planInterface";
 import { Session } from "@/app/interfaces/sessionInterface";
 import SessionDetailsTabs from "@/app/Components/ActivePlans.tsx/SessionDetails";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const TABS = ["Information", "Trainer", "Workout"];
 
@@ -168,7 +169,10 @@ const FullPlanDetails = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right", "bottom"]}
+    >
       {loading ? (
         <View
           style={{
@@ -209,7 +213,7 @@ const FullPlanDetails = () => {
           />
         </>
       )}
-    </View>
+    </SafeAreaView>
   );
 };
 

@@ -66,9 +66,11 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
           transform: [{ translateY: headerTranslateY }],
           position: "absolute",
           top: 0,
+          paddingTop: insets.top, // add this line!
           left: 0,
           right: 0,
           zIndex: 10,
+          paddingBottom: 10,
         }}
       >
         <LinearGradient
@@ -78,7 +80,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
             borderBottomLeftRadius: 30,
             borderBottomRightRadius: 30,
             paddingHorizontal: 20,
-            paddingTop: 10 + insets.top, // <-- add safe area inset here
+
             paddingBottom: 25,
           }}
         >
@@ -88,6 +90,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
               alignItems: "center",
               justifyContent: "space-between",
               position: "relative", // important
+              paddingTop: 10,
             }}
           >
             {/* Left Side */}

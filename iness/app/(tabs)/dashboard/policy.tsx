@@ -51,7 +51,7 @@ export default function PolicyScreen() {
     >
       <SafeAreaView
         style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-        edges={["top", "left", "right"]}
+        edges={["top", "left", "right", "bottom"]}
       >
         <View style={{ paddingTop: 30, paddingLeft: 20 }}>
           <NormalHeader screenName="Policies" />

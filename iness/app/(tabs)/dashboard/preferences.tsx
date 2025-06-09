@@ -140,7 +140,7 @@ const BookSessionDetailsScreen = () => {
     >
       <SafeAreaView
         style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-        edges={["top", "left", "right"]}
+        edges={["top", "left", "right", "bottom"]}
       >
         <View style={{ paddingLeft: 20, paddingTop: 20 }}>
           <NormalHeader screenName="Preferences" />

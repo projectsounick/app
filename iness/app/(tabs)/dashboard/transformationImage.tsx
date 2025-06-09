@@ -142,7 +142,7 @@ export default function TransformationImage() {
     >
       <SafeAreaView
         style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-        edges={["top", "left", "right"]}
+        edges={["top", "left", "right", "bottom"]}
       >
         <View style={{ paddingTop: 20, paddingLeft: 20 }}>
           <NormalHeader screenName="Transformation" />

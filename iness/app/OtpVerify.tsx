@@ -78,12 +78,12 @@ const OTPInputScreen = () => {
     if (fullOtp.length === 6) {
       try {
         //// Calling the fcmToken getting tuils funciton to get the fcmToken ------------------/
-        // const pushToken = await registerForPushNotificationsAsync();
+        const pushToken = await registerForPushNotificationsAsync();
 
         let requestBody = {
           email: userAsyncStorageResponse.data.email,
           otp: fullOtp,
-          expoPushToken: "",
+          expoPushToken: pushToken,
         };
 
         const response = await callService(requestBody);
@@ -125,8 +125,9 @@ const OTPInputScreen = () => {
     try {
       setOtpResendLoading(true);
       /// Fetching the phone number from AsyncStorage---/
-      const userData =
-        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+      const userData = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
+        "user"
+      );
       if (!userData || userData.exists === false) {
         setSnackbarVisible(true);
         setSnackbarMessage("Email not found. Please try again.");

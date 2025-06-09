@@ -152,7 +152,7 @@ export default function SupportScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right"]}
+      edges={["top", "left", "right", "bottom"]}
     >
       <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: "#fff" }}
@@ -230,7 +230,7 @@ export default function SupportScreen() {
         <View
           style={{
             width: "100%",
-            padding: 20,
+            padding: 10,
             borderTopWidth: 1,
             borderTopColor: "#eee",
             backgroundColor: "#fff",

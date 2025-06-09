@@ -48,7 +48,7 @@ export default function CartScreen() {
       {/* Header + Content */}
       <SafeAreaView
         style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-        edges={["top", "left", "right"]}
+        edges={["top", "left", "right", "bottom"]}
       >
         <View style={{ flex: 1, backgroundColor: "#fff" }}>
           <SmallHeader title="Cart" />

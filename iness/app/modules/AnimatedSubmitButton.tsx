@@ -9,6 +9,7 @@ import {
 import theme from "../Theme/globalTheme";
 import LoadingDots from "./LoadingDots";
 import { AnimatedSubmitButtonProps } from "../interfaces/moduleInterfaces";
+import { ActivityIndicator } from "react-native-paper";
 
 const { width } = Dimensions.get("window");
 
@@ -43,7 +44,7 @@ const AnimatedSubmitButton: React.FC<AnimatedSubmitButtonProps> = ({
     >
       <TouchableOpacity disabled={loading} onPress={onPress}>
         {loading ? (
-          <LoadingDots />
+          <ActivityIndicator />
         ) : (
           <Text
             style={{

@@ -51,44 +51,27 @@ const LoadingDots = () => {
     <View
       style={{
         flexDirection: "row",
-        alignItems: "center",
         justifyContent: "center",
-        height: 24, // controls button height
+        alignItems: "center",
+        height: 24,
+        width: "100%", // ensures full width for centering
+        backgroundColor: "blue",
       }}
     >
-      <Animated.Text
-        style={{
-          opacity: dot1Opacity,
-          fontSize: 40,
-          lineHeight: 24,
-          marginHorizontal: 1,
-          paddingTop: 2,
-        }}
-      >
-        .
-      </Animated.Text>
-      <Animated.Text
-        style={{
-          opacity: dot2Opacity,
-          fontSize: 40,
-          lineHeight: 24,
-          marginHorizontal: 1,
-          paddingTop: 2,
-        }}
-      >
-        .
-      </Animated.Text>
-      <Animated.Text
-        style={{
-          opacity: dot3Opacity,
-          fontSize: 40,
-          lineHeight: 24,
-          marginHorizontal: 1,
-          paddingTop: 2,
-        }}
-      >
-        .
-      </Animated.Text>
+      {[dot1Opacity, dot2Opacity, dot3Opacity].map((opacity, idx) => (
+        <Animated.Text
+          key={idx}
+          style={{
+            opacity,
+            fontSize: 20,
+            marginHorizontal: 4,
+            transform: [{ scale: 2 }],
+            textAlign: "center",
+          }}
+        >
+          .
+        </Animated.Text>
+      ))}
     </View>
   );
 };

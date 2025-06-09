@@ -136,14 +136,14 @@ export default function TrackingGraphPage() {
     }).start();
   }, [selectedTab, monthOffset]);
   return (
-    <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpg")} // Replace with your image
-      resizeMode="cover"
-      style={{ flex: 1 }}
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right", "bottom"]}
     >
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-        edges={["top", "left", "right"]}
+      <ImageBackground
+        source={require("../../../assets/images/basicBackground.jpg")} // Replace with your image
+        resizeMode="cover"
+        style={{ flex: 1 }}
       >
         <ScrollView style={{ flex: 1 }}>
           <View style={{ paddingLeft: 20, paddingTop: 20 }}>
@@ -329,7 +329,7 @@ export default function TrackingGraphPage() {
             {/* Scrollable Cards */}
           </View>
         </ScrollView>
-      </SafeAreaView>
-    </ImageBackground>
+      </ImageBackground>
+    </SafeAreaView>
   );
 }

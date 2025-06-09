@@ -4,23 +4,21 @@ import { store } from "../store"; // adjust path if needed
 import * as Notifications from "expo-notifications";
 import { storeNotification } from "@/utils/notificationUtils";
 import { useEffect } from "react";
-
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: false,
-    shouldSetBadge: false,
+    shouldPlaySound: true,
+    shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true,
   }),
 });
-
 export default function RootLayout() {
   useEffect(() => {
-    console.log("called");
+    console.log("Notification listener initialized");
 
     const subscription = Notifications.addNotificationReceivedListener(
       async (notification) => {
         const content = notification.request.content;
-
         await storeNotification({
           title: content.title ?? null,
           body: content.body ?? null,
@@ -29,7 +27,15 @@ export default function RootLayout() {
       }
     );
 
-    return () => subscription.remove();
+    const responseListener =
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        console.log("Notification tapped:", response);
+      });
+
+    return () => {
+      subscription.remove();
+      responseListener.remove();
+    };
   }, []);
 
   return (

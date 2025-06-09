@@ -3,10 +3,14 @@ import Constants from "expo-constants";
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export async function registerForPushNotificationsAsync() {
-  let token;
+export async function registerForPushNotificationsAsync(): Promise<
+  string | undefined
+> {
+  let token: string | undefined;
+  console.log(Constants);
 
-  if (Constants.isDevice) {
+  try {
+    // Request permissions
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
@@ -21,22 +25,33 @@ export async function registerForPushNotificationsAsync() {
       return;
     }
 
-    token = (await Notifications.getExpoPushTokenAsync()).data;
+    // Optional: use project ID for EAS build compatibility
+    const projectId =
+      Constants?.expoConfig?.extra?.eas?.projectId ??
+      Constants?.easConfig?.projectId;
+
+    const pushTokenResponse = projectId
+      ? await Notifications.getExpoPushTokenAsync({ projectId })
+      : await Notifications.getExpoPushTokenAsync();
+
+    token = pushTokenResponse.data;
     console.log("Expo push token:", token);
 
+    // Set notification channel for Android
     if (Platform.OS === "android") {
-      Notifications.setNotificationChannelAsync("default", {
+      await Notifications.setNotificationChannelAsync("default", {
         name: "default",
         importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
       });
     }
-  } else {
-    alert("Must use physical device for Push Notifications");
+  } catch (error) {
+    console.error("Error getting push token:", error);
   }
 
   return token;
 }
-
 //// Funciton for storing the coming notificaiton in asyncstorage -------------/
 // utils/storeNotification.ts
 
