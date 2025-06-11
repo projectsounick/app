@@ -26,7 +26,7 @@ const BannerCard = ({ cardData }: BannerCardProps) => {
       style={{
         borderRadius: 12,
         paddingHorizontal: 12,
-        marginTop: 18,
+        marginTop: 8,
         height: 142,
         justifyContent: "center",
         overflow: "hidden",
@@ -96,7 +96,13 @@ const BannerCard = ({ cardData }: BannerCardProps) => {
               })
             }
           >
-            <Text style={{ color: "#000", fontWeight: "bold", fontSize: 13 }}>
+            <Text
+              style={{
+                color: "#000",
+                fontWeight: "bold",
+                fontSize: theme.fontSizes.regularSmall,
+              }}
+            >
               {buttonText}
             </Text>
           </TouchableOpacity>

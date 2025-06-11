@@ -63,6 +63,8 @@ export const storeNotification = async (notification: {
   data: any;
 }) => {
   try {
+    console.log("called");
+
     const existing = await AsyncStorage.getItem(STORAGE_KEY);
     const parsed = existing ? JSON.parse(existing) : [];
 

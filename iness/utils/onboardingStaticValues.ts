@@ -79,7 +79,7 @@ export const activityLevelOptions = [
     icon: "run-fast", // 🏃‍♂️ Jogging / running
   },
   {
-    label: "Highly Active (Physically Demanding Job or Intense Daily Exercise)",
+    label: "Physically Demanding Job or Intense Daily Exercise",
     description: "Typical Steps: More than 10k daily",
     icon: "dumbbell", // 🏋️‍♂️ Weight lifting / physical work
   },

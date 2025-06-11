@@ -45,13 +45,10 @@ const OnboardingPrimaryGoal = ({
         flex: 1,
         paddingHorizontal: "5%",
         paddingBottom: "2%",
-        paddingTop: "4%",
       }}
     >
       <ScrollView showsVerticalScrollIndicator={false}>
-        <OnboardingHeading>
-          What is your primary {"\n"} fitness goal?
-        </OnboardingHeading>
+        <OnboardingHeading>primary fitness {"\n"} goal?</OnboardingHeading>
         {goalOptionsOnboarding.map(({ label, icon }: any, index) => (
           <OnboardingCard
             key={label}

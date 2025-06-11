@@ -16,6 +16,7 @@ import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { LinearGradient } from "expo-linear-gradient";
 import { UserData } from "@/app/interfaces/UserInterface";
 import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 // Main functional component for the Onboarding Name screen------------------------------------/
 const OnboardingName = ({ onNext }: { onNext: () => void }) => {
@@ -112,23 +113,46 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
               </Text>
             </View>
 
-            <TextInput
-              value={name}
-              onChangeText={setName}
-              placeholder="Enter your name"
-              placeholderTextColor={theme.colors.mutedText}
+            <View
               style={{
+                flexDirection: "row",
+                alignItems: "center",
+                height: 48,
+                borderColor: "#ccc",
                 borderWidth: 1,
-                borderColor: theme.colors.normal,
+
                 borderRadius: 8,
-                padding: 12,
+                paddingHorizontal: 12,
                 backgroundColor: "#fff",
-                color: "#000",
-                fontSize: 16,
                 width: "100%",
+                marginBottom: 12, // optional
               }}
-              returnKeyType="done"
-            />
+            >
+              <MaterialCommunityIcons
+                name="account-outline" // 👈 person icon
+                size={20}
+                color="#888"
+                style={{ marginRight: 8 }}
+              />
+              <TextInput
+                placeholder="Enter your name"
+                placeholderTextColor={theme.colors.mutedText}
+                value={name}
+                onChangeText={setName}
+                underlineColorAndroid="transparent"
+                returnKeyType="done"
+                style={{
+                  flex: 1,
+                  fontSize: 16,
+                  color: "#000",
+                  backgroundColor: "transparent",
+                  borderWidth: 0,
+                  paddingVertical: 0,
+                  includeFontPadding: false,
+                  textAlignVertical: "center",
+                }}
+              />
+            </View>
           </View>
 
           {/* Bottom Button */}

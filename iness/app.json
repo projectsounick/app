@@ -3,7 +3,7 @@
     "name": "iness",
     "slug": "iness",
 
-    "version": "1.0.0",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/logonew.png",
     "scheme": "myapp",
@@ -15,7 +15,8 @@
     },
 
     "android": {
-      "googleServicesFile": "android/app/google-services.json",
+      "versionCode": 2,
+      "googleServicesFile": "./android/app/google-services.json",
       "intentFilters": [
         {
           "action": "VIEW",

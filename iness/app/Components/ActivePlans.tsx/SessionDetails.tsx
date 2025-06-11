@@ -18,6 +18,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Session } from "@/app/interfaces/sessionInterface";
 import theme from "@/app/Theme/globalTheme";
+import { router } from "expo-router";
 
 const TabbedSessionDetails = ({
   selectedSession,
@@ -33,9 +34,53 @@ const TabbedSessionDetails = ({
   const renderInfoTab = () => {
     if (!selectedSession)
       return (
-        <Text style={{ textAlign: "center", color: "#999" }}>
-          No data available
-        </Text>
+        <View style={{ marginTop: 20, alignItems: "center" }}>
+          <Text style={{ textAlign: "center", color: "#999" }}>
+            No Session Available
+          </Text>
+
+          <TouchableOpacity
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              backgroundColor: "#fff",
+              borderRadius: 12,
+              paddingVertical: 16,
+              paddingHorizontal: 20,
+              marginTop: 20,
+              width: "90%",
+              alignSelf: "center",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 4,
+              elevation: 3,
+            }}
+            onPress={() => {
+              router.push("/dashboard/supportchat");
+            }}
+          >
+            <Text
+              style={{
+                color: "#000",
+                fontSize: 16,
+                fontWeight: "600",
+              }}
+            >
+              Request a Session
+            </Text>
+
+            <Text
+              style={{
+                fontSize: 18,
+                color: "#888",
+              }}
+            >
+              →
+            </Text>
+          </TouchableOpacity>
+        </View>
       );
 
     return (
@@ -128,28 +173,133 @@ const TabbedSessionDetails = ({
           >
             Session Information
           </Text>
+          <View style={{ marginBottom: 12, paddingHorizontal: 2 }}>
+            {/* First Row */}
+            <View style={{ flexDirection: "row", marginBottom: 10 }}>
+              {/* Date */}
+              <View
+                style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
+              >
+                <MaterialCommunityIcons
+                  name="calendar-month-outline"
+                  size={16}
+                  color="#eee"
+                  style={{ marginRight: 2 }}
+                />
+                <Text style={{ color: "#eee", fontSize: 10 }}>
+                  {new Date(selectedSession.sessionDate).toDateString()}
+                </Text>
+              </View>
 
-          <View style={{ marginBottom: 8 }}>
-            <Text style={{ color: "#eee" }}>
-              Date: {new Date(selectedSession.sessionDate).toDateString()}
-            </Text>
-            <Text style={{ color: "#eee" }}>
-              Time: {selectedSession.sessionTime}
-            </Text>
-            <Text style={{ color: "#eee" }}>
-              Duration: {selectedSession.sessionDuration} mins
-            </Text>
-            <Text style={{ color: "#eee" }}>
-              Type: {selectedSession.sessionType}
-            </Text>
-            {selectedSession.sessionType === "offline" && (
-              <Text style={{ color: "#eee" }}>
-                Address: {selectedSession.sessionAddress || "N/A"}
-              </Text>
-            )}
-            <Text style={{ color: "#eee" }}>
-              Status: {selectedSession.sessionStatus}
-            </Text>
+              {/* Time */}
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="clock-outline"
+                  size={16}
+                  color="#eee"
+                  style={{ marginRight: 2 }}
+                />
+                <Text style={{ color: "#eee", fontSize: 10 }}>
+                  {selectedSession.sessionTime}
+                </Text>
+              </View>
+
+              {/* Duration */}
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "flex-end",
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="timer-outline"
+                  size={16}
+                  color="#eee"
+                  style={{ marginRight: 2 }}
+                />
+                <Text style={{ color: "#eee", fontSize: 10 }}>
+                  {selectedSession.sessionDuration} mins
+                </Text>
+              </View>
+            </View>
+
+            {/* Second Row */}
+            <View style={{ flexDirection: "row", marginBottom: 10 }}>
+              {/* Type */}
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="account-group-outline"
+                  size={16}
+                  color="#eee"
+                  style={{ marginRight: 2 }}
+                />
+                <Text style={{ color: "#eee", fontSize: 10 }}>
+                  {selectedSession.sessionType}
+                </Text>
+              </View>
+
+              {/* Status */}
+              <View
+                style={{
+                  flex: 1,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="progress-check"
+                  size={16}
+                  color="#eee"
+                  style={{ marginRight: 2 }}
+                />
+                <Text style={{ color: "#eee", fontSize: 10 }}>
+                  {selectedSession.sessionStatus}
+                </Text>
+              </View>
+
+              {/* Address (only for offline) */}
+              {selectedSession.sessionType === "offline" ? (
+                <View
+                  style={{
+                    flex: 1,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "flex-end",
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="map-marker-outline"
+                    size={16}
+                    color="#eee"
+                    style={{ marginRight: 2 }}
+                  />
+                  <Text
+                    style={{ color: "#eee", fontSize: 10 }}
+                    numberOfLines={1}
+                  >
+                    {selectedSession.sessionAddress || "N/A"}
+                  </Text>
+                </View>
+              ) : (
+                <View style={{ flex: 1 }} />
+              )}
+            </View>
           </View>
 
           {/* Diet Plan Download Button */}
@@ -202,7 +352,7 @@ const TabbedSessionDetails = ({
   const renderTrainerTab = () => {
     if (!selectedSession?.trainer)
       return (
-        <Text style={{ textAlign: "center", color: "#999" }}>
+        <Text style={{ textAlign: "center", marginTop: 20, color: "#999" }}>
           No trainer data
         </Text>
       );

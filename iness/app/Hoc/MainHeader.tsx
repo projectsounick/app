@@ -60,10 +60,10 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
     }, []);
     const insets = useSafeAreaInsets();
     return (
-      <Animated.View
+      <View
         style={{
-          opacity: headerOpacity,
-          transform: [{ translateY: headerTranslateY }],
+          // opacity: headerOpacity,
+          // transform: [{ translateY: headerTranslateY }],
           position: "absolute",
           top: 0,
           paddingTop: insets.top, // add this line!
@@ -202,7 +202,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
 
           <WrappedComponent userData={userData} />
         </LinearGradient>
-      </Animated.View>
+      </View>
     );
   };
 

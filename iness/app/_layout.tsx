@@ -10,6 +10,7 @@ Notifications.setNotificationHandler({
     shouldSetBadge: true,
     shouldShowBanner: true,
     shouldShowList: true,
+    shouldShowAlert: true, // this is important!
   }),
 });
 export default function RootLayout() {
@@ -19,6 +20,8 @@ export default function RootLayout() {
     const subscription = Notifications.addNotificationReceivedListener(
       async (notification) => {
         const content = notification.request.content;
+        console.log("called");
+
         await storeNotification({
           title: content.title ?? null,
           body: content.body ?? null,

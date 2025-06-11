@@ -61,6 +61,7 @@ const YourComponent = () => {
 
   const {
     loading,
+
     error,
     fetchAll,
     setDataManually,
@@ -77,20 +78,20 @@ const YourComponent = () => {
       {/* Animated Header */}
       <MainHeader scrollY={scrollY} title="Home" />
       {/* Scrollable Content */}
-      <Animated.ScrollView
+      <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
           paddingTop: headerHeight, // ← dynamic and safe
           paddingBottom: 10,
           paddingHorizontal: 16, // ✅ Add horizontal spacing here
         }}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          {
-            useNativeDriver: true, // Required for better performance with transform/opacity
-          }
-        )}
-        scrollEventThrottle={16}
+        // onScroll={Animated.event(
+        //   [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+        //   {
+        //     useNativeDriver: true, // Required for better performance with transform/opacity
+        //   }
+        // )}
+        // scrollEventThrottle={16}
       >
         {loading ? (
           <View
@@ -111,10 +112,10 @@ const YourComponent = () => {
             <BannerCard cardData={trackingCardData} />
             <BannerCard cardData={bookSessionCardData} />
 
-            <FeatureCarousel />
+            {/* <FeatureCarousel /> */}
           </>
         )}
-      </Animated.ScrollView>
+      </ScrollView>
     </SafeAreaView>
   );
 };

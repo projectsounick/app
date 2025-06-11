@@ -55,7 +55,7 @@ const OnboardingtimeCommitment = ({
       <ScrollView showsVerticalScrollIndicator={false}>
         <OnboardingHeading>
           {" "}
-          How much can you {"\n"}commit to fitness {"\n"}daily?
+          Daily Commitment {"\n"} to fitness?
         </OnboardingHeading>
         {onboardingCommitmentOptions.map((item: string, index: number) => (
           <OnboardingCard

@@ -9,28 +9,30 @@ import {
 import Icon from "react-native-vector-icons/Feather";
 
 const { width } = Dimensions.get("window");
+const CARD_WIDTH = width * 0.8;
+const CARD_SPACING = (width - CARD_WIDTH) / 2;
 
 const featureData = [
   {
-    image: require("../../assets/images/featureCard1.jpg"), // Path to the image
+    image: require("../../assets/images/featureCard1.jpg"),
   },
   {
-    image: require("../../assets/images/featureCard2.jpg"), // Path to the image
+    image: require("../../assets/images/featureCard2.jpg"),
   },
   {
-    image: require("../../assets/images/featureCard3.png"), // Path to the image
+    image: require("../../assets/images/featureCard3.png"),
   },
 ];
 
 const FeatureCarousel = () => {
   const scrollRef = useRef<ScrollView>(null);
-  const [activeIndex, setActiveIndex] = useState(1); // Start with the middle card active
+  const [activeIndex, setActiveIndex] = useState(1); // Start from middle
 
   useEffect(() => {
     const interval = setInterval(() => {
       const nextIndex = (activeIndex + 1) % featureData.length;
       scrollRef.current?.scrollTo({
-        x: nextIndex * width * 0.8,
+        x: nextIndex * CARD_WIDTH,
         animated: true,
       });
       setActiveIndex(nextIndex);
@@ -54,8 +56,6 @@ const FeatureCarousel = () => {
         style={{
           backgroundColor: "#9C56F6",
           padding: 12,
-          borderTopLeftRadius: 0,
-          borderTopRightRadius: 0,
           borderBottomLeftRadius: 12,
           borderBottomRightRadius: 12,
           alignItems: "center",
@@ -89,86 +89,67 @@ const FeatureCarousel = () => {
         ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
-        pagingEnabled
-        snapToInterval={width * 0.8} // Ensure scroll is based on image size
+        pagingEnabled={false}
+        snapToInterval={CARD_WIDTH}
         decelerationRate="fast"
         contentContainerStyle={{
-          paddingHorizontal: 10,
-          marginTop: 10,
-          alignItems: "center",
+          paddingHorizontal: CARD_SPACING,
         }}
+        scrollEventThrottle={16}
       >
         {featureData.map((item, index) => (
           <View
             key={index}
             style={{
-              width: width * 0.8,
+              width: CARD_WIDTH,
               height: 180,
-              marginRight: 15,
+              marginRight: index === featureData.length - 1 ? 0 : 15,
               borderRadius: 16,
-              justifyContent: "center",
-              padding: 16,
               overflow: "hidden",
+              justifyContent: "center",
               position: "relative",
             }}
           >
-            {/* First Background Image */}
             <ImageBackground
-              source={item.image} // Dynamic image for the background
+              source={item.image}
               style={{
-                position: "absolute",
-                width: width * 0.8, // Full width
-                height: "100%", // Full height
-                borderRadius: 16,
+                width: "100%",
+                height: "100%",
                 justifyContent: "center",
-                overflow: "hidden",
-                left: 0, // Align first background image to the left
               }}
               imageStyle={{
                 borderRadius: 16,
-                resizeMode: "contain", // Ensure full content is visible and not cropped
+                resizeMode: "contain",
               }}
-            />
-
-            {/* Second Background Image */}
-            <ImageBackground
-              source={item.image} // Dynamic image for the background
-              style={{
-                position: "absolute",
-                width: width * 0.8, // Full width
-                height: "100%", // Full height
-                borderRadius: 16,
-                justifyContent: "center",
-                overflow: "hidden",
-                right: 0, // Align second background image to the right
-              }}
-              imageStyle={{
-                borderRadius: 16,
-                resizeMode: "contain", // Ensure full content is visible and not cropped
-              }}
-            />
-
-            {/* Middle Image (On top of background images) */}
-            {index === activeIndex && (
-              <ImageBackground
-                source={item.image} // Dynamic image for the middle image
-                style={{
-                  position: "absolute",
-                  width: width * 0.8, // Full width of the container
-                  height: "100%", // Full height of the container
-                  borderRadius: 16,
-                  justifyContent: "center",
-                  overflow: "hidden",
-                  top: 0, // Align it to the top
-                  zIndex: 1, // Ensure it floats on top of the background images
-                  transform: [{ scale: 1.1 }], // Slightly enlarge the middle image
-                }}
-                imageStyle={{
-                  borderRadius: 16,
-                  resizeMode: "contain", // Ensure full content is visible and not cropped
-                }}
-              />
-            )}
+            >
+              {/* Highlight middle image */}
+              {index === activeIndex && (
+                <View
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    bottom: 0,
+                    left: 0,
+                    transform: [{ scale: 1.08 }],
+                    zIndex: 1,
+                  }}
+                >
+                  <ImageBackground
+                    source={item.image}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      justifyContent: "center",
+                    }}
+                    imageStyle={{
+                      borderRadius: 16,
+                      resizeMode: "contain",
+                    }}
+                  />
+                </View>
+              )}
+            </ImageBackground>
           </View>
         ))}
       </ScrollView>

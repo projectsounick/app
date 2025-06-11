@@ -36,16 +36,17 @@ export default function NotificationScreen() {
     fetchNotificationsFromLocal();
   }, []);
   return (
-    <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpg")} // ✅ replace with your background
-      style={{ flex: 1 }}
-      resizeMode="cover"
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right", "bottom"]}
     >
-      {/* Overlay for contrast */}
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-        edges={["top", "left", "right", "bottom"]}
+      <ImageBackground
+        source={require("../../../assets/images/basicBackground.jpg")} // ✅ replace with your background
+        style={{ flex: 1 }}
+        resizeMode="cover"
       >
+        {/* Overlay for contrast */}
+
         {/* Header */}
         <View
           style={{
@@ -136,7 +137,7 @@ export default function NotificationScreen() {
             ))
           )}
         </ScrollView>
-      </SafeAreaView>
-    </ImageBackground>
+      </ImageBackground>
+    </SafeAreaView>
   );
 }

@@ -28,7 +28,7 @@ export default function SliderCard() {
       end={{ x: 0.5, y: 1 }}
       style={{
         height: 220,
-        paddingVertical: 16,
+        paddingVertical: 18,
         paddingHorizontal: 12,
         borderRadius: 12,
       }}
@@ -39,7 +39,6 @@ export default function SliderCard() {
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 8,
         }}
       >
         <View>
@@ -62,7 +61,7 @@ export default function SliderCard() {
               fontSize: theme.fontSizes.regularSmall,
               fontWeight: theme.fontWeights.regular,
               color: theme.colors.text,
-              marginTop: 8,
+              marginTop: 4,
             }}
           >
             Tailored plans for your personalized lifestyles.
@@ -90,7 +89,7 @@ export default function SliderCard() {
               borderColor: "#D6B6FF",
               borderRadius: 12,
               marginRight: 12,
-              width: 310,
+              width: 290,
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "center",
@@ -115,15 +114,14 @@ export default function SliderCard() {
               <View
                 style={{
                   flex: 1,
-
                   flexDirection: "column",
                   justifyContent: "space-between",
                   alignItems: "flex-start",
-
                   height: "90%",
                   width: "60%",
                 }}
               >
+                {/* Title */}
                 <Text
                   style={{
                     fontWeight: theme.fontWeights.bold,
@@ -137,6 +135,46 @@ export default function SliderCard() {
                   {item.title}
                 </Text>
 
+                {/* Bullet List Section */}
+                <View style={{ marginBottom: 8 }}>
+                  {item.descItems
+                    ?.slice(0, 2)
+                    .map((desc: string, idx: number) => (
+                      <View
+                        key={idx}
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "flex-start", // align top edges
+                          marginBottom: 4,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            color: "#000",
+                            marginRight: 4,
+                            fontSize: 10,
+                            lineHeight: 14,
+                          }}
+                        >
+                          •
+                        </Text>
+                        <Text
+                          style={{
+                            fontSize: 10,
+                            fontWeight: "500",
+                            color: theme.colors.dark,
+                            lineHeight: 14,
+                          }}
+                          numberOfLines={1}
+                          ellipsizeMode="tail" // optional: adds "..." if it's too long
+                        >
+                          {desc}
+                        </Text>
+                      </View>
+                    ))}
+                </View>
+
+                {/* Know More Button */}
                 <TouchableOpacity
                   style={{
                     backgroundColor: "#B4F455",
@@ -165,7 +203,7 @@ export default function SliderCard() {
               {/* Right Section - Image */}
               <View
                 style={{
-                  height: "90%",
+                  height: "95%",
                   justifyContent: "center",
                   alignItems: "center",
                   width: "40%",

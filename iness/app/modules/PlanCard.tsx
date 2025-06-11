@@ -24,7 +24,7 @@ const PlanCard: React.FC<PlanCardProps> = ({
       key={index}
       style={{
         marginRight: index === planGroupLength - 1 ? 0 : 12,
-        width: 310,
+        width: 280,
         height: 180,
         borderRadius: 12,
         overflow: "hidden",
