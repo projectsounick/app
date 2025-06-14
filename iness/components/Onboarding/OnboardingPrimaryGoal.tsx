@@ -48,7 +48,7 @@ const OnboardingPrimaryGoal = ({
       }}
     >
       <ScrollView showsVerticalScrollIndicator={false}>
-        <OnboardingHeading>primary fitness {"\n"} goal?</OnboardingHeading>
+        <OnboardingHeading>Primary fitness {"\n"} goal?</OnboardingHeading>
         {goalOptionsOnboarding.map(({ label, icon }: any, index) => (
           <OnboardingCard
             key={label}

@@ -25,9 +25,6 @@ import { RootState } from "@/store";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function WellnessDashboard() {
-  const totalTrackData = useSelector(
-    (state: RootState) => state.track.totalTrackData
-  );
   const currentDayTrackData = useSelector(
     (state: RootState) => state.track.currentDateTrackData
   );
@@ -191,14 +188,14 @@ export default function WellnessDashboard() {
     fetchData();
   }, []);
   return (
-    <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpg")}
-      style={{ flex: 1 }}
-      resizeMode="cover"
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right", "bottom"]}
     >
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-        edges={["top", "left", "right", "bottom"]}
+      <ImageBackground
+        source={require("../../../assets/images/basicBackground.jpg")}
+        style={{ flex: 1 }}
+        resizeMode="cover"
       >
         <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 80 }}>
           <NormalHeader screenName="Track" rightIcon={true} />
@@ -230,7 +227,7 @@ export default function WellnessDashboard() {
                   size={200}
                   width={14}
                   fill={progressSleep}
-                  tintColor="#C3FF77"
+                  tintColor="#ADD8E6"
                   backgroundColor="#eaeaea"
                   duration={1200}
                 >
@@ -239,7 +236,7 @@ export default function WellnessDashboard() {
                       size={140}
                       width={12}
                       fill={progressSteps}
-                      tintColor="#6C1B9B"
+                      tintColor="#FFD700"
                       backgroundColor="#f0f0f0"
                       duration={1200}
                     >
@@ -295,7 +292,7 @@ export default function WellnessDashboard() {
                         style={{
                           width: 12,
                           height: 12,
-                          backgroundColor: theme.colors.primary,
+                          backgroundColor: "#ADD8E6",
                           marginRight: 6,
                         }}
                       />
@@ -310,7 +307,7 @@ export default function WellnessDashboard() {
                         style={{
                           width: 12,
                           height: 12,
-                          backgroundColor: theme.colors.secondPrimary,
+                          backgroundColor: "#FFD700",
                           marginRight: 6,
                         }}
                       />
@@ -423,7 +420,7 @@ export default function WellnessDashboard() {
             />
           ) : null}
         </ScrollView>
-      </SafeAreaView>
-    </ImageBackground>
+      </ImageBackground>
+    </SafeAreaView>
   );
 }

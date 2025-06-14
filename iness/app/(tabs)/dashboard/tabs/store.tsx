@@ -4,6 +4,10 @@ import { View, Text, Image, Animated, Dimensions } from "react-native";
 import theme from "@/app/Theme/globalTheme";
 import withAnimatedHeader from "@/app/Hoc/MainHeader";
 import NameHeader from "@/app/Components/HeaderSubComponents/NameHeader";
+import {
+  SafeAreaFrameContext,
+  SafeAreaView,
+} from "react-native-safe-area-context";
 
 //// Main functional component for the equipscreen ------------------------/
 const MainHeader = withAnimatedHeader(NameHeader);
@@ -11,7 +15,7 @@ export default function EquipScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       {/* Header */}
       <MainHeader scrollY={scrollY} title="Equip" />
 
@@ -22,7 +26,6 @@ export default function EquipScreen() {
           alignItems: "center",
           justifyContent: "center",
           padding: 20,
-          marginTop: 40,
         }}
       >
         <View
@@ -77,6 +80,6 @@ export default function EquipScreen() {
           />
         </View>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }

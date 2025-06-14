@@ -64,13 +64,12 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
         style={{
           // opacity: headerOpacity,
           // transform: [{ translateY: headerTranslateY }],
-          position: "absolute",
+
           top: 0,
-          paddingTop: insets.top, // add this line!
+
           left: 0,
           right: 0,
           zIndex: 10,
-          paddingBottom: 10,
         }}
       >
         <LinearGradient
@@ -81,7 +80,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
             borderBottomRightRadius: 30,
             paddingHorizontal: 20,
 
-            paddingBottom: 25,
+            paddingBottom: 18,
           }}
         >
           <View
@@ -90,7 +89,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
               alignItems: "center",
               justifyContent: "space-between",
               position: "relative", // important
-              paddingTop: 10,
+              paddingTop: 8,
             }}
           >
             {/* Left Side */}

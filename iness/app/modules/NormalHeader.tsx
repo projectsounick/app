@@ -26,7 +26,7 @@ export default function NormalHeader({ screenName, rightIcon }: any) {
           style={{
             backgroundColor: theme.colors.dark,
             borderRadius: 20,
-            padding: 8,
+            padding: 4,
             marginRight: 10,
           }}
           onPress={() => router.back()}

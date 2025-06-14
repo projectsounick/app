@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useDispatch } from "react-redux";
 import { sliceConfig, SliceKey } from "@/sliceRegistery";
+import { setMainLoader } from "@/Slices/loadingSlice";
 
 interface ServiceCallConfig {
   sliceKey: SliceKey;
@@ -14,13 +15,12 @@ function useFetchMultipleStoreDataHook(
 ) {
   const dispatch = useDispatch();
 
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const fetchAll = useCallback(async () => {
-    setLoading(true);
+    dispatch(setMainLoader(true));
     setError(null);
 
     try {
@@ -56,7 +56,8 @@ function useFetchMultipleStoreDataHook(
       setSnackbarMessage(msg);
     } finally {
       setSnackbarVisible(true);
-      setLoading(false);
+
+      dispatch(setMainLoader(false));
     }
   }, [configs, dispatch]);
 
@@ -75,7 +76,6 @@ function useFetchMultipleStoreDataHook(
   }, [autoFetch, fetchAll]);
 
   return {
-    loading,
     error,
     fetchAll,
     setDataManually,

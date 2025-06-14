@@ -9,6 +9,7 @@ function useFetchStoreDataHook(
   autoFetch: boolean = true
 ) {
   const dispatch = useDispatch();
+  const [hasFetchedOnce, setHasFetchedOnce] = useState(false);
 
   const selectorPath = sliceConfig[sliceKey].selectorKey;
   const setAction = sliceConfig[sliceKey].setAction;
@@ -44,6 +45,7 @@ function useFetchStoreDataHook(
       } finally {
         setSnackbarVisible(true);
         setLoading(false);
+        setHasFetchedOnce(true); // ✅ prevent re-calling on failure
       }
     },
     [dispatch, fetchFunction, params, setAction]
@@ -56,15 +58,9 @@ function useFetchStoreDataHook(
     },
     [dispatch, setAction]
   );
-
   useEffect(() => {
-    if (
-      autoFetch &&
-      (!sliceState || (Array.isArray(sliceState) && sliceState.length === 0))
-    ) {
-      fetchData();
-    }
-  }, [autoFetch, sliceState, fetchData]);
+    fetchData();
+  }, []);
 
   return {
     data: sliceState,

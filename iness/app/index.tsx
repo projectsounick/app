@@ -5,6 +5,7 @@ import {
   ImageBackground,
   TouchableOpacity,
   Dimensions,
+  Image,
 } from "react-native";
 import theme from "./Theme/globalTheme";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -85,10 +86,20 @@ const HomeScreen = () => {
         <View
           style={{
             flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
+            justifyContent: "center", // aligns vertically
+            alignItems: "center", // aligns horizontally
           }}
         >
+          <Image
+            source={require("../assets/images/logonew.png")} // Replace with your logo path
+            style={{
+              width: 100,
+              height: 100,
+
+              resizeMode: "contain", // adjust if needed
+            }}
+          />
+
           <Text
             allowFontScaling={false}
             style={{
@@ -119,7 +130,7 @@ const HomeScreen = () => {
               fontFamily: theme.fonts.heading,
             }}
           >
-            MAKING
+            Transforming lives
           </Text>
           <Text
             allowFontScaling={false}
@@ -130,20 +141,7 @@ const HomeScreen = () => {
               fontFamily: theme.fonts.heading,
             }}
           >
-            PEOPLE FIT.
-          </Text>
-
-          {/* Subtitle */}
-          <Text
-            allowFontScaling={false}
-            style={{
-              fontSize: theme.fontSizes.regular,
-              color: theme.colors.text,
-              fontFamily: theme.fonts.body,
-              marginTop: theme.spacing.sm,
-            }}
-          >
-            No Matter The Lifestyle
+            Since 2015
           </Text>
 
           {/* Footer text */}
@@ -157,7 +155,8 @@ const HomeScreen = () => {
               marginTop: theme.spacing.md,
             }}
           >
-            Personal Coaching | Programs | Fitness Store | Tracking
+            Personal Coaching | Sustainable Diet Plans | FitTube |
+            Fitness shopping
           </Text>
 
           {/* Button */}

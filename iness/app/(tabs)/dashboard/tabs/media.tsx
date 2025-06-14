@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, ScrollView } from "react-native";
+import { View, Text, ScrollView, Image } from "react-native";
 import VideoCard from "@/app/modules/VideoCard";
 
 import SmallHeader from "@/app/modules/SmallHeader";
@@ -82,7 +82,66 @@ export default function MediaScreen() {
             <SimmerSkeletonCard />
           </>
         ) : mediaItems.length === 0 && loggedUser ? (
-          <Text>No podcast available. We will be uploading soon.</Text>
+          <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              justifyContent: "center",
+              padding: 20,
+            }}
+          >
+            <View
+              style={{
+                height: "80%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-evenly",
+                alignItems: "center",
+              }}
+            >
+              <View
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: theme.fontSizes.medium,
+                    fontWeight: "800",
+                    color: theme.colors.normal,
+
+                    textAlign: "center",
+                    marginBottom: 4,
+                  }}
+                >
+                  No Medial available
+                </Text>
+
+                <Text
+                  style={{
+                    fontSize: theme.fontSizes.regularSmall,
+                    fontWeight: "500",
+                    color: theme.colors.dark,
+
+                    textAlign: "center",
+                  }}
+                >
+                  we will update soon
+                </Text>
+              </View>
+              <Image
+                source={require("../../../../assets/images/placeholderMedia.png")}
+                style={{
+                  width: 250,
+                  height: 250,
+                  resizeMode: "contain",
+                }}
+              />
+            </View>
+          </View>
         ) : (
           mediaItems.map((item: PodcastInterface, index: number) => (
             <VideoCard

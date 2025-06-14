@@ -14,6 +14,7 @@ import {
   FontAwesome,
   MaterialCommunityIcons,
   Ionicons,
+  Feather,
 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Session } from "@/app/interfaces/sessionInterface";
@@ -71,14 +72,7 @@ const TabbedSessionDetails = ({
               Request a Session
             </Text>
 
-            <Text
-              style={{
-                fontSize: 18,
-                color: "#888",
-              }}
-            >
-              →
-            </Text>
+            <Feather name="arrow-right" size={24} color="#000" />
           </TouchableOpacity>
         </View>
       );

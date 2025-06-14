@@ -5,6 +5,8 @@ import trackReducer from "../Slices/trackSlice";
 import planReducer from "../Slices/planSlice";
 import cartReducer from "../Slices/cartSlice";
 import dietPlanReducer from "../Slices/dietPlanSlice";
+import loaderReducer from "../Slices/loadingSlice";
+import blogReducer from "../Slices/blogSlice";
 export const store = configureStore({
   reducer: {
     media: mediaReducer,
@@ -12,6 +14,8 @@ export const store = configureStore({
     plan: planReducer,
     cart: cartReducer,
     dietPlan: dietPlanReducer,
+    loader: loaderReducer,
+    blog: blogReducer,
   },
 });
 

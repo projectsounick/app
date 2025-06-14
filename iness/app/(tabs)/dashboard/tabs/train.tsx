@@ -13,8 +13,6 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
-
-const HEADER_HEIGHT = 180;
 const MainHeader = withAnimatedHeader(PlanProgressStatus);
 export default function TrainScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -30,7 +28,7 @@ export default function TrainScreen() {
       <Animated.ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
-          paddingTop: HEADER_HEIGHT + 20, // Reserve space under the header
+          paddingTop: 10, // Reserve space under the header
           paddingBottom: 10,
           paddingHorizontal: 16, // ✅ Add horizontal spacing here
         }}

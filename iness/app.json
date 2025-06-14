@@ -2,18 +2,19 @@
   "expo": {
     "name": "iness",
     "slug": "iness",
-
     "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/logonew.png",
     "scheme": "myapp",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
     },
-
     "android": {
       "versionCode": 2,
       "googleServicesFile": "./android/app/google-services.json",
@@ -23,7 +24,10 @@
           "data": {
             "scheme": "myapp"
           },
-          "category": ["BROWSABLE", "DEFAULT"]
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "useNextNotificationsApi": true,
@@ -31,7 +35,6 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-
       "package": "com.iness.fitness"
     },
     "web": {
@@ -59,9 +62,9 @@
         "origin": false
       },
       "eas": {
-        "projectId": "d80cbfa4-17b7-44ae-9955-a47743e5be15"
+        "projectId": "87dfba75-ecf1-4c1c-9b9a-74df81667288"
       }
     },
-    "owner": "surjayan"
+    "owner": "sounick_project"
   }
 }

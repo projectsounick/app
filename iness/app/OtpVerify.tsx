@@ -159,7 +159,8 @@ const OTPInputScreen = () => {
           style={{
             flex: 1,
             justifyContent: "space-between",
-            paddingVertical: 60,
+            paddingTop: "10%",
+            paddingBottom: "10%",
           }}
         >
           {/* Top Content */}
@@ -193,8 +194,8 @@ const OTPInputScreen = () => {
                   keyboardType="numeric"
                   maxLength={1}
                   style={{
-                    width: 50,
-                    height: 60,
+                    width: 40,
+                    height: 50,
                     borderWidth: 1,
                     borderColor: theme.colors.normal,
                     borderRadius: 10,

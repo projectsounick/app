@@ -21,7 +21,7 @@ export const ImageWithLoader = ({ uri }: { uri: string }) => {
         source={{ uri }}
         style={{
           width: 110, // Set a default width
-          height: 110, // Set a default height
+          height: "100%", // Set a default height
           resizeMode: "cover",
           borderRadius: 8,
         }}

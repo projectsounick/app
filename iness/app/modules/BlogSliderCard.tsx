@@ -9,21 +9,22 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-const { width } = Dimensions.get("window");
 import theme from "../Theme/globalTheme";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { PlanInterface } from "../interfaces/planInterface";
+
 import { ImageWithLoader } from "./ImageWithLoader";
 import { router } from "expo-router";
+import { Blog } from "../interfaces/blogInterface";
 
-export default function SliderCard() {
-  const plans = useSelector((state: RootState) => state.plan.plans);
+export default function BlogSliderCard() {
+  const blogs = useSelector((state: RootState) => state.blog.blogs);
+  console.log(blogs);
 
   return (
     <LinearGradient
-      colors={["#9C56F6", "#3A1B63"]}
+      colors={["#3D0E7B", "#000000"]}
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
       style={{
@@ -31,6 +32,7 @@ export default function SliderCard() {
         paddingVertical: 10,
         paddingHorizontal: 12,
         borderRadius: 12,
+        marginTop: 8,
       }}
     >
       {/* Fixed Header */}
@@ -54,7 +56,7 @@ export default function SliderCard() {
               size={18}
               color={theme.colors.primary}
             />{" "}
-            Explore our plans
+            Read our Blogs
           </Text>
           <Text
             style={{
@@ -80,7 +82,7 @@ export default function SliderCard() {
         showsHorizontalScrollIndicator={false}
         style={{ marginTop: 8 }}
       >
-        {plans.map((item: PlanInterface, index) => (
+        {blogs.map((item: Blog, index) => (
           <View
             key={index}
             style={{
@@ -122,58 +124,18 @@ export default function SliderCard() {
                 }}
               >
                 {/* Title */}
+                {/* Title */}
                 <Text
                   style={{
                     fontWeight: theme.fontWeights.bold,
-                    fontSize: 14,
+                    fontSize: 12,
                     marginBottom: 6,
                     color: theme.colors.dark,
+                    flexShrink: 1, // Ensures text doesn't overflow
                   }}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
                 >
                   {item.title}
                 </Text>
-
-                {/* Bullet List Section */}
-                <View style={{ marginBottom: 8 }}>
-                  {item.descItems
-                    ?.slice(0, 2)
-                    .map((desc: string, idx: number) => (
-                      <View
-                        key={idx}
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "flex-start", // align top edges
-                          marginBottom: 4,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            color: "#000",
-                            marginRight: 4,
-                            fontSize: 10,
-                            lineHeight: 14,
-                          }}
-                        >
-                          •
-                        </Text>
-                        <Text
-                          style={{
-                            fontSize: 10,
-                            fontWeight: "500",
-                            color: theme.colors.dark,
-                            lineHeight: 14,
-                          }}
-                          numberOfLines={1}
-                          ellipsizeMode="tail" // optional: adds "..." if it's too long
-                        >
-                          {desc}
-                        </Text>
-                      </View>
-                    ))}
-                </View>
-
                 {/* Know More Button */}
                 <TouchableOpacity
                   style={{
@@ -185,7 +147,12 @@ export default function SliderCard() {
                     justifyContent: "center",
                     alignItems: "center",
                   }}
-                  onPress={() => router.push("/dashboard/plan")}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(tabs)/dashboard/blogdetails",
+                      params: { id: item._id },
+                    })
+                  }
                 >
                   <Text
                     style={{
@@ -195,7 +162,7 @@ export default function SliderCard() {
                       color: theme.colors.dark,
                     }}
                   >
-                    Know More
+                    Read
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -209,7 +176,7 @@ export default function SliderCard() {
                   width: "40%",
                 }}
               >
-                <ImageWithLoader uri={item.imgUrl} />
+                <ImageWithLoader uri={item.coverImage} />
               </View>
             </View>
           </View>

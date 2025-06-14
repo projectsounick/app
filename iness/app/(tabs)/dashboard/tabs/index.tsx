@@ -28,12 +28,14 @@ import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
+import { blogService } from "@/app/services/blog.Service";
+import BlogSliderCard from "@/app/modules/BlogSliderCard";
 
 const MainHeader = withAnimatedHeader(NameHeader);
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
-  const headerHeight = 180;
-
+  //// Getting the loader from the state ----------------------------/
+  const loading = useSelector((state: RootState) => state.loader.mainLoader);
   const scrollY = new Animated.Value(0);
   //// Fetching the plan data -----------------------------/
 
@@ -55,13 +57,15 @@ const YourComponent = () => {
         sliceKey: "activePlans" as SliceKey,
         fetchFunction: planService.getActivePlans,
       },
+      {
+        sliceKey: "blogs" as SliceKey,
+        fetchFunction: blogService.getBlogOverallData,
+      },
     ],
     []
   );
 
   const {
-    loading,
-
     error,
     fetchAll,
     setDataManually,
@@ -81,9 +85,9 @@ const YourComponent = () => {
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
-          paddingTop: headerHeight, // ← dynamic and safe
+          paddingTop: 10,
           paddingBottom: 10,
-          paddingHorizontal: 16, // ✅ Add horizontal spacing here
+          paddingHorizontal: 8, // ✅ Add horizontal spacing here
         }}
         // onScroll={Animated.event(
         //   [{ nativeEvent: { contentOffset: { y: scrollY } } }],
@@ -111,7 +115,7 @@ const YourComponent = () => {
             <SliderCard />
             <BannerCard cardData={trackingCardData} />
             <BannerCard cardData={bookSessionCardData} />
-
+            <BlogSliderCard />
             {/* <FeatureCarousel /> */}
           </>
         )}
