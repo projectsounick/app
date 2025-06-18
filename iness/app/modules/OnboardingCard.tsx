@@ -78,7 +78,7 @@ export default function OnboardingCard({
         {icon && (
           <MaterialCommunityIcons
             name={icon}
-            size={28}
+            size={20}
             color={theme.colors.secondPrimary}
             style={{
               marginRight: 12,
@@ -96,7 +96,7 @@ export default function OnboardingCard({
         >
           <Text
             style={{
-              fontSize: style ? style.fontSize : theme.fontSizes.large,
+              fontSize: 16,
               fontWeight: "600",
               color: theme.colors.dark,
               textAlign: icon || description ? "left" : "center",
@@ -109,7 +109,7 @@ export default function OnboardingCard({
             <Text
               style={{
                 marginTop: 4,
-                fontSize: 14,
+                fontSize: 12,
                 color: theme.colors.grey,
                 fontWeight: "400",
                 textAlign: "left",

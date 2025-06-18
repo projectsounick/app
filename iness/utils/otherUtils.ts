@@ -11,3 +11,5 @@ export const formatDateTime = (date: string | Date): string => {
     hour12: true,
   });
 };
+export const normalizeDate = (dateStr: string) =>
+  new Date(dateStr).toLocaleDateString("en-CA");

@@ -40,18 +40,18 @@ export default function PolicyScreen() {
   ];
 
   return (
-    <ImageBackground
-      source={require("../../../assets/images/onboardingBackground.jpg")}
-      resizeMode="cover"
-      style={{
-        flex: 1,
-        justifyContent: "flex-start",
-        backgroundColor: "#000",
-      }}
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right", "bottom"]}
     >
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-        edges={["top", "left", "right", "bottom"]}
+      <ImageBackground
+        source={require("../../../assets/images/basicBackground.jpg")}
+        resizeMode="cover"
+        style={{
+          flex: 1,
+          justifyContent: "flex-start",
+          backgroundColor: "#000",
+        }}
       >
         <View style={{ paddingTop: 30, paddingLeft: 20 }}>
           <NormalHeader screenName="Policies" />
@@ -60,6 +60,7 @@ export default function PolicyScreen() {
         <ScrollView
           style={{ flex: 1, padding: 20 }}
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 20 }} // 👈 Add this
         >
           {policies.map((policy, index) => (
             <View
@@ -87,7 +88,7 @@ export default function PolicyScreen() {
             </View>
           ))}
         </ScrollView>
-      </SafeAreaView>
-    </ImageBackground>
+      </ImageBackground>
+    </SafeAreaView>
   );
 }

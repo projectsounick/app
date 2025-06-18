@@ -14,6 +14,8 @@ import { checkAndNavigateToStoredScreen } from "@/utils/checkScreenRedirection";
 import AnimatedSubmitButton from "./modules/AnimatedSubmitButton";
 import LottieView from "lottie-react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import { router, useRouter } from "expo-router";
 // Define the navigation types
 type RootStackParamList = {
   Home: undefined;
@@ -27,12 +29,18 @@ type NavigationProp = StackNavigationProp<RootStackParamList, "Home">;
 const HomeScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const [showSplash, setShowSplash] = useState(true);
-
+  const router = useRouter();
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setShowSplash(false);
-      checkAndNavigateToStoredScreen<RootStackParamList>(navigation);
-    }, 3000); // Match your splash animation duration
+    const timer = setTimeout(async () => {
+      const userData =
+        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+
+      if (userData?.exists && userData.data?.onboarding === true) {
+        router.push("/secondsplashscreen");
+      } else {
+        setShowSplash(false); // Show main content with login button
+      }
+    }, 2000); // Wait for splash animation to finish (6 seconds)
 
     return () => clearTimeout(timer);
   }, []);

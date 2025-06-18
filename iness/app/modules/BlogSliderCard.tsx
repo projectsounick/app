@@ -66,7 +66,7 @@ export default function BlogSliderCard() {
               marginTop: 4,
             }}
           >
-            Tailored plans for your personalized lifestyles.
+            Explore expert tips, and practical guides to help you
           </Text>
         </View>
         <MaterialCommunityIcons
@@ -126,16 +126,18 @@ export default function BlogSliderCard() {
                 {/* Title */}
                 {/* Title */}
                 <Text
+                  numberOfLines={4}
                   style={{
                     fontWeight: theme.fontWeights.bold,
                     fontSize: 12,
                     marginBottom: 6,
                     color: theme.colors.dark,
-                    flexShrink: 1, // Ensures text doesn't overflow
+                    flexShrink: 1,
                   }}
                 >
                   {item.title}
                 </Text>
+
                 {/* Know More Button */}
                 <TouchableOpacity
                   style={{

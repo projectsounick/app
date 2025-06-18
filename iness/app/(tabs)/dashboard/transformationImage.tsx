@@ -67,9 +67,8 @@ export default function TransformationImage() {
 
       const { storageAccountName, sasToken } =
         storageAccountDetailsResponse.data;
-      const userData = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
-        "user"
-      );
+      const userData =
+        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
       if (userData.exists) {
         let userId = userData.data._id;
         // ✅ Prepare image file
@@ -135,14 +134,14 @@ export default function TransformationImage() {
   const imageSize = (screenWidth - 48) / 3; // 16 padding + 8 gap * 2
 
   return (
-    <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpg")} // ✅ replace with your background
-      style={{ flex: 1 }}
-      resizeMode="cover"
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right", "bottom"]}
     >
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-        edges={["top", "left", "right", "bottom"]}
+      <ImageBackground
+        source={require("../../../assets/images/basicBackground.jpg")} // ✅ replace with your background
+        style={{ flex: 1 }}
+        resizeMode="cover"
       >
         <View style={{ paddingTop: 20, paddingLeft: 20 }}>
           <NormalHeader screenName="Transformation" />
@@ -235,13 +234,14 @@ export default function TransformationImage() {
           onClose={() => setModalVisible(false)}
           imageUrl={selectedImage}
         />
-      </SafeAreaView>
-      <CustomSnackbar
-        visible={snackbarVisible}
-        message={snackbarMessage}
-        onDismiss={() => setSnackbarVisible(false)}
-        bgColor={theme.colors.primary}
-      />
-    </ImageBackground>
+
+        <CustomSnackbar
+          visible={snackbarVisible}
+          message={snackbarMessage}
+          onDismiss={() => setSnackbarVisible(false)}
+          bgColor={theme.colors.primary}
+        />
+      </ImageBackground>
+    </SafeAreaView>
   );
 }

@@ -72,7 +72,7 @@ const WorkoutPreferences = ({
             icon={icon}
             state={workoutPreferences}
             updateState={updateState}
-            height={70}
+            height={60}
           />
         ))}
       </ScrollView>

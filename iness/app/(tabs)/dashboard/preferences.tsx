@@ -74,14 +74,26 @@ const BookSessionDetailsScreen = () => {
         if (response.success) {
           /// update the data in the async stroage --------/
           await asyncStorageUtils.updateUserDataInAsyncStorage(response.user);
-          setSnackbarMessage("Profile updated successfully.");
-          setSnackbarOpen(true);
-          setSelectedSlot(null);
-          setAddressMap({
-            Home: "",
-            Gym: "",
-          });
-          setPreferences(true);
+          const preferences = response?.user?.preferences ?? {};
+          const { slot, date, address } = preferences;
+
+          if (slot && date && address) {
+            const dateObject = new Date(date);
+
+            setSnackbarMessage("Profile updated successfully.");
+            setSnackbarOpen(true);
+            setSelectedSlot(slot);
+            setSelectedDate(dateObject);
+            setAddressMap({
+              Home: address,
+              Gym: "",
+            });
+            setPreferences(true);
+          } else {
+            setSnackbarOpen(true);
+            setSnackbarMessage("Unable to update your data, try again");
+            // Optionally set default values or show a warning
+          }
         } else {
           setSnackbarOpen(true);
           setSnackbarMessage("Unable to update your data, try again");

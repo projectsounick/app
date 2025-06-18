@@ -28,6 +28,9 @@ export default function WellnessDashboard() {
   const currentDayTrackData = useSelector(
     (state: RootState) => state.track.currentDateTrackData
   );
+  const trackData = useSelector(
+    (state: RootState) => state.track.totalTrackData
+  );
   const dispatch = useDispatch();
   const [distanceDetails, setDistanceDetails] = useState({
     calorie: 0,
@@ -185,7 +188,9 @@ export default function WellnessDashboard() {
     }
   };
   useEffect(() => {
-    fetchData();
+    if (trackData.length === 0) {
+      fetchData();
+    }
   }, []);
   return (
     <SafeAreaView

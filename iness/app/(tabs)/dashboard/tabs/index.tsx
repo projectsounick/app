@@ -15,7 +15,7 @@ import { bookSessionCardData, trackingCardData } from "@/utils/ModuletaticData";
 
 import withAnimatedHeader from "@/app/Hoc/MainHeader";
 import NameHeader from "@/app/Components/HeaderSubComponents/NameHeader";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { totalStoreStateInterface } from "@/app/interfaces/otherInterfaces";
 import { RootState } from "@/store";
 import useFetchMultipleStoreDataHook from "@/hooks/useMultipleDataStoreHook";
@@ -30,12 +30,20 @@ import {
 } from "react-native-safe-area-context";
 import { blogService } from "@/app/services/blog.Service";
 import BlogSliderCard from "@/app/modules/BlogSliderCard";
+import { trackService } from "@/app/services/track.service";
+import { TrackingData } from "@/app/interfaces/trackInterface";
+import { setMainLoader } from "@/Slices/loadingSlice";
+import { normalizeDate } from "@/utils/otherUtils";
+import {
+  setCurrentDateTrackData,
+  setTotalTrackData,
+} from "@/Slices/trackSlice";
 
 const MainHeader = withAnimatedHeader(NameHeader);
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
   //// Getting the loader from the state ----------------------------/
-  const loading = useSelector((state: RootState) => state.loader.mainLoader);
+  const dispatch = useDispatch();
   const scrollY = new Animated.Value(0);
   //// Fetching the plan data -----------------------------/
 
@@ -66,6 +74,7 @@ const YourComponent = () => {
   );
 
   const {
+    loading,
     error,
     fetchAll,
     setDataManually,
@@ -74,6 +83,80 @@ const YourComponent = () => {
     setSnackbarVisible,
   } = useFetchMultipleStoreDataHook(configs);
 
+  //// Useeffect function for loading the data ------------------------------------/
+  const fetchData = async () => {
+    dispatch(setMainLoader(true));
+    try {
+      const today = new Date();
+
+      const formatDate = (d: Date) => d.toLocaleDateString("en-CA"); // e.g., "2025-05-18"
+
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const startDate = formatDate(startOfMonth);
+      const endDate = formatDate(today);
+
+      const [stepsRes, sleepRes, waterRes] = await Promise.all([
+        trackService.getTrackingData("walk", startDate, endDate),
+        trackService.getTrackingData("sleep", startDate, endDate),
+        trackService.getTrackingData("water", startDate, endDate),
+      ]);
+
+      if (stepsRes.success && sleepRes.success && waterRes.success) {
+        const stepsData = stepsRes.data || [];
+        const sleepData = sleepRes.data || [];
+        const waterData = waterRes.data || [];
+
+        // Generate total data for each date (merge by date)
+        const dateMap: { [date: string]: TrackingData } = {};
+        stepsData.forEach((item: any) => {
+          const date = normalizeDate(item.date); // ✅ Normalize
+          if (!dateMap[date])
+            dateMap[date] = { steps: null, sleep: null, water: null };
+          dateMap[date].steps = item;
+        });
+
+        sleepData.forEach((item: any) => {
+          const date = normalizeDate(item.date); // ✅ Normalize
+          if (!dateMap[date])
+            dateMap[date] = { steps: null, sleep: null, water: null };
+          dateMap[date].sleep = item;
+        });
+
+        waterData.forEach((item: any) => {
+          const date = normalizeDate(item.date); // ✅ Normalize
+          if (!dateMap[date])
+            dateMap[date] = { steps: null, sleep: null, water: null };
+          dateMap[date].water = item;
+        });
+        // Convert the map to an array sorted by date
+        const totalTrackArray: TrackingData[] = Object.values(dateMap).sort(
+          (a, b) => {
+            const dateA = a.steps?.date || a.sleep?.date || a.water?.date || "";
+            const dateB = b.steps?.date || b.sleep?.date || b.water?.date || "";
+            return new Date(dateA).getTime() - new Date(dateB).getTime();
+          }
+        );
+
+        const todayStr = formatDate(today); // "YYYY-MM-DD"
+        const todayData = dateMap[todayStr] || {
+          steps: null,
+          sleep: null,
+          water: null,
+        };
+
+        // Update Redux store
+        dispatch(setTotalTrackData(totalTrackArray));
+        dispatch(setCurrentDateTrackData(todayData));
+        setSnackbarVisible(false);
+      }
+    } catch (error: any) {
+    } finally {
+      dispatch(setMainLoader(false));
+    }
+  };
+  useEffect(() => {
+    fetchData();
+  }, []);
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}

@@ -57,7 +57,7 @@ const OnboardingPrimaryGoal = ({
             state={goal}
             icon={icon}
             updateState={updateState}
-            height={73} // smaller height passed here
+            height={60} // smaller height passed here
           />
         ))}
       </ScrollView>

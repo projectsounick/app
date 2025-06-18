@@ -21,14 +21,16 @@ import { planService } from "@/app/services/plan.service";
 import { useDispatch } from "react-redux";
 import { setActivePlans } from "@/Slices/planSlice";
 import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { clearCart } from "@/Slices/cartSlice";
 
 const PaymentSuccessScreen = () => {
-  const { orderId } = useLocalSearchParams();
   const router = useRouter();
 
   const slideUpAnim = useRef(new Animated.Value(50)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
-
+  const [orderId, setOrderId] = useState<string | null>(null);
+  const [reciptShow, setReciptShow] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [recEiptLoading, setReceiptLoading] = useState(false);
@@ -46,17 +48,32 @@ const PaymentSuccessScreen = () => {
         useNativeDriver: true,
       }),
     ]).start();
+    return () => {
+      setOrderId(null);
+      // AsyncStorage remove using promise
+      AsyncStorage.removeItem("currentOrderId")
+        .then(() => console.log("Order ID removed on unmount"))
+        .catch((e) => console.error("Failed to remove:", e));
+    };
   }, []);
   const dispatch = useDispatch();
   async function fetchOrderStatus() {
     try {
-      setLoading(true);
-      const response = await cartService.getOrderStatus(orderId);
-      if (response.success) {
-        setMessage("Thank you! Payment successful.");
-        const response = await planService.getActivePlans();
+      // Get orderId from AsyncStorage
+      const savedOrderId = await AsyncStorage.getItem("currentOrderId");
+
+      if (savedOrderId) {
+        setOrderId(savedOrderId);
+        setLoading(true);
+        const response = await cartService.getOrderStatus(savedOrderId);
         if (response.success) {
-          dispatch(setActivePlans(response.data));
+          setMessage("Thank you! Payment successful.");
+          const response = await planService.getActivePlans();
+          if (response.success) {
+            setReciptShow(true);
+            dispatch(setActivePlans(response.data));
+            dispatch(clearCart());
+          }
         }
       }
     } catch (error) {
@@ -68,7 +85,10 @@ const PaymentSuccessScreen = () => {
   async function fetchReceipt(orderId: any) {
     try {
       setReceiptLoading(true);
+      console.log(orderId);
+
       const response = await paymentService.getReciptData(orderId);
+      console.log(response);
 
       if (response.success && response.receipt) {
         const supported = await Linking.canOpenURL(response.receipt);
@@ -136,61 +156,63 @@ const PaymentSuccessScreen = () => {
             </View>
 
             {/* Receipt Download Card */}
-            <TouchableOpacity
-              onPress={() => {
-                // TODO: Implement actual receipt download
-                fetchReceipt(orderId);
-              }}
-              activeOpacity={0.8}
-              style={{
-                width: "90%",
-                borderRadius: 20,
-                backgroundColor: "#fff",
-                padding: 20,
-                flexDirection: "row",
-                alignItems: "center",
-                elevation: 5,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 6,
-              }}
-            >
-              {recEiptLoading ? (
-                <View
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <ActivityIndicator color={theme.colors.secondPriamy} />
-                </View>
-              ) : (
-                <View
-                  style={{
-                    backgroundColor: "#E6FFF0",
-                    borderRadius: 50,
-                    padding: 12,
-                    marginRight: 16,
-                  }}
-                >
-                  <Text style={{ fontSize: 20 }}>📄</Text>
-                </View>
-              )}
+            {reciptShow ? (
+              <TouchableOpacity
+                onPress={() => {
+                  // TODO: Implement actual receipt download
+                  fetchReceipt(orderId);
+                }}
+                activeOpacity={0.8}
+                style={{
+                  width: "90%",
+                  borderRadius: 20,
+                  backgroundColor: "#fff",
+                  padding: 20,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  elevation: 5,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 6,
+                }}
+              >
+                {recEiptLoading ? (
+                  <View
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <ActivityIndicator color={theme.colors.secondPriamy} />
+                  </View>
+                ) : (
+                  <View
+                    style={{
+                      backgroundColor: "#E6FFF0",
+                      borderRadius: 50,
+                      padding: 12,
+                      marginRight: 16,
+                    }}
+                  >
+                    <Text style={{ fontSize: 20 }}>📄</Text>
+                  </View>
+                )}
 
-              <View>
-                <Text
-                  style={{ fontSize: 16, fontWeight: "600", color: "#222" }}
-                >
-                  Download your receipt
-                </Text>
-                <Text style={{ fontSize: 12, color: "#666" }}>
-                  Tap to get your payment receipt
-                </Text>
-              </View>
-            </TouchableOpacity>
+                <View>
+                  <Text
+                    style={{ fontSize: 16, fontWeight: "600", color: "#222" }}
+                  >
+                    Download your receipt
+                  </Text>
+                  <Text style={{ fontSize: 12, color: "#666" }}>
+                    Tap to get your payment receipt
+                  </Text>
+                </View>
+              </TouchableOpacity>
+            ) : null}
           </View>
         )}
 

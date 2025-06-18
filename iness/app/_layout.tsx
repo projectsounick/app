@@ -1,9 +1,14 @@
-import { Stack } from "expo-router";
+import { router, Stack, useFocusEffect } from "expo-router";
 import { Provider } from "react-redux";
 import { store } from "../store"; // adjust path if needed
 import * as Notifications from "expo-notifications";
 import { storeNotification } from "@/utils/notificationUtils";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
+// App.tsx or index.tsx
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StyleSheet } from "react-native";
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldPlaySound: true,
@@ -42,15 +47,22 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <Provider store={store}>
-      <Stack
-        screenOptions={{
-          headerShown: false, // Removes header for all screens
-        }}
-      >
-        <Stack.Screen name="index" />
-        <Stack.Screen name="login" />
-      </Stack>
-    </Provider>
+    <GestureHandlerRootView style={styles.container}>
+      <Provider store={store}>
+        <Stack
+          screenOptions={{
+            headerShown: false, // Removes header for all screens
+          }}
+        >
+          <Stack.Screen name="index" />
+          <Stack.Screen name="login" />
+        </Stack>
+      </Provider>
+    </GestureHandlerRootView>
   );
 }
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});

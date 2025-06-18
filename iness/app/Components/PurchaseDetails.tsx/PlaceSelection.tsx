@@ -81,7 +81,6 @@ const PlaceSelectionSection: React.FC<Props> = ({
 
       <View
         style={{
-          backgroundColor: "#F3F4F6",
           padding: 12,
           borderRadius: 10,
           flexDirection: "row",
@@ -93,18 +92,20 @@ const PlaceSelectionSection: React.FC<Props> = ({
           value={addressMap[place] || ""}
           onChangeText={(text) => onAddressChange(place, text)}
           placeholder={`Enter ${place} Address`}
-          editable={!preferences} // <-- disable input
+          editable={!preferences}
           style={{
             flex: 1,
             fontSize: 14,
-            color: preferences ? "#888" : "#000", // grayed out text when disabled
-            backgroundColor: preferences ? "#f0f0f0" : "#fff", // optional: light gray background
-            padding: 8, // optional for better UX
-            borderRadius: 6, // optional for UI consistency
+            color: preferences ? "#888" : "#000",
+            backgroundColor: preferences ? "#f0f0f0" : "#fff",
+            padding: 8,
+            borderRadius: 6,
+            borderWidth: 1, // ✅ add this
+            borderColor: preferences ? "#ccc" : "#999", // ✅ light gray for disabled, darker for enabled
           }}
         />
 
-        <Icon name="edit" size={18} color="#888" />
+        <Icon name="edit" size={18} color="#888" style={{ marginLeft: 2 }} />
       </View>
     </View>
   );

@@ -14,13 +14,13 @@ function useFetchMultipleStoreDataHook(
   autoFetch: boolean = true
 ) {
   const dispatch = useDispatch();
-
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const fetchAll = useCallback(async () => {
-    dispatch(setMainLoader(true));
+    setLoading(true);
     setError(null);
 
     try {
@@ -57,7 +57,7 @@ function useFetchMultipleStoreDataHook(
     } finally {
       setSnackbarVisible(true);
 
-      dispatch(setMainLoader(false));
+      setLoading(false);
     }
   }, [configs, dispatch]);
 
@@ -76,6 +76,7 @@ function useFetchMultipleStoreDataHook(
   }, [autoFetch, fetchAll]);
 
   return {
+    loading,
     error,
     fetchAll,
     setDataManually,

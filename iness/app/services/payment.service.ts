@@ -4,7 +4,7 @@ import { fetchWrapper } from "../helpers/fetchWrapper";
 import { CouponInterface } from "../interfaces/otherInterfaces";
 
 //// Exporting the functions of accountService------------------------------------------------------------/
-export const paymentService = { getReciptData };
+export const paymentService = { getReciptData, getMerchentId };
 
 ///// Function for getting all the prodcuts based on category--------/
 
@@ -16,4 +16,9 @@ async function getReciptData(orderId: any): Promise<{
   return fetchWrapper.get(
     `${config.apiUrl}/api/get-payment-recipt?orderId=${orderId}`
   );
+}
+
+///// Funciton for getting the merchent id ---------------------------------/
+async function getMerchentId() {
+  return fetchWrapper.get(`${config.apiUrl}/api/get-phonepe-merchent`);
 }

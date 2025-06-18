@@ -10,10 +10,7 @@ import {
   Dimensions,
 } from "react-native";
 import { Formik } from "formik";
-import CountryPicker, {
-  Country,
-  CountryCode,
-} from "react-native-country-picker-modal";
+import { useRouter } from "expo-router";
 import theme from "./Theme/globalTheme";
 import { validationSchemaForLogin } from "./validation/formikValidations";
 import useServiceWithSnackbar from "@/hooks/usePostDataHook";
@@ -25,15 +22,13 @@ import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import NormalHeader from "./modules/NormalHeader";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { error } from "console";
 
 //// Main functional component for the Login screen ///// -----------------------------------/
 const Login = () => {
   const formikRef = React.useRef<any>(null);
-  const navigation = useNavigation<any>();
 
-  const [countryCode, setCountryCode] = useState<CountryCode>("IN");
-  const [country, setCountry] = useState<Country | null>(null);
-
+  const router = useRouter();
   /// Custom hook to handle the service call and snackbar visibility---/
   const {
     loading,
@@ -43,25 +38,31 @@ const Login = () => {
     snackbarMessage,
     setSnackbarVisible,
   } = useServiceWithSnackbar(userService.sendLoginOtp);
-
-  /// Function to handle the country selection---/
-  const onSelect = (selectedCountry: Country) => {
-    setCountryCode(selectedCountry.cca2);
-    setCountry(selectedCountry);
-  };
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   /// Function to handle the submission of the login data---/
-  async function submitLoginData(email: string) {
+  async function submitLoginData(email: string, resetForm: any) {
     // const formattedPhoneNumber = `+${
     //   country?.callingCode?.[0] || "91"
     // }${phoneNumber}`;
-    let response = await callService(email);
 
-    if (response?.success) {
-      /// Store the screen name in AsyncStorage---/
+    if (email !== "") {
+      let response = await callService(email);
 
-      await asyncStorageUtils.storeUserInAsyncStorage(response.data);
+      if (response?.success) {
+        /// Store the screen name in AsyncStorage---/
 
-      navigation.navigate("OtpVerify");
+        await asyncStorageUtils.storeUserInAsyncStorage(response.data);
+
+        router.push("/OtpVerify"); // ✅ replace with Expo Router path
+        resetForm({
+          values: { email: "" },
+          errors: {},
+          touched: {},
+        });
+        setErrorMessage(null);
+      }
+    } else {
+      setErrorMessage("Email is required");
     }
   }
 
@@ -111,9 +112,9 @@ const Login = () => {
               <Formik
                 innerRef={formikRef}
                 initialValues={{ email: "" }}
-                validationSchema={validationSchemaForLogin}
-                onSubmit={(values) => {
-                  submitLoginData(values.email);
+                onSubmit={(values, { resetForm }) => {
+                  submitLoginData(values.email, resetForm);
+                  // ✅ Reset the form after submission
                 }}
               >
                 {({
@@ -178,6 +179,10 @@ const Login = () => {
                             handleChange("email")(text.toLowerCase())
                           }
                           onBlur={handleBlur("email")}
+                          keyboardType="email-address"
+                          textContentType="emailAddress" // 🔐 Helps iOS recognize input type
+                          autoComplete="email" // ✅ For Android autofill
+                          importantForAutofill="yes" // ✅ Explicitly request autofill
                           autoCapitalize="none"
                           style={{
                             flex: 1,
@@ -195,17 +200,18 @@ const Login = () => {
                     </View>
 
                     {/* Error */}
-                    {errors.email && touched.email && (
+                    {errorMessage && (
                       <Text
                         style={{
                           color: "red",
                           fontSize: theme.fontSizes.small,
-                          alignSelf: "flex-start",
+                          alignSelf: "center",
+                          textAlign: "center",
                           marginBottom: theme.spacing.md,
                           marginLeft: 4,
                         }}
                       >
-                        {errors.email}
+                        {errorMessage}
                       </Text>
                     )}
                   </>

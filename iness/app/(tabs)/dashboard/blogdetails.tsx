@@ -117,7 +117,7 @@ export default function BlogDetailsScreen() {
                     borderRadius: 12,
                     marginBottom: 16,
                   }}
-                  resizeMode="cover"
+                  resizeMode="contain"
                 />
               )}
 
@@ -167,7 +167,7 @@ export default function BlogDetailsScreen() {
                         borderRadius: 10,
                         marginBottom: 16,
                       }}
-                      resizeMode="cover"
+                      resizeMode="contain"
                     />
                   );
                 }

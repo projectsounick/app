@@ -65,7 +65,7 @@ async function updateUser(userData: any): Promise<any> {
 
 async function logout() {
   try {
-    await AsyncStorage.removeItem("user"); // Delete user data from storage
+    await AsyncStorage.clear();
     router.replace("/"); // Navigate to root (login/home) screen
   } catch (error) {
     console.error("Logout error:", error);

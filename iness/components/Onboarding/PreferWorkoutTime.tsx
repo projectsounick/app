@@ -55,7 +55,7 @@ const PreferredWorkoutTime = ({
       <ScrollView showsVerticalScrollIndicator={false}>
         <Text
           style={{
-            fontSize: theme.fontSizes.xl,
+            fontSize: 24,
             fontWeight: "bold",
             textAlign: "center",
             marginBottom: 25,
@@ -72,7 +72,7 @@ const PreferredWorkoutTime = ({
               option={item}
               state={preferredWorkoutTime}
               updateState={updateState}
-              height={screenHeight * 0.1} // 10% of screen height
+              height={60} // 10% of screen height
             />
           )
         )}

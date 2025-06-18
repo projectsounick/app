@@ -19,6 +19,7 @@ import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { ActivityIndicator } from "react-native-paper";
 import { registerForPushNotificationsAsync } from "@/utils/notificationUtils";
 import NormalHeader from "./modules/NormalHeader";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 /// Main functional component for the OTP input screen ///// -----------------------------------/
 const OTPInputScreen = () => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
@@ -98,8 +99,13 @@ const OTPInputScreen = () => {
 
           if (onboarding) {
             setOtp(["", "", "", "", "", ""]);
+
+            await AsyncStorage.removeItem("wasRedirectedFromCart");
+
+            navigation.navigate("secondsplashscreen");
+
             //// When onboarding is true we will directly redirect him to secondsplashscreen
-            navigation.navigate("secondsplashscreen"); // Uncomment to navigate on success
+            // Uncomment to navigate on success
           } else {
             setOtp(["", "", "", "", "", ""]);
             //// when onboarding is false we will redirect him to onboarding screen
@@ -125,9 +131,8 @@ const OTPInputScreen = () => {
     try {
       setOtpResendLoading(true);
       /// Fetching the phone number from AsyncStorage---/
-      const userData = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
-        "user"
-      );
+      const userData =
+        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
       if (!userData || userData.exists === false) {
         setSnackbarVisible(true);
         setSnackbarMessage("Email not found. Please try again.");
@@ -187,7 +192,7 @@ const OTPInputScreen = () => {
               {otp.map((digit, index) => (
                 <TextInput
                   key={index}
-                  ref={(ref) => (inputRefs.current[index] = ref)}
+                  ref={(ref: any) => (inputRefs.current[index] = ref)}
                   value={digit}
                   onChangeText={(text) => handleChange(text, index)}
                   onKeyPress={(e) => handleKeyPress(e, index)}

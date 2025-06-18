@@ -54,9 +54,8 @@ const OnboardingScreen = () => {
       /// So this is the final step of the onboarding process
       /// we will make an api call to the backend will save user data will
       /// move the user to dashboard screen
-      const userData = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
-        "user"
-      );
+      const userData =
+        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
       if (userData && userData.exists) {
         //// Adding onboarding ==> true to the user data
         let data = userData.data;
@@ -93,7 +92,7 @@ const OnboardingScreen = () => {
       case 2:
         return <OnboardingSex onNext={handleNext} onBack={handleBack} />;
       case 3:
-        return <OnboardingWeight onNext={handleNext} onBack={handleBack} />;
+        return <OnboardingWeight onNext={handleNext} />;
       case 4:
         return <OnboardingHeight onNext={handleNext} />;
       case 5:
@@ -139,65 +138,62 @@ const OnboardingScreen = () => {
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <>
-              <View style={{ flex: 1, paddingTop: 60, paddingHorizontal: 20 }}>
-                {/* Row with Back Button + Progress Bar */}
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 30,
-                  }}
-                >
-                  {currentStep > 0 && (
-                    <TouchableOpacity
-                      onPress={handleBack}
-                      style={{
-                        backgroundColor: "#000",
-                        width: 50,
-                        height: 50,
-                        borderRadius: 25,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginRight: 10,
-                      }}
-                    >
-                      <Ionicons name="arrow-back" size={24} color="#fff" />
-                    </TouchableOpacity>
-                  )}
-
-                  {/* Progress Bar */}
-                  <View
+            <View style={{ flex: 1, paddingTop: 60, paddingHorizontal: 20 }}>
+              {/* Row with Back Button + Progress Bar */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 30,
+                }}
+              >
+                {currentStep > 0 && (
+                  <TouchableOpacity
+                    onPress={handleBack}
                     style={{
-                      flex: 1,
-                      height: 6,
-                      backgroundColor: "#eee",
-                      borderRadius: 5,
-                      overflow: "hidden",
+                      backgroundColor: "#000",
+                      width: 35,
+                      height: 35,
+                      borderRadius: 18,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 10,
                     }}
                   >
-                    <View
-                      style={{
-                        height: 6,
-                        width: progressWidth,
-                        backgroundColor: theme.colors.secondPrimary,
-                        borderRadius: 5,
-                      }}
-                    />
-                  </View>
-                </View>
+                    <Ionicons name="arrow-back" size={18} color="#fff" />
+                  </TouchableOpacity>
+                )}
 
-                {/* Step Content (your OnboardingName component) */}
-                <View style={{ flex: 1 }}>{renderStepComponent(loading)}</View>
+                {/* Progress Bar */}
+                <View
+                  style={{
+                    flex: 1,
+                    height: 6,
+                    backgroundColor: "#eee",
+                    borderRadius: 5,
+                    overflow: "hidden",
+                  }}
+                >
+                  <View
+                    style={{
+                      height: 6,
+                      width: progressWidth,
+                      backgroundColor: theme.colors.secondPrimary,
+                      borderRadius: 5,
+                    }}
+                  />
+                </View>
               </View>
 
+              {/* Step Content (your OnboardingName component) */}
+              <View style={{ flex: 1 }}>{renderStepComponent(loading)}</View>
               <CustomSnackbar
                 visible={snackbarVisible}
                 message={snackbarMessage}
                 bgColor={theme.colors.primary}
                 onDismiss={() => setSnackbarVisible(false)}
               />
-            </>
+            </View>
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </ImageBackground>

@@ -63,8 +63,7 @@ const ActivityLevel = ({
               icon={icon}
               description={description}
               updateState={updateState}
-              height={73} // smaller height passed here
-              style={{ fontSize: theme.fontSizes.smallRegular }}
+              height={70} // smaller height passed here
             />
           )
         )}

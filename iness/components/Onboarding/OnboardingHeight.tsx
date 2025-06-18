@@ -2,143 +2,157 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  FlatList,
+  TextInput,
+  StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
 } from "react-native";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
-import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
-import { UserData } from "@/app/interfaces/UserInterface";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import theme from "@/app/Theme/globalTheme";
+import OnboardingHeading from "@/app/modules/OnboardingHeading";
 
 const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
-  const [feet, setFeet] = useState(5);
-  const [inches, setInches] = useState(7);
+  const [height, setHeight] = useState("5'10");
   const [loading, setLoading] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  // Function to update user data in AsyncStorage
-
-  const feetData = Array.from({ length: 8 }, (_, i) => i + 1);
-  const inchesData = Array.from({ length: 12 }, (_, i) => i);
-
-  const renderPicker = (
-    data: number[],
-    selected: number,
-    setSelected: (val: number) => void,
-    itemWidth: number
-  ) => (
-    <FlatList
-      data={data}
-      keyExtractor={(item) => item.toString()}
-      showsVerticalScrollIndicator={false}
-      snapToInterval={50}
-      decelerationRate="fast"
-      contentContainerStyle={{
-        paddingTop: 100,
-        paddingBottom: 100,
-        alignItems: "center",
-      }}
-      getItemLayout={(_, index) => ({ length: 50, offset: 50 * index, index })}
-      initialScrollIndex={data.indexOf(selected)}
-      onScroll={(e) => {
-        const offset = e.nativeEvent.contentOffset.y;
-        const index = Math.round(offset / 50);
-        setSelected(data[Math.min(Math.max(index, 0), data.length - 1)]);
-      }}
-      renderItem={({ item }) => (
-        <View style={{ height: 50, justifyContent: "center" }}>
-          <Text
-            style={{
-              fontSize: 24,
-              color: item === selected ? "#7D4CFF" : "#ccc",
-              fontWeight: item === selected ? "bold" : "normal",
-              textAlign: "center",
-            }}
-          >
-            {item}
-          </Text>
-        </View>
-      )}
-      style={{ width: itemWidth, height: 250 }}
-      scrollEventThrottle={16}
-    />
-  );
 
   const handleNext = async () => {
     try {
-      const height = `${feet}'${inches}`;
+      if (!/^\d'\d{1,2}$/.test(height)) {
+        setSnackbarMessage("Please enter height in format like 5'10");
+        setSnackbarVisible(true);
+        return;
+      }
 
-      await asyncStorageUtils.updateUserDataInAsyncStorage({
-        height,
-      });
-
+      await asyncStorageUtils.updateUserDataInAsyncStorage({ height });
       onNext();
     } catch (error: any) {
       setSnackbarVisible(true);
       setSnackbarMessage(error.message);
     }
   };
+
   return (
     <KeyboardAvoidingView
+      style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={{ flex: 1, paddingHorizontal: 24, paddingVertical: 60 }}
+      keyboardVerticalOffset={60}
     >
-      <View style={{ flex: 1, justifyContent: "space-evenly" }}>
-        <View style={{ alignItems: "center" }}>
-          <Text
-            style={{
-              fontSize: 26,
-              fontWeight: "bold",
-              color: "#000",
-              textAlign: "center",
-            }}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          {/* Scrollable content */}
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
           >
-            What is your{`\n`}height?
-          </Text>
-        </View>
+            <OnboardingHeading>
+              <Text style={styles.title}>What is your{`\n`}height?</Text>
+            </OnboardingHeading>
 
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            marginBottom: 40,
-          }}
-        >
-          {renderPicker(feetData, feet, setFeet, 60)}
-          <Text style={{ fontSize: 26, marginHorizontal: 10 }}>.</Text>
+            <View style={styles.inputContainer}>
+              <TextInput
+                value={height}
+                onChangeText={setHeight}
+                placeholder="Height"
+                placeholderTextColor="#999"
+                style={styles.input}
+                keyboardType="default"
+                maxLength={5}
+                returnKeyType="done"
+                textAlign="center"
+              />
+              <View style={styles.unitBox}>
+                <Text style={styles.unitText}>ft/in</Text>
+              </View>
+            </View>
 
-          {renderPicker(inchesData, inches, setInches, 60)}
-          <View
-            style={{
-              backgroundColor: "#EFE4FF",
-              borderRadius: 10,
-              paddingHorizontal: 12,
-              paddingVertical: 6,
-              marginBottom: 6,
-            }}
-          >
-            <Text style={{ color: "#7D4CFF", fontSize: 18 }}>ft/in</Text>
+            <Text style={styles.hintText}>
+              Enter your height in feet and inches (e.g. 5'10)
+            </Text>
+          </ScrollView>
+
+          {/* Button pinned to bottom */}
+          <View style={styles.bottomButton}>
+            <AnimatedSubmitButton
+              loading={loading}
+              onPress={handleNext}
+              title="Next"
+            />
           </View>
-        </View>
 
-        <AnimatedSubmitButton
-          loading={loading}
-          onPress={handleNext}
-          title="Next"
-        />
-      </View>
-      <CustomSnackbar
-        visible={snackbarVisible}
-        bgColor={theme.colors.red}
-        message={snackbarMessage}
-        onDismiss={() => setSnackbarVisible(false)}
-      />
+          <CustomSnackbar
+            visible={snackbarVisible}
+            bgColor={theme.colors.red}
+            message={snackbarMessage}
+            onDismiss={() => setSnackbarVisible(false)}
+          />
+        </View>
+      </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "space-between",
+  },
+  scrollContent: {
+    paddingTop: 60,
+    paddingHorizontal: 24,
+    paddingBottom: 20,
+    flexGrow: 1,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#000",
+    textAlign: "center",
+  },
+  inputContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    paddingBottom: 4,
+    marginTop: 30,
+    width: 180,
+  },
+  input: {
+    fontSize: 18,
+    color: "#000",
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+  },
+  unitBox: {
+    backgroundColor: "#EFE4FF",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginLeft: 8,
+  },
+  unitText: {
+    color: "#7D4CFF",
+    fontSize: 18,
+  },
+  hintText: {
+    textAlign: "center",
+    color: "#666",
+    fontSize: 14,
+    marginTop: 8,
+  },
+  bottomButton: {
+    paddingHorizontal: 24,
+    paddingBottom: 30,
+  },
+});
 
 export default OnboardingHeight;

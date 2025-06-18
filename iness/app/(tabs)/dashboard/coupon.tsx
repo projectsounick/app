@@ -70,18 +70,18 @@ export default function CouponScreen() {
   };
 
   return (
-    <ImageBackground
-      source={require("../../../assets/images/onboardingBackground.jpg")}
-      resizeMode="cover"
-      style={{
-        flex: 1,
-        justifyContent: "flex-start",
-        backgroundColor: "#000",
-      }}
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right"]}
     >
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-        edges={["top", "left", "right"]}
+      <ImageBackground
+        source={require("../../../assets/images/basicBackground.jpg")}
+        resizeMode="cover"
+        style={{
+          flex: 1,
+          justifyContent: "flex-start",
+          backgroundColor: "#000",
+        }}
       >
         {/* Header */}
         <View style={{ paddingTop: 30, paddingLeft: 20 }}>
@@ -240,14 +240,15 @@ export default function CouponScreen() {
             })}
           </Animated.ScrollView>
         )}
-      </SafeAreaView>
-      {/* Coupon Cards */}
-      <CustomSnackbar
-        onDismiss={() => setSnackBarOpen(false)}
-        visible={snackbarOpen}
-        message={snackbarMessage}
-        bgColor={theme.colors.primary}
-      />
-    </ImageBackground>
+
+        {/* Coupon Cards */}
+        <CustomSnackbar
+          onDismiss={() => setSnackBarOpen(false)}
+          visible={snackbarOpen}
+          message={snackbarMessage}
+          bgColor={theme.colors.primary}
+        />
+      </ImageBackground>
+    </SafeAreaView>
   );
 }

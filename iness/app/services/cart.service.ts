@@ -18,9 +18,8 @@ export const cartService = {
 //// Funciton for updating the user in using backend then storing in AsyncStorage----/
 async function getCartItems(): Promise<ApiResponseInterface> {
   try {
-    const loggedUser = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
-      "user"
-    );
+    const loggedUser =
+      await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
     if (!loggedUser.exists) {
       throw new Error("Some error has happened,try again");
     }

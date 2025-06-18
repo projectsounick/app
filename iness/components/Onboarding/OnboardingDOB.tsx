@@ -2,94 +2,38 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  FlatList,
-  KeyboardAvoidingView,
+  TouchableOpacity,
   Platform,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  StyleSheet,
 } from "react-native";
+import DateTimePickerModal from "react-native-modal-datetime-picker";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
-import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import CustomSnackbar from "@/app/modules/Snackbar";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import theme from "@/app/Theme/globalTheme";
 
 const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
-  // States for day, month, year
-  const [day, setDay] = useState(1);
-  const [month, setMonth] = useState(1); // January is 1 for user friendliness
-  const [year, setYear] = useState(1990);
-
+  const [dob, setDob] = useState(new Date(1990, 0, 1));
+  const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [loading, setLoading] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  // Generate day/month/year data arrays
-  const dayData = Array.from({ length: 31 }, (_, i) => i + 1);
-  const monthData = Array.from({ length: 12 }, (_, i) => i + 1);
-  const currentYear = new Date().getFullYear();
-  const yearData = Array.from({ length: 100 }, (_, i) => currentYear - i); // last 100 years
+  const showDatePicker = () => setDatePickerVisibility(true);
+  const hideDatePicker = () => setDatePickerVisibility(false);
 
-  const renderPicker = (
-    data: number[],
-    selected: number,
-    setSelected: (val: number) => void,
-    itemWidth: number
-  ) => (
-    <FlatList
-      data={data}
-      keyExtractor={(item) => item.toString()}
-      showsVerticalScrollIndicator={false}
-      snapToInterval={50}
-      decelerationRate="fast"
-      contentContainerStyle={{
-        paddingTop: 100,
-        paddingBottom: 100,
-        alignItems: "center",
-      }}
-      getItemLayout={(_, index) => ({ length: 50, offset: 50 * index, index })}
-      initialScrollIndex={data.indexOf(selected)}
-      onScroll={(e) => {
-        const offset = e.nativeEvent.contentOffset.y;
-        const index = Math.round(offset / 50);
-        setSelected(data[Math.min(Math.max(index, 0), data.length - 1)]);
-      }}
-      renderItem={({ item }) => (
-        <View style={{ height: 50, justifyContent: "center" }}>
-          <Text
-            style={{
-              fontSize: 24,
-              color: item === selected ? "#7D4CFF" : "#ccc",
-              fontWeight: item === selected ? "bold" : "normal",
-              textAlign: "center",
-            }}
-          >
-            {item}
-          </Text>
-        </View>
-      )}
-      style={{ width: itemWidth, height: 250 }}
-      scrollEventThrottle={16}
-    />
-  );
+  const handleConfirm = (date: Date) => {
+    setDob(date);
+    hideDatePicker();
+  };
 
   const handleNext = async () => {
     try {
       setLoading(true);
-
-      const dob = new Date(year, month - 1, day);
-
-      // Validate date is valid
-      if (
-        dob.getFullYear() !== year ||
-        dob.getMonth() !== month - 1 ||
-        dob.getDate() !== day
-      ) {
-        throw new Error("Invalid date selected");
-      }
-
-      // Pass Date object itself (not string)
-      await asyncStorageUtils.updateUserDataInAsyncStorage({
-        dob, // Date object here
-      });
-
+      await asyncStorageUtils.updateUserDataInAsyncStorage({ dob });
       setLoading(false);
       onNext();
     } catch (error: any) {
@@ -102,65 +46,90 @@ const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={{ flex: 1, paddingHorizontal: 24, paddingVertical: 60 }}
+      style={{ flex: 1 }}
     >
-      <View style={{ flex: 1, justifyContent: "space-evenly" }}>
-        <View style={{ alignItems: "center" }}>
-          <Text
-            style={{
-              fontSize: 26,
-              fontWeight: "bold",
-              color: "#000",
-              textAlign: "center",
-            }}
-          >
-            What is your{`\n`}date of birth?
-          </Text>
-          {/* Formatted DOB below */}
-          <Text
-            style={{
-              marginTop: 8,
-              fontSize: 12,
-              color: "#7D4CFF",
-              fontWeight: "600",
-            }}
-          >
-            DD/MM/YY
-          </Text>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          {/* Top content */}
+          <View style={styles.content}>
+            <Text style={styles.title}>What is your{`\n`}date of birth?</Text>
+            <Text style={styles.hint}>DD/MM/YYYY</Text>
+
+            <TouchableOpacity onPress={showDatePicker} style={styles.dobBox}>
+              <Text style={styles.dobText}>
+                {dob.toLocaleDateString("en-GB")}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Bottom fixed button */}
+          <View style={styles.bottomButton}>
+            <AnimatedSubmitButton
+              loading={loading}
+              onPress={handleNext}
+              title="Next"
+            />
+          </View>
+
+          {/* Modal Picker */}
+          <DateTimePickerModal
+            isVisible={isDatePickerVisible}
+            mode="date"
+            date={dob}
+            maximumDate={new Date()}
+            onConfirm={handleConfirm}
+            onCancel={hideDatePicker}
+          />
+
+          <CustomSnackbar
+            visible={snackbarVisible}
+            bgColor={theme.colors.red}
+            message={snackbarMessage}
+            onDismiss={() => setSnackbarVisible(false)}
+          />
         </View>
-
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            marginBottom: 40,
-          }}
-        >
-          {renderPicker(dayData, day, setDay, 60)}
-          <Text style={{ fontSize: 26, marginHorizontal: 10 }}>.</Text>
-
-          {renderPicker(monthData, month, setMonth, 60)}
-          <Text style={{ fontSize: 26, marginHorizontal: 10 }}>.</Text>
-
-          {renderPicker(yearData, year, setYear, 80)}
-        </View>
-
-        <AnimatedSubmitButton
-          loading={loading}
-          onPress={handleNext}
-          title="Next"
-        />
-      </View>
-
-      <CustomSnackbar
-        visible={snackbarVisible}
-        bgColor={theme.colors.red}
-        message={snackbarMessage}
-        onDismiss={() => setSnackbarVisible(false)}
-      />
+      </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    paddingHorizontal: 24,
+    paddingVertical: 40,
+    justifyContent: "space-between",
+  },
+  content: {
+    alignItems: "center",
+    marginTop: 40,
+  },
+  title: {
+    fontSize: 26,
+    fontWeight: "bold",
+    color: "#000",
+    textAlign: "center",
+  },
+  hint: {
+    marginTop: 8,
+    fontSize: 12,
+    color: "#7D4CFF",
+    fontWeight: "600",
+  },
+  dobBox: {
+    marginTop: 20,
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+  },
+  dobText: {
+    fontSize: 18,
+    color: "#000",
+  },
+  bottomButton: {
+    paddingBottom: 30,
+  },
+});
 
 export default OnboardingDOB;

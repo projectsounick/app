@@ -50,7 +50,7 @@ export default function OnboardingHeading({
 
 const styles = StyleSheet.create({
   headingText: {
-    fontSize: theme.fontSizes.xl,
+    fontSize: 24,
     fontWeight: "bold",
     textAlign: "center",
     marginBottom: 25,
