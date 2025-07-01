@@ -25,7 +25,7 @@ const PlanCard: React.FC<PlanCardProps> = ({
       style={{
         marginRight: index === planGroupLength - 1 ? 0 : 12,
         width: 280,
-        height: 180,
+        height: 209,
         borderRadius: 12,
         overflow: "hidden",
       }}
@@ -61,15 +61,25 @@ const PlanCard: React.FC<PlanCardProps> = ({
                 style={{
                   flexDirection: "row",
                   alignItems: "flex-start",
-                  marginBottom: 2,
+                  marginBottom: 10,
                 }}
               >
+                <View
+                  style={{
+                    width: 11,
+                    height: 11,
+                    borderRadius: 5.5,
+                    backgroundColor: "rgba(229, 210, 255, 1)",
+                    marginRight: 6,
+                    marginTop: 2,
+                  }}
+                />
+
                 <Text
-                  style={{ color: "rgba(229, 210, 255, 1)", marginRight: 4 }}
+                  style={{ color: "#fff", fontSize: 12, flex: 1 }}
+                  numberOfLines={1}
+                  ellipsizeMode="tail"
                 >
-                  •
-                </Text>
-                <Text style={{ color: "#fff", fontSize: 12, flex: 1 }}>
                   {desc}
                 </Text>
               </View>
@@ -78,17 +88,19 @@ const PlanCard: React.FC<PlanCardProps> = ({
 
           <TouchableOpacity
             style={{
-              backgroundColor: "#B4F455",
+              backgroundColor: " rgba(189, 255, 132, 1)",
               width: 114,
-              height: 31,
-              borderRadius: 16,
+              height: 33,
+
+              borderRadius: 15.5,
               justifyContent: "center",
+
               alignItems: "center",
               marginTop: 4,
             }}
             onPress={() => {
-              dispatch(setCurrentPlan(item));
               router.push("/dashboard/plandetails");
+              dispatch(setCurrentPlan(item));
             }}
           >
             <Text
@@ -99,7 +111,7 @@ const PlanCard: React.FC<PlanCardProps> = ({
                 color: theme.colors.dark,
               }}
             >
-              Know More
+              Check Details
             </Text>
           </TouchableOpacity>
         </View>

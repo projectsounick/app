@@ -12,6 +12,7 @@ export default function DashboardLayout() {
           fontSize: 12,
           fontWeight: "500",
         },
+
         tabBarActiveTintColor: "#fff",
         tabBarInactiveTintColor: "#888",
         tabBarStyle: {
@@ -28,6 +29,7 @@ export default function DashboardLayout() {
         name="index"
         options={{
           tabBarLabel: "Home",
+
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons
               name="home-variant"

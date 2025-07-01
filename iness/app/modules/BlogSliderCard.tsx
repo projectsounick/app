@@ -69,11 +69,6 @@ export default function BlogSliderCard() {
             Explore expert tips, and practical guides to help you
           </Text>
         </View>
-        <MaterialCommunityIcons
-          name="chevron-right"
-          size={24}
-          color={theme.colors.text}
-        />
       </View>
 
       {/* Horizontal Scrollable Cards */}
@@ -126,7 +121,7 @@ export default function BlogSliderCard() {
                 {/* Title */}
                 {/* Title */}
                 <Text
-                  numberOfLines={4}
+                  numberOfLines={3}
                   style={{
                     fontWeight: theme.fontWeights.bold,
                     fontSize: 12,

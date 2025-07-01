@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
@@ -10,6 +9,7 @@ import {
   Keyboard,
   ScrollView,
 } from "react-native";
+import RNPickerSelect from "react-native-picker-select";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import CustomSnackbar from "@/app/modules/Snackbar";
@@ -17,26 +17,44 @@ import theme from "@/app/Theme/globalTheme";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
 
 const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
-  const [height, setHeight] = useState("5'10");
+  const [heightFeet, setHeightFeet] = useState("5");
+  const [heightInches, setHeightInches] = useState("10");
   const [loading, setLoading] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const handleNext = async () => {
-    try {
-      if (!/^\d'\d{1,2}$/.test(height)) {
-        setSnackbarMessage("Please enter height in format like 5'10");
-        setSnackbarVisible(true);
-        return;
-      }
+    const formattedHeight = `${heightFeet}'${heightInches}`;
 
-      await asyncStorageUtils.updateUserDataInAsyncStorage({ height });
+    if (!heightFeet || !heightInches) {
+      setSnackbarMessage("Please select both feet and inches.");
+      setSnackbarVisible(true);
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await asyncStorageUtils.updateUserDataInAsyncStorage({
+        height: formattedHeight,
+      });
+      setLoading(false);
       onNext();
     } catch (error: any) {
+      setLoading(false);
       setSnackbarVisible(true);
       setSnackbarMessage(error.message);
     }
   };
+
+  const feetOptions = Array.from({ length: 4 }, (_, i) => ({
+    label: (4 + i).toString(),
+    value: (4 + i).toString(),
+  }));
+
+  const inchOptions = Array.from({ length: 12 }, (_, i) => ({
+    label: i.toString(),
+    value: i.toString(),
+  }));
 
   return (
     <KeyboardAvoidingView
@@ -46,7 +64,6 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
-          {/* Scrollable content */}
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
@@ -55,29 +72,31 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
               <Text style={styles.title}>What is your{`\n`}height?</Text>
             </OnboardingHeading>
 
-            <View style={styles.inputContainer}>
-              <TextInput
-                value={height}
-                onChangeText={setHeight}
-                placeholder="Height"
-                placeholderTextColor="#999"
-                style={styles.input}
-                keyboardType="default"
-                maxLength={5}
-                returnKeyType="done"
-                textAlign="center"
+            <View style={styles.pickerRow}>
+              <RNPickerSelect
+                onValueChange={setHeightFeet}
+                items={feetOptions}
+                value={heightFeet}
+                placeholder={{ label: "ft", value: null }}
+                style={pickerSelectStyles}
               />
-              <View style={styles.unitBox}>
-                <Text style={styles.unitText}>ft/in</Text>
-              </View>
+              <Text style={styles.unit}>ft</Text>
+
+              <RNPickerSelect
+                onValueChange={setHeightInches}
+                items={inchOptions}
+                value={heightInches}
+                placeholder={{ label: "in", value: null }}
+                style={pickerSelectStyles}
+              />
+              <Text style={styles.unit}>in</Text>
             </View>
 
             <Text style={styles.hintText}>
-              Enter your height in feet and inches (e.g. 5'10)
+              Select your height (e.g. 5 feet 10 inches)
             </Text>
           </ScrollView>
 
-          {/* Button pinned to bottom */}
           <View style={styles.bottomButton}>
             <AnimatedSubmitButton
               loading={loading}
@@ -115,33 +134,17 @@ const styles = StyleSheet.create({
     color: "#000",
     textAlign: "center",
   },
-  inputContainer: {
+  pickerRow: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    alignSelf: "center",
-    borderBottomWidth: 1,
-    borderColor: "#ccc",
-    paddingBottom: 4,
     marginTop: 30,
-    width: 180,
   },
-  input: {
+  unit: {
+    marginHorizontal: 8,
     fontSize: 18,
-    color: "#000",
-    borderBottomWidth: 1,
-    borderColor: "#ccc",
-  },
-  unitBox: {
-    backgroundColor: "#EFE4FF",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginLeft: 8,
-  },
-  unitText: {
     color: "#7D4CFF",
-    fontSize: 18,
+    fontWeight: "bold",
   },
   hintText: {
     textAlign: "center",
@@ -152,6 +155,33 @@ const styles = StyleSheet.create({
   bottomButton: {
     paddingHorizontal: 24,
     paddingBottom: 30,
+  },
+});
+
+const pickerSelectStyles = StyleSheet.create({
+  inputIOS: {
+    fontSize: 18,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    color: "#000",
+    paddingRight: 30,
+    minWidth: 80,
+    textAlign: "center",
+  },
+  inputAndroid: {
+    fontSize: 18,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    color: "#000",
+    paddingRight: 30,
+    minWidth: 80,
+    textAlign: "center",
   },
 });
 

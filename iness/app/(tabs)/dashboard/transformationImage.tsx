@@ -156,7 +156,7 @@ export default function TransformationImage() {
               alignItems: "center",
             }}
           >
-            <ActivityIndicator color={theme.colors.secondPrimary} />{" "}
+            <ActivityIndicator color={theme.colors.secondPrimary} />
           </View>
         ) : (
           <FlatList

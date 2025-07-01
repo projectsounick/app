@@ -30,9 +30,9 @@ const ActivityLevel = ({
     setter: setactivityLevel, // or setAge
   });
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (activityLevel.length > 0) {
-      await asyncStorageUtils.updateUserDataInAsyncStorage({
+      asyncStorageUtils.updateUserDataInAsyncStorage({
         activityLevel,
       });
       onNext();

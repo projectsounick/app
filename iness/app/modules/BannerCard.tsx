@@ -26,7 +26,7 @@ const BannerCard = ({ cardData }: BannerCardProps) => {
       style={{
         borderRadius: 12,
         paddingHorizontal: 12,
-        marginTop: 8,
+        marginTop: 14,
         height: 142,
         justifyContent: "center",
         overflow: "hidden",
@@ -78,14 +78,13 @@ const BannerCard = ({ cardData }: BannerCardProps) => {
           </Text>
           <TouchableOpacity
             style={{
-              backgroundColor: "#C3FF77",
-              display: "flex",
-              flexDirection: "row",
+              backgroundColor: "rgba(189, 255, 132, 1)",
+              width: 114,
+              height: 28,
+              borderRadius: 16,
+              alignSelf: "flex-start",
               justifyContent: "center",
               alignItems: "center",
-              width: 110,
-              height: 31,
-              borderRadius: 15,
             }}
             onPress={() =>
               router.push({
@@ -100,7 +99,7 @@ const BannerCard = ({ cardData }: BannerCardProps) => {
               style={{
                 color: "#000",
                 fontWeight: "bold",
-                fontSize: theme.fontSizes.regularSmall,
+                fontSize: theme.fontSizes.small,
               }}
             >
               {buttonText}

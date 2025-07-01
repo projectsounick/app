@@ -12,6 +12,8 @@ import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getStoredNotifications } from "@/utils/notificationUtils";
+import eventBus from "@/event";
 
 interface AnimatedHeaderProps {
   scrollY: Animated.Value;
@@ -28,37 +30,59 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
     const title = props.title;
     const [userData, setUserData] = useState<any>(null);
     const router = useRouter();
+    const [notificationResponseLength, setNotificationResponseLength] =
+      useState(0);
+    // const headerOpacity = scrollY.interpolate({
+    //   inputRange: [0, 100],
+    //   outputRange: [1, 0],
+    //   extrapolate: "clamp",
+    // });
 
-    const headerOpacity = scrollY.interpolate({
-      inputRange: [0, 100],
-      outputRange: [1, 0],
-      extrapolate: "clamp",
-    });
-
-    const headerTranslateY = scrollY.interpolate({
-      inputRange: [0, 100],
-      outputRange: [0, -80],
-      extrapolate: "clamp",
-    });
+    // const headerTranslateY = scrollY.interpolate({
+    //   inputRange: [0, 100],
+    //   outputRange: [0, -80],
+    //   extrapolate: "clamp",
+    // });
 
     useEffect(() => {
       async function fetchData() {
-        console.log("called");
+        const response =
+          await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+        const notificationResponse = await getStoredNotifications();
 
-        const response = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
-          "user"
-        );
-        console.log(typeof response.exists);
+        console.log("📨 Notification response:", notificationResponse);
+        setNotificationResponseLength(notificationResponse?.length ?? 0);
 
         if (response.exists) {
-          console.log(response.data.weight);
-
+          console.log("👤 User data found:", response.data.weight);
           setUserData(response.data);
         }
       }
+
       fetchData();
+
+      // 📨 Handler when notification is received
+      const handleNotification = () => {
+        console.log("🔁 Triggering fetch due to notification");
+        fetchData();
+      };
+
+      // ❌ Handler when notifications are cleared
+      const handleClearNotification = () => {
+        console.log("🗑️ Clearing notifications");
+        setNotificationResponseLength(0);
+      };
+
+      // ✅ Attach both events
+      eventBus.on("notification-received", handleNotification);
+      eventBus.on("clear-notifications", handleClearNotification);
+
+      return () => {
+        eventBus.off("notification-received", handleNotification);
+        eventBus.off("clear-notifications", handleClearNotification);
+      };
     }, []);
-    const insets = useSafeAreaInsets();
+
     return (
       <View
         style={{
@@ -93,12 +117,18 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
             }}
           >
             {/* Left Side */}
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                width: "33%",
+              }}
+            >
               <TouchableOpacity
                 style={{
-                  width: 35,
-                  height: 35,
-                  borderRadius: 35,
+                  width: 40,
+                  height: 40,
+                  borderRadius: 40,
                   backgroundColor: theme.colors.cardLight,
                   justifyContent: "center",
                   alignItems: "center",
@@ -109,7 +139,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
                 {userData?.profilePic ? (
                   <Image
                     source={{ uri: userData.profilePic }}
-                    style={{ width: 30, height: 30, borderRadius: 20 }}
+                    style={{ width: 38, height: 38, borderRadius: 20 }}
                   />
                 ) : (
                   <Ionicons name="person" size={25} color={theme.colors.text} />
@@ -125,9 +155,6 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
             {/* Title in absolute center */}
             <Text
               style={{
-                position: "absolute",
-                left: 0,
-                right: 0,
                 textAlign: "center",
                 color: theme.colors.text,
                 fontWeight: "bold",
@@ -184,17 +211,19 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
                 onPress={() => router.push("/dashboard/notification")}
               >
                 <Feather name="bell" size={16} color="#FFFA67" />
-                <View
-                  style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: 4,
-                    backgroundColor: "red",
-                    position: "absolute",
-                    top: 6,
-                    right: 6,
-                  }}
-                />
+                {notificationResponseLength > 0 ? (
+                  <View
+                    style={{
+                      width: 8,
+                      height: 8,
+                      borderRadius: 4,
+                      backgroundColor: "red",
+                      position: "absolute",
+                      top: 6,
+                      right: 6,
+                    }}
+                  />
+                ) : null}
               </TouchableOpacity>
             </View>
           </View>

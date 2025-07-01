@@ -26,9 +26,9 @@ const OnboardingPrimaryGoal = ({
     setter: setGoal, // or setAge
   });
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (goal.trim()) {
-      await asyncStorageUtils.updateUserDataInAsyncStorage({
+      asyncStorageUtils.updateUserDataInAsyncStorage({
         goal,
       });
       onNext();

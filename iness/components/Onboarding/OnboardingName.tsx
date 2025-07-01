@@ -29,9 +29,9 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
     setter: setName, // or setAge
   });
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (name.trim()) {
-      await asyncStorageUtils.updateUserDataInAsyncStorage({
+      asyncStorageUtils.updateUserDataInAsyncStorage({
         name,
       });
       onNext();

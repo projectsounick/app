@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+  Modal,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -19,7 +20,14 @@ import { ImageWithLoader } from "./ImageWithLoader";
 import { router } from "expo-router";
 
 export default function SliderCard() {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
   const plans = useSelector((state: RootState) => state.plan.plans);
+  const truncateText = (text: string, maxLength: number) => {
+    return text.length > maxLength
+      ? text.substring(0, maxLength - 3) + "..."
+      : text;
+  };
 
   return (
     <LinearGradient
@@ -27,9 +35,10 @@ export default function SliderCard() {
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
       style={{
-        height: 190,
-        paddingVertical: 10,
-        paddingHorizontal: 12,
+        height: 214,
+        paddingTop: 13,
+        paddingBottom: 19,
+        paddingLeft: 14,
         borderRadius: 12,
       }}
     >
@@ -39,6 +48,8 @@ export default function SliderCard() {
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
+
+          width: "95%",
         }}
       >
         <View>
@@ -53,7 +64,7 @@ export default function SliderCard() {
               name="run"
               size={18}
               color={theme.colors.primary}
-            />{" "}
+            />
             Explore our plans
           </Text>
           <Text
@@ -71,6 +82,7 @@ export default function SliderCard() {
           name="chevron-right"
           size={24}
           color={theme.colors.text}
+          onPress={() => router.push("/dashboard/plan")}
         />
       </View>
 
@@ -87,9 +99,10 @@ export default function SliderCard() {
               backgroundColor: "#FFFFFF",
               borderWidth: 1,
               borderColor: "#D6B6FF",
-              borderRadius: 12,
-              marginRight: 12,
-              width: 290,
+              borderRadius: 14,
+              padding: 10,
+              marginRight: 7,
+              width: 310,
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "center",
@@ -102,7 +115,7 @@ export default function SliderCard() {
           >
             <View
               style={{
-                width: "95%",
+                width: "100%",
                 display: "flex",
                 flexDirection: "row",
                 justifyContent: "space-between",
@@ -168,7 +181,8 @@ export default function SliderCard() {
                           numberOfLines={1}
                           ellipsizeMode="tail" // optional: adds "..." if it's too long
                         >
-                          {desc}
+                          {truncateText(desc, 35)}{" "}
+                          {/* truncates manually to 40 characters */}
                         </Text>
                       </View>
                     ))}
@@ -177,7 +191,7 @@ export default function SliderCard() {
                 {/* Know More Button */}
                 <TouchableOpacity
                   style={{
-                    backgroundColor: "#B4F455",
+                    backgroundColor: "rgba(189, 255, 132, 1)",
                     width: 114,
                     height: 28,
                     borderRadius: 16,
@@ -201,19 +215,55 @@ export default function SliderCard() {
               </View>
 
               {/* Right Section - Image */}
-              <View
+              <TouchableOpacity
                 style={{
                   height: "95%",
                   justifyContent: "center",
                   alignItems: "center",
-                  width: "40%",
+                  width: "35%",
+                  marginLeft: 15,
+                }}
+                onPress={() => {
+                  setSelectedImage(item.imgUrl);
+                  setModalVisible(true);
                 }}
               >
                 <ImageWithLoader uri={item.imgUrl} />
-              </View>
+              </TouchableOpacity>
             </View>
           </View>
         ))}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={modalVisible}
+          onRequestClose={() => setModalVisible(false)}
+        >
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "rgba(0,0,0,0.8)",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <TouchableOpacity
+              onPress={() => setModalVisible(false)}
+              activeOpacity={1}
+              style={{ width: "90%", height: "70%" }}
+            >
+              <Image
+                source={{ uri: selectedImage ?? "" }}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  resizeMode: "contain",
+                  borderRadius: 12,
+                }}
+              />
+            </TouchableOpacity>
+          </View>
+        </Modal>
       </ScrollView>
     </LinearGradient>
   );

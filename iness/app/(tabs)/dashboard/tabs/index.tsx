@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -38,10 +38,16 @@ import {
   setCurrentDateTrackData,
   setTotalTrackData,
 } from "@/Slices/trackSlice";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import VideoCallChecker from "@/app/modules/VideoCallJoinModal";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { eventBus } from "@/utils/events";
+import { videocallService } from "@/app/services/videocall.service";
 
 const MainHeader = withAnimatedHeader(NameHeader);
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
+  console.log("compo is called three times");
   //// Getting the loader from the state ----------------------------/
   const dispatch = useDispatch();
   const scrollY = new Animated.Value(0);
@@ -75,11 +81,7 @@ const YourComponent = () => {
 
   const {
     loading,
-    error,
-    fetchAll,
-    setDataManually,
-    snackbarVisible,
-    snackbarMessage,
+
     setSnackbarVisible,
   } = useFetchMultipleStoreDataHook(configs);
 
@@ -154,13 +156,12 @@ const YourComponent = () => {
       dispatch(setMainLoader(false));
     }
   };
-  useEffect(() => {
-    fetchData();
-  }, []);
+  //// Video call exists or not checking -----------------------------------------/
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right"]}
+      edges={["left", "right"]}
     >
       {/* Animated Header */}
       <MainHeader scrollY={scrollY} title="Home" />
@@ -168,7 +169,7 @@ const YourComponent = () => {
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
-          paddingTop: 10,
+          paddingTop: 20,
           paddingBottom: 10,
           paddingHorizontal: 8, // ✅ Add horizontal spacing here
         }}

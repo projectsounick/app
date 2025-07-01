@@ -7,6 +7,8 @@ import theme from "../Theme/globalTheme";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
+import eventBus from "@/event";
+import { getStoredNotifications } from "@/utils/notificationUtils";
 
 export default function SmallHeader({
   title,
@@ -19,17 +21,51 @@ export default function SmallHeader({
   const cartItems = useSelector((state: RootState) => state.cart.cartItems);
   const router = useRouter();
   const [profilePic, setProfilePic] = useState<string | null>(null);
-
+  const [weight, setWeight] = useState(null);
+  const [notificationResponseLength, setNotificationResponseLength] =
+    useState(0);
   useEffect(() => {
+    const isMounted = { current: true };
+
     async function getLoggedUser() {
-      const user = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
-        "user"
-      );
-      if (user.exists) {
+      const user =
+        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+      if (user.exists && isMounted.current) {
         setProfilePic(user.data.profilePic);
+        setWeight(user.data.weight);
       }
     }
+
+    async function handleNotificationReceived() {
+      console.log("📩 Notification received event");
+      const notificationResponse = await getStoredNotifications();
+      if (isMounted.current) {
+        setNotificationResponseLength(notificationResponse?.length ?? 0);
+        await getLoggedUser(); // update user state too
+      }
+    }
+
+    function handleClearNotifications() {
+      console.log("called");
+
+      if (isMounted.current) {
+        console.log("🗑 Notifications cleared");
+        setNotificationResponseLength(0);
+      }
+    }
+
+    // Initial fetch on mount
     getLoggedUser();
+
+    // Subscribe to events
+    eventBus.on("notification-received", handleNotificationReceived);
+    eventBus.on("clear-notifications", handleClearNotifications);
+
+    return () => {
+      isMounted.current = false;
+      eventBus.off("notification-received", handleNotificationReceived);
+      eventBus.off("clear-notifications", handleClearNotifications);
+    };
   }, []);
 
   return (
@@ -93,9 +129,9 @@ export default function SmallHeader({
               <Text
                 style={{ color: "white", fontSize: 14, marginHorizontal: 4 }}
               >
-                79 kgs
+                {weight ? weight : null}
+                {""}kgs
               </Text>
-              <Feather name="check-circle" size={14} color="lightgreen" />
             </View>
           </View>
         </View>
@@ -161,17 +197,19 @@ export default function SmallHeader({
             onPress={() => router.push("/dashboard/notification")}
           >
             <Feather name="bell" size={16} color="#FFFA67" />
-            <View
-              style={{
-                width: 8,
-                height: 8,
-                borderRadius: 4,
-                backgroundColor: "red",
-                position: "absolute",
-                top: 6,
-                right: 6,
-              }}
-            />
+            {notificationResponseLength > 0 ? (
+              <View
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 4,
+                  backgroundColor: "red",
+                  position: "absolute",
+                  top: 6,
+                  right: 6,
+                }}
+              />
+            ) : null}
           </TouchableOpacity>
         </View>
       </View>

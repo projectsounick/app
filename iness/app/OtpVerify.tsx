@@ -31,6 +31,7 @@ const OTPInputScreen = () => {
   const {
     loading,
     data,
+    setLoading,
     callService,
     snackbarVisible,
     snackbarMessage,
@@ -62,6 +63,7 @@ const OTPInputScreen = () => {
 
   //// Function to handle the submission of the OTP data---------------------/
   const handleSubmit = async () => {
+    setLoading(true);
     let userAsyncStorageResponse =
       await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
 

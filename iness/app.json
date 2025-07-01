@@ -2,7 +2,7 @@
   "expo": {
     "name": "iness",
     "slug": "iness",
-    "version": "1.0.3",
+    "version": "1.0.6",
     "orientation": "portrait",
     "icon": "./assets/images/logonew.png",
     "scheme": "myapp",
@@ -13,7 +13,7 @@
       "supportsTablet": true
     },
     "android": {
-      "versionCode": 3,
+      "versionCode": 6,
       "googleServicesFile": "./android/app/google-services.json",
       "permissions": ["NOTIFICATIONS"],
       "intentFilters": [

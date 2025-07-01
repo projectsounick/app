@@ -33,6 +33,7 @@ const Login = () => {
   const {
     loading,
     data,
+    setLoading,
     callService,
     snackbarVisible,
     snackbarMessage,
@@ -44,7 +45,7 @@ const Login = () => {
     // const formattedPhoneNumber = `+${
     //   country?.callingCode?.[0] || "91"
     // }${phoneNumber}`;
-
+    setLoading(true);
     if (email !== "") {
       let response = await callService(email);
 

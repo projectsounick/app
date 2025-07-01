@@ -39,23 +39,32 @@ export default function CouponScreen() {
         //// getting the user from localstorage ---------/
         const loggedUser =
           await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+        console.log(loggedUser);
         if (loggedUser.exists) {
           let couponIds = loggedUser.data.assignedCoupons;
-          const couponRespone = await couponService.getAllCoupons(couponIds);
-
-          if (couponRespone.success) {
-            setCoupons(couponRespone.data);
-            setSnackBarOpen(true);
-            setSnackbarMessage("Coupons has been fetched");
+          console.log(couponIds);
+          if (couponIds) {
+            const couponRespone = await couponService.getAllCoupons(couponIds);
+            console.log(couponRespone);
+            if (couponRespone.success) {
+              setCoupons(couponRespone.data);
+              setSnackBarOpen(true);
+              setSnackbarMessage("Coupons has been fetched");
+            } else {
+              setSnackBarOpen(true);
+              setSnackbarMessage("Some error has happened,try again");
+            }
           } else {
             setSnackBarOpen(true);
-            setSnackbarMessage("Some error has happened,try again");
+            setSnackbarMessage("You do not have any coupon");
           }
         } else {
           setSnackBarOpen(true);
           setSnackbarMessage("Some error has happened,try again");
         }
-      } catch (error) {
+      } catch (error: any) {
+        console.log(`erro ${error.message}`);
+
         setSnackBarOpen(true);
         setSnackbarMessage("Some error has happened,try again");
       } finally {

@@ -2,14 +2,13 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  ScrollView,
 } from "react-native";
+import RNPickerSelect from "react-native-picker-select";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import CustomSnackbar from "@/app/modules/Snackbar";
@@ -17,18 +16,42 @@ import theme from "@/app/Theme/globalTheme";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
 
 const OnboardingWeight = ({ onNext }: { onNext: () => void }) => {
-  const [weight, setweight] = useState("80");
+  const kgOptions = Array.from({ length: 171 }, (_, i) => {
+    const value = (30 + i).toString();
+    return { label: value, value };
+  });
+
+  const gramOptions = Array.from({ length: 10 }, (_, i) => {
+    const value = (i * 100).toString();
+    return { label: value, value };
+  });
+
+  const [kg, setKg] = useState("80");
+  const [grams, setGrams] = useState("0");
   const [loading, setLoading] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  const handleNext = async () => {
+  const handleNext = () => {
+    if (!kg || !grams) {
+      setSnackbarMessage("Please select both Kg and Grams");
+      setSnackbarVisible(true);
+      return;
+    }
+
+    const combinedWeight = `${kg}.${grams}`;
+
     try {
-      await asyncStorageUtils.updateUserDataInAsyncStorage({ weight });
+      setLoading(true);
+      asyncStorageUtils.updateUserDataInAsyncStorage({
+        weight: combinedWeight,
+      });
+      setLoading(false);
       onNext();
     } catch (error: any) {
+      setLoading(false);
       setSnackbarVisible(true);
-      setSnackbarMessage(error.message);
+      setSnackbarMessage(error.message || "Something went wrong");
     }
   };
 
@@ -40,41 +63,51 @@ const OnboardingWeight = ({ onNext }: { onNext: () => void }) => {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
-          {/* Scrollable content area */}
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-          >
-            {/* Heading */}
-            <OnboardingHeading>
-              <Text style={styles.title}>What is your{`\n`}weight?</Text>
-            </OnboardingHeading>
+          <OnboardingHeading>
+            <Text style={styles.title}>What is your{`\n`}weight?</Text>
+          </OnboardingHeading>
 
-            {/* Input Field */}
-            <View style={styles.inputContainer}>
-              <TextInput
-                value={weight}
-                onChangeText={setweight}
-                placeholder="Weight"
-                placeholderTextColor="#999"
-                style={styles.input}
-                keyboardType="default"
-                maxLength={5}
-                returnKeyType="done"
-                textAlign="center"
+          {/* Picker Section */}
+          <View style={styles.pickerRow}>
+            <View style={styles.pickerContainer}>
+              <RNPickerSelect
+                value={kg}
+                onValueChange={(value) => setKg(value)}
+                items={kgOptions}
+                placeholder={{ label: "Kg", value: null }}
+                style={{
+                  inputIOS: styles.pickerText,
+                  inputAndroid: styles.pickerText,
+                  modalViewMiddle: {
+                    justifyContent: "flex-end",
+                    height: 100, // ✅ adjust this to desired height
+                  },
+                }}
+                useNativeAndroidPickerStyle={false}
               />
-              <View style={styles.unitBox}>
-                <Text style={styles.unitText}>Kg</Text>
-              </View>
+              <Text style={styles.unit}>Kg</Text>
             </View>
 
-            {/* Hint Text */}
-            <Text style={styles.hintText}>
-              Enter your weight in Kg and gm (e.g. 80.4)
-            </Text>
-          </ScrollView>
+            <View style={styles.pickerContainer}>
+              <RNPickerSelect
+                value={grams}
+                onValueChange={(value) => setGrams(value)}
+                items={gramOptions}
+                placeholder={{ label: "Grams", value: null }}
+                style={{
+                  inputIOS: styles.pickerText,
+                  inputAndroid: styles.pickerText,
+                }}
+                useNativeAndroidPickerStyle={false}
+              />
+              <Text style={styles.unit}>g</Text>
+            </View>
+          </View>
 
-          {/* Always at bottom */}
+          <Text style={styles.hintText}>
+            Select your weight in Kg and Grams (e.g. 80.300)
+          </Text>
+
           <View style={styles.bottomButton}>
             <AnimatedSubmitButton
               loading={loading}
@@ -83,7 +116,6 @@ const OnboardingWeight = ({ onNext }: { onNext: () => void }) => {
             />
           </View>
 
-          {/* Snackbar */}
           <CustomSnackbar
             visible={snackbarVisible}
             bgColor={theme.colors.red}
@@ -101,51 +133,43 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "space-between",
   },
-  scrollContent: {
-    paddingTop: 60,
-    paddingHorizontal: 24,
-    paddingBottom: 20,
-    flexGrow: 1,
-  },
   title: {
-    fontSize: 26,
+    fontSize: 28,
     fontWeight: "bold",
     color: "#000",
     textAlign: "center",
   },
-  inputContainer: {
+  pickerRow: {
     flexDirection: "row",
     justifyContent: "center",
+
+    gap: 24,
+  },
+  pickerContainer: {
     alignItems: "center",
-    alignSelf: "center",
-    borderBottomWidth: 1,
-    borderColor: "#ccc",
-    paddingBottom: 4,
-    marginTop: 30,
-    width: 180,
   },
-  input: {
-    fontSize: 18,
+  pickerText: {
+    fontSize: 20,
+
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
     color: "#000",
-    borderBottomWidth: 1,
-    borderColor: "#ccc",
+    backgroundColor: "transparent",
+    width: 120,
+    textAlign: "center",
   },
-  unitBox: {
-    backgroundColor: "#EFE4FF",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginLeft: 8,
-  },
-  unitText: {
+  unit: {
+    marginTop: 6,
+    fontSize: 16,
     color: "#7D4CFF",
-    fontSize: 18,
+    fontWeight: "600",
   },
   hintText: {
     textAlign: "center",
     color: "#666",
     fontSize: 14,
-    marginTop: 8,
   },
   bottomButton: {
     paddingHorizontal: 24,

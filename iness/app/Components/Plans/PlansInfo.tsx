@@ -100,7 +100,16 @@ const PlansInfo: React.FC<Props> = ({
                 }}
               >
                 <Ionicons name="checkmark-circle" size={18} color="#22C55E" />
-                <Text style={{ marginLeft: 8, fontSize: 14 }}>{item}</Text>
+                <Text
+                  style={{
+                    marginLeft: 8,
+                    fontSize: 14,
+                    flexShrink: 1,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  {item}
+                </Text>
               </View>
             ))}
           </View>
@@ -172,8 +181,20 @@ const PlansInfo: React.FC<Props> = ({
                       alignItems: "center",
                     }}
                   >
-                    <Text style={{ fontSize: 14, fontWeight: "600" }}>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontWeight: "600",
+                        color: "#111827",
+                      }}
+                    >
                       {plan.duration} {plan.durationType}
+                      {plan.sessionCount != null && (
+                        <Text style={{ fontSize: 8, color: "#6B7280" }}>
+                          {" "}
+                          ({plan.sessionCount} sessions)
+                        </Text>
+                      )}
                     </Text>
                     {isSelected && (
                       <View

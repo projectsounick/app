@@ -30,10 +30,10 @@ const OnboardingSex = ({
     setter: setSex, // or setAge
   });
   //// Function to handle the Next button click
-  const handleNext = async () => {
+  const handleNext = () => {
     try {
       if (sex) {
-        let res = await asyncStorageUtils.updateUserDataInAsyncStorage({
+        asyncStorageUtils.updateUserDataInAsyncStorage({
           sex,
         });
 

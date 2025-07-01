@@ -31,9 +31,9 @@ const PreferredWorkoutTime = ({
     setter: setPreferredWorkoutTime, // or setAge
   });
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (preferredWorkoutTime.trim()) {
-      await asyncStorageUtils.updateUserDataInAsyncStorage({
+      asyncStorageUtils.updateUserDataInAsyncStorage({
         preferredWorkoutTime,
       });
       onNext();

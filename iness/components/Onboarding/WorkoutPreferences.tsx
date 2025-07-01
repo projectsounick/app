@@ -32,9 +32,9 @@ const WorkoutPreferences = ({
     },
   });
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (workoutPreferences.length > 0) {
-      await asyncStorageUtils.updateUserDataInAsyncStorage({
+      asyncStorageUtils.updateUserDataInAsyncStorage({
         workoutPreferences,
       });
       onNext();

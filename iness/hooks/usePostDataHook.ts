@@ -9,7 +9,6 @@ function useServiceWithSnackbar(serviceFunction: any) {
   const callService = async (
     params: any
   ): Promise<{ data: any; message: string; success: boolean }> => {
-    setLoading(true);
     try {
       const response = await serviceFunction(params);
 
@@ -37,6 +36,7 @@ function useServiceWithSnackbar(serviceFunction: any) {
   return {
     loading,
     data,
+    setLoading,
     callService,
     snackbarVisible,
     snackbarMessage,

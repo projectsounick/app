@@ -31,9 +31,9 @@ const OnboardingtimeCommitment = ({
     setter: setTimeCommitment, // or setAge
   });
 
-  const handleNext = async () => {
+  const handleNext = () => {
     if (timeCommitment.trim()) {
-      await asyncStorageUtils.updateUserDataInAsyncStorage({
+      asyncStorageUtils.updateUserDataInAsyncStorage({
         timeCommitment,
       });
       onNext();

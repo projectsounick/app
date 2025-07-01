@@ -135,7 +135,7 @@ export default function ProfileCard() {
           alignItems: "center",
         }}
       >
-        <View
+        <TouchableOpacity
           style={{
             width: 70,
             height: 70,
@@ -145,6 +145,7 @@ export default function ProfileCard() {
             alignItems: "center",
             position: "relative",
           }}
+          onPress={pickImage}
         >
           {imageUploadLoader ? (
             <View>
@@ -164,7 +165,6 @@ export default function ProfileCard() {
           )}
 
           <TouchableOpacity
-            onPress={pickImage}
             style={{
               position: "absolute",
               bottom: 0,
@@ -173,10 +173,11 @@ export default function ProfileCard() {
               borderRadius: 12,
               padding: 2,
             }}
+            onPress={pickImage}
           >
             <Feather name="edit-3" size={14} color={theme.colors.text} />
           </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
         <Ionicons name="chevron-forward" size={20} color={theme.colors.dark} />
       </View>
 

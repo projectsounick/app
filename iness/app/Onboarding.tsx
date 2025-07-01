@@ -41,6 +41,7 @@ const OnboardingScreen = () => {
   const {
     loading,
     data,
+    setLoading,
     callService,
     snackbarVisible,
     snackbarMessage,
@@ -51,6 +52,7 @@ const OnboardingScreen = () => {
     if (currentStep < onboardingSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
+      setLoading(true);
       /// So this is the final step of the onboarding process
       /// we will make an api call to the backend will save user data will
       /// move the user to dashboard screen

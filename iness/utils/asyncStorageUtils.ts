@@ -8,6 +8,7 @@ export const asyncStorageUtils = {
   checkIfKeyExistsInAsyncStorage,
   storeScreenName,
   updateUserDataInAsyncStorage,
+  updateUserAccessToken,
 };
 
 async function storeUserInAsyncStorage(userData: any) {
@@ -19,6 +20,28 @@ async function storeUserInAsyncStorage(userData: any) {
   }
 }
 
+async function updateUserAccessToken(newAccessToken: string) {
+  try {
+    console.log("this is new access");
+    console.log(newAccessToken);
+
+    const storedUser = await AsyncStorage.getItem("user");
+    if (!storedUser) return;
+
+    const userObj = JSON.parse(storedUser);
+    console.log(userObj);
+
+    // Update the token in the user object
+    userObj.jwtToken = newAccessToken;
+
+    // Save the updated object back to AsyncStorage
+    await AsyncStorage.setItem("user", JSON.stringify(userObj));
+
+    console.log("Access token updated successfully in AsyncStorage");
+  } catch (error) {
+    console.error("Error updating access token:", error);
+  }
+}
 /// Function to check if a key exists in AsyncStorage and return its value
 async function checkIfKeyExistsInAsyncStorage<T = any>(
   key: string

@@ -11,6 +11,7 @@ export const userService = {
   updateUser,
   logout,
   getStorageAccountDetails,
+  generateRefreshToken,
 };
 
 //// Function for sending the otp to the user ---------------/
@@ -76,6 +77,40 @@ async function logout() {
 async function getStorageAccountDetails() {
   try {
     return fetchWrapper.get(`${baseUrl}/get-storageaccount-details`);
+  } catch (error: any) {
+    throw new Error("Error updating user: " + error.message);
+  }
+}
+async function updateAccessTokenInStorage(newAccessToken: string) {
+  try {
+    const userDataString = await AsyncStorage.getItem("user");
+
+    if (!userDataString) {
+      console.warn("User not found in AsyncStorage");
+      return;
+    }
+
+    const userData = JSON.parse(userDataString);
+    userData.accessToken = newAccessToken;
+
+    await AsyncStorage.setItem("user", JSON.stringify(userData));
+  } catch (e) {
+    console.error("Error updating accessToken in AsyncStorage:", e);
+  }
+}
+///// Function for getting the getting new refresh token  ------------------------------/
+async function generateRefreshToken(userId: string) {
+  try {
+    const response = await fetchWrapper.get(
+      `${baseUrl}/generate-refreshtoken?userId=${userId}`
+    );
+
+    // If refresh is successful, update the access token in storage
+    if (response.success && response.accessToken) {
+      await updateAccessTokenInStorage(response.accessToken);
+    }
+
+    return response;
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }

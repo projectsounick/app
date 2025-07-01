@@ -69,22 +69,22 @@ export const activityLevelOptions = [
     icon: "seat-outline", // 🪑 Sitting
   },
   {
-    label: "Light Movement (Occasional Activity)",
+    label: "Light Movement",
     description: "Typical Steps: 3k - 7k daily",
     icon: "walk", // 🚶‍♂️ Light walking
   },
   {
-    label: "Active Lifestyle (Regular Exercise)",
+    label: "Active Lifestyle ",
     description: "Typical Steps: 7k - 10k daily",
     icon: "run-fast", // 🏃‍♂️ Jogging / running
   },
   {
-    label: "Physically Demanding Job or Intense Daily Exercise",
+    label: "Intense Daily Exercise",
     description: "Typical Steps: More than 10k daily",
     icon: "dumbbell", // 🏋️‍♂️ Weight lifting / physical work
   },
   {
-    label: "Dynamic Movement (Varied Intensity)",
+    label: "Dynamic Movement",
     description: "Typical Steps: 5k - 20k+; varies daily",
     icon: "pulse", // 📈 Dynamic / changing
   },
