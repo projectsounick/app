@@ -100,7 +100,7 @@ async function getAllPlans(): Promise<{
   data: PlanInterface[];
   success: boolean;
 }> {
-  return fetchWrapper.get(`${config.apiUrl}/api/get-plan`);
+  return fetchWrapper.get(`${config.apiUrl}/api/get-plan?isActive=true`);
 }
 
 ///// Function for deleting the PlanInterface-------------------------------/

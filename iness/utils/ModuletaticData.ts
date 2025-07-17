@@ -1,11 +1,11 @@
 import theme from "../app/Theme/globalTheme";
 export const bookSessionCardData = {
-  title: "Book a session ",
-  subtitle: "Get answers to all questions about your goals.",
-  buttonText: "Book Session",
+  title: "Book Services",
+  subtitle: "Get fit with Yoga, Zumba & more",
+  buttonText: "Know More",
   icon: "clock",
   redirectionPageName: "/dashboard/session",
-  backgroundColor: ["#3D0E7B", "#000000"],
+  backgroundColor: ["#9C56F6", "#3A1B63"],
   imageSource: require("../assets/images/booksession.png"), // your local image
   textColor: theme.colors.text, // optional, any hex
 };

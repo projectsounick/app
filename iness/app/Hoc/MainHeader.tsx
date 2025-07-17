@@ -50,11 +50,9 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
           await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
         const notificationResponse = await getStoredNotifications();
 
-        console.log("📨 Notification response:", notificationResponse);
         setNotificationResponseLength(notificationResponse?.length ?? 0);
 
         if (response.exists) {
-          console.log("👤 User data found:", response.data.weight);
           setUserData(response.data);
         }
       }
@@ -145,8 +143,15 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
                   <Ionicons name="person" size={25} color={theme.colors.text} />
                 )}
               </TouchableOpacity>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Text style={{ color: "#fff", marginLeft: 8 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginLeft: 8,
+                }}
+              >
+                <Feather name="arrow-up-right" size={14} color="lightgreen" />
+                <Text style={{ color: "#fff" }}>
                   {parseInt(userData?.weight)} kgs
                 </Text>
               </View>

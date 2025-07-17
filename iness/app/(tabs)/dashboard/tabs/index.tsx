@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   View,
   Text,
@@ -6,6 +12,7 @@ import {
   Animated,
   ScrollView,
   TouchableOpacity,
+  StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import SliderCard from "@/app/modules/SliderCard";
@@ -16,8 +23,7 @@ import { bookSessionCardData, trackingCardData } from "@/utils/ModuletaticData";
 import withAnimatedHeader from "@/app/Hoc/MainHeader";
 import NameHeader from "@/app/Components/HeaderSubComponents/NameHeader";
 import { useDispatch, useSelector } from "react-redux";
-import { totalStoreStateInterface } from "@/app/interfaces/otherInterfaces";
-import { RootState } from "@/store";
+
 import useFetchMultipleStoreDataHook from "@/hooks/useMultipleDataStoreHook";
 import { SliceKey } from "@/sliceRegistery";
 import { planService } from "@/app/services/plan.service";
@@ -38,20 +44,23 @@ import {
   setCurrentDateTrackData,
   setTotalTrackData,
 } from "@/Slices/trackSlice";
+import * as ImagePicker from "expo-image-picker";
+import NotificationPermissionModal from "@/app/modules/NotificationPermissionModal";
+import VideoPromotionModal from "@/app/modules/PromotionalVideo";
+
+import { transformatiomImageService } from "@/app/services/transofmationImage.service";
+import { uploadToAzureFromExpo } from "@/utils/azureUtils";
+import { userService } from "@/app/services/user.service";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import VideoCallChecker from "@/app/modules/VideoCallJoinModal";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { eventBus } from "@/utils/events";
-import { videocallService } from "@/app/services/videocall.service";
+import Imagepicker from "@/app/modules/Imagepicker";
+import { manualWorkoutPlanService } from "@/app/services/manualWorkoutPlan";
+import AppUpdateBottomSheet from "@/app/modules/AndroidVersionUpdateModal";
 
 const MainHeader = withAnimatedHeader(NameHeader);
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
-  console.log("compo is called three times");
   //// Getting the loader from the state ----------------------------/
   const dispatch = useDispatch();
-  const scrollY = new Animated.Value(0);
-  //// Fetching the plan data -----------------------------/
 
   const configs = useMemo(
     () => [
@@ -75,15 +84,18 @@ const YourComponent = () => {
         sliceKey: "blogs" as SliceKey,
         fetchFunction: blogService.getBlogOverallData,
       },
+      {
+        sliceKey: "activeManualPlan" as SliceKey,
+        fetchFunction: manualWorkoutPlanService.getUserActiveManualPlan,
+      },
     ],
     []
   );
+  const { loading, setSnackbarMessage, setSnackbarVisible } =
+    useFetchMultipleStoreDataHook(configs);
 
-  const {
-    loading,
-
-    setSnackbarVisible,
-  } = useFetchMultipleStoreDataHook(configs);
+  const scrollY = new Animated.Value(0);
+  //// Fetching the plan data -----------------------------/
 
   //// Useeffect function for loading the data ------------------------------------/
   const fetchData = async () => {
@@ -203,7 +215,12 @@ const YourComponent = () => {
             {/* <FeatureCarousel /> */}
           </>
         )}
+        <NotificationPermissionModal />
+        <VideoPromotionModal />
       </ScrollView>
+
+      <Imagepicker />
+      <AppUpdateBottomSheet />
     </SafeAreaView>
   );
 };

@@ -2,7 +2,7 @@
   "expo": {
     "name": "iness",
     "slug": "iness",
-    "version": "1.0.6",
+    "version": "1.0.8",
     "orientation": "portrait",
     "icon": "./assets/images/logonew.png",
     "scheme": "myapp",
@@ -13,7 +13,7 @@
       "supportsTablet": true
     },
     "android": {
-      "versionCode": 6,
+      "versionCode": 8,
       "googleServicesFile": "./android/app/google-services.json",
       "permissions": ["NOTIFICATIONS"],
       "intentFilters": [
@@ -27,7 +27,7 @@
       ],
       "useNextNotificationsApi": true,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/logonew.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.iness.fitness"

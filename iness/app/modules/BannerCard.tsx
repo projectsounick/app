@@ -54,7 +54,7 @@ const BannerCard = ({ cardData }: BannerCardProps) => {
               alignItems: "center",
             }}
           >
-            <Icon name={icon} size={22} color={theme.colors.primary} />
+            <Icon name={icon} size={16} color={theme.colors.primary} />
             <Text
               style={{
                 color: textColor,

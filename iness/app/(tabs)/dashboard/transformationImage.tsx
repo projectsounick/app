@@ -4,11 +4,10 @@ import {
   Text,
   Image,
   TouchableOpacity,
-  FlatList,
-  Modal,
-  Pressable,
+  SectionList,
   Dimensions,
   ImageBackground,
+  ScrollView,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import theme from "@/app/Theme/globalTheme";
@@ -21,219 +20,291 @@ import CustomSnackbar from "@/app/modules/Snackbar";
 import { userService } from "@/app/services/user.service";
 import { uploadToAzureFromExpo } from "@/utils/azureUtils";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import { formatDateTime } from "@/utils/otherUtils";
-import ImageViewerModal from "@/app/modules/ImageModel";
 import { SafeAreaView } from "react-native-safe-area-context";
+import ImageViewerModal from "@/app/modules/ImageModel";
+import VideoViewerModal from "@/app/modules/VideoViewerModal";
+import { Ionicons } from "@expo/vector-icons";
 
-///// Main functional component for uploading the User transformation images -------/
+// Format date like "06 Jul 2025"
+const formatDateDisplay = (dateStr: string) => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
+
 export default function TransformationImage() {
-  ///// Custom hook for fetching the images ----------/
   const {
     data,
     loading,
-    error,
     fetchData,
     snackbarVisible,
-    snackbarMessage,
     setSnackbarVisible,
+    snackbarMessage,
     setSnackbarMessage,
-    setData,
   } = useGetDataHook(transformatiomImageService.getTransformationImages);
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<{
+    url: string;
+    type: "image" | "video";
+  } | null>(null);
   const [imageUploadLoader, setImageUploadLoader] = useState(false);
 
-  //// Funciton for upload the image --------------------------------------/
+  const screenWidth = Dimensions.get("window").width;
+  const imageSize = (screenWidth - 48) / 3;
+
+  const openModal = (url: string, type: "image" | "video") => {
+    setSelectedMedia({ url, type });
+    setModalVisible(true);
+  };
+
+  const normalizeData = (raw: any[]) => {
+    return raw.map((group) => ({
+      title: group.date,
+      data: group.images,
+    }));
+  };
+
   const pickImage = async () => {
     setImageUploadLoader(true);
+
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ImagePicker.MediaTypeOptions.All, // ✅ Allow both
       quality: 0.8,
+      videoMaxDuration: 60,
     });
 
-    if (result.canceled) return;
+    if (result.canceled) {
+      setImageUploadLoader(false);
+      return;
+    }
 
     try {
-      // ✅ Get Azure SAS token and account details
-      const storageAccountDetailsResponse =
-        await userService.getStorageAccountDetails();
-
-      if (!storageAccountDetailsResponse.success) {
+      const storageDetails = await userService.getStorageAccountDetails();
+      if (!storageDetails.success) {
         setSnackbarVisible(true);
         setSnackbarMessage("Server error, try again.");
         return;
       }
 
-      const { storageAccountName, sasToken } =
-        storageAccountDetailsResponse.data;
+      const { storageAccountName, sasToken } = storageDetails.data;
+
       const userData =
         await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-      if (userData.exists) {
-        let userId = userData.data._id;
-        // ✅ Prepare image file
-        const fileUri = result.assets[0].uri;
-        // ✅ Assign userId to the fileName
-        const originalFileName =
-          fileUri.split("/").pop() || `image-${Date.now()}.jpg`;
-        const fileName = `${userId}_${originalFileName}`; // e.g., "61234abc_image.jpg"
+      if (!userData.exists) {
+        setSnackbarVisible(true);
+        setSnackbarMessage("User not found.");
+        return;
+      }
 
-        // ✅ Upload to Azure
-        const uploadedUrl = await uploadToAzureFromExpo(
-          fileUri,
-          fileName,
-          sasToken,
-          storageAccountName,
-          "admin-data", // Container name
-          "transformationImages" // Folder name
-        );
+      const userId = userData.data._id;
+      const asset = result.assets[0];
+      const fileUri = asset.uri;
+      const type = asset.type; // "image" | "video"
+      const ext =
+        fileUri.split(".").pop() || (type === "video" ? "mp4" : "jpg");
+      const fileName = `${userId}_${Date.now()}.${ext}`;
 
-        const currentDateTime = new Date().toLocaleString();
+      const uploadedUrl = await uploadToAzureFromExpo(
+        fileUri,
+        fileName,
+        sasToken,
+        storageAccountName,
+        "admin-data",
+        "transformationImages"
+      );
 
-        const data = [
-          {
-            url: uploadedUrl,
-            date: currentDateTime,
-          },
-        ];
+      const uploadData = [{ url: uploadedUrl }];
 
-        // ✅ Send to backend
-        let imageUploadInDbResponse =
-          await transformatiomImageService.addTransformationImages(data);
-        if (imageUploadInDbResponse && imageUploadInDbResponse.data) {
-          const newImages = imageUploadInDbResponse.data; // [{ url, date }]
+      const uploadRes =
+        await transformatiomImageService.addTransformationImages(uploadData);
 
-          // 🟩 Update the local state using the response from the server
-          setData((prev: any) => [...prev, ...newImages]);
-
-          setSnackbarVisible(true);
-          setSnackbarMessage("Image uploaded successfully!");
-        } else {
-          setSnackbarVisible(true);
-          setSnackbarMessage("Some error has happened , try again");
-        }
+      if (uploadRes && uploadRes.data) {
+        setSnackbarVisible(true);
+        setSnackbarMessage("Upload successful!");
+        fetchData();
       } else {
         setSnackbarVisible(true);
-        setSnackbarMessage("Some error has happened , try again");
+        setSnackbarMessage("Failed to save media.");
       }
     } catch (err) {
-      setSnackbarVisible(true);
-      setSnackbarMessage("Failed to upload image.");
       console.error(err);
+      setSnackbarVisible(true);
+      setSnackbarMessage("Upload failed.");
     } finally {
       setImageUploadLoader(false);
     }
   };
 
-  const openModal = (uri: string) => {
-    setSelectedImage(uri);
-    setModalVisible(true);
-  };
-
-  const screenWidth = Dimensions.get("window").width;
-  const imageSize = (screenWidth - 48) / 3; // 16 padding + 8 gap * 2
-
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right", "bottom"]}
-    >
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <ImageBackground
-        source={require("../../../assets/images/basicBackground.jpg")} // ✅ replace with your background
+        source={require("../../../assets/images/basicBackground.jpg")}
         style={{ flex: 1 }}
         resizeMode="cover"
       >
         <View style={{ paddingTop: 20, paddingLeft: 20 }}>
-          <NormalHeader screenName="Transformation" />
+          <NormalHeader screenName="Photos" />
         </View>
+
         {loading ? (
           <View
-            style={{
-              height: "100%",
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
             <ActivityIndicator color={theme.colors.secondPrimary} />
           </View>
         ) : (
-          <FlatList
-            data={data}
+          <SectionList
+            sections={normalizeData(data || [])}
             keyExtractor={(_, index) => index.toString()}
-            numColumns={3}
-            contentContainerStyle={{ padding: 16, flexGrow: 1 }}
-            columnWrapperStyle={{
-              justifyContent: "space-between",
-              marginBottom: 12,
-            }}
+            contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
             ListEmptyComponent={
-              <Text
-                style={{
-                  textAlign: "center",
-                  color: theme.colors.normal,
-                  marginTop: 20,
-                  fontSize: 16,
-                }}
-              >
-                No images uploaded yet
+              <Text style={{ textAlign: "center", marginTop: 20 }}>
+                No images/videos uploaded yet
               </Text>
             }
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => openModal(item.url)}
-                style={{ width: imageSize }}
-              >
+            renderItem={() => null}
+            renderSectionHeader={({ section }) => (
+              <View style={{ marginBottom: 10 }}>
                 <View
                   style={{
-                    backgroundColor: theme.colors.cardLight,
-                    borderRadius: 10,
-                    padding: 8,
-                    shadowColor: "#000",
-                    shadowOpacity: 0.08,
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowRadius: 4,
-                    elevation: 2,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 6,
                   }}
                 >
-                  <Image
-                    source={{ uri: item.url }}
-                    style={{
-                      width: "100%",
-                      height: imageSize - 30,
-                      borderRadius: 8,
-                    }}
-                  />
                   <Text
                     style={{
-                      marginTop: 6,
-                      fontSize: 12,
+                      fontSize: 14,
+                      fontWeight: "bold",
                       color: theme.colors.dark,
-                      textAlign: "center",
+                      marginRight: 10,
                     }}
                   >
-                    {formatDateTime(item.date)}
+                    {formatDateDisplay(section.title)}
                   </Text>
+                  <View
+                    style={{ flex: 1, height: 1, backgroundColor: "#ccc" }}
+                  />
                 </View>
-              </TouchableOpacity>
+              </View>
+            )}
+            renderSectionFooter={({ section }) => (
+              <View style={{ position: "relative", marginBottom: 16 }}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingRight: 40 }}
+                >
+                  {section.data.map((item: any, index: number) => {
+                    const isVideo = item.url.endsWith(".mp4");
+                    return (
+                      <TouchableOpacity
+                        key={`img-${index}`}
+                        onPress={() =>
+                          openModal(item.url, isVideo ? "video" : "image")
+                        }
+                        style={{
+                          width: imageSize,
+                          marginRight: 12,
+                          backgroundColor: theme.colors.cardLight,
+                          padding: 6,
+                          borderRadius: 10,
+                        }}
+                      >
+                        {isVideo ? (
+                          <View
+                            style={{
+                              width: "100%",
+                              height: imageSize - 20,
+                              backgroundColor: "#000",
+                              borderRadius: 8,
+                              justifyContent: "center",
+                              alignItems: "center",
+                            }}
+                          >
+                            <Ionicons
+                              name="play-circle-outline"
+                              size={36}
+                              color="#fff"
+                            />
+                          </View>
+                        ) : (
+                          <Image
+                            source={{ uri: item.url }}
+                            style={{
+                              width: "100%",
+                              height: imageSize - 20,
+                              borderRadius: 8,
+                            }}
+                          />
+                        )}
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+
+                <View
+                  pointerEvents="none"
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    height: "100%",
+                    width: 40,
+                    backgroundColor: "rgba(255,255,255,0)",
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 1,
+                      backgroundColor: theme.colors.cardLight,
+                      opacity: 0.3,
+                    }}
+                  />
+                </View>
+
+                <Ionicons
+                  name="arrow-forward-circle-outline"
+                  size={20}
+                  color={theme.colors.dark}
+                  style={{
+                    position: "absolute",
+                    right: 6,
+                    bottom: 6,
+                    opacity: 0.6,
+                  }}
+                />
+              </View>
             )}
           />
         )}
 
-        {/* Upload Button */}
         <AnimatedSubmitButton
           loading={imageUploadLoader}
           onPress={pickImage}
-          title="Upload Image"
+          title="Upload Media"
         />
 
-        {/* Full Image Modal */}
-        <ImageViewerModal
-          visible={modalVisible}
-          onClose={() => setModalVisible(false)}
-          imageUrl={selectedImage}
-        />
+        {/* ✅ Media viewer modals */}
+        {selectedMedia?.type === "image" && (
+          <ImageViewerModal
+            visible={modalVisible}
+            onClose={() => setModalVisible(false)}
+            imageUrl={selectedMedia.url}
+          />
+        )}
+
+        {selectedMedia?.type === "video" && (
+          <VideoViewerModal
+            visible={modalVisible}
+            onClose={() => setModalVisible(false)}
+            videoUrl={selectedMedia.url}
+          />
+        )}
 
         <CustomSnackbar
           visible={snackbarVisible}

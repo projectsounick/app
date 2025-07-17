@@ -33,6 +33,9 @@ export interface PhonePeTransactionResponse {
 export default function CartScreen() {
   //// getting the cart values from the store -------------------------/
   const cartItems = useSelector((state: RootState) => state.cart.cartItems);
+  console.log("this are cartitems");
+  console.log(cartItems);
+
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [snackbarOpen, setSnackBarOpen] = useState(false);
@@ -94,7 +97,7 @@ export default function CartScreen() {
                 alignItems: "center",
               }}
             >
-              <ActivityIndicator />{" "}
+              <ActivityIndicator />
             </View>
           ) : (
             <View style={{ padding: 20, flex: 1, backgroundColor: "#fff" }}>

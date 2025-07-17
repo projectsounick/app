@@ -1,3 +1,7 @@
+import {
+  ActiveManualWorkoutPlanInterface,
+  WorkoutPlanInterface,
+} from "@/app/interfaces/activeManualPlan";
 import { PlanInterface } from "@/app/interfaces/planInterface";
 import { PodcastInterface } from "@/app/interfaces/podcastsInterface";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
@@ -8,6 +12,7 @@ interface planState {
   planTab: string | null;
   activePlans: any[];
   completedPlans: any[];
+  activeManualPlan: ActiveManualWorkoutPlanInterface | null;
 }
 
 const initialState: planState = {
@@ -16,6 +21,7 @@ const initialState: planState = {
   planTab: "current",
   activePlans: [],
   completedPlans: [],
+  activeManualPlan: null,
 };
 
 const planSlice = createSlice({
@@ -39,9 +45,38 @@ const planSlice = createSlice({
         (plan: any) => plan.isActive === false
       );
     },
+    setActiveManualPlan: (
+      state,
+      action: PayloadAction<ActiveManualWorkoutPlanInterface[]>
+    ) => {
+      console.log("this is action");
+
+      console.log(action);
+      if (action.payload && action.payload.length > 0) {
+        const { endDate } = action.payload[0];
+
+        const today = new Date();
+        const end = new Date(endDate);
+        console.log(today);
+        console.log(end);
+
+        // Check if the end date is today or in the future
+        if (end >= today) {
+          state.activeManualPlan = action.payload[0];
+        } else {
+          console.warn("⚠️ Skipped setting plan — End date has passed.");
+          state.activeManualPlan = null;
+        }
+      }
+    },
   },
 });
 
-export const { setPlans, setCurrentPlan, setPlanTab, setActivePlans } =
-  planSlice.actions;
+export const {
+  setPlans,
+  setCurrentPlan,
+  setPlanTab,
+  setActivePlans,
+  setActiveManualPlan,
+} = planSlice.actions;
 export default planSlice.reducer;

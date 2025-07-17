@@ -1,23 +1,35 @@
-import { Session } from "@/app/interfaces/sessionInterface";
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
+import { Session } from "@/app/interfaces/sessionInterface";
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-// Get label and day from ISO date
 const getDayLabel = (dateStr: string) => weekdays[new Date(dateStr).getDay()];
 const getDayNumber = (dateStr: string) => new Date(dateStr).getDate();
-interface props {
+const isToday = (dateStr: string) => {
+  const today = new Date();
+  const date = new Date(dateStr);
+  return (
+    today.getFullYear() === date.getFullYear() &&
+    today.getMonth() === date.getMonth() &&
+    today.getDate() === date.getDate()
+  );
+};
+
+interface Props {
   sessions: Session[];
   selectedSession: Session | null;
-  setSelectedSession: any;
+  setSelectedSession: (session: Session) => void;
 }
+
 export default function DateBar({
   sessions = [],
   selectedSession,
   setSelectedSession,
-}: props) {
-  const [selectedDay, setSelectedDay] = useState(
+}: Props) {
+  const scrollViewRef = useRef<ScrollView>(null);
+
+  const [selectedDay, setSelectedDay] = useState(() =>
     getDayNumber(
       selectedSession?.sessionDate ||
         sessions[0]?.sessionDate ||
@@ -31,15 +43,34 @@ export default function DateBar({
     fullDate: s.sessionDate,
   }));
 
-  const getOpacity = (index: number) => {
-    const center = Math.floor(days.length / 2);
-    const distance = Math.abs(index - center);
-    return 1 - distance * 0.15;
-  };
+  const itemWidth = 60; // approximate width of each day box
+  const spacing = 6; // horizontal margin
 
-  const currentSelectedSession = sessions.find(
-    (s) => getDayNumber(s.sessionDate) === selectedDay
-  );
+  useEffect(() => {
+    if (!scrollViewRef.current || days.length === 0) return;
+
+    const todayIndex = days.findIndex((d) => isToday(d.fullDate));
+    const fallbackIndex =
+      days.findIndex((d) => new Date(d.fullDate) > new Date()) ||
+      days.length - 1;
+
+    const targetIndex = todayIndex >= 0 ? todayIndex : fallbackIndex;
+
+    // Scroll to the target date
+    scrollViewRef.current.scrollTo({
+      x: targetIndex * (itemWidth + spacing),
+      animated: true,
+    });
+
+    const session = sessions.find(
+      (s) =>
+        getDayNumber(s.sessionDate) === getDayNumber(days[targetIndex].fullDate)
+    );
+    if (session) {
+      setSelectedSession(session);
+      setSelectedDay(getDayNumber(session.sessionDate));
+    }
+  }, [sessions]);
 
   const handleDayPress = (day: number) => {
     setSelectedDay(day);
@@ -58,15 +89,14 @@ export default function DateBar({
         marginTop: 10,
       }}
     >
-      {/* Scrollable Dates */}
       <ScrollView
+        ref={scrollViewRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingHorizontal: 10 }}
       >
         {days.map((item, index) => {
           const isSelected = item.day === selectedDay;
-          const opacity = getOpacity(index);
           return (
             <TouchableOpacity
               key={item.fullDate}
@@ -74,13 +104,12 @@ export default function DateBar({
               style={{
                 alignItems: "center",
                 paddingVertical: 8,
-                paddingHorizontal: 12,
+                width: itemWidth,
+                marginHorizontal: spacing / 2,
                 borderRadius: 10,
                 backgroundColor: isSelected ? "#C6FF00" : "transparent",
                 borderWidth: isSelected ? 0 : 1,
                 borderColor: "#fff",
-                opacity,
-                marginHorizontal: 3,
               }}
             >
               <Text
@@ -93,7 +122,10 @@ export default function DateBar({
                 {item.day}
               </Text>
               <Text
-                style={{ color: isSelected ? "#000" : "#ccc", fontSize: 12 }}
+                style={{
+                  color: isSelected ? "#000" : "#ccc",
+                  fontSize: 12,
+                }}
               >
                 {item.label}
               </Text>

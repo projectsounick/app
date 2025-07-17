@@ -107,6 +107,7 @@ const FullPlanDetails = () => {
           <SessionDetailsTabs
             selectedSession={selectedSession}
             totalSessions={sessions.length}
+            setSelectedSession={setSelectedSession}
           />
           <CustomSnackbar
             visible={snackbarOpen}

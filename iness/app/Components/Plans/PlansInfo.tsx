@@ -1,6 +1,6 @@
 // components/PlanPricingSelector.tsx
 
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   TouchableOpacity,
@@ -9,9 +9,10 @@ import {
   LayoutChangeEvent,
   ScrollView,
   Animated,
+  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
+import { Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { PlanInterface } from "@/app/interfaces/planInterface";
@@ -43,6 +44,8 @@ const PlansInfo: React.FC<Props> = ({
   bottomSectionHeight,
 }) => {
   if (!currentPlan) return null;
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
   const translateY = useRef(new Animated.Value(100)).current;
   useEffect(() => {
     Animated.timing(translateY, {
@@ -51,6 +54,7 @@ const PlansInfo: React.FC<Props> = ({
       useNativeDriver: true,
     }).start();
   }, []);
+
   return (
     <>
       {/* Main Scrollable Section */}
@@ -116,6 +120,82 @@ const PlansInfo: React.FC<Props> = ({
           {currentPlan?.dietPlanDetails ? (
             <DietPlanInfoModal dietPlan={currentPlan.dietPlanDetails} />
           ) : null}
+          {currentPlan?.otherImages?.length > 0 && (
+            <>
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: "bold",
+                  marginVertical: 16,
+                  color: "#000",
+                }}
+              >
+                Plan Gallery
+              </Text>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingVertical: 10 }}
+              >
+                {currentPlan.otherImages.map(
+                  (imgUrl: string, index: number) => (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => setSelectedImage(imgUrl)}
+                      style={{ marginRight: 12 }}
+                    >
+                      <Image
+                        source={{ uri: imgUrl }}
+                        style={{
+                          width: 120,
+                          height: 80,
+                          borderRadius: 8,
+                          backgroundColor: "#eee",
+                        }}
+                        resizeMode="cover"
+                      />
+                    </TouchableOpacity>
+                  )
+                )}
+              </ScrollView>
+
+              {/* Modal to view full image */}
+              <Modal visible={!!selectedImage} transparent animationType="fade">
+                <View
+                  style={{
+                    flex: 1,
+                    backgroundColor: "rgba(0,0,0,0.85)",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <TouchableOpacity
+                    style={{
+                      position: "absolute",
+                      top: 40,
+                      right: 20,
+                      zIndex: 2,
+                    }}
+                    onPress={() => setSelectedImage(null)}
+                  >
+                    <Ionicons name="close" size={30} color="#fff" />
+                  </TouchableOpacity>
+                  {selectedImage ? (
+                    <Image
+                      source={{ uri: selectedImage }}
+                      style={{
+                        width: "90%",
+                        height: "70%",
+                        resizeMode: "contain",
+                        borderRadius: 12,
+                      }}
+                    />
+                  ) : null}
+                </View>
+              </Modal>
+            </>
+          )}
         </ScrollView>
       </View>
 
@@ -137,7 +217,9 @@ const PlansInfo: React.FC<Props> = ({
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={{
-            padding: 20,
+            paddingTop: 20,
+            paddingLeft: 20,
+            paddingRight: 20,
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
           }}

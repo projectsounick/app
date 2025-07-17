@@ -22,12 +22,21 @@ const handleSupport = () => {
 const handleCalculator = () => {
   router.push("/dashboard/calculator");
 };
+const handleYourPurchases = () => {
+  router.push("/dashboard/purchases");
+};
 const handlePreferences = () => {
   router.push("/dashboard/preferences");
 };
 const settings = [
   { icon: "pricetags-outline", label: "Coupons", onPress: handleCoupons },
   // { icon: "settings-outline", label: "Settings", onPress: handleSettings },
+  {
+    icon: "cart-outline",
+    label: "Your Purchases",
+    onPress: handleYourPurchases,
+  },
+
   {
     icon: "chatbox-ellipses-outline",
     label: "Support",

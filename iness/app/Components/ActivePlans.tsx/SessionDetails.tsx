@@ -7,6 +7,7 @@ import {
   ScrollView,
   ImageBackground,
   Linking,
+  Pressable,
 } from "react-native";
 import {
   MaterialIcons,
@@ -20,18 +21,63 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Session } from "@/app/interfaces/sessionInterface";
 import theme from "@/app/Theme/globalTheme";
 import { router } from "expo-router";
+import FeedbackModal from "./SessionFeedbackModal";
+import useServiceWithSnackbar from "@/hooks/usePostDataHook";
+import { sessionService } from "@/app/services/sessionService";
+import { ActivityIndicator } from "react-native-paper";
+import CustomSnackbar from "@/app/modules/Snackbar";
 
 const TabbedSessionDetails = ({
   selectedSession,
   totalSessions,
+  setSelectedSession,
 }: {
   selectedSession: Session | null;
   totalSessions: number;
+  setSelectedSession: any;
 }) => {
   const [activeTab, setActiveTab] = useState<"info" | "trainer" | "workout">(
     "info"
   );
+  const [showModal, setShowModal] = useState(false);
 
+  const {
+    callService,
+    loading,
+    snackbarVisible,
+    setLoading,
+    snackbarMessage,
+    setSnackbarMessage,
+    setSnackbarVisible,
+  } = useServiceWithSnackbar(sessionService.updateSession);
+
+  const submitFeedback = async (feedback: string) => {
+    try {
+      setLoading(true);
+      const params = {
+        sessionId: selectedSession?._id || null,
+        data: {
+          sessionFeedback: feedback,
+        },
+      };
+
+      const response = await callService(params);
+      setShowModal(false);
+      if (response.success) {
+        console.log("Feedback submitted successfully");
+        setSelectedSession((prev: any) => ({
+          ...prev,
+          sessionFeedback: feedback,
+        }));
+      } else {
+        setSnackbarVisible(false);
+        setSnackbarMessage("Failed to submit the feedback");
+      }
+    } catch (error) {
+    } finally {
+      setLoading(false);
+    }
+  };
   const renderInfoTab = () => {
     if (!selectedSession)
       return (
@@ -339,11 +385,65 @@ const TabbedSessionDetails = ({
               </TouchableOpacity>
             )}
         </LinearGradient>
+        {selectedSession.sessionStatus === "completed" && (
+          <Pressable
+            onPress={() => setShowModal(true)}
+            style={{
+              backgroundColor: "#eee",
+              borderColor: "#7C3AED",
+              borderWidth: 1,
+              marginHorizontal: 16,
+              padding: 12,
+              borderRadius: 12,
+              marginBottom: 16,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <View style={{ flex: 1, paddingRight: 8 }}>
+              <Text
+                style={{
+                  fontWeight: "bold",
+                  marginBottom: 6,
+                  color: "#000",
+                }}
+              >
+                Session Feedback
+              </Text>
+              {loading ? (
+                <ActivityIndicator />
+              ) : (
+                <Text style={{ fontSize: 12, color: "#333" }}>
+                  {selectedSession.sessionFeedback
+                    ? selectedSession.sessionFeedback
+                    : "Tap to give feedback"}
+                </Text>
+              )}
+            </View>
+            <MaterialIcons name="chevron-right" size={24} color="#2e7d32" />
+          </Pressable>
+        )}
+        <FeedbackModal
+          visible={showModal}
+          onClose={() => setShowModal(false)}
+          onSubmit={submitFeedback}
+          sessionId={selectedSession._id}
+        />
+        <CustomSnackbar
+          visible={snackbarVisible}
+          message={snackbarMessage}
+          bgColor={theme.colors.primary}
+          onDismiss={() => setSnackbarVisible(false)}
+        />
       </ScrollView>
     );
   };
 
   const renderTrainerTab = () => {
+    console.log("this is selectedsession trainer");
+    console.log(selectedSession?.trainer);
+
     if (!selectedSession?.trainer)
       return (
         <Text style={{ textAlign: "center", marginTop: 20, color: "#999" }}>
@@ -385,7 +485,11 @@ const TabbedSessionDetails = ({
           </Text>
         </View>
         <Image
-          source={require("../../../assets/images/track.png")}
+          source={
+            selectedSession?.trainer?.profilePic
+              ? { uri: selectedSession.trainer.profilePic }
+              : require("../../../assets/images/track.png")
+          }
           style={{
             width: 80,
             height: 80,
@@ -393,6 +497,7 @@ const TabbedSessionDetails = ({
             marginLeft: 12,
             borderWidth: 2,
             borderColor: "#fff",
+            backgroundColor: "#ccc", // fallback bg for empty/transparent images
           }}
           resizeMode="cover"
         />

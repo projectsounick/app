@@ -6,6 +6,7 @@ import { RootState } from "@/store";
 import { ActivePlans } from "@/app/interfaces/planInterface";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
+import { ActiveManualWorkoutPlanInterface } from "@/app/interfaces/activeManualPlan";
 
 interface CurrentPlansProps {
   isActive: boolean;
@@ -16,7 +17,9 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
   const plans: ActivePlans[] = useSelector((state: RootState) =>
     isActive ? state.plan.activePlans : state.plan.completedPlans
   );
-
+  const activeManualPlan: ActiveManualWorkoutPlanInterface | null = useSelector(
+    (state: RootState) => (isActive ? state.plan.activeManualPlan : null)
+  );
   return (
     <ScrollView
       contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 4 }}
@@ -58,7 +61,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
       </View>
 
       {/* Plan Cards */}
-      {plans.length === 0 ? (
+      {plans.length === 0 && activeManualPlan === null ? (
         <Text style={{ color: "gray", textAlign: "center", marginTop: 24 }}>
           No {isActive ? "active" : "completed"} plans found.
         </Text>
@@ -215,6 +218,76 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
             </LinearGradient>
           );
         })
+      )}
+      {isActive && activeManualPlan && (
+        <LinearGradient
+          colors={["#9C56F6", "#3A1B63"]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={{
+            borderRadius: 12,
+            paddingHorizontal: 12,
+            marginTop: 18,
+            height: 142,
+            justifyContent: "center",
+            overflow: "hidden",
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
+          {/* Left Content */}
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "700",
+                marginBottom: 6,
+                color: "white",
+              }}
+              numberOfLines={1}
+            >
+              {activeManualPlan.workoutPlanId.planName || "Custom Plan"}
+            </Text>
+
+            <Text
+              style={{ fontSize: 13, color: "white" }}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {activeManualPlan.workoutPlanId.description || "No description"}
+            </Text>
+
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#C6FF69",
+                paddingVertical: 6,
+                paddingHorizontal: 20,
+                borderRadius: 30,
+                alignSelf: "flex-start",
+                marginTop: 10,
+              }}
+              onPress={() =>
+                router.push({
+                  pathname: "/dashboard/activeManualPlan",
+                })
+              }
+            >
+              <Text style={{ color: "#000", fontWeight: "600" }}>Continue</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Static Workout Image */}
+          <Image
+            source={require("../../../assets/images/track.png")}
+            style={{
+              width: 100,
+              height: 120,
+              resizeMode: "cover",
+              marginLeft: 8,
+              borderRadius: 8,
+            }}
+          />
+        </LinearGradient>
       )}
     </ScrollView>
   );

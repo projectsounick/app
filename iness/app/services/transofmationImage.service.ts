@@ -20,7 +20,6 @@ async function getTransformationImages(): Promise<ApiResponseInterface> {
 async function addTransformationImages(
   data: {
     url: string;
-    date: any;
   }[]
 ): Promise<ApiResponseInterface> {
   try {

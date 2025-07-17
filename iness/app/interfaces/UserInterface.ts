@@ -19,6 +19,7 @@ interface UserData {
     slot: string;
     address: string;
   };
+  expoPushToken: string;
 }
 
 export type { UserData };

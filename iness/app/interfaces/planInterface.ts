@@ -55,6 +55,7 @@ interface PlanInterface {
   imgUrl: string;
   planType: PlanType;
   isActive: boolean;
+  otherImages: string[];
   planItems: PlanItemFormValues[];
   dietPlanDetails?: DietPlanDetails; // <-- added here
 }

@@ -117,101 +117,124 @@ export default function CartItemList({ items, onAddItem }: Props) {
                     key={item.productId}
                     style={{
                       flexDirection: "row",
-                      alignItems: "center",
-                      marginBottom: 14,
-                      height: 40,
-                      opacity: 1, // subtle shimmer effect
+                      alignItems: "flex-start",
+                      marginBottom: 16,
                     }}
                   >
                     {/* Image */}
                     <View
                       style={{
-                        width: 32,
-                        height: 32,
-                        borderRadius: 6,
-                        marginRight: 10,
+                        width: 60,
+                        height: 60,
+                        borderRadius: 8,
+                        marginRight: 12,
                         backgroundColor: "#ccc",
                         overflow: "hidden",
-                        justifyContent: "center",
-                        alignItems: "center",
                       }}
                     >
                       <Image
                         source={{ uri: item.imgUrl }}
                         style={{
-                          width: 32,
-                          height: 32,
-                          borderRadius: 6,
+                          width: "100%",
+                          height: "100%",
+                          borderRadius: 8,
                         }}
                         resizeMode="cover"
                       />
                     </View>
 
-                    <View
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        backgroundColor: "#F2E7FE",
-                        borderRadius: 14,
-                        paddingHorizontal: 8,
-                        marginHorizontal: 10,
-                        height: 28,
-                        opacity: 0.5, // visually indicate disabled state
-                      }}
-                    >
-                      <TouchableOpacity
-                        disabled={true} // disable if planId exists
-                        onPress={() => {
-                          removeCartItem(item._id, item.productId);
+                    {/* Right Section */}
+                    <View style={{ flex: 1, justifyContent: "space-between" }}>
+                      {/* Name (single line) */}
+                      <Text
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                        style={{
+                          fontSize: 14,
+                          fontWeight: "600",
+                          color: "#000",
+                          marginBottom: 6,
                         }}
                       >
-                        <Text
-                          style={{
-                            fontSize: 16,
-                            color: item.plan?.planId ? "#aaa" : "#9747FF", // gray out if disabled
-                            paddingHorizontal: 6,
-                          }}
-                        >
-                          -
-                        </Text>
-                      </TouchableOpacity>
-
-                      <Text style={{ fontSize: 14, color: "#000" }}>
-                        {item.quantity}
+                        {item.name}
                       </Text>
 
-                      <TouchableOpacity
-                        disabled={true}
-                        onPress={() => {
-                          // handle increase quantity
+                      {/* Bottom row: quantity + price/delete */}
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
                         }}
                       >
-                        <Text
+                        {/* Quantity controls */}
+                        <View
                           style={{
-                            fontSize: 16,
-                            color: item.plan?.planId ? "#aaa" : "#9747FF",
-                            paddingHorizontal: 6,
+                            flexDirection: "row",
+                            alignItems: "center",
+                            backgroundColor: "#F2E7FE",
+                            borderRadius: 14,
+                            paddingHorizontal: 8,
+                            height: 28,
+                            opacity: 0.5,
                           }}
                         >
-                          +
-                        </Text>
-                      </TouchableOpacity>
+                          <TouchableOpacity disabled={true}>
+                            <Text
+                              style={{
+                                fontSize: 16,
+                                color: item.plan?.planId ? "#aaa" : "#9747FF",
+                                paddingHorizontal: 6,
+                              }}
+                            >
+                              -
+                            </Text>
+                          </TouchableOpacity>
+
+                          <Text style={{ fontSize: 14, color: "#000" }}>
+                            {item.quantity}
+                          </Text>
+
+                          <TouchableOpacity disabled={true}>
+                            <Text
+                              style={{
+                                fontSize: 16,
+                                color: item.plan?.planId ? "#aaa" : "#9747FF",
+                                paddingHorizontal: 6,
+                              }}
+                            >
+                              +
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+
+                        {/* Price and delete icon */}
+                        <View
+                          style={{ flexDirection: "row", alignItems: "center" }}
+                        >
+                          <Text
+                            style={{
+                              fontSize: 14,
+                              fontWeight: "600",
+                              color: "#000",
+                              marginRight: 10,
+                            }}
+                          >
+                            ₹{(item?.price ?? 0) * (item?.quantity ?? 1)}
+                          </Text>
+
+                          <TouchableOpacity
+                            onPress={() => deleteItem(item._id)}
+                          >
+                            <Ionicons
+                              name="trash-outline"
+                              size={18}
+                              color="red"
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      </View>
                     </View>
-
-                    {/* Price */}
-                    <Text style={{ color: "#000", fontWeight: "600" }}>
-                      ₹{(item?.price ?? 0) * (item?.quantity ?? 1)}
-                    </Text>
-                    {/* Delete Icon */}
-
-                    <TouchableOpacity
-                      onPress={() => {
-                        deleteItem(item._id);
-                      }}
-                      style={{ marginLeft: 5 }}
-                    >
-                      <Ionicons name="trash-outline" size={18} color="red" />
-                    </TouchableOpacity>
                   </View>
                 );
               })}

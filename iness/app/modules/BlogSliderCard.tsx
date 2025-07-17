@@ -20,11 +20,10 @@ import { Blog } from "../interfaces/blogInterface";
 
 export default function BlogSliderCard() {
   const blogs = useSelector((state: RootState) => state.blog.blogs);
-  console.log(blogs);
 
   return (
     <LinearGradient
-      colors={["#3D0E7B", "#000000"]}
+      colors={["#9C56F6", "#3A1B63"]}
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
       style={{
@@ -55,7 +54,7 @@ export default function BlogSliderCard() {
               name="run"
               size={18}
               color={theme.colors.primary}
-            />{" "}
+            />
             Read our Blogs
           </Text>
           <Text

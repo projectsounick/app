@@ -18,6 +18,7 @@ export interface Trainer {
   dob: string;
   email: string;
   isActive: boolean;
+  profilePic: string;
   name: string;
   onboarding: boolean;
   phoneNumber: string;
@@ -35,6 +36,7 @@ export interface Session {
   color: string;
   createdAt: string;
   end: string;
+  sessionFeedback: string;
   isActive: boolean;
   sessionAgainstPlan: boolean;
   sessionDate: string;

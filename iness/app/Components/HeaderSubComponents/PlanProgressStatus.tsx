@@ -1,19 +1,28 @@
 import { setPlanTab } from "@/Slices/planSlice";
 import { RootState } from "@/store";
-import React, { useState } from "react";
+import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { State } from "react-native-gesture-handler";
 import { useDispatch, useSelector } from "react-redux";
 
 const PlansStatusCard = () => {
-  const current = useSelector(
+  const dispatch = useDispatch();
+
+  const currentPlansCount = useSelector(
     (state: RootState) => state.plan.activePlans.length
   );
+
+  const hasActiveManualPlan = useSelector(
+    (state: RootState) => !!state.plan.activeManualPlan
+  );
+
+  const current = currentPlansCount + (hasActiveManualPlan ? 1 : 0);
+
   const completed = useSelector(
     (state: RootState) => state.plan.completedPlans.length
   );
-  const dispatch = useDispatch();
+
   const planTab = useSelector((state: RootState) => state.plan.planTab);
+
   const renderCard = (
     type: "current" | "completed",
     label: string,

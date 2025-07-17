@@ -51,7 +51,7 @@ export default function TransformationCard() {
         <Text
           style={{ fontSize: 16, fontWeight: "bold", color: theme.colors.dark }}
         >
-          Transformation Images
+          Daily Progress Photos
         </Text>
         {/* <TouchableOpacity
           style={{ flexDirection: "row", alignItems: "center" }}
@@ -108,20 +108,45 @@ export default function TransformationCard() {
           </View>
         ) : (
           <View style={{ flexDirection: "row" }}>
-            {data.length > 0
-              ? data.slice(0, 5).map((item: any, i: number) => (
-                  <Image
-                    key={i}
-                    source={{ uri: item.url }}
-                    style={{
-                      width: 50,
-                      height: 50,
-                      borderRadius: 8,
-                      marginRight: 8,
-                    }}
-                    resizeMode="cover"
-                  />
-                ))
+            {data && data.length > 0
+              ? data
+                  .flatMap((group: any) => group.images)
+                  .slice(0, 5)
+                  .map((item: any, i: number) => {
+                    const isVideo = item.url.endsWith(".mp4");
+
+                    return (
+                      <View
+                        key={i}
+                        style={{
+                          width: 50,
+                          height: 50,
+                          borderRadius: 8,
+                          marginRight: 8,
+                          backgroundColor: isVideo ? "#000" : "transparent",
+                          justifyContent: "center",
+                          alignItems: "center",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {isVideo ? (
+                          <>
+                            <Ionicons
+                              name="play-circle-outline"
+                              size={24}
+                              color="#fff"
+                            />
+                          </>
+                        ) : (
+                          <Image
+                            source={{ uri: item.url }}
+                            style={{ width: "100%", height: "100%" }}
+                            resizeMode="cover"
+                          />
+                        )}
+                      </View>
+                    );
+                  })
               : null}
           </View>
         )}
