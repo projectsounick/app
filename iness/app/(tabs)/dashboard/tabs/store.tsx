@@ -1,5 +1,13 @@
-import React, { useRef } from "react";
-import { View, Text, Image, Animated, Dimensions } from "react-native";
+import React, { useMemo, useRef } from "react";
+import {
+  View,
+  Text,
+  Image,
+  Animated,
+  Dimensions,
+  ScrollView,
+  FlatList,
+} from "react-native";
 
 import theme from "@/app/Theme/globalTheme";
 import withAnimatedHeader from "@/app/Hoc/MainHeader";
@@ -8,78 +16,69 @@ import {
   SafeAreaFrameContext,
   SafeAreaView,
 } from "react-native-safe-area-context";
+import useFetchMultipleStoreDataHook from "@/hooks/useMultipleDataStoreHook";
+import { SliceKey } from "@/sliceRegistery";
+import { ecommerceService } from "@/app/services/ecom.service";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { ActivityIndicator } from "react-native-paper";
+import CategoryList from "@/app/Components/ecom/CategoryList";
+import GroupedProductDisplay from "@/app/Components/ecom/ProductList";
 
 //// Main functional component for the equipscreen ------------------------/
 const MainHeader = withAnimatedHeader(NameHeader);
 export default function EquipScreen() {
+  const categories = useSelector((state: RootState) => state.ecom.categories);
+  const products = useSelector((state: RootState) => state.ecom.products);
   const scrollY = useRef(new Animated.Value(0)).current;
+  const configs = useMemo(
+    () => [
+      {
+        sliceKey: "categories" as SliceKey,
+        fetchFunction: ecommerceService.getCategories,
+      },
+      {
+        sliceKey: "products" as SliceKey,
+        fetchFunction: ecommerceService.getProducts,
+      },
+    ],
+    []
+  );
+  const { loading, setSnackbarMessage, setSnackbarVisible } =
+    useFetchMultipleStoreDataHook(configs);
+  const components = [
+    { key: "CategoryList", component: <CategoryList /> },
+    { key: "GroupedProductDisplay", component: <GroupedProductDisplay /> },
+  ];
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       {/* Header */}
       <MainHeader scrollY={scrollY} title="Equip" />
-
-      {/* Coming Soon Content */}
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          padding: 20,
-        }}
-      >
+      {loading ? (
         <View
           style={{
-            height: "80%",
             display: "flex",
-            flexDirection: "column",
-            justifyContent: "space-evenly",
+            flexDirection: "row",
+            justifyContent: "center",
             alignItems: "center",
           }}
         >
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text
-              style={{
-                fontSize: theme.fontSizes.medium,
-                fontWeight: "800",
-                color: theme.colors.normal,
-
-                textAlign: "center",
-                marginBottom: 4,
-              }}
-            >
-              This feature is
-            </Text>
-
-            <Text
-              style={{
-                fontSize: theme.fontSizes.xxl,
-                fontWeight: "800",
-                color: theme.colors.secondPrimary,
-
-                textAlign: "center",
-              }}
-            >
-              Coming Soon
-            </Text>
-          </View>
-          <Image
-            source={require("../../../../assets/images/placholderEquip.png")}
-            style={{
-              width: 250,
-              height: 250,
-              resizeMode: "contain",
-            }}
-          />
+          <ActivityIndicator />
         </View>
-      </View>
+      ) : (
+        <FlatList
+          data={components}
+          keyExtractor={(item) => item.key}
+          renderItem={({ item }) => (
+            <View style={{ paddingLeft: 16, paddingRight: 16 }}>
+              {item.component}
+            </View>
+          )}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
+      {/* Coming Soon Content */}
     </SafeAreaView>
   );
 }

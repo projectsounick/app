@@ -1,24 +1,24 @@
 import theme from "../app/Theme/globalTheme";
 export const bookSessionCardData = {
-  title: "Book Services",
+  title: "Book\nServices",
   subtitle: "Get fit with Yoga, Zumba & more",
   buttonText: "Know More",
   icon: "clock",
   redirectionPageName: "/dashboard/session",
   backgroundColor: ["#9C56F6", "#3A1B63"],
-  imageSource: require("../assets/images/booksession.png"), // your local image
+  imageSource: require("../assets/images/sessionpicture.png"), // your local image
   textColor: theme.colors.text, // optional, any hex
 };
 
 //// Data for tracking card -----------------------/
 export const trackingCardData = {
-  title: "Track your activity",
+  title: "Track\nActivity",
   subtitle: "Tailored equipment for your personalized lifestyles.",
   buttonText: "Track Now",
   redirectionPageName: "/dashboard/track",
   icon: "target",
   backgroundColor: ["#9C56F6", "#3A1B63"],
-  imageSource: require("../assets/images/track.png"), // your local image
+  imageSource: require("../assets/images/trackingpicture.png"), // your local image
   textColor: theme.colors.text, // optional, any hex
 };
 // cardsData.ts

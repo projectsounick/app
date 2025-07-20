@@ -48,13 +48,12 @@ import * as ImagePicker from "expo-image-picker";
 import NotificationPermissionModal from "@/app/modules/NotificationPermissionModal";
 import VideoPromotionModal from "@/app/modules/PromotionalVideo";
 
-import { transformatiomImageService } from "@/app/services/transofmationImage.service";
-import { uploadToAzureFromExpo } from "@/utils/azureUtils";
-import { userService } from "@/app/services/user.service";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import Imagepicker from "@/app/modules/Imagepicker";
 import { manualWorkoutPlanService } from "@/app/services/manualWorkoutPlan";
 import AppUpdateBottomSheet from "@/app/modules/AndroidVersionUpdateModal";
+import DualBannerCardRow from "@/app/modules/HorizontalCards";
+import InfoCarousel from "@/app/modules/AdvirtisementCarraousel";
 
 const MainHeader = withAnimatedHeader(NameHeader);
 //// Main functional component for the Dashboard screen ---------------------------------/
@@ -181,7 +180,7 @@ const YourComponent = () => {
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
-          paddingTop: 20,
+          paddingTop: 10,
           paddingBottom: 10,
           paddingHorizontal: 8, // ✅ Add horizontal spacing here
         }}
@@ -209,9 +208,14 @@ const YourComponent = () => {
         ) : (
           <>
             <SliderCard />
-            <BannerCard cardData={trackingCardData} />
-            <BannerCard cardData={bookSessionCardData} />
+            {/* <BannerCard cardData={trackingCardData} />
+            <BannerCard cardData={bookSessionCardData} /> */}
+            <DualBannerCardRow
+              firstCard={bookSessionCardData}
+              secondCard={trackingCardData}
+            />
             <BlogSliderCard />
+            <InfoCarousel />
             {/* <FeatureCarousel /> */}
           </>
         )}

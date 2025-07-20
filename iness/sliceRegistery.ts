@@ -7,6 +7,7 @@ import {
 import { setCart } from "./Slices/cartSlice";
 import { setdietPlans } from "./Slices/dietPlanSlice";
 import { addToBlog } from "./Slices/blogSlice";
+import { setCategories, setProducts } from "./Slices/ecomSlice";
 export const sliceConfig = {
   media: {
     selectorKey: "mediaItems",
@@ -35,6 +36,14 @@ export const sliceConfig = {
   activeManualPlan: {
     selectorKey: "plans",
     setAction: setActiveManualPlan,
+  },
+  categories: {
+    selectorKey: "ecom",
+    setAction: setCategories,
+  },
+  products: {
+    selectorKey: "ecom",
+    setAction: setProducts,
   },
 } as const;
 

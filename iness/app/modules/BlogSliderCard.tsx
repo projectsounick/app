@@ -23,9 +23,8 @@ export default function BlogSliderCard() {
 
   return (
     <LinearGradient
-      colors={["#9C56F6", "#3A1B63"]}
-      start={{ x: 0.5, y: 0 }}
-      end={{ x: 0.5, y: 1 }}
+      colors={["#140A21", "#522987"]}
+      start={{ x: 0, y: 0 }}
       style={{
         height: 190,
         paddingVertical: 10,

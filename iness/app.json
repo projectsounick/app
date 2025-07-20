@@ -2,7 +2,7 @@
   "expo": {
     "name": "iness",
     "slug": "iness",
-    "version": "1.0.8",
+    "version": "1.0.9",
     "orientation": "portrait",
     "icon": "./assets/images/logonew.png",
     "scheme": "myapp",
@@ -13,7 +13,7 @@
       "supportsTablet": true
     },
     "android": {
-      "versionCode": 8,
+      "versionCode": 9,
       "googleServicesFile": "./android/app/google-services.json",
       "permissions": ["NOTIFICATIONS"],
       "intentFilters": [
@@ -35,7 +35,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/logonew.png"
     },
     "plugins": [
       "expo-router",
