@@ -88,8 +88,7 @@ export default function VideoCallScreen({
         console.error("❌ Agora error:", err);
       },
     });
-    console.log(token);
-    console.log(uid);
+
     await engine.joinChannel(token, channelName, uid, {
       clientRoleType: isHost
         ? ClientRoleType.ClientRoleBroadcaster

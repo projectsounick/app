@@ -1,10 +1,9 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Linking } from "react-native";
-import { useRouter, usePathname, useFocusEffect } from "expo-router";
-import PhonePePaymentSDK from "react-native-phonepe-pg";
+import React, { useState } from "react";
+import { View, Linking, TouchableOpacity, Text } from "react-native";
+import { useRouter } from "expo-router";
+
 import SmallHeader from "@/app/modules/SmallHeader";
 // Base64 encode it before using with startTransaction
-import { Buffer } from "buffer";
 
 import CartItemList from "@/app/Components/Cart/CartItemCard";
 import CartCheckoutCard from "@/app/Components/Cart/CartCheckoutCard";
@@ -16,10 +15,13 @@ import { cartService } from "@/app/services/cart.service";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { paymentService } from "@/app/services/payment.service";
 import { ActivityIndicator } from "react-native-paper";
-import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+
 import CustomSnackbar from "@/app/modules/Snackbar";
 import theme from "@/app/Theme/globalTheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import AddressModal from "@/app/Components/Cart/AddressModal";
+import CouponModal from "@/app/Components/Cart/CouponModal";
+import { DiscountCoupon } from "@/app/interfaces/otherInterfaces";
 
 export interface PhonePeTransactionResponse {
   success: boolean;
@@ -33,9 +35,16 @@ export interface PhonePeTransactionResponse {
 export default function CartScreen() {
   //// getting the cart values from the store -------------------------/
   const cartItems = useSelector((state: RootState) => state.cart.cartItems);
-  console.log("this are cartitems");
-  console.log(cartItems);
-
+  const [showAddressModal, setShowAddressModal] = useState(false);
+  const [deliveryAddress, setDeliveryAddress] = useState({
+    fullAddress: "",
+    city: "",
+    state: "",
+    pincode: "",
+  });
+  const [couponDetails, setCouponDetails] = useState<DiscountCoupon | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [snackbarOpen, setSnackBarOpen] = useState(false);
@@ -45,15 +54,19 @@ export default function CartScreen() {
     router.replace("/dashboard/tabs/store");
   };
   const [dataFetchLogin, setDataFetchLogin] = useState(false);
-  /// Function for chaning the address ------------------------/
-  function onChangeAddress() {}
 
-  /// Function for placing the order ----------------------------.
-  async function onplaceOrder() {
+  // Function for placing the order ----------------------------.
+  async function onplaceOrder(
+    address: string,
+    couponDetails: DiscountCoupon | null
+  ) {
     try {
-      const response: any = await cartService.getPhonePeUrl();
+      let data = {
+        couponCode: couponDetails ? couponDetails.code : null,
+        address: address,
+      };
+      const response: any = await cartService.getPhonePeUrl(data);
       const orderId = response?.data?.orderId;
-      console.log(response);
 
       if (orderId) {
         console.log("Order ID:", orderId);
@@ -74,6 +87,12 @@ export default function CartScreen() {
       setSnackbarMessage(error.message);
     } finally {
       setLoading(false);
+      setDeliveryAddress({
+        fullAddress: "",
+        city: "",
+        state: "",
+        pincode: "",
+      });
       router.push("/(tabs)/dashboard/paymentsuccess");
     }
   }
@@ -101,22 +120,42 @@ export default function CartScreen() {
             </View>
           ) : (
             <View style={{ padding: 20, flex: 1, backgroundColor: "#fff" }}>
-              <CartItemList items={cartItems} onAddItem={handleAdd} />
+              <CartItemList
+                items={cartItems}
+                setCouponDetails={setCouponDetails}
+                couponDetails={couponDetails}
+              />
             </View>
           )}
         </View>
         <CartCheckoutCard
           cartItems={cartItems}
-          onChangeAddress={onChangeAddress}
-          onPlaceOrder={onplaceOrder}
-          address={"Howrah kolkata"}
+          onPlaceOrder={() => setShowAddressModal(true)}
           loading={loading}
+          couponDetails={couponDetails}
         />
         <CustomSnackbar
           visible={snackbarOpen}
           message={snackbarMessage}
           bgColor={theme.colors.primary}
           onDismiss={() => setSnackBarOpen(false)}
+        />
+        <AddressModal
+          visible={showAddressModal}
+          onClose={() => setShowAddressModal(false)}
+          address={deliveryAddress}
+          setAddress={setDeliveryAddress}
+          onConfirm={(addr) => {
+            const { fullAddress, city, state, pincode } = addr;
+
+            if (!fullAddress || !city || !state || !pincode) {
+              alert("Please fill in all address fields before proceeding.");
+              return;
+            }
+            const finalAddress = `${addr.fullAddress}_${addr.city}_${addr.state}_${addr.pincode}`;
+            setShowAddressModal(false);
+            onplaceOrder(finalAddress, couponDetails);
+          }}
         />
       </SafeAreaView>
     </>

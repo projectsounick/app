@@ -121,7 +121,9 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
       const type = asset.type; // 'image' or 'video'
 
       // Step 3: Get Azure credentials
-      const storageDetails = await userService.getStorageAccountDetails();
+      const storageDetails = await userService.getStorageAccountDetails(
+        "transformationImages"
+      );
       if (!storageDetails.success) {
         setSnackbarVisible(true);
         setSnackbarMessage("Server error, try again.");

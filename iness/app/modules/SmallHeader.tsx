@@ -37,7 +37,6 @@ export default function SmallHeader({
     }
 
     async function handleNotificationReceived() {
-      console.log("📩 Notification received event");
       const notificationResponse = await getStoredNotifications();
       if (isMounted.current) {
         setNotificationResponseLength(notificationResponse?.length ?? 0);
@@ -46,10 +45,7 @@ export default function SmallHeader({
     }
 
     function handleClearNotifications() {
-      console.log("called");
-
       if (isMounted.current) {
-        console.log("🗑 Notifications cleared");
         setNotificationResponseLength(0);
       }
     }

@@ -34,7 +34,6 @@ export default function BlogDetailsScreen() {
       setLoading(true);
       if (id) {
         const response = await blogService.fetchIndividualBlog(id);
-        console.log(response);
 
         if (response.success && response.data && response.data.length > 0) {
           setBlogData(response.data[0]);

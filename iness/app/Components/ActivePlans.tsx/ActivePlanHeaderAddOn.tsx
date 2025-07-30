@@ -4,9 +4,18 @@ import { Session } from "@/app/interfaces/sessionInterface";
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-const getDayLabel = (dateStr: string) => weekdays[new Date(dateStr).getDay()];
-const getDayNumber = (dateStr: string) => new Date(dateStr).getDate();
-const isToday = (dateStr: string) => {
+const getDayLabel = (dateStr?: string) => {
+  const date = dateStr ? new Date(dateStr) : new Date();
+  return weekdays[date.getDay()] || "";
+};
+
+const getDayNumber = (dateStr?: string) => {
+  const date = dateStr ? new Date(dateStr) : new Date();
+  return date.getDate();
+};
+
+const isToday = (dateStr?: string) => {
+  if (!dateStr) return false;
   const today = new Date();
   const date = new Date(dateStr);
   return (
@@ -37,14 +46,16 @@ export default function DateBar({
     )
   );
 
-  const days = sessions.map((s) => ({
-    day: getDayNumber(s.sessionDate),
-    label: getDayLabel(s.sessionDate),
-    fullDate: s.sessionDate,
-  }));
+  const days = sessions
+    .filter((s) => !!s.sessionDate)
+    .map((s) => ({
+      day: getDayNumber(s.sessionDate),
+      label: getDayLabel(s.sessionDate),
+      fullDate: s.sessionDate!,
+    }));
 
-  const itemWidth = 60; // approximate width of each day box
-  const spacing = 6; // horizontal margin
+  const itemWidth = 60;
+  const spacing = 6;
 
   useEffect(() => {
     if (!scrollViewRef.current || days.length === 0) return;
@@ -56,7 +67,6 @@ export default function DateBar({
 
     const targetIndex = todayIndex >= 0 ? todayIndex : fallbackIndex;
 
-    // Scroll to the target date
     scrollViewRef.current.scrollTo({
       x: targetIndex * (itemWidth + spacing),
       animated: true,
@@ -64,8 +74,11 @@ export default function DateBar({
 
     const session = sessions.find(
       (s) =>
-        getDayNumber(s.sessionDate) === getDayNumber(days[targetIndex].fullDate)
+        !!s.sessionDate &&
+        getDayNumber(s.sessionDate) ===
+          getDayNumber(days[targetIndex]?.fullDate)
     );
+
     if (session) {
       setSelectedSession(session);
       setSelectedDay(getDayNumber(session.sessionDate));
@@ -74,7 +87,9 @@ export default function DateBar({
 
   const handleDayPress = (day: number) => {
     setSelectedDay(day);
-    const session = sessions.find((s) => getDayNumber(s.sessionDate) === day);
+    const session = sessions.find(
+      (s) => !!s.sessionDate && getDayNumber(s.sessionDate) === day
+    );
     if (session) {
       setSelectedSession(session);
     }

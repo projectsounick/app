@@ -46,6 +46,7 @@ function useGetDataHook(
   return {
     data,
     loading,
+    setLoading,
     error,
     fetchData,
     snackbarVisible,

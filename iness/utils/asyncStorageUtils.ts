@@ -22,22 +22,16 @@ async function storeUserInAsyncStorage(userData: any) {
 
 async function updateUserAccessToken(newAccessToken: string) {
   try {
-    console.log("this is new access");
-    console.log(newAccessToken);
-
     const storedUser = await AsyncStorage.getItem("user");
     if (!storedUser) return;
 
     const userObj = JSON.parse(storedUser);
-    console.log(userObj);
 
     // Update the token in the user object
     userObj.jwtToken = newAccessToken;
 
     // Save the updated object back to AsyncStorage
     await AsyncStorage.setItem("user", JSON.stringify(userObj));
-
-    console.log("Access token updated successfully in AsyncStorage");
   } catch (error) {
     console.error("Error updating access token:", error);
   }
@@ -79,15 +73,11 @@ async function storeScreenName(
 /// Function to update user data in AsyncStorage
 async function updateUserDataInAsyncStorage(updates: Partial<UserData>) {
   try {
-    console.log(updates);
-
     const existing = await AsyncStorage.getItem("user");
     const user: UserData = existing ? JSON.parse(existing) : {};
     const updated = { ...user, ...updates };
-    console.log(updated);
 
     let response = await AsyncStorage.setItem("user", JSON.stringify(updated));
-    console.log(response);
   } catch (error) {
     throw new Error("some error has occurred , try again later");
   }

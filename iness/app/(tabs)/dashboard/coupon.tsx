@@ -39,13 +39,13 @@ export default function CouponScreen() {
         //// getting the user from localstorage ---------/
         const loggedUser =
           await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-        console.log(loggedUser);
+
         if (loggedUser.exists) {
           let couponIds = loggedUser.data.assignedCoupons;
-          console.log(couponIds);
+
           if (couponIds) {
             const couponRespone = await couponService.getAllCoupons(couponIds);
-            console.log(couponRespone);
+
             if (couponRespone.success) {
               setCoupons(couponRespone.data);
               setSnackBarOpen(true);

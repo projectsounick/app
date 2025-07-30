@@ -64,7 +64,6 @@ const TabbedSessionDetails = ({
       const response = await callService(params);
       setShowModal(false);
       if (response.success) {
-        console.log("Feedback submitted successfully");
         setSelectedSession((prev: any) => ({
           ...prev,
           sessionFeedback: feedback,
@@ -441,9 +440,6 @@ const TabbedSessionDetails = ({
   };
 
   const renderTrainerTab = () => {
-    console.log("this is selectedsession trainer");
-    console.log(selectedSession?.trainer);
-
     if (!selectedSession?.trainer)
       return (
         <Text style={{ textAlign: "center", marginTop: 20, color: "#999" }}>

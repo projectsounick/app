@@ -20,6 +20,7 @@ async function getUserActiveManualPlan(): Promise<{
   if (userData.exists) {
     userId = userData.data._id;
   }
+  console.log(userId);
   if (status !== undefined) query.push(`status=${status}`);
   if (userId != undefined) query.push(`userId=${userId}`);
   const queryString = query.length > 0 ? `?${query.join("&")}` : "";

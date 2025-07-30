@@ -49,16 +49,11 @@ const planSlice = createSlice({
       state,
       action: PayloadAction<ActiveManualWorkoutPlanInterface[]>
     ) => {
-      console.log("this is action");
-
-      console.log(action);
       if (action.payload && action.payload.length > 0) {
         const { endDate } = action.payload[0];
 
         const today = new Date();
         const end = new Date(endDate);
-        console.log(today);
-        console.log(end);
 
         // Check if the end date is today or in the future
         if (end >= today) {

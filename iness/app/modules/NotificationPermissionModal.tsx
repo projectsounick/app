@@ -122,7 +122,6 @@ export default function NotificationPermissionModal() {
                             }
                           );
                         }
-                        console.log("went till here");
 
                         const response = await userService.updateUser({
                           expoPushToken: token,

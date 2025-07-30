@@ -45,7 +45,7 @@ export default function NotificationScreen() {
 
     try {
       const response = await notificationService.getNotification();
-      console.log(response);
+
       if (response.success) {
         setNotifications(response.data);
       } else {

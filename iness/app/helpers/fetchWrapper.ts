@@ -11,17 +11,13 @@ async function handleResponseWithRetry(
 
     if (!response.ok) {
       if (response.status === 401 && retryOnce) {
-        console.log("went inside this");
         // try to refresh token and retry request
         const userObj =
           await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-        console.log("this is userobj");
 
-        console.log(userObj);
         const userId = userObj?.data?._id;
 
         if (userId) {
-          console.log(userId);
           const refreshResult = await userService.generateRefreshToken(userId);
 
           if (refreshResult.success) {

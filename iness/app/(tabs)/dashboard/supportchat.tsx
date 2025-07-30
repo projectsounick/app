@@ -59,7 +59,7 @@ export default function SupportScreen() {
       if (selectedAttachments.length > 0) {
         try {
           const storageAccountDetailsResponse =
-            await userService.getStorageAccountDetails();
+            await userService.getStorageAccountDetails("chatMedia");
 
           if (!storageAccountDetailsResponse.success) {
             setSnackbarVisible(true);
@@ -98,9 +98,8 @@ export default function SupportScreen() {
         attachments: uploadedUrls,
         date: new Date().toDateString(),
       };
-      let loggedUser = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
-        "user"
-      );
+      let loggedUser =
+        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
       let userId;
       if (loggedUser.exists) {
         userId = loggedUser.data._id;

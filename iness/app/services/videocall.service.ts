@@ -12,11 +12,9 @@ export const videocallService = {
 //// Funciton for updating the user in using backend then storing in AsyncStorage----/
 async function joinVideoCall(data: any): Promise<ApiResponseInterface> {
   try {
-    console.log("called");
     let response = await fetchWrapper.post(`${baseUrl}/get-videocall-token`, {
       ...data,
     });
-    console.log(response);
 
     return response;
   } catch (error: any) {

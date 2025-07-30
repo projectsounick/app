@@ -85,10 +85,8 @@ const PaymentSuccessScreen = () => {
   async function fetchReceipt(orderId: any) {
     try {
       setReceiptLoading(true);
-      console.log(orderId);
 
       const response = await paymentService.getReciptData(orderId);
-      console.log(response);
 
       if (response.success && response.receipt) {
         const supported = await Linking.canOpenURL(response.receipt);

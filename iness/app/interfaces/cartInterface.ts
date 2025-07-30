@@ -10,7 +10,10 @@ interface CartItem {
     planId?: string;
     planItemId?: string;
   };
-
+  product?: {
+    productId: string;
+    variationId: string;
+  };
   dietPlanId?: string;
   isDeleted?: boolean;
 
@@ -36,6 +39,7 @@ interface RawCartItem {
       type: string;
     };
   };
+  product?: {};
   dietPlanDetails?: {
     _id: string;
     title: string;
@@ -58,7 +62,11 @@ interface AddCartItemsApiCallInterface {
     planItemId: string | undefined;
   };
   dietPlanId?: string;
-  quantity: number;
+  quantity?: number;
+  product?: {
+    productId: string;
+    variationId: string;
+  };
 }
 
 interface CartState {

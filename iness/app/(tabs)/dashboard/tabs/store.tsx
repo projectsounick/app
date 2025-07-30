@@ -28,8 +28,6 @@ import GroupedProductDisplay from "@/app/Components/ecom/ProductList";
 //// Main functional component for the equipscreen ------------------------/
 const MainHeader = withAnimatedHeader(NameHeader);
 export default function EquipScreen() {
-  const categories = useSelector((state: RootState) => state.ecom.categories);
-  const products = useSelector((state: RootState) => state.ecom.products);
   const scrollY = useRef(new Animated.Value(0)).current;
   const configs = useMemo(
     () => [
@@ -62,6 +60,7 @@ export default function EquipScreen() {
             flexDirection: "row",
             justifyContent: "center",
             alignItems: "center",
+            marginTop: "40%",
           }}
         >
           <ActivityIndicator />

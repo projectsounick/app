@@ -1,25 +1,65 @@
 import { CartItem } from "@/app/interfaces/cartInterface";
+import CustomSnackbar from "@/app/modules/Snackbar";
 import { cartService } from "@/app/services/cart.service";
-import { removeFromCart, deleteCartItem } from "@/Slices/cartSlice";
+import theme from "@/app/Theme/globalTheme";
+import useServiceWithSnackbar from "@/hooks/usePostDataHook";
+import {
+  removeFromCart,
+  deleteCartItem,
+  updateCartItemQuantity,
+} from "@/Slices/cartSlice";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { useDispatch } from "react-redux";
+import CouponModal from "./CouponModal";
+import { DiscountCoupon } from "@/app/interfaces/otherInterfaces";
 
 interface Props {
   items: CartItem[];
-  onAddItem: () => void;
+  couponDetails: DiscountCoupon | null;
+  setCouponDetails: any;
 }
 
 ///// Main funcitonal component for the CartItemList ----------------------------------/
-export default function CartItemList({ items, onAddItem }: Props) {
+export default function CartItemList({
+  items,
+  couponDetails,
+  setCouponDetails,
+}: Props) {
+  const {
+    loading,
+    data,
+    setLoading,
+    callService,
+    snackbarVisible,
+    snackbarMessage,
+    setSnackbarVisible,
+    setSnackbarMessage,
+  } = useServiceWithSnackbar(cartService.updateCartItems);
   const [simmerLodaing, setSimmerLoading] = useState(false);
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const dispatch = useDispatch();
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const updateQuantity = (id: string, delta: number) => {};
 
+  const dispatch = useDispatch();
+  const [couponVisible, setCouponVisible] = useState(false);
+  const [couponCode, setCouponCode] = useState("");
+  function onAddItem() {
+    setCouponVisible(true);
+  }
+  async function updateCart(cartItemId: any, action: string) {
+    setLoading(true);
+    let data = {
+      cartItemId: cartItemId,
+      action: action,
+    };
+    const response = await callService(data);
+
+    if (response && response.success) {
+      dispatch(updateCartItemQuantity(data));
+    }
+
+    //// need to update the store data based on response---/
+  }
   /// Funciton for removing from the cart ------------------/
   const removeCartItem = (
     cartItemId: string | undefined,
@@ -32,7 +72,7 @@ export default function CartItemList({ items, onAddItem }: Props) {
         dispatch(removeFromCart(id));
       }
     } catch (error: any) {
-      setSnackbarOpen(true);
+      setSnackbarVisible(true);
       setSnackbarMessage(error.message);
     } finally {
       setSimmerLoading(false);
@@ -54,11 +94,24 @@ export default function CartItemList({ items, onAddItem }: Props) {
         dispatch(deleteCartItem(_id));
       }
     } catch (error: any) {
-      setSnackbarOpen(true);
+      setSnackbarVisible(true);
       setSnackbarMessage(error.message);
     } finally {
       setSimmerLoading(false);
     }
+  }
+  async function applyDiscountCode(couponCode: string) {
+    try {
+      console.log("called");
+      setCouponVisible(false);
+      const response = await cartService.applyDiscountCoupon(couponCode);
+      if (response.success) {
+        setCouponDetails(response.data);
+      } else {
+        setSnackbarVisible(true);
+        setSnackbarMessage(response.message);
+      }
+    } catch (error) {}
   }
   return (
     <View
@@ -84,10 +137,9 @@ export default function CartItemList({ items, onAddItem }: Props) {
         <Text style={{ fontSize: 16, fontWeight: "bold", color: "#000" }}>
           Your Items
         </Text>
-        <Text style={{ fontSize: 18 }}>⌄</Text>
       </View>
 
-      {simmerLodaing ? (
+      {simmerLodaing || loading ? (
         <View
           style={{
             display: "flex",
@@ -96,12 +148,10 @@ export default function CartItemList({ items, onAddItem }: Props) {
             alignItems: "center",
           }}
         >
-          {" "}
           <ActivityIndicator />
         </View>
       ) : (
         <>
-          {" "}
           {items.length === 0 ? (
             <Text style={{ color: "#888", fontStyle: "italic", fontSize: 14 }}>
               There is nothing available in the cart.
@@ -167,46 +217,66 @@ export default function CartItemList({ items, onAddItem }: Props) {
                           justifyContent: "space-between",
                         }}
                       >
+                        {loading ? (
+                          <View>
+                            <ActivityIndicator />
+                          </View>
+                        ) : (
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                              backgroundColor: "#F2E7FE",
+                              borderRadius: 14,
+                              paddingHorizontal: 8,
+                              height: 28,
+                              opacity: 0.5,
+                            }}
+                          >
+                            <TouchableOpacity
+                              disabled={
+                                item.product && item.quantity >= 2
+                                  ? false
+                                  : true
+                              }
+                              onPress={() => updateCart(item._id, "decrement")}
+                            >
+                              <Text
+                                style={{
+                                  fontSize: 16,
+                                  color: item.plan?.planId ? "#aaa" : "#9747FF",
+                                  paddingHorizontal: 6,
+                                }}
+                              >
+                                -
+                              </Text>
+                            </TouchableOpacity>
+
+                            <Text style={{ fontSize: 14, color: "#000" }}>
+                              {item.quantity}
+                            </Text>
+
+                            <TouchableOpacity
+                              disabled={
+                                item.product && item.quantity >= 1
+                                  ? false
+                                  : true
+                              }
+                              onPress={() => updateCart(item._id, "increment")}
+                            >
+                              <Text
+                                style={{
+                                  fontSize: 16,
+                                  color: item.plan?.planId ? "#aaa" : "#9747FF",
+                                  paddingHorizontal: 6,
+                                }}
+                              >
+                                +
+                              </Text>
+                            </TouchableOpacity>
+                          </View>
+                        )}
                         {/* Quantity controls */}
-                        <View
-                          style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            backgroundColor: "#F2E7FE",
-                            borderRadius: 14,
-                            paddingHorizontal: 8,
-                            height: 28,
-                            opacity: 0.5,
-                          }}
-                        >
-                          <TouchableOpacity disabled={true}>
-                            <Text
-                              style={{
-                                fontSize: 16,
-                                color: item.plan?.planId ? "#aaa" : "#9747FF",
-                                paddingHorizontal: 6,
-                              }}
-                            >
-                              -
-                            </Text>
-                          </TouchableOpacity>
-
-                          <Text style={{ fontSize: 14, color: "#000" }}>
-                            {item.quantity}
-                          </Text>
-
-                          <TouchableOpacity disabled={true}>
-                            <Text
-                              style={{
-                                fontSize: 16,
-                                color: item.plan?.planId ? "#aaa" : "#9747FF",
-                                paddingHorizontal: 6,
-                              }}
-                            >
-                              +
-                            </Text>
-                          </TouchableOpacity>
-                        </View>
 
                         {/* Price and delete icon */}
                         <View
@@ -245,27 +315,73 @@ export default function CartItemList({ items, onAddItem }: Props) {
       {/* Empty State or Items */}
 
       {/* Footer */}
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginTop: 10,
-        }}
-      >
-        <Text style={{ color: "#000", fontSize: 13 }}>Missed something?</Text>
-        <TouchableOpacity
-          onPress={onAddItem}
+      {couponDetails ? (
+        <View
           style={{
-            backgroundColor: "#F2E7FE",
-            paddingHorizontal: 14,
-            paddingVertical: 6,
-            borderRadius: 16,
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginTop: 10,
           }}
         >
-          <Text style={{ color: "#9747FF", fontWeight: "600" }}>Add +</Text>
-        </TouchableOpacity>
-      </View>
+          <Text style={{ color: "#000", fontSize: 13 }}>
+            Coupon Applied{" "}
+            <Text style={{ color: "green", fontWeight: "bold" }}>
+              - ₹{couponDetails.discountPrice} OFF
+            </Text>
+          </Text>
+          <TouchableOpacity
+            onPress={() => setCouponDetails(null)}
+            style={{
+              backgroundColor: "#F2E7FE",
+              paddingHorizontal: 14,
+              paddingVertical: 6,
+              borderRadius: 16,
+            }}
+          >
+            <Text style={{ color: "#9747FF", fontWeight: "600" }}>Remove</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginTop: 10,
+          }}
+        >
+          <Text style={{ color: "#000", fontSize: 13 }}>Have a coupon?</Text>
+          <TouchableOpacity
+            onPress={onAddItem}
+            style={{
+              backgroundColor: "#F2E7FE",
+              paddingHorizontal: 14,
+              paddingVertical: 6,
+              borderRadius: 16,
+            }}
+          >
+            <Text style={{ color: "#9747FF", fontWeight: "600" }}>Add +</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+
+      <CustomSnackbar
+        visible={snackbarVisible}
+        message={snackbarMessage}
+        bgColor={theme.colors.primary}
+        onDismiss={() => setSnackbarVisible(false)}
+      />
+      {couponVisible ? (
+        <CouponModal
+          visible={couponVisible}
+          onClose={() => setCouponVisible(false)}
+          onApply={applyDiscountCode}
+          couponCode={couponCode}
+          setCouponCode={setCouponCode}
+        />
+      ) : null}
+      {/* Coupon Modal */}
     </View>
   );
 }

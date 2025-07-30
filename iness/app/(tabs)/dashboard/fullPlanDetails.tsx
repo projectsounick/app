@@ -42,6 +42,9 @@ const FullPlanDetails = () => {
       setLoading(true);
       const response = await sessionService.getSessions();
       const sessions = response.data;
+      console.log("this is sessions");
+      console.log(sessions);
+
       setSessions(sessions);
 
       const today = new Date();

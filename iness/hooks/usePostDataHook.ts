@@ -11,6 +11,7 @@ function useServiceWithSnackbar(serviceFunction: any) {
   ): Promise<{ data: any; message: string; success: boolean }> => {
     try {
       const response = await serviceFunction(params);
+      console.log(response);
 
       if (response.success) {
         setData(response.data); // Set the data if success

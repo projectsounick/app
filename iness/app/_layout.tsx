@@ -45,8 +45,6 @@ export default function RootLayout() {
   }, [fontsLoaded]);
 
   useEffect(() => {
-    console.log("Notification listeners initialized");
-
     // Listener: store notification on receipt
     const subscription = Notifications.addNotificationReceivedListener(
       async (notification) => {

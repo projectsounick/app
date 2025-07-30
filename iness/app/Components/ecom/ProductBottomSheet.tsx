@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Modal,
   View,
@@ -15,6 +15,16 @@ import { Product } from "@/app/interfaces/ecommerceInterface";
 import { Ionicons } from "@expo/vector-icons";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import theme from "@/app/Theme/globalTheme";
+import { cartService } from "@/app/services/cart.service";
+import { addToCart } from "@/Slices/cartSlice";
+import {
+  convertToProductCartItem,
+  isEcomProductAddableToCart,
+  isProductAddableToCart,
+} from "@/utils/cartUtils";
+import { RootState } from "@/store";
+import CustomSnackbar from "@/app/modules/Snackbar";
+import { useDispatch, useSelector } from "react-redux";
 
 const { width, height } = Dimensions.get("window");
 
@@ -31,14 +41,30 @@ const ProductModal: React.FC<ProductModalProps> = ({
   selectedProduct,
   bgColor,
 }) => {
+  const cartItems = useSelector((state: RootState) => state.cart.cartItems);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedVariation, setSelectedVariation] = useState<number>(0);
+  const [selectedVariationId, setSelectedVariationId] = useState<
+    string | null
+  >();
+  const dispatch = useDispatch();
   const [quantity, setQuantity] = useState(1);
   const [showFullDescription, setShowFullDescription] = useState(false);
   const imageScrollRef = useRef<ScrollView>(null);
+  const [cartLoading, setCardLoading] = useState(false);
 
+  const [selectedPlanItem, setSelectedPlanItem] = React.useState("");
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   if (!selectedProduct) return null;
-
+  useEffect(() => {
+    if (
+      selectedProduct &&
+      selectedProduct.variations &&
+      selectedProduct.variations.length > 0
+    )
+      setSelectedVariationId(selectedProduct.variations[0]._id);
+  }, []);
   const handleScroll = (event: any) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / width);
     setActiveIndex(index);
@@ -52,7 +78,56 @@ const ProductModal: React.FC<ProductModalProps> = ({
       : selectedProduct.basePrice;
 
   const toggleDescription = () => setShowFullDescription((prev) => !prev);
+  const addingIntoToCart = async () => {
+    try {
+      setCardLoading(true);
 
+      /// checking whether this product is available in cart or not--/
+      const alreadyExistsInCart = isEcomProductAddableToCart(
+        cartItems,
+        selectedProduct._id,
+        selectedVariationId
+      );
+      if (alreadyExistsInCart) {
+        setSnackbarOpen(true);
+        setSnackbarMessage("Already added to the cart");
+        return;
+      }
+
+      let apiObject = {
+        product: {
+          productId: selectedProduct._id,
+          variationId: selectedVariationId,
+        },
+      };
+
+      /// making the api call to store cart details in the database ---/
+      const cartDbResponse = await cartService.addCartItems(apiObject);
+      const updatedCartItem = convertToProductCartItem(
+        selectedProduct,
+        selectedVariationId
+      );
+      if (!cartDbResponse.success) {
+        throw new Error(cartDbResponse.message);
+      } else {
+        let finalItem = {
+          ...updatedCartItem,
+          _id: cartDbResponse.data._id,
+        };
+
+        dispatch(addToCart(finalItem));
+        setSnackbarOpen(true);
+        setSnackbarMessage("Added to cart successfully");
+        setSelectedPlanItem("");
+      }
+      //}
+    } catch (error: any) {
+      setSnackbarOpen(error.message);
+      setSnackbarOpen(true);
+    } finally {
+      setCardLoading(false);
+    }
+  };
   return (
     <Modal visible={visible} transparent animationType="slide">
       <TouchableWithoutFeedback onPress={onClose}>
@@ -78,7 +153,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
         }}
       >
         {/* Close Button */}
-        <View
+        <TouchableOpacity
           style={{
             position: "absolute",
             top: 16,
@@ -88,11 +163,12 @@ const ProductModal: React.FC<ProductModalProps> = ({
             padding: 6,
             zIndex: 1,
           }}
+          onPress={onClose}
         >
-          <Pressable onPress={onClose}>
-            <Ionicons name="close" size={20} color="black" />
+          <Pressable>
+            <Ionicons name="close" size={22} color="black" />
           </Pressable>
-        </View>
+        </TouchableOpacity>
 
         {/* Image Carousel */}
         <View style={{ height: 220, marginBottom: 16 }}>
@@ -181,7 +257,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
                 {variations.map((v, idx) => (
                   <Pressable
                     key={idx}
-                    onPress={() => setSelectedVariation(idx)}
+                    onPress={() => {
+                      setSelectedVariation(idx);
+                      setSelectedVariationId(v._id);
+                    }}
                     style={{
                       paddingHorizontal: 12,
                       paddingVertical: 6,
@@ -206,39 +285,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
           )}
 
           {/* Quantity Control */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 16,
-            }}
-          >
-            <Text style={{ fontSize: 16, fontWeight: "600" }}>Quantity</Text>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "#eee",
-                borderRadius: 20,
-                overflow: "hidden",
-              }}
-            >
-              <TouchableOpacity
-                onPress={() => quantity > 1 && setQuantity(quantity - 1)}
-                style={{ paddingHorizontal: 12, paddingVertical: 6 }}
-              >
-                <Text style={{ fontSize: 18 }}>-</Text>
-              </TouchableOpacity>
-              <Text style={{ paddingHorizontal: 12 }}>{quantity}</Text>
-              <TouchableOpacity
-                onPress={() => setQuantity(quantity + 1)}
-                style={{ paddingHorizontal: 12, paddingVertical: 6 }}
-              >
-                <Text style={{ fontSize: 18 }}>+</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
 
           {/* Price */}
           <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 32 }}>
@@ -248,11 +294,17 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
         {/* Add to Cart Button */}
         <AnimatedSubmitButton
-          loading={false}
+          loading={cartLoading}
           title="Add to cart"
           onPress={() => {
-            //addingIntoToCart("dietplan");
+            addingIntoToCart();
           }}
+        />
+        <CustomSnackbar
+          visible={snackbarOpen}
+          message={snackbarMessage}
+          onDismiss={() => setSnackbarOpen(false)}
+          bgColor={theme.colors.primary}
         />
       </View>
     </Modal>

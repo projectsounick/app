@@ -3,12 +3,14 @@ import { RefObject } from "react";
 
 // interfaces/categoryInterface.ts
 export interface Category {
-  _id: string;
+  _id: string; // ObjectId as string
   name: string;
-  description?: string;
+  description: string;
+  image: string;
   isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: string; // or Date if parsed
+  updatedAt: string; // or Date if parsed
+  __v: number;
 }
 
 // interfaces/productInterface.ts
@@ -29,7 +31,7 @@ export interface Product {
   name: string;
   description?: string;
   images: string[];
-  category: string;
+  category: Category;
   variationType: ProductVariationType;
   basePrice?: number;
   isActive: boolean;

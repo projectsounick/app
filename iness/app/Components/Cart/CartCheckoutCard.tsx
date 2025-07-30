@@ -3,35 +3,29 @@ import { View, Text, TouchableOpacity, Modal, TextInput } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { CartItem } from "@/app/interfaces/cartInterface";
 import AnimatedDots from "./LoadingDots";
+import { DiscountCoupon } from "@/app/interfaces/otherInterfaces";
 
 interface CartCheckoutSummaryProps {
-  address: string;
   cartItems: CartItem[];
-  onChangeAddress: (newAddress: string) => void;
+  couponDetails: DiscountCoupon | null;
   onPlaceOrder: () => void;
   loading: any;
 }
 
 const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
-  address,
   cartItems,
-  onChangeAddress,
+  couponDetails,
   onPlaceOrder,
   loading,
 }) => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [newAddress, setNewAddress] = useState(address);
-  const totalAmount = cartItems.reduce(
+  const subtotal = cartItems.reduce(
     (sum, item: any) => sum + item?.price * item.quantity,
     0
   );
-
-  const handleSubmitAddress = () => {
-    if (newAddress.trim()) {
-      onChangeAddress(newAddress);
-      setModalVisible(false);
-    }
-  };
+  let couponePrice = couponDetails?.discountPrice
+    ? couponDetails?.discountPrice
+    : 0;
+  const totalAmount = Math.max(subtotal - couponePrice, 0);
 
   return (
     <View
@@ -43,7 +37,7 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
       }}
     >
       {/* Billing Address */}
-      <View
+      {/* <View
         style={{ flexDirection: "row", alignItems: "center", marginBottom: 14 }}
       >
         <MaterialCommunityIcons name="home-outline" size={18} color="#fff" />
@@ -60,7 +54,7 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
             Change
           </Text>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       {/* Bottom Row - Payment & Button */}
       <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -117,75 +111,6 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
           )}
         </TouchableOpacity>
       </View>
-
-      {/* Address Change Modal */}
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "#fff",
-              width: "85%",
-              borderRadius: 16,
-              padding: 20,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 16,
-                fontWeight: "bold",
-                marginBottom: 10,
-                color: "#2D0140",
-              }}
-            >
-              Enter New Address
-            </Text>
-            <TextInput
-              placeholder="Your address..."
-              value={newAddress}
-              onChangeText={setNewAddress}
-              multiline
-              placeholderTextColor="#999"
-              style={{
-                height: 80,
-                borderColor: "#ccc",
-                borderWidth: 1,
-                borderRadius: 10,
-                paddingHorizontal: 12,
-                paddingTop: 10,
-                marginBottom: 16,
-                color: "#000",
-              }}
-            />
-            <TouchableOpacity
-              onPress={handleSubmitAddress}
-              style={{
-                backgroundColor: "#A4F77F",
-                paddingVertical: 10,
-                borderRadius: 10,
-                alignItems: "center",
-                marginBottom: 10,
-              }}
-            >
-              <Text style={{ color: "#2D0140", fontWeight: "bold" }}>
-                Submit
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={{ alignItems: "center", paddingVertical: 6 }}
-            >
-              <Text style={{ color: "#555" }}>Cancel</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };

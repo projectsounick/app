@@ -31,25 +31,16 @@ const AppUpdateBottomSheet = () => {
   useEffect(() => {
     const checkVersion = async () => {
       try {
-        console.log("this is current version");
-        console.log(CURRENT_VERSION);
-
         const response = await fetch(
           "https://inessstorage.blob.core.windows.net/iness-public/androidVersion.json"
         );
         const versions: string[] = await response.json();
-        console.log("this are versions");
-        console.log(versions);
 
         if (!versions.length) return;
 
         const latest = versions[0]; // 🔥 First is latest
-        console.log("this is latest version");
-        console.log(latest);
 
         if (isNewerVersion(latest, CURRENT_VERSION)) {
-          console.log("went here");
-
           const dismissed = await getDismissedVersion();
           if (dismissed !== latest) {
             setLatestVersion(latest); // Update state

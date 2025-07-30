@@ -51,7 +51,6 @@ export default function CompletedPlan() {
   const completedPlan: ActivePlans = useSelector((state: RootState) =>
     state.plan.completedPlans.find((p) => p._id === id)
   );
-  console.log(completedPlan);
 
   if (!completedPlan) {
     return (

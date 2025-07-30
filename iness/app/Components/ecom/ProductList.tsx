@@ -28,7 +28,7 @@ const GroupedProductDisplay = () => {
   // Group products by category
   const groupedProducts = products.reduce(
     (acc, product) => {
-      const cat = product.category || "Others";
+      const cat = product.category.name || "Others";
       if (!acc[cat]) acc[cat] = [];
       acc[cat].push(product);
       return acc;
@@ -56,8 +56,8 @@ const GroupedProductDisplay = () => {
       <View
         key={item._id}
         style={{
-          width: 120,
-          height: 137,
+          width: 130,
+          height: 150,
           borderRadius: 12,
           backgroundColor: "#fff",
           overflow: "hidden",
@@ -68,7 +68,7 @@ const GroupedProductDisplay = () => {
         <View
           style={{
             backgroundColor: bgColor,
-            height: 110, // increased height slightly
+            height: 120, // increased height slightly
             padding: 8,
             borderRadius: 12,
             justifyContent: "space-between",
@@ -79,11 +79,11 @@ const GroupedProductDisplay = () => {
             <Image
               source={{ uri: item.images[0] }}
               style={{
-                width: 75, // increased width
-                height: 65, // increased height
+                width: "90%", // increased width
+                height: 75, // increased height
                 borderRadius: 8,
-                resizeMode: "cover", // makes sure background is covered
-                alignSelf: "flex-end",
+                resizeMode: "contain", // makes sure background is covered
+                alignSelf: "center",
                 backgroundColor: bgColor, // fallback to cover any transparency
               }}
             />
@@ -114,24 +114,24 @@ const GroupedProductDisplay = () => {
               style={{
                 color: "#000",
                 fontWeight: "600",
-                fontSize: 10,
+                fontSize: 8,
                 marginRight: 4,
               }}
             >
               Check
             </Text>
-            <Feather name="arrow-right" size={12} color="#000" />
+            <Feather name="arrow-right" size={10} color="#000" />
           </TouchableOpacity>
         </View>
 
         {/* Bottom Section */}
         <View style={{ paddingHorizontal: 8, paddingVertical: 6 }}>
           <Text
-            numberOfLines={1}
+            numberOfLines={2}
             style={{
               fontWeight: "600",
               color: "#000",
-              fontSize: 13,
+              fontSize: 10,
             }}
           >
             {item.name}

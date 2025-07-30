@@ -45,7 +45,7 @@ export default function ProfileCard() {
       try {
         // ✅ Get Azure SAS token and account details
         const storageAccountDetailsResponse =
-          await userService.getStorageAccountDetails();
+          await userService.getStorageAccountDetails("MEDIA");
 
         if (!storageAccountDetailsResponse.success) {
           setSnackbarVisible(true);

@@ -28,6 +28,9 @@ const handleYourPurchases = () => {
 const handlePreferences = () => {
   router.push("/dashboard/preferences");
 };
+const handleMeasurements = () => {
+  router.push("/dashboard/measurement");
+};
 const settings = [
   { icon: "pricetags-outline", label: "Coupons", onPress: handleCoupons },
   // { icon: "settings-outline", label: "Settings", onPress: handleSettings },
@@ -47,6 +50,12 @@ const settings = [
     label: "Calculator",
     onPress: handleCalculator,
   },
+  {
+    icon: "scale-outline",
+    label: "Measurements",
+    onPress: handleMeasurements,
+  },
+
   {
     icon: "settings-outline",
     label: "Preferences",

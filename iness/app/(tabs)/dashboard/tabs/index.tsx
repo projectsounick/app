@@ -1,19 +1,5 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import {
-  View,
-  Text,
-  Image,
-  Animated,
-  ScrollView,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import React, { useMemo } from "react";
+import { View, Animated, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import SliderCard from "@/app/modules/SliderCard";
 import BannerCard from "@/app/modules/BannerCard";
@@ -28,12 +14,9 @@ import useFetchMultipleStoreDataHook from "@/hooks/useMultipleDataStoreHook";
 import { SliceKey } from "@/sliceRegistery";
 import { planService } from "@/app/services/plan.service";
 import { cartService } from "@/app/services/cart.service";
-import { CircularProgress } from "react-native-circular-progress";
+
 import { ActivityIndicator } from "react-native-paper";
-import {
-  SafeAreaView,
-  useSafeAreaInsets,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { blogService } from "@/app/services/blog.Service";
 import BlogSliderCard from "@/app/modules/BlogSliderCard";
 import { trackService } from "@/app/services/track.service";
@@ -44,11 +27,10 @@ import {
   setCurrentDateTrackData,
   setTotalTrackData,
 } from "@/Slices/trackSlice";
-import * as ImagePicker from "expo-image-picker";
+
 import NotificationPermissionModal from "@/app/modules/NotificationPermissionModal";
 import VideoPromotionModal from "@/app/modules/PromotionalVideo";
 
-import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import Imagepicker from "@/app/modules/Imagepicker";
 import { manualWorkoutPlanService } from "@/app/services/manualWorkoutPlan";
 import AppUpdateBottomSheet from "@/app/modules/AndroidVersionUpdateModal";
@@ -72,20 +54,8 @@ const YourComponent = () => {
         fetchFunction: cartService.getCartItems,
       },
       {
-        sliceKey: "dietPlan" as SliceKey,
-        fetchFunction: planService.getDietPlans,
-      },
-      {
-        sliceKey: "activePlans" as SliceKey,
-        fetchFunction: planService.getActivePlans,
-      },
-      {
         sliceKey: "blogs" as SliceKey,
         fetchFunction: blogService.getBlogOverallData,
-      },
-      {
-        sliceKey: "activeManualPlan" as SliceKey,
-        fetchFunction: manualWorkoutPlanService.getUserActiveManualPlan,
       },
     ],
     []

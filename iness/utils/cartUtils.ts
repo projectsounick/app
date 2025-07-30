@@ -1,4 +1,5 @@
 import { CartItem, RawCartItem } from "@/app/interfaces/cartInterface";
+import { Product } from "@/app/interfaces/ecommerceInterface";
 import { DietPlan, PlanInterface } from "@/app/interfaces/planInterface";
 
 //// function for converting selected plan product to cart item structure -----------/
@@ -47,6 +48,32 @@ export function convertToCartItem(
     return cartItem;
   }
 }
+export function convertToProductCartItem(
+  product: Product,
+  variationId: any
+): CartItem | null {
+  if (!product || !variationId || !product.variations) return null;
+
+  const selectedVariation = product.variations.find(
+    (v) => v._id === variationId
+  );
+
+  if (!selectedVariation) return null;
+
+  const cartItem: CartItem = {
+    name: product.name,
+    price: selectedVariation.price,
+    type: "product",
+    imgUrl: product.images?.[0] || "", // Use first image or empty string
+    product: {
+      productId: product._id,
+      variationId: selectedVariation._id,
+    },
+    quantity: 1,
+  };
+
+  return cartItem;
+}
 
 //// Function for checking whether the plan or session exists in cart already -------/
 export function isProductAddableToCart(
@@ -59,14 +86,27 @@ export function isProductAddableToCart(
       item.plan?.planItemId === planItemId || item.plan?.planId === planId
   );
 }
-
+export function isEcomProductAddableToCart(
+  cartItems: CartItem[],
+  productId: string,
+  variationId: any
+): boolean {
+  return cartItems.some(
+    (item) =>
+      item.product?.productId === productId &&
+      item.product.variationId === variationId
+  );
+}
 //// Function for formatting the fetch cartitems ------------------------------/
 export function formateFetchedCartItems(cartItems: RawCartItem[]): CartItem[] {
   const formattedCartItems: CartItem[] = [];
 
   for (let i = 0; i < cartItems.length; i++) {
     const item = cartItems[i];
+
     const plan = item.plan;
+    const dietPlanDetails = item.dietPlanDetails;
+    const product: any = item.product;
 
     if (plan && plan.planItem) {
       const selectedPlanItem = plan.planItem;
@@ -75,29 +115,44 @@ export function formateFetchedCartItems(cartItems: RawCartItem[]): CartItem[] {
         _id: item._id,
         name: plan.title,
         price: selectedPlanItem.price,
-        type: "",
+        type: "plan",
         imgUrl: plan.imgUrl,
         quantity: item.quantity,
         plan: {
           planId: plan._id,
           planItemId: selectedPlanItem._id,
         },
-        isDeleted: item.isDeleted ? item.isDeleted : false,
+        isDeleted: item.isDeleted ?? false,
       };
 
       formattedCartItems.push(cartItem);
-    } else if (item.dietPlanDetails) {
-      /// this is a diet plan ------------/
-      let dietPlanDetails = item.dietPlanDetails;
+    } else if (dietPlanDetails) {
       const cartItem: CartItem = {
         _id: item._id,
         name: dietPlanDetails.title,
         price: dietPlanDetails.price,
-        type: "",
+        type: "dietPlan",
         imgUrl: dietPlanDetails.imgUrl,
         quantity: item.quantity,
         dietPlanId: dietPlanDetails._id,
-        isDeleted: item.isDeleted ? item.isDeleted : false,
+        isDeleted: item.isDeleted ?? false,
+      };
+      formattedCartItems.push(cartItem);
+    } else if (product) {
+      const selectedVariation = product.variation;
+
+      const cartItem: CartItem = {
+        _id: item._id,
+        name: product.name,
+        price: selectedVariation?.price ?? product.basePrice ?? 0,
+        type: "product",
+        imgUrl: product.images?.[0] ?? "",
+        quantity: item.quantity,
+        product: {
+          productId: product._id,
+          variationId: selectedVariation?._id ?? null,
+        },
+        isDeleted: item.isDeleted ?? false,
       };
       formattedCartItems.push(cartItem);
     }

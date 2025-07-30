@@ -27,9 +27,11 @@ export default function PaymentScreen() {
       try {
         setLoading(true);
         const response = await paymentService.getTotalPurchaseHistory();
-        if (response.success) {
-          console.log(response.data[1]);
+        console.log("this is response");
 
+        console.log(response);
+
+        if (response.success) {
           setPayment(response.data);
         } else {
           setSnackbarMessage("Failed to fetch payment history");

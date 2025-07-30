@@ -61,13 +61,11 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
 
       // 📨 Handler when notification is received
       const handleNotification = () => {
-        console.log("🔁 Triggering fetch due to notification");
         fetchData();
       };
 
       // ❌ Handler when notifications are cleared
       const handleClearNotification = () => {
-        console.log("🗑️ Clearing notifications");
         setNotificationResponseLength(0);
       };
 

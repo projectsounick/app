@@ -83,7 +83,9 @@ export default function TransformationImage() {
     }
 
     try {
-      const storageDetails = await userService.getStorageAccountDetails();
+      const storageDetails = await userService.getStorageAccountDetails(
+        "transformationImages"
+      );
       if (!storageDetails.success) {
         setSnackbarVisible(true);
         setSnackbarMessage("Server error, try again.");

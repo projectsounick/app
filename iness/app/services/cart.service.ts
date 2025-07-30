@@ -13,6 +13,7 @@ export const cartService = {
   updateCartItems,
   getPhonePeUrl,
   getOrderStatus,
+  applyDiscountCoupon,
 };
 
 //// Funciton for updating the user in using backend then storing in AsyncStorage----/
@@ -44,29 +45,27 @@ async function deleteCartItems(
   }
 }
 
-async function addCartItems(
-  data: AddCartItemsApiCallInterface
-): Promise<ApiResponseInterface> {
+async function addCartItems(data: any): Promise<ApiResponseInterface> {
   try {
     return fetchWrapper.post(`${baseUrl}/add-cart`, { ...data });
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }
 }
-async function updateCartItems(
-  cartItemId: string,
-  action: string
-): Promise<ApiResponseInterface> {
+async function updateCartItems(data: any): Promise<ApiResponseInterface> {
   try {
-    return fetchWrapper.put(`${baseUrl}/update-cart/${cartItemId}`, { action });
+    let action = data.action;
+    return fetchWrapper.put(`${baseUrl}/update-cart/${data.cartItemId}`, {
+      action,
+    });
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }
 }
 
 //// Funciton for checking out the user cart details and getting the phonepe url ---------------/
-async function getPhonePeUrl() {
-  return fetchWrapper.post(`${baseUrl}/checkout-cart`, {});
+async function getPhonePeUrl(data: any) {
+  return fetchWrapper.post(`${baseUrl}/checkout-cart`, { ...data });
 }
 
 //// funciton for getting the order status -----------------------------------/
@@ -76,4 +75,12 @@ async function getOrderStatus(orderId: any) {
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }
+}
+
+///// Function for applying the discount coupon --------------------------------.
+async function applyDiscountCoupon(couponCode: string) {
+  return fetchWrapper.post(
+    `${baseUrl}/apply-discount-coupon/${couponCode}`,
+    {}
+  );
 }

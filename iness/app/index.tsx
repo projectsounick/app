@@ -99,7 +99,7 @@ const HomeScreen = () => {
           }}
         >
           <Image
-            source={require("../assets/images/logonew.png")} // Replace with your logo path
+            source={require("../assets/images/logowithoutbackground.png")} // Replace with your logo path
             style={{
               width: 100,
               height: 100,

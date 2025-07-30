@@ -52,14 +52,13 @@ export default function VideoCallChecker({
   const handleJoin = async () => {
     try {
       setLoading(true);
-      console.log(videoCallSchedule);
+
       let data = {
         channelName: videoCallSchedule.data.channelName,
         type: "audience",
         videoCallId: videoCallSchedule.data.videoCallId,
       };
 
-      console.log(data);
       const response = await videocallService.joinVideoCall(data);
 
       if (response.success) {

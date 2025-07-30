@@ -126,8 +126,6 @@ export const storeNotification = async (notification: {
   data: any;
 }) => {
   try {
-    console.log("called");
-
     const existing = await AsyncStorage.getItem(STORAGE_KEY);
     const parsed = existing ? JSON.parse(existing) : [];
 
@@ -139,8 +137,6 @@ export const storeNotification = async (notification: {
     const updated = [newNotification, ...parsed].slice(0, 10); // Keep only 10 latest
 
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-
-    console.log("📦 Notification stored.");
   } catch (error) {
     console.error("❌ Failed to store notification:", error);
   }

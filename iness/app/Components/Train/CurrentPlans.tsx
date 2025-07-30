@@ -7,6 +7,7 @@ import { ActivePlans } from "@/app/interfaces/planInterface";
 import { Feather } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ActiveManualWorkoutPlanInterface } from "@/app/interfaces/activeManualPlan";
+import theme from "@/app/Theme/globalTheme";
 
 interface CurrentPlansProps {
   isActive: boolean;
@@ -91,7 +92,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                 borderRadius: 12,
                 paddingHorizontal: 12,
                 marginTop: 18,
-                height: 142,
+                height: 170,
                 justifyContent: "center",
                 overflow: "hidden",
                 flexDirection: "row",
@@ -124,20 +125,30 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                           marginBottom: 4,
                         }}
                       >
-                        <Text
+                        <View
                           style={{
-                            fontSize: 13,
-                            color: "white",
-                            marginRight: 4,
+                            height: "100%",
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            alignItems: "center",
                           }}
                         >
-                          →
-                        </Text>
+                          <View
+                            style={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: 4,
+                              backgroundColor: "rgba(229, 210, 255, 1)",
+                              marginRight: 6,
+                            }}
+                          />
+                        </View>
                         <Text
-                          numberOfLines={1}
+                          numberOfLines={2}
                           ellipsizeMode="tail"
                           style={{
-                            fontSize: 13,
+                            fontSize: 12,
                             color: "white",
                             flexShrink: 1,
                           }}
@@ -155,13 +166,14 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
 
                 <TouchableOpacity
                   style={{
-                    backgroundColor: buttonBgColor,
-                    paddingVertical: 6,
-                    paddingHorizontal: 20,
-                    borderRadius: 30,
+                    backgroundColor: "rgba(189, 255, 132, 1)",
+                    width: 114,
+                    height: 28,
+                    borderRadius: 16,
                     alignSelf: "flex-start",
-                    marginTop: 10,
-                    opacity: isActive ? 1 : 1,
+                    marginTop: 8,
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
                   onPress={() => {
                     if (isActive) {
@@ -192,6 +204,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                     style={{
                       color: buttonTextColor,
                       fontWeight: "600",
+                      fontSize: theme.fontSizes.small,
                     }}
                   >
                     {buttonText}

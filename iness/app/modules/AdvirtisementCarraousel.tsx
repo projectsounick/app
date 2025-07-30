@@ -18,176 +18,123 @@ const CARD_MARGIN = 15;
 const DATA = [
   {
     icon: "✅",
-    title: "All minimum 4 years",
-    subtitle: "experience trainers",
+    text: "All minimum 4 years experience trainers",
   },
   {
     icon: "💪",
-    title: "500+ success",
-    subtitle: "stories",
+    text: "500+ success stories",
   },
   {
     icon: "👥",
-    title: "24×7 active",
-    subtitle: "community",
+    text: "24×7 active community",
   },
   {
     icon: "🔥",
-    title: "Personalized",
-    subtitle: "plans for you",
+    text: "Personalized plans for you",
   },
 ];
 
 const StylishCarousel = () => {
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const scrollViewRef = useRef<ScrollView>(null);
-  const indexRef = useRef(1);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      indexRef.current = (indexRef.current + 1) % DATA.length;
-      scrollViewRef.current?.scrollTo({
-        x: indexRef.current * (CARD_WIDTH + CARD_MARGIN),
-        animated: true,
-      });
-    }, 3000);
-
-    setTimeout(() => {
-      scrollViewRef.current?.scrollTo({
-        x: indexRef.current * (CARD_WIDTH + CARD_MARGIN),
-        animated: true,
-      });
-    }, 100);
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <LinearGradient
-      colors={["#140A21", "#522987"]}
-      start={{ x: 0, y: 0 }}
-      style={styles.gradient}
+    <View
+      style={{
+        marginBottom: 10,
+        marginTop: 10,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 12,
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 3,
+      }}
     >
-      <View>
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "flex-start",
-            alignItems: "center",
-          }}
-        >
-          <MaterialCommunityIcons
-            name="information"
-            size={18}
-            color={theme.colors.primary}
-          />
-          <Text
-            style={{
-              fontSize: theme.fontSizes.regular,
-              fontWeight: "bold",
-              color: theme.colors.text,
-              marginLeft: 4,
-            }}
-          >
-            Why choose us
-          </Text>
-        </View>
+      <View
+        style={{
+          width: "100%",
+          flexDirection: "row",
+          alignItems: "center",
+          marginBottom: 8,
+        }}
+      >
+        <MaterialCommunityIcons
+          name="shield-check"
+          size={20}
+          color={theme.colors.primary}
+          style={{ marginRight: 8 }}
+        />
         <Text
           style={{
-            fontSize: theme.fontSizes.small,
-            fontWeight: theme.fontWeights.regular,
-            color: theme.colors.text,
-            marginTop: 4,
-            marginLeft: "7%",
+            fontSize: theme.fontSizes.medium,
+            fontWeight: "bold",
+            color: theme.colors.dark,
           }}
         >
-          Expert guidance, real results, and a supportive journey.
+          Why Choose us
         </Text>
       </View>
-
-      <ScrollView
-        horizontal
-        ref={scrollViewRef}
-        showsHorizontalScrollIndicator={false}
-        snapToInterval={CARD_WIDTH + CARD_MARGIN}
-        decelerationRate="fast"
-        contentContainerStyle={{ paddingHorizontal: CARD_MARGIN }}
-        style={{ flexGrow: 0, marginTop: 10 }}
+      <Text
+        style={{
+          fontSize: theme.fontSizes.regularSmall,
+          color: theme.colors.medium,
+          marginBottom: 12,
+        }}
       >
-        {DATA.map((item, index) => (
-          <View key={index} style={styles.card}>
-            <View style={styles.iconWrapper}>
-              <Text style={styles.icon}>{item.icon}</Text>
+        Discover the key features that set us apart .
+      </Text>
+
+      <View
+        style={{
+          width: "100%",
+          borderRadius: 12,
+          overflow: "hidden",
+          marginBottom: 12,
+        }}
+      >
+        <LinearGradient
+          colors={["#140A21", "#522987"]}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
+          style={{
+            padding: 16,
+          }}
+        >
+          {DATA.map((item, index) => (
+            <View
+              key={index}
+              style={{
+                flexDirection: "row",
+                alignItems: "flex-start",
+                marginBottom: index === DATA.length - 1 ? 0 : 12,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 14,
+                  marginRight: 8,
+                }}
+              >
+                {item.icon}
+              </Text>
+              <Text
+                style={{
+                  color: "#fff",
+                  fontSize: 13,
+                  flex: 1,
+                }}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                {item.text}
+              </Text>
             </View>
-            <View style={styles.cardText}>
-              <Text style={styles.title}>{item.title}</Text>
-              <Text style={styles.subtitle}>{item.subtitle}</Text>
-            </View>
-          </View>
-        ))}
-      </ScrollView>
-    </LinearGradient>
+          ))}
+        </LinearGradient>
+      </View>
+    </View>
   );
 };
-
-const styles = StyleSheet.create({
-  gradient: {
-    paddingVertical: 16,
-    paddingBottom: 20,
-    paddingHorizontal: 10,
-    borderRadius: 12,
-    marginTop: 10,
-  },
-  headingContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  heading: {
-    fontSize: theme.fontSizes.regular,
-    fontWeight: "bold",
-    color: theme.colors.text,
-  },
-  card: {
-    width: CARD_WIDTH,
-    backgroundColor: "#fff",
-    borderRadius: 12,
-    padding: 18,
-    marginRight: CARD_MARGIN,
-    flexDirection: "row",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 6,
-    elevation: 4,
-  },
-  iconWrapper: {
-    width: 50,
-    height: 50,
-    backgroundColor: "#F0F0F0",
-    borderRadius: 25,
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 15,
-  },
-  icon: {
-    fontSize: 24,
-  },
-  cardText: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#666",
-  },
-});
 
 export default StylishCarousel;

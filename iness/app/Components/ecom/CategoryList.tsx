@@ -4,6 +4,8 @@ import { MaterialIcons } from "@expo/vector-icons"; // for the arrow icon
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import theme from "@/app/Theme/globalTheme";
+import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 
 interface Category {
   _id: string;
@@ -29,6 +31,8 @@ const bgColors = [
 ];
 
 function CategoryGrid() {
+  const navigation = useNavigation();
+  const router = useRouter();
   const renderItem = ({ item, index }: { item: Category; index: number }) => {
     const backgroundColor = bgColors[index % bgColors.length];
 
@@ -40,10 +44,15 @@ function CategoryGrid() {
           height: 137,
           borderRadius: 12,
           backgroundColor,
-          padding: 12,
+          padding: 8,
           margin: 8,
           justifyContent: "space-between",
         }}
+        onPress={() =>
+          router.push(
+            `/dashboard/productList?category=${encodeURIComponent(item.name)}&color=${encodeURIComponent(backgroundColor)}&categoryId=${encodeURIComponent(item._id)}`
+          )
+        }
       >
         {/* Image in top-right corner */}
         <View style={{ alignItems: "flex-end" }}>
@@ -51,7 +60,7 @@ function CategoryGrid() {
             source={{ uri: item.image }}
             style={{
               width: 95, // increased size
-              height: 80,
+              height: 75,
               resizeMode: "contain",
             }}
           />
@@ -63,12 +72,12 @@ function CategoryGrid() {
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
-            marginTop: 8,
+            marginTop: 6,
           }}
         >
           <Text
             style={{
-              fontSize: 14,
+              fontSize: 12,
               fontWeight: "600",
               color: "#000",
               flex: 1,

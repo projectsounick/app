@@ -39,12 +39,26 @@ export default function DashboardLayout() {
           ),
         }}
       />
+
       <Tabs.Screen
         name="train"
         options={{
           tabBarLabel: "Train",
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons name="fire" size={28} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="community"
+        options={{
+          tabBarLabel: "Community",
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons
+              name="account-group"
+              size={28}
+              color={color}
+            />
           ),
         }}
       />

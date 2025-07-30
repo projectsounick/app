@@ -15,15 +15,19 @@ const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    addToCart: (state, action: PayloadAction<CartItem>) => {
-      const existingItem = state.cartItems.find(
-        (item) => item.plan?.planItemId === action.payload.productId
-      );
-
-      if (existingItem) {
-        existingItem.quantity += action.payload.quantity;
-      } else {
+    addToCart: (state, action: PayloadAction<any>) => {
+      if (action.payload.product) {
         state.cartItems.push(action.payload);
+      } else {
+        const existingItem = state.cartItems.find(
+          (item) => item.plan?.planItemId === action.payload.productId
+        );
+
+        if (existingItem) {
+          existingItem.quantity += action.payload.quantity;
+        } else {
+          state.cartItems.push(action.payload);
+        }
       }
     },
     // ✅ Store fetched cart
@@ -45,13 +49,21 @@ const cartSlice = createSlice({
 
     updateCartItemQuantity: (
       state,
-      action: PayloadAction<{ productId: string; quantity: number }>
+      action: PayloadAction<{
+        cartItemId: string;
+        action: string;
+      }>
     ) => {
       const item = state.cartItems.find(
-        (i) => i.productId === action.payload.productId
+        (i) => i._id === action.payload.cartItemId
       );
+
       if (item) {
-        item.quantity = action.payload.quantity;
+        if (action.payload.action === "increment") {
+          item.quantity += 1;
+        } else if (action.payload.action === "decrement" && item.quantity > 1) {
+          item.quantity -= 1;
+        }
       }
     },
     clearCart: (state) => {

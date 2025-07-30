@@ -20,12 +20,30 @@ function useFetchMultipleStoreDataHook(
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const fetchAll = useCallback(async () => {
+    console.log("called");
     setLoading(true);
     setError(null);
 
     try {
-      const promises = configs.map((cfg) => cfg.fetchFunction(cfg.params));
-      const results = await Promise.allSettled(promises);
+      const timedPromises = configs.map((cfg) => {
+        const { sliceKey, fetchFunction, params } = cfg;
+
+        const startTime = Date.now();
+
+        return fetchFunction(params)
+          .then((res) => {
+            const duration = Date.now() - startTime;
+            console.log(`[${sliceKey}] completed in ${duration} ms`);
+            return res;
+          })
+          .catch((err) => {
+            const duration = Date.now() - startTime;
+            console.error(`[${sliceKey}] failed in ${duration} ms`);
+            throw err;
+          });
+      });
+
+      const results = await Promise.allSettled(timedPromises);
 
       let hasError = false;
 
@@ -56,7 +74,6 @@ function useFetchMultipleStoreDataHook(
       setSnackbarMessage(msg);
     } finally {
       setSnackbarVisible(true);
-
       setLoading(false);
     }
   }, [configs, dispatch]);

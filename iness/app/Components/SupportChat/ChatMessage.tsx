@@ -37,7 +37,7 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
               fontSize: 14,
             }}
           >
-            {item.content}
+            {item.content.replace(/\\n/g, "\n")}
           </Text>
         ) : null}
 

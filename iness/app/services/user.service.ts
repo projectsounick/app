@@ -34,18 +34,11 @@ async function verifyLoginOtp(data: {
   expoPushToken: string;
 }): Promise<ApiResponseInterface> {
   try {
-    console.log("this is data");
-
-    console.log(data);
-
     let response = await fetchWrapper.post(`${baseUrl}/user-otp-verify`, {
       email: data.email,
       otp: data.otp,
       expoPushToken: data.expoPushToken,
     });
-    console.log("this is response");
-
-    console.log(response);
 
     return response;
   } catch (error: any) {
@@ -74,9 +67,11 @@ async function logout() {
 }
 
 ///// Function for getting the storage account details ------------------------------/
-async function getStorageAccountDetails() {
+async function getStorageAccountDetails(folderName: string) {
   try {
-    return fetchWrapper.get(`${baseUrl}/get-storageaccount-details`);
+    return fetchWrapper.get(
+      `${baseUrl}/get-storageaccount-details?container=${folderName}`
+    );
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }
