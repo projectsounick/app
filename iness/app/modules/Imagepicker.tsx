@@ -59,13 +59,13 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
     setImageUploadLoader(true);
 
     try {
-      // Step 1: Request permission
-      const permissionResult =
+      // Step 1: Ask permission
+      const permission =
         mode === "camera"
           ? await ImagePicker.requestCameraPermissionsAsync()
           : await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-      if (!permissionResult.granted) {
+      if (!permission.granted) {
         setSnackbarVisible(true);
         setSnackbarMessage(
           mode === "camera"
@@ -77,23 +77,19 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
 
       let result: ImagePicker.ImagePickerResult;
 
-      // Step 2: Launch based on mode
+      // Step 2: Handle camera or gallery
       if (mode === "camera") {
         const mediaType = await new Promise<"image" | "video">(
           (resolve, reject) => {
-            Alert.alert(
-              "Select Capture Type",
-              "Choose what you want to capture",
-              [
-                { text: "Photo", onPress: () => resolve("image") },
-                { text: "Video", onPress: () => resolve("video") },
-                {
-                  text: "Cancel",
-                  onPress: () => reject("cancel"),
-                  style: "cancel",
-                },
-              ]
-            );
+            Alert.alert("Capture Type", "Choose what you want to capture", [
+              { text: "Photo", onPress: () => resolve("image") },
+              { text: "Video", onPress: () => resolve("video") },
+              {
+                text: "Cancel",
+                style: "cancel",
+                onPress: () => reject("cancel"),
+              },
+            ]);
           }
         );
 
@@ -112,15 +108,15 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
         });
       }
 
-      if (result.canceled || !result.assets || result.assets.length === 0) {
+      // Step 3: Cancel check
+      if (result.canceled || !result.assets || result.assets.length === 0)
         return;
-      }
 
       const asset = result.assets[0];
       const fileUri = asset.uri;
-      const type = asset.type; // 'image' or 'video'
+      const type = asset.type ?? "image"; // fallback to image
 
-      // Step 3: Get Azure credentials
+      // Step 4: Get storage credentials
       const storageDetails = await userService.getStorageAccountDetails(
         "transformationImages"
       );
@@ -132,7 +128,7 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
 
       const { storageAccountName, sasToken } = storageDetails.data;
 
-      // Step 4: Get user
+      // Step 5: Get user
       const userData =
         await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
       if (!userData.exists) {
@@ -142,17 +138,16 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
       }
 
       setMenuOpen(false);
-
       const userId = userData.data._id;
 
-      // Step 5: Generate file name
+      // Step 6: Generate filename
       const fileExtension =
         fileUri.split(".").pop() || (type === "video" ? "mp4" : "jpg");
       const originalFileName =
-        fileUri.split("/").pop() || `file-${Date.now()}.${fileExtension}`;
+        fileUri.split("/").pop() ?? `file-${Date.now()}.${fileExtension}`;
       const fileName = `${userId}_${originalFileName}`;
 
-      // Step 6: Upload to Azure
+      // Step 7: Upload to Azure
       const uploadedUrl = await uploadToAzureFromExpo(
         fileUri,
         fileName,
@@ -162,10 +157,11 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
         "transformationImages"
       );
 
-      // Step 7: Save to DB
-      const uploadData = [{ url: uploadedUrl }];
+      // Step 8: Save to DB
       const uploadRes =
-        await transformatiomImageService.addTransformationImages(uploadData);
+        await transformatiomImageService.addTransformationImages([
+          { url: uploadedUrl },
+        ]);
 
       if (uploadRes?.data) {
         setSnackbarVisible(true);

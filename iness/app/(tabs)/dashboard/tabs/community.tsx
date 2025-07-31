@@ -35,7 +35,7 @@ const YourComponent = () => {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["left", "right"]}
+      edges={["left", "right", "top"]}
     >
       <SmallHeader title="Community" />
       {loading ? (

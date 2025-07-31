@@ -168,43 +168,75 @@ const CommunityPosts = ({
     };
 
     return (
-      <View style={styles.mediaWrapper}>
+      <View style={{ width: "100%", alignItems: "center", marginBottom: 10 }}>
         <FlatList
           data={media}
           keyExtractor={(uri, idx) => `${uri}-${idx}`}
           horizontal
           pagingEnabled
+          snapToInterval={screenWidth}
+          decelerationRate="fast"
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
           scrollEventThrottle={16}
           renderItem={({ item: mediaUrl }) => {
             const isVideo =
               mediaUrl.endsWith(".mp4") || mediaUrl.includes("video");
+
             return (
-              <View style={styles.mediaItem}>
+              <View
+                style={{
+                  width: screenWidth,
+                  height: 300,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
                 {isVideo ? (
                   <Video
                     source={{ uri: mediaUrl }}
-                    style={styles.media}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      borderRadius: 10,
+                    }}
                     resizeMode={ResizeMode.COVER}
                     useNativeControls
                   />
                 ) : (
-                  <Image source={{ uri: mediaUrl }} style={styles.media} />
+                  <Image
+                    source={{ uri: mediaUrl }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      resizeMode: "cover",
+                      borderRadius: 10,
+                    }}
+                  />
                 )}
               </View>
             );
           }}
         />
         {media.length > 1 && (
-          <View style={styles.dotsContainer}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "center",
+              marginTop: 8,
+            }}
+          >
             {media.map((_, idx) => (
               <View
                 key={idx}
-                style={[
-                  styles.dot,
-                  (activeMediaIndex[postId] || 0) === idx && styles.activeDot,
-                ]}
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 4,
+                  marginHorizontal: 4,
+                  backgroundColor:
+                    (activeMediaIndex[postId] || 0) === idx ? "#333" : "#bbb",
+                }}
               />
             ))}
           </View>

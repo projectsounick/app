@@ -15,7 +15,7 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right", "bottom"]}
+      edges={["top", "left", "right"]}
     >
       <ImageBackground
         source={require("../../../assets/images/basicBackground.jpg")}

@@ -90,7 +90,7 @@ const StylishCarousel = () => {
           width: "100%",
           borderRadius: 12,
           overflow: "hidden",
-          marginBottom: 12,
+          marginBottom: 2,
         }}
       >
         <LinearGradient
@@ -98,7 +98,14 @@ const StylishCarousel = () => {
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={{
-            padding: 16,
+            height: 160,
+            paddingHorizontal: screenWidth < 360 ? 12 : 16,
+            width: "100%",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            borderRadius: 12,
           }}
         >
           {DATA.map((item, index) => (
@@ -112,7 +119,7 @@ const StylishCarousel = () => {
             >
               <Text
                 style={{
-                  fontSize: 14,
+                  fontSize: screenWidth < 360 ? 12 : 14,
                   marginRight: 8,
                 }}
               >
@@ -121,7 +128,7 @@ const StylishCarousel = () => {
               <Text
                 style={{
                   color: "#fff",
-                  fontSize: 13,
+                  fontSize: screenWidth < 360 ? 11 : 13,
                   flex: 1,
                 }}
                 numberOfLines={2}
