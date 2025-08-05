@@ -29,19 +29,20 @@ jobs:
 
       - name: eas_build
         env:
-          EXPO_TOKEN: ${{secrets.EXPO_TOKEN}}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          BRANCH_NAME: $(echo "${{github.ref}}"  sed  's/refs/heads/||')
+          BRANCH_NAME=${GITHUB_REF##*/}
           echo "BRANCH=$BRANCH_NAME"
 
-          if["$BRANCH_NAME"= "ios-testflight"];then
-            eas build --platofm ios --profile preview --non-interactive --wait
+          if [ "$BRANCH_NAME" = "ios-testflight" ]; then
+            eas build --platform ios --profile preview --non-interactive --wait
+          fi
 
   submit:
     name: eas_top_submit
     runs-on: ubuntu-latest
     needs: build
-    if: github.ref== 'refs/heads/ios-testflight'
+    if: github.ref == 'refs/heads/ios-testflight'
     steps:
       - name: install_eas
         run: npm install -g eas-cli
