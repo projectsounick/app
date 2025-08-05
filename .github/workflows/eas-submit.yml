@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Clone Repo
+      - name: Checkout Repo
         uses: actions/checkout@v3
 
       - name: Setup Node
@@ -23,7 +23,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          cd app/iness
+          cd iness
           npm install
 
       - name: Install Expo CLI
@@ -33,22 +33,24 @@ jobs:
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
         run: |
-          cd app/iness
+          cd iness
           BRANCH_NAME=${GITHUB_REF##*/}
           echo "Branch: $BRANCH_NAME"
-
+          
           if [ "$BRANCH_NAME" = "ios-testflight" ]; then
             eas build --platform ios --profile preview --non-interactive --wait
           fi
 
   submit:
-    name: eas_top_submit
+    name: eas-submit
     runs-on: ubuntu-latest
     needs: build
     if: github.ref == 'refs/heads/ios-testflight'
-
     steps:
-      - name: Install EAS CLI
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Install Expo CLI
         run: npm install -g eas-cli
 
       - name: Submit iOS Build
@@ -58,5 +60,6 @@ jobs:
           APPLE_API_KEY_CONTENT: ${{ secrets.APPLE_API_KEY_CONTENT }}
           APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
         run: |
-          cd app/iness
+          cd iness
           eas submit --platform ios --profile preview --non-interactive --latest
+
