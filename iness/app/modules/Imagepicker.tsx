@@ -13,6 +13,7 @@ import { uploadToAzureFromExpo } from "@/utils/azureUtils"; // Adjust paths acco
 import { userService } from "../services/user.service";
 import { transformatiomImageService } from "../services/transofmationImage.service";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+
 interface FloatingCameraButtonProps {}
 
 const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
@@ -54,26 +55,27 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
       ]).start();
     }
   };
+  // const requestPermissions = async (): Promise<boolean> => {
+  //   const { status: cameraStatus } =
+  //     await Camera.requestCameraPermissionsAsync();
+  //   const { status: mediaStatus } =
+  //     await MediaLibrary.requestPermissionsAsync();
 
+  //   if (cameraStatus !== "granted" || mediaStatus !== "granted") {
+  //     alert("Camera and Media permissions are required to upload content.");
+  //     return false;
+  //   }
+
+  //   return true;
+  // };
   const pickImage = async (mode: "camera" | "gallery") => {
     setImageUploadLoader(true);
+    console.log("called");
 
     try {
-      // Step 1: Ask permission
-      const permission =
-        mode === "camera"
-          ? await ImagePicker.requestCameraPermissionsAsync()
-          : await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (!permission.granted) {
-        setSnackbarVisible(true);
-        setSnackbarMessage(
-          mode === "camera"
-            ? "Camera permission is required."
-            : "Gallery permission is required."
-        );
-        return;
-      }
+      // 👉 Ask for permissions
+      // const hasPermission = await requestPermissions();
+      // if (!hasPermission) return;
 
       let result: ImagePicker.ImagePickerResult;
 
@@ -174,7 +176,9 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
         setSnackbarVisible(true);
         setSnackbarMessage("Failed to save file.");
       }
-    } catch (err) {
+    } catch (err: any) {
+      console.log(err.message);
+
       if (err !== "cancel") {
         console.error(err);
         setSnackbarVisible(true);
@@ -187,22 +191,22 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
 
   return (
     <>
-      {menuOpen && (
+      {/* {menuOpen && (
         <Animated.View
           style={[
             styles.subButton,
             {
               transform: [
                 {
-                  translateY: animation1.interpolate({
+                  translateY: animation2.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [0, -80],
+                    outputRange: [0, -90],
                   }),
                 },
                 {
-                  translateX: animation1.interpolate({
+                  translateX: animation2.interpolate({
                     inputRange: [0, 1],
-                    outputRange: [0, -60],
+                    outputRange: [0, 0],
                   }),
                 },
               ],
@@ -216,9 +220,9 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
             <Ionicons name="document" size={24} color="#fff" />
           </TouchableOpacity>
         </Animated.View>
-      )}
+      )} */}
 
-      {menuOpen && (
+      {/* {menuOpen && (
         <Animated.View
           style={[
             styles.subButton,
@@ -248,10 +252,10 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
             <Ionicons name="camera" size={24} color="#fff" />
           </TouchableOpacity>
         </Animated.View>
-      )}
+      )} */}
 
       <TouchableOpacity
-        onPress={toggleMenu}
+        onPress={() => pickImage("gallery")}
         style={styles.floatingButton}
         activeOpacity={0.8}
       >
@@ -275,7 +279,7 @@ const styles = StyleSheet.create({
   floatingButton: {
     position: "absolute",
     bottom: 10,
-    right: 20,
+    right: 10,
     backgroundColor: "#19002E",
     width: 60,
     height: 60,

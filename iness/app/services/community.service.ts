@@ -14,18 +14,27 @@ export const communityService = {
   createPostComment,
   getPostComment,
   getUserCommunityById,
+  deletePost,
 };
 
 //// Funciton for updating the user in using backend then storing in AsyncStorage----/
 async function getCommunityPosts(
   communityId: string,
   page: number,
-  limit: number
+  limit: number,
+  allPost: any
 ): Promise<any> {
   try {
     return fetchWrapper.get(
-      `${baseUrl}/get-community-posts/?communityId=${communityId}&page=${page}&limit=${limit}`
+      `${baseUrl}/get-community-posts/?communityId=${communityId}&page=${page}&limit=${limit}&allPost=${allPost}`
     );
+  } catch (error: any) {
+    throw new Error("Error updating user: " + error.message);
+  }
+}
+async function deletePost(postId: string): Promise<any> {
+  try {
+    return fetchWrapper.delete(`${baseUrl}/delete-post/${postId}`);
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }

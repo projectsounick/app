@@ -50,9 +50,9 @@ export default function DashboardLayout() {
         }}
       />
       <Tabs.Screen
-        name="community"
+        name="feed"
         options={{
-          tabBarLabel: "Community",
+          tabBarLabel: "Feed",
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons
               name="account-group"

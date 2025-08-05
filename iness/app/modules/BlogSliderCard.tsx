@@ -84,7 +84,7 @@ export default function BlogSliderCard() {
               borderColor: "#D6B6FF",
               borderRadius: 12,
               marginRight: 12,
-              width: 290,
+              width: 330,
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "center",

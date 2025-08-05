@@ -11,10 +11,11 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
   Keyboard,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { Video } from "expo-av";
+import { ResizeMode, Video } from "expo-av";
 import theme from "../Theme/globalTheme";
 import { uploadToAzureFromExpo } from "@/utils/azureUtils";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
@@ -26,7 +27,7 @@ import { ActivityIndicator } from "react-native-paper";
 
 const screenWidth = Dimensions.get("window").width;
 
-const CustomPostModal = ({ setPosts }: any) => {
+const CustomPostModal = ({ setPosts, communityId }: any) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [postType, setPostType] = useState<"text" | "image" | "video" | null>(
     null
@@ -65,8 +66,10 @@ const CustomPostModal = ({ setPosts }: any) => {
       setMedia((prev) => [...prev, ...selectedUris]);
     }
   };
+
   const handlePost = async () => {
     if (!postType || (!caption && media.length === 0)) return;
+
     setLoading(true);
     try {
       const storageDetails =
@@ -114,7 +117,7 @@ const CustomPostModal = ({ setPosts }: any) => {
       }
 
       const post: Post = {
-        communityId: "68866c50cf2f2ea93541e6f5",
+        communityId: communityId || "68866c50cf2f2ea93541e6f5",
         type: postType,
         media: uploadedUrls,
         text: caption,
@@ -124,8 +127,19 @@ const CustomPostModal = ({ setPosts }: any) => {
         createdBy: userId,
       };
       let response = await callService(post);
+      console.log("this is post response");
+
+      console.log(response);
+
       if (response.success) {
-        setPosts((prev: any) => [response.data, ...prev]);
+        const newPost = {
+          ...response.data,
+          likeCount: 0,
+          likedByUser: false,
+          commentCount: 0,
+        };
+
+        setPosts((prev: any) => [newPost, ...prev]);
       }
     } catch (err) {
       console.error("Post error:", err);
@@ -203,23 +217,48 @@ const CustomPostModal = ({ setPosts }: any) => {
                       showsHorizontalScrollIndicator={false}
                       onScroll={handleScroll}
                       scrollEventThrottle={16}
+                      style={{
+                        width: screenWidth,
+                        height: 220,
+                      }}
                     >
-                      {media.map((uri, index) =>
-                        postType === "video" ? (
-                          <Video
-                            key={index}
-                            source={{ uri }}
-                            style={styles.slideImage}
-                            useNativeControls
-                          />
-                        ) : (
-                          <Image
-                            key={index}
-                            source={{ uri }}
-                            style={styles.slideImage}
-                          />
-                        )
-                      )}
+                      {media.map((uri, index) => (
+                        <View
+                          key={index}
+                          style={{
+                            width: screenWidth,
+                            height: 220,
+
+                            alignItems: "center",
+                            justifyContent: "center", // ⬅️ center vertically
+                          }}
+                        >
+                          {postType === "video" ? (
+                            <Video
+                              source={{ uri }}
+                              style={{
+                                width: screenWidth - 40,
+                                height: 200,
+                                borderRadius: 10,
+                              }}
+                              useNativeControls
+                              resizeMode={ResizeMode.CONTAIN}
+                            />
+                          ) : (
+                            <Pressable>
+                              <Image
+                                source={{ uri }}
+                                style={{
+                                  width: screenWidth - 40,
+                                  height: "100%",
+                                  borderRadius: 10,
+                                  resizeMode: "contain",
+                                }}
+                              />
+                            </Pressable>
+                          )}
+                        </View>
+                      ))}
                     </ScrollView>
 
                     <View style={styles.dotsContainer}>

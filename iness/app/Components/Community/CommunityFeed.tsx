@@ -10,21 +10,25 @@ import {
   ActivityIndicator,
   Dimensions,
   ScrollView,
+  Pressable,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ResizeMode, Video } from "expo-av";
 import { communityService } from "@/app/services/community.service";
 import { useFocusEffect } from "expo-router";
 import theme from "@/app/Theme/globalTheme";
+import ImageViewerModal from "@/app/modules/ImageModel";
 
 const screenWidth = Dimensions.get("window").width;
 
 const CommunityPosts = ({
   communityId,
   posts,
+  communityName,
   setPosts,
 }: {
   communityId: string;
+  communityName: string;
   posts: any[];
   setPosts: any;
 }) => {
@@ -38,22 +42,55 @@ const CommunityPosts = ({
     onEndReachedCalledDuringMomentum,
     setOnEndReachedCalledDuringMomentum,
   ] = useState(false);
-
+  const [deleteloading, setDeleteLoading] = useState<any>({
+    _id: null,
+    loading: true,
+  });
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedMedia, setSelectedMedia] = useState<{
+    url: string;
+    type: "image" | "video";
+  } | null>(null);
+  const [showMyPosts, setShowMyPosts] = useState(false);
   const [commentsMap, setCommentsMap] = useState<Record<string, any[]>>({});
   const [newComments, setNewComments] = useState<Record<string, string>>({});
   const [activeMediaIndex, setActiveMediaIndex] = useState<
     Record<string, number>
   >({});
+  async function handleDelete(_id: any) {
+    try {
+      setDeleteLoading({ _id: _id, loading: true });
+      const response = await communityService.deletePost(_id);
+
+      if (response.success) {
+        setPosts((prevPosts: any[]) =>
+          prevPosts.filter((post) => post._id !== _id)
+        );
+      } else {
+        alert("Unable to delete the post");
+      }
+    } catch (error) {
+      alert("Unable to delete the post");
+    } finally {
+      setDeleteLoading({ _id: null, loading: false });
+    }
+  }
 
   const fetchPosts = useCallback(
     async (pageToFetch: number = 1) => {
+      console.log("called");
+
       setIsLoading(true);
       try {
+        let allPost = showMyPosts ? false : true;
         const response = await communityService.getCommunityPosts(
           communityId,
           pageToFetch,
-          20
+          20,
+          allPost
         );
+        console.log(response);
+
         if (response.success) {
           setPosts(response.data);
           const totalPages = response.pagination.totalPages;
@@ -65,12 +102,12 @@ const CommunityPosts = ({
         setIsLoading(false);
       }
     },
-    [communityId, setPosts]
+    [communityId, setPosts, showMyPosts]
   );
 
   useEffect(() => {
     fetchPosts(page);
-  }, [page]);
+  }, [page, showMyPosts]);
 
   const fetchComments = async (postId: string) => {
     try {
@@ -86,6 +123,10 @@ const CommunityPosts = ({
     }
   };
 
+  const openModal = (url: string, type: "image" | "video") => {
+    setSelectedMedia({ url, type });
+    setModalVisible(true);
+  };
   const toggleCommentSection = async (postId: string) => {
     setVisibleComments((prev) => ({
       ...prev,
@@ -115,9 +156,12 @@ const CommunityPosts = ({
       console.error("Failed to add comment:", error);
     }
   };
+
   const handleToggleLike = async (postId: string) => {
     try {
       let response = await communityService.togglePostLike(postId);
+      console.log("this is like response");
+
       console.log(response);
 
       setPosts((prevPosts: any) =>
@@ -204,15 +248,17 @@ const CommunityPosts = ({
                     useNativeControls
                   />
                 ) : (
-                  <Image
-                    source={{ uri: mediaUrl }}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      resizeMode: "cover",
-                      borderRadius: 10,
-                    }}
-                  />
+                  <Pressable onPress={() => openModal(mediaUrl, "image")}>
+                    <Image
+                      source={{ uri: mediaUrl }}
+                      resizeMode="contain"
+                      style={{
+                        width: screenWidth,
+                        height: 300,
+                        borderRadius: 10,
+                      }}
+                    />
+                  </Pressable>
                 )}
               </View>
             );
@@ -247,23 +293,49 @@ const CommunityPosts = ({
 
   const renderPost = ({ item }: { item: any }) => (
     <View style={styles.card}>
-      <View style={styles.header}>
-        {item.createdBy?.profilePic ? (
-          <Image
-            source={{ uri: item.createdBy.profilePic }}
-            style={styles.avatar}
-          />
-        ) : (
-          <Ionicons
-            name="person-circle-outline"
-            size={40}
-            color="gray"
-            style={{ marginRight: 8 }}
-          />
+      <View
+        style={[
+          styles.header,
+          {
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          },
+        ]}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          {item.createdBy?.profilePic ? (
+            <Image
+              source={{ uri: item.createdBy.profilePic }}
+              style={styles.avatar}
+              resizeMode="cover"
+            />
+          ) : (
+            <Ionicons
+              name="person-circle-outline"
+              size={40}
+              color="gray"
+              style={{ marginRight: 8 }}
+            />
+          )}
+          <Text style={styles.username}>
+            {item.createdBy?.name || "Anonymous"}
+          </Text>
+        </View>
+
+        {showMyPosts && (
+          <>
+            {deleteloading.loading && deleteloading._id === item._id ? (
+              <View>
+                <ActivityIndicator />
+              </View>
+            ) : (
+              <TouchableOpacity onPress={() => handleDelete(item._id)}>
+                <Ionicons name="trash-outline" size={24} color="#000" />
+              </TouchableOpacity>
+            )}
+          </>
         )}
-        <Text style={styles.username}>
-          {item.createdBy?.name || "Anonymous"}
-        </Text>
       </View>
 
       {item.text && <Text style={styles.text}>{item.text}</Text>}
@@ -329,6 +401,82 @@ const CommunityPosts = ({
         </View>
       ) : (
         <>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginVertical: 10,
+              paddingHorizontal: 16,
+            }}
+          >
+            {/* Community Name with Icon */}
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Ionicons
+                name="people"
+                size={18}
+                color="#19002E"
+                style={{ marginRight: 6 }}
+              />
+              <Text
+                style={{
+                  fontSize: 16,
+                  fontWeight: "bold",
+                  color: "#19002E",
+                }}
+              >
+                {communityName}
+              </Text>
+            </View>
+
+            {/* Toggle Button */}
+            <View
+              style={{
+                flexDirection: "row",
+                backgroundColor: "#e0e0e0",
+                borderRadius: 20,
+                overflow: "hidden",
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  paddingVertical: 8,
+                  paddingHorizontal: 16,
+                  backgroundColor: !showMyPosts ? "#19002E" : "transparent",
+                }}
+                onPress={() => setShowMyPosts(false)}
+              >
+                <Text
+                  style={{
+                    color: !showMyPosts ? "#fff" : "#000",
+                    fontWeight: "bold",
+                    fontSize: 12,
+                  }}
+                >
+                  All Posts
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={{
+                  paddingVertical: 8,
+                  paddingHorizontal: 16,
+                  backgroundColor: showMyPosts ? "#19002E" : "transparent",
+                }}
+                onPress={() => setShowMyPosts(true)}
+              >
+                <Text
+                  style={{
+                    color: showMyPosts ? "#fff" : "#000",
+                    fontWeight: "bold",
+                  }}
+                >
+                  My Posts
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+
           <FlatList
             data={posts}
             keyExtractor={(item) => item._id}
@@ -341,6 +489,13 @@ const CommunityPosts = ({
           />
           <PaginationControls />
         </>
+      )}
+      {selectedMedia?.type === "image" && (
+        <ImageViewerModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          imageUrl={selectedMedia.url}
+        />
       )}
     </View>
   );
@@ -517,5 +672,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
+  },
+  toggleButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    marginHorizontal: 8,
+  },
+  activeToggleButton: {
+    backgroundColor: "#007AFF",
+    borderColor: "#007AFF",
+  },
+  toggleButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });

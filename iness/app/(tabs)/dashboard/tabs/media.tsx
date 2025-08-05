@@ -71,7 +71,7 @@ export default function MediaScreen() {
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
       edges={["top", "left", "right"]}
     >
-      <SmallHeader title="Iness TV" />
+      <SmallHeader title="Media" />
       <ScrollView
         contentContainerStyle={{ padding: 20 }}
         scrollEventThrottle={16}
