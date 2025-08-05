@@ -2,7 +2,7 @@
   "expo": {
     "name": "iness",
     "slug": "iness",
-    "version": "1.0.13",
+    "version": "1.0.14",
     "orientation": "portrait",
     "icon": "./assets/images/logonew.png",
     "scheme": "myapp",
@@ -12,7 +12,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.iness.fitness",
-      "buildNumber": "1.0.13",
+      "buildNumber": "1.0.14",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSMicrophoneUsageDescription": "We use the microphone for video recording.",
@@ -20,7 +20,7 @@
       }
     },
     "android": {
-      "versionCode": 13,
+      "versionCode": 14,
       "googleServicesFile": "./android/app/google-services.json",
       "permissions": ["NOTIFICATIONS"],
       "intentFilters": [
