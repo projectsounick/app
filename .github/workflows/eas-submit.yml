@@ -50,9 +50,18 @@ jobs:
       - name: Checkout Repo
         uses: actions/checkout@v3
 
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+         node-version: 18
+
       - name: Install Expo CLI
         run: npm install -g eas-cli
 
+      - name: Install Dependencies
+        run: |
+         cd iness
+         npm install
       - name: Submit iOS Build
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
