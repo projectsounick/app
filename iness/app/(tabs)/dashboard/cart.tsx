@@ -35,6 +35,8 @@ export interface PhonePeTransactionResponse {
 export default function CartScreen() {
   //// getting the cart values from the store -------------------------/
   const cartItems = useSelector((state: RootState) => state.cart.cartItems);
+  console.log(cartItems);
+
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState({
     fullAddress: "",

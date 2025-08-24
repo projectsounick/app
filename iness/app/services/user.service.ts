@@ -1,4 +1,7 @@
-import { ApiResponseInterface } from "../interfaces/otherInterfaces";
+import {
+  ApiResponseInterface,
+  ComplaintInterface,
+} from "../interfaces/otherInterfaces";
 import { config } from "../shared/config";
 import { fetchWrapper } from "../helpers/fetchWrapper";
 import { router } from "expo-router";
@@ -12,6 +15,10 @@ export const userService = {
   logout,
   getStorageAccountDetails,
   generateRefreshToken,
+  deleteaccount,
+  addUserComplain,
+  getActiveDietPlans,
+  blockUser,
 };
 
 //// Function for sending the otp to the user ---------------/
@@ -65,6 +72,13 @@ async function logout() {
     console.error("Logout error:", error);
   }
 }
+async function deleteaccount() {
+  try {
+    return fetchWrapper.delete(`${baseUrl}/delete-user`);
+  } catch (error) {
+    console.error("Logout error:", error);
+  }
+}
 
 ///// Function for getting the storage account details ------------------------------/
 async function getStorageAccountDetails(folderName: string) {
@@ -106,6 +120,31 @@ async function generateRefreshToken(userId: string) {
     }
 
     return response;
+  } catch (error: any) {
+    throw new Error("Error updating user: " + error.message);
+  }
+}
+//// Funciton for Complaining ----/
+async function addUserComplain(data: ComplaintInterface): Promise<any> {
+  try {
+    return fetchWrapper.post(`${baseUrl}/add-user-complain`, { ...data });
+  } catch (error: any) {
+    throw new Error("Error updating user: " + error.message);
+  }
+}
+//// Funciton for userblocking ----/
+async function blockUser(data: any): Promise<any> {
+  try {
+    return fetchWrapper.post(`${baseUrl}/block-user`, { ...data });
+  } catch (error: any) {
+    throw new Error("Error updating user: " + error.message);
+  }
+}
+
+////Function for getting the user active diet plans ----------------------------/
+async function getActiveDietPlans() {
+  try {
+    return fetchWrapper.get(`${baseUrl}/get-active-diets`);
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }

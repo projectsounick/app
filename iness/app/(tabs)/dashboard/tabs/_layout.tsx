@@ -53,6 +53,7 @@ export default function DashboardLayout() {
         name="feed"
         options={{
           tabBarLabel: "Feed",
+
           tabBarIcon: ({ color }) => (
             <MaterialCommunityIcons
               name="account-group"

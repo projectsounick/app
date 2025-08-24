@@ -3,124 +3,72 @@ import {
   View,
   Text,
   ScrollView,
-  TouchableOpacity,
-  ImageBackground,
-  Modal,
-  Image,
-  Dimensions,
+  ActivityIndicator,
+  SafeAreaView,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import BannerCard from "@/app/modules/BannerCard";
-import {
-  offlineSessionCardData,
-  onlineSessionCardData,
-} from "@/utils/ModuletaticData";
 import SmallHeader from "@/app/modules/SmallHeader";
 import BackHeader from "@/app/modules/BackHeader";
-import Icon from "react-native-vector-icons/Ionicons"; // for arrow icon
-import { SafeAreaView } from "react-native-safe-area-context";
-
-const { width } = Dimensions.get("window");
+import BannerCard from "@/app/modules/BannerCard";
+import useGetDataHook from "@/hooks/useFetchHook";
+import { otherService } from "@/app/services/singleService.service";
 
 const BookSessionScreen = () => {
-  const navigation = useNavigation();
-  const [showModal, setShowModal] = useState(true);
+  const { data, loading, fetchData } = useGetDataHook(
+    otherService.getAvailableServices
+  );
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right"]}
-    >
-      {/* Modal */}
-      <Modal visible={showModal} transparent animationType="fade">
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            justifyContent: "center",
-            alignItems: "center",
-            paddingHorizontal: 30,
-          }}
-        >
-          <ImageBackground
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: 20,
-              padding: 25,
-              alignItems: "center",
-              width: width * 0.8,
-            }}
-            source={require("../../../assets/images/carrauselBackground.jpg")}
-          >
-            <Text
-              style={{
-                fontSize: 20,
-                fontWeight: "bold",
-                color: "#333",
-                marginBottom: 20,
-              }}
-            >
-              Coming Soon!
-            </Text>
-
-            <TouchableOpacity
-              onPress={() => navigation.goBack()}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                paddingVertical: 10,
-                paddingHorizontal: 20,
-                backgroundColor: "#f0f0f0",
-                borderRadius: 10,
-              }}
-            >
-              <Icon
-                name="arrow-back"
-                size={20}
-                color="#333"
-                style={{ marginRight: 8 }}
-              />
-              <Text style={{ fontSize: 16, color: "#333" }}>Go Back</Text>
-            </TouchableOpacity>
-          </ImageBackground>
-        </View>
-      </Modal>
-
-      {/* Header and Content */}
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <SmallHeader title="Sessions" />
       <BackHeader />
 
-      <ScrollView
-        contentContainerStyle={{
-          padding: 19,
-          paddingBottom: 40,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: "700",
-            marginBottom: 6,
-            color: "#000",
+      {loading ? (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <ActivityIndicator size="large" color="#4CAF50" />
+        </View>
+      ) : data && data.length > 0 ? (
+        <ScrollView
+          contentContainerStyle={{
+            padding: 19,
+            paddingBottom: 40,
           }}
         >
-          Choose Your Training Mode
-        </Text>
-        <Text
-          style={{
-            fontSize: 14,
-            color: "#666",
-            marginBottom: 16,
-            lineHeight: 20,
-          }}
-        >
-          Get expert guidance your way{"\n"}online or in person.
-        </Text>
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: "700",
+              marginBottom: 6,
+              color: "#000",
+            }}
+          >
+            Pick What Suits You Best
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              color: "#666",
+              marginBottom: 16,
+              lineHeight: 20,
+            }}
+          >
+            Get expert guidance your way{"\n"}online or in person.
+          </Text>
 
-        <BannerCard cardData={onlineSessionCardData} />
-        <View style={{ height: 16 }} />
-        <BannerCard cardData={offlineSessionCardData} />
-      </ScrollView>
+          {data.map((service: any) => (
+            <BannerCard key={service._id} cardData={service} />
+          ))}
+        </ScrollView>
+      ) : (
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        >
+          <Text style={{ fontSize: 16, color: "#666", textAlign: "center" }}>
+            No service available.{"\n"}We will be adding soon.
+          </Text>
+        </View>
+      )}
     </SafeAreaView>
   );
 };

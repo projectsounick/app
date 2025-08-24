@@ -12,6 +12,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Pressable,
+  FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -211,55 +212,48 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
                       value={caption}
                       onChangeText={setCaption}
                     />
-                    <ScrollView
+                    <FlatList
+                      data={media}
+                      keyExtractor={(_, index) => index.toString()}
                       horizontal
                       pagingEnabled
                       showsHorizontalScrollIndicator={false}
                       onScroll={handleScroll}
-                      scrollEventThrottle={16}
-                      style={{
-                        width: screenWidth,
-                        height: 220,
-                      }}
-                    >
-                      {media.map((uri, index) => (
+                      scrollEventThrottle={14}
+                      renderItem={({ item }) => (
                         <View
-                          key={index}
                           style={{
                             width: screenWidth,
                             height: 220,
-
                             alignItems: "center",
-                            justifyContent: "center", // ⬅️ center vertically
+                            justifyContent: "center",
                           }}
                         >
                           {postType === "video" ? (
                             <Video
-                              source={{ uri }}
+                              source={{ uri: item }}
                               style={{
-                                width: screenWidth - 40,
-                                height: 200,
-                                borderRadius: 10,
+                                width: screenWidth, // ✅ fill full page
+                                height: 220, // keep height fixed
                               }}
                               useNativeControls
-                              resizeMode={ResizeMode.CONTAIN}
+                              resizeMode={ResizeMode.COVER} // crop/cover to fill
                             />
                           ) : (
                             <Pressable>
                               <Image
-                                source={{ uri }}
+                                source={{ uri: item }}
                                 style={{
-                                  width: screenWidth - 40,
-                                  height: "100%",
-                                  borderRadius: 10,
-                                  resizeMode: "contain",
+                                  width: screenWidth, // ✅ fill full page
+                                  height: 220,
                                 }}
+                                resizeMode="cover"
                               />
                             </Pressable>
                           )}
                         </View>
-                      ))}
-                    </ScrollView>
+                      )}
+                    />
 
                     <View style={styles.dotsContainer}>
                       {media.map((_, i) => (

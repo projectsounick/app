@@ -3,9 +3,11 @@ import { View, Text, Image, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import theme from "@/app/Theme/globalTheme";
 import { ChatMessageBubbleProps } from "@/app/interfaces/chatInterface";
+import { router } from "expo-router";
 
 const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
   item,
+  index,
   setSelectedImage,
   setImageModalVisible,
 }) => {
@@ -42,13 +44,13 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
         ) : null}
 
         {/* Attachments */}
-        {item.attachments?.map((file: any, index) => {
+        {item.attachments?.map((file: any, idx) => {
           const fileUrl = typeof file === "string" ? file : file.name;
           const isImage = /\.(jpg|jpeg|png|gif|webp)$/i.test(fileUrl);
 
           return (
             <TouchableOpacity
-              key={index}
+              key={idx}
               style={{ marginTop: 8 }}
               onPress={() => {
                 setImageModalVisible(true);
@@ -76,6 +78,37 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
             </TouchableOpacity>
           );
         })}
+
+        {/* "Go to Plans" Button inside chat bubble */}
+        {index === 0 && !isUser && (
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#fff",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
+              paddingVertical: 8,
+              paddingHorizontal: 14,
+              borderRadius: 8,
+              marginTop: 10,
+            }}
+            onPress={() => {
+              router.push("/(tabs)/dashboard/plan");
+            }}
+          >
+            <Text
+              style={{
+                color: "#000",
+                fontWeight: "bold",
+                fontSize: 13,
+                marginRight: 6,
+              }}
+            >
+              Go to Plans
+            </Text>
+            <Ionicons name="arrow-forward" size={16} color="#000" />
+          </TouchableOpacity>
+        )}
       </View>
 
       <Text style={{ fontSize: 10, color: "#888", marginTop: 4 }}>

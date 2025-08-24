@@ -14,6 +14,7 @@ interface UserData {
   phoneNumber: string;
   assignedCoupons: string[];
   _id: string;
+  healthReport?: string;
   preferences?: {
     date: string;
     slot: string;

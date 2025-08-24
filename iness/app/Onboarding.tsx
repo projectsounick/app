@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,12 +9,16 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   Platform,
+  ScrollView,
 } from "react-native";
+import Modal from "react-native-modal";
+import Animated, { FadeInUp } from "react-native-reanimated";
+import { Ionicons } from "@expo/vector-icons";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import theme from "./Theme/globalTheme";
 import OnboardingName from "@/components/Onboarding/OnboardingName";
 import OnboardingSex from "@/components/Onboarding/OnboardingSex";
-import { Ionicons } from "@expo/vector-icons"; // Make sure this is installed
 import OnboardingPrimaryGoal from "@/components/Onboarding/OnboardingPrimaryGoal";
 import OnboardingtimeCommitment from "@/components/Onboarding/OnboardingCommitment";
 import { onboardingSteps } from "@/utils/onboardingStaticValues";
@@ -27,46 +31,38 @@ import { userService } from "./services/user.service";
 import CustomSnackbar from "./modules/Snackbar";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import OnboardingWeight from "@/components/Onboarding/OnboardingWeight";
-import OnboardingHeading from "./modules/OnboardingHeading";
 import OnboardingHeight from "@/components/Onboarding/OnboardingHeight";
 import OnboardingDOB from "@/components/Onboarding/OnboardingDOB";
 import OnboardingphoneNumber from "@/components/Onboarding/OnboardingPhoneNumber";
-import { SafeAreaView } from "react-native-safe-area-context";
+import InfoModal from "@/components/Onboarding/Information";
 
 //// Main functional component for the Onboarding screen ///// -----------------------------------/
 const OnboardingScreen = () => {
   const [currentStep, setCurrentStep] = useState(0);
+  const [showIntroModal, setShowIntroModal] = useState(true); // Show intro first
   const navigation = useNavigation<any>();
 
   const {
     loading,
-    data,
     setLoading,
-    callService,
     snackbarVisible,
     snackbarMessage,
     setSnackbarVisible,
     setSnackbarMessage,
   } = useServiceWithSnackbar(userService.updateUser);
+
   const handleNext = async () => {
     if (currentStep < onboardingSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
       setLoading(true);
-      /// So this is the final step of the onboarding process
-      /// we will make an api call to the backend will save user data will
-      /// move the user to dashboard screen
       const userData =
         await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
       if (userData && userData.exists) {
-        //// Adding onboarding ==> true to the user data
         let data = userData.data;
         data.onboarding = true;
-        //// Function for update
-
         const { _id, role, __v, jwtToken, ...cleanData } = data;
         let response = await userService.updateUser(cleanData);
-
         if (response.success) {
           navigation.navigate("secondsplashscreen");
         }
@@ -124,13 +120,22 @@ const OnboardingScreen = () => {
 
   const progressWidth =
     ((currentStep + 1) / onboardingSteps.length) *
-    (Dimensions.get("window").width - 90); // adjusted to fit beside back button
+    (Dimensions.get("window").width - 90);
+
+  // Info points for modal
+  const infoPoints = [
+    { icon: "fitness", text: "Height, Weight & Target Weight" },
+    { icon: "medkit", text: "Medical Conditions" },
+    { icon: "flag", text: "Primary & Secondary Goals" },
+    { icon: "time", text: "Time Commitment & Preferred Workout Time" },
+    { icon: "barbell", text: "Workout Preferences & Location" },
+    { icon: "pulse", text: "Activity Level" },
+    { icon: "calendar", text: "Preferred Date & Slot" },
+    { icon: "home", text: "Address" },
+  ];
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right"]}
-    >
+    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <ImageBackground
         source={require("../assets/images/onboardingBackground.jpg")}
         style={{ flex: 1 }}
@@ -140,7 +145,7 @@ const OnboardingScreen = () => {
           behavior={Platform.OS === "ios" ? "padding" : undefined}
         >
           <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={{ flex: 1, paddingTop: 60, paddingHorizontal: 20 }}>
+            <View style={{ flex: 1, paddingTop: "15%", paddingHorizontal: 20 }}>
               {/* Row with Back Button + Progress Bar */}
               <View
                 style={{
@@ -165,8 +170,6 @@ const OnboardingScreen = () => {
                     <Ionicons name="arrow-back" size={18} color="#fff" />
                   </TouchableOpacity>
                 )}
-
-                {/* Progress Bar */}
                 <View
                   style={{
                     flex: 1,
@@ -187,8 +190,9 @@ const OnboardingScreen = () => {
                 </View>
               </View>
 
-              {/* Step Content (your OnboardingName component) */}
+              {/* Step Content */}
               <View style={{ flex: 1 }}>{renderStepComponent(loading)}</View>
+
               <CustomSnackbar
                 visible={snackbarVisible}
                 message={snackbarMessage}
@@ -199,7 +203,13 @@ const OnboardingScreen = () => {
           </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
       </ImageBackground>
-    </SafeAreaView>
+
+      {/* Intro Modal */}
+      <InfoModal
+        setShowIntroModal={setShowIntroModal}
+        showIntroModal={showIntroModal}
+      />
+    </View>
   );
 };
 

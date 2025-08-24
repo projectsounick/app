@@ -154,12 +154,7 @@ export default function MediaScreen() {
           ))
         )}
       </ScrollView>
-      <CustomSnackbar
-        visible={snackbarVisible}
-        message={snackbarMessage}
-        bgColor={theme.colors.primary}
-        onDismiss={() => setSnackbarVisible(false)}
-      />
+
       {updateLoader && <FullScreenLoader />}
     </SafeAreaView>
   );

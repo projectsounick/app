@@ -55,9 +55,11 @@ async function createPost(data: Post): Promise<ApiResponseInterface> {
   }
 }
 
-async function togglePostLike(postId: string) {
+async function togglePostLike(postId: string, notificationData: any) {
   try {
-    return fetchWrapper.post(`${baseUrl}/toggle-post-like/${postId}`, {});
+    return fetchWrapper.post(`${baseUrl}/toggle-post-like/${postId}`, {
+      ...notificationData,
+    });
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }

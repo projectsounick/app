@@ -16,15 +16,30 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addToCart: (state, action: PayloadAction<any>) => {
+      console.log(action.payload);
+
       if (action.payload.product) {
+        // Product case
         state.cartItems.push(action.payload);
-      } else {
-        const existingItem = state.cartItems.find(
+      } else if (action.payload.serviceId) {
+        // Service case
+        const existingService = state.cartItems.find(
+          (item) => item.serviceId === action.payload.serviceId
+        );
+
+        if (existingService) {
+          existingService.quantity += action.payload.quantity;
+        } else {
+          state.cartItems.push(action.payload);
+        }
+      } else if (action.payload.plan) {
+        // Plan case
+        const existingPlan = state.cartItems.find(
           (item) => item.plan?.planItemId === action.payload.productId
         );
 
-        if (existingItem) {
-          existingItem.quantity += action.payload.quantity;
+        if (existingPlan) {
+          existingPlan.quantity += action.payload.quantity;
         } else {
           state.cartItems.push(action.payload);
         }

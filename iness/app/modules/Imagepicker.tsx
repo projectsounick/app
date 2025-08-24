@@ -13,61 +13,61 @@ import { uploadToAzureFromExpo } from "@/utils/azureUtils"; // Adjust paths acco
 import { userService } from "../services/user.service";
 import { transformatiomImageService } from "../services/transofmationImage.service";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import DietPlanBottomSheet from "./PdfBottomSheet";
 
 interface FloatingCameraButtonProps {}
 
 const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
   const animation1 = useRef(new Animated.Value(0)).current;
-  const animation2 = useRef(new Animated.Value(0)).current;
+  const [visible, setVisible] = useState(false);
+  const onClose = () => {
+    setVisible(false);
+  };
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [imageUploadLoader, setImageUploadLoader] = useState(false);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-
+  const openDietPlanModal = () => {
+    setVisible(true);
+    setMenuOpen(false);
+  };
   const toggleMenu = () => {
     if (menuOpen) {
-      Animated.parallel([
-        Animated.timing(animation1, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animation2, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start(() => setMenuOpen(false));
+      Animated.timing(animation1, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start(() => setMenuOpen(false));
     } else {
       setMenuOpen(true);
-      Animated.parallel([
-        Animated.timing(animation1, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animation2, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      Animated.timing(animation1, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
     }
   };
-  // const requestPermissions = async (): Promise<boolean> => {
-  //   const { status: cameraStatus } =
-  //     await Camera.requestCameraPermissionsAsync();
-  //   const { status: mediaStatus } =
-  //     await MediaLibrary.requestPermissionsAsync();
-
-  //   if (cameraStatus !== "granted" || mediaStatus !== "granted") {
-  //     alert("Camera and Media permissions are required to upload content.");
-  //     return false;
-  //   }
-
-  //   return true;
-  // };
+  const cameraStyle = {
+    transform: [
+      {
+        translateY: animation1.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, -80],
+        }),
+      },
+    ],
+    opacity: animation1,
+  };
+  const dietPlanStyle = {
+    transform: [
+      {
+        translateY: animation1.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, -150],
+        }),
+      },
+    ],
+    opacity: animation1,
+  };
   const pickImage = async (mode: "camera" | "gallery") => {
     setImageUploadLoader(true);
     console.log("called");
@@ -122,22 +122,12 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
       const storageDetails = await userService.getStorageAccountDetails(
         "transformationImages"
       );
-      if (!storageDetails.success) {
-        setSnackbarVisible(true);
-        setSnackbarMessage("Server error, try again.");
-        return;
-      }
 
       const { storageAccountName, sasToken } = storageDetails.data;
 
       // Step 5: Get user
       const userData =
         await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-      if (!userData.exists) {
-        setSnackbarVisible(true);
-        setSnackbarMessage("User not found.");
-        return;
-      }
 
       setMenuOpen(false);
       const userId = userData.data._id;
@@ -166,23 +156,13 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
         ]);
 
       if (uploadRes?.data) {
-        setSnackbarVisible(true);
-        setSnackbarMessage(
-          type === "video"
-            ? "Video uploaded successfully!"
-            : "Image uploaded successfully!"
-        );
       } else {
-        setSnackbarVisible(true);
-        setSnackbarMessage("Failed to save file.");
       }
     } catch (err: any) {
       console.log(err.message);
 
       if (err !== "cancel") {
         console.error(err);
-        setSnackbarVisible(true);
-        setSnackbarMessage("Upload failed.");
       }
     } finally {
       setImageUploadLoader(false);
@@ -190,72 +170,40 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
   };
 
   return (
-    <>
-      {/* {menuOpen && (
-        <Animated.View
-          style={[
-            styles.subButton,
-            {
-              transform: [
-                {
-                  translateY: animation2.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, -90],
-                  }),
-                },
-                {
-                  translateX: animation2.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 0],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
+    <View style={styles.container}>
+      {/* Diet Plan Button */}
+      {menuOpen && (
+        <Animated.View style={[styles.subButton, dietPlanStyle]}>
           <TouchableOpacity
-            onPress={() => pickImage("gallery")}
+            onPress={() => {
+              console.log("called");
+
+              openDietPlanModal();
+            }}
             style={styles.iconButton}
+            activeOpacity={0.8}
           >
-            <Ionicons name="document" size={24} color="#fff" />
+            <Ionicons name="document-text" size={24} color="#fff" />
           </TouchableOpacity>
         </Animated.View>
-      )} */}
+      )}
 
-      {/* {menuOpen && (
-        <Animated.View
-          style={[
-            styles.subButton,
-            {
-              transform: [
-                {
-                  translateY: animation2.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, -90],
-                  }),
-                },
-                {
-                  translateX: animation2.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 0],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
+      {/* Camera Button */}
+      {menuOpen && (
+        <Animated.View style={[styles.subButton, cameraStyle]}>
           <TouchableOpacity
-            onPress={() => pickImage("camera")}
+            onPress={() => pickImage("gallery")}
             style={styles.iconButton}
             activeOpacity={0.8}
           >
             <Ionicons name="camera" size={24} color="#fff" />
           </TouchableOpacity>
         </Animated.View>
-      )} */}
+      )}
 
+      {/* Main Floating Button */}
       <TouchableOpacity
-        onPress={() => pickImage("gallery")}
+        onPress={toggleMenu}
         style={styles.floatingButton}
         activeOpacity={0.8}
       >
@@ -263,23 +211,29 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
           <ActivityIndicator color="#fff" />
         ) : (
           <Ionicons
-            name={menuOpen ? "close" : "camera"}
+            name={menuOpen ? "close" : "flash-outline"}
             size={30}
             color="#fff"
           />
         )}
       </TouchableOpacity>
-    </>
+      {visible ? (
+        <DietPlanBottomSheet visible={visible} onClose={onClose} />
+      ) : null}
+    </View>
   );
 };
 
 export default memo(ImagePickerButton);
 
 const styles = StyleSheet.create({
-  floatingButton: {
+  container: {
     position: "absolute",
-    bottom: 10,
+    bottom: 20,
     right: 10,
+    alignItems: "center",
+  },
+  floatingButton: {
     backgroundColor: "#19002E",
     width: 60,
     height: 60,
@@ -291,7 +245,7 @@ const styles = StyleSheet.create({
   },
   subButton: {
     position: "absolute",
-    bottom: 1,
+    bottom: 0,
     right: 5,
     zIndex: 99,
   },

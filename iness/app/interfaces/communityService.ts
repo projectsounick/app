@@ -7,6 +7,6 @@ interface Post {
   isApproved: boolean;
 
   isActive: boolean;
-  createdBy: string;
+  createdBy: any;
 }
 export type { Post };

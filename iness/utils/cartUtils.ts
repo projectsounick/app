@@ -1,5 +1,6 @@
 import { CartItem, RawCartItem } from "@/app/interfaces/cartInterface";
 import { Product } from "@/app/interfaces/ecommerceInterface";
+import { Service } from "@/app/interfaces/otherInterfaces";
 import { DietPlan, PlanInterface } from "@/app/interfaces/planInterface";
 
 //// function for converting selected plan product to cart item structure -----------/
@@ -47,6 +48,28 @@ export function convertToCartItem(
 
     return cartItem;
   }
+}
+export function convertToServiceCartItem(
+  service: Service,
+  cartData: any
+): CartItem | null {
+  console.log("called this");
+
+  if (!service || !cartData?.serviceId) return null;
+
+  const cartItem: CartItem = {
+    name: service.title,
+    price: service.price, // assuming services have a direct price field
+    type: "service",
+    imgUrl: service.imgUrl ?? null, // first service image or empty
+
+    serviceId: cartData.serviceId,
+
+    quantity: cartData.quantity || 1,
+  };
+  console.log("go beyond this");
+
+  return cartItem;
 }
 export function convertToProductCartItem(
   product: Product,
@@ -97,6 +120,13 @@ export function isEcomProductAddableToCart(
       item.product.variationId === variationId
   );
 }
+export function isServiceAddableToCart(
+  cartItems: CartItem[],
+  serviceId: string
+): boolean {
+  return cartItems.some((item) => item.serviceId === serviceId);
+}
+
 //// Function for formatting the fetch cartitems ------------------------------/
 export function formateFetchedCartItems(cartItems: RawCartItem[]): CartItem[] {
   const formattedCartItems: CartItem[] = [];

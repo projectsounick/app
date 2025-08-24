@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -11,13 +11,20 @@ import {
   Dimensions,
   ScrollView,
   Pressable,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ResizeMode, Video } from "expo-av";
+import { Filter } from "bad-words";
+
+const filter = new Filter();
 import { communityService } from "@/app/services/community.service";
 import { useFocusEffect } from "expo-router";
 import theme from "@/app/Theme/globalTheme";
 import ImageViewerModal from "@/app/modules/ImageModel";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import { userService } from "@/app/services/user.service";
+import { Post } from "@/app/interfaces/communityService";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -51,12 +58,19 @@ const CommunityPosts = ({
     url: string;
     type: "image" | "video";
   } | null>(null);
+  const videoRef: any = useRef(null);
   const [showMyPosts, setShowMyPosts] = useState(false);
   const [commentsMap, setCommentsMap] = useState<Record<string, any[]>>({});
   const [newComments, setNewComments] = useState<Record<string, string>>({});
   const [activeMediaIndex, setActiveMediaIndex] = useState<
     Record<string, number>
   >({});
+  const [showMenuForPost, setShowMenuForPost] = useState<string | null>(null);
+  const [showTooltipForPost, setShowTooltipForPost] = useState<string | null>(
+    null
+  );
+  const [toolTipActionType, setToolTipActionType] = useState("");
+  const [blockLoading, setBlockLoading] = useState(false);
   async function handleDelete(_id: any) {
     try {
       setDeleteLoading({ _id: _id, loading: true });
@@ -80,7 +94,6 @@ const CommunityPosts = ({
     async (pageToFetch: number = 1) => {
       console.log("called");
 
-      setIsLoading(true);
       try {
         let allPost = showMyPosts ? false : true;
         const response = await communityService.getCommunityPosts(
@@ -89,7 +102,6 @@ const CommunityPosts = ({
           20,
           allPost
         );
-        console.log(response);
 
         if (response.success) {
           setPosts(response.data);
@@ -105,9 +117,82 @@ const CommunityPosts = ({
     [communityId, setPosts, showMyPosts]
   );
 
-  useEffect(() => {
-    fetchPosts(page);
-  }, [page, showMyPosts]);
+  useFocusEffect(
+    useCallback(() => {
+      setIsLoading(true);
+      fetchPosts(page);
+      return () => {
+        // Screen is unfocused (navigated away)
+        console.log("Cleaning up video");
+        if (videoRef.current) {
+          videoRef.current.stopAsync?.();
+        }
+      };
+    }, [page, showMyPosts])
+  );
+  async function toolTipAction(postDetails: any, type: string) {
+    try {
+      console.log(`this is type${type}`);
+
+      if (type === "complain") {
+        setShowTooltipForPost(postDetails._id);
+
+        let complainerId;
+        setToolTipActionType(type);
+        let loggedUser =
+          await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+        if (loggedUser.exists) {
+          complainerId = loggedUser.data._id;
+        }
+        const response = await userService.addUserComplain({
+          complainType: "feed",
+          complainedId: postDetails.createdBy._id,
+          complainerId: complainerId,
+          postId: postDetails._id,
+        });
+        setShowTooltipForPost(null);
+        alert(
+          type === "complain"
+            ? "Your complain has been recived by us ,we will have a look"
+            : "You have successfully blocked this user"
+        );
+        setShowMenuForPost(null);
+      } else {
+        setBlockLoading(true);
+
+        if (!postDetails?.createdBy?._id) {
+          alert("Block request has been sent");
+        } else {
+          //// Blocking the user -------------------------/
+          setShowTooltipForPost(postDetails._id);
+          let response = await userService.blockUser({
+            blockedUserId: postDetails.createdBy._id || null,
+          });
+
+          setShowTooltipForPost(null);
+          alert(
+            type === "complain"
+              ? "Your complain has been recived by us ,we will have a look"
+              : "You have successfully blocked this user"
+          );
+          setBlockLoading(false);
+          setShowMenuForPost(null);
+          fetchPosts(page);
+        }
+      }
+
+      return;
+    } catch (error) {
+      setShowTooltipForPost(null);
+      alert(
+        type === "complain"
+          ? "Your complain has been recived by us ,we will have a look"
+          : "You have successfully blocked this user"
+      );
+      setShowMenuForPost(null);
+    } finally {
+    }
+  }
 
   const fetchComments = async (postId: string) => {
     try {
@@ -136,13 +221,15 @@ const CommunityPosts = ({
   };
 
   const handleCommentAdd = async (postId: string) => {
-    const text = newComments[postId];
+    let text = newComments[postId];
     if (!text?.trim()) return;
+
+    text = filter.clean(text); // 👈 Censoring bad words
 
     try {
       const response = await communityService.createPostComment(postId, text);
       if (response.success) {
-        await fetchComments(postId); // refresh list
+        await fetchComments(postId);
         setPosts((prevPosts: any) =>
           prevPosts.map((post: any) =>
             post._id === postId
@@ -157,30 +244,43 @@ const CommunityPosts = ({
     }
   };
 
-  const handleToggleLike = async (postId: string) => {
-    try {
-      let response = await communityService.togglePostLike(postId);
-      console.log("this is like response");
+  const handleToggleLike = async (post: Post) => {
+    let { _id: postId, createdBy } = post;
 
-      console.log(response);
-
-      setPosts((prevPosts: any) =>
-        prevPosts.map((post: any) =>
-          post._id === postId
-            ? {
-                ...post,
-                likedByUser: !post.likedByUser,
-                likeCount: post.likedByUser
-                  ? post.likeCount - 1
-                  : post.likeCount + 1,
-              }
-            : post
-        )
-      );
-    } catch (error) {
-      console.error("Error toggling like:", error);
+    if (!postId) {
+      alert("Some error has happened");
+      return;
     }
+    const loggedUser =
+      await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+    const notificationData = {
+      reciverId: createdBy._id || null,
+      senderId: loggedUser.exists ? loggedUser.data._id : null,
+    };
+
+    communityService
+      .togglePostLike(postId, notificationData)
+      .then((response) => {
+        console.log("this is like response", response);
+
+        setPosts((prevPosts: any) =>
+          prevPosts.map((p: any) =>
+            p._id === postId
+              ? {
+                  ...p,
+                  likedByUser: !p.likedByUser,
+                  likeCount: p.likedByUser ? p.likeCount - 1 : p.likeCount + 1,
+                }
+              : p
+          )
+        );
+      })
+      .catch((error) => {
+        console.error("Error toggling like:", error);
+        alert("Failed to toggle like. Please try again.");
+      });
   };
+
   const PaginationControls = () => (
     <View style={styles.paginationControls}>
       <TouchableOpacity
@@ -203,7 +303,7 @@ const CommunityPosts = ({
     </View>
   );
 
-  const renderMedia = (postId: string, media: string[]) => {
+  const renderMedia = (postId: string, media: string[], type: string) => {
     if (!media?.length) return null;
 
     const handleScroll = (event: any) => {
@@ -225,35 +325,41 @@ const CommunityPosts = ({
           scrollEventThrottle={16}
           renderItem={({ item: mediaUrl }) => {
             const isVideo =
-              mediaUrl.endsWith(".mp4") || mediaUrl.includes("video");
+              mediaUrl.endsWith(".mp4") ||
+              mediaUrl.includes("video") ||
+              type === "video";
 
             return (
               <View
                 style={{
-                  width: screenWidth,
+                  width: 340,
+
                   height: 300,
                   justifyContent: "center",
                   alignItems: "center",
+                  gap: 10,
                 }}
               >
                 {isVideo ? (
                   <Video
+                    ref={videoRef}
                     source={{ uri: mediaUrl }}
                     style={{
-                      width: "100%",
-                      height: "100%",
+                      width: 300,
+                      height: 300,
                       borderRadius: 10,
                     }}
-                    resizeMode={ResizeMode.COVER}
+                    resizeMode={ResizeMode.CONTAIN}
                     useNativeControls
+                    shouldPlay
                   />
                 ) : (
                   <Pressable onPress={() => openModal(mediaUrl, "image")}>
                     <Image
                       source={{ uri: mediaUrl }}
-                      resizeMode="contain"
+                      resizeMode="cover"
                       style={{
-                        width: screenWidth,
+                        width: 300,
                         height: 300,
                         borderRadius: 10,
                       }}
@@ -322,27 +428,133 @@ const CommunityPosts = ({
             {item.createdBy?.name || "Anonymous"}
           </Text>
         </View>
-
-        {showMyPosts && (
-          <>
-            {deleteloading.loading && deleteloading._id === item._id ? (
-              <View>
-                <ActivityIndicator />
-              </View>
+        <View
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {showMyPosts && (
+            <>
+              {deleteloading.loading && deleteloading._id === item._id ? (
+                <View>
+                  <ActivityIndicator />
+                </View>
+              ) : (
+                <TouchableOpacity onPress={() => handleDelete(item._id)}>
+                  <Ionicons name="trash-outline" size={24} color="#000" />
+                </TouchableOpacity>
+              )}
+            </>
+          )}
+          <TouchableOpacity
+            onPress={() => {
+              setShowMenuForPost((prev) =>
+                prev === item._id ? null : item._id
+              );
+            }}
+          >
+            <Ionicons name="ellipsis-vertical" size={20} color="#000" />
+          </TouchableOpacity>
+        </View>
+        {showMenuForPost === item._id && (
+          <View
+            style={{
+              position: "absolute",
+              right: 0,
+              top: 25,
+              backgroundColor: "#fff",
+              borderRadius: 6,
+              shadowColor: "#000",
+              shadowOpacity: 0.1,
+              shadowOffset: { width: 0, height: 2 },
+              shadowRadius: 4,
+              elevation: 3,
+              paddingVertical: 5,
+              width: 150,
+              zIndex: 999,
+            }}
+          >
+            {showTooltipForPost === item._id ? (
+              <ActivityIndicator />
             ) : (
-              <TouchableOpacity onPress={() => handleDelete(item._id)}>
-                <Ionicons name="trash-outline" size={24} color="#000" />
+              <TouchableOpacity
+                onPress={() => {
+                  toolTipAction(item, "complain");
+                }}
+              >
+                <Text
+                  style={{
+                    paddingVertical: 10,
+                    paddingHorizontal: 15,
+                    fontSize: 16,
+                    color: "#333",
+                  }}
+                >
+                  Complain
+                </Text>
               </TouchableOpacity>
             )}
-          </>
+
+            <TouchableOpacity
+              onPress={() => {
+                Alert.alert(
+                  "Block User",
+                  "Are you sure you want to block this user? You won't be able to see their content from now on.",
+                  [
+                    { text: "Cancel", style: "cancel" },
+                    {
+                      text: "Yes, Block",
+                      onPress: async () => {
+                        let loggedUser =
+                          await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
+                            "user"
+                          );
+                        let currentUser = loggedUser.exists
+                          ? loggedUser.data._id
+                          : null;
+
+                        if (item.createdBy._id === currentUser) {
+                          Alert.alert(
+                            "Action not allowed",
+                            "You can't block yourself"
+                          );
+                        } else {
+                          toolTipAction(item, "block");
+                        }
+                      },
+                    },
+                  ]
+                );
+              }}
+            >
+              {blockLoading ? (
+                <ActivityIndicator />
+              ) : (
+                <Text
+                  style={{
+                    paddingVertical: 10,
+                    paddingHorizontal: 15,
+                    fontSize: 16,
+                    color: "red",
+                    fontWeight: "600",
+                  }}
+                >
+                  Block User
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
         )}
       </View>
 
       {item.text && <Text style={styles.text}>{item.text}</Text>}
-      {renderMedia(item._id, item.media)}
+      {renderMedia(item._id, item.media, item.type)}
 
       <View style={styles.actions}>
-        <TouchableOpacity onPress={() => handleToggleLike(item._id)}>
+        <TouchableOpacity onPress={() => handleToggleLike(item)}>
           <Ionicons
             name={item.likedByUser ? "heart" : "heart-outline"}
             size={20}
@@ -350,14 +562,14 @@ const CommunityPosts = ({
           />
         </TouchableOpacity>
         <Text style={styles.iconText}>{item.likeCount ?? 0}</Text>
-
+        {/* 
         <TouchableOpacity
           style={{ marginLeft: 16 }}
           onPress={() => toggleCommentSection(item._id)}
         >
           <Ionicons name="chatbubble-outline" size={20} color="#333" />
         </TouchableOpacity>
-        <Text style={styles.iconText}>{item.commentCount ?? 0}</Text>
+        <Text style={styles.iconText}>{item.commentCount ?? 0}</Text> */}
       </View>
 
       {visibleComments[item._id] && (
@@ -391,6 +603,81 @@ const CommunityPosts = ({
 
   return (
     <View style={{ flex: 1 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginVertical: 10,
+          paddingHorizontal: 16,
+        }}
+      >
+        {/* Community Name with Icon */}
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <Ionicons
+            name="people"
+            size={18}
+            color="#19002E"
+            style={{ marginRight: 6 }}
+          />
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: "bold",
+              color: "#19002E",
+            }}
+          >
+            {communityName}
+          </Text>
+        </View>
+
+        {/* Toggle Button */}
+        <View
+          style={{
+            flexDirection: "row",
+            backgroundColor: "#e0e0e0",
+            borderRadius: 20,
+            overflow: "hidden",
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              paddingVertical: 8,
+              paddingHorizontal: 16,
+              backgroundColor: !showMyPosts ? "#19002E" : "transparent",
+            }}
+            onPress={() => setShowMyPosts(false)}
+          >
+            <Text
+              style={{
+                color: !showMyPosts ? "#fff" : "#000",
+                fontWeight: "bold",
+                fontSize: 12,
+              }}
+            >
+              All Posts
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={{
+              paddingVertical: 8,
+              paddingHorizontal: 16,
+              backgroundColor: showMyPosts ? "#19002E" : "transparent",
+            }}
+            onPress={() => setShowMyPosts(true)}
+          >
+            <Text
+              style={{
+                color: showMyPosts ? "#fff" : "#000",
+                fontWeight: "bold",
+              }}
+            >
+              My Posts
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
       {isLoading && posts.length === 0 ? (
         <View style={styles.centerContent}>
           <ActivityIndicator size="large" color="#007BFF" />
@@ -401,82 +688,6 @@ const CommunityPosts = ({
         </View>
       ) : (
         <>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginVertical: 10,
-              paddingHorizontal: 16,
-            }}
-          >
-            {/* Community Name with Icon */}
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Ionicons
-                name="people"
-                size={18}
-                color="#19002E"
-                style={{ marginRight: 6 }}
-              />
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "bold",
-                  color: "#19002E",
-                }}
-              >
-                {communityName}
-              </Text>
-            </View>
-
-            {/* Toggle Button */}
-            <View
-              style={{
-                flexDirection: "row",
-                backgroundColor: "#e0e0e0",
-                borderRadius: 20,
-                overflow: "hidden",
-              }}
-            >
-              <TouchableOpacity
-                style={{
-                  paddingVertical: 8,
-                  paddingHorizontal: 16,
-                  backgroundColor: !showMyPosts ? "#19002E" : "transparent",
-                }}
-                onPress={() => setShowMyPosts(false)}
-              >
-                <Text
-                  style={{
-                    color: !showMyPosts ? "#fff" : "#000",
-                    fontWeight: "bold",
-                    fontSize: 12,
-                  }}
-                >
-                  All Posts
-                </Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={{
-                  paddingVertical: 8,
-                  paddingHorizontal: 16,
-                  backgroundColor: showMyPosts ? "#19002E" : "transparent",
-                }}
-                onPress={() => setShowMyPosts(true)}
-              >
-                <Text
-                  style={{
-                    color: showMyPosts ? "#fff" : "#000",
-                    fontWeight: "bold",
-                  }}
-                >
-                  My Posts
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-
           <FlatList
             data={posts}
             keyExtractor={(item) => item._id}
@@ -688,5 +899,39 @@ const styles = StyleSheet.create({
   toggleButtonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  menuDropdown: {
+    position: "absolute",
+    right: 12,
+    top: 50,
+    backgroundColor: "#fff",
+    padding: 8,
+    borderRadius: 6,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 3,
+    zIndex: 10,
+  },
+
+  menuItem: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    color: "#000",
+  },
+
+  tooltipBox: {
+    backgroundColor: "#333",
+    padding: 8,
+    marginTop: 4,
+    borderRadius: 6,
+    alignSelf: "center", // center horizontally
+    maxWidth: "50%",
+  },
+  tooltipText: {
+    color: "#fff",
+    fontSize: 12,
   },
 });

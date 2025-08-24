@@ -7,8 +7,8 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 const { width: screenWidth } = Dimensions.get("window");
 
 const DATA = [
-  { icon: "✅", line1: "4+ Years", line2: "Experience" },
-  { icon: "💪", line1: "500+", line2: "Stories" },
+  { icon: "✅", line1: "11+ Years", line2: "Experience" },
+  { icon: "💪", line1: "700+", line2: "Stories" },
   { icon: "👥", line1: "24x7", line2: "Support" },
   { icon: "🔥", line1: "Custom", line2: "Plans" },
 ];

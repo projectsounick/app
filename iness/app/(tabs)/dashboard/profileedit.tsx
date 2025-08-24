@@ -377,7 +377,7 @@ export default function EditOnboardingScreen() {
               fontSize: theme.fontSizes.medium,
             }}
           >
-            {label}
+            {label === "Sex" ? "Gender" : label}
           </Text>
           {editFields[field] ? (
             isTextInput ? (

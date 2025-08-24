@@ -10,6 +10,7 @@ interface CartItem {
     planId?: string;
     planItemId?: string;
   };
+  serviceId?: string;
   product?: {
     productId: string;
     variationId: string;
@@ -67,6 +68,7 @@ interface AddCartItemsApiCallInterface {
     productId: string;
     variationId: string;
   };
+  serviceId?: string;
 }
 
 interface CartState {

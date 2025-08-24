@@ -49,13 +49,14 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
   };
 
   const handleNext = () => {
-    if (validatePhoneNumber()) {
+    if (phoneNumber != "" && validatePhoneNumber()) {
       const formattedPhoneNumber = `+91${phoneNumber}`;
       asyncStorageUtils.updateUserDataInAsyncStorage({
         phoneNumber: formattedPhoneNumber,
       });
-      onNext();
+    } else {
     }
+    onNext();
   };
 
   return (
@@ -89,6 +90,16 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
               }}
             >
               <OnboardingHeading>Your Contact{"\n"} Number?</OnboardingHeading>
+
+              <Text
+                style={{
+                  textAlign: "center",
+                  fontSize: theme.fontSizes.small, // or a fixed small value like 12
+                  color: theme.colors.normal, // you can also use a lighter gray like "#888"
+                }}
+              >
+                (optional)
+              </Text>
             </View>
 
             <View
@@ -147,7 +158,7 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
             <AnimatedSubmitButton
               loading={false}
               onPress={handleNext}
-              title="Next"
+              title={phoneNumber === "" ? "Skip" : "Next"}
             />
           </View>
         </ScrollView>

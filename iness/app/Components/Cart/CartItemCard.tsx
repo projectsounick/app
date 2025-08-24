@@ -158,7 +158,7 @@ export default function CartItemList({
             </Text>
           ) : (
             <ScrollView
-              style={{ maxHeight: 200 }}
+              style={{ maxHeight: 500 }}
               showsVerticalScrollIndicator={false}
             >
               {items.map((item: CartItem) => {

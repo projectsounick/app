@@ -1,9 +1,8 @@
 import React, { useMemo } from "react";
 import { View, Animated, ScrollView } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+
 import SliderCard from "@/app/modules/SliderCard";
-import BannerCard from "@/app/modules/BannerCard";
-import FeatureCarousel from "@/app/modules/FeatureCarousel";
+
 import { bookSessionCardData, trackingCardData } from "@/utils/ModuletaticData";
 
 import withAnimatedHeader from "@/app/Hoc/MainHeader";
@@ -36,6 +35,9 @@ import { manualWorkoutPlanService } from "@/app/services/manualWorkoutPlan";
 import AppUpdateBottomSheet from "@/app/modules/AndroidVersionUpdateModal";
 import DualBannerCardRow from "@/app/modules/HorizontalCards";
 import InfoCarousel from "@/app/modules/AdvirtisementCarraousel";
+import TransformationCards from "@/app/modules/TransformationCards";
+import HomeSimmerSkeleton from "@/app/modules/HomeSimmerSkeleton";
+import HealthReportUploader from "@/app/modules/UploadReportPdf";
 
 const MainHeader = withAnimatedHeader(NameHeader);
 //// Main functional component for the Dashboard screen ---------------------------------/
@@ -163,18 +165,7 @@ const YourComponent = () => {
         // scrollEventThrottle={16}
       >
         {loading ? (
-          <View
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <ActivityIndicator style={{ marginTop: "20%" }} />
-          </View>
+          <HomeSimmerSkeleton />
         ) : (
           <>
             <SliderCard />
@@ -186,11 +177,13 @@ const YourComponent = () => {
             />
             <BlogSliderCard />
             <InfoCarousel />
+            <HealthReportUploader />
             {/* <FeatureCarousel /> */}
           </>
         )}
+        <TransformationCards />
         <NotificationPermissionModal />
-        <VideoPromotionModal />
+        {/* <VideoPromotionModal /> */}
       </ScrollView>
 
       <Imagepicker />

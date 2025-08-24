@@ -27,7 +27,7 @@ export default function BlogSliderCard() {
       start={{ x: 0, y: 0 }}
       style={{
         height: 190,
-        paddingVertical: 10,
+        paddingVertical: 16,
         paddingHorizontal: 12,
         borderRadius: 12,
         marginTop: 8,

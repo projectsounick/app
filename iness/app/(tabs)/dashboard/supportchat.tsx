@@ -180,8 +180,9 @@ export default function SupportScreen() {
             <FlatList
               data={data}
               keyExtractor={(_, index) => index.toString()}
-              renderItem={({ item }) => (
+              renderItem={({ item, index }) => (
                 <ChatMessage
+                  index={index}
                   item={item}
                   setSelectedImage={setSelectedImage}
                   setImageModalVisible={setImageModalVisible}
