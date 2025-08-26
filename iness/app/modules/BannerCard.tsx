@@ -6,17 +6,18 @@ import {
   Image,
   Modal,
   ScrollView,
+  StyleSheet,
   FlatList,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/Feather";
-
+import theme from "../Theme/globalTheme";
 import { cartService } from "../services/cart.service";
 import CustomSnackbar from "./Snackbar";
 import { addToCart } from "@/Slices/cartSlice";
 import { CircularProgress } from "react-native-circular-progress";
 import { ActivityIndicator } from "react-native-paper";
-import theme from "../Theme/globalTheme";
+
 import {
   convertToProductCartItem,
   convertToServiceCartItem,
@@ -89,94 +90,89 @@ const BannerCard = ({ cardData }: { cardData: any }) => {
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={{
+          flexDirection: "row",
+          alignItems: "center",
+          paddingHorizontal: 16, // ✅ space on both sides
+          paddingVertical: 20,
           borderRadius: 12,
-          padding: 12,
-          marginTop: 14,
-          height: 180,
-          justifyContent: "center",
+          marginTop: 10,
         }}
       >
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          {/* Left Text Section */}
-          <View style={{ flex: 1.2, paddingRight: 8 }}>
-            {/* Title */}
-            <Text
+        {/* Left Section (60%) */}
+        <View style={{ width: "60%", paddingRight: 10 }}>
+          {/* Title */}
+          <Text
+            style={{
+              fontSize: theme.fontSizes.medium,
+              fontWeight: "bold",
+              color: "#fff",
+              marginBottom: 8,
+            }}
+          >
+            {cardData.title}
+          </Text>
+
+          {/* Description Bullets */}
+          {cardData.descItems.slice(0, 2).map((item: string, idx: number) => (
+            <View
+              key={idx}
               style={{
-                color: "#fff",
-                fontSize: theme.fontSizes.regular,
-                fontWeight: "bold",
-                marginBottom: 8,
+                flexDirection: "row",
+                alignItems: "flex-start",
+                marginBottom: 6,
               }}
             >
-              {cardData.title}
-            </Text>
-
-            {/* First Two Description Lines with Bullet */}
-            {cardData.descItems.slice(0, 2).map((item: string, idx: number) => (
               <View
-                key={idx}
                 style={{
-                  flexDirection: "row",
-                  alignItems: "flex-start",
-                  marginBottom: 4,
+                  width: 6,
+                  height: 6,
+                  borderRadius: 3,
+                  backgroundColor: "#fff",
+                  marginTop: 6,
+                  marginRight: 6,
                 }}
-              >
-                <View
-                  style={{
-                    width: 6,
-                    height: 6,
-                    borderRadius: 3,
-                    backgroundColor: "#fff",
-                    marginRight: 6,
-                    marginTop: 6,
-                  }}
-                />
-                <Text
-                  style={{
-                    color: "#fff",
-                    fontSize: theme.fontSizes.small,
-                    flexShrink: 1,
-                  }}
-                  numberOfLines={2}
-                >
-                  {item}
-                </Text>
-              </View>
-            ))}
-
-            {/* View Button */}
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#4CAF50",
-                paddingHorizontal: 24, // wider
-                paddingVertical: 6, // same height
-                borderRadius: 16,
-                alignSelf: "flex-start",
-                marginTop: 8,
-              }}
-              onPress={() => setModalVisible(true)}
-            >
+              />
               <Text
                 style={{
+                  fontSize: theme.fontSizes.small,
                   color: "#fff",
-                  fontWeight: "bold",
-                  fontSize: 12,
+                  flexShrink: 1,
                 }}
+                numberOfLines={2}
               >
-                View
+                {item}
               </Text>
-            </TouchableOpacity>
-          </View>
+            </View>
+          ))}
 
-          {/* Right Image Section */}
+          {/* CTA Button */}
+          <TouchableOpacity
+            style={{
+              backgroundColor: theme.colors.primary,
+              paddingVertical: 6,
+              paddingHorizontal: 18,
+              borderRadius: 16,
+              alignSelf: "flex-start",
+              marginTop: 10,
+            }}
+            onPress={() => setModalVisible(true)}
+          >
+            <Text style={{ color: "#000", fontWeight: "600" }}>View</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Right Section (40%) */}
+        <View
+          style={{
+            width: "40%",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
           <Image
             source={{ uri: cardData.imgUrl }}
-            style={{
-              flex: 1,
-              height: "100%",
-              borderRadius: 8,
-            }}
-            resizeMode="cover"
+            style={{ width: "100%", height: 150, borderRadius: 10 }} // ✅ bigger image
+            resizeMode="contain"
           />
         </View>
       </LinearGradient>
@@ -222,7 +218,7 @@ const BannerCard = ({ cardData }: { cardData: any }) => {
                   borderRadius: 10,
                   marginBottom: 12,
                 }}
-                resizeMode="cover"
+                resizeMode="contain"
               />
 
               {/* Carousel for Other Images */}
@@ -251,7 +247,7 @@ const BannerCard = ({ cardData }: { cardData: any }) => {
                           borderRadius: 10,
                           marginRight: 10,
                         }}
-                        resizeMode="cover"
+                        resizeMode="contain"
                       />
                     )}
                   />
@@ -338,3 +334,74 @@ const BannerCard = ({ cardData }: { cardData: any }) => {
 };
 
 export default BannerCard;
+const styles = StyleSheet.create({
+  gradient: {
+    borderRadius: 16,
+    padding: 16,
+    marginTop: 16,
+    minHeight: 220,
+    flexDirection: "row",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 5,
+  },
+  leftSection: {
+    flex: 1.4,
+    paddingRight: 14,
+  },
+  title: {
+    color: "#fff",
+    fontWeight: "600",
+    marginBottom: 10,
+  },
+  bulletRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 6,
+  },
+  bulletDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#fff",
+    marginRight: 8,
+    marginTop: 6,
+  },
+  bulletText: {
+    color: "#d1d1d1",
+    flexShrink: 1,
+    lineHeight: 18,
+  },
+  button: {
+    backgroundColor: "#4CAF50",
+    paddingHorizontal: 22,
+    paddingVertical: 8,
+    borderRadius: 22,
+    alignSelf: "flex-start",
+    marginTop: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  buttonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 13,
+  },
+  rightSection: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    marginHorizontal: 13, // ✅ space around image
+  },
+  image: {
+    width: 120,
+    height: 120,
+    borderRadius: 12,
+  },
+});

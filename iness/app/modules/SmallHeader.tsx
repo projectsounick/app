@@ -12,9 +12,11 @@ import { getStoredNotifications } from "@/utils/notificationUtils";
 
 export default function SmallHeader({
   title,
+  weightShow = true,
   bottomComponent,
 }: {
   title?: string;
+  weightShow?: boolean;
   bottomComponent?: React.ReactNode;
 }) {
   /// Getting the stored cart data for the ------------------/
@@ -112,24 +114,25 @@ export default function SmallHeader({
               <Ionicons name="person" size={25} color={theme.colors.text} />
             )}
           </TouchableOpacity>
-
-          <View style={{ marginLeft: 8 }}>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginBottom: 2,
-              }}
-            >
-              <Feather name="arrow-up-right" size={14} color="lightgreen" />
-              <Text
-                style={{ color: "white", fontSize: 14, marginHorizontal: 4 }}
+          {weightShow ? (
+            <View style={{ marginLeft: 8 }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 2,
+                }}
               >
-                {weight ? weight : null}
-                {""}kgs
-              </Text>
+                <Feather name="arrow-up-right" size={14} color="lightgreen" />
+                <Text
+                  style={{ color: "white", fontSize: 14, marginHorizontal: 4 }}
+                >
+                  {weight ? weight : null}
+                  {""}kgs
+                </Text>
+              </View>
             </View>
-          </View>
+          ) : null}
         </View>
 
         {/* Center Title */}

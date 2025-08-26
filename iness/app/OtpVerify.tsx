@@ -95,22 +95,19 @@ const OTPInputScreen = () => {
         ]);
         console.log("this is response");
         console.log(response);
-
+        console.log(dietPlanResponse);
+        try {
+          if (dietPlanResponse.success && dietPlanResponse.data) {
+            let dietPlanUrls = dietPlanResponse.data
+              .filter((elem: any) => elem.dietPlanUrl) // keeps only truthy values
+              .map((elem: any) => elem.dietPlanUrl);
+            await asyncStorageUtils.storeDataInAsyncStorage(
+              dietPlanUrls,
+              "dietplans"
+            );
+          }
+        } catch (error) {}
         /// Getting all the active diet plan url of that user --------------------/
-        if (
-          dietPlanResponse &&
-          dietPlanResponse.value &&
-          dietPlanResponse.value.success &&
-          dietPlanResponse.value.data
-        ) {
-          let dietPlanUrls = dietPlanResponse.value.data
-            .filter((elem: any) => elem.dietPlanUrl) // keeps only truthy values
-            .map((elem: any) => elem.dietPlanUrl);
-          await asyncStorageUtils.storeDataInAsyncStorage(
-            dietPlanUrls,
-            "dietplans"
-          );
-        }
 
         if (response?.success) {
           /// Store user data in AsyncStorage

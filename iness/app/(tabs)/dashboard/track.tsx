@@ -28,9 +28,6 @@ export default function WellnessDashboard() {
   const currentDayTrackData = useSelector(
     (state: RootState) => state.track.currentDateTrackData
   );
-  const trackData = useSelector(
-    (state: RootState) => state.track.totalTrackData
-  );
   const dispatch = useDispatch();
   const [distanceDetails, setDistanceDetails] = useState({
     calorie: 0,
@@ -87,8 +84,21 @@ export default function WellnessDashboard() {
       setUpdateDataLoading(true);
       // Map "steps" to "walk", others remain the same
       const apiType = type === "steps" ? "walk" : type;
+      // Get current day's existing value
+      const existingData: any = currentDayTrackData[type];
+      console.log("this is existing");
+
+      // Calculate new value: add new value to existing if present
+      let newValue = value;
+      if (existingData) {
+        if (type === "steps") newValue += existingData.steps || 0;
+        else if (type === "sleep") newValue += existingData.sleepDuration || 0;
+        else if (type === "water") newValue += existingData.waterIntake || 0;
+      }
+
+      // Call API: send _id if exists, so backend knows to update
       const response = await trackService.updateTrackingData(
-        value,
+        newValue,
         Date.now(),
         apiType
       );
@@ -111,87 +121,7 @@ export default function WellnessDashboard() {
       setUpdateDataLoading(false);
     }
   }
-  const normalizeDate = (dateStr: string) =>
-    new Date(dateStr).toLocaleDateString("en-CA");
 
-  //// Useeffect function for loading the data ------------------------------------/
-  const fetchData = async () => {
-    setDataLoading(true);
-    try {
-      const today = new Date();
-
-      const formatDate = (d: Date) => d.toLocaleDateString("en-CA"); // e.g., "2025-05-18"
-
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const startDate = formatDate(startOfMonth);
-      const endDate = formatDate(today);
-
-      const [stepsRes, sleepRes, waterRes] = await Promise.all([
-        trackService.getTrackingData("walk", startDate, endDate),
-        trackService.getTrackingData("sleep", startDate, endDate),
-        trackService.getTrackingData("water", startDate, endDate),
-      ]);
-
-      if (stepsRes.success && sleepRes.success && waterRes.success) {
-        const stepsData = stepsRes.data || [];
-        const sleepData = sleepRes.data || [];
-        const waterData = waterRes.data || [];
-
-        // Generate total data for each date (merge by date)
-        const dateMap: { [date: string]: TrackingData } = {};
-        stepsData.forEach((item: any) => {
-          const date = normalizeDate(item.date); // ✅ Normalize
-          if (!dateMap[date])
-            dateMap[date] = { steps: null, sleep: null, water: null };
-          dateMap[date].steps = item;
-        });
-
-        sleepData.forEach((item: any) => {
-          const date = normalizeDate(item.date); // ✅ Normalize
-          if (!dateMap[date])
-            dateMap[date] = { steps: null, sleep: null, water: null };
-          dateMap[date].sleep = item;
-        });
-
-        waterData.forEach((item: any) => {
-          const date = normalizeDate(item.date); // ✅ Normalize
-          if (!dateMap[date])
-            dateMap[date] = { steps: null, sleep: null, water: null };
-          dateMap[date].water = item;
-        });
-        // Convert the map to an array sorted by date
-        const totalTrackArray: TrackingData[] = Object.values(dateMap).sort(
-          (a, b) => {
-            const dateA = a.steps?.date || a.sleep?.date || a.water?.date || "";
-            const dateB = b.steps?.date || b.sleep?.date || b.water?.date || "";
-            return new Date(dateA).getTime() - new Date(dateB).getTime();
-          }
-        );
-
-        const todayStr = formatDate(today); // "YYYY-MM-DD"
-        const todayData = dateMap[todayStr] || {
-          steps: null,
-          sleep: null,
-          water: null,
-        };
-
-        // Update Redux store
-        dispatch(setTotalTrackData(totalTrackArray));
-        dispatch(setCurrentDateTrackData(todayData));
-        setSnackbarVisible(false);
-      }
-    } catch (error: any) {
-      setSnackbarMsg("Failed to load tracking data.");
-      setSnackbarVisible(true);
-    } finally {
-      setDataLoading(false);
-    }
-  };
-  useEffect(() => {
-    if (trackData.length === 0) {
-      fetchData();
-    }
-  }, []);
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
@@ -397,7 +327,9 @@ export default function WellnessDashboard() {
                     {tracker.value}
                   </Text>
                   <TouchableOpacity
-                    onPress={() => openModal(tracker.key as any)}
+                    onPress={() => {
+                      openModal(tracker.key as any);
+                    }}
                   >
                     <Ionicons name="add-circle" size={28} color="#6C1B9B" />
                   </TouchableOpacity>

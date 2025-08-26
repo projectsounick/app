@@ -15,13 +15,22 @@ import { paymentService } from "@/app/services/payment.service";
 import { ActivityIndicator } from "react-native-paper";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import theme from "@/app/Theme/globalTheme";
+import useServiceWithSnackbar from "@/hooks/usePostDataHook";
 
 export default function PaymentScreen() {
   const [payment, setPayment] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [snackbarOpen, setSnackBarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const {
+    loading: paymentLoading,
+    data,
+    setLoading: setPaymentLoading,
+    callService,
+    snackbarVisible,
 
+    setSnackbarVisible,
+  } = useServiceWithSnackbar(paymentService.getReciptData);
   useEffect(() => {
     const fetchPayment = async () => {
       try {
@@ -48,6 +57,15 @@ export default function PaymentScreen() {
     fetchPayment();
   }, []);
 
+  async function fetchPaymentRecipt(orderId: string) {
+    try {
+      console.log("called");
+
+      let response = await callService({ orderId });
+      console.log("this is response");
+      console.log(response);
+    } catch (error) {}
+  }
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleString("en-GB", {
@@ -122,13 +140,15 @@ export default function PaymentScreen() {
           </View>
 
           {/* Download Receipt */}
-          {/* {isSuccess && (
+          {isSuccess && (
             <TouchableOpacity
-              onPress={() => console.log("Download receipt for", item._id)}
+              onPress={() => {
+                fetchPaymentRecipt(item._id);
+              }}
             >
               <Feather name="download" size={20} color="#555" />
             </TouchableOpacity>
-          )} */}
+          )}
         </View>
 
         {/* All Items List */}
@@ -200,6 +220,24 @@ export default function PaymentScreen() {
           message={snackbarMessage}
           bgColor={theme.colors.primary}
         />
+        {paymentLoading && (
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: "rgba(0,0,0,0.5)", // semi-transparent overlay
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 100,
+            }}
+          >
+            <ActivityIndicator size="large" color="#fff" />
+            <Text style={{ color: "#fff", marginTop: 10 }}>Loading...</Text>
+          </View>
+        )}
       </ImageBackground>
     </SafeAreaView>
   );

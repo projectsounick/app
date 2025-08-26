@@ -606,30 +606,14 @@ const CommunityPosts = ({
       <View
         style={{
           flexDirection: "row",
-          justifyContent: "space-between",
+          justifyContent: "center",
           alignItems: "center",
+
           marginVertical: 10,
           paddingHorizontal: 16,
         }}
       >
         {/* Community Name with Icon */}
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <Ionicons
-            name="people"
-            size={18}
-            color="#19002E"
-            style={{ marginRight: 6 }}
-          />
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: "bold",
-              color: "#19002E",
-            }}
-          >
-            {communityName}
-          </Text>
-        </View>
 
         {/* Toggle Button */}
         <View
@@ -637,6 +621,8 @@ const CommunityPosts = ({
             flexDirection: "row",
             backgroundColor: "#e0e0e0",
             borderRadius: 20,
+            justifyContent: "center",
+            alignItems: "center",
             overflow: "hidden",
           }}
         >

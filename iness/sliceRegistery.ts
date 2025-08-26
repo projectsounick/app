@@ -8,6 +8,7 @@ import { setCart } from "./Slices/cartSlice";
 import { setdietPlans } from "./Slices/dietPlanSlice";
 import { addToBlog } from "./Slices/blogSlice";
 import { setCategories, setProducts } from "./Slices/ecomSlice";
+import { setCurrentDateTrackData } from "./Slices/trackSlice";
 export const sliceConfig = {
   media: {
     selectorKey: "mediaItems",
@@ -44,6 +45,10 @@ export const sliceConfig = {
   products: {
     selectorKey: "ecom",
     setAction: setProducts,
+  },
+  track: {
+    selectorKey: "tracking",
+    setAction: setCurrentDateTrackData,
   },
 } as const;
 

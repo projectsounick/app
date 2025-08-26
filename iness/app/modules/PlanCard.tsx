@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useDispatch } from "react-redux";
 import { useRouter } from "expo-router";
+
 import { setCurrentPlan } from "@/Slices/planSlice";
 import theme from "../Theme/globalTheme";
 interface PlanCardProps {
@@ -10,7 +11,9 @@ interface PlanCardProps {
   index: number;
   planGroupLength: number;
 }
+import { Dimensions } from "react-native";
 
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const PlanCard: React.FC<PlanCardProps> = ({
   item,
   index,
@@ -89,10 +92,9 @@ const PlanCard: React.FC<PlanCardProps> = ({
           <TouchableOpacity
             style={{
               backgroundColor: " rgba(189, 255, 132, 1)",
-              width: 114,
-              height: 33,
-
-              borderRadius: 15.5,
+              width: SCREEN_WIDTH * 0.3, // ~30% of screen width
+              height: SCREEN_WIDTH * 0.08, // scales proportionally
+              borderRadius: (SCREEN_WIDTH * 0.5) / 2,
               justifyContent: "center",
 
               alignItems: "center",
@@ -105,7 +107,7 @@ const PlanCard: React.FC<PlanCardProps> = ({
           >
             <Text
               style={{
-                fontWeight: theme.fontWeights.bold,
+                fontWeight: "700",
                 fontSize: theme.fontSizes.regularSmall,
                 textAlign: "center",
                 color: theme.colors.dark,

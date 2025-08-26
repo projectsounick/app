@@ -13,6 +13,8 @@ import eventBus from "@/event";
 import * as NavigationBar from "expo-navigation-bar";
 
 import SystemNavigationBar from "react-native-system-navigation-bar";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
 // Fonts
 SplashScreen.preventAutoHideAsync();
 
@@ -43,6 +45,18 @@ export default function RootLayout() {
         },
       };
     }
+    // ✅ Only check user once after fonts are loaded
+    const checkUser = async () => {
+      try {
+        const user = await AsyncStorage.getItem("user");
+        if (user) {
+          router.replace("/secondsplashscreen");
+        }
+      } catch (error) {
+        console.error("Error checking user:", error);
+      }
+    };
+    checkUser();
   }, [fontsLoaded]);
 
   useEffect(() => {

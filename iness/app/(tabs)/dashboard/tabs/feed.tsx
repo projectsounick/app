@@ -17,9 +17,6 @@ const YourComponent = () => {
     const fetchCommunity = async () => {
       try {
         const res = await communityService.getUserCommunityById();
-        console.log("this is res");
-
-        console.log(res);
 
         if (res.success && res.communityId) {
           setCommunityId(res.communityId);
@@ -43,7 +40,6 @@ const YourComponent = () => {
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
       edges={["left", "right", "top"]}
     >
-      <SmallHeader title="Community" />
       {loading ? (
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
@@ -52,6 +48,10 @@ const YourComponent = () => {
         </View>
       ) : (
         <>
+          <SmallHeader
+            weightShow={false}
+            title={communitName || "Iness Fitness Hub"}
+          />
           <PostFeed
             communityId={communityId}
             posts={posts}

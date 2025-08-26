@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { View, Animated, ScrollView } from "react-native";
 
 import SliderCard from "@/app/modules/SliderCard";
@@ -43,7 +43,6 @@ const MainHeader = withAnimatedHeader(NameHeader);
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
   //// Getting the loader from the state ----------------------------/
-  const dispatch = useDispatch();
 
   const configs = useMemo(
     () => [
@@ -59,86 +58,29 @@ const YourComponent = () => {
         sliceKey: "blogs" as SliceKey,
         fetchFunction: blogService.getBlogOverallData,
       },
+      {
+        sliceKey: "track" as SliceKey,
+        fetchFunction: trackService.getCurrentDayTrackData,
+      },
     ],
     []
   );
   const { loading, setSnackbarMessage, setSnackbarVisible } =
     useFetchMultipleStoreDataHook(configs);
+  useEffect(() => {
+    async function fetchTrack() {
+      try {
+        const response = await trackService.getCurrentDayTrackData();
+        console.log("track response");
 
+        console.log(response);
+      } catch (error) {}
+    }
+    fetchTrack();
+  }, []);
   const scrollY = new Animated.Value(0);
   //// Fetching the plan data -----------------------------/
 
-  //// Useeffect function for loading the data ------------------------------------/
-  const fetchData = async () => {
-    dispatch(setMainLoader(true));
-    try {
-      const today = new Date();
-
-      const formatDate = (d: Date) => d.toLocaleDateString("en-CA"); // e.g., "2025-05-18"
-
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const startDate = formatDate(startOfMonth);
-      const endDate = formatDate(today);
-
-      const [stepsRes, sleepRes, waterRes] = await Promise.all([
-        trackService.getTrackingData("walk", startDate, endDate),
-        trackService.getTrackingData("sleep", startDate, endDate),
-        trackService.getTrackingData("water", startDate, endDate),
-      ]);
-
-      if (stepsRes.success && sleepRes.success && waterRes.success) {
-        const stepsData = stepsRes.data || [];
-        const sleepData = sleepRes.data || [];
-        const waterData = waterRes.data || [];
-
-        // Generate total data for each date (merge by date)
-        const dateMap: { [date: string]: TrackingData } = {};
-        stepsData.forEach((item: any) => {
-          const date = normalizeDate(item.date); // ✅ Normalize
-          if (!dateMap[date])
-            dateMap[date] = { steps: null, sleep: null, water: null };
-          dateMap[date].steps = item;
-        });
-
-        sleepData.forEach((item: any) => {
-          const date = normalizeDate(item.date); // ✅ Normalize
-          if (!dateMap[date])
-            dateMap[date] = { steps: null, sleep: null, water: null };
-          dateMap[date].sleep = item;
-        });
-
-        waterData.forEach((item: any) => {
-          const date = normalizeDate(item.date); // ✅ Normalize
-          if (!dateMap[date])
-            dateMap[date] = { steps: null, sleep: null, water: null };
-          dateMap[date].water = item;
-        });
-        // Convert the map to an array sorted by date
-        const totalTrackArray: TrackingData[] = Object.values(dateMap).sort(
-          (a, b) => {
-            const dateA = a.steps?.date || a.sleep?.date || a.water?.date || "";
-            const dateB = b.steps?.date || b.sleep?.date || b.water?.date || "";
-            return new Date(dateA).getTime() - new Date(dateB).getTime();
-          }
-        );
-
-        const todayStr = formatDate(today); // "YYYY-MM-DD"
-        const todayData = dateMap[todayStr] || {
-          steps: null,
-          sleep: null,
-          water: null,
-        };
-
-        // Update Redux store
-        dispatch(setTotalTrackData(totalTrackArray));
-        dispatch(setCurrentDateTrackData(todayData));
-        setSnackbarVisible(false);
-      }
-    } catch (error: any) {
-    } finally {
-      dispatch(setMainLoader(false));
-    }
-  };
   //// Video call exists or not checking -----------------------------------------/
 
   return (
