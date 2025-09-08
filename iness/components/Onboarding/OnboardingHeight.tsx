@@ -8,8 +8,10 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
+  TouchableOpacity,
+  Modal,
+  FlatList,
 } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import CustomSnackbar from "@/app/modules/Snackbar";
@@ -17,20 +19,26 @@ import theme from "@/app/Theme/globalTheme";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
 
 const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
-  const [heightFeet, setHeightFeet] = useState("5");
-  const [heightInches, setHeightInches] = useState("10");
+  const [heightFeet, setHeightFeet] = useState<string | null>(null);
+  const [heightInches, setHeightInches] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  const handleNext = async () => {
-    const formattedHeight = `${heightFeet}'${heightInches}`;
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalType, setModalType] = useState<"feet" | "inches" | null>(null);
 
+  const feetOptions = Array.from({ length: 4 }, (_, i) => `${4 + i}`);
+  const inchOptions = Array.from({ length: 12 }, (_, i) => `${i}`);
+
+  const handleNext = async () => {
     if (!heightFeet || !heightInches) {
       setSnackbarMessage("Please select both feet and inches.");
       setSnackbarVisible(true);
       return;
     }
+
+    const formattedHeight = `${heightFeet}'${heightInches}`;
 
     try {
       setLoading(true);
@@ -46,15 +54,18 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
     }
   };
 
-  const feetOptions = Array.from({ length: 4 }, (_, i) => ({
-    label: (4 + i).toString(),
-    value: (4 + i).toString(),
-  }));
+  const openModal = (type: "feet" | "inches") => {
+    setModalType(type);
+    setModalVisible(true);
+  };
 
-  const inchOptions = Array.from({ length: 12 }, (_, i) => ({
-    label: i.toString(),
-    value: i.toString(),
-  }));
+  const selectValue = (value: string) => {
+    if (modalType === "feet") setHeightFeet(value);
+    if (modalType === "inches") setHeightInches(value);
+    setModalVisible(false);
+  };
+
+  const getOptions = () => (modalType === "feet" ? feetOptions : inchOptions);
 
   return (
     <KeyboardAvoidingView
@@ -62,7 +73,7 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={60}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.container}>
           <ScrollView
             contentContainerStyle={styles.scrollContent}
@@ -73,22 +84,26 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
             </OnboardingHeading>
 
             <View style={styles.pickerRow}>
-              <RNPickerSelect
-                onValueChange={setHeightFeet}
-                items={feetOptions}
-                value={heightFeet}
-                placeholder={{ label: "ft", value: null }}
-                style={pickerSelectStyles}
-              />
+              {/* Feet Picker */}
+              <TouchableOpacity
+                style={styles.pickerButton}
+                onPress={() => openModal("feet")}
+              >
+                <Text style={styles.pickerText}>
+                  {heightFeet ?? "Select ft"}
+                </Text>
+              </TouchableOpacity>
               <Text style={styles.unit}>ft</Text>
 
-              <RNPickerSelect
-                onValueChange={setHeightInches}
-                items={inchOptions}
-                value={heightInches}
-                placeholder={{ label: "in", value: null }}
-                style={pickerSelectStyles}
-              />
+              {/* Inches Picker */}
+              <TouchableOpacity
+                style={styles.pickerButton}
+                onPress={() => openModal("inches")}
+              >
+                <Text style={styles.pickerText}>
+                  {heightInches ?? "Select in"}
+                </Text>
+              </TouchableOpacity>
               <Text style={styles.unit}>in</Text>
             </View>
 
@@ -111,11 +126,47 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
             message={snackbarMessage}
             onDismiss={() => setSnackbarVisible(false)}
           />
+
+          {/* Modal */}
+          <Modal
+            visible={modalVisible}
+            animationType="slide"
+            transparent
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>
+                  Select {modalType === "feet" ? "Feet" : "Inches"}
+                </Text>
+                <FlatList
+                  data={getOptions()}
+                  keyExtractor={(item) => item}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.option}
+                      onPress={() => selectValue(item)}
+                    >
+                      <Text style={styles.optionText}>{item}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setModalVisible(false)}
+                >
+                  <Text style={styles.closeButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 };
+
+export default OnboardingHeight;
 
 const styles = StyleSheet.create({
   container: {
@@ -140,6 +191,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 30,
   },
+  pickerButton: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    minWidth: 80,
+    alignItems: "center",
+  },
+  pickerText: {
+    fontSize: 18,
+    color: "#000",
+  },
   unit: {
     marginHorizontal: 8,
     fontSize: 18,
@@ -156,33 +220,45 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingBottom: 30,
   },
-});
-
-const pickerSelectStyles = StyleSheet.create({
-  inputIOS: {
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 20,
+    maxHeight: "60%",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    padding: 15,
+    textAlign: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  option: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    alignItems: "center",
+  },
+  optionText: {
     fontSize: 18,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    color: "#000",
-    paddingRight: 30,
-    minWidth: 80,
+  },
+  closeButton: {
+    backgroundColor: "#ff4d4d",
+    marginHorizontal: 20,
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 16,
     textAlign: "center",
   },
-  inputAndroid: {
-    fontSize: 18,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    color: "#000",
-    paddingRight: 30,
-    minWidth: 80,
-    textAlign: "center",
-  },
 });
-
-export default OnboardingHeight;

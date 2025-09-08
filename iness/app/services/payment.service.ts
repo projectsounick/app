@@ -12,7 +12,7 @@ export const paymentService = {
 
 ///// Function for getting all the prodcuts based on category--------/
 
-async function getReciptData(orderId: any): Promise<{
+async function getReciptData({ orderId }: any): Promise<{
   message: String;
   receipt: string;
   success: boolean;

@@ -35,9 +35,9 @@ const GroupedProductDisplay = () => {
     },
     {} as Record<string, Product[]>
   );
-  const handleCheck = (product: Product, color: string) => {
+  const handleCheck = (product: Product) => {
     setProduct(product);
-    setBgColor(color);
+    setBgColor("#FFE600");
     setShowModal(true);
   };
 
@@ -50,94 +50,131 @@ const GroupedProductDisplay = () => {
   ];
 
   const renderProductCard = (item: Product, index: number) => {
-    const bgColor = bgColors[index % bgColors.length];
+    const hasVariation = item.variations && item.variations.length > 0;
+    const variation =
+      hasVariation && item.variations ? item.variations[0] : null;
+    const displayLabel = variation?.label;
+    const displayPrice = variation?.price ?? item.basePrice;
 
     return (
-      <View
+      <TouchableOpacity
         key={item._id}
         style={{
           width: 130,
-          height: 150,
           borderRadius: 12,
           backgroundColor: "#fff",
           overflow: "hidden",
-          marginRight: 8,
+          marginRight: 10,
         }}
+        onPress={() => handleCheck(item)}
       >
-        {/* Top Section with dynamic background */}
+        {/* Image Container */}
         <View
           style={{
-            backgroundColor: bgColor,
-            height: 120, // increased height slightly
-            padding: 8,
-            borderRadius: 12,
-            justifyContent: "space-between",
-            overflow: "hidden", // ensures borderRadius applies to children
+            width: "100%",
+            height: 120,
+            position: "relative",
+            justifyContent: "flex-end", // to push quantity to bottom
           }}
         >
+          {/* Image as background */}
           {item.images && item.images.length > 0 ? (
             <Image
               source={{ uri: item.images[0] }}
               style={{
-                width: "90%", // increased width
-                height: 75, // increased height
-                borderRadius: 8,
-                resizeMode: "contain", // makes sure background is covered
-                alignSelf: "center",
-                backgroundColor: bgColor, // fallback to cover any transparency
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                resizeMode: "cover",
               }}
             />
           ) : (
             <View
               style={{
-                width: 75,
-                height: 75,
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
                 backgroundColor: "#999",
-                borderRadius: 8,
-                alignSelf: "flex-end",
               }}
             />
           )}
+
+          {/* Plus icon */}
           <TouchableOpacity
             style={{
+              position: "absolute",
+              top: 6,
+              right: 6,
               backgroundColor: "#fff",
               borderRadius: 20,
-              paddingVertical: 4,
-              paddingHorizontal: 8,
-              alignSelf: "flex-end",
-              flexDirection: "row",
+              width: 24,
+              height: 24,
               alignItems: "center",
+              justifyContent: "center",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.1,
+              shadowRadius: 2,
+              elevation: 2,
             }}
-            onPress={() => handleCheck(item, bgColor)}
+            onPress={() => handleCheck(item)}
           >
-            <Text
+            <Feather name="plus" size={12} color="#00A300" />
+          </TouchableOpacity>
+
+          {/* Quantity (Variation Label) */}
+          {displayLabel && (
+            <View
               style={{
-                color: "#000",
-                fontWeight: "600",
-                fontSize: 8,
-                marginRight: 4,
+                backgroundColor: "#fff",
+                alignSelf: "center",
+                paddingHorizontal: 8,
+                paddingVertical: 2,
+                borderRadius: 10,
+                marginBottom: 6,
               }}
             >
-              Check
-            </Text>
-            <Feather name="arrow-right" size={10} color="#000" />
-          </TouchableOpacity>
+              <Text
+                style={{
+                  fontSize: 10,
+                  fontWeight: "600",
+                  color: "#333",
+                }}
+              >
+                {displayLabel}
+              </Text>
+            </View>
+          )}
         </View>
 
-        {/* Bottom Section */}
+        {/* Bottom Details */}
         <View style={{ paddingHorizontal: 8, paddingVertical: 6 }}>
           <Text
             numberOfLines={2}
             style={{
+              fontSize: 10,
               fontWeight: "600",
               color: "#000",
-              fontSize: 10,
             }}
           >
             {item.name}
           </Text>
+          <Text
+            style={{
+              fontSize: 11,
+              fontWeight: "700",
+              color: "#000",
+              marginTop: 2,
+            }}
+          >
+            ₹{displayPrice}
+          </Text>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -186,7 +223,7 @@ const GroupedProductDisplay = () => {
               marginBottom: 12,
             }}
           >
-            Tailored plans for your personalized lifestyles.
+            Premium products designed to fit your everyday needs.
           </Text>
 
           <FlatList

@@ -35,6 +35,7 @@ export interface PhonePeTransactionResponse {
 export default function CartScreen() {
   //// getting the cart values from the store -------------------------/
   const cartItems = useSelector((state: RootState) => state.cart.cartItems);
+
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [deliveryAddress, setDeliveryAddress] = useState({
     fullAddress: "",
@@ -69,8 +70,6 @@ export default function CartScreen() {
       const orderId = response?.data?.orderId;
 
       if (orderId) {
-        console.log("Order ID:", orderId);
-
         // Save redirect flag for later detection
         await AsyncStorage.setItem("currentOrderId", orderId);
 
@@ -102,7 +101,7 @@ export default function CartScreen() {
       {/* Header + Content */}
       <SafeAreaView
         style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-        edges={["top", "left", "right", "bottom"]}
+        edges={["left", "right"]}
       >
         <View style={{ flex: 1, backgroundColor: "#fff" }}>
           <SmallHeader title="Cart" />

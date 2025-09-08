@@ -7,19 +7,30 @@ import { useDispatch, useSelector } from "react-redux";
 const PlansStatusCard = () => {
   const dispatch = useDispatch();
 
+  // Plans
   const currentPlansCount = useSelector(
     (state: RootState) => state.plan.activePlans.length
   );
-
   const hasActiveManualPlan = useSelector(
     (state: RootState) => !!state.plan.activeManualPlan
   );
-
-  const current = currentPlansCount + (hasActiveManualPlan ? 1 : 0);
-
-  const completed = useSelector(
+  const completedPlansCount = useSelector(
     (state: RootState) => state.plan.completedPlans.length
   );
+
+  // Services
+  const currentServicesCount = useSelector(
+    (state: RootState) => state.plan.activeServices.length
+  );
+
+  const completedServicesCount = useSelector(
+    (state: RootState) => state.plan.completedServices.length
+  );
+
+  // Merge plans and services counts
+  const current =
+    currentPlansCount + (hasActiveManualPlan ? 1 : 0) + currentServicesCount;
+  const completed = completedPlansCount + completedServicesCount;
 
   const planTab = useSelector((state: RootState) => state.plan.planTab);
 

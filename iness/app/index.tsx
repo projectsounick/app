@@ -78,10 +78,7 @@ const HomeScreen = () => {
     navigation.navigate("login");
   };
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right"]}
-    >
+    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <ImageBackground
         source={require("../assets/images/getstartedBackground.jpg")}
         style={{
@@ -176,7 +173,7 @@ const HomeScreen = () => {
           />
         </View>
       </ImageBackground>
-    </SafeAreaView>
+    </View>
   );
 };
 

@@ -10,14 +10,17 @@ import { communityService } from "@/app/services/community.service";
 const YourComponent = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [communityId, setCommunityId] = useState<any>(null);
+  const [communitName, setCommunityName] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCommunity = async () => {
       try {
         const res = await communityService.getUserCommunityById();
+
         if (res.success && res.communityId) {
           setCommunityId(res.communityId);
+          setCommunityName(res.communityName);
         } else {
           setCommunityId(null); // No community found
         }
@@ -37,7 +40,6 @@ const YourComponent = () => {
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
       edges={["left", "right"]}
     >
-      <SmallHeader title="Community" />
       {loading ? (
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
@@ -46,12 +48,17 @@ const YourComponent = () => {
         </View>
       ) : (
         <>
+          <SmallHeader
+            weightShow={false}
+            title={communitName || "Iness Fitness Hub"}
+          />
           <PostFeed
             communityId={communityId}
             posts={posts}
+            communityName={communitName}
             setPosts={setPosts}
           />
-          <ImageSelectorModal setPosts={setPosts} />
+          <ImageSelectorModal setPosts={setPosts} communityId={communityId} />
         </>
       )}
     </SafeAreaView>

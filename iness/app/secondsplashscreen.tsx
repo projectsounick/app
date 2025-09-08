@@ -18,37 +18,54 @@ const SecondSplashScreen = () => {
   const navigation = useNavigation<any>();
   const CIRCLE_RADIUS = 80;
   const CIRCLE_LENGTH = 2 * Math.PI * CIRCLE_RADIUS;
+  const LETTER_DELAY = 300;
+  const FULL_TEXT = "INESS";
 
   useEffect(() => {
     const runAnimation = async () => {
-      let response = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
-        "user"
-      );
+      await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
 
-      // Animate Circle Progress
+      // Animate circle
       Animated.timing(progress, {
         toValue: 1,
-        duration: 2500,
+        duration: 2000,
         useNativeDriver: true,
       }).start(() => {
-        // After circle completes, hide it
         setShowCircle(false);
 
-        // Show Logo
+        // Fade in logo
         Animated.timing(logoOpacity, {
           toValue: 1,
           duration: 800,
           useNativeDriver: true,
         }).start(() => {
-          // Move Logo + Text left slightly
+          // Slide logo
           Animated.timing(combinedTranslateX, {
             toValue: -40,
             duration: 800,
             useNativeDriver: true,
           }).start(() => {
-            // Show Letters one by one
+            // Show letters
             setShowLetters(true);
-            animateLetters();
+
+            // Animate letters without worrying about navigation
+            const FULL_TEXT = "INESS";
+            const LETTER_DELAY = 300;
+            let currentText = "";
+
+            FULL_TEXT.split("").forEach((letter, index) => {
+              setTimeout(() => {
+                currentText += letter;
+                setVisibleLetters(currentText);
+              }, index * LETTER_DELAY);
+            });
+
+            // ⏳ Navigate after all animations + 2 second buffer
+            const totalAnimationTime =
+              2000 + 800 + FULL_TEXT.length * LETTER_DELAY;
+            setTimeout(() => {
+              router.replace("/(tabs)/dashboard/tabs");
+            }, totalAnimationTime); // extra 2s delay
           });
         });
       });
@@ -56,25 +73,6 @@ const SecondSplashScreen = () => {
 
     runAnimation();
   }, []);
-
-  const animateLetters = () => {
-    const fullText = "INESS";
-    let currentText = "";
-
-    fullText.split("").forEach((letter, index) => {
-      setTimeout(() => {
-        currentText += letter;
-        setVisibleLetters(currentText);
-
-        // When all letters are shown, navigate
-        if (index === fullText.length - 1) {
-          setTimeout(() => {
-            router.replace("/(tabs)/dashboard/tabs");
-          }, 500); // slight delay after last letter
-        }
-      }, index * 300);
-    });
-  };
 
   const strokeDashoffset = progress.interpolate({
     inputRange: [0, 1],

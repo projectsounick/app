@@ -26,6 +26,7 @@ import useServiceWithSnackbar from "@/hooks/usePostDataHook";
 import { sessionService } from "@/app/services/sessionService";
 import { ActivityIndicator } from "react-native-paper";
 import CustomSnackbar from "@/app/modules/Snackbar";
+import SessionCardRow from "@/app/modules/SessionDetailsCard";
 
 const TabbedSessionDetails = ({
   selectedSession,
@@ -36,9 +37,9 @@ const TabbedSessionDetails = ({
   totalSessions: number;
   setSelectedSession: any;
 }) => {
-  const [activeTab, setActiveTab] = useState<"info" | "trainer" | "workout">(
-    "info"
-  );
+  console.log(selectedSession);
+
+  const [activeTab, setActiveTab] = useState<any>("info");
   const [showModal, setShowModal] = useState(false);
 
   const {
@@ -125,73 +126,10 @@ const TabbedSessionDetails = ({
     return (
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
         {/* Summary Cards */}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            marginTop: 20,
-            paddingHorizontal: 16,
-          }}
-        >
-          {/* Sessions Count */}
-          <View
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: 12,
-              padding: 12,
-              flex: 1,
-              marginRight: 8,
-              height: 69,
-              justifyContent: "center",
-              borderWidth: 1.2,
-              borderColor: "#E0E0E0", // Light gray border
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.1,
-              shadowRadius: 2,
-              elevation: 2,
-            }}
-          >
-            <Text style={{ fontSize: 14, fontWeight: "500", color: "#444" }}>
-              Sessions Count
-            </Text>
-            <Text
-              style={{ fontSize: 20, fontWeight: "bold", color: "#6A1B9A" }}
-            >
-              {totalSessions}
-            </Text>
-          </View>
-
-          {/* Session Time */}
-          <View
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: 12,
-              padding: 12,
-              flex: 1,
-              marginLeft: 8,
-              height: 69,
-              justifyContent: "center",
-              borderWidth: 1.2,
-              borderColor: "#E0E0E0",
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.1,
-              shadowRadius: 2,
-              elevation: 2,
-            }}
-          >
-            <Text style={{ fontSize: 14, fontWeight: "500", color: "#444" }}>
-              Session time
-            </Text>
-            <Text
-              style={{ fontSize: 20, fontWeight: "bold", color: "#6A1B9A" }}
-            >
-              {selectedSession?.sessionDuration || "--"}
-              <Text style={{ fontSize: 12, color: "#999" }}> mins</Text>
-            </Text>
-          </View>
-        </View>
+        <SessionCardRow
+          selectedSession={selectedSession}
+          totalSessions={totalSessions}
+        />
 
         {/* Session Information Card */}
         <LinearGradient
@@ -225,7 +163,7 @@ const TabbedSessionDetails = ({
                   color="#eee"
                   style={{ marginRight: 2 }}
                 />
-                <Text style={{ color: "#eee", fontSize: 10 }}>
+                <Text style={{ color: "#eee", fontSize: 12 }}>
                   {new Date(selectedSession.sessionDate).toDateString()}
                 </Text>
               </View>
@@ -245,7 +183,7 @@ const TabbedSessionDetails = ({
                   color="#eee"
                   style={{ marginRight: 2 }}
                 />
-                <Text style={{ color: "#eee", fontSize: 10 }}>
+                <Text style={{ color: "#eee", fontSize: 12 }}>
                   {selectedSession.sessionTime}
                 </Text>
               </View>
@@ -265,7 +203,7 @@ const TabbedSessionDetails = ({
                   color="#eee"
                   style={{ marginRight: 2 }}
                 />
-                <Text style={{ color: "#eee", fontSize: 10 }}>
+                <Text style={{ color: "#eee", fontSize: 12 }}>
                   {selectedSession.sessionDuration} mins
                 </Text>
               </View>
@@ -287,7 +225,7 @@ const TabbedSessionDetails = ({
                   color="#eee"
                   style={{ marginRight: 2 }}
                 />
-                <Text style={{ color: "#eee", fontSize: 10 }}>
+                <Text style={{ color: "#eee", fontSize: 12 }}>
                   {selectedSession.sessionType}
                 </Text>
               </View>
@@ -307,7 +245,7 @@ const TabbedSessionDetails = ({
                   color="#eee"
                   style={{ marginRight: 2 }}
                 />
-                <Text style={{ color: "#eee", fontSize: 10 }}>
+                <Text style={{ color: "#eee", fontSize: 12 }}>
                   {selectedSession.sessionStatus}
                 </Text>
               </View>
@@ -329,7 +267,7 @@ const TabbedSessionDetails = ({
                     style={{ marginRight: 2 }}
                   />
                   <Text
-                    style={{ color: "#eee", fontSize: 10 }}
+                    style={{ color: "#eee", fontSize: 12 }}
                     numberOfLines={1}
                   >
                     {selectedSession.sessionAddress || "N/A"}
@@ -577,92 +515,93 @@ const TabbedSessionDetails = ({
       <View
         style={{
           flexDirection: "row",
-          justifyContent: "space-around",
-          backgroundColor: "#f0f0f0",
-          borderRadius: 8,
+          justifyContent: "space-between",
+          backgroundColor: "transparent",
+          borderRadius: 12,
           marginHorizontal: 16,
           marginTop: 16,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
         }}
       >
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            alignItems: "center",
-            paddingVertical: 12,
-            backgroundColor:
-              activeTab === "info" ? theme.colors.primary : "transparent",
-            borderRadius: 8,
-          }}
-          onPress={() => setActiveTab("info")}
-        >
-          <MaterialIcons
-            name="info"
-            size={20}
-            color={activeTab === "info" ? "#000" : "#555"}
-          />
-          <Text
-            style={{
-              color: activeTab === "info" ? "#000" : "#555",
-              fontWeight: "bold",
-            }}
-          >
-            Info
-          </Text>
-        </TouchableOpacity>
+        {["info", "trainer", "workout"].map((tab) => {
+          const isActive: any = activeTab === tab;
 
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            alignItems: "center",
-            paddingVertical: 12,
-            backgroundColor:
-              activeTab === "trainer" ? theme.colors.primary : "transparent",
-            borderRadius: 8,
-          }}
-          onPress={() => setActiveTab("trainer")}
-        >
-          <FontAwesome5
-            name="user-tie"
-            size={18}
-            color={activeTab === "trainer" ? "#000" : "#555"}
-          />
-          <Text
-            style={{
-              color: activeTab === "trainer" ? "#000" : "#555",
-              fontWeight: "bold",
-            }}
-          >
-            Trainer
-          </Text>
-        </TouchableOpacity>
+          const icons: any = {
+            info: (
+              <MaterialIcons
+                name="info"
+                size={20}
+                color={isActive ? "#000" : "#555"}
+              />
+            ),
+            trainer: (
+              <FontAwesome5
+                name="user-tie"
+                size={18}
+                color={isActive ? "#000" : "#555"}
+              />
+            ),
+            workout: (
+              <FontAwesome
+                name="heartbeat"
+                size={20}
+                color={isActive ? "#000" : "#555"}
+              />
+            ),
+          };
 
-        <TouchableOpacity
-          style={{
-            flex: 1,
-            alignItems: "center",
-            paddingVertical: 12,
-            backgroundColor:
-              activeTab === "workout" ? theme.colors.primary : "transparent",
-            borderRadius: 8,
-          }}
-          onPress={() => setActiveTab("workout")}
-        >
-          <FontAwesome
-            name="heartbeat"
-            size={20}
-            color={activeTab === "workout" ? "#000" : "#555"}
-          />
-          <Text
-            style={{
-              color: activeTab === "workout" ? "#000" : "#555",
-              fontWeight: "bold",
-            }}
-          >
-            Workout
-          </Text>
-        </TouchableOpacity>
+          const labels: any = {
+            info: "Info",
+            trainer: "Trainer",
+            workout: "Workout",
+          };
+
+          return (
+            <TouchableOpacity
+              key={tab}
+              onPress={() => setActiveTab(tab)}
+              style={{
+                flex: 1,
+                alignItems: "center",
+                paddingVertical: 12,
+                marginHorizontal: 4,
+                borderRadius: 10,
+                backgroundColor: "#fff",
+                borderWidth: isActive ? 1.5 : 1,
+                borderColor: isActive ? "#000" : "#ccc",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+                elevation: 2,
+              }}
+            >
+              {icons[tab]}
+              <Text
+                style={{
+                  color: "#000",
+                  fontWeight: isActive ? "bold" : "500",
+                  marginTop: 4,
+                }}
+              >
+                {labels[tab]}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
-
+      <View
+        style={{
+          height: 1,
+          marginTop: 10,
+          backgroundColor: "#ccc",
+          width: "95%",
+          alignSelf: "center",
+        }}
+      />
       {/* Tab Content */}
       <View style={{ flex: 1 }}>
         {activeTab === "info" && renderInfoTab()}

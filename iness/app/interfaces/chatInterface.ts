@@ -19,6 +19,7 @@ interface SupportChat {
 }
 interface ChatMessageBubbleProps {
   item: ChatMessage;
+  index: any;
   setSelectedImage: (type: string) => void;
   setImageModalVisible: (type: boolean) => void;
 }

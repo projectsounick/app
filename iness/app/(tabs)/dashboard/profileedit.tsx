@@ -377,7 +377,7 @@ export default function EditOnboardingScreen() {
               fontSize: theme.fontSizes.medium,
             }}
           >
-            {label}
+            {label === "Sex" ? "Gender" : label}
           </Text>
           {editFields[field] ? (
             isTextInput ? (
@@ -439,7 +439,7 @@ export default function EditOnboardingScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right", "bottom"]}
+      edges={["top", "left", "right"]}
     >
       <ImageBackground source={backgroundImage} style={{ flex: 1 }}>
         <View style={{ paddingTop: 20, paddingLeft: 20 }}>

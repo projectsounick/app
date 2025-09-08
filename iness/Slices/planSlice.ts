@@ -4,6 +4,7 @@ import {
 } from "@/app/interfaces/activeManualPlan";
 import { PlanInterface } from "@/app/interfaces/planInterface";
 import { PodcastInterface } from "@/app/interfaces/podcastsInterface";
+import { UserActiveServiceWithDetails } from "@/app/interfaces/serviceInterface";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface planState {
@@ -13,6 +14,9 @@ interface planState {
   activePlans: any[];
   completedPlans: any[];
   activeManualPlan: ActiveManualWorkoutPlanInterface | null;
+  // Add services state
+  activeServices: UserActiveServiceWithDetails[];
+  completedServices: UserActiveServiceWithDetails[];
 }
 
 const initialState: planState = {
@@ -22,6 +26,8 @@ const initialState: planState = {
   activePlans: [],
   completedPlans: [],
   activeManualPlan: null,
+  activeServices: [],
+  completedServices: [],
 };
 
 const planSlice = createSlice({
@@ -64,6 +70,18 @@ const planSlice = createSlice({
         }
       }
     },
+    setServices: (state, action: PayloadAction<any[]>) => {
+      console.log("service payload");
+
+      console.log(action.payload);
+
+      state.activeServices = action.payload.filter(
+        (service) => service.isActive === true
+      );
+      state.completedServices = action.payload.filter(
+        (service) => service.isActive === false
+      );
+    },
   },
 });
 
@@ -73,5 +91,6 @@ export const {
   setPlanTab,
   setActivePlans,
   setActiveManualPlan,
+  setServices,
 } = planSlice.actions;
 export default planSlice.reducer;

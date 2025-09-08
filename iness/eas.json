@@ -6,6 +6,7 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "ios": {},
       "android": {
         "buildType": "app-bundle"
       },
@@ -14,6 +15,8 @@
       }
     },
     "preview": {
+      "distribution": "internal",
+      "ios": {},
       "android": {
         "buildType": "app-bundle"
       },
@@ -22,12 +25,22 @@
       }
     },
     "production": {
+      "distribution": "store",
+      "ios": {},
       "android": {
         "buildType": "app-bundle"
       },
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true"
       }
+    }
+  },
+  "submit": {
+    "preview": {
+      "ios": {}
+    },
+    "production": {
+      "ios": {}
     }
   }
 }

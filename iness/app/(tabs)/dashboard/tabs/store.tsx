@@ -24,6 +24,7 @@ import { RootState } from "@/store";
 import { ActivityIndicator } from "react-native-paper";
 import CategoryList from "@/app/Components/ecom/CategoryList";
 import GroupedProductDisplay from "@/app/Components/ecom/ProductList";
+import SmallHeader from "@/app/modules/SmallHeader";
 
 //// Main functional component for the equipscreen ------------------------/
 const MainHeader = withAnimatedHeader(NameHeader);
@@ -50,9 +51,12 @@ export default function EquipScreen() {
   ];
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["left", "right"]}
+    >
       {/* Header */}
-      <MainHeader scrollY={scrollY} title="Equip" />
+      <SmallHeader title="Store" weightShow={false} />
       {loading ? (
         <View
           style={{

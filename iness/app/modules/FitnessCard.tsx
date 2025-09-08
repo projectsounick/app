@@ -200,6 +200,8 @@ const FitnessGoalsCard = () => {
             borderRadius: 20,
             paddingVertical: 6,
             paddingHorizontal: 16,
+            alignItems: "center",
+            justifyContent: "center",
           }}
           onPress={() => router.push("/(tabs)/dashboard/track")}
         >

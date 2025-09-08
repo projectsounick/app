@@ -102,7 +102,6 @@ export default function CartItemList({
   }
   async function applyDiscountCode(couponCode: string) {
     try {
-      console.log("called");
       setCouponVisible(false);
       const response = await cartService.applyDiscountCoupon(couponCode);
       if (response.success) {
@@ -158,7 +157,7 @@ export default function CartItemList({
             </Text>
           ) : (
             <ScrollView
-              style={{ maxHeight: 200 }}
+              style={{ maxHeight: 500 }}
               showsVerticalScrollIndicator={false}
             >
               {items.map((item: CartItem) => {

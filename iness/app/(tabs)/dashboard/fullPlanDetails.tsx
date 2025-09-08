@@ -25,28 +25,53 @@ import { SafeAreaView } from "react-native-safe-area-context";
 const TABS = ["Information", "Trainer", "Workout"];
 
 const FullPlanDetails = () => {
-  const { id } = useLocalSearchParams();
+  const { id, type } = useLocalSearchParams(); // type: 'plan' | 'service'
   const [loading, setLoading] = useState(false);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [activeTab, setActiveTab] = useState("Information");
 
-  const selectedPlan: ActivePlans = useSelector((state: RootState) =>
-    state.plan.activePlans.find((plan) => plan._id === id)
+  const activePlans: ActivePlans[] = useSelector(
+    (state: RootState) => state.plan.activePlans
   );
+  const activeServices = useSelector(
+    (state: RootState) => state.plan.activeServices
+  );
+
+  const selectedPlanOrService: any =
+    type === "plan"
+      ? activePlans.find((plan) => plan._id === id)
+      : activeServices.find((service) => service._id === id);
 
   async function fetchSessions() {
     try {
       setLoading(true);
-      const response = await sessionService.getSessions();
+      let response;
+      if (type === "plan") {
+        let activePlanId: any = id;
+        let activeServiceId: any = null;
+        response = await sessionService.getSessions(
+          activePlanId,
+          activeServiceId
+        ); // planId
+      } else {
+        let activePlanId: any = null;
+        let activeServiceId: any = id;
+        response = await sessionService.getSessions(
+          activePlanId,
+          activeServiceId
+        ); // activeServiceId
+      }
       const sessions = response.data;
-      console.log("this is sessions");
-      console.log(sessions);
+      const filteredSessions = sessions.filter((s: any) => {
+        const status = s.sessionStatus?.toLowerCase().trim();
+        return status !== "canceled" && status !== "cancelled";
+      });
 
-      setSessions(sessions);
+      setSessions(filteredSessions);
 
+      // Select closest session
       const today = new Date();
       today.setHours(0, 0, 0, 0);
 
@@ -59,33 +84,33 @@ const FullPlanDetails = () => {
         const sessionDate = new Date(sessions[i].sessionDate);
         sessionDate.setHours(0, 0, 0, 0);
         const diff = Math.abs(sessionDate.getTime() - today.getTime());
-
         if (diff < smallestDiff) {
           smallestDiff = diff;
           closestSession = sessions[i];
         }
       }
       setSelectedSession(closestSession);
-    } catch (error: any) {}
-    setLoading(false);
+    } catch (error: any) {
+      console.log("Error fetching sessions:", error);
+      setSnackbarMessage("Failed to fetch sessions");
+      setSnackbarOpen(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
     fetchSessions();
-  }, []);
+  }, [id, type]);
 
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right", "bottom"]}
+      edges={["left", "right"]}
     >
       {loading ? (
         <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
+          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
           <ActivityIndicator />
         </View>
@@ -95,8 +120,12 @@ const FullPlanDetails = () => {
             title="Overview"
             bottomComponent={
               <HeaderContent
-                title={selectedPlan?.plan?.planType?.title || "Diet Plan"}
-                subtitle={selectedPlan?.plan?.title || ""}
+                title={"Plans"}
+                subtitle={
+                  selectedPlanOrService?.plan?.title ||
+                  selectedPlanOrService?.serviceDetails?.title ||
+                  ""
+                }
               >
                 <WorkoutSummaryCard
                   sessions={sessions}

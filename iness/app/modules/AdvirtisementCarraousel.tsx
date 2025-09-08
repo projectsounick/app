@@ -1,37 +1,16 @@
-import React, { useEffect, useRef } from "react";
-import {
-  View,
-  Text,
-  ScrollView,
-  Dimensions,
-  Animated,
-  StyleSheet,
-} from "react-native";
+import React from "react";
+import { View, Text, Dimensions } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
 import theme from "../Theme/globalTheme";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 const { width: screenWidth } = Dimensions.get("window");
-const CARD_WIDTH = screenWidth * 0.7;
-const CARD_MARGIN = 15;
 
 const DATA = [
-  {
-    icon: "✅",
-    text: "All minimum 4 years experience trainers",
-  },
-  {
-    icon: "💪",
-    text: "500+ success stories",
-  },
-  {
-    icon: "👥",
-    text: "24×7 active community",
-  },
-  {
-    icon: "🔥",
-    text: "Personalized plans for you",
-  },
+  { icon: "✅", line1: "11+ Years", line2: "Experience" },
+  { icon: "💪", line1: "700+", line2: "Stories" },
+  { icon: "👥", line1: "24x7", line2: "Support" },
+  { icon: "🔥", line1: "Custom", line2: "Plans" },
 ];
 
 const StylishCarousel = () => {
@@ -75,6 +54,7 @@ const StylishCarousel = () => {
           Why Choose us
         </Text>
       </View>
+
       <Text
         style={{
           fontSize: theme.fontSizes.regularSmall,
@@ -82,7 +62,7 @@ const StylishCarousel = () => {
           marginBottom: 12,
         }}
       >
-        Discover the key features that set us apart .
+        Discover the key features that set us apart.
       </Text>
 
       <View
@@ -90,7 +70,6 @@ const StylishCarousel = () => {
           width: "100%",
           borderRadius: 12,
           overflow: "hidden",
-          marginBottom: 12,
         }}
       >
         <LinearGradient
@@ -98,36 +77,45 @@ const StylishCarousel = () => {
           start={{ x: 0.5, y: 0 }}
           end={{ x: 0.5, y: 1 }}
           style={{
-            padding: 16,
+            height: 100,
+            width: "100%",
+            flexDirection: "row",
+            justifyContent: "space-around",
+            alignItems: "center",
+            borderRadius: 12,
           }}
         >
           {DATA.map((item, index) => (
             <View
               key={index}
               style={{
-                flexDirection: "row",
-                alignItems: "flex-start",
-                marginBottom: index === DATA.length - 1 ? 0 : 12,
+                flexDirection: "column",
+                alignItems: "center",
+                width: screenWidth / 5,
               }}
             >
-              <Text
-                style={{
-                  fontSize: 14,
-                  marginRight: 8,
-                }}
-              >
+              <Text style={{ fontSize: 18, color: "#fff", marginBottom: 4 }}>
                 {item.icon}
               </Text>
               <Text
                 style={{
                   color: "#fff",
-                  fontSize: 13,
-                  flex: 1,
+                  fontSize: 12,
+                  textAlign: "center",
+                  lineHeight: 14,
                 }}
-                numberOfLines={2}
-                ellipsizeMode="tail"
               >
-                {item.text}
+                {item.line1}
+              </Text>
+              <Text
+                style={{
+                  color: "#fff",
+                  fontSize: 12,
+                  textAlign: "center",
+                  lineHeight: 14,
+                }}
+              >
+                {item.line2}
               </Text>
             </View>
           ))}

@@ -1,24 +1,55 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import ShimmerPlaceHolder from "react-native-shimmer-placeholder";
+import { LinearGradient } from "expo-linear-gradient"; // ✅ shimmer requires this
 
-//// Main functional component for the Simmer skeleton card
+// Main functional component for the Simmer skeleton card
 const SimmerSkeletonCard = () => {
   return (
     <View style={styles.card}>
       {/* Thumbnail */}
-      <ShimmerPlaceHolder style={styles.thumbnail} />
+      <ShimmerPlaceHolder
+        LinearGradient={LinearGradient} // ✅ add gradient
+        style={styles.thumbnail}
+        shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]} // ✅ light shimmer
+        visible={false} // ✅ keeps shimmer animating
+      />
 
       {/* Content */}
       <View style={styles.content}>
-        <ShimmerPlaceHolder style={styles.title} />
-        <ShimmerPlaceHolder style={styles.description} />
+        <ShimmerPlaceHolder
+          LinearGradient={LinearGradient}
+          style={styles.title}
+          shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+          visible={false}
+        />
+        <ShimmerPlaceHolder
+          LinearGradient={LinearGradient}
+          style={styles.description}
+          shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+          visible={false}
+        />
 
         {/* Buttons */}
         <View style={styles.actions}>
-          <ShimmerPlaceHolder style={styles.icon} />
-          <ShimmerPlaceHolder style={styles.icon} />
-          <ShimmerPlaceHolder style={styles.share} />
+          <ShimmerPlaceHolder
+            LinearGradient={LinearGradient}
+            style={styles.icon}
+            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            visible={false}
+          />
+          <ShimmerPlaceHolder
+            LinearGradient={LinearGradient}
+            style={styles.icon}
+            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            visible={false}
+          />
+          <ShimmerPlaceHolder
+            LinearGradient={LinearGradient}
+            style={styles.share}
+            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            visible={false}
+          />
         </View>
       </View>
     </View>

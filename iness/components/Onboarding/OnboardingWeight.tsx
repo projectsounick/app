@@ -7,8 +7,11 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  ScrollView,
+  TouchableOpacity,
+  Modal,
+  FlatList,
 } from "react-native";
-import RNPickerSelect from "react-native-picker-select";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import CustomSnackbar from "@/app/modules/Snackbar";
@@ -16,23 +19,22 @@ import theme from "@/app/Theme/globalTheme";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
 
 const OnboardingWeight = ({ onNext }: { onNext: () => void }) => {
-  const kgOptions = Array.from({ length: 171 }, (_, i) => {
-    const value = (30 + i).toString();
-    return { label: value, value };
-  });
+  // Options
+  const kgOptions = Array.from({ length: 171 }, (_, i) => `${30 + i}`);
+  const gramOptions = Array.from({ length: 10 }, (_, i) => `${i * 100}`);
 
-  const gramOptions = Array.from({ length: 10 }, (_, i) => {
-    const value = (i * 100).toString();
-    return { label: value, value };
-  });
-
-  const [kg, setKg] = useState("80");
-  const [grams, setGrams] = useState("0");
+  // State
+  const [kg, setKg] = useState<string | null>(null);
+  const [grams, setGrams] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  const handleNext = () => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalType, setModalType] = useState<"kg" | "grams" | null>(null);
+
+  // Handlers
+  const handleNext = async () => {
     if (!kg || !grams) {
       setSnackbarMessage("Please select both Kg and Grams");
       setSnackbarVisible(true);
@@ -43,7 +45,7 @@ const OnboardingWeight = ({ onNext }: { onNext: () => void }) => {
 
     try {
       setLoading(true);
-      asyncStorageUtils.updateUserDataInAsyncStorage({
+      await asyncStorageUtils.updateUserDataInAsyncStorage({
         weight: combinedWeight,
       });
       setLoading(false);
@@ -55,58 +57,59 @@ const OnboardingWeight = ({ onNext }: { onNext: () => void }) => {
     }
   };
 
+  const openModal = (type: "kg" | "grams") => {
+    setModalType(type);
+    setModalVisible(true);
+  };
+
+  const selectValue = (value: string) => {
+    if (modalType === "kg") setKg(value);
+    if (modalType === "grams") setGrams(value);
+    setModalVisible(false);
+  };
+
+  const getOptions = () => (modalType === "kg" ? kgOptions : gramOptions);
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={60}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
         <View style={styles.container}>
-          <OnboardingHeading>
-            <Text style={styles.title}>What is your{`\n`}weight?</Text>
-          </OnboardingHeading>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            <OnboardingHeading>
+              <Text style={styles.title}>What is your{`\n`}weight?</Text>
+            </OnboardingHeading>
 
-          {/* Picker Section */}
-          <View style={styles.pickerRow}>
-            <View style={styles.pickerContainer}>
-              <RNPickerSelect
-                value={kg}
-                onValueChange={(value) => setKg(value)}
-                items={kgOptions}
-                placeholder={{ label: "Kg", value: null }}
-                style={{
-                  inputIOS: styles.pickerText,
-                  inputAndroid: styles.pickerText,
-                  modalViewMiddle: {
-                    justifyContent: "flex-end",
-                    height: 100, // ✅ adjust this to desired height
-                  },
-                }}
-                useNativeAndroidPickerStyle={false}
-              />
+            <View style={styles.pickerRow}>
+              {/* Kg Picker */}
+              <TouchableOpacity
+                style={styles.pickerButton}
+                onPress={() => openModal("kg")}
+              >
+                <Text style={styles.pickerText}>{kg ?? "Select kg"}</Text>
+              </TouchableOpacity>
               <Text style={styles.unit}>Kg</Text>
-            </View>
 
-            <View style={styles.pickerContainer}>
-              <RNPickerSelect
-                value={grams}
-                onValueChange={(value) => setGrams(value)}
-                items={gramOptions}
-                placeholder={{ label: "Grams", value: null }}
-                style={{
-                  inputIOS: styles.pickerText,
-                  inputAndroid: styles.pickerText,
-                }}
-                useNativeAndroidPickerStyle={false}
-              />
+              {/* Gram Picker */}
+              <TouchableOpacity
+                style={styles.pickerButton}
+                onPress={() => openModal("grams")}
+              >
+                <Text style={styles.pickerText}>{grams ?? "Select g"}</Text>
+              </TouchableOpacity>
               <Text style={styles.unit}>g</Text>
             </View>
-          </View>
 
-          <Text style={styles.hintText}>
-            Select your weight in Kg and Grams (e.g. 80.300)
-          </Text>
+            <Text style={styles.hintText}>
+              Select your weight (e.g. 80 kg 300 g)
+            </Text>
+          </ScrollView>
 
           <View style={styles.bottomButton}>
             <AnimatedSubmitButton
@@ -122,19 +125,61 @@ const OnboardingWeight = ({ onNext }: { onNext: () => void }) => {
             message={snackbarMessage}
             onDismiss={() => setSnackbarVisible(false)}
           />
+
+          {/* Modal */}
+          <Modal
+            visible={modalVisible}
+            animationType="slide"
+            transparent
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>
+                  Select {modalType === "kg" ? "Kg" : "Grams"}
+                </Text>
+                <FlatList
+                  data={getOptions()}
+                  keyExtractor={(item) => item}
+                  renderItem={({ item }) => (
+                    <TouchableOpacity
+                      style={styles.option}
+                      onPress={() => selectValue(item)}
+                    >
+                      <Text style={styles.optionText}>{item}</Text>
+                    </TouchableOpacity>
+                  )}
+                />
+                <TouchableOpacity
+                  style={styles.closeButton}
+                  onPress={() => setModalVisible(false)}
+                >
+                  <Text style={styles.closeButtonText}>Cancel</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
         </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 };
 
+export default OnboardingWeight;
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "space-between",
   },
+  scrollContent: {
+    paddingTop: 60,
+    paddingHorizontal: 24,
+    paddingBottom: 20,
+    flexGrow: 1,
+  },
   title: {
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "bold",
     color: "#000",
     textAlign: "center",
@@ -142,39 +187,77 @@ const styles = StyleSheet.create({
   pickerRow: {
     flexDirection: "row",
     justifyContent: "center",
-
-    gap: 24,
-  },
-  pickerContainer: {
     alignItems: "center",
+    marginTop: 30,
   },
-  pickerText: {
-    fontSize: 20,
-
-    paddingHorizontal: 10,
+  pickerButton: {
     borderWidth: 1,
     borderColor: "#ccc",
     borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    minWidth: 80,
+    alignItems: "center",
+  },
+  pickerText: {
+    fontSize: 18,
     color: "#000",
-    backgroundColor: "transparent",
-    width: 120,
-    textAlign: "center",
   },
   unit: {
-    marginTop: 6,
-    fontSize: 16,
+    marginHorizontal: 8,
+    fontSize: 18,
     color: "#7D4CFF",
-    fontWeight: "600",
+    fontWeight: "bold",
   },
   hintText: {
     textAlign: "center",
     color: "#666",
     fontSize: 14,
+    marginTop: 8,
   },
   bottomButton: {
     paddingHorizontal: 24,
     paddingBottom: 30,
   },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingBottom: 20,
+    maxHeight: "60%",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "600",
+    padding: 15,
+    textAlign: "center",
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+  },
+  option: {
+    padding: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
+    alignItems: "center",
+  },
+  optionText: {
+    fontSize: 18,
+  },
+  closeButton: {
+    backgroundColor: "#ff4d4d",
+    marginHorizontal: 20,
+    padding: 15,
+    borderRadius: 10,
+    marginTop: 10,
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    textAlign: "center",
+  },
 });
-
-export default OnboardingWeight;

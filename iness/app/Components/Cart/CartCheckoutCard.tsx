@@ -30,7 +30,9 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
   return (
     <View
       style={{
-        padding: 20,
+        paddingHorizontal: 20,
+        paddingTop: 20,
+        paddingBottom: 30,
         backgroundColor: "#2D0140",
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
@@ -89,6 +91,7 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
             paddingHorizontal: 16,
             borderRadius: 12,
             height: 48,
+
             opacity: cartItems.length === 0 ? 0.6 : 1, // visual cue
           }}
         >

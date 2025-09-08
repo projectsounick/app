@@ -9,6 +9,7 @@ export const asyncStorageUtils = {
   storeScreenName,
   updateUserDataInAsyncStorage,
   updateUserAccessToken,
+  storeDataInAsyncStorage,
 };
 
 async function storeUserInAsyncStorage(userData: any) {
@@ -19,7 +20,15 @@ async function storeUserInAsyncStorage(userData: any) {
     console.error("Error saving user data to AsyncStorage:", e);
   }
 }
-
+//// Store data in async storage ------------------------------------------/
+async function storeDataInAsyncStorage(data: any, key: string) {
+  try {
+    const jsonValue = JSON.stringify(data);
+    await AsyncStorage.setItem(key, jsonValue);
+  } catch (e) {
+    console.error("Error saving user data to AsyncStorage:", e);
+  }
+}
 async function updateUserAccessToken(newAccessToken: string) {
   try {
     const storedUser = await AsyncStorage.getItem("user");

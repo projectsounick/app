@@ -1,14 +1,7 @@
 import React, { useState } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  Pressable,
-  TextInput,
-  ScrollView,
-} from "react-native";
+import { View, Text, Pressable, TextInput, ScrollView } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
+import Modal from "react-native-modal";
 const options = [
   { icon: "emoticon-happy-outline", label: "Good" },
   { icon: "star-circle-outline", label: "Excellent" },
@@ -25,7 +18,7 @@ const FeedbackModal = ({
   visible: boolean;
   onClose: () => void;
   onSubmit: (feedback: string) => void;
-  sessionId: string;
+  sessionId?: string;
 }) => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [customFeedback, setCustomFeedback] = useState("");
@@ -36,7 +29,14 @@ const FeedbackModal = ({
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
+    <Modal
+      isVisible={visible}
+      onBackdropPress={onClose}
+      style={{ margin: 0, justifyContent: "center" }}
+      useNativeDriver={true}
+      propagateSwipe={true}
+      backdropOpacity={0.7}
+    >
       <View
         style={{
           flex: 1,

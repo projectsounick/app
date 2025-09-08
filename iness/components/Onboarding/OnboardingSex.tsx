@@ -61,7 +61,7 @@ const OnboardingSex = ({
     >
       {/* Question + Options */}
       <View>
-        <OnboardingHeading>What is your{"\n"}biological sex?</OnboardingHeading>
+        <OnboardingHeading>What is your{"\n"}Gender?</OnboardingHeading>
         {["Male", "Female"].map((option, index) => (
           <OnboardingCard
             key={option}

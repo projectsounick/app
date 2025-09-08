@@ -69,9 +69,9 @@ export default function MediaScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right"]}
+      edges={["left", "right"]}
     >
-      <SmallHeader title="Iness TV" />
+      <SmallHeader title="Media" weightShow={false} />
       <ScrollView
         contentContainerStyle={{ padding: 20 }}
         scrollEventThrottle={16}
@@ -154,12 +154,7 @@ export default function MediaScreen() {
           ))
         )}
       </ScrollView>
-      <CustomSnackbar
-        visible={snackbarVisible}
-        message={snackbarMessage}
-        bgColor={theme.colors.primary}
-        onDismiss={() => setSnackbarVisible(false)}
-      />
+
       {updateLoader && <FullScreenLoader />}
     </SafeAreaView>
   );

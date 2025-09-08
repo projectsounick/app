@@ -65,19 +65,48 @@ const PaymentSuccessScreen = () => {
       if (savedOrderId) {
         setOrderId(savedOrderId);
         setLoading(true);
-        const response = await cartService.getOrderStatus(savedOrderId);
-        if (response.success) {
-          setMessage("Thank you! Payment successful.");
-          const response = await planService.getActivePlans();
-          if (response.success) {
-            setReciptShow(true);
-            dispatch(setActivePlans(response.data));
-            dispatch(clearCart());
+        try {
+          const response = await cartService.getOrderStatus(savedOrderId);
+
+          if (response.success && response.data.staus === "success") {
+            setMessage("✅ Thank you! Payment successful.");
+            const activePlansResp = await planService.getActivePlans();
+            if (activePlansResp.success) {
+              setReciptShow(true);
+              dispatch(setActivePlans(activePlansResp.data));
+              dispatch(clearCart());
+            }
+          } else {
+            // Payment failed / incomplete
+            setMessage(
+              "⚠️ Your payment could not be processed. Please try again."
+            );
+            Alert.alert(
+              "⚠️ Payment Incomplete",
+              "Your payment could not be processed. Please try again.",
+              [{ text: "OK", onPress: () => console.log("Alert closed") }]
+            );
           }
+        } catch (err) {
+          setMessage(
+            "⚠️ Your payment could not be processed. Please try again."
+          );
+          Alert.alert(
+            "❌ Error",
+            "Something went wrong. Please try again later.",
+            [{ text: "OK" }]
+          );
+        } finally {
+          setLoading(false);
         }
       }
     } catch (error) {
       setMessage("Unable to process the payment");
+      Alert.alert(
+        "⚠️ Payment Incomplete",
+        "Your payment could not be processed. Please try again.",
+        [{ text: "OK", onPress: () => console.log("Alert closed") }]
+      );
     } finally {
       setLoading(false);
     }

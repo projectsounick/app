@@ -41,75 +41,107 @@ const CategoryProductsScreen = () => {
   };
 
   const renderProductCard = ({ item }: { item: Product; index: number }) => {
+    const variation = item.variations?.[0];
+    const displayLabel = variation?.label;
+    const displayPrice = variation?.price ?? item.basePrice;
+
     return (
-      <View
+      <TouchableOpacity
         key={item._id}
         style={{
           width: CARD_WIDTH,
-          height: 160,
+          height: 180,
           borderRadius: 12,
           backgroundColor: "#fff",
           overflow: "hidden",
           marginBottom: 16,
           marginRight: 16,
         }}
+        onPress={() => handleCheck(item)}
       >
-        {/* Top Section */}
+        {/* Top Section (Image + Quantity + Button) */}
         <View
           style={{
-            backgroundColor: color,
             height: 120,
-            padding: 8,
-            borderRadius: 12,
-            justifyContent: "space-between",
+            borderTopLeftRadius: 12,
+            borderTopRightRadius: 12,
+            position: "relative",
+            justifyContent: "flex-end",
+            alignItems: "center",
           }}
         >
+          {/* Background Image */}
           {item.images?.[0] ? (
             <Image
               source={{ uri: item.images[0] }}
               style={{
                 width: "100%",
-                height: 75,
-                borderRadius: 8,
-
+                height: "100%",
+                position: "absolute",
+                top: 0,
+                left: 0,
                 resizeMode: "contain",
-                alignSelf: "center", // changed from flex-end to center
               }}
             />
           ) : (
             <View
               style={{
                 backgroundColor: "#999",
-                borderRadius: 8,
-
-                alignSelf: "flex-end",
+                width: "100%",
+                height: "100%",
+                position: "absolute",
+                top: 0,
+                left: 0,
               }}
             />
           )}
+
+          {/* Plus/Check Button */}
           <TouchableOpacity
             style={{
+              position: "absolute",
+              top: 6,
+              right: 6,
               backgroundColor: "#fff",
-              borderRadius: 20,
-              paddingVertical: 2,
-              paddingHorizontal: 8,
-              alignSelf: "flex-end",
-              flexDirection: "row",
+              borderRadius: 30,
+              width: 34,
+              height: 34,
               alignItems: "center",
+              justifyContent: "center",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.1,
+              shadowRadius: 2,
+              elevation: 2,
             }}
             onPress={() => handleCheck(item)}
           >
-            <Text
+            <Feather name="plus" size={22} color="#00A300" />
+          </TouchableOpacity>
+
+          {/* Quantity (Variation Label) */}
+          {displayLabel && (
+            <View
               style={{
-                color: "#000",
-                fontWeight: "600",
-                fontSize: 8,
-                marginRight: 6,
+                backgroundColor: "#fff",
+                paddingHorizontal: 8,
+                paddingVertical: 2,
+                borderRadius: 10,
+                marginBottom: 6,
+                alignSelf: "center",
               }}
             >
-              Check
-            </Text>
-            <Feather name="arrow-right" size={10} color="#000" />
-          </TouchableOpacity>
+              <Text
+                style={{
+                  fontSize: 10,
+                  fontWeight: "600",
+                  color: "#333",
+                }}
+              >
+                {displayLabel}
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Bottom Section */}
@@ -124,8 +156,19 @@ const CategoryProductsScreen = () => {
           >
             {item.name}
           </Text>
+
+          <Text
+            style={{
+              fontSize: 11,
+              fontWeight: "700",
+              color: "#000",
+              marginTop: 2,
+            }}
+          >
+            ₹{displayPrice}
+          </Text>
         </View>
-      </View>
+      </TouchableOpacity>
     );
   };
 
@@ -144,7 +187,7 @@ const CategoryProductsScreen = () => {
             textAlign: "center",
           }}
         >
-          Products
+          {category}
         </Text>
       </View>
       {/* Product Grid */}

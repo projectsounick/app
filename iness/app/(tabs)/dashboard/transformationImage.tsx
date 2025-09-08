@@ -142,7 +142,10 @@ export default function TransformationImage() {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      edges={["top", "left", "right"]}
+    >
       <ImageBackground
         source={require("../../../assets/images/basicBackground.jpg")}
         style={{ flex: 1 }}

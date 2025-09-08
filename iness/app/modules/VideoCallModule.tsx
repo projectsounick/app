@@ -6,6 +6,7 @@ import {
   PermissionsAndroid,
   Platform,
   TouchableOpacity,
+  InteractionManager,
 } from "react-native";
 import {
   createAgoraRtcEngine,
@@ -38,7 +39,28 @@ export default function VideoCallScreen({
   const [joined, setJoined] = useState(false);
   const [remoteUid, setRemoteUid] = useState<number | null>(null);
   const [isMuted, setIsMuted] = useState(false);
-  const [showLocalFull, setShowLocalFull] = useState(false); // 👈 View toggle
+  const [cameraOn, setCameraOn] = useState(true);
+  const [showLocalFull, setShowLocalFull] = useState(false);
+  const [callStartTime, setCallStartTime] = useState<Date | null>(null);
+  const [callDuration, setCallDuration] = useState<string>("00:00");
+
+  // Update call duration
+  useEffect(() => {
+    let timer: any;
+    if (callStartTime) {
+      timer = setInterval(() => {
+        const diff = Math.floor(
+          (new Date().getTime() - callStartTime.getTime()) / 1000
+        );
+        const minutes = Math.floor(diff / 60)
+          .toString()
+          .padStart(2, "0");
+        const seconds = (diff % 60).toString().padStart(2, "0");
+        setCallDuration(`${minutes}:${seconds}`);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [callStartTime]);
 
   const getPermission = async () => {
     if (Platform.OS === "android") {
@@ -75,8 +97,9 @@ export default function VideoCallScreen({
     }
 
     engine.registerEventHandler({
-      onJoinChannelSuccess: (connection, localUid) => {
+      onJoinChannelSuccess: (_, localUid) => {
         setJoined(true);
+        setCallStartTime(new Date());
       },
       onUserJoined: (_, uid) => {
         setRemoteUid(uid);
@@ -97,13 +120,32 @@ export default function VideoCallScreen({
   };
 
   const endCall = async () => {
-    agoraEngineRef.current?.leaveChannel();
-    agoraEngineRef.current?.release();
+    onCallEnd();
     setJoined(false);
     setRemoteUid(null);
-    onCallEnd();
-    await AsyncStorage.removeItem("videocallActivity");
+
+    InteractionManager.runAfterInteractions(async () => {
+      try {
+        if (agoraEngineRef.current) {
+          await agoraEngineRef.current.leaveChannel();
+          await agoraEngineRef.current.release();
+          agoraEngineRef.current = null;
+        }
+        await AsyncStorage.removeItem("videocallActivity");
+        console.log("✅ Agora cleanup done");
+      } catch (err) {
+        console.warn("⚠️ Agora cleanup failed:", err);
+      }
+    });
   };
+  useEffect(() => {
+    setupAgora();
+
+    return () => {
+      // just delegate cleanup here
+      endCall();
+    };
+  }, []);
 
   const toggleMute = () => {
     const mute = !isMuted;
@@ -111,13 +153,15 @@ export default function VideoCallScreen({
     agoraEngineRef.current?.muteLocalAudioStream(mute);
   };
 
-  useEffect(() => {
-    setupAgora();
-    return () => {
-      agoraEngineRef.current?.leaveChannel();
-      agoraEngineRef.current?.release();
-    };
-  }, []);
+  const toggleCamera = () => {
+    const camOn = !cameraOn;
+    setCameraOn(camOn);
+    agoraEngineRef.current?.muteLocalVideoStream(!camOn);
+  };
+
+  const switchCamera = () => {
+    agoraEngineRef.current?.switchCamera();
+  };
 
   const swapViews = () => {
     setShowLocalFull((prev) => !prev);
@@ -125,73 +169,71 @@ export default function VideoCallScreen({
 
   return (
     <View style={styles.container}>
-      {joined ? (
-        <>
-          {/* Main Video Area */}
-          <View style={styles.fullVideo}>
-            {showLocalFull ? (
-              isHost && (
-                <RtcSurfaceView
-                  canvas={{ uid: 0, renderMode: 1 }}
-                  style={styles.fullVideo}
-                />
-              )
-            ) : remoteUid !== null ? (
-              <RtcSurfaceView
-                canvas={{ uid: remoteUid, renderMode: 1 }}
-                style={[styles.fullVideo, { transform: [{ scaleX: -1 }] }]}
-              />
-            ) : (
-              <Text style={styles.statusText}>Waiting for remote user...</Text>
-            )}
-          </View>
-
-          {/* Small Picture-in-Picture View */}
-          {remoteUid !== null && isHost && (
-            <TouchableOpacity onPress={swapViews} style={styles.pipContainer}>
-              <RtcSurfaceView
-                canvas={{ uid: showLocalFull ? remoteUid : 0, renderMode: 1 }}
-                style={styles.pipVideo}
-              />
-            </TouchableOpacity>
-          )}
-
-          {/* Mic Button */}
-          <TouchableOpacity style={styles.micButton} onPress={toggleMute}>
-            <Ionicons
-              name={isMuted ? "mic-off" : "mic"}
-              size={24}
-              color="#fff"
-            />
-          </TouchableOpacity>
-
-          {/* End Call Button */}
-          <TouchableOpacity style={styles.endButton} onPress={endCall}>
-            <Ionicons name="call" size={28} color="#fff" />
-            <Text style={styles.endText}>End Call</Text>
-          </TouchableOpacity>
-        </>
-      ) : (
-        <Text style={styles.statusText}>Joining call...</Text>
+      {/* Call Duration */}
+      {joined && (
+        <View style={styles.timerContainer}>
+          <Text style={styles.timerText}>{callDuration}</Text>
+        </View>
       )}
+
+      {/* Video Area */}
+      <View style={styles.fullVideo}>
+        {showLocalFull ? (
+          isHost && (
+            <RtcSurfaceView
+              canvas={{ uid: 0, renderMode: 1 }}
+              style={styles.fullVideo}
+            />
+          )
+        ) : remoteUid !== null ? (
+          <RtcSurfaceView
+            canvas={{ uid: remoteUid, renderMode: 1 }}
+            style={[styles.fullVideo, { transform: [{ scaleX: -1 }] }]}
+          />
+        ) : (
+          <Text style={styles.statusText}>Waiting for remote user...</Text>
+        )}
+      </View>
+
+      {/* Picture-in-Picture */}
+      {remoteUid !== null && isHost && (
+        <TouchableOpacity onPress={swapViews} style={styles.pipContainer}>
+          <RtcSurfaceView
+            canvas={{ uid: showLocalFull ? remoteUid : 0, renderMode: 1 }}
+            style={styles.pipVideo}
+          />
+        </TouchableOpacity>
+      )}
+
+      {/* Controls */}
+      <View style={styles.controls}>
+        <TouchableOpacity style={styles.circleButton} onPress={toggleMute}>
+          <Ionicons name={isMuted ? "mic-off" : "mic"} size={24} color="#fff" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.circleButton} onPress={toggleCamera}>
+          <Ionicons
+            name={cameraOn ? "videocam" : "videocam-off"}
+            size={24}
+            color="#fff"
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.circleButton} onPress={switchCamera}>
+          <Ionicons name="camera-reverse-outline" size={24} color="#fff" />
+        </TouchableOpacity>
+
+        <TouchableOpacity style={styles.endButton} onPress={endCall}>
+          <Ionicons name="call" size={28} color="#fff" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  fullVideo: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    width: "100%",
-    height: "100%",
-  },
+  container: { flex: 1, backgroundColor: "#000" },
+  fullVideo: { flex: 1, width: "100%", height: "100%" },
   pipContainer: {
     position: "absolute",
     top: 40,
@@ -204,37 +246,60 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     zIndex: 10,
   },
-  pipVideo: {
-    width: "100%",
-    height: "100%",
+  pipVideo: { width: "100%", height: "100%" },
+  controls: {
+    position: "absolute",
+    right: 16,
+    bottom: 40,
+    flexDirection: "column",
+    gap: 16,
+    alignItems: "center",
+  },
+  circleButton: {
+    backgroundColor: "#333",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 5,
+    elevation: 6,
   },
   endButton: {
-    position: "absolute",
-    bottom: 40,
     backgroundColor: "#E53935",
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 30,
-    flexDirection: "row",
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    justifyContent: "center",
     alignItems: "center",
-    gap: 8,
-  },
-  micButton: {
-    position: "absolute",
-    bottom: 110,
-    backgroundColor: "#333",
-    padding: 12,
-    borderRadius: 50,
-  },
-  endText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
-    marginLeft: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.6,
+    shadowRadius: 6,
+    elevation: 8,
+    marginTop: 16,
   },
   statusText: {
     color: "#fff",
     fontSize: 18,
     textAlign: "center",
+    position: "absolute",
+    top: "50%",
+    left: 0,
+    right: 0,
   },
+  timerContainer: {
+    position: "absolute",
+    top: 40,
+    left: 16,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    zIndex: 10,
+  },
+  timerText: { color: "#fff", fontSize: 16, fontWeight: "600" },
 });

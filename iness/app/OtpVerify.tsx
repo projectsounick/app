@@ -89,7 +89,23 @@ const OTPInputScreen = () => {
           expoPushToken: pushToken,
         };
 
-        const response = await callService(requestBody);
+        const [response, dietPlanResponse] = await Promise.all([
+          callService(requestBody),
+          userService.getActiveDietPlans(),
+        ]);
+
+        try {
+          if (dietPlanResponse.success && dietPlanResponse.data) {
+            let dietPlanUrls = dietPlanResponse.data
+              .filter((elem: any) => elem.dietPlanUrl) // keeps only truthy values
+              .map((elem: any) => elem.dietPlanUrl);
+            await asyncStorageUtils.storeDataInAsyncStorage(
+              dietPlanUrls,
+              "dietplans"
+            );
+          }
+        } catch (error) {}
+        /// Getting all the active diet plan url of that user --------------------/
 
         if (response?.success) {
           /// Store user data in AsyncStorage
@@ -166,7 +182,7 @@ const OTPInputScreen = () => {
           style={{
             flex: 1,
             justifyContent: "space-between",
-            paddingTop: "10%",
+            paddingTop: "15%",
             paddingBottom: "10%",
           }}
         >

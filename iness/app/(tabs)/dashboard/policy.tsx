@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Text, ScrollView, ImageBackground } from "react-native";
+import {
+  View,
+  Text,
+  ScrollView,
+  ImageBackground,
+  Platform,
+} from "react-native";
 import NormalHeader from "@/app/modules/NormalHeader";
 import theme from "@/app/Theme/globalTheme";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -42,7 +48,7 @@ export default function PolicyScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right", "bottom"]}
+      edges={["top", "left", "right"]}
     >
       <ImageBackground
         source={require("../../../assets/images/basicBackground.jpg")}
@@ -53,7 +59,12 @@ export default function PolicyScreen() {
           backgroundColor: "#000",
         }}
       >
-        <View style={{ paddingTop: 30, paddingLeft: 20 }}>
+        <View
+          style={{
+            paddingTop: Platform.OS === "ios" ? "15%" : "4%",
+            paddingLeft: 20,
+          }}
+        >
           <NormalHeader screenName="Policies" />
         </View>
 

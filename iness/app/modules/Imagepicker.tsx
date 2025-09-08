@@ -13,87 +13,106 @@ import { uploadToAzureFromExpo } from "@/utils/azureUtils"; // Adjust paths acco
 import { userService } from "../services/user.service";
 import { transformatiomImageService } from "../services/transofmationImage.service";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import DietPlanBottomSheet from "./PdfBottomSheet";
+import SessionCalendarSheet from "./SessionCalendarSheet";
+import FeedbackModal from "../Components/ActivePlans.tsx/SessionFeedbackModal";
+import { sessionService } from "../services/sessionService";
+
 interface FloatingCameraButtonProps {}
 
 const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
   const animation1 = useRef(new Animated.Value(0)).current;
-  const animation2 = useRef(new Animated.Value(0)).current;
+  const [visible, setVisible] = useState(false);
+  const onClose = () => {
+    setVisible(false);
+  };
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [currentSession, setCurrentSession] = useState<any>(null);
+  const [sessionSheetVisible, setSessionSheetVisible] = useState(false);
+  const onCloseSessionSheet = () => {
+    setSessionSheetVisible(false);
+  };
+
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [imageUploadLoader, setImageUploadLoader] = useState(false);
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-
+  const openDietPlanModal = () => {
+    setVisible(true);
+    setMenuOpen(false);
+  };
   const toggleMenu = () => {
     if (menuOpen) {
-      Animated.parallel([
-        Animated.timing(animation1, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animation2, {
-          toValue: 0,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start(() => setMenuOpen(false));
+      Animated.timing(animation1, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start(() => setMenuOpen(false));
     } else {
       setMenuOpen(true);
-      Animated.parallel([
-        Animated.timing(animation1, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animation2, {
-          toValue: 1,
-          duration: 200,
-          useNativeDriver: true,
-        }),
-      ]).start();
+      Animated.timing(animation1, {
+        toValue: 1,
+        duration: 200,
+        useNativeDriver: true,
+      }).start();
     }
   };
-
+  const cameraStyle = {
+    transform: [
+      {
+        translateY: animation1.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, -70],
+        }),
+      },
+    ],
+    opacity: animation1,
+  };
+  const dietPlanStyle = {
+    transform: [
+      {
+        translateY: animation1.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, -190],
+        }),
+      },
+    ],
+    opacity: animation1,
+  };
+  const sessionSheetStyle = {
+    transform: [
+      {
+        translateY: animation1.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, -130],
+        }),
+      },
+    ],
+    opacity: animation1,
+  };
   const pickImage = async (mode: "camera" | "gallery") => {
     setImageUploadLoader(true);
 
     try {
-      // Step 1: Request permission
-      const permissionResult =
-        mode === "camera"
-          ? await ImagePicker.requestCameraPermissionsAsync()
-          : await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-      if (!permissionResult.granted) {
-        setSnackbarVisible(true);
-        setSnackbarMessage(
-          mode === "camera"
-            ? "Camera permission is required."
-            : "Gallery permission is required."
-        );
-        return;
-      }
+      // 👉 Ask for permissions
+      // const hasPermission = await requestPermissions();
+      // if (!hasPermission) return;
 
       let result: ImagePicker.ImagePickerResult;
 
-      // Step 2: Launch based on mode
+      // Step 2: Handle camera or gallery
       if (mode === "camera") {
         const mediaType = await new Promise<"image" | "video">(
           (resolve, reject) => {
-            Alert.alert(
-              "Select Capture Type",
-              "Choose what you want to capture",
-              [
-                { text: "Photo", onPress: () => resolve("image") },
-                { text: "Video", onPress: () => resolve("video") },
-                {
-                  text: "Cancel",
-                  onPress: () => reject("cancel"),
-                  style: "cancel",
-                },
-              ]
-            );
+            Alert.alert("Capture Type", "Choose what you want to capture", [
+              { text: "Photo", onPress: () => resolve("image") },
+              { text: "Video", onPress: () => resolve("video") },
+              {
+                text: "Cancel",
+                style: "cancel",
+                onPress: () => reject("cancel"),
+              },
+            ]);
           }
         );
 
@@ -112,47 +131,36 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
         });
       }
 
-      if (result.canceled || !result.assets || result.assets.length === 0) {
+      // Step 3: Cancel check
+      if (result.canceled || !result.assets || result.assets.length === 0)
         return;
-      }
 
       const asset = result.assets[0];
       const fileUri = asset.uri;
-      const type = asset.type; // 'image' or 'video'
+      const type = asset.type ?? "image"; // fallback to image
 
-      // Step 3: Get Azure credentials
+      // Step 4: Get storage credentials
       const storageDetails = await userService.getStorageAccountDetails(
         "transformationImages"
       );
-      if (!storageDetails.success) {
-        setSnackbarVisible(true);
-        setSnackbarMessage("Server error, try again.");
-        return;
-      }
 
       const { storageAccountName, sasToken } = storageDetails.data;
 
-      // Step 4: Get user
+      // Step 5: Get user
       const userData =
         await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-      if (!userData.exists) {
-        setSnackbarVisible(true);
-        setSnackbarMessage("User not found.");
-        return;
-      }
 
       setMenuOpen(false);
-
       const userId = userData.data._id;
 
-      // Step 5: Generate file name
+      // Step 6: Generate filename
       const fileExtension =
         fileUri.split(".").pop() || (type === "video" ? "mp4" : "jpg");
       const originalFileName =
-        fileUri.split("/").pop() || `file-${Date.now()}.${fileExtension}`;
+        fileUri.split("/").pop() ?? `file-${Date.now()}.${fileExtension}`;
       const fileName = `${userId}_${originalFileName}`;
 
-      // Step 6: Upload to Azure
+      // Step 7: Upload to Azure
       const uploadedUrl = await uploadToAzureFromExpo(
         fileUri,
         fileName,
@@ -162,90 +170,81 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
         "transformationImages"
       );
 
-      // Step 7: Save to DB
-      const uploadData = [{ url: uploadedUrl }];
+      // Step 8: Save to DB
       const uploadRes =
-        await transformatiomImageService.addTransformationImages(uploadData);
+        await transformatiomImageService.addTransformationImages([
+          { url: uploadedUrl },
+        ]);
 
       if (uploadRes?.data) {
-        setSnackbarVisible(true);
-        setSnackbarMessage(
-          type === "video"
-            ? "Video uploaded successfully!"
-            : "Image uploaded successfully!"
-        );
       } else {
-        setSnackbarVisible(true);
-        setSnackbarMessage("Failed to save file.");
       }
-    } catch (err) {
+    } catch (err: any) {
+      console.log(err.message);
+
       if (err !== "cancel") {
         console.error(err);
-        setSnackbarVisible(true);
-        setSnackbarMessage("Upload failed.");
       }
     } finally {
       setImageUploadLoader(false);
     }
   };
-
+  const submitFeedback = async (feedback: string) => {
+    if (!currentSession) return;
+    try {
+      setFeedbackLoading(true);
+      const params = {
+        sessionId: currentSession._id,
+        data: { sessionFeedback: feedback },
+      };
+      const response = await sessionService.updateSession(params);
+      if (response.success) {
+        setCurrentSession({ ...currentSession, sessionFeedback: feedback });
+        setShowFeedbackModal(false);
+      } else {
+        alert("Failed to submit feedback");
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
   return (
-    <>
+    <View style={styles.container}>
+      {/* Diet Plan Button */}
       {menuOpen && (
-        <Animated.View
-          style={[
-            styles.subButton,
-            {
-              transform: [
-                {
-                  translateY: animation1.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, -80],
-                  }),
-                },
-                {
-                  translateX: animation1.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, -60],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
+        <Animated.View style={[styles.subButton, dietPlanStyle]}>
           <TouchableOpacity
-            onPress={() => pickImage("gallery")}
+            onPress={() => {
+              console.log("called");
+
+              openDietPlanModal();
+            }}
             style={styles.iconButton}
+            activeOpacity={0.8}
           >
-            <Ionicons name="document" size={24} color="#fff" />
+            <Ionicons name="document-text" size={24} color="#fff" />
           </TouchableOpacity>
         </Animated.View>
       )}
 
       {menuOpen && (
-        <Animated.View
-          style={[
-            styles.subButton,
-            {
-              transform: [
-                {
-                  translateY: animation2.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, -90],
-                  }),
-                },
-                {
-                  translateX: animation2.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0, 0],
-                  }),
-                },
-              ],
-            },
-          ]}
-        >
+        <Animated.View style={[styles.subButton, sessionSheetStyle]}>
           <TouchableOpacity
-            onPress={() => pickImage("camera")}
+            onPress={() => setSessionSheetVisible(true)}
+            style={styles.iconButton}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="calendar" size={24} color="#fff" />
+          </TouchableOpacity>
+        </Animated.View>
+      )}
+      {/* Camera Button */}
+      {menuOpen && (
+        <Animated.View style={[styles.subButton, cameraStyle]}>
+          <TouchableOpacity
+            onPress={() => pickImage("gallery")}
             style={styles.iconButton}
             activeOpacity={0.8}
           >
@@ -254,6 +253,7 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
         </Animated.View>
       )}
 
+      {/* Main Floating Button */}
       <TouchableOpacity
         onPress={toggleMenu}
         style={styles.floatingButton}
@@ -263,23 +263,45 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
           <ActivityIndicator color="#fff" />
         ) : (
           <Ionicons
-            name={menuOpen ? "close" : "camera"}
+            name={menuOpen ? "close" : "flash-outline"}
             size={30}
             color="#fff"
           />
         )}
       </TouchableOpacity>
-    </>
+      {visible ? (
+        <DietPlanBottomSheet visible={visible} onClose={onClose} />
+      ) : null}
+      {sessionSheetVisible ? (
+        <SessionCalendarSheet
+          isVisible={sessionSheetVisible}
+          onClose={onCloseSessionSheet}
+          setCurrentSession={setCurrentSession}
+          currentSession={currentSession}
+          setShowFeedbackModal={setShowFeedbackModal}
+        />
+      ) : null}
+      {showFeedbackModal ? (
+        <FeedbackModal
+          visible={showFeedbackModal}
+          onClose={() => setShowFeedbackModal(false)}
+          onSubmit={submitFeedback}
+        />
+      ) : null}
+    </View>
   );
 };
 
 export default memo(ImagePickerButton);
 
 const styles = StyleSheet.create({
-  floatingButton: {
+  container: {
     position: "absolute",
-    bottom: 10,
-    right: 20,
+    bottom: 20,
+    right: 10,
+    alignItems: "center",
+  },
+  floatingButton: {
     backgroundColor: "#19002E",
     width: 60,
     height: 60,
@@ -291,7 +313,7 @@ const styles = StyleSheet.create({
   },
   subButton: {
     position: "absolute",
-    bottom: 1,
+    bottom: 0,
     right: 5,
     zIndex: 99,
   },

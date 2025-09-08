@@ -9,10 +9,14 @@ import {
   Image,
   ScrollView,
   Dimensions,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Pressable,
+  FlatList,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { Video } from "expo-av";
+import { ResizeMode, Video } from "expo-av";
 import theme from "../Theme/globalTheme";
 import { uploadToAzureFromExpo } from "@/utils/azureUtils";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
@@ -24,7 +28,7 @@ import { ActivityIndicator } from "react-native-paper";
 
 const screenWidth = Dimensions.get("window").width;
 
-const CustomPostModal = ({ setPosts }: any) => {
+const CustomPostModal = ({ setPosts, communityId }: any) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [postType, setPostType] = useState<"text" | "image" | "video" | null>(
     null
@@ -63,8 +67,10 @@ const CustomPostModal = ({ setPosts }: any) => {
       setMedia((prev) => [...prev, ...selectedUris]);
     }
   };
+
   const handlePost = async () => {
     if (!postType || (!caption && media.length === 0)) return;
+
     setLoading(true);
     try {
       const storageDetails =
@@ -112,7 +118,7 @@ const CustomPostModal = ({ setPosts }: any) => {
       }
 
       const post: Post = {
-        communityId: "68866c50cf2f2ea93541e6f5",
+        communityId: communityId || "68866c50cf2f2ea93541e6f5",
         type: postType,
         media: uploadedUrls,
         text: caption,
@@ -122,8 +128,16 @@ const CustomPostModal = ({ setPosts }: any) => {
         createdBy: userId,
       };
       let response = await callService(post);
+
       if (response.success) {
-        setPosts((prev: any) => [response.data, ...prev]);
+        const newPost = {
+          ...response.data,
+          likeCount: 0,
+          likedByUser: false,
+          commentCount: 0,
+        };
+
+        setPosts((prev: any) => [newPost, ...prev]);
       }
     } catch (err) {
       console.error("Post error:", err);
@@ -145,139 +159,159 @@ const CustomPostModal = ({ setPosts }: any) => {
       </TouchableOpacity>
 
       <Modal animationType="slide" transparent={true} visible={modalVisible}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalTitle}>Choose your post type</Text>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalOverlay}>
+            <View style={styles.modalContainer}>
+              <Text style={styles.modalTitle}>Choose your post type</Text>
 
-            <View style={styles.optionContainer}>
-              {["text", "image", "video"].map((type) => (
-                <TouchableOpacity
-                  key={type}
-                  style={[
-                    styles.optionButton,
-                    postType === type && styles.optionButtonSelected,
-                  ]}
-                  onPress={() => {
-                    setPostType(type as any);
-                    setMedia([]);
-                  }}
-                >
-                  <Text
+              <View style={styles.optionContainer}>
+                {["text", "image", "video"].map((type) => (
+                  <TouchableOpacity
+                    key={type}
                     style={[
-                      styles.optionButtonText,
-                      postType === type && styles.optionButtonTextSelected,
+                      styles.optionButton,
+                      postType === type && styles.optionButtonSelected,
                     ]}
+                    onPress={() => {
+                      setPostType(type as any);
+                      setMedia([]);
+                    }}
                   >
-                    {type.charAt(0).toUpperCase() + type.slice(1)}
-                  </Text>
-                </TouchableOpacity>
-              ))}
-            </View>
+                    <Text
+                      style={[
+                        styles.optionButtonText,
+                        postType === type && styles.optionButtonTextSelected,
+                      ]}
+                    >
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
 
-            {postType === "text" && (
-              <TextInput
-                placeholder="Write your caption..."
-                multiline
-                style={styles.captionInput}
-                value={caption}
-                onChangeText={setCaption}
-              />
-            )}
+              {postType === "text" && (
+                <TextInput
+                  placeholder="Write your caption..."
+                  multiline
+                  style={styles.captionInput}
+                  value={caption}
+                  onChangeText={setCaption}
+                />
+              )}
 
-            {(postType === "image" || postType === "video") &&
-              media.length > 0 && (
-                <View style={styles.sliderContainer}>
-                  <TextInput
-                    placeholder="Write your caption..."
-                    multiline
-                    style={styles.captionInput}
-                    value={caption}
-                    onChangeText={setCaption}
-                  />
-                  <ScrollView
-                    horizontal
-                    pagingEnabled
-                    showsHorizontalScrollIndicator={false}
-                    onScroll={handleScroll}
-                    scrollEventThrottle={16}
-                  >
-                    {media.map((uri, index) =>
-                      postType === "video" ? (
-                        <Video
-                          key={index}
-                          source={{ uri }}
-                          style={styles.slideImage}
-                          useNativeControls
+              {(postType === "image" || postType === "video") &&
+                media.length > 0 && (
+                  <View style={styles.sliderContainer}>
+                    <TextInput
+                      placeholder="Write your caption..."
+                      multiline
+                      style={styles.captionInput}
+                      value={caption}
+                      onChangeText={setCaption}
+                    />
+                    <FlatList
+                      data={media}
+                      keyExtractor={(_, index) => index.toString()}
+                      horizontal
+                      pagingEnabled
+                      showsHorizontalScrollIndicator={false}
+                      onScroll={handleScroll}
+                      scrollEventThrottle={14}
+                      renderItem={({ item }) => (
+                        <View
+                          style={{
+                            width: screenWidth,
+                            height: 220,
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          {postType === "video" ? (
+                            <Video
+                              source={{ uri: item }}
+                              style={{
+                                width: screenWidth, // ✅ fill full page
+                                height: 220, // keep height fixed
+                              }}
+                              useNativeControls
+                              resizeMode={ResizeMode.COVER} // crop/cover to fill
+                            />
+                          ) : (
+                            <Pressable>
+                              <Image
+                                source={{ uri: item }}
+                                style={{
+                                  width: screenWidth, // ✅ fill full page
+                                  height: 220,
+                                }}
+                                resizeMode="cover"
+                              />
+                            </Pressable>
+                          )}
+                        </View>
+                      )}
+                    />
+
+                    <View style={styles.dotsContainer}>
+                      {media.map((_, i) => (
+                        <View
+                          key={i}
+                          style={[
+                            styles.dot,
+                            i === currentMediaIndex && styles.activeDot,
+                          ]}
                         />
-                      ) : (
-                        <Image
-                          key={index}
-                          source={{ uri }}
-                          style={styles.slideImage}
-                        />
-                      )
-                    )}
-                  </ScrollView>
-
-                  <View style={styles.dotsContainer}>
-                    {media.map((_, i) => (
-                      <View
-                        key={i}
-                        style={[
-                          styles.dot,
-                          i === currentMediaIndex && styles.activeDot,
-                        ]}
-                      />
-                    ))}
+                      ))}
+                    </View>
                   </View>
-                </View>
-              )}
+                )}
 
-            {(postType === "image" || postType === "video") && (
-              <TouchableOpacity
-                style={styles.uploadButton}
-                onPress={handleUploadMedia}
-              >
-                <Text style={styles.uploadButtonText}>Upload {postType}</Text>
-              </TouchableOpacity>
-            )}
-
-            <View style={styles.actionRow}>
-              <TouchableOpacity
-                style={styles.cancelButton}
-                onPress={() => {
-                  setModalVisible(false);
-                  setPostType(null);
-                  setMedia([]);
-                  setCaption("");
-                }}
-              >
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              {loading ? (
-                <View
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <ActivityIndicator />
-                </View>
-              ) : (
+              {(postType === "image" || postType === "video") && (
                 <TouchableOpacity
-                  style={styles.postButton}
-                  onPress={() => {
-                    handlePost();
-                  }}
+                  style={styles.uploadButton}
+                  onPress={handleUploadMedia}
                 >
-                  <Text style={styles.postButtonText}>Post</Text>
+                  <Text style={styles.uploadButtonText}>Upload {postType}</Text>
                 </TouchableOpacity>
               )}
+
+              <View style={styles.actionRow}>
+                <TouchableOpacity
+                  style={styles.cancelButton}
+                  onPress={() => {
+                    setModalVisible(false);
+                    setPostType(null);
+                    setMedia([]);
+                    setCaption("");
+                  }}
+                >
+                  <Text style={styles.cancelButtonText}>Cancel</Text>
+                </TouchableOpacity>
+                {loading ? (
+                  <View
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <ActivityIndicator />
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={styles.postButton}
+                    onPress={() => {
+                      handlePost();
+                    }}
+                  >
+                    <Text style={styles.postButtonText}>Post</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
           </View>
-        </View>
+        </TouchableWithoutFeedback>
       </Modal>
     </>
   );

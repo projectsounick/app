@@ -1,9 +1,8 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, Animated, ScrollView } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+
 import SliderCard from "@/app/modules/SliderCard";
-import BannerCard from "@/app/modules/BannerCard";
-import FeatureCarousel from "@/app/modules/FeatureCarousel";
+
 import { bookSessionCardData, trackingCardData } from "@/utils/ModuletaticData";
 
 import withAnimatedHeader from "@/app/Hoc/MainHeader";
@@ -20,13 +19,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { blogService } from "@/app/services/blog.Service";
 import BlogSliderCard from "@/app/modules/BlogSliderCard";
 import { trackService } from "@/app/services/track.service";
-import { TrackingData } from "@/app/interfaces/trackInterface";
-import { setMainLoader } from "@/Slices/loadingSlice";
-import { normalizeDate } from "@/utils/otherUtils";
-import {
-  setCurrentDateTrackData,
-  setTotalTrackData,
-} from "@/Slices/trackSlice";
 
 import NotificationPermissionModal from "@/app/modules/NotificationPermissionModal";
 import VideoPromotionModal from "@/app/modules/PromotionalVideo";
@@ -36,12 +28,42 @@ import { manualWorkoutPlanService } from "@/app/services/manualWorkoutPlan";
 import AppUpdateBottomSheet from "@/app/modules/AndroidVersionUpdateModal";
 import DualBannerCardRow from "@/app/modules/HorizontalCards";
 import InfoCarousel from "@/app/modules/AdvirtisementCarraousel";
+import TransformationCards from "@/app/modules/TransformationCards";
+import HomeSimmerSkeleton from "@/app/modules/HomeSimmerSkeleton";
+import HealthReportUploader from "@/app/modules/UploadReportPdf";
+import OffersCards from "@/app/modules/OfferCard";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const MainHeader = withAnimatedHeader(NameHeader);
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
+  const [modalVisible, setModalVisible] = useState(false);
+  // Fetch user data and modal flag from AsyncStorage
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const [userStr] = await Promise.all([AsyncStorage.getItem("user")]);
+
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          console.log(user.healthReport);
+
+          if (user.healthReport == null) {
+            console.log("went inside this");
+
+            // null or undefined
+            setModalVisible(true); // show the modal
+          }
+        }
+      } catch (err) {
+        console.log("Error fetching AsyncStorage data:", err);
+      }
+    };
+    setTimeout(() => {
+      fetchUserData();
+    }, 2000);
+  }, []);
   //// Getting the loader from the state ----------------------------/
-  const dispatch = useDispatch();
 
   const configs = useMemo(
     () => [
@@ -57,6 +79,10 @@ const YourComponent = () => {
         sliceKey: "blogs" as SliceKey,
         fetchFunction: blogService.getBlogOverallData,
       },
+      {
+        sliceKey: "track" as SliceKey,
+        fetchFunction: trackService.getCurrentDayTrackData,
+      },
     ],
     []
   );
@@ -66,77 +92,6 @@ const YourComponent = () => {
   const scrollY = new Animated.Value(0);
   //// Fetching the plan data -----------------------------/
 
-  //// Useeffect function for loading the data ------------------------------------/
-  const fetchData = async () => {
-    dispatch(setMainLoader(true));
-    try {
-      const today = new Date();
-
-      const formatDate = (d: Date) => d.toLocaleDateString("en-CA"); // e.g., "2025-05-18"
-
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-      const startDate = formatDate(startOfMonth);
-      const endDate = formatDate(today);
-
-      const [stepsRes, sleepRes, waterRes] = await Promise.all([
-        trackService.getTrackingData("walk", startDate, endDate),
-        trackService.getTrackingData("sleep", startDate, endDate),
-        trackService.getTrackingData("water", startDate, endDate),
-      ]);
-
-      if (stepsRes.success && sleepRes.success && waterRes.success) {
-        const stepsData = stepsRes.data || [];
-        const sleepData = sleepRes.data || [];
-        const waterData = waterRes.data || [];
-
-        // Generate total data for each date (merge by date)
-        const dateMap: { [date: string]: TrackingData } = {};
-        stepsData.forEach((item: any) => {
-          const date = normalizeDate(item.date); // ✅ Normalize
-          if (!dateMap[date])
-            dateMap[date] = { steps: null, sleep: null, water: null };
-          dateMap[date].steps = item;
-        });
-
-        sleepData.forEach((item: any) => {
-          const date = normalizeDate(item.date); // ✅ Normalize
-          if (!dateMap[date])
-            dateMap[date] = { steps: null, sleep: null, water: null };
-          dateMap[date].sleep = item;
-        });
-
-        waterData.forEach((item: any) => {
-          const date = normalizeDate(item.date); // ✅ Normalize
-          if (!dateMap[date])
-            dateMap[date] = { steps: null, sleep: null, water: null };
-          dateMap[date].water = item;
-        });
-        // Convert the map to an array sorted by date
-        const totalTrackArray: TrackingData[] = Object.values(dateMap).sort(
-          (a, b) => {
-            const dateA = a.steps?.date || a.sleep?.date || a.water?.date || "";
-            const dateB = b.steps?.date || b.sleep?.date || b.water?.date || "";
-            return new Date(dateA).getTime() - new Date(dateB).getTime();
-          }
-        );
-
-        const todayStr = formatDate(today); // "YYYY-MM-DD"
-        const todayData = dateMap[todayStr] || {
-          steps: null,
-          sleep: null,
-          water: null,
-        };
-
-        // Update Redux store
-        dispatch(setTotalTrackData(totalTrackArray));
-        dispatch(setCurrentDateTrackData(todayData));
-        setSnackbarVisible(false);
-      }
-    } catch (error: any) {
-    } finally {
-      dispatch(setMainLoader(false));
-    }
-  };
   //// Video call exists or not checking -----------------------------------------/
 
   return (
@@ -163,20 +118,10 @@ const YourComponent = () => {
         // scrollEventThrottle={16}
       >
         {loading ? (
-          <View
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <ActivityIndicator style={{ marginTop: "20%" }} />
-          </View>
+          <HomeSimmerSkeleton />
         ) : (
           <>
+            <OffersCards />
             <SliderCard />
             {/* <BannerCard cardData={trackingCardData} />
             <BannerCard cardData={bookSessionCardData} /> */}
@@ -186,11 +131,18 @@ const YourComponent = () => {
             />
             <BlogSliderCard />
             <InfoCarousel />
+            {modalVisible && (
+              <HealthReportUploader
+                modalVisible={modalVisible}
+                setModalVisible={setModalVisible}
+              />
+            )}
             {/* <FeatureCarousel /> */}
           </>
         )}
+        <TransformationCards />
         <NotificationPermissionModal />
-        <VideoPromotionModal />
+        {/* <VideoPromotionModal /> */}
       </ScrollView>
 
       <Imagepicker />

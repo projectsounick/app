@@ -34,6 +34,13 @@ export interface MeasurementEntry {
   armSizeLeft?: number;
   armSizeRight?: number;
 }
+export interface ComplaintInterface {
+  complainType: string;
+  complainerId: string;
+  complainedId?: string;
+  postId?: string;
+  medianName?: string;
+}
 
 export interface UserMeasurement {
   userId: string; // or use a more specific type if needed
@@ -50,6 +57,20 @@ export interface DiscountCoupon {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+}
+export interface Service {
+  _id: string;
+  title: string;
+  descItems: string[];
+  imgUrl: string;
+  otherImages: string[];
+  price: number;
+  isOnline: boolean;
+  isCorporate: boolean;
+  sessionCount: number;
+  isActive: boolean;
+  createdAt: string; // ISO date string when coming from API
+  updatedAt: string; // ISO date string when coming from API
 }
 
 interface StorageAccountDetailsInterface {}
