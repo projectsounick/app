@@ -238,7 +238,7 @@ const Login = () => {
                   <Checkbox
                     value={isChecked}
                     onValueChange={setIsChecked}
-                    color={isChecked ? theme.colors.primary : undefined}
+                    color={isChecked ? "#000" : undefined}
                   />
                   <Text style={{ marginLeft: 8, fontSize: 14 }}>
                     I accept the{" "}

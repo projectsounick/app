@@ -46,6 +46,8 @@ async function verifyLoginOtp(data: {
       otp: data.otp,
       expoPushToken: data.expoPushToken,
     });
+    console.log("this is response");
+    console.log(response);
 
     return response;
   } catch (error: any) {

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { View, Animated, ScrollView } from "react-native";
 
 import SliderCard from "@/app/modules/SliderCard";
@@ -19,13 +19,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { blogService } from "@/app/services/blog.Service";
 import BlogSliderCard from "@/app/modules/BlogSliderCard";
 import { trackService } from "@/app/services/track.service";
-import { TrackingData } from "@/app/interfaces/trackInterface";
-import { setMainLoader } from "@/Slices/loadingSlice";
-import { normalizeDate } from "@/utils/otherUtils";
-import {
-  setCurrentDateTrackData,
-  setTotalTrackData,
-} from "@/Slices/trackSlice";
 
 import NotificationPermissionModal from "@/app/modules/NotificationPermissionModal";
 import VideoPromotionModal from "@/app/modules/PromotionalVideo";
@@ -38,10 +31,38 @@ import InfoCarousel from "@/app/modules/AdvirtisementCarraousel";
 import TransformationCards from "@/app/modules/TransformationCards";
 import HomeSimmerSkeleton from "@/app/modules/HomeSimmerSkeleton";
 import HealthReportUploader from "@/app/modules/UploadReportPdf";
+import OffersCards from "@/app/modules/OfferCard";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const MainHeader = withAnimatedHeader(NameHeader);
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
+  const [modalVisible, setModalVisible] = useState(false);
+  // Fetch user data and modal flag from AsyncStorage
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const [userStr] = await Promise.all([AsyncStorage.getItem("user")]);
+
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          console.log(user.healthReport);
+
+          if (user.healthReport == null) {
+            console.log("went inside this");
+
+            // null or undefined
+            setModalVisible(true); // show the modal
+          }
+        }
+      } catch (err) {
+        console.log("Error fetching AsyncStorage data:", err);
+      }
+    };
+    setTimeout(() => {
+      fetchUserData();
+    }, 2000);
+  }, []);
   //// Getting the loader from the state ----------------------------/
 
   const configs = useMemo(
@@ -67,17 +88,7 @@ const YourComponent = () => {
   );
   const { loading, setSnackbarMessage, setSnackbarVisible } =
     useFetchMultipleStoreDataHook(configs);
-  useEffect(() => {
-    async function fetchTrack() {
-      try {
-        const response = await trackService.getCurrentDayTrackData();
-        console.log("track response");
 
-        console.log(response);
-      } catch (error) {}
-    }
-    fetchTrack();
-  }, []);
   const scrollY = new Animated.Value(0);
   //// Fetching the plan data -----------------------------/
 
@@ -86,7 +97,7 @@ const YourComponent = () => {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["left", "right", "top"]}
+      edges={["left", "right"]}
     >
       {/* Animated Header */}
       <MainHeader scrollY={scrollY} title="Home" />
@@ -110,6 +121,7 @@ const YourComponent = () => {
           <HomeSimmerSkeleton />
         ) : (
           <>
+            <OffersCards />
             <SliderCard />
             {/* <BannerCard cardData={trackingCardData} />
             <BannerCard cardData={bookSessionCardData} /> */}
@@ -119,7 +131,12 @@ const YourComponent = () => {
             />
             <BlogSliderCard />
             <InfoCarousel />
-            <HealthReportUploader />
+            {modalVisible && (
+              <HealthReportUploader
+                modalVisible={modalVisible}
+                setModalVisible={setModalVisible}
+              />
+            )}
             {/* <FeatureCarousel /> */}
           </>
         )}

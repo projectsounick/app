@@ -38,7 +38,7 @@ const YourComponent = () => {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["left", "right", "top"]}
+      edges={["left", "right"]}
     >
       {loading ? (
         <View

@@ -18,9 +18,14 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
   const plans: ActivePlans[] = useSelector((state: RootState) =>
     isActive ? state.plan.activePlans : state.plan.completedPlans
   );
+
   const activeManualPlan: ActiveManualWorkoutPlanInterface | null = useSelector(
     (state: RootState) => (isActive ? state.plan.activeManualPlan : null)
   );
+  const activeServices: any[] = useSelector((state: RootState) =>
+    isActive ? state.plan.activeServices : []
+  );
+
   return (
     <ScrollView
       contentContainerStyle={{ paddingBottom: 40, paddingHorizontal: 4 }}
@@ -89,23 +94,27 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
               start={{ x: 0.5, y: 0 }}
               end={{ x: 0.5, y: 1 }}
               style={{
-                borderRadius: 12,
-                paddingHorizontal: 12,
-                marginTop: 18,
-                height: 170,
-                justifyContent: "center",
-                overflow: "hidden",
+                borderRadius: 16,
+                padding: 20,
+                marginVertical: 12,
+                height: 200,
                 flexDirection: "row",
                 alignItems: "center",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 5 },
+                shadowOpacity: 0.15,
+                shadowRadius: 10,
+                elevation: 5,
+                overflow: "hidden",
               }}
             >
               {/* Left Content */}
-              <View style={{ flex: 1 }}>
+              <View style={{ flex: 1, paddingRight: 12 }}>
                 <Text
                   style={{
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: "700",
-                    marginBottom: 6,
+                    marginBottom: 12,
                     color: "white",
                   }}
                   numberOfLines={1}
@@ -114,43 +123,35 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                   {title}
                 </Text>
 
-                <View>
+                <View style={{ marginBottom: 16 }}>
                   {descItems.length > 0 ? (
                     descItems.slice(0, 2).map((item, idx) => (
                       <View
                         key={idx}
                         style={{
                           flexDirection: "row",
-                          alignItems: "flex-start",
-                          marginBottom: 4,
+                          alignItems: "center",
+                          marginBottom: 6,
                         }}
                       >
                         <View
                           style={{
-                            height: "100%",
-                            display: "flex",
-                            flexDirection: "row",
-                            justifyContent: "center",
-                            alignItems: "center",
+                            width: 8,
+                            height: 8,
+                            borderRadius: 4,
+                            backgroundColor: "rgba(229, 210, 255, 1)",
+                            marginRight: 10,
                           }}
-                        >
-                          <View
-                            style={{
-                              width: 8,
-                              height: 8,
-                              borderRadius: 4,
-                              backgroundColor: "rgba(229, 210, 255, 1)",
-                              marginRight: 6,
-                            }}
-                          />
-                        </View>
+                        />
                         <Text
                           numberOfLines={2}
                           ellipsizeMode="tail"
                           style={{
-                            fontSize: 12,
+                            fontSize: 13,
+                            textAlign: "justify",
                             color: "white",
                             flexShrink: 1,
+                            lineHeight: 16,
                           }}
                         >
                           {item}
@@ -158,7 +159,9 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                       </View>
                     ))
                   ) : (
-                    <Text style={{ fontSize: 13, color: "white" }}>
+                    <Text
+                      style={{ fontSize: 13, color: "white", lineHeight: 16 }}
+                    >
                       No description available.
                     </Text>
                   )}
@@ -167,32 +170,27 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                 <TouchableOpacity
                   style={{
                     backgroundColor: "rgba(189, 255, 132, 1)",
-                    width: 114,
-                    height: 28,
-                    borderRadius: 16,
-                    alignSelf: "flex-start",
-                    marginTop: 8,
+                    paddingHorizontal: 20,
+                    height: 36,
+                    borderRadius: 18,
                     justifyContent: "center",
                     alignItems: "center",
+                    alignSelf: "flex-start",
                   }}
                   onPress={() => {
                     if (isActive) {
                       if (plan.plan) {
-                        /// it is a whole plan---/
-                        /// it is a diet plan---/
                         router.push({
                           pathname: "/dashboard/fullPlanDetails",
-                          params: { id: plan._id },
+                          params: { id: plan._id, type: "plan" },
                         });
                       } else {
-                        /// it is a diet plan---/
                         router.push({
                           pathname: "/dashboard/dietplan",
                           params: { id: plan._id },
                         });
                       }
                     } else {
-                      /// plan is not active redirect to completedplan----/
                       router.push({
                         pathname: "/dashboard/completedplan",
                         params: { id: plan._id },
@@ -204,7 +202,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                     style={{
                       color: buttonTextColor,
                       fontWeight: "600",
-                      fontSize: theme.fontSizes.small,
+                      fontSize: 14,
                     }}
                   >
                     {buttonText}
@@ -220,12 +218,12 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                     : require("../../../assets/images/track.png")
                 }
                 style={{
-                  width: 100,
-                  height: 120,
+                  width: 120,
+                  height: 160,
+                  borderRadius: 12,
                   resizeMode: "cover",
-                  marginLeft: 8,
-                  borderRadius: 8,
                   opacity: isActive ? 1 : 0.6,
+                  marginLeft: 12,
                 }}
               />
             </LinearGradient>
@@ -301,6 +299,183 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
             }}
           />
         </LinearGradient>
+      )}
+      {activeServices.length > 0 && (
+        <View style={{ marginBottom: 16 }}>
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: "700",
+                  marginRight: 8,
+                  color: "#000",
+                }}
+              >
+                Services Available
+              </Text>
+              <View
+                style={{
+                  height: 2,
+                  width: 80,
+                  backgroundColor: "black",
+                  marginTop: 4,
+                }}
+              />
+            </View>
+            <Feather
+              name="info"
+              size={16}
+              color="#3A8DFF"
+              style={{ marginRight: 4 }}
+            />
+          </View>
+
+          {activeServices.map((service, index) => {
+            const title = service.serviceDetails?.title || "Untitled Service";
+            const imageUrl = service.serviceDetails?.imgUrl;
+            const descItems = service.serviceDetails?.descItems || [];
+            const gradientColors: any = isActive
+              ? ["#9C56F6", "#3A1B63"]
+              : ["#555555", "#222222"]; // dimmed for completed/expired
+            const buttonBgColor = isActive ? "#C6FF69" : "#C6FF69";
+            const buttonText = isActive ? "Continue" : "Check";
+            const buttonTextColor = isActive ? "#000" : "#000";
+            return (
+              <LinearGradient
+                key={service._id || index}
+                colors={gradientColors}
+                start={{ x: 0.5, y: 0 }}
+                end={{ x: 0.5, y: 1 }}
+                style={{
+                  borderRadius: 16,
+                  padding: 20,
+                  marginVertical: 12,
+                  height: 200,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 5 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 10,
+                  elevation: 5,
+                  overflow: "hidden",
+                }}
+              >
+                {/* Left Content */}
+                <View style={{ flex: 1, paddingRight: 12 }}>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: "700",
+                      marginBottom: 12,
+                      color: "white",
+                    }}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {title}
+                  </Text>
+
+                  <View style={{ marginBottom: 16 }}>
+                    {descItems.length > 0 ? (
+                      descItems.slice(0, 2).map((item: string, idx: any) => (
+                        <View
+                          key={idx}
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            marginBottom: 6,
+                          }}
+                        >
+                          <View
+                            style={{
+                              width: 8,
+                              height: 8,
+                              borderRadius: 4,
+                              backgroundColor: "rgba(229, 210, 255, 1)",
+                              marginRight: 10,
+                            }}
+                          />
+                          <Text
+                            numberOfLines={2}
+                            ellipsizeMode="tail"
+                            style={{
+                              fontSize: 13,
+                              textAlign: "justify",
+                              color: "white",
+                              flexShrink: 1,
+                              lineHeight: 16,
+                            }}
+                          >
+                            {item}
+                          </Text>
+                        </View>
+                      ))
+                    ) : (
+                      <Text
+                        style={{ fontSize: 13, color: "white", lineHeight: 16 }}
+                      >
+                        No description available.
+                      </Text>
+                    )}
+                  </View>
+
+                  <TouchableOpacity
+                    style={{
+                      backgroundColor: "rgba(189, 255, 132, 1)",
+                      paddingHorizontal: 20,
+                      height: 36,
+                      borderRadius: 18,
+                      justifyContent: "center",
+                      alignItems: "center",
+                      alignSelf: "flex-start",
+                    }}
+                    onPress={() => {
+                      router.push({
+                        pathname: "/dashboard/fullPlanDetails",
+                        params: { id: service._id, type: "service" },
+                      });
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: buttonTextColor,
+                        fontWeight: "600",
+                        fontSize: 14,
+                      }}
+                    >
+                      {buttonText}
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Right-side image */}
+                <Image
+                  source={
+                    imageUrl
+                      ? { uri: imageUrl }
+                      : require("../../../assets/images/track.png")
+                  }
+                  style={{
+                    width: 120,
+                    height: 160,
+                    borderRadius: 12,
+                    resizeMode: "cover",
+                    opacity: isActive ? 1 : 0.6,
+                    marginLeft: 12,
+                  }}
+                />
+              </LinearGradient>
+            );
+          })}
+        </View>
       )}
     </ScrollView>
   );

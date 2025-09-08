@@ -1,9 +1,4 @@
-import React, {
-  forwardRef,
-  useEffect,
-  useImperativeHandle,
-  useState,
-} from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -20,37 +15,24 @@ import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import theme from "../Theme/globalTheme";
 import { userService } from "../services/user.service";
-import { uploadToAzureFromExpo } from "@/utils/azureUtils"; // your azure upload util
-import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import { uploadToAzureFromExpo } from "@/utils/azureUtils";
 
-const { width, height } = Dimensions.get("window");
-export type HealthReportUploaderRef = {
-  openModal?: () => void;
-};
-const HealthReportUploader = forwardRef<HealthReportUploaderRef>((_, ref) => {
-  const [modalVisible, setModalVisible] = useState(false);
+const { width } = Dimensions.get("window");
+
+interface HealthReportUploaderProps {
+  modalVisible: boolean;
+  setModalVisible: (visible: boolean) => void;
+}
+
+const HealthReportUploader: React.FC<HealthReportUploaderProps> = ({
+  modalVisible,
+  setModalVisible,
+}) => {
   const [loading, setLoading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>("");
-  // Expose function to parent via ref
-  useImperativeHandle(ref, () => ({
-    openModal: () => setModalVisible(true),
-  }));
 
-  useEffect(() => {
-    const checkHealthReport = async () => {
-      const userStr = await AsyncStorage.getItem("user");
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        if (!user.healthReport) {
-          setTimeout(() => setModalVisible(true), 4000);
-        }
-      }
-    };
-    checkHealthReport();
-  }, []);
   const checkPermission = async () => {
-    // Normally, PDF picking doesn't need permissions
     const granted = await new Promise<boolean>((resolve) => {
       Alert.alert(
         "Permission Required",
@@ -62,39 +44,26 @@ const HealthReportUploader = forwardRef<HealthReportUploaderRef>((_, ref) => {
         { cancelable: false }
       );
     });
-
-    if (!granted) {
-      return false;
-    }
-    return true;
+    return granted;
   };
 
   const pickAndUploadPDF = async () => {
     try {
-      console.log("Starting PDF upload...");
-
-      // Check permission
       const permission = await checkPermission();
       if (!permission) return;
 
-      // Pick the PDF document
       const result: any = await DocumentPicker.getDocumentAsync({
         type: "application/pdf",
       });
-      console.log("DocumentPicker result:", result);
-
-      if (!result.canceled && result.assets && result.assets.length > 0) {
-        const file = result.assets[0]; // Use the first selected file
+      if (!result.canceled && result.assets?.length) {
+        const file = result.assets[0];
         setLoading(true);
         setFileName(file.name);
 
-        // Get storage details
         const storageDetails =
           await userService.getStorageAccountDetails("healthreport");
         const { storageAccountName, sasToken } = storageDetails.data;
-        console.log("Storage details:", storageDetails);
 
-        // Upload to Azure
         const uploaded = await uploadToAzureFromExpo(
           file.uri,
           file.name,
@@ -103,12 +72,10 @@ const HealthReportUploader = forwardRef<HealthReportUploaderRef>((_, ref) => {
           "admin-data",
           "healthreport"
         );
-        console.log("Uploaded URL:", uploaded);
 
         setUploadedUrl(uploaded);
         setLoading(false);
 
-        // Update user in backend and AsyncStorage
         const userStr = await AsyncStorage.getItem("user");
         if (userStr) {
           const user = JSON.parse(userStr);
@@ -124,13 +91,34 @@ const HealthReportUploader = forwardRef<HealthReportUploaderRef>((_, ref) => {
             throw new Error("Failed to update health report on server");
           }
         }
-      } else {
-        console.log("User canceled PDF selection");
       }
     } catch (err) {
       console.log("Upload error:", err);
       Alert.alert("Error", "Failed to upload the health report.");
       setLoading(false);
+    }
+  };
+
+  const handleClose = async () => {
+    setLoading(true);
+    try {
+      const response = await userService.updateUser({ healthReport: "" });
+      if (response.success) {
+        const userStr = await AsyncStorage.getItem("user");
+        if (userStr) {
+          const user = JSON.parse(userStr);
+          user.healthReport = "";
+          await AsyncStorage.setItem("user", JSON.stringify(user));
+        }
+      } else {
+        Alert.alert("Error", "Failed to clear health report on server.");
+      }
+    } catch (err) {
+      console.log("Error clearing health report:", err);
+      Alert.alert("Error", "Failed to clear health report.");
+    } finally {
+      setLoading(false);
+      setModalVisible(false);
     }
   };
 
@@ -157,7 +145,6 @@ const HealthReportUploader = forwardRef<HealthReportUploaderRef>((_, ref) => {
             shadowRadius: 8,
           }}
         >
-          {/* Header with Close Icon */}
           <LinearGradient
             colors={[theme.primary, theme.secondary]}
             style={{
@@ -166,53 +153,55 @@ const HealthReportUploader = forwardRef<HealthReportUploaderRef>((_, ref) => {
               justifyContent: "center",
               position: "relative",
             }}
+          />
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: 20,
+              fontWeight: "700",
+              textAlign: "center",
+            }}
           >
-            <Text
-              style={{
-                color: "#fff",
-                fontSize: 20,
-                fontWeight: "700",
-                textAlign: "center",
-              }}
-            >
-              Upload Health Report
-            </Text>
+            Upload Health Report
+          </Text>
 
-            {/* Circular Close Icon */}
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={{
-                position: "absolute",
-                top: 10,
-                right: 10,
-                backgroundColor: "#fff",
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                justifyContent: "center",
-                alignItems: "center",
-                elevation: 5,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.25,
-                shadowRadius: 3,
-              }}
-            >
+          <TouchableOpacity
+            onPress={handleClose}
+            style={{
+              position: "absolute",
+              top: 10,
+              right: 10,
+              backgroundColor: "#fff",
+              width: 32,
+              height: 32,
+              borderRadius: 16,
+              justifyContent: "center",
+              alignItems: "center",
+              elevation: 5,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.25,
+              shadowRadius: 3,
+            }}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color={theme.primary} />
+            ) : (
               <Ionicons name="close" size={20} color={theme.primary} />
-            </TouchableOpacity>
-          </LinearGradient>
+            )}
+          </TouchableOpacity>
 
-          {/* Body */}
           <View style={{ padding: 25, alignItems: "center" }}>
             <Text
               style={{
                 textAlign: "center",
-                fontSize: 16,
+                fontSize: 18,
                 color: "#333",
+                fontWeight: "600",
                 marginBottom: 10,
               }}
             >
-              We couldn't find your health report.
+              Upload Your Health Report
             </Text>
             <Text
               style={{
@@ -293,5 +282,6 @@ const HealthReportUploader = forwardRef<HealthReportUploaderRef>((_, ref) => {
       </View>
     </Modal>
   );
-});
+};
+
 export default HealthReportUploader;

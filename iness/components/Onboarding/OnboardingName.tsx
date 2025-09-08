@@ -57,55 +57,33 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
           {/* Centered Content */}
           <View
             style={{
+              flex: 1,
               justifyContent: "center",
               alignItems: "center",
-              flexGrow: 1,
+              paddingHorizontal: 20,
             }}
           >
+            {/* Card */}
             <View
               style={{
-                position: "relative",
                 backgroundColor: "#fff",
-                borderLeftWidth: 1,
-                borderLeftColor: "#DDD",
-                borderRadius: 10,
-                marginBottom: theme.spacing.md,
-                padding: 26,
+                borderRadius: 16,
+                padding: 30,
                 width: "100%",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 5,
+                marginBottom: 24,
+                alignItems: "center",
               }}
             >
-              <LinearGradient
-                colors={["#DDD", "transparent"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "50%",
-                  height: 1,
-                  borderTopLeftRadius: 10,
-                }}
-              />
-              <LinearGradient
-                colors={["#DDD", "transparent"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={{
-                  position: "absolute",
-                  bottom: 0,
-                  left: 0,
-                  width: "50%",
-                  height: 1,
-                  borderBottomLeftRadius: 10,
-                }}
-              />
               <Text
                 style={{
-                  fontSize: 24,
-                  fontWeight: "bold",
-                  color: theme.colors.dark,
-                  fontFamily: theme.fonts.heading,
+                  fontSize: 26,
+                  fontWeight: "700",
+                  color: "#333",
                   textAlign: "center",
                 }}
               >
@@ -113,43 +91,41 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
               </Text>
             </View>
 
+            {/* Input with Icon */}
             <View
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                height: 48,
-                borderColor: "#ccc",
-                borderWidth: 1,
-
-                borderRadius: 8,
-                paddingHorizontal: 12,
+                height: 50,
+                borderRadius: 12,
+                paddingHorizontal: 16,
                 backgroundColor: "#fff",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.08,
+                shadowRadius: 4,
+                elevation: 3,
                 width: "100%",
-                marginBottom: 12, // optional
               }}
             >
               <MaterialCommunityIcons
-                name="account-outline" // 👈 person icon
-                size={20}
+                name="account-outline"
+                size={24}
                 color="#888"
-                style={{ marginRight: 8 }}
+                style={{ marginRight: 12 }}
               />
               <TextInput
                 placeholder="Enter your name"
-                placeholderTextColor={theme.colors.mutedText}
+                placeholderTextColor="#aaa"
                 value={name}
                 onChangeText={setName}
-                underlineColorAndroid="transparent"
                 returnKeyType="done"
                 style={{
                   flex: 1,
                   fontSize: 16,
-                  color: "#000",
+                  color: "#333",
                   backgroundColor: "transparent",
-                  borderWidth: 0,
                   paddingVertical: 0,
-                  includeFontPadding: false,
-                  textAlignVertical: "center",
                 }}
               />
             </View>

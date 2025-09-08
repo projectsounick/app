@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Session } from "@/app/interfaces/sessionInterface";
+import Icon from "react-native-vector-icons/Feather";
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -25,6 +26,11 @@ const isToday = (dateStr?: string) => {
   );
 };
 
+const getMonthName = (dateStr?: string) => {
+  const date = dateStr ? new Date(dateStr) : new Date();
+  return date.toLocaleString("default", { month: "long", year: "numeric" });
+};
+
 interface Props {
   sessions: Session[];
   selectedSession: Session | null;
@@ -46,15 +52,20 @@ export default function DateBar({
     )
   );
 
+  const [currentMonth, setCurrentMonth] = useState(() =>
+    getMonthName(selectedSession?.sessionDate)
+  );
+
   const days = sessions
     .filter((s) => !!s.sessionDate)
     .map((s) => ({
       day: getDayNumber(s.sessionDate),
       label: getDayLabel(s.sessionDate),
       fullDate: s.sessionDate!,
+      sessionStatus: s.sessionStatus,
     }));
 
-  const itemWidth = 60;
+  const itemWidth = 43;
   const spacing = 6;
 
   useEffect(() => {
@@ -82,6 +93,7 @@ export default function DateBar({
     if (session) {
       setSelectedSession(session);
       setSelectedDay(getDayNumber(session.sessionDate));
+      setCurrentMonth(getMonthName(session.sessionDate));
     }
   }, [sessions]);
 
@@ -92,6 +104,7 @@ export default function DateBar({
     );
     if (session) {
       setSelectedSession(session);
+      setCurrentMonth(getMonthName(session.sessionDate));
     }
   };
 
@@ -101,53 +114,120 @@ export default function DateBar({
         flexDirection: "column",
         alignItems: "center",
         paddingHorizontal: 10,
-        marginTop: 10,
       }}
     >
-      <ScrollView
-        ref={scrollViewRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 10 }}
+      {/* Month Display */}
+      <Text
+        style={{
+          fontSize: 16,
+          fontWeight: "bold",
+          color: "#fff",
+          marginBottom: 6,
+        }}
       >
-        {days.map((item, index) => {
-          const isSelected = item.day === selectedDay;
-          return (
-            <TouchableOpacity
-              key={item.fullDate}
-              onPress={() => handleDayPress(item.day)}
-              style={{
-                alignItems: "center",
-                paddingVertical: 8,
-                width: itemWidth,
-                marginHorizontal: spacing / 2,
-                borderRadius: 10,
-                backgroundColor: isSelected ? "#C6FF00" : "transparent",
-                borderWidth: isSelected ? 0 : 1,
-                borderColor: "#fff",
-              }}
-            >
-              <Text
-                style={{
-                  color: isSelected ? "#000" : "#fff",
-                  fontWeight: "bold",
-                  fontSize: 16,
-                }}
-              >
-                {item.day}
-              </Text>
-              <Text
-                style={{
-                  color: isSelected ? "#000" : "#ccc",
-                  fontSize: 12,
-                }}
-              >
-                {item.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+        {currentMonth}
+      </Text>
+
+      {/* Days Scroll */}
+      <View style={{ flexDirection: "row", alignItems: "center" }}>
+        {/* Left Arrow */}
+        <TouchableOpacity style={{ padding: 8 }}>
+          <Icon name="chevron-left" size={30} color="#BDFF84" />
+        </TouchableOpacity>
+
+        {/* Scroll Container */}
+        <View
+          style={{
+            flex: 1,
+
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <ScrollView
+            ref={scrollViewRef}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingHorizontal: 10,
+              justifyContent: "flex-start", // aligns items to start
+            }}
+          >
+            {days.map((item, index) => {
+              const isSelected = item.day === selectedDay;
+              const isScheduled = item.sessionStatus === "scheduled";
+              const isCompleted = item.sessionStatus === "completed";
+
+              let backgroundColor = "transparent";
+              let borderColor = "#fff";
+              let textColor = "#fff";
+              let subTextColor = "#ccc";
+
+              if (isScheduled) {
+                backgroundColor = "orange";
+                borderColor = "orange";
+                textColor = "#000";
+                subTextColor = "#000";
+              } else if (isSelected) {
+                backgroundColor = "#C6FF00";
+                borderColor = "#C6FF00";
+                textColor = "#000";
+                subTextColor = "#000";
+              } else if (isCompleted) {
+                borderColor = "#C6FF00";
+                textColor = "#C6FF00";
+              }
+
+              return (
+                <TouchableOpacity
+                  key={item.fullDate}
+                  onPress={() => handleDayPress(item.day)}
+                  style={{
+                    alignItems: "center",
+                    justifyContent: "space-evenly",
+                    width: itemWidth,
+                    marginHorizontal: spacing / 2,
+                    borderRadius: 6,
+                    height: 72,
+                    backgroundColor,
+                    borderWidth: isSelected || isScheduled ? 0 : 1,
+                    borderColor,
+                  }}
+                >
+                  {isSelected && (
+                    <View
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: 3,
+                        backgroundColor: "#000",
+                        marginBottom: 4,
+                      }}
+                    />
+                  )}
+                  <Text
+                    style={{
+                      color: textColor,
+                      fontWeight: "bold",
+                      fontSize: 16,
+                    }}
+                  >
+                    {item.day}
+                  </Text>
+                  <Text style={{ color: subTextColor, fontSize: 12 }}>
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+        </View>
+
+        {/* Right Arrow */}
+        <TouchableOpacity style={{ padding: 8 }}>
+          <Icon name="chevron-right" size={30} color="#BDFF84" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }

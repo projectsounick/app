@@ -14,6 +14,9 @@ import { userService } from "../services/user.service";
 import { transformatiomImageService } from "../services/transofmationImage.service";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import DietPlanBottomSheet from "./PdfBottomSheet";
+import SessionCalendarSheet from "./SessionCalendarSheet";
+import FeedbackModal from "../Components/ActivePlans.tsx/SessionFeedbackModal";
+import { sessionService } from "../services/sessionService";
 
 interface FloatingCameraButtonProps {}
 
@@ -23,6 +26,14 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
   const onClose = () => {
     setVisible(false);
   };
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+  const [currentSession, setCurrentSession] = useState<any>(null);
+  const [sessionSheetVisible, setSessionSheetVisible] = useState(false);
+  const onCloseSessionSheet = () => {
+    setSessionSheetVisible(false);
+  };
+
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [imageUploadLoader, setImageUploadLoader] = useState(false);
@@ -51,7 +62,7 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
       {
         translateY: animation1.interpolate({
           inputRange: [0, 1],
-          outputRange: [0, -80],
+          outputRange: [0, -70],
         }),
       },
     ],
@@ -62,7 +73,18 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
       {
         translateY: animation1.interpolate({
           inputRange: [0, 1],
-          outputRange: [0, -150],
+          outputRange: [0, -190],
+        }),
+      },
+    ],
+    opacity: animation1,
+  };
+  const sessionSheetStyle = {
+    transform: [
+      {
+        translateY: animation1.interpolate({
+          inputRange: [0, 1],
+          outputRange: [0, -130],
         }),
       },
     ],
@@ -70,7 +92,6 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
   };
   const pickImage = async (mode: "camera" | "gallery") => {
     setImageUploadLoader(true);
-    console.log("called");
 
     try {
       // 👉 Ask for permissions
@@ -168,7 +189,27 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
       setImageUploadLoader(false);
     }
   };
-
+  const submitFeedback = async (feedback: string) => {
+    if (!currentSession) return;
+    try {
+      setFeedbackLoading(true);
+      const params = {
+        sessionId: currentSession._id,
+        data: { sessionFeedback: feedback },
+      };
+      const response = await sessionService.updateSession(params);
+      if (response.success) {
+        setCurrentSession({ ...currentSession, sessionFeedback: feedback });
+        setShowFeedbackModal(false);
+      } else {
+        alert("Failed to submit feedback");
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
   return (
     <View style={styles.container}>
       {/* Diet Plan Button */}
@@ -188,6 +229,17 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
         </Animated.View>
       )}
 
+      {menuOpen && (
+        <Animated.View style={[styles.subButton, sessionSheetStyle]}>
+          <TouchableOpacity
+            onPress={() => setSessionSheetVisible(true)}
+            style={styles.iconButton}
+            activeOpacity={0.8}
+          >
+            <Ionicons name="calendar" size={24} color="#fff" />
+          </TouchableOpacity>
+        </Animated.View>
+      )}
       {/* Camera Button */}
       {menuOpen && (
         <Animated.View style={[styles.subButton, cameraStyle]}>
@@ -219,6 +271,22 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
       </TouchableOpacity>
       {visible ? (
         <DietPlanBottomSheet visible={visible} onClose={onClose} />
+      ) : null}
+      {sessionSheetVisible ? (
+        <SessionCalendarSheet
+          isVisible={sessionSheetVisible}
+          onClose={onCloseSessionSheet}
+          setCurrentSession={setCurrentSession}
+          currentSession={currentSession}
+          setShowFeedbackModal={setShowFeedbackModal}
+        />
+      ) : null}
+      {showFeedbackModal ? (
+        <FeedbackModal
+          visible={showFeedbackModal}
+          onClose={() => setShowFeedbackModal(false)}
+          onSubmit={submitFeedback}
+        />
       ) : null}
     </View>
   );

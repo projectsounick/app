@@ -20,7 +20,6 @@ function useFetchMultipleStoreDataHook(
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const fetchAll = useCallback(async () => {
-    console.log("called");
     setLoading(true);
     setError(null);
 

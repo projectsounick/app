@@ -102,7 +102,6 @@ export default function CartItemList({
   }
   async function applyDiscountCode(couponCode: string) {
     try {
-      console.log("called");
       setCouponVisible(false);
       const response = await cartService.applyDiscountCoupon(couponCode);
       if (response.success) {

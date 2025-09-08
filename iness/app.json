@@ -2,7 +2,7 @@
   "expo": {
     "name": "iness",
     "slug": "iness",
-    "version": "1.0.17",
+    "version": "1.0.23",
     "orientation": "portrait",
     "icon": "./assets/images/logonew.png",
     "scheme": "myapp",
@@ -12,7 +12,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.iness.fitness",
-      "buildNumber": "1.0.18",
+      "buildNumber": "1.0.23",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSMicrophoneUsageDescription": "We use the microphone for video recording.",
@@ -20,7 +20,10 @@
       }
     },
     "android": {
-      "versionCode": 17,
+      "versionCode": 20,
+      "minSdkVersion": 26,
+      "compileSdkVersion": 34,
+      "targetSdkVersion": 34,
       "googleServicesFile": "./android/app/google-services.json",
       "permissions": ["NOTIFICATIONS"],
       "intentFilters": [
@@ -54,7 +57,18 @@
         }
       ],
       "expo-video",
-      "expo-notifications"
+      "expo-notifications",
+      "expo-health-connect",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "minSdkVersion": 26
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

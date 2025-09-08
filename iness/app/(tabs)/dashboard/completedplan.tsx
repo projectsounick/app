@@ -12,39 +12,6 @@ import dayjs from "dayjs";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 // Sample data
-const completedPlan = {
-  planStartDate: "2024-04-01",
-  planEndDate: "2024-04-28",
-  plan: {
-    title: "Fat Loss Phase 1",
-    descItems: ["Lose fat", "Improve stamina"],
-    imgUrl: "https://via.placeholder.com/150",
-    planType: "fat-loss",
-    isActive: false,
-    planItems: {
-      _id: "planItem1",
-      price: 999,
-      isOnline: true,
-      isCorporate: false,
-      duration: 4,
-      durationType: "week",
-      sessionCount: 12,
-      isActive: true,
-    },
-  },
-  dietPlanDetails: {
-    _id: "diet1",
-    title: "Keto Diet Plan",
-    descItems: ["Low carb", "High protein"],
-    imgUrl: "https://via.placeholder.com/150",
-    desc: "A structured 4-week keto diet for fat loss.",
-    duration: 4,
-    durationType: "week",
-    price: 299,
-    isActive: true,
-    createdAt: new Date(),
-  },
-};
 
 export default function CompletedPlan() {
   const { id } = useLocalSearchParams();

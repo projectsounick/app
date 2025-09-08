@@ -8,7 +8,7 @@ import { SliceKey } from "@/sliceRegistery";
 
 import useFetchMultipleStoreDataHook from "@/hooks/useMultipleDataStoreHook";
 import { RootState } from "@/store";
-import React, { useMemo, useRef } from "react";
+import React, { useEffect, useMemo, useRef } from "react";
 import {
   View,
   Text,
@@ -21,6 +21,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
 import { CircularProgress } from "react-native-circular-progress";
 import { ActivityIndicator } from "react-native-paper";
+import { sessionService } from "@/app/services/sessionService";
 const MainHeader = withAnimatedHeader(PlanProgressStatus);
 export default function TrainScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
@@ -40,15 +41,20 @@ export default function TrainScreen() {
         sliceKey: "activeManualPlan" as SliceKey,
         fetchFunction: manualWorkoutPlanService.getUserActiveManualPlan,
       },
+      {
+        sliceKey: "activeServices" as SliceKey,
+        fetchFunction: sessionService.getServices,
+      },
     ],
     []
   );
   const { loading, setSnackbarMessage, setSnackbarVisible } =
     useFetchMultipleStoreDataHook(configs);
+
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right", "bottom"]}
+      edges={["left", "right", "bottom"]}
     >
       {loading ? (
         <View

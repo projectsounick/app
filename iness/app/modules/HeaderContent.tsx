@@ -22,8 +22,8 @@ export default function HeaderContent({
     <View
       style={{
         width: "100%",
-        paddingTop: 10,
-        paddingBottom: 10,
+        paddingTop: 4,
+        paddingBottom: 4,
       }}
     >
       {/* Top row: Back arrow + title */}

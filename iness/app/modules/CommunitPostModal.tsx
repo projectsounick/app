@@ -128,9 +128,6 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
         createdBy: userId,
       };
       let response = await callService(post);
-      console.log("this is post response");
-
-      console.log(response);
 
       if (response.success) {
         const newPost = {

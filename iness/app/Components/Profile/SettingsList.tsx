@@ -10,9 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import theme from "@/app/Theme/globalTheme";
 import { router } from "expo-router";
 import { userService } from "@/app/services/user.service";
-import HealthReportUploader, {
-  HealthReportUploaderRef,
-} from "@/app/modules/UploadReportPdf";
+import HealthReportUploader from "@/app/modules/UploadReportPdf";
 
 const handleCoupons = () => router.push("/dashboard/coupon");
 const handlePolicy = () => router.push("/dashboard/policy");
@@ -25,8 +23,8 @@ const handleMeasurements = () => router.push("/dashboard/measurement");
 export default function SettingsList() {
   const [isModalVisible, setModalVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const uploaderRef: any = useRef<HealthReportUploaderRef>(null);
 
+  const [modalVisible, setHealthReportModalVisible] = useState(false);
   const handleLogout = async () => {
     await userService.logout();
   };
@@ -55,7 +53,7 @@ export default function SettingsList() {
     {
       icon: "cloud-upload-outline",
       label: "Health Report Upload",
-      onPress: () => uploaderRef.current?.openModal(), // opens the HealthReportUploader modal
+      onPress: () => setHealthReportModalVisible(true), // opens the HealthReportUploader modal
     },
     {
       icon: "chatbox-ellipses-outline",
@@ -207,7 +205,10 @@ export default function SettingsList() {
           </View>
         </View>
       </Modal>
-      <HealthReportUploader ref={uploaderRef} />
+      <HealthReportUploader
+        modalVisible={modalVisible}
+        setModalVisible={setHealthReportModalVisible}
+      />
     </View>
   );
 }

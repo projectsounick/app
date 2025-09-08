@@ -93,9 +93,7 @@ const OTPInputScreen = () => {
           callService(requestBody),
           userService.getActiveDietPlans(),
         ]);
-        console.log("this is response");
-        console.log(response);
-        console.log(dietPlanResponse);
+
         try {
           if (dietPlanResponse.success && dietPlanResponse.data) {
             let dietPlanUrls = dietPlanResponse.data

@@ -13,7 +13,7 @@ import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = 305; // main card width
+const CARD_WIDTH = 295; // main card width
 const SPACING = 15; // gap between cards
 
 export default function App() {
@@ -122,12 +122,12 @@ export default function App() {
                 shadowOpacity: 0.1,
                 shadowRadius: 8,
                 elevation: 3,
-                height: 200,
+                height: 260,
               }}
             >
               <Image
                 source={{ uri: item.imageUrl }}
-                style={{ width: 305, height: 130 }}
+                style={{ width: 305, height: 180 }}
                 resizeMode="cover"
               />
               <View

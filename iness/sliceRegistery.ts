@@ -3,6 +3,7 @@ import {
   setActiveManualPlan,
   setActivePlans,
   setPlans,
+  setServices,
 } from "./Slices/planSlice";
 import { setCart } from "./Slices/cartSlice";
 import { setdietPlans } from "./Slices/dietPlanSlice";
@@ -49,6 +50,10 @@ export const sliceConfig = {
   track: {
     selectorKey: "tracking",
     setAction: setCurrentDateTrackData,
+  },
+  activeServices: {
+    selectorKey: "plans",
+    setAction: setServices,
   },
 } as const;
 

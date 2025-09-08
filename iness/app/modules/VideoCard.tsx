@@ -63,7 +63,6 @@ const VideoCard = ({
       if (loggedUser.exists) {
         complainerId = loggedUser.data._id;
       }
-      console.log(complainerId);
 
       const response = await userService.addUserComplain({
         complainType: "media",
@@ -71,9 +70,6 @@ const VideoCard = ({
         complainerId: complainerId,
         medianName: podcast.podcastName,
       });
-      console.log("this is response");
-
-      console.log(response);
 
       return;
     } catch (error) {
@@ -115,10 +111,7 @@ const VideoCard = ({
       });
     }
   }, [podcast?.thumbnailImageLink]);
-  useEffect(() => {
-    console.log("show post");
-    console.log(showMenuForPost);
-  }, [showMenuForPost]);
+
   return (
     <View
       style={{

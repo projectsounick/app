@@ -1,7 +1,14 @@
 // hoc/withAnimatedHeader.tsx
 
 import React, { ReactElement, useEffect, useRef, useState } from "react";
-import { Animated, View, StyleSheet, ScrollView } from "react-native";
+import {
+  Animated,
+  View,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+  Platform,
+} from "react-native";
 
 import { Text, TouchableOpacity, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -14,7 +21,8 @@ import { RootState } from "@/store";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getStoredNotifications } from "@/utils/notificationUtils";
 import eventBus from "@/event";
-
+const { height } = Dimensions.get("window");
+const topPadding = height * 0.04;
 interface AnimatedHeaderProps {
   scrollY: Animated.Value;
   title: string;
@@ -109,7 +117,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
               alignItems: "center",
               justifyContent: "space-between",
               position: "relative", // important
-              paddingTop: 8,
+              marginTop: Platform.OS === "ios" ? topPadding : "4%",
             }}
           >
             {/* Left Side */}

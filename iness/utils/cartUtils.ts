@@ -53,8 +53,6 @@ export function convertToServiceCartItem(
   service: Service,
   cartData: any
 ): CartItem | null {
-  console.log("called this");
-
   if (!service || !cartData?.serviceId) return null;
 
   const cartItem: CartItem = {
@@ -67,7 +65,6 @@ export function convertToServiceCartItem(
 
     quantity: cartData.quantity || 1,
   };
-  console.log("go beyond this");
 
   return cartItem;
 }

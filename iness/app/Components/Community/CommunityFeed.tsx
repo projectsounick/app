@@ -92,8 +92,6 @@ const CommunityPosts = ({
 
   const fetchPosts = useCallback(
     async (pageToFetch: number = 1) => {
-      console.log("called");
-
       try {
         let allPost = showMyPosts ? false : true;
         const response = await communityService.getCommunityPosts(
@@ -123,7 +121,7 @@ const CommunityPosts = ({
       fetchPosts(page);
       return () => {
         // Screen is unfocused (navigated away)
-        console.log("Cleaning up video");
+
         if (videoRef.current) {
           videoRef.current.stopAsync?.();
         }
@@ -132,8 +130,6 @@ const CommunityPosts = ({
   );
   async function toolTipAction(postDetails: any, type: string) {
     try {
-      console.log(`this is type${type}`);
-
       if (type === "complain") {
         setShowTooltipForPost(postDetails._id);
 

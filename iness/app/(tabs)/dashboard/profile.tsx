@@ -1,11 +1,11 @@
 ////// Main functional component for the profile screen --------------------------------------/
 import {
   View,
-  Text,
-  Image,
   ScrollView,
   TouchableOpacity,
   Linking,
+  Dimensions,
+  Platform,
 } from "react-native";
 
 import TransformationCard from "@/app/Components/Profile/Tranformation";
@@ -17,6 +17,8 @@ import NormalHeader from "@/app/modules/NormalHeader";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome } from "@expo/vector-icons"; // You can also use Entypo, Ionicons etc.
+const { height } = Dimensions.get("window");
+const topPadding = height * 0.05; // 2% of screen height
 
 //// Main funcitonal component for the Profile screen -------------------------/
 export default function ProfileScreen() {
@@ -28,14 +30,19 @@ export default function ProfileScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right"]}
+      edges={["left", "right"]}
     >
       <ImageBackground
         source={require("../../../assets/images/basicBackground.jpg")}
         style={{ flex: 1 }}
         resizeMode="cover"
       >
-        <View style={{ paddingLeft: 20, paddingTop: 20 }}>
+        <View
+          style={{
+            paddingLeft: 20,
+            marginTop: Platform.OS === "ios" ? topPadding : "4%",
+          }}
+        >
           {/* Header */}
           <NormalHeader screenName="Profile" />
         </View>

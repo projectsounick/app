@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   ScrollView,
   ImageBackground,
+  Dimensions,
+  Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -19,7 +21,8 @@ import VideoCallChecker from "@/app/modules/VideoCallJoinModal";
 import eventBus from "@/event";
 import { notificationService } from "@/app/services/notification.service";
 import CustomSnackbar from "@/app/modules/Snackbar";
-
+const { height } = Dimensions.get("window");
+const topPadding = height * 0.05; // 2
 interface NotificationItem {
   title: string | null;
   body: string | null;
@@ -104,7 +107,7 @@ export default function NotificationScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right"]}
+      edges={["left", "right"]}
     >
       <ImageBackground
         source={require("../../../assets/images/basicBackground.jpg")}
@@ -118,7 +121,7 @@ export default function NotificationScreen() {
             alignItems: "center",
             marginBottom: 24,
             paddingLeft: 20,
-            paddingTop: 20,
+            marginTop: Platform.OS === "ios" ? topPadding : "4%",
           }}
         >
           <TouchableOpacity

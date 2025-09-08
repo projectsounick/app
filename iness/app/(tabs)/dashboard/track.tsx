@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   ScrollView,
   ImageBackground,
+  Platform,
+  Dimensions,
 } from "react-native";
 import { AnimatedCircularProgress } from "react-native-circular-progress";
 import { Ionicons } from "@expo/vector-icons";
@@ -14,13 +16,10 @@ import TrackerModal from "@/app/Components/Tracking/TrackingModal";
 import theme from "@/app/Theme/globalTheme";
 import { trackService } from "@/app/services/track.service";
 import { ActivityIndicator, Snackbar } from "react-native-paper"; // install react-native-paper or use your existing Snackbar
-import { TrackingData } from "@/app/interfaces/trackInterface";
+const { height } = Dimensions.get("window");
 import CustomSnackbar from "@/app/modules/Snackbar";
-import {
-  setCurrentDateTrackData,
-  setTotalTrackData,
-  updateTrackingField,
-} from "@/Slices/trackSlice";
+const topPadding = height * 0.05; // 2% of screen height
+import { updateTrackingField } from "@/Slices/trackSlice";
 import { RootState } from "@/store";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -86,7 +85,6 @@ export default function WellnessDashboard() {
       const apiType = type === "steps" ? "walk" : type;
       // Get current day's existing value
       const existingData: any = currentDayTrackData[type];
-      console.log("this is existing");
 
       // Calculate new value: add new value to existing if present
       let newValue = value;
@@ -125,17 +123,23 @@ export default function WellnessDashboard() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right", "bottom"]}
+      edges={["left", "right"]}
     >
       <ImageBackground
         source={require("../../../assets/images/basicBackground.jpg")}
         style={{ flex: 1 }}
         resizeMode="cover"
       >
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 80 }}>
+        <View
+          style={{
+            paddingHorizontal: 20,
+            marginTop: Platform.OS === "ios" ? topPadding : "4%",
+          }}
+        >
           <NormalHeader screenName="Track" rightIcon={true} />
-          {/* History Icon Button */}
-
+        </View>
+        {/* History Icon Button */}
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 80 }}>
           {dataLoading ? (
             <View
               style={{
@@ -155,7 +159,7 @@ export default function WellnessDashboard() {
                 style={{
                   alignItems: "center",
                   justifyContent: "center",
-                  marginVertical: 20,
+                  marginBottom: 10,
                 }}
               >
                 <AnimatedCircularProgress
@@ -257,7 +261,7 @@ export default function WellnessDashboard() {
                 style={{
                   flexDirection: "row",
                   justifyContent: "space-between",
-                  marginBottom: 20,
+                  marginBottom: 10,
                   backgroundColor: theme.colors.cardLight,
                   paddingTop: 10,
                   paddingBottom: 10,
@@ -287,56 +291,85 @@ export default function WellnessDashboard() {
               </View>
 
               {/* Tracker Cards */}
-              {[
-                {
-                  label: "Steps",
-                  value: `${currentDayTrackData.steps?.steps || 0}/10000`,
-                  key: "steps",
-                },
-                {
-                  label: "Sleep",
-                  value: `${
-                    currentDayTrackData.sleep?.sleepDuration || 0
-                  }/12 hrs`,
-                  key: "sleep",
-                },
-                {
-                  label: "Water",
-                  value: `${
-                    currentDayTrackData.water?.waterIntake || 0
-                  }/10 glasses`,
-                  key: "water",
-                },
-              ].map((tracker, i) => (
-                <View
-                  key={i}
-                  style={{
-                    backgroundColor: theme.colors.cardLight,
-                    padding: 16,
-                    marginBottom: 12,
-                    borderRadius: 14,
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text style={{ fontSize: 16, fontWeight: "bold" }}>
-                    {tracker.label}
-                  </Text>
-                  <Text style={{ fontSize: 14, color: "#666" }}>
-                    {tracker.value}
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => {
-                      openModal(tracker.key as any);
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  marginBottom: 10,
+                }}
+              >
+                {[
+                  {
+                    label: "Steps",
+                    value: `${currentDayTrackData.steps?.steps || 0}/10000`,
+                    key: "steps",
+                    icon: "walk-outline",
+                    color: "#2196F3",
+                  },
+                  {
+                    label: "Sleep",
+                    value: `${currentDayTrackData.sleep?.sleepDuration || 0}/12 hrs`,
+                    key: "sleep",
+                    icon: "bed-outline",
+                    color: "#4CAF50",
+                  },
+                  {
+                    label: "Water",
+                    value: `${currentDayTrackData.water?.waterIntake || 0}/10 glasses`,
+                    key: "water",
+                    icon: "water-outline",
+                    color: "#00BFA5",
+                  },
+                ].map((tracker: any, i) => (
+                  <View
+                    key={i}
+                    style={{
+                      backgroundColor: theme.colors.cardLight,
+                      padding: 16,
+                      borderRadius: 14,
+                      alignItems: "center",
+                      flex: 1,
+                      marginHorizontal: 4, // spacing between cards
+                      elevation: 3, // adds shadow on Android
                     }}
                   >
-                    <Ionicons name="add-circle" size={28} color="#6C1B9B" />
-                  </TouchableOpacity>
-                </View>
-              ))}
+                    {/* Icon */}
+                    <Ionicons
+                      name={tracker.icon}
+                      size={28}
+                      color={tracker.color}
+                      style={{ marginBottom: 8 }}
+                    />
+
+                    {/* Label */}
+                    <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                      {tracker.label}
+                    </Text>
+
+                    {/* Value */}
+                    <Text
+                      style={{ fontSize: 14, color: "#666", marginVertical: 4 }}
+                    >
+                      {tracker.value}
+                    </Text>
+
+                    {/* Add Button */}
+                    <TouchableOpacity
+                      onPress={() => openModal(tracker.key as any)}
+                    >
+                      <Ionicons
+                        name="add-circle"
+                        size={28}
+                        color="#6C1B9B"
+                        style={{ marginTop: 8 }}
+                      />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
             </>
           )}
+          {/* <AppleHealthSync /> */}
 
           {modalVisible ? (
             <TrackerModal

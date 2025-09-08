@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  Dimensions,
+  Platform,
+} from "react-native";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
@@ -10,6 +17,8 @@ import { RootState } from "@/store";
 import eventBus from "@/event";
 import { getStoredNotifications } from "@/utils/notificationUtils";
 
+const { height } = Dimensions.get("window");
+const topPadding = height * 0.03;
 export default function SmallHeader({
   title,
   weightShow = true,
@@ -74,8 +83,8 @@ export default function SmallHeader({
         paddingTop: 20,
         paddingHorizontal: 20,
         paddingBottom: 20,
-        borderBottomLeftRadius: 24,
-        borderBottomRightRadius: 24,
+        borderBottomLeftRadius: 20,
+        borderBottomRightRadius: 20,
       }}
     >
       {/* Top Row */}
@@ -84,6 +93,7 @@ export default function SmallHeader({
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
+          marginTop: Platform.OS === "ios" ? topPadding : 0,
         }}
       >
         {/* Left: Profile & Info */}

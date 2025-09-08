@@ -13,6 +13,7 @@ import theme from "@/app/Theme/globalTheme";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 // Main functional component
 const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
@@ -78,79 +79,103 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
           {/* Centered Content */}
           <View
             style={{
+              flex: 1,
               justifyContent: "center",
               alignItems: "center",
-              flexGrow: 1,
+              paddingHorizontal: 20,
             }}
           >
+            {/* Heading */}
             <View
               style={{
-                marginBottom: theme.spacing.md,
+                backgroundColor: "#fff",
+                borderRadius: 16,
+                padding: 30,
                 width: "100%",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 5,
+                marginBottom: 24,
+                alignItems: "center",
               }}
             >
-              <OnboardingHeading>Your Contact{"\n"} Number?</OnboardingHeading>
-
+              <Text
+                style={{
+                  fontSize: 26,
+                  fontWeight: "700",
+                  color: "#333",
+                  textAlign: "center",
+                }}
+              >
+                Your Contact{"\n"}Number?
+              </Text>
               <Text
                 style={{
                   textAlign: "center",
-                  fontSize: theme.fontSizes.small, // or a fixed small value like 12
-                  color: theme.colors.normal, // you can also use a lighter gray like "#888"
+                  fontSize: 12,
+                  color: "#888",
+                  marginTop: 4,
                 }}
               >
                 (optional)
               </Text>
             </View>
 
+            {/* Input with Icon */}
             <View
               style={{
-                flexDirection: "column",
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: "#fff",
+                borderRadius: 12,
+                paddingHorizontal: 16,
+                height: 50,
                 width: "100%",
+                borderWidth: 1,
+                borderColor: "#ccc",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.08,
+                shadowRadius: 4,
+                elevation: 3,
+                marginBottom: phoneNumberError ? 4 : 16,
               }}
             >
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  backgroundColor: "#fff",
-                  borderRadius: 8,
-                  paddingHorizontal: theme.spacing.md,
-                  paddingVertical: 6,
-                  width: "100%",
-                  borderWidth: 1,
-                  borderColor: "#ccc",
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 1 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 2,
-                  elevation: 2,
+              <MaterialCommunityIcons
+                name="phone-outline"
+                size={24}
+                color="#888"
+                style={{ marginRight: 12 }}
+              />
+              <TextInput
+                value={phoneNumber}
+                onChangeText={(text) => {
+                  setphoneNumber(text);
+                  if (phoneNumberError) validatePhoneNumber();
                 }}
-              >
-                <TextInput
-                  value={phoneNumber}
-                  onChangeText={(text) => {
-                    setphoneNumber(text);
-                    if (phoneNumberError) validatePhoneNumber(); // auto-validate on change
-                  }}
-                  placeholder="Enter your number"
-                  placeholderTextColor={theme.colors.mutedText}
-                  style={{
-                    flex: 1,
-                    fontSize: 16,
-                    color: theme.colors.dark,
-                  }}
-                  returnKeyType="done"
-                  keyboardType="number-pad"
-                  maxLength={10}
-                />
-              </View>
-
-              {phoneNumberError ? (
-                <Text style={{ color: "red", marginTop: 6, fontSize: 14 }}>
-                  {phoneNumberError}
-                </Text>
-              ) : null}
+                placeholder="Enter your number"
+                placeholderTextColor="#aaa"
+                style={{
+                  flex: 1,
+                  fontSize: 16,
+                  color: "#333",
+                  backgroundColor: "transparent",
+                  paddingVertical: 0,
+                }}
+                returnKeyType="done"
+                keyboardType="number-pad"
+                maxLength={10}
+              />
             </View>
+
+            {/* Error message */}
+            {phoneNumberError ? (
+              <Text style={{ color: "red", fontSize: 14, marginBottom: 16 }}>
+                {phoneNumberError}
+              </Text>
+            ) : null}
           </View>
 
           {/* Bottom Button */}
