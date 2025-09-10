@@ -1,9 +1,16 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-  <style name="AppTheme" parent="Theme.AppCompat.DayNight.NoActionBar">
-    <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
-    <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
+  <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <!-- Common properties -->
     <item name="colorPrimary">@color/colorPrimary</item>
     <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+
+    <!-- Optional edit text background -->
+    <item name="android:editTextBackground">@drawable/rn_edit_text_material</item>
+
+    <!-- Optional Android 13+ edge-to-edge enforcement -->
+    <item name="android:windowOptOutEdgeToEdgeEnforcement" tools:targetApi="35">true</item>
+
+    <!-- Status bar color -->
     <item name="android:statusBarColor">#ffffff</item>
   </style>
 
