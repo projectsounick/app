@@ -17,12 +17,12 @@ import {
 import { Formik } from "formik";
 import { useRouter } from "expo-router";
 import theme from "./Theme/globalTheme";
-import { validationSchemaForLogin } from "./validation/formikValidations";
+
 import useServiceWithSnackbar from "@/hooks/usePostDataHook";
 import { userService } from "./services/user.service";
 import AnimatedSubmitButton from "./modules/AnimatedSubmitButton";
 import CustomSnackbar from "./modules/Snackbar";
-import { useNavigation } from "@react-navigation/native";
+
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import NormalHeader from "./modules/NormalHeader";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -232,7 +232,7 @@ const Login = () => {
                     flexDirection: "row",
                     alignItems: "center",
                     marginTop: 16,
-                    marginLeft: "5%",
+                    justifyContent: "center",
                   }}
                 >
                   <Checkbox
@@ -244,7 +244,7 @@ const Login = () => {
                     I accept the{" "}
                     <Text
                       style={{
-                        color: theme.colors.primary,
+                        color: theme.colors.dark,
                         textDecorationLine: "underline",
                       }}
                       onPress={() => setPolicyVisible(true)}
@@ -259,6 +259,7 @@ const Login = () => {
                     onPress={() => {
                       if (isChecked) formikRef.current?.handleSubmit();
                     }}
+                    height={60}
                     title="Send OTP"
                   />
                 </View>

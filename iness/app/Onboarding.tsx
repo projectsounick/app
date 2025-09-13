@@ -10,6 +10,7 @@ import {
   Keyboard,
   Platform,
   ScrollView,
+  Alert,
 } from "react-native";
 import Modal from "react-native-modal";
 import Animated, { FadeInUp } from "react-native-reanimated";
@@ -55,20 +56,26 @@ const OnboardingScreen = () => {
     if (currentStep < onboardingSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      setLoading(true);
-      const userData =
-        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-      if (userData && userData.exists) {
-        let data = userData.data;
-        data.onboarding = true;
-        const { _id, role, __v, jwtToken, ...cleanData } = data;
-        let response = await userService.updateUser(cleanData);
-        if (response.success) {
-          navigation.navigate("secondsplashscreen");
+      try {
+        setLoading(true);
+        const userData =
+          await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+        if (userData && userData.exists) {
+          let data = userData.data;
+          data.onboarding = true;
+          const { _id, role, __v, jwtToken, ...cleanData } = data;
+          let response = await userService.updateUser(cleanData);
+          if (response.success) {
+            navigation.navigate("secondsplashscreen");
+          }
+        } else {
+          setSnackbarMessage("Please complete the onboarding process first.");
+          setSnackbarVisible(true);
         }
-      } else {
-        setSnackbarMessage("Please complete the onboarding process first.");
-        setSnackbarVisible(true);
+      } catch (error) {
+        Alert.alert("Some error has happened");
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -112,7 +119,13 @@ const OnboardingScreen = () => {
       case 9:
         return <WorkoutPreferences onNext={handleNext} onBack={handleBack} />;
       case 10:
-        return <ActivityLevel onNext={handleNext} onBack={handleBack} />;
+        return (
+          <ActivityLevel
+            onNext={handleNext}
+            onBack={handleBack}
+            loading={loading}
+          />
+        );
       default:
         return null;
     }
@@ -123,16 +136,6 @@ const OnboardingScreen = () => {
     (Dimensions.get("window").width - 90);
 
   // Info points for modal
-  const infoPoints = [
-    { icon: "fitness", text: "Height, Weight & Target Weight" },
-    { icon: "medkit", text: "Medical Conditions" },
-    { icon: "flag", text: "Primary & Secondary Goals" },
-    { icon: "time", text: "Time Commitment & Preferred Workout Time" },
-    { icon: "barbell", text: "Workout Preferences & Location" },
-    { icon: "pulse", text: "Activity Level" },
-    { icon: "calendar", text: "Preferred Date & Slot" },
-    { icon: "home", text: "Address" },
-  ];
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
@@ -154,22 +157,21 @@ const OnboardingScreen = () => {
                   marginBottom: 30,
                 }}
               >
-                {currentStep > 0 && (
-                  <TouchableOpacity
-                    onPress={handleBack}
-                    style={{
-                      backgroundColor: "#000",
-                      width: 35,
-                      height: 35,
-                      borderRadius: 18,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginRight: 10,
-                    }}
-                  >
-                    <Ionicons name="arrow-back" size={18} color="#fff" />
-                  </TouchableOpacity>
-                )}
+                <TouchableOpacity
+                  onPress={handleBack}
+                  style={{
+                    backgroundColor: "#000",
+                    width: 35,
+                    height: 35,
+                    borderRadius: 18,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 10,
+                  }}
+                >
+                  <Ionicons name="arrow-back" size={18} color="#fff" />
+                </TouchableOpacity>
+
                 <View
                   style={{
                     flex: 1,

@@ -69,6 +69,15 @@ const CommunityPosts = ({
   const [showTooltipForPost, setShowTooltipForPost] = useState<string | null>(
     null
   );
+  const [selected, setSelected] = useState("All Posts"); // default
+  const [open, setOpen] = useState(false);
+
+  const options = ["All Posts", "My Posts"];
+
+  const handleSelect = (option: string) => {
+    setSelected(option);
+    setOpen(false);
+  };
   const [toolTipActionType, setToolTipActionType] = useState("");
   const [blockLoading, setBlockLoading] = useState(false);
   async function handleDelete(_id: any) {
@@ -611,53 +620,66 @@ const CommunityPosts = ({
       >
         {/* Community Name with Icon */}
 
-        {/* Toggle Button */}
         <View
           style={{
-            flexDirection: "row",
-            backgroundColor: "#e0e0e0",
-            borderRadius: 20,
-            justifyContent: "center",
-            alignItems: "center",
-            overflow: "hidden",
+            alignItems: "flex-end",
+
+            position: "relative",
+
+            width: "100%",
           }}
         >
+          {/* Dropdown Button */}
           <TouchableOpacity
             style={{
-              paddingVertical: 8,
+              flexDirection: "row",
+              alignItems: "center",
+              backgroundColor: "#e0e0e0",
+              paddingVertical: 2,
               paddingHorizontal: 16,
-              backgroundColor: !showMyPosts ? "#19002E" : "transparent",
+              borderRadius: 20,
             }}
-            onPress={() => setShowMyPosts(false)}
+            onPress={() => setOpen(!open)}
           >
-            <Text
-              style={{
-                color: !showMyPosts ? "#fff" : "#000",
-                fontWeight: "bold",
-                fontSize: 12,
-              }}
-            >
-              All Posts
+            <Text style={{ fontSize: 14, fontWeight: "bold", marginRight: 8 }}>
+              {selected}
             </Text>
+            <Ionicons
+              name={open ? "chevron-up" : "chevron-down"}
+              size={20}
+              color="#000"
+            />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            style={{
-              paddingVertical: 8,
-              paddingHorizontal: 16,
-              backgroundColor: showMyPosts ? "#19002E" : "transparent",
-            }}
-            onPress={() => setShowMyPosts(true)}
-          >
-            <Text
+          {/* Dropdown List */}
+          {open && (
+            <View
               style={{
-                color: showMyPosts ? "#fff" : "#000",
-                fontWeight: "bold",
+                position: "absolute",
+                top: 45, // distance from button
+                right: 0,
+                backgroundColor: "#fff",
+                borderRadius: 10,
+                elevation: 5, // shadow for Android
+                shadowColor: "#000", // shadow for iOS
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.2,
+                shadowRadius: 4,
+                width: 150,
+                zIndex: 1000, // make sure it appears above other content
               }}
             >
-              My Posts
-            </Text>
-          </TouchableOpacity>
+              {options.map((item) => (
+                <TouchableOpacity
+                  key={item}
+                  style={{ paddingVertical: 10, paddingHorizontal: 16 }}
+                  onPress={() => handleSelect(item)}
+                >
+                  <Text style={{ fontSize: 14 }}>{item}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
         </View>
       </View>
       {isLoading && posts.length === 0 ? (

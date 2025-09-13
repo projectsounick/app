@@ -1,35 +1,28 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  ImageBackground,
-  TouchableOpacity,
-  Dimensions,
-  Image,
-} from "react-native";
+import { View, Text, ImageBackground, Dimensions, Image } from "react-native";
 import theme from "./Theme/globalTheme";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
-import { checkAndNavigateToStoredScreen } from "@/utils/checkScreenRedirection";
 import AnimatedSubmitButton from "./modules/AnimatedSubmitButton";
 import LottieView from "lottie-react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import { router, useRouter } from "expo-router";
-// Define the navigation types
+import { useRouter } from "expo-router";
+
 type RootStackParamList = {
   Home: undefined;
   login: undefined;
-  Onboarding: undefined; // Add any other screens here as needed
+  Onboarding: undefined;
   OtpVerify: undefined;
 };
+
 const { width, height } = Dimensions.get("window");
 type NavigationProp = StackNavigationProp<RootStackParamList, "Home">;
-///// Main functional component for the Home screen ///// -----------------------------------/
+
 const HomeScreen = () => {
   const navigation = useNavigation<NavigationProp>();
   const [showSplash, setShowSplash] = useState(true);
   const router = useRouter();
+
   useEffect(() => {
     const timer = setTimeout(async () => {
       const userData =
@@ -38,9 +31,9 @@ const HomeScreen = () => {
       if (userData?.exists && userData.data?.onboarding === true) {
         router.push("/secondsplashscreen");
       } else {
-        setShowSplash(false); // Show main content with login button
+        setShowSplash(false);
       }
-    }, 2000); // Wait for splash animation to finish (6 seconds)
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -52,8 +45,6 @@ const HomeScreen = () => {
           justifyContent: "center",
           alignItems: "center",
           backgroundColor: "#fff",
-          padding: 0,
-          margin: 0,
         }}
       >
         <LottieView
@@ -73,10 +64,10 @@ const HomeScreen = () => {
     );
   }
 
-  //// Function to handle the button press---/
   const handlePress = () => {
     navigation.navigate("login");
   };
+
   return (
     <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <ImageBackground
@@ -84,24 +75,22 @@ const HomeScreen = () => {
         style={{
           flex: 1,
           paddingHorizontal: theme.spacing.md,
-          paddingVertical: theme.spacing.lg,
+          justifyContent: "space-between", // ✅ push logo to top, button section to bottom
         }}
       >
-        {/* Centered "INESS" */}
+        {/* Logo section */}
         <View
           style={{
-            flex: 1,
-            justifyContent: "center", // aligns vertically
-            alignItems: "center", // aligns horizontally
+            alignItems: "center",
+            marginTop: height * 0.2, // ✅ 20% from top
           }}
         >
           <Image
-            source={require("../assets/images/logowithoutbackground.png")} // Replace with your logo path
+            source={require("../assets/images/logowithoutbackground.png")}
             style={{
               width: 100,
               height: 100,
-
-              resizeMode: "contain", // adjust if needed
+              resizeMode: "contain",
             }}
           />
 
@@ -112,6 +101,7 @@ const HomeScreen = () => {
               fontSize: theme.fontSizes.large,
               fontFamily: theme.fonts.heading,
               fontWeight: theme.fontWeights.medium as any,
+              marginTop: 4,
             }}
           >
             INESS
@@ -122,54 +112,53 @@ const HomeScreen = () => {
         <View
           style={{
             alignItems: "center",
-            marginBottom: theme.spacing.lg,
+            marginBottom: height * 0.15, // ✅ 30% from bottom
           }}
         >
-          {/* Title */}
           <Text
             allowFontScaling={false}
             style={{
-              fontSize: theme.fontSizes.xl,
+              fontSize: 45,
               fontWeight: theme.fontWeights.bold as any,
               color: theme.colors.text,
-              fontFamily: theme.fonts.heading,
+              fontFamily: theme.fonts.bold,
+              textAlign: "center",
             }}
           >
-            Transforming lives
+            TRANSFORMING LIVES
           </Text>
           <Text
             allowFontScaling={false}
             style={{
-              fontSize: theme.fontSizes.xl,
-              fontWeight: theme.fontWeights.bold as any,
+              fontSize: 25,
+              fontWeight: "400",
+              marginTop: "2%",
               color: theme.colors.text,
-              fontFamily: theme.fonts.heading,
+              fontFamily: theme.fonts.regular,
             }}
           >
             Since 2015
           </Text>
 
-          {/* Footer text */}
           <Text
             allowFontScaling={false}
             style={{
-              fontSize: theme.fontSizes.small,
+              fontSize: 12,
               color: theme.colors.mutedText,
-              fontFamily: theme.fonts.body,
+              fontFamily: theme.fonts.regular,
               textAlign: "center",
-              marginTop: theme.spacing.md,
+              marginTop: 33,
             }}
           >
-            Personal Coaching | Sustainable Diet Plans | FitTube |
-            Fitness shopping
+            Personal Coaching | Sustainable Diet Plans | FitTube | Fitness
+            shopping
           </Text>
 
-          {/* Button */}
-          {/* Next Button */}
           <AnimatedSubmitButton
             loading={false}
             onPress={handlePress}
             title="Login"
+            height={67}
           />
         </View>
       </ImageBackground>

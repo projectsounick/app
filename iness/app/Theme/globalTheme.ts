@@ -1,7 +1,7 @@
 // /app/theme.ts
 const theme: any = {
   colors: {
-    primary: "#A4F77F",
+    primary: "#BDFF84",
     text: "#FFFFFF",
     link: "#7ABFFF",
     mutedText: "#CCCCCC",
@@ -33,8 +33,12 @@ const theme: any = {
     lg: 24,
   },
   fonts: {
-    heading: "System",
-    body: "System",
+    heading: "SatoshiBold", // for big headings
+    subheading: "SatoshiMedium", // for medium emphasis
+    body: "SatoshiRegular", // for normal text
+    regular: "SatoshiRegular",
+    medium: "SatoshiMedium",
+    bold: "SatoshiBold",
   },
 };
 

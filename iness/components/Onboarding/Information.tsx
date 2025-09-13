@@ -10,26 +10,36 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
+import theme from "@/app/Theme/globalTheme";
+import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+
+const { height, width } = Dimensions.get("window");
 
 interface Props {
   showIntroModal: boolean;
   setShowIntroModal: (value: boolean) => void;
 }
 
-const { height } = Dimensions.get("window");
-
 export default function OnboardingMetricsModal({
   showIntroModal,
   setShowIntroModal,
 }: Props) {
   const slideAnim = useRef(new Animated.Value(height)).current;
+  const scaleAnim = useRef(new Animated.Value(0)).current; // for Proceed button
+  const router = useRouter();
 
   useEffect(() => {
     if (showIntroModal) {
       Animated.timing(slideAnim, {
         toValue: 0,
         duration: 350,
+        useNativeDriver: true,
+      }).start();
+
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 700,
         useNativeDriver: true,
       }).start();
     } else {
@@ -40,6 +50,16 @@ export default function OnboardingMetricsModal({
       }).start();
     }
   }, [showIntroModal]);
+
+  const handleCancel = () => {
+    setShowIntroModal(false);
+    router.replace("/login");
+  };
+
+  const handleProceed = () => {
+    setShowIntroModal(false);
+    // add any additional logic for Proceed here
+  };
 
   return (
     <Modal transparent visible={showIntroModal} animationType="fade">
@@ -110,12 +130,60 @@ export default function OnboardingMetricsModal({
           </Text>
         </ScrollView>
 
-        {/* Proceed Button */}
-        <AnimatedSubmitButton
-          loading={false}
-          onPress={() => setShowIntroModal(false)}
-          title="Proceed"
-        />
+        {/* Buttons: Proceed & Cancel */}
+        <View style={styles.buttonRow}>
+          {/* Proceed Button */}
+          <Animated.View
+            style={{
+              transform: [{ scale: scaleAnim }],
+              width: width * 0.45,
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                backgroundColor: theme.colors.primary,
+                borderRadius: 40,
+                height: 50,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onPress={handleProceed}
+            >
+              <Text
+                style={{
+                  color: theme.colors.dark,
+                  fontWeight: theme.fontWeights?.bold,
+                  fontSize: 18,
+                }}
+              >
+                Proceed
+              </Text>
+            </TouchableOpacity>
+          </Animated.View>
+
+          {/* Cancel Button */}
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#FF4D4D",
+              width: width * 0.45,
+              height: 50,
+              borderRadius: 40,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+            onPress={handleCancel}
+          >
+            <Text
+              style={{
+                color: "#fff",
+                fontSize: 18,
+                fontWeight: "bold",
+              }}
+            >
+              Cancel
+            </Text>
+          </TouchableOpacity>
+        </View>
       </Animated.View>
     </Modal>
   );
@@ -135,6 +203,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     overflow: "hidden",
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   handle: {
     width: 50,
@@ -145,14 +215,14 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   content: {
-    paddingHorizontal: 20,
-    paddingBottom: 20,
+    flex: 1,
   },
   heading: {
     fontSize: 20,
-    fontWeight: "bold",
     marginBottom: 20,
-    textAlign: "center",
+    textAlign: "left",
+    fontFamily: theme.fonts.bold,
+    marginTop: 20,
     color: "#222",
   },
   point: {
@@ -166,6 +236,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     lineHeight: 20,
     textAlign: "justify",
+    fontFamily: theme.fonts.regular,
     color: "#444",
   },
   disclaimer: {
@@ -174,15 +245,12 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     color: "#666",
     textAlign: "center",
+    fontFamily: theme.fonts.regular,
   },
-  proceedButton: {
-    backgroundColor: "#4A90E2",
-    paddingVertical: 15,
-    alignItems: "center",
-  },
-  proceedText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
+  buttonRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 15,
+    gap: 10,
   },
 });

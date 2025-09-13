@@ -64,7 +64,8 @@ const OnboardingtimeCommitment = ({
             option={item}
             state={timeCommitment}
             updateState={updateState}
-            height={60} // 10% of screen height
+            height={70} // 10% of screen height
+            fontSize={16}
           />
         ))}
       </ScrollView>
@@ -74,6 +75,7 @@ const OnboardingtimeCommitment = ({
         loading={loading}
         onPress={handleNext}
         title="Next"
+        height={50}
       />
     </View>
   );

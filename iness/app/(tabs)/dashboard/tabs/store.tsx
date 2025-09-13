@@ -27,7 +27,7 @@ import GroupedProductDisplay from "@/app/Components/ecom/ProductList";
 import SmallHeader from "@/app/modules/SmallHeader";
 
 //// Main functional component for the equipscreen ------------------------/
-const MainHeader = withAnimatedHeader(NameHeader);
+
 export default function EquipScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const configs = useMemo(

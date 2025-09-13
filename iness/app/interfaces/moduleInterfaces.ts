@@ -5,6 +5,7 @@ interface AnimatedSubmitButtonProps {
   // ✅ After (no argument needed)
   onPress?: () => void;
   title?: string;
+  height?: number;
 }
 interface CustomSnackbarProps {
   visible: boolean;

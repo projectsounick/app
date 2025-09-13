@@ -113,25 +113,14 @@ export default function DateBar({
       style={{
         flexDirection: "column",
         alignItems: "center",
-        paddingHorizontal: 10,
       }}
     >
       {/* Month Display */}
-      <Text
-        style={{
-          fontSize: 16,
-          fontWeight: "bold",
-          color: "#fff",
-          marginBottom: 6,
-        }}
-      >
-        {currentMonth}
-      </Text>
 
       {/* Days Scroll */}
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         {/* Left Arrow */}
-        <TouchableOpacity style={{ padding: 8 }}>
+        <TouchableOpacity style={{ paddingRight: 8 }}>
           <Icon name="chevron-left" size={30} color="#BDFF84" />
         </TouchableOpacity>
 
@@ -149,7 +138,7 @@ export default function DateBar({
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{
-              paddingHorizontal: 10,
+              paddingHorizontal: 2,
               justifyContent: "flex-start", // aligns items to start
             }}
           >
@@ -194,17 +183,17 @@ export default function DateBar({
                     borderColor,
                   }}
                 >
-                  {isSelected && (
-                    <View
-                      style={{
-                        width: 6,
-                        height: 6,
-                        borderRadius: 3,
-                        backgroundColor: "#000",
-                        marginBottom: 4,
-                      }}
-                    />
-                  )}
+                  {/* Dot placeholder */}
+                  <View
+                    style={{
+                      width: 6,
+                      height: 6,
+                      borderRadius: 6,
+                      backgroundColor: isSelected ? "#000" : "transparent", // show dot only if selected
+                      marginBottom: 4,
+                    }}
+                  />
+
                   <Text
                     style={{
                       color: textColor,
@@ -214,8 +203,16 @@ export default function DateBar({
                   >
                     {item.day}
                   </Text>
+
                   <Text style={{ color: subTextColor, fontSize: 12 }}>
                     {item.label}
+                  </Text>
+                  <Text style={{ color: subTextColor, fontSize: 12 }}>
+                    (
+                    {new Date(item.fullDate).toLocaleString("default", {
+                      month: "short",
+                    })}
+                    )
                   </Text>
                 </TouchableOpacity>
               );
@@ -224,7 +221,7 @@ export default function DateBar({
         </View>
 
         {/* Right Arrow */}
-        <TouchableOpacity style={{ padding: 8 }}>
+        <TouchableOpacity style={{ paddingLeft: 8 }}>
           <Icon name="chevron-right" size={30} color="#BDFF84" />
         </TouchableOpacity>
       </View>

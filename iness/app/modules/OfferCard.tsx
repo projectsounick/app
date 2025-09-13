@@ -14,7 +14,7 @@ const { width: screenWidth } = Dimensions.get("window");
 const OffersCards = () => {
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const flatListRef = useRef<FlatList>(null);
+  const flatListRef: any = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -110,4 +110,4 @@ const OffersCards = () => {
   );
 };
 
-export default memo(OffersCards);
+export default OffersCards;

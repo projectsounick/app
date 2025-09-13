@@ -148,10 +148,9 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                           ellipsizeMode="tail"
                           style={{
                             fontSize: 13,
-                            textAlign: "justify",
+                            textAlign: "left", // 👈 or remove textAlign
                             color: "white",
                             flexShrink: 1,
-                            lineHeight: 16,
                           }}
                         >
                           {item}
@@ -171,7 +170,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                   style={{
                     backgroundColor: "rgba(189, 255, 132, 1)",
                     paddingHorizontal: 20,
-                    height: 36,
+                    height: 26,
                     borderRadius: 18,
                     justifyContent: "center",
                     alignItems: "center",
@@ -431,7 +430,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                     style={{
                       backgroundColor: "rgba(189, 255, 132, 1)",
                       paddingHorizontal: 20,
-                      height: 36,
+                      height: 26,
                       borderRadius: 18,
                       justifyContent: "center",
                       alignItems: "center",

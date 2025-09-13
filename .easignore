@@ -1,0 +1,14 @@
+# Ignore android completely
+iness/android
+
+
+
+# Ignore Expo caches
+
+
+# Misc
+*.DS_Store
+*.zip
+*.tar
+*.tar.gz
+.vscode

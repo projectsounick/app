@@ -19,24 +19,27 @@ export async function registerForPushNotificationsAsync(): Promise<
 
   try {
     if (!Device.isDevice) {
-      alert("Push notifications require a physical device.");
+      Alert.alert("Push notifications require a physical device.");
       return;
     }
 
+    // Get existing permission status
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();
     let finalStatus = existingStatus;
 
+    // Request permission if not granted
     if (existingStatus !== "granted") {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
     }
 
+    // Handle permission denied
     if (finalStatus !== "granted") {
       return new Promise((resolve) => {
         const handleAppStateChange = async (nextAppState: AppStateStatus) => {
           if (nextAppState === "active") {
-            subscription.remove(); // ✅ use `.remove()` from returned subscription
+            subscription.remove();
             const { status } = await Notifications.getPermissionsAsync();
             if (status === "granted") {
               const projectId =
@@ -90,7 +93,7 @@ export async function registerForPushNotificationsAsync(): Promise<
       });
     }
 
-    // Already granted
+    // Already granted or Android <13
     const projectId =
       Constants?.expoConfig?.extra?.eas?.projectId ??
       Constants?.easConfig?.projectId;
@@ -101,6 +104,7 @@ export async function registerForPushNotificationsAsync(): Promise<
 
     token = pushTokenResponse.data;
 
+    // Android channel setup
     if (Platform.OS === "android") {
       await Notifications.setNotificationChannelAsync("default", {
         name: "default",
@@ -110,7 +114,7 @@ export async function registerForPushNotificationsAsync(): Promise<
       });
     }
   } catch (error) {
-    console.error("Error getting push token:", error);
+    console.error("Error getting push toke:", error);
   }
 
   return token;

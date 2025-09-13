@@ -107,6 +107,7 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
                   fontWeight: "700",
                   color: "#333",
                   textAlign: "center",
+                  fontFamily: theme.fonts.bold,
                 }}
               >
                 Your Contact{"\n"}Number?
@@ -117,6 +118,7 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
                   fontSize: 12,
                   color: "#888",
                   marginTop: 4,
+                  fontFamily: theme.fonts.regular,
                 }}
               >
                 (optional)
@@ -163,6 +165,7 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
                   color: "#333",
                   backgroundColor: "transparent",
                   paddingVertical: 0,
+                  fontFamily: theme.fonts.regular,
                 }}
                 returnKeyType="done"
                 keyboardType="number-pad"
@@ -182,6 +185,7 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
           <View style={{ marginTop: 40 }}>
             <AnimatedSubmitButton
               loading={false}
+              height={50}
               onPress={handleNext}
               title={phoneNumber === "" ? "Skip" : "Next"}
             />

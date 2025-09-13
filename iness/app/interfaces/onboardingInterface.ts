@@ -11,6 +11,7 @@ interface OnboardingCardInterface {
   description?: string;
   icon?: string;
   style?: OnboardingCardStyle;
+  fontSize?: number;
 }
 
 export type { OnboardingCardInterface };

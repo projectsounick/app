@@ -19,6 +19,7 @@ export default function OnboardingCard({
   icon,
   description,
   style,
+  fontSize,
 }: OnboardingCardInterface) {
   const isSelected = Array.isArray(state)
     ? state.includes(option)
@@ -96,9 +97,10 @@ export default function OnboardingCard({
         >
           <Text
             style={{
-              fontSize: 16,
+              fontSize: fontSize ? fontSize : 28,
               fontWeight: "600",
               color: theme.colors.dark,
+              fontFamily: theme.fonts.bold,
               textAlign: icon || description ? "left" : "center",
             }}
           >

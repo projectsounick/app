@@ -8,6 +8,7 @@ import {
   Dimensions,
   ImageBackground,
   ScrollView,
+  Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import theme from "@/app/Theme/globalTheme";
@@ -71,8 +72,21 @@ export default function TransformationImage() {
   const pickImage = async () => {
     setImageUploadLoader(true);
 
+    // Ask for permission first
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission required",
+        "We need permission to access your media library to upload images or videos.",
+        [{ text: "OK" }]
+      );
+      setImageUploadLoader(false);
+      return;
+    }
+
+    // Launch the picker
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All, // ✅ Allow both
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
       quality: 0.8,
       videoMaxDuration: 60,
     });
@@ -105,7 +119,7 @@ export default function TransformationImage() {
       const userId = userData.data._id;
       const asset = result.assets[0];
       const fileUri = asset.uri;
-      const type = asset.type; // "image" | "video"
+      const type = asset.type;
       const ext =
         fileUri.split(".").pop() || (type === "video" ? "mp4" : "jpg");
       const fileName = `${userId}_${Date.now()}.${ext}`;

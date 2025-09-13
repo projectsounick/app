@@ -2,14 +2,20 @@
   "expo": {
     "name": "iness",
     "slug": "iness",
-    "version": "1.0.23",
-    "orientation": "portrait",
-    "icon": "./assets/images/logonew.png",
+    "jsEngine": "hermes",
+    "version": "1.0.25",
+    "orientation": "default",
+    "notification": {
+      "icon": "./assets/images/logonew.png",
+      "color": "#FF231F7C"
+    },
+    "icon": "./assets/images/androidlogo.png",
     "scheme": "myapp",
     "platforms": ["ios", "android"],
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "ios": {
+      "icon": "./assets/images/logonew.png",
       "supportsTablet": false,
       "bundleIdentifier": "com.iness.fitness",
       "buildNumber": "1.0.23",
@@ -20,26 +26,24 @@
       }
     },
     "android": {
-      "versionCode": 20,
-      "minSdkVersion": 26,
-      "compileSdkVersion": 34,
-      "targetSdkVersion": 34,
+      "icon": "./assets/images/androidlogo.png",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/androidlogo.png",
+        "backgroundColor": "#000000"
+      },
+      "edgeToEdgeEnabled": true,
+      "versionCode": 23,
       "googleServicesFile": "./android/app/google-services.json",
       "permissions": ["NOTIFICATIONS"],
       "intentFilters": [
         {
           "action": "VIEW",
-          "data": {
-            "scheme": "myapp"
-          },
+          "data": { "scheme": "myapp" },
           "category": ["BROWSABLE", "DEFAULT"]
         }
       ],
       "useNextNotificationsApi": true,
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logonew.png",
-        "backgroundColor": "#000000"
-      },
+
       "package": "com.iness.fitness"
     },
     "web": {
@@ -56,16 +60,26 @@
           "imageWidth": 200
         }
       ],
+      [
+        "react-native-health",
+        {
+          "isClinicalDataEnabled": true,
+          "healthSharePermission": "Custom health share permission",
+          "healthUpdatePermission": "Custom health update permission",
+          "healthClinicalDescription": "Custom health share permission for clinical data"
+        }
+      ],
       "expo-video",
       "expo-notifications",
-      "expo-health-connect",
+
       [
         "expo-build-properties",
         {
           "android": {
-            "compileSdkVersion": 34,
-            "targetSdkVersion": 34,
-            "minSdkVersion": 26
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "minSdkVersion": 26,
+            "ndk": "26.1.10909125"
           }
         }
       ]
@@ -73,17 +87,12 @@
     "experiments": {
       "typedRoutes": true
     },
-    "experimental": {
-      "exportEmbed": false
-    },
     "extra": {
-      "router": {
-        "origin": false
-      },
+      "router": { "origin": false },
       "eas": {
-        "projectId": "87dfba75-ecf1-4c1c-9b9a-74df81667288"
+        "projectId": "d80cbfa4-17b7-44ae-9955-a47743e5be15"
       }
     },
-    "owner": "sounick_project"
+    "owner": "surjayan"
   }
 }

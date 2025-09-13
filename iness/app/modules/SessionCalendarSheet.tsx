@@ -10,7 +10,7 @@ import {
   ScrollView,
   TextInput,
 } from "react-native";
-import Modal from "react-native-modal";
+const Modal = require("react-native-modal");
 import { Calendar, DateData } from "react-native-calendars";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import {
@@ -25,22 +25,27 @@ import { sessionService } from "../services/sessionService";
 import FeedbackModal from "../Components/ActivePlans.tsx/SessionFeedbackModal";
 import SessionFeedback from "./SessionFeedback";
 import { date } from "yup";
+import { Session } from "../interfaces/sessionInterface";
+import { JSX } from "react/jsx-runtime";
 
 const { height } = Dimensions.get("window");
 
-const SessionCalendar: React.FC<{
+interface SessionCalendarProps {
   isVisible: boolean;
   onClose: () => void;
-  setCurrentSession: any;
-  currentSession: any;
-  setShowFeedbackModal: any;
-}> = ({
+  setCurrentSession: (session: Session | null) => void;
+  currentSession: Session | null;
+  setShowFeedbackModal: (value: boolean) => void;
+}
+
+// Replace 'Session' with the actual type/interface for a session in your project
+const SessionCalendar = ({
   isVisible,
   onClose,
   setCurrentSession,
   currentSession,
   setShowFeedbackModal,
-}) => {
+}: SessionCalendarProps): JSX.Element | null => {
   const { data: sessionData, loading } = useGetDataHook(
     sessionService.getSessions
   );

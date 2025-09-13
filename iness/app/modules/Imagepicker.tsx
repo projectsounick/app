@@ -94,10 +94,30 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
     setImageUploadLoader(true);
 
     try {
-      // 👉 Ask for permissions
-      // const hasPermission = await requestPermissions();
-      // if (!hasPermission) return;
+      // First show alert to choose image or video
+      const mediaType = await new Promise<"image" | "video">(
+        (resolve, reject) => {
+          Alert.alert("Capture Type", "Choose what you want to capture", [
+            { text: "Photo", onPress: () => resolve("image") },
+            { text: "Video", onPress: () => resolve("video") },
+            {
+              text: "Cancel",
+              style: "cancel",
+              onPress: () => reject("cancel"),
+            },
+          ]);
+        }
+      );
 
+      // Ask for camera permissions
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert(
+          "Permission Required",
+          "Camera access is needed to take a photo or video."
+        );
+        return;
+      }
       let result: ImagePicker.ImagePickerResult;
 
       // Step 2: Handle camera or gallery

@@ -57,13 +57,19 @@ const OnboardingPrimaryGoal = ({
             state={goal}
             icon={icon}
             updateState={updateState}
-            height={60} // smaller height passed here
+            height={70} // smaller height passed here
+            fontSize={16}
           />
         ))}
       </ScrollView>
 
       {/* Next Button */}
-      <AnimatedSubmitButton loading={false} onPress={handleNext} title="Next" />
+      <AnimatedSubmitButton
+        loading={false}
+        onPress={handleNext}
+        title="Next"
+        height={50}
+      />
     </View>
   );
 };

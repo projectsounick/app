@@ -75,7 +75,12 @@ const OnboardingSex = ({
       </View>
 
       {/* Next Button */}
-      <AnimatedSubmitButton loading={false} onPress={handleNext} title="Next" />
+      <AnimatedSubmitButton
+        loading={false}
+        height={50}
+        onPress={handleNext}
+        title="Next"
+      />
       <CustomSnackbar
         visible={snackbarVisible}
         bgColor={theme.colors.red}

@@ -101,13 +101,13 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
         }}
       >
         <LinearGradient
-          colors={["#140A21", "#522987"]}
-          start={{ x: 0, y: 0 }}
+          colors={["#844ACF", "#432569"]}
+          start={{ x: 0, y: 0 }} // top
+          end={{ x: 0, y: 1 }} // bottom
           style={{
             borderBottomLeftRadius: 30,
             borderBottomRightRadius: 30,
             paddingHorizontal: 20,
-
             paddingBottom: 18,
           }}
         >
@@ -168,8 +168,9 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
               style={{
                 textAlign: "center",
                 color: theme.colors.text,
-                fontWeight: "bold",
-                fontSize: theme.fontSizes.regularSmall,
+                fontFamily: theme.fonts.bold,
+                fontSize: 20,
+                marginTop: "2%",
               }}
             >
               {title}

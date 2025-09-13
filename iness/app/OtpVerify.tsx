@@ -175,8 +175,9 @@ const OTPInputScreen = () => {
       style={{ flex: 1 }}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
       >
         <View
           style={{
@@ -235,7 +236,6 @@ const OTPInputScreen = () => {
               onPress={handleResendOtp}
               disabled={otpResendLoading}
               // disable while loading
-              style={{ cursor: "pointer" }}
             >
               {otpResendLoading ? (
                 <ActivityIndicator
@@ -247,7 +247,7 @@ const OTPInputScreen = () => {
                 <Text
                   style={{
                     color: theme.colors.dark,
-                    cursor: "pointer",
+
                     fontSize: theme.fontSizes.small,
                     marginTop: theme.spacing.sm,
                   }}
@@ -262,7 +262,8 @@ const OTPInputScreen = () => {
           {/* Submit Button at Bottom */}
           <AnimatedSubmitButton
             onPress={handleSubmit}
-            title="Login"
+            title="Verify"
+            height={60}
             loading={loading}
           />
         </View>

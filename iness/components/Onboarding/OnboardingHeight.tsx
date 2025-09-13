@@ -79,9 +79,7 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
           >
-            <OnboardingHeading>
-              <Text style={styles.title}>What is your{`\n`}height?</Text>
-            </OnboardingHeading>
+            <OnboardingHeading>What is your{`\n`}height?</OnboardingHeading>
 
             <View style={styles.pickerRow}>
               {/* Feet Picker */}
@@ -116,6 +114,7 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
             <AnimatedSubmitButton
               loading={loading}
               onPress={handleNext}
+              height={50}
               title="Next"
             />
           </View>
@@ -134,28 +133,96 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
             transparent
             onRequestClose={() => setModalVisible(false)}
           >
-            <View style={styles.modalOverlay}>
-              <View style={styles.modalContent}>
-                <Text style={styles.modalTitle}>
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: "rgba(0,0,0,0.4)",
+                justifyContent: "flex-end",
+              }}
+            >
+              {/* Bottom sheet container */}
+              <View
+                style={{
+                  backgroundColor: "#fff",
+                  maxHeight: "60%",
+                  borderTopLeftRadius: 20,
+                  borderTopRightRadius: 20,
+                  paddingHorizontal: 20,
+                  paddingTop: 10,
+                  paddingBottom: 20,
+                }}
+              >
+                {/* Handle dash (inline) */}
+                <View
+                  style={{
+                    width: 50,
+                    height: 5,
+                    backgroundColor: "#ccc",
+                    borderRadius: 3,
+                    alignSelf: "center",
+                    marginBottom: 10,
+                  }}
+                />
+
+                {/* Title */}
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontFamily: theme.fonts.bold,
+                    marginBottom: 10,
+                    textAlign: "center",
+                  }}
+                >
                   Select {modalType === "feet" ? "Feet" : "Inches"}
                 </Text>
+
+                {/* Options list */}
                 <FlatList
                   data={getOptions()}
                   keyExtractor={(item) => item}
                   renderItem={({ item }) => (
                     <TouchableOpacity
-                      style={styles.option}
+                      style={{
+                        paddingVertical: 15,
+                        borderBottomWidth: 1,
+                        borderBottomColor: "#eee",
+                      }}
                       onPress={() => selectValue(item)}
                     >
-                      <Text style={styles.optionText}>{item}</Text>
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          textAlign: "center",
+                          fontFamily: theme.fonts.medium,
+                        }}
+                      >
+                        {item}
+                      </Text>
                     </TouchableOpacity>
                   )}
                 />
+
+                {/* Cancel button */}
                 <TouchableOpacity
-                  style={styles.closeButton}
+                  style={{
+                    marginTop: 10,
+                    paddingVertical: 15,
+                    backgroundColor: "#FF4D4D",
+                    borderRadius: 40,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
                   onPress={() => setModalVisible(false)}
                 >
-                  <Text style={styles.closeButtonText}>Cancel</Text>
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontSize: 16,
+                      fontFamily: theme.fonts.bold,
+                    }}
+                  >
+                    Cancel
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -179,12 +246,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     flexGrow: 1,
   },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#000",
-    textAlign: "center",
-  },
+
   pickerRow: {
     flexDirection: "row",
     justifyContent: "center",
@@ -203,17 +265,19 @@ const styles = StyleSheet.create({
   pickerText: {
     fontSize: 18,
     color: "#000",
+    fontFamily: theme.fonts.medium,
   },
   unit: {
     marginHorizontal: 8,
     fontSize: 18,
     color: "#7D4CFF",
-    fontWeight: "bold",
+    fontFamily: theme.fonts.bold,
   },
   hintText: {
     textAlign: "center",
     color: "#666",
     fontSize: 14,
+    fontFamily: theme.fonts.regular,
     marginTop: 8,
   },
   bottomButton: {

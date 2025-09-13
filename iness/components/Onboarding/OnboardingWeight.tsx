@@ -82,9 +82,7 @@ const OnboardingWeight = ({ onNext }: { onNext: () => void }) => {
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
           >
-            <OnboardingHeading>
-              <Text style={styles.title}>What is your{`\n`}weight?</Text>
-            </OnboardingHeading>
+            <OnboardingHeading>What is your{`\n`}weight?</OnboardingHeading>
 
             <View style={styles.pickerRow}>
               {/* Kg Picker */}
@@ -116,6 +114,7 @@ const OnboardingWeight = ({ onNext }: { onNext: () => void }) => {
               loading={loading}
               onPress={handleNext}
               title="Next"
+              height={50}
             />
           </View>
 
@@ -202,17 +201,19 @@ const styles = StyleSheet.create({
   pickerText: {
     fontSize: 18,
     color: "#000",
+    fontFamily: theme.fonts.medium,
   },
   unit: {
     marginHorizontal: 8,
     fontSize: 18,
     color: "#7D4CFF",
-    fontWeight: "bold",
+    fontFamily: theme.fonts.bold,
   },
   hintText: {
     textAlign: "center",
     color: "#666",
     fontSize: 14,
+    fontFamily: theme.fonts.regular,
     marginTop: 8,
   },
   bottomButton: {
@@ -252,7 +253,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ff4d4d",
     marginHorizontal: 20,
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 30,
     marginTop: 10,
   },
   closeButtonText: {
