@@ -14,6 +14,8 @@ import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import theme from "@/app/Theme/globalTheme";
+import OnboardingHeading from "@/app/modules/OnboardingHeading";
+import { Ionicons } from "@expo/vector-icons";
 
 const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
   const [dob, setDob] = useState(new Date(1990, 0, 1));
@@ -52,14 +54,44 @@ const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
         <View style={styles.container}>
           {/* Top content */}
           <View style={styles.content}>
-            <Text style={styles.title}>What is your{`\n`}date of birth?</Text>
-            <Text style={styles.hint}>DD/MM/YYYY</Text>
+            <OnboardingHeading>
+              What is your{`\n`}date of birth?
+            </OnboardingHeading>
 
-            <TouchableOpacity onPress={showDatePicker} style={styles.dobBox}>
-              <Text style={styles.dobText}>
+            <TouchableOpacity
+              onPress={showDatePicker}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                borderWidth: 1,
+                borderColor: "#ccc",
+                borderRadius: 10,
+                paddingHorizontal: 20, // more horizontal padding
+                paddingVertical: 12,
+                backgroundColor: "#fff",
+                marginVertical: 10,
+                width: "90%", // wider box
+                alignSelf: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: "#333",
+                  fontFamily: theme.fonts.medium,
+                }}
+              >
                 {dob.toLocaleDateString("en-GB")}
               </Text>
+              <Ionicons
+                name="calendar"
+                size={24}
+                color="#333"
+                style={{ marginLeft: 15 }} // space between text and icon
+              />
             </TouchableOpacity>
+            <Text style={styles.hint}>DD/MM/YYYY</Text>
           </View>
 
           {/* Bottom fixed button */}
@@ -68,6 +100,7 @@ const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
               loading={loading}
               onPress={handleNext}
               title="Next"
+              height={50}
             />
           </View>
 
@@ -114,7 +147,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 12,
     color: "#7D4CFF",
-    fontWeight: "600",
+    fontFamily: theme.fonts.medium,
   },
   dobBox: {
     marginTop: 20,

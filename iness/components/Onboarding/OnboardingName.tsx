@@ -85,6 +85,7 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
                   fontWeight: "700",
                   color: "#333",
                   textAlign: "center",
+                  fontFamily: theme.fonts.bold,
                 }}
               >
                 What should we call you?
@@ -126,6 +127,7 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
                   color: "#333",
                   backgroundColor: "transparent",
                   paddingVertical: 0,
+                  fontFamily: theme.fonts.regular,
                 }}
               />
             </View>
@@ -137,6 +139,7 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
               loading={false}
               onPress={handleNext}
               title="Next"
+              height={50}
             />
           </View>
         </ScrollView>

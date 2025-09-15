@@ -35,7 +35,7 @@ const DualBannerCardRow = ({
         end={{ x: 1, y: 1 }}
         style={{
           width: "49%",
-          borderRadius: 16,
+          borderRadius: 12,
           padding: 12,
           height: 100, // 🔥 Set fixed height here
           flexDirection: "row",

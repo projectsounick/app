@@ -22,7 +22,11 @@ import { useSelector } from "react-redux";
 import { CircularProgress } from "react-native-circular-progress";
 import { ActivityIndicator } from "react-native-paper";
 import { sessionService } from "@/app/services/sessionService";
-const MainHeader = withAnimatedHeader(PlanProgressStatus);
+import ShimmerLoaderForTrain from "@/app/modules/TrainSimmer";
+import ShimmerLoader from "@/app/modules/TrainSimmer";
+const MainHeader = withAnimatedHeader(
+  PlanProgressStatus as unknown as React.FC
+);
 export default function TrainScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
   const selectedTab = useSelector((state: RootState) => state.plan.planTab);
@@ -66,7 +70,7 @@ export default function TrainScreen() {
             marginTop: 30,
           }}
         >
-          <ActivityIndicator />
+          <ShimmerLoader screenName="train" />
         </View>
       ) : (
         <>

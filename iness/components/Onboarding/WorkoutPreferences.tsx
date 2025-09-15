@@ -72,12 +72,18 @@ const WorkoutPreferences = ({
             icon={icon}
             state={workoutPreferences}
             updateState={updateState}
-            height={60}
+            height={70}
+            fontSize={16}
           />
         ))}
       </ScrollView>
 
-      <AnimatedSubmitButton loading={false} onPress={handleNext} title="Next" />
+      <AnimatedSubmitButton
+        loading={false}
+        onPress={handleNext}
+        title="Next"
+        height={50}
+      />
     </View>
   );
 };

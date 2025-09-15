@@ -11,6 +11,7 @@ import {
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { UserData } from "@/app/interfaces/UserInterface";
 import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
+import OnboardingHeading from "@/app/modules/OnboardingHeading";
 
 const screenHeight = Dimensions.get("window").height;
 
@@ -53,16 +54,9 @@ const PreferredWorkoutTime = ({
       }}
     >
       <ScrollView showsVerticalScrollIndicator={false}>
-        <Text
-          style={{
-            fontSize: 24,
-            fontWeight: "bold",
-            textAlign: "center",
-            marginBottom: 25,
-          }}
-        >
+        <OnboardingHeading>
           When do you {"\n"} prefer to workout?
-        </Text>
+        </OnboardingHeading>
 
         {onboardingPreferredWorkoutTimeOptions.map(
           (item: string, index: number) => (
@@ -72,14 +66,20 @@ const PreferredWorkoutTime = ({
               option={item}
               state={preferredWorkoutTime}
               updateState={updateState}
-              height={60} // 10% of screen height
+              height={70} // 10% of screen height
+              fontSize={16}
             />
           )
         )}
       </ScrollView>
 
       {/* Next Button */}
-      <AnimatedSubmitButton loading={false} onPress={handleNext} title="Next" />
+      <AnimatedSubmitButton
+        loading={false}
+        onPress={handleNext}
+        title="Next"
+        height={50}
+      />
     </View>
   );
 };

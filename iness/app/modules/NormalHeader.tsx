@@ -25,7 +25,7 @@ export default function NormalHeader({ screenName, rightIcon }: any) {
         <TouchableOpacity
           style={{
             backgroundColor: theme.colors.dark,
-            borderRadius: 20,
+            borderRadius: 24,
             padding: 4,
             marginRight: 10,
           }}

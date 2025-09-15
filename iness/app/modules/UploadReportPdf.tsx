@@ -24,10 +24,10 @@ interface HealthReportUploaderProps {
   setModalVisible: (visible: boolean) => void;
 }
 
-const HealthReportUploader: React.FC<HealthReportUploaderProps> = ({
+const HealthReportUploader = ({
   modalVisible,
   setModalVisible,
-}) => {
+}: HealthReportUploaderProps) => {
   const [loading, setLoading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>("");

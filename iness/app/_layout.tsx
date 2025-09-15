@@ -14,6 +14,7 @@ import * as NavigationBar from "expo-navigation-bar";
 
 import SystemNavigationBar from "react-native-system-navigation-bar";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import React from "react";
 
 // Fonts
 SplashScreen.preventAutoHideAsync();
@@ -31,7 +32,9 @@ Notifications.setNotificationHandler({
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
-    "Satoshi-Regular": require("../assets/fonts/Satoshi.otf"),
+    SatoshiRegular: require("../assets/fonts/Satoshi-Regular.otf"),
+    SatoshiMedium: require("../assets/fonts/Satoshi-Medium.otf"),
+    SatoshiBold: require("../assets/fonts/Satoshi-Bold.otf"),
   });
   useEffect(() => {
     if (fontsLoaded) {

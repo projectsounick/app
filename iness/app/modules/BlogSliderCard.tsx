@@ -30,7 +30,7 @@ export default function BlogSliderCard() {
         paddingVertical: 16,
         paddingHorizontal: 12,
         borderRadius: 12,
-        marginTop: 8,
+        marginTop: 12,
       }}
     >
       {/* Fixed Header */}

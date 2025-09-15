@@ -17,8 +17,7 @@ const StylishCarousel = () => {
   return (
     <View
       style={{
-        marginBottom: 10,
-        marginTop: 10,
+        marginTop: 12,
         backgroundColor: "#FFFFFF",
         borderRadius: 12,
         paddingVertical: 12,

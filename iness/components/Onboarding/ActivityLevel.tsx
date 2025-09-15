@@ -17,9 +17,11 @@ import OnboardingHeading from "@/app/modules/OnboardingHeading";
 const ActivityLevel = ({
   onNext,
   onBack,
+  loading,
 }: {
   onNext: () => void;
   onBack: () => void;
+  loading: boolean;
 }) => {
   const [activityLevel, setactivityLevel] = useState<string>("");
 
@@ -63,6 +65,7 @@ const ActivityLevel = ({
               icon={icon}
               description={description}
               updateState={updateState}
+              fontSize={16}
               height={70} // smaller height passed here
             />
           )
@@ -70,7 +73,12 @@ const ActivityLevel = ({
       </ScrollView>
 
       {/* Next Button */}
-      <AnimatedSubmitButton loading={false} onPress={handleNext} title="Next" />
+      <AnimatedSubmitButton
+        loading={loading}
+        onPress={handleNext}
+        title="Next"
+        height={50}
+      />
     </View>
   );
 };

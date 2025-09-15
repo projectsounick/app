@@ -17,6 +17,7 @@ const AnimatedSubmitButton: React.FC<AnimatedSubmitButtonProps> = ({
   loading,
   onPress,
   title = "Let’s Get Started",
+  height,
 }) => {
   const scaleAnim = useRef(new Animated.Value(0)).current; // Start hidden
 
@@ -30,19 +31,23 @@ const AnimatedSubmitButton: React.FC<AnimatedSubmitButtonProps> = ({
   }, []);
 
   return (
-    <Animated.View
-      style={{
-        transform: [{ scale: scaleAnim }],
-        backgroundColor: theme.colors.primary,
-        borderRadius: 30,
-        paddingVertical: 14,
-        width: width * 0.8,
-        marginBottom: theme.spacing?.md || 16,
-        alignSelf: "center",
-        marginTop: "5%",
-      }}
-    >
-      <TouchableOpacity disabled={loading} onPress={onPress}>
+    <TouchableOpacity disabled={loading} onPress={onPress}>
+      <Animated.View
+        style={{
+          transform: [{ scale: scaleAnim }],
+          backgroundColor: theme.colors.primary,
+          borderRadius: 40,
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "center",
+          width: width * 0.8,
+          marginBottom: theme.spacing?.md || 16,
+          alignSelf: "center",
+          alignItems: "center",
+          marginTop: 33,
+          height: height,
+        }}
+      >
         {loading ? (
           <ActivityIndicator />
         ) : (
@@ -50,15 +55,15 @@ const AnimatedSubmitButton: React.FC<AnimatedSubmitButtonProps> = ({
             style={{
               color: theme.colors.dark,
               textAlign: "center",
-              fontWeight: theme.fontWeights?.bold || "bold",
-              fontSize: theme.fontSizes?.medium || 16,
+              fontWeight: theme.fontWeights?.bold,
+              fontSize: 20,
             }}
           >
             {title}
           </Text>
         )}
-      </TouchableOpacity>
-    </Animated.View>
+      </Animated.View>
+    </TouchableOpacity>
   );
 };
 

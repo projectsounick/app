@@ -82,7 +82,7 @@ export default function HeaderContent({
         </View>
       ) : null}
       {/* Optional children */}
-      {children && <View style={{ marginTop: 6 }}>{children}</View>}
+      {children && <View style={{ marginTop: 12 }}>{children}</View>}
     </View>
   );
 }

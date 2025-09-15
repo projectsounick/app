@@ -8,17 +8,13 @@ import { setCurrentPlan } from "@/Slices/planSlice";
 import theme from "../Theme/globalTheme";
 interface PlanCardProps {
   item: any;
-  index: number;
+  index: any;
   planGroupLength: number;
 }
 import { Dimensions } from "react-native";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const PlanCard: React.FC<PlanCardProps> = ({
-  item,
-  index,
-  planGroupLength,
-}) => {
+const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
   const dispatch = useDispatch();
   const router = useRouter();
 

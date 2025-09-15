@@ -21,6 +21,7 @@ import { ActivePlans } from "@/app/interfaces/planInterface";
 import { Session } from "@/app/interfaces/sessionInterface";
 import SessionDetailsTabs from "@/app/Components/ActivePlans.tsx/SessionDetails";
 import { SafeAreaView } from "react-native-safe-area-context";
+import ShimmerLoader from "@/app/modules/TrainSimmer";
 
 const TABS = ["Information", "Trainer", "Workout"];
 
@@ -64,6 +65,10 @@ const FullPlanDetails = () => {
         ); // activeServiceId
       }
       const sessions = response.data;
+      console.log("this is sessions length");
+
+      console.log(sessions.length);
+
       const filteredSessions = sessions.filter((s: any) => {
         const status = s.sessionStatus?.toLowerCase().trim();
         return status !== "canceled" && status !== "cancelled";
@@ -112,7 +117,7 @@ const FullPlanDetails = () => {
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          <ActivityIndicator />
+          <ShimmerLoader screenName="session" />
         </View>
       ) : (
         <>

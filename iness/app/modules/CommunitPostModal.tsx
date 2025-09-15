@@ -7,16 +7,18 @@ import {
   TextInput,
   StyleSheet,
   Image,
-  ScrollView,
   Dimensions,
   TouchableWithoutFeedback,
   Keyboard,
   Pressable,
   FlatList,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { ResizeMode, Video } from "expo-av";
+import { ActivityIndicator } from "react-native-paper";
+
 import theme from "../Theme/globalTheme";
 import { uploadToAzureFromExpo } from "@/utils/azureUtils";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
@@ -24,7 +26,6 @@ import { userService } from "../services/user.service";
 import { Post } from "../interfaces/communityService";
 import useServiceWithSnackbar from "@/hooks/usePostDataHook";
 import { communityService } from "../services/community.service";
-import { ActivityIndicator } from "react-native-paper";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -33,19 +34,13 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
   const [postType, setPostType] = useState<"text" | "image" | "video" | null>(
     null
   );
-  const {
-    loading,
-    data,
-    setLoading,
-    callService,
-    snackbarVisible,
-    snackbarMessage,
-    setSnackbarVisible,
-    setSnackbarMessage,
-  } = useServiceWithSnackbar(communityService.createPost);
   const [caption, setCaption] = useState("");
   const [media, setMedia] = useState<string[]>([]);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+
+  const { loading, callService, setLoading } = useServiceWithSnackbar(
+    communityService.createPost
+  );
 
   const handleScroll = (event: any) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
@@ -53,6 +48,13 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
   };
 
   const handleUploadMedia = async () => {
+    // ✅ Ask for permissions
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission Required", "We need access to your gallery.");
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes:
         postType === "video"
@@ -124,9 +126,9 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
         text: caption,
         isActive: true,
         isApproved: true,
-
         createdBy: userId,
       };
+
       let response = await callService(post);
 
       if (response.success) {
@@ -146,6 +148,7 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
       setModalVisible(false);
       setMedia([]);
       setCaption("");
+      setPostType(null);
     }
   };
 
@@ -155,15 +158,19 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
         style={styles.floatingButton}
         onPress={() => setModalVisible(true)}
       >
-        <Ionicons name="images" size={26} color="#fff" />
+        <Ionicons name="add-circle" size={54} color="#19002E" />
       </TouchableOpacity>
 
       <Modal animationType="slide" transparent={true} visible={modalVisible}>
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <View style={styles.modalOverlay}>
             <View style={styles.modalContainer}>
-              <Text style={styles.modalTitle}>Choose your post type</Text>
+              {/* Dash Handle */}
+              <View style={styles.dash} />
 
+              <Text style={styles.modalTitle}>Create a Post</Text>
+
+              {/* Post Type Options */}
               <View style={styles.optionContainer}>
                 {["text", "image", "video"].map((type) => (
                   <TouchableOpacity
@@ -189,6 +196,7 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
                 ))}
               </View>
 
+              {/* Caption for text post */}
               {postType === "text" && (
                 <TextInput
                   placeholder="Write your caption..."
@@ -199,6 +207,7 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
                 />
               )}
 
+              {/* Media Preview */}
               {(postType === "image" || postType === "video") &&
                 media.length > 0 && (
                   <View style={styles.sliderContainer}>
@@ -209,6 +218,7 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
                       value={caption}
                       onChangeText={setCaption}
                     />
+
                     <FlatList
                       data={media}
                       keyExtractor={(_, index) => index.toString()}
@@ -218,32 +228,19 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
                       onScroll={handleScroll}
                       scrollEventThrottle={14}
                       renderItem={({ item }) => (
-                        <View
-                          style={{
-                            width: screenWidth,
-                            height: 220,
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
+                        <View style={styles.mediaItem}>
                           {postType === "video" ? (
                             <Video
                               source={{ uri: item }}
-                              style={{
-                                width: screenWidth, // ✅ fill full page
-                                height: 220, // keep height fixed
-                              }}
+                              style={styles.media}
                               useNativeControls
-                              resizeMode={ResizeMode.COVER} // crop/cover to fill
+                              resizeMode={ResizeMode.COVER}
                             />
                           ) : (
                             <Pressable>
                               <Image
                                 source={{ uri: item }}
-                                style={{
-                                  width: screenWidth, // ✅ fill full page
-                                  height: 220,
-                                }}
+                                style={styles.media}
                                 resizeMode="cover"
                               />
                             </Pressable>
@@ -266,15 +263,22 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
                   </View>
                 )}
 
+              {/* Upload Button */}
               {(postType === "image" || postType === "video") && (
                 <TouchableOpacity
                   style={styles.uploadButton}
                   onPress={handleUploadMedia}
                 >
+                  <Ionicons
+                    name="cloud-upload-outline"
+                    size={20}
+                    color="#fff"
+                  />
                   <Text style={styles.uploadButtonText}>Upload {postType}</Text>
                 </TouchableOpacity>
               )}
 
+              {/* Action Buttons */}
               <View style={styles.actionRow}>
                 <TouchableOpacity
                   style={styles.cancelButton}
@@ -287,23 +291,13 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
                 >
                   <Text style={styles.cancelButtonText}>Cancel</Text>
                 </TouchableOpacity>
+
                 {loading ? (
-                  <View
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <ActivityIndicator />
-                  </View>
+                  <ActivityIndicator color="#19002E" />
                 ) : (
                   <TouchableOpacity
                     style={styles.postButton}
-                    onPress={() => {
-                      handlePost();
-                    }}
+                    onPress={handlePost}
                   >
                     <Text style={styles.postButtonText}>Post</Text>
                   </TouchableOpacity>
@@ -323,17 +317,12 @@ const styles = StyleSheet.create({
   floatingButton: {
     position: "absolute",
     bottom: "3%",
-    left: "50%",
-    transform: [{ translateX: -30 }], // adjust based on button width
-    backgroundColor: "#19002E",
-    borderRadius: 30,
-    padding: 16,
+    alignSelf: "center",
     zIndex: 99,
-    elevation: 5,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.6)",
     justifyContent: "flex-end",
   },
   modalContainer: {
@@ -342,10 +331,23 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 25,
     padding: 20,
     maxHeight: "90%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  dash: {
+    width: 50,
+    height: 5,
+    backgroundColor: "#ccc",
+    borderRadius: 3,
+    alignSelf: "center",
+    marginBottom: 10,
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: "600",
+    fontWeight: "700",
     marginBottom: 15,
     textAlign: "center",
     color: "#333",
@@ -374,24 +376,34 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   captionInput: {
-    height: 100,
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#f9f9f9",
     borderRadius: 12,
     padding: 12,
     textAlignVertical: "top",
     marginBottom: 16,
     fontSize: 15,
+    borderWidth: 1,
+    borderColor: "#eee",
   },
   sliderContainer: {
     marginBottom: 12,
   },
-  slideImage: {
-    width: screenWidth - 40,
-
-    height: 150,
-    resizeMode: "contain", // for Image
+  mediaItem: {
+    width: screenWidth - 60,
+    height: 240,
     borderRadius: 15,
-    marginRight: 10,
+    marginHorizontal: 8,
+    overflow: "hidden",
+    backgroundColor: "#000",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  media: {
+    width: "100%",
+    height: "100%",
   },
   dotsContainer: {
     flexDirection: "row",
@@ -409,20 +421,23 @@ const styles = StyleSheet.create({
     backgroundColor: "#19002E",
   },
   uploadButton: {
-    backgroundColor: "#19002E",
-    padding: 10,
-    borderRadius: 8,
+    flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "#19002E",
+    padding: 12,
+    borderRadius: 12,
+    justifyContent: "center",
     marginTop: 10,
   },
   uploadButtonText: {
     color: "#fff",
-    fontWeight: "500",
+    fontWeight: "600",
+    marginLeft: 6,
   },
   actionRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 16,
+    marginTop: 20,
   },
   cancelButton: {
     padding: 12,
@@ -444,6 +459,6 @@ const styles = StyleSheet.create({
   postButtonText: {
     color: "#000",
     textAlign: "center",
-    fontWeight: "600",
+    fontWeight: "700",
   },
 });
