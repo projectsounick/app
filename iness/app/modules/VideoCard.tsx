@@ -183,6 +183,7 @@ const VideoCard = ({
             fontWeight: theme.fontWeights.bold,
             marginTop: 12,
             color: theme.colors.secondPrimary,
+            fontFamily: theme.fonts.bold,
           }}
         >
           {podcast.podcastName}
@@ -194,6 +195,7 @@ const VideoCard = ({
             marginTop: 6,
             fontSize: theme.fontSizes.small,
             color: theme.colors.dark,
+            fontFamily: theme.fonts.meidium,
           }}
           numberOfLines={expandedIndex === podcast._id ? undefined : 2}
         >
@@ -210,6 +212,7 @@ const VideoCard = ({
               color: "#1E90FF",
               fontWeight: "500",
               marginTop: 4,
+              fontFamily: theme.fonts.medium,
             }}
           >
             {expandedIndex === podcast._id ? "Show Less" : "Show More"}

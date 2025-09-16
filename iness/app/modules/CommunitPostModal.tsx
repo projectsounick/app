@@ -13,6 +13,7 @@ import {
   Pressable,
   FlatList,
   Alert,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -48,11 +49,14 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
   };
 
   const handleUploadMedia = async () => {
-    // ✅ Ask for permissions
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission Required", "We need access to your gallery.");
-      return;
+    // ✅ Only ask for permission on Android
+    if (Platform.OS === "android") {
+      const { status } =
+        await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission Required", "We need access to your gallery.");
+        return;
+      }
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -349,6 +353,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     marginBottom: 15,
+    fontFamily: theme.fonts.bold,
     textAlign: "center",
     color: "#333",
   },
@@ -373,7 +378,7 @@ const styles = StyleSheet.create({
   },
   optionButtonTextSelected: {
     color: "#fff",
-    fontWeight: "600",
+    fontFamily: theme.fonts.bold,
   },
   captionInput: {
     backgroundColor: "#f9f9f9",
@@ -425,7 +430,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#19002E",
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 20,
     justifyContent: "center",
     marginTop: 10,
   },
@@ -442,7 +447,7 @@ const styles = StyleSheet.create({
   cancelButton: {
     padding: 12,
     backgroundColor: "#eee",
-    borderRadius: 10,
+    borderRadius: 20,
     flex: 1,
     marginRight: 10,
   },
@@ -453,12 +458,12 @@ const styles = StyleSheet.create({
   postButton: {
     padding: 12,
     backgroundColor: theme.colors.primary,
-    borderRadius: 10,
+    borderRadius: 20,
     flex: 1,
   },
   postButtonText: {
     color: "#000",
     textAlign: "center",
-    fontWeight: "700",
+    fontFamily: theme.fonts.bold,
   },
 });

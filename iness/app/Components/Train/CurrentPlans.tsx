@@ -45,6 +45,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
               fontWeight: "700",
               marginRight: 8,
               color: "#000",
+              fontFamily: theme.fonts.bold,
             }}
           >
             Plans Available
@@ -94,36 +95,39 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
               start={{ x: 0.5, y: 0 }}
               end={{ x: 0.5, y: 1 }}
               style={{
-                borderRadius: 16,
+                borderRadius: 20,
                 padding: 20,
-                marginVertical: 12,
-                height: 200,
+                marginVertical: 14,
+                height: 260,
                 flexDirection: "row",
                 alignItems: "center",
                 shadowColor: "#000",
-                shadowOffset: { width: 0, height: 5 },
-                shadowOpacity: 0.15,
-                shadowRadius: 10,
-                elevation: 5,
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.2,
+                shadowRadius: 12,
+                elevation: 6,
                 overflow: "hidden",
               }}
             >
               {/* Left Content */}
-              <View style={{ flex: 1, paddingRight: 12 }}>
+              <View style={{ flex: 1, paddingRight: 14 }}>
+                {/* Title */}
                 <Text
                   style={{
-                    fontSize: 18,
-                    fontWeight: "700",
-                    marginBottom: 12,
-                    color: "white",
+                    fontSize: 16,
+
+                    marginBottom: 14,
+                    color: "#fff",
+                    fontFamily: theme.fonts.bold,
                   }}
-                  numberOfLines={1}
+                  numberOfLines={3}
                   ellipsizeMode="tail"
                 >
                   {title}
                 </Text>
 
-                <View style={{ marginBottom: 16 }}>
+                {/* Description */}
+                <View style={{ marginBottom: 18 }}>
                   {descItems.length > 0 ? (
                     descItems.slice(0, 2).map((item, idx) => (
                       <View
@@ -131,7 +135,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                         style={{
                           flexDirection: "row",
                           alignItems: "center",
-                          marginBottom: 6,
+                          marginBottom: 8,
                         }}
                       >
                         <View
@@ -139,7 +143,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                             width: 8,
                             height: 8,
                             borderRadius: 4,
-                            backgroundColor: "rgba(229, 210, 255, 1)",
+                            backgroundColor: "rgba(255,255,255,0.9)",
                             marginRight: 10,
                           }}
                         />
@@ -147,10 +151,11 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                           numberOfLines={2}
                           ellipsizeMode="tail"
                           style={{
-                            fontSize: 13,
-                            textAlign: "left", // 👈 or remove textAlign
-                            color: "white",
+                            fontSize: 14,
+                            color: "#f5f5f5",
                             flexShrink: 1,
+                            fontFamily: theme.fonts.medium,
+                            lineHeight: 18,
                           }}
                         >
                           {item}
@@ -159,22 +164,28 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                     ))
                   ) : (
                     <Text
-                      style={{ fontSize: 13, color: "white", lineHeight: 16 }}
+                      style={{ fontSize: 14, color: "#eee", lineHeight: 18 }}
                     >
                       No description available.
                     </Text>
                   )}
                 </View>
 
+                {/* Action Button */}
                 <TouchableOpacity
                   style={{
                     backgroundColor: "rgba(189, 255, 132, 1)",
-                    paddingHorizontal: 20,
-                    height: 26,
-                    borderRadius: 18,
+                    height: 40,
+                    width: 120,
+                    borderRadius: 20,
                     justifyContent: "center",
                     alignItems: "center",
                     alignSelf: "flex-start",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 4,
+                    elevation: 4,
                   }}
                   onPress={() => {
                     if (isActive) {
@@ -200,8 +211,9 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                   <Text
                     style={{
                       color: buttonTextColor,
-                      fontWeight: "600",
-                      fontSize: 14,
+                      fontWeight: "700",
+                      fontSize: 16,
+                      fontFamily: theme.fonts.bold,
                     }}
                   >
                     {buttonText}
@@ -209,7 +221,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                 </TouchableOpacity>
               </View>
 
-              {/* Right-side image */}
+              {/* Right-side Image */}
               <Image
                 source={
                   imageUrl
@@ -217,12 +229,16 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                     : require("../../../assets/images/track.png")
                 }
                 style={{
-                  width: 120,
-                  height: 160,
-                  borderRadius: 12,
-                  resizeMode: "cover",
-                  opacity: isActive ? 1 : 0.6,
+                  width: 140,
+                  height: "100%",
+
+                  resizeMode: "contain",
+                  opacity: isActive ? 1 : 0.7,
                   marginLeft: 12,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 3 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 6,
                 }}
               />
             </LinearGradient>
@@ -343,7 +359,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
             const gradientColors: any = isActive
               ? ["#9C56F6", "#3A1B63"]
               : ["#555555", "#222222"]; // dimmed for completed/expired
-            const buttonBgColor = isActive ? "#C6FF69" : "#C6FF69";
+
             const buttonText = isActive ? "Continue" : "Check";
             const buttonTextColor = isActive ? "#000" : "#000";
             return (
@@ -353,44 +369,46 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                 start={{ x: 0.5, y: 0 }}
                 end={{ x: 0.5, y: 1 }}
                 style={{
-                  borderRadius: 16,
+                  borderRadius: 20,
                   padding: 20,
-                  marginVertical: 12,
-                  height: 200,
+                  marginVertical: 14,
+                  height: 260,
                   flexDirection: "row",
                   alignItems: "center",
                   shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 5 },
-                  shadowOpacity: 0.15,
-                  shadowRadius: 10,
-                  elevation: 5,
+                  shadowOffset: { width: 0, height: 6 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 12,
+                  elevation: 6,
                   overflow: "hidden",
                 }}
               >
                 {/* Left Content */}
-                <View style={{ flex: 1, paddingRight: 12 }}>
+                <View style={{ flex: 1, paddingRight: 14 }}>
+                  {/* Title */}
                   <Text
                     style={{
-                      fontSize: 18,
-                      fontWeight: "700",
-                      marginBottom: 12,
-                      color: "white",
+                      fontSize: 16,
+                      marginBottom: 14,
+                      color: "#fff",
+                      fontFamily: theme.fonts.bold,
                     }}
-                    numberOfLines={1}
+                    numberOfLines={3}
                     ellipsizeMode="tail"
                   >
                     {title}
                   </Text>
 
-                  <View style={{ marginBottom: 16 }}>
+                  {/* Description */}
+                  <View style={{ marginBottom: 18 }}>
                     {descItems.length > 0 ? (
-                      descItems.slice(0, 2).map((item: string, idx: any) => (
+                      descItems.slice(0, 2).map((item: any, idx: any) => (
                         <View
                           key={idx}
                           style={{
                             flexDirection: "row",
                             alignItems: "center",
-                            marginBottom: 6,
+                            marginBottom: 8,
                           }}
                         >
                           <View
@@ -398,7 +416,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                               width: 8,
                               height: 8,
                               borderRadius: 4,
-                              backgroundColor: "rgba(229, 210, 255, 1)",
+                              backgroundColor: "rgba(255,255,255,0.9)",
                               marginRight: 10,
                             }}
                           />
@@ -406,11 +424,11 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                             numberOfLines={2}
                             ellipsizeMode="tail"
                             style={{
-                              fontSize: 13,
-                              textAlign: "justify",
-                              color: "white",
+                              fontSize: 14,
+                              color: "#f5f5f5",
                               flexShrink: 1,
-                              lineHeight: 16,
+                              fontFamily: theme.fonts.medium,
+                              lineHeight: 18,
                             }}
                           >
                             {item}
@@ -419,22 +437,28 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                       ))
                     ) : (
                       <Text
-                        style={{ fontSize: 13, color: "white", lineHeight: 16 }}
+                        style={{ fontSize: 14, color: "#eee", lineHeight: 18 }}
                       >
                         No description available.
                       </Text>
                     )}
                   </View>
 
+                  {/* Action Button */}
                   <TouchableOpacity
                     style={{
                       backgroundColor: "rgba(189, 255, 132, 1)",
-                      paddingHorizontal: 20,
-                      height: 26,
-                      borderRadius: 18,
+                      paddingHorizontal: 22,
+                      paddingVertical: 8,
+                      borderRadius: 20,
                       justifyContent: "center",
                       alignItems: "center",
                       alignSelf: "flex-start",
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.15,
+                      shadowRadius: 4,
+                      elevation: 4,
                     }}
                     onPress={() => {
                       router.push({
@@ -446,8 +470,9 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                     <Text
                       style={{
                         color: buttonTextColor,
-                        fontWeight: "600",
+                        fontWeight: "700",
                         fontSize: 14,
+                        fontFamily: theme.fonts.bold,
                       }}
                     >
                       {buttonText}
@@ -455,22 +480,35 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                   </TouchableOpacity>
                 </View>
 
-                {/* Right-side image */}
-                <Image
-                  source={
-                    imageUrl
-                      ? { uri: imageUrl }
-                      : require("../../../assets/images/track.png")
-                  }
+                {/* Right-side Image wrapped in container */}
+                <View
                   style={{
-                    width: 120,
-                    height: 160,
-                    borderRadius: 12,
-                    resizeMode: "cover",
-                    opacity: isActive ? 1 : 0.6,
+                    width: 140,
+                    height: "90%",
+
+                    overflow: "hidden",
                     marginLeft: 12,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 3 },
+                    shadowOpacity: 0.2,
+                    shadowRadius: 6,
+                    elevation: 4,
                   }}
-                />
+                >
+                  <Image
+                    source={
+                      imageUrl
+                        ? { uri: imageUrl }
+                        : require("../../../assets/images/track.png")
+                    }
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      resizeMode: "contain",
+                      opacity: isActive ? 1 : 0.7,
+                    }}
+                  />
+                </View>
               </LinearGradient>
             );
           })}

@@ -4,6 +4,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Icon from "react-native-vector-icons/Feather";
 import { router } from "expo-router";
 import { BannerCardProps } from "../interfaces/moduleInterfaces";
+import theme from "../Theme/globalTheme";
 
 const { width } = Dimensions.get("window");
 
@@ -30,14 +31,14 @@ const DualBannerCardRow = ({
 
     return (
       <LinearGradient
-        colors={backgroundColor}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
+        colors={["#9C56F6", "#3A1B63"]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
         style={{
           width: "49%",
           borderRadius: 12,
           padding: 12,
-          height: 100, // 🔥 Set fixed height here
+          height: 110, // 🔥 Set fixed height here
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
@@ -67,6 +68,7 @@ const DualBannerCardRow = ({
                 fontSize: 12,
                 fontWeight: "600",
                 marginLeft: 6,
+                fontFamily: theme.fonts.bold,
               }}
             >
               {title}
@@ -78,24 +80,27 @@ const DualBannerCardRow = ({
             onPress={() =>
               router.push({
                 pathname: redirectionPageName,
-                params: {
-                  type: params,
-                },
+                params: { type: params },
               })
             }
             style={{
               backgroundColor: "#BDFF84",
               borderRadius: 20,
-              paddingHorizontal: 14,
-              paddingVertical: 4,
+              paddingHorizontal: 18,
+              paddingVertical: 4, // use vertical padding instead of fixed height
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
               alignSelf: "flex-start",
             }}
           >
             <Text
               style={{
-                fontSize: 8,
+                fontSize: 12,
                 color: "#000",
                 fontWeight: "600",
+                fontFamily: theme.fonts.bold,
               }}
             >
               {buttonText}
@@ -106,7 +111,7 @@ const DualBannerCardRow = ({
         {/* Right: Image */}
         <View
           style={{
-            width: 70,
+            width: 60,
             height: "auto",
 
             justifyContent: "center",

@@ -110,7 +110,7 @@ export default function MediaScreen() {
                 <Text
                   style={{
                     fontSize: theme.fontSizes.medium,
-                    fontWeight: "800",
+                    fontFamily: theme.fonts.bold,
                     color: theme.colors.normal,
 
                     textAlign: "center",

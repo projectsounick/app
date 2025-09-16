@@ -2,7 +2,7 @@ import theme from "../app/Theme/globalTheme";
 export const bookSessionCardData = {
   title: "Book\nServices",
   subtitle: "Get fit with Yoga, Zumba & more",
-  buttonText: "Know More",
+  buttonText: "Check",
   icon: "clock",
   redirectionPageName: "/dashboard/session",
   backgroundColor: ["#9C56F6", "#3A1B63"],
@@ -14,7 +14,7 @@ export const bookSessionCardData = {
 export const trackingCardData = {
   title: "Track\nActivity",
   subtitle: "Tailored equipment for your personalized lifestyles.",
-  buttonText: "Track Now",
+  buttonText: "Track",
   redirectionPageName: "/dashboard/track",
   icon: "target",
   backgroundColor: ["#9C56F6", "#3A1B63"],

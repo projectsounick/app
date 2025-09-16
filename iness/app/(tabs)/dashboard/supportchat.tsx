@@ -10,6 +10,7 @@ import {
   Keyboard,
   ImageBackground,
   Image,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -27,6 +28,8 @@ import {
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+const { height } = Dimensions.get("window");
+const topPadding = height * 0.05; // 2% of screen height
 
 export default function SupportScreen() {
   const [inputText, setInputText] = useState("");
@@ -149,15 +152,17 @@ export default function SupportScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right"]}
-    >
+    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: "#fff" }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <View style={{ paddingTop: 20, paddingLeft: 20 }}>
+        <View
+          style={{
+            paddingLeft: 20,
+            marginTop: Platform.OS === "ios" ? topPadding : "4%",
+          }}
+        >
           <NormalHeader screenName="Support" />
         </View>
 
@@ -203,6 +208,7 @@ export default function SupportScreen() {
                       color: theme.colors.dark,
                       fontSize: theme.fontSizes.medium,
                       textAlign: "center",
+                      fontFamily: theme.fonts.bold,
                     }}
                   >
                     No conversation available.
@@ -315,6 +321,6 @@ export default function SupportScreen() {
           />
         ) : null}
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 }

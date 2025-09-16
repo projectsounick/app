@@ -1,6 +1,10 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import theme from "../Theme/globalTheme";
 import { Divider } from "react-native-paper";
@@ -8,13 +12,13 @@ import { Divider } from "react-native-paper";
 type BackTitleInfoProps = {
   title?: string;
   subtitle?: string;
-  children?: React.ReactNode; // 👈 Allow nested content
+  children?: React.ReactNode;
 };
 
 export default function HeaderContent({
   title = "Back",
   subtitle,
-  children, // 👈 Receive children here
+  children,
 }: BackTitleInfoProps) {
   const router = useRouter();
 
@@ -26,61 +30,51 @@ export default function HeaderContent({
         paddingBottom: 4,
       }}
     >
-      {/* Top row: Back arrow + title */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-        }}
-      >
+      {/* Top row: Back arrow */}
+      <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
         <TouchableOpacity onPress={() => router.back()}>
-          <Ionicons name="arrow-back" size={22} color={theme.colors.text} />
+          <MaterialCommunityIcons
+            name="chevron-left"
+            size={34}
+            color={theme.colors.text}
+          />
         </TouchableOpacity>
 
-        <Text
-          style={{
-            color: theme.colors.text,
-            fontSize: theme.fontSizes.small,
-            fontWeight: "500",
-            marginLeft: 8,
-          }}
-        >
-          {title}
-        </Text>
+        {/* Subtitle below / next to arrow */}
+        {subtitle && (
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text
+              numberOfLines={3}
+              ellipsizeMode="tail"
+              style={{
+                color: "#fff",
+
+                fontSize: 22,
+                fontFamily: theme.fonts.bold,
+                textAlign: "left",
+                flexShrink: 1, // ✅ allows wrapping instead of overflowing
+              }}
+            >
+              {subtitle}
+            </Text>
+          </View>
+        )}
       </View>
 
-      {/* Subtitle */}
-      {subtitle && (
-        <View style={{ marginTop: 8 }}>
-          <Text
-            numberOfLines={3}
-            ellipsizeMode="tail"
-            style={{
-              color: "#fff",
-              fontSize: 22,
-              fontWeight: "600",
-              textAlign: "left",
-              marginBottom: 2,
-            }}
-          >
-            {subtitle}
-          </Text>
-        </View>
-      )}
+      {/* Divider if children exist */}
       {children ? (
         <View
           style={{
             width: "100%",
-            display: "flex",
             flexDirection: "row",
             justifyContent: "center",
-            alignItems: "center",
             marginTop: 10,
           }}
         >
           <Divider style={{ width: "90%" }} />
         </View>
       ) : null}
+
       {/* Optional children */}
       {children && <View style={{ marginTop: 12 }}>{children}</View>}
     </View>

@@ -118,7 +118,7 @@ const HomeScreen = () => {
           <Text
             allowFontScaling={false}
             style={{
-              fontSize: 45,
+              fontSize: 40,
               fontWeight: theme.fontWeights.bold as any,
               color: theme.colors.text,
               fontFamily: theme.fonts.bold,
@@ -158,7 +158,7 @@ const HomeScreen = () => {
             loading={false}
             onPress={handlePress}
             title="Login"
-            height={67}
+            height={60}
           />
         </View>
       </ImageBackground>

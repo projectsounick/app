@@ -156,10 +156,11 @@ const HealthReportUploader = ({
           />
           <Text
             style={{
-              color: "#fff",
+              color: "#000",
               fontSize: 20,
               fontWeight: "700",
               textAlign: "center",
+              fontFamily: theme.fonts.bold,
             }}
           >
             Upload Health Report
@@ -195,18 +196,8 @@ const HealthReportUploader = ({
             <Text
               style={{
                 textAlign: "center",
-                fontSize: 18,
-                color: "#333",
-                fontWeight: "600",
-                marginBottom: 10,
-              }}
-            >
-              Upload Your Health Report
-            </Text>
-            <Text
-              style={{
-                textAlign: "center",
                 fontSize: 14,
+                fontFamily: theme.fonts.medium,
                 color: "#666",
                 marginBottom: 20,
                 lineHeight: 20,
@@ -245,10 +236,9 @@ const HealthReportUploader = ({
                   borderWidth: 1,
                   borderColor: "#000",
                   shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 4 },
+                  shadowOffset: { width: 0, height: 2 },
                   shadowOpacity: 0.3,
                   shadowRadius: 5,
-                  elevation: 6,
                 }}
               >
                 <Ionicons name="cloud-upload" size={24} color="#000" />
@@ -258,6 +248,7 @@ const HealthReportUploader = ({
                     fontWeight: "700",
                     marginLeft: 12,
                     fontSize: 16,
+                    fontFamily: theme.fonts.bold,
                   }}
                 >
                   Upload Report

@@ -3,14 +3,14 @@ import {
   View,
   Text,
   TouchableOpacity,
-  FlatList,
   Dimensions,
   ActivityIndicator,
   Image,
   ScrollView,
-  TextInput,
+  Modal,
+  StyleSheet,
 } from "react-native";
-const Modal = require("react-native-modal");
+
 import { Calendar, DateData } from "react-native-calendars";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import {
@@ -22,11 +22,7 @@ import {
 
 import useGetDataHook from "@/hooks/useFetchHook";
 import { sessionService } from "../services/sessionService";
-import FeedbackModal from "../Components/ActivePlans.tsx/SessionFeedbackModal";
-import SessionFeedback from "./SessionFeedback";
-import { date } from "yup";
 import { Session } from "../interfaces/sessionInterface";
-import { JSX } from "react/jsx-runtime";
 
 const { height } = Dimensions.get("window");
 
@@ -38,29 +34,25 @@ interface SessionCalendarProps {
   setShowFeedbackModal: (value: boolean) => void;
 }
 
-// Replace 'Session' with the actual type/interface for a session in your project
-const SessionCalendar = ({
+function SessionCalendar({
   isVisible,
   onClose,
   setCurrentSession,
   currentSession,
   setShowFeedbackModal,
-}: SessionCalendarProps): JSX.Element | null => {
+}: SessionCalendarProps) {
   const { data: sessionData, loading } = useGetDataHook(
     sessionService.getSessions
   );
-  console.log(sessionData);
-
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
-  // Prepare marked dates
-  // Prepare marked dates
-  // ✅ Filter only Active sessions once
-  const activeSessions = sessionData?.filter((s: any) => {
-    return s.isActive && s.sessionStatus.toLowerCase().trim() !== "cancelled";
-  });
+  // Filter only active sessions
+  const activeSessions = sessionData?.filter(
+    (s: any) =>
+      s.isActive && s.sessionStatus.toLowerCase().trim() !== "cancelled"
+  );
 
-  // Prepare marked dates only for active sessions
+  // Prepare marked dates
   const markedDates: any = {};
   if (activeSessions) {
     activeSessions.forEach((s: any) => {
@@ -77,7 +69,6 @@ const SessionCalendar = ({
     });
   }
 
-  // When a day is pressed → check only active sessions
   const onDayPress = (day: DateData) => {
     const sessions = activeSessions?.filter((s: any) => {
       const sessionDate = new Date(s.sessionDate).toLocaleDateString("en-CA", {
@@ -86,12 +77,9 @@ const SessionCalendar = ({
       return sessionDate === day.dateString;
     });
 
-    if (sessions && sessions.length) {
-      setSelectedDate(day.dateString);
-    }
+    if (sessions && sessions.length) setSelectedDate(day.dateString);
   };
 
-  // Selected sessions for details → only from activeSessions
   const selectedSessions = activeSessions?.filter((s: any) => {
     const sessionDate = new Date(s.sessionDate).toLocaleDateString("en-CA", {
       timeZone: "Asia/Kolkata",
@@ -100,93 +88,31 @@ const SessionCalendar = ({
   });
 
   const renderSessionCard = (session: any) => {
-    console.log(session);
-
-    let planTitle =
+    const planTitle =
       session?.activeServiceDetails?.service?.title ||
       session?.activePlanDetails?.plan?.title;
 
     return (
-      <View
-        style={{
-          width: "100%",
-          backgroundColor: "#fff",
-          padding: 20,
-          borderRadius: 20,
-          marginBottom: 20,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.1,
-          shadowRadius: 6,
-          elevation: 5,
-        }}
-      >
-        {planTitle && planTitle && (
-          <View
-            style={{
-              width: "100%",
+      <View style={styles.card}>
+        {planTitle && <Text style={styles.planTitle}>{planTitle}</Text>}
 
-              alignSelf: "flex-start",
-              marginBottom: 20,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 18,
-                textAlign: "center",
-                fontWeight: "800",
-                color: "#444",
-              }}
-            >
-              {planTitle}
-            </Text>
-          </View>
-        )}
         {/* Header */}
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 12,
-          }}
-        >
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <View
-              style={{
-                width: 14,
-                height: 14,
-                borderRadius: 7,
-                backgroundColor: session.color,
-                marginRight: 10,
-              }}
-            />
-            <Text style={{ fontSize: 14, fontWeight: "700", color: "#333" }}>
+        <View style={styles.headerRow}>
+          <View style={styles.headerLeft}>
+            <View style={[styles.dot, { backgroundColor: session.color }]} />
+            <Text style={styles.sessionType}>
               {session.sessionType.toUpperCase()} Session
             </Text>
           </View>
-          <Text
-            style={{
-              fontSize: 14,
-              fontWeight: "700",
-              color: session.color,
-              textTransform: "uppercase",
-            }}
-          >
+          <Text style={[styles.sessionStatus, { color: session.color }]}>
             {session.sessionStatus}
           </Text>
         </View>
 
         {/* Date & Time */}
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 10,
-          }}
-        >
+        <View style={styles.infoRow}>
           <MaterialIcons name="date-range" size={20} color="#6c5ce7" />
-          <Text style={{ marginLeft: 8, fontSize: 14, color: "#555" }}>
+          <Text style={styles.infoText}>
             {new Date(session.sessionDate).toLocaleString("en-IN", {
               timeZone: "Asia/Kolkata",
               day: "2-digit",
@@ -197,200 +123,33 @@ const SessionCalendar = ({
             })}
           </Text>
         </View>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 10,
-          }}
-        >
+        <View style={styles.infoRow}>
           <Entypo name="clock" size={20} color="#6c5ce7" />
-          <Text style={{ marginLeft: 8, fontSize: 14, color: "#555" }}>
+          <Text style={styles.infoText}>
             {session.sessionTime} ({session.sessionDuration})
           </Text>
         </View>
 
         {session.sessionAddress && (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 10,
-            }}
-          >
+          <View style={styles.infoRow}>
             <FontAwesome5 name="map-marker-alt" size={20} color="#6c5ce7" />
-            <Text style={{ marginLeft: 8, fontSize: 14, color: "#555" }}>
-              {session.sessionAddress}
-            </Text>
+            <Text style={styles.infoText}>{session.sessionAddress}</Text>
           </View>
         )}
 
         {/* Trainer Info */}
         {session.trainer && (
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 12,
-              paddingTop: 8,
-              borderTopWidth: 1,
-              borderTopColor: "#eee",
-            }}
-          >
+          <View style={styles.trainerRow}>
             {session.trainer.profilePic && (
               <Image
                 source={{ uri: session.trainer.profilePic }}
-                style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 25,
-                  marginRight: 12,
-                }}
+                style={styles.trainerImage}
               />
             )}
             <View>
-              <Text style={{ fontSize: 16, fontWeight: "600", color: "#333" }}>
-                {session.trainer.name}
-              </Text>
-              <Text style={{ fontSize: 13, color: "#777" }}>
-                {session.trainer.email}
-              </Text>
+              <Text style={styles.trainerName}>{session.trainer.name}</Text>
+              <Text style={styles.trainerEmail}>{session.trainer.email}</Text>
             </View>
-          </View>
-        )}
-
-        {/* Workouts */}
-        {session.workouts?.length > 0 && (
-          <View
-            style={{
-              marginTop: 8,
-              paddingTop: 8,
-              borderTopWidth: 1,
-              borderTopColor: "#eee",
-            }}
-          >
-            <Text
-              style={{
-                fontWeight: "700",
-                fontSize: 15,
-                color: "#333",
-                marginBottom: 6,
-              }}
-            >
-              Workouts
-            </Text>
-
-            {session.workouts.map((w: any, idx: number) => (
-              <View
-                key={idx}
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 12,
-                  padding: 10,
-                  backgroundColor: "#f9f9f9",
-                  borderRadius: 12,
-                }}
-              >
-                {/* Dumbbell Icon */}
-                <FontAwesome5 name="dumbbell" size={18} color="#6c5ce7" />
-
-                <View style={{ flex: 1, marginLeft: 12 }}>
-                  {/* Exercise Name */}
-                  <Text
-                    style={{ fontSize: 15, color: "#333", fontWeight: "700" }}
-                  >
-                    {w.exercise || "Unnamed Exercise"}
-                  </Text>
-
-                  {/* Reps / Sets / Timer */}
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      marginTop: 6,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    {w.reps !== undefined && (
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          marginRight: 15,
-                        }}
-                      >
-                        <MaterialIcons
-                          name="repeat"
-                          size={16}
-                          color="#fd79a8"
-                        />
-                        <Text
-                          style={{ marginLeft: 4, color: "#555", fontSize: 13 }}
-                        >
-                          {w.reps} {w.reps === 1 ? "rep" : "reps"}
-                        </Text>
-                      </View>
-                    )}
-
-                    {w.sets !== undefined && (
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          marginRight: 15,
-                        }}
-                      >
-                        <FontAwesome5
-                          name="layer-group"
-                          size={16}
-                          color="#00b894"
-                        />
-                        <Text
-                          style={{ marginLeft: 4, color: "#555", fontSize: 13 }}
-                        >
-                          {w.sets} {w.sets === 1 ? "set" : "sets"}
-                        </Text>
-                      </View>
-                    )}
-
-                    {w.timer && (
-                      <View
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          marginRight: 15,
-                        }}
-                      >
-                        <Entypo name="time-slot" size={16} color="#6c5ce7" />
-                        <Text
-                          style={{ marginLeft: 4, color: "#555", fontSize: 13 }}
-                        >
-                          {w.timer}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                </View>
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Feedback */}
-        {session.sessionFeedback && (
-          <View
-            style={{
-              marginTop: 12,
-              padding: 12,
-              backgroundColor: "#f0f0f0",
-              borderRadius: 12,
-            }}
-          >
-            <Text style={{ fontWeight: "600", marginBottom: 4 }}>
-              Your Feedback:
-            </Text>
-            <Text style={{ color: "#555" }}>{session.sessionFeedback}</Text>
           </View>
         )}
 
@@ -401,15 +160,9 @@ const SessionCalendar = ({
             onClose();
             setShowFeedbackModal(true);
           }}
-          style={{
-            marginTop: 12,
-            backgroundColor: "#6c5ce7",
-            padding: 12,
-            borderRadius: 12,
-            alignItems: "center",
-          }}
+          style={styles.feedbackButton}
         >
-          <Text style={{ color: "#fff", fontWeight: "600" }}>
+          <Text style={styles.feedbackButtonText}>
             {session.sessionFeedback ? "Edit Feedback" : "Add Feedback"}
           </Text>
         </TouchableOpacity>
@@ -418,29 +171,15 @@ const SessionCalendar = ({
   };
 
   return (
-    <>
-      <Modal
-        isVisible={isVisible}
-        onBackdropPress={onClose}
-        style={{ justifyContent: "flex-end", margin: 0 }}
+    <Modal visible={isVisible} animationType="slide" transparent={true}>
+      <TouchableOpacity
+        activeOpacity={1}
+        onPress={onClose}
+        style={styles.backdrop}
       >
-        <View
-          style={{
-            height: height * 0.5,
-            backgroundColor: "#fff",
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            padding: 20,
-          }}
-        >
+        <View style={styles.bottomSheetContainer}>
           {/* Header */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 10,
-            }}
-          >
+          <View style={styles.modalHeader}>
             {selectedDate && (
               <TouchableOpacity
                 onPress={() => setSelectedDate(null)}
@@ -449,26 +188,29 @@ const SessionCalendar = ({
                 <AntDesign name="arrowleft" size={24} color="#333" />
               </TouchableOpacity>
             )}
-            <Text style={{ fontSize: 18, fontWeight: "600", color: "#333" }}>
+            <Text style={styles.modalTitle}>
               {selectedDate ? "Session Details" : "Your Sessions"}
             </Text>
             <TouchableOpacity
               onPress={onClose}
-              style={{ marginLeft: "auto", padding: 6 }}
+              style={{
+                marginLeft: "auto",
+                padding: 6,
+                backgroundColor: "#eee", // circular background color
+                borderRadius: 20, // make it circular
+                width: 36,
+                height: 36,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
             >
-              <Icon name="close" size={28} color="#333" />
+              <Icon name="close" size={20} color="#333" />
             </TouchableOpacity>
           </View>
 
           {/* Loader */}
           {loading && (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
+            <View style={styles.loader}>
               <ActivityIndicator size="large" color="#6c5ce7" />
               <Text style={{ marginTop: 10, color: "#555" }}>
                 Loading sessions...
@@ -504,9 +246,93 @@ const SessionCalendar = ({
             </ScrollView>
           )}
         </View>
-      </Modal>
-    </>
+      </TouchableOpacity>
+    </Modal>
   );
-};
+}
+
+const styles = StyleSheet.create({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  bottomSheetContainer: {
+    maxHeight: height * 0.6,
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#333",
+  },
+  loader: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  card: {
+    width: "100%",
+    backgroundColor: "#fff",
+    padding: 20,
+    borderRadius: 20,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  planTitle: {
+    fontSize: 18,
+    textAlign: "center",
+    fontWeight: "800",
+    color: "#444",
+    marginBottom: 20,
+  },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  headerLeft: { flexDirection: "row", alignItems: "center" },
+  dot: { width: 14, height: 14, borderRadius: 7, marginRight: 10 },
+  sessionType: { fontSize: 14, fontWeight: "700", color: "#333" },
+  sessionStatus: {
+    fontSize: 14,
+    fontWeight: "700",
+    textTransform: "uppercase",
+  },
+  infoRow: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
+  infoText: { marginLeft: 8, fontSize: 14, color: "#555" },
+  trainerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#eee",
+  },
+  trainerImage: { width: 50, height: 50, borderRadius: 25, marginRight: 12 },
+  trainerName: { fontSize: 16, fontWeight: "600", color: "#333" },
+  trainerEmail: { fontSize: 13, color: "#777" },
+  feedbackButton: {
+    marginTop: 12,
+    backgroundColor: "#6c5ce7",
+    padding: 12,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  feedbackButtonText: { color: "#fff", fontWeight: "600" },
+});
 
 export default SessionCalendar;

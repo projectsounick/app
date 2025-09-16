@@ -464,95 +464,6 @@ const CommunityPosts = ({
             <Ionicons name="ellipsis-vertical" size={20} color="#000" />
           </TouchableOpacity>
         </View>
-        {showMenuForPost === item._id && (
-          <View
-            style={{
-              position: "absolute",
-              right: 0,
-              top: 25,
-              backgroundColor: "#fff",
-              borderRadius: 6,
-              shadowColor: "#000",
-              shadowOpacity: 0.1,
-              shadowOffset: { width: 0, height: 2 },
-              shadowRadius: 4,
-              elevation: 3,
-              paddingVertical: 5,
-              width: 150,
-              zIndex: 999,
-            }}
-          >
-            {showTooltipForPost === item._id ? (
-              <ActivityIndicator />
-            ) : (
-              <TouchableOpacity
-                onPress={() => {
-                  toolTipAction(item, "complain");
-                }}
-              >
-                <Text
-                  style={{
-                    paddingVertical: 10,
-                    paddingHorizontal: 15,
-                    fontSize: 16,
-                    color: "#333",
-                  }}
-                >
-                  Complain
-                </Text>
-              </TouchableOpacity>
-            )}
-
-            <TouchableOpacity
-              onPress={() => {
-                Alert.alert(
-                  "Block User",
-                  "Are you sure you want to block this user? You won't be able to see their content from now on.",
-                  [
-                    { text: "Cancel", style: "cancel" },
-                    {
-                      text: "Yes, Block",
-                      onPress: async () => {
-                        let loggedUser =
-                          await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
-                            "user"
-                          );
-                        let currentUser = loggedUser.exists
-                          ? loggedUser.data._id
-                          : null;
-
-                        if (item.createdBy._id === currentUser) {
-                          Alert.alert(
-                            "Action not allowed",
-                            "You can't block yourself"
-                          );
-                        } else {
-                          toolTipAction(item, "block");
-                        }
-                      },
-                    },
-                  ]
-                );
-              }}
-            >
-              {blockLoading ? (
-                <ActivityIndicator />
-              ) : (
-                <Text
-                  style={{
-                    paddingVertical: 10,
-                    paddingHorizontal: 15,
-                    fontSize: 16,
-                    color: "red",
-                    fontWeight: "600",
-                  }}
-                >
-                  Block User
-                </Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        )}
       </View>
 
       {item.text && <Text style={styles.text}>{item.text}</Text>}
@@ -603,6 +514,117 @@ const CommunityPosts = ({
           </View>
         </View>
       )}
+      {showMenuForPost === item._id && (
+        <View
+          style={{
+            position: "absolute",
+            right: "6%",
+            top: "5%",
+            backgroundColor: "#fff",
+            borderRadius: 12,
+            shadowColor: "#000",
+            shadowOpacity: 0.15,
+            shadowOffset: { width: 0, height: 3 },
+            shadowRadius: 6,
+            elevation: 5,
+            paddingVertical: 8,
+            width: 180,
+            zIndex: 1300,
+          }}
+        >
+          {showTooltipForPost === item._id ? (
+            <ActivityIndicator style={{ paddingVertical: 12 }} />
+          ) : (
+            <TouchableOpacity
+              onPress={() => toolTipAction(item, "complain")}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                paddingVertical: 12,
+                paddingHorizontal: 16,
+              }}
+            >
+              <Ionicons name="alert-circle-outline" size={20} color="#FF9800" />
+              <Text
+                style={{
+                  marginLeft: 10,
+                  fontSize: 15,
+                  color: "#333",
+                  fontWeight: "500",
+                }}
+              >
+                Complain
+              </Text>
+            </TouchableOpacity>
+          )}
+
+          {/* Divider */}
+          <View
+            style={{
+              height: 1,
+              backgroundColor: "#eee",
+              marginHorizontal: 10,
+            }}
+          />
+
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert(
+                "Block User",
+                "Are you sure you want to block this user? You won't be able to see their content from now on.",
+                [
+                  { text: "Cancel", style: "cancel" },
+                  {
+                    text: "Yes, Block",
+                    onPress: async () => {
+                      let loggedUser =
+                        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
+                          "user"
+                        );
+                      let currentUser = loggedUser.exists
+                        ? loggedUser.data._id
+                        : null;
+
+                      if (item.createdBy._id === currentUser) {
+                        Alert.alert(
+                          "Action not allowed",
+                          "You can't block yourself"
+                        );
+                      } else {
+                        toolTipAction(item, "block");
+                      }
+                    },
+                  },
+                ]
+              );
+            }}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              paddingVertical: 12,
+              paddingHorizontal: 16,
+            }}
+          >
+            {blockLoading ? (
+              <ActivityIndicator />
+            ) : (
+              <>
+                <Ionicons name="close-circle-outline" size={20} color="red" />
+                <Text
+                  style={{
+                    marginLeft: 10,
+                    fontSize: 15,
+                    color: "red",
+                    fontWeight: "600",
+                  }}
+                >
+                  Block User
+                </Text>
+              </>
+            )}
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 
@@ -619,68 +641,6 @@ const CommunityPosts = ({
         }}
       >
         {/* Community Name with Icon */}
-
-        <View
-          style={{
-            alignItems: "flex-end",
-
-            position: "relative",
-
-            width: "100%",
-          }}
-        >
-          {/* Dropdown Button */}
-          <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              backgroundColor: "#e0e0e0",
-              paddingVertical: 2,
-              paddingHorizontal: 16,
-              borderRadius: 20,
-            }}
-            onPress={() => setOpen(!open)}
-          >
-            <Text style={{ fontSize: 14, fontWeight: "bold", marginRight: 8 }}>
-              {selected}
-            </Text>
-            <Ionicons
-              name={open ? "chevron-up" : "chevron-down"}
-              size={20}
-              color="#000"
-            />
-          </TouchableOpacity>
-
-          {/* Dropdown List */}
-          {open && (
-            <View
-              style={{
-                position: "absolute",
-                top: 45, // distance from button
-                right: 0,
-                backgroundColor: "#fff",
-                borderRadius: 10,
-                elevation: 5, // shadow for Android
-                shadowColor: "#000", // shadow for iOS
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.2,
-                shadowRadius: 4,
-                width: 150,
-                zIndex: 1000, // make sure it appears above other content
-              }}
-            >
-              {options.map((item) => (
-                <TouchableOpacity
-                  key={item}
-                  style={{ paddingVertical: 10, paddingHorizontal: 16 }}
-                  onPress={() => handleSelect(item)}
-                >
-                  <Text style={{ fontSize: 14 }}>{item}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </View>
       </View>
       {isLoading && posts.length === 0 ? (
         <View style={styles.centerContent}>

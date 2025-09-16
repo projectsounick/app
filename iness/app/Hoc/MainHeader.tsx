@@ -169,8 +169,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
                 textAlign: "center",
                 color: theme.colors.text,
                 fontFamily: theme.fonts.bold,
-                fontSize: 20,
-                marginTop: "2%",
+                fontSize: 14,
               }}
             >
               {title}

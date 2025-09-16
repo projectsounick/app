@@ -3,6 +3,7 @@ import { useNavigation } from "@react-navigation/native";
 import { TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
 import { Text } from "react-native-paper";
+import theme from "../Theme/globalTheme";
 
 ///// Main funcitonal component for the back header --------------/
 export default function BackHeader() {
@@ -27,6 +28,7 @@ export default function BackHeader() {
             fontWeight: "600",
             marginLeft: 10,
             color: "#000",
+            fontFamily: theme.fonts.medium,
           }}
         >
           Continue Exploring

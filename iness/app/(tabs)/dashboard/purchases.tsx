@@ -197,6 +197,7 @@ export default function PaymentScreen() {
                   fontSize: 12,
                   fontWeight: "500",
                   color: isSuccess ? "#28a745" : "#f0ad4e",
+                  fontFamily: theme.fonts.bold,
                 }}
               >
                 {isSuccess ? "Delivered" : "Pending"}
@@ -225,6 +226,7 @@ export default function PaymentScreen() {
                 fontSize: 13,
                 color: "#333",
                 marginBottom: 4,
+                fontFamily: theme.fonts.medium,
               }}
             >
               {c.quantity}x {c.plan?.title || "Item"}
@@ -243,7 +245,13 @@ export default function PaymentScreen() {
             paddingTop: 10,
           }}
         >
-          <Text style={{ color: "#999", fontSize: 13 }}>
+          <Text
+            style={{
+              color: "#999",
+              fontSize: 13,
+              fontFamily: theme.fonts.regular,
+            }}
+          >
             Ordered: {formatDate(item.createdAt)}
           </Text>
           <Text style={{ fontWeight: "600", fontSize: 14 }}>

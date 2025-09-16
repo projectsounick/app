@@ -7,13 +7,16 @@ import {
   ImageBackground,
   Modal,
   Pressable,
+  Platform,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import NormalHeader from "@/app/modules/NormalHeader";
 import theme from "@/app/Theme/globalTheme";
 import { SafeAreaView } from "react-native-safe-area-context";
 const backgroundImg = require("../../../assets/images/basicBackground.jpg");
-
+const { height } = Dimensions.get("window");
+const topPadding = height * 0.05; // 2% of screen height
 export default function CalculatorScreen() {
   const [height, setHeight] = useState("");
   const [weight, setWeight] = useState("");
@@ -60,16 +63,19 @@ export default function CalculatorScreen() {
   };
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right"]}
-    >
+    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <ImageBackground
         source={backgroundImg}
         style={{ flex: 1, padding: 20 }}
         resizeMode="cover"
       >
-        <NormalHeader screenName="Health Calculator" />
+        <View
+          style={{
+            marginTop: Platform.OS === "ios" ? topPadding : "4%",
+          }}
+        >
+          <NormalHeader screenName="Health Calculator" />
+        </View>
 
         {/* BMI Calculator */}
         <View
@@ -97,9 +103,10 @@ export default function CalculatorScreen() {
             <Text
               style={{
                 fontSize: 22,
-                fontWeight: "bold",
+
                 color: theme.colors.dark,
                 flex: 1,
+                fontFamily: theme.fonts.bold,
               }}
             >
               BMI Calculator
@@ -123,6 +130,7 @@ export default function CalculatorScreen() {
               backgroundColor: "#fff",
               borderRadius: 10,
               padding: 12,
+              fontFamily: theme.fonts.regular,
               marginBottom: 10,
               borderWidth: 1,
               borderColor: "#ddd",
@@ -137,6 +145,7 @@ export default function CalculatorScreen() {
             style={{
               backgroundColor: "#fff",
               borderRadius: 10,
+              fontFamily: theme.fonts.regular,
               padding: 12,
               marginBottom: 14,
               borderWidth: 1,
@@ -149,7 +158,7 @@ export default function CalculatorScreen() {
             style={{
               backgroundColor: theme.colors.primary,
               padding: 14,
-              borderRadius: 10,
+              borderRadius: 30,
               alignItems: "center",
             }}
           >
@@ -175,6 +184,7 @@ export default function CalculatorScreen() {
                   fontWeight: "600",
                   color: theme.colors.secondPrimary,
                   textAlign: "center",
+                  fontFamily: theme.fonts.bold,
                 }}
               >
                 Your BMI is:
@@ -185,6 +195,7 @@ export default function CalculatorScreen() {
                   fontWeight: "bold",
                   color: theme.colors.dark,
                   textAlign: "center",
+                  fontFamily: theme.fonts.medium,
                 }}
               >
                 {bmi.toFixed(2)}
@@ -222,6 +233,7 @@ export default function CalculatorScreen() {
                 fontWeight: "bold",
                 color: theme.colors.dark,
                 flex: 1,
+                fontFamily: theme.fonts.bold,
               }}
             >
               BMR Calculator
@@ -247,6 +259,7 @@ export default function CalculatorScreen() {
               padding: 12,
               marginBottom: 12,
               borderWidth: 1,
+              fontFamily: theme.fonts.medium,
               borderColor: "#ddd",
             }}
           />
@@ -262,6 +275,7 @@ export default function CalculatorScreen() {
                   gender === "male" ? theme.colors.secondPrimary : "#fff",
                 borderRadius: 10,
                 alignItems: "center",
+
                 borderWidth: 1,
                 borderColor: "#ccc",
               }}
@@ -269,6 +283,7 @@ export default function CalculatorScreen() {
               <Text
                 style={{
                   color: gender === "male" ? "#fff" : theme.colors.dark,
+                  fontFamily: theme.fonts.medium,
                 }}
               >
                 Male
@@ -291,6 +306,7 @@ export default function CalculatorScreen() {
               <Text
                 style={{
                   color: gender === "female" ? "#fff" : theme.colors.dark,
+                  fontFamily: theme.fonts.medium,
                 }}
               >
                 Female
@@ -303,7 +319,7 @@ export default function CalculatorScreen() {
             style={{
               backgroundColor: theme.colors.primary,
               padding: 14,
-              borderRadius: 10,
+              borderRadius: 30,
               alignItems: "center",
             }}
           >
@@ -390,6 +406,6 @@ export default function CalculatorScreen() {
           </View>
         </Modal>
       </ImageBackground>
-    </SafeAreaView>
+    </View>
   );
 }

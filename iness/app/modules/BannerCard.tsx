@@ -26,6 +26,7 @@ import {
 } from "@/utils/cartUtils";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
+import CustomModal from "./ServiceDetailsModal";
 
 const BannerCard = ({ cardData }: { cardData: any }) => {
   const cartItems = useSelector((state: RootState) => state.cart.cartItems);
@@ -99,12 +100,12 @@ const BannerCard = ({ cardData }: { cardData: any }) => {
         }}
       >
         {/* Left Section (60%) */}
-        <View style={{ width: "60%", paddingRight: 10 }}>
+        <View style={{ width: "70%", paddingRight: 10 }}>
           {/* Title */}
           <Text
             style={{
               fontSize: theme.fontSizes.medium,
-              fontWeight: "bold",
+              fontFamily: theme.fonts.bold,
               color: "#fff",
               marginBottom: 8,
             }}
@@ -137,6 +138,7 @@ const BannerCard = ({ cardData }: { cardData: any }) => {
                   fontSize: theme.fontSizes.small,
                   color: "#fff",
                   flexShrink: 1,
+                  fontFamily: theme.fonts.regular,
                 }}
                 numberOfLines={2}
               >
@@ -149,22 +151,34 @@ const BannerCard = ({ cardData }: { cardData: any }) => {
           <TouchableOpacity
             style={{
               backgroundColor: theme.colors.primary,
-              paddingVertical: 6,
-              paddingHorizontal: 18,
-              borderRadius: 16,
+              height: 30,
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              borderRadius: 18,
               alignSelf: "flex-start",
               marginTop: 10,
+              minWidth: 100, // 👈 ensures it’s always at least this wide
+              alignItems: "center", // centers text
             }}
             onPress={() => setModalVisible(true)}
           >
-            <Text style={{ color: "#000", fontWeight: "600" }}>View</Text>
+            <Text
+              style={{
+                color: "#000",
+                fontWeight: "600",
+                fontFamily: theme.fonts.bold,
+              }}
+            >
+              View
+            </Text>
           </TouchableOpacity>
         </View>
 
         {/* Right Section (40%) */}
         <View
           style={{
-            width: "40%",
+            width: "30%",
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -178,151 +192,13 @@ const BannerCard = ({ cardData }: { cardData: any }) => {
       </LinearGradient>
 
       {/* Bottom Sheet Modal */}
-      <Modal
-        visible={modalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "flex-end",
-            backgroundColor: "rgba(0,0,0,0.5)",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "#fff",
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              maxHeight: "85%",
-              padding: 20,
-            }}
-          >
-            {/* Close Icon */}
-            <TouchableOpacity
-              onPress={() => setModalVisible(false)}
-              style={{ alignSelf: "flex-end" }}
-            >
-              <Icon name="x" size={24} color="#000" />
-            </TouchableOpacity>
-
-            <ScrollView>
-              {/* Large Main Image */}
-              <Image
-                source={{ uri: cardData.imgUrl }}
-                style={{
-                  width: "100%",
-                  height: 320, // taller than before
-                  borderRadius: 10,
-                  marginBottom: 12,
-                }}
-                resizeMode="contain"
-              />
-
-              {/* Carousel for Other Images */}
-              {cardData.otherImages && cardData.otherImages.length > 0 && (
-                <View style={{ marginBottom: 16 }}>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: "600",
-                      marginBottom: 8,
-                    }}
-                  >
-                    More Images
-                  </Text>
-                  <FlatList
-                    data={cardData.otherImages}
-                    keyExtractor={(item, index) => index.toString()}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    renderItem={({ item }) => (
-                      <Image
-                        source={{ uri: item }}
-                        style={{
-                          width: 140,
-                          height: 140,
-                          borderRadius: 10,
-                          marginRight: 10,
-                        }}
-                        resizeMode="contain"
-                      />
-                    )}
-                  />
-                </View>
-              )}
-
-              {/* Title */}
-              <Text
-                style={{
-                  fontSize: 20,
-                  fontWeight: "bold",
-                  marginBottom: 10,
-                }}
-              >
-                {cardData.title}
-              </Text>
-
-              {/* All Description Items */}
-              {cardData.descItems.map((item: string, idx: number) => (
-                <Text
-                  key={idx}
-                  style={{
-                    fontSize: 14,
-                    color: "#444",
-                    marginBottom: 6,
-                  }}
-                >
-                  • {item}
-                </Text>
-              ))}
-
-              {/* Price & Sessions */}
-              <Text
-                style={{
-                  fontSize: 16,
-                  fontWeight: "600",
-                  marginTop: 10,
-                }}
-              >
-                Price: ₹{cardData.price}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: "#666",
-                  marginTop: 5,
-                }}
-              >
-                Sessions: {cardData.sessionCount}
-              </Text>
-
-              {/* Add to Cart */}
-              <TouchableOpacity
-                style={{
-                  marginTop: 16,
-                  backgroundColor: theme.colors.primary, // Use your theme's primary color
-                  paddingVertical: 12,
-                  paddingHorizontal: 20,
-                  borderRadius: 50, // Fully rounded
-                  alignItems: "center",
-                }}
-                onPress={addingIntoToCart}
-              >
-                {cartLoading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={{ color: "#000", fontWeight: "bold" }}>
-                    Confirm & Add to Cart
-                  </Text>
-                )}
-              </TouchableOpacity>
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
+      <CustomModal
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        cardData={cardData}
+        addingIntoToCart={addingIntoToCart}
+        cartLoading={false}
+      />
       <CustomSnackbar
         visible={snackbarOpen}
         message={snackbarMessage}

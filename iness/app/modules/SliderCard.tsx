@@ -56,7 +56,7 @@ export default function SliderCard() {
           <Text
             style={{
               fontSize: theme.fontSizes.regular,
-              fontWeight: "bold",
+              fontFamily: theme.fonts.bold,
               color: theme.colors.text,
             }}
           >
@@ -72,7 +72,7 @@ export default function SliderCard() {
               fontSize: theme.fontSizes.small,
               fontWeight: theme.fontWeights.regular,
               color: theme.colors.text,
-              marginTop: 4,
+              marginTop: 6,
             }}
           >
             Tailored plans for your personalized lifestyles.
@@ -90,7 +90,7 @@ export default function SliderCard() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={{ marginTop: 8 }}
+        style={{ marginTop: 10 }}
       >
         {plans.map((item: PlanInterface, index) => (
           <View
@@ -130,70 +130,32 @@ export default function SliderCard() {
                   flexDirection: "column",
                   justifyContent: "space-between",
                   alignItems: "flex-start",
-                  height: "90%",
+                  height: "100%",
                   width: "60%",
                 }}
               >
                 {/* Title */}
                 <Text
                   style={{
-                    fontWeight: theme.fontWeights.bold,
+                    fontFamily: theme.fonts.bold,
                     fontSize: 14,
                     marginBottom: 6,
                     color: theme.colors.dark,
                   }}
-                  numberOfLines={1}
+                  numberOfLines={3}
                   ellipsizeMode="tail"
                 >
                   {item.title}
                 </Text>
 
                 {/* Bullet List Section */}
-                <View style={{ marginBottom: 8 }}>
-                  {item.descItems
-                    ?.slice(0, 2)
-                    .map((desc: string, idx: number) => (
-                      <View
-                        key={idx}
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "flex-start", // align top edges
-                          marginBottom: 4,
-                        }}
-                      >
-                        <Text
-                          style={{
-                            color: "#000",
-                            marginRight: 4,
-                            fontSize: 10,
-                            lineHeight: 14,
-                          }}
-                        >
-                          •
-                        </Text>
-                        <Text
-                          style={{
-                            fontSize: 10,
-                            fontWeight: "500",
-                            color: theme.colors.dark,
-                            lineHeight: 14,
-                          }}
-                          numberOfLines={1}
-                          ellipsizeMode="tail" // optional: adds "..." if it's too long
-                        >
-                          {truncateText(desc, 35)}{" "}
-                          {/* truncates manually to 40 characters */}
-                        </Text>
-                      </View>
-                    ))}
-                </View>
 
                 {/* Know More Button */}
                 <TouchableOpacity
                   style={{
                     backgroundColor: "rgba(189, 255, 132, 1)",
                     width: 114,
-                    height: 28,
+                    height: 31,
                     borderRadius: 16,
                     alignSelf: "flex-start",
                     justifyContent: "center",
@@ -203,8 +165,8 @@ export default function SliderCard() {
                 >
                   <Text
                     style={{
-                      fontWeight: theme.fontWeights.bold,
-                      fontSize: theme.fontSizes.small,
+                      fontFamily: theme.fonts.bold,
+                      fontSize: 14,
                       textAlign: "center",
                       color: theme.colors.dark,
                     }}

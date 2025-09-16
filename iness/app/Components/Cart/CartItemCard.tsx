@@ -133,7 +133,14 @@ export default function CartItemList({
           marginBottom: 8,
         }}
       >
-        <Text style={{ fontSize: 16, fontWeight: "bold", color: "#000" }}>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: "bold",
+            color: "#000",
+            fontFamily: theme.fonts.bold,
+          }}
+        >
           Your Items
         </Text>
       </View>
@@ -152,7 +159,14 @@ export default function CartItemList({
       ) : (
         <>
           {items.length === 0 ? (
-            <Text style={{ color: "#888", fontStyle: "italic", fontSize: 14 }}>
+            <Text
+              style={{
+                color: "#888",
+                fontStyle: "italic",
+                fontSize: 14,
+                fontFamily: theme.fonts.bold,
+              }}
+            >
               There is nothing available in the cart.
             </Text>
           ) : (
@@ -173,8 +187,8 @@ export default function CartItemList({
                     {/* Image */}
                     <View
                       style={{
-                        width: 60,
-                        height: 60,
+                        width: 80,
+                        height: 80,
                         borderRadius: 8,
                         marginRight: 12,
                         backgroundColor: "#ccc",
@@ -196,13 +210,14 @@ export default function CartItemList({
                     <View style={{ flex: 1, justifyContent: "space-between" }}>
                       {/* Name (single line) */}
                       <Text
-                        numberOfLines={1}
+                        numberOfLines={2}
                         ellipsizeMode="tail"
                         style={{
                           fontSize: 14,
                           fontWeight: "600",
                           color: "#000",
                           marginBottom: 6,
+                          fontFamily: theme.fonts.bold,
                         }}
                       >
                         {item.name}
@@ -323,7 +338,13 @@ export default function CartItemList({
             marginTop: 10,
           }}
         >
-          <Text style={{ color: "#000", fontSize: 13 }}>
+          <Text
+            style={{
+              color: "#000",
+              fontSize: 13,
+              fontFamily: theme.fonts.bold,
+            }}
+          >
             Coupon Applied{" "}
             <Text style={{ color: "green", fontWeight: "bold" }}>
               - ₹{couponDetails.discountPrice} OFF
@@ -350,7 +371,15 @@ export default function CartItemList({
             marginTop: 10,
           }}
         >
-          <Text style={{ color: "#000", fontSize: 13 }}>Have a coupon?</Text>
+          <Text
+            style={{
+              color: "#000",
+              fontSize: 13,
+              fontFamily: theme.fonts.regular,
+            }}
+          >
+            Have a coupon?
+          </Text>
           <TouchableOpacity
             onPress={onAddItem}
             style={{
@@ -360,7 +389,15 @@ export default function CartItemList({
               borderRadius: 16,
             }}
           >
-            <Text style={{ color: "#9747FF", fontWeight: "600" }}>Add +</Text>
+            <Text
+              style={{
+                color: "#9747FF",
+                fontWeight: "600",
+                fontFamily: theme.fonts.regular,
+              }}
+            >
+              Add +
+            </Text>
           </TouchableOpacity>
         </View>
       )}

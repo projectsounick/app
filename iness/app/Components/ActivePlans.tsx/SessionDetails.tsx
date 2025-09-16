@@ -82,7 +82,13 @@ const TabbedSessionDetails = ({
     if (!selectedSession)
       return (
         <View style={{ marginTop: 20, alignItems: "center" }}>
-          <Text style={{ textAlign: "center", color: "#999" }}>
+          <Text
+            style={{
+              textAlign: "center",
+              color: "#999",
+              fontFamily: theme.fonts.bold,
+            }}
+          >
             No Session Available
           </Text>
 
@@ -113,6 +119,7 @@ const TabbedSessionDetails = ({
                 color: "#000",
                 fontSize: 16,
                 fontWeight: "600",
+                fontFamily: theme.fonts.bold,
               }}
             >
               Request a Session
@@ -146,6 +153,7 @@ const TabbedSessionDetails = ({
               fontSize: 18,
               fontWeight: "bold",
               marginBottom: 12,
+              fontFamily: theme.fonts.bold,
             }}
           >
             Session Information
@@ -163,7 +171,13 @@ const TabbedSessionDetails = ({
                   color="#eee"
                   style={{ marginRight: 2 }}
                 />
-                <Text style={{ color: "#eee", fontSize: 12 }}>
+                <Text
+                  style={{
+                    color: "#eee",
+                    fontSize: 12,
+                    fontFamily: theme.fonts.medium,
+                  }}
+                >
                   {new Date(selectedSession.sessionDate).toDateString()}
                 </Text>
               </View>
@@ -183,7 +197,13 @@ const TabbedSessionDetails = ({
                   color="#eee"
                   style={{ marginRight: 2 }}
                 />
-                <Text style={{ color: "#eee", fontSize: 12 }}>
+                <Text
+                  style={{
+                    color: "#eee",
+                    fontSize: 12,
+                    fontFamily: theme.fonts.medium,
+                  }}
+                >
                   {selectedSession.sessionTime}
                 </Text>
               </View>
@@ -203,7 +223,13 @@ const TabbedSessionDetails = ({
                   color="#eee"
                   style={{ marginRight: 2 }}
                 />
-                <Text style={{ color: "#eee", fontSize: 12 }}>
+                <Text
+                  style={{
+                    color: "#eee",
+                    fontSize: 12,
+                    fontFamily: theme.fonts.medium,
+                  }}
+                >
                   {selectedSession.sessionDuration} mins
                 </Text>
               </View>
@@ -225,7 +251,13 @@ const TabbedSessionDetails = ({
                   color="#eee"
                   style={{ marginRight: 2 }}
                 />
-                <Text style={{ color: "#eee", fontSize: 12 }}>
+                <Text
+                  style={{
+                    color: "#eee",
+                    fontSize: 12,
+                    fontFamily: theme.fonts.medium,
+                  }}
+                >
                   {selectedSession.sessionType}
                 </Text>
               </View>
@@ -245,7 +277,13 @@ const TabbedSessionDetails = ({
                   color="#eee"
                   style={{ marginRight: 2 }}
                 />
-                <Text style={{ color: "#eee", fontSize: 12 }}>
+                <Text
+                  style={{
+                    color: "#eee",
+                    fontSize: 12,
+                    fontFamily: theme.fonts.medium,
+                  }}
+                >
                   {selectedSession.sessionStatus}
                 </Text>
               </View>
@@ -267,7 +305,11 @@ const TabbedSessionDetails = ({
                     style={{ marginRight: 2 }}
                   />
                   <Text
-                    style={{ color: "#eee", fontSize: 12 }}
+                    style={{
+                      color: "#eee",
+                      fontSize: 12,
+                      fontFamily: theme.fonts.medium,
+                    }}
                     numberOfLines={1}
                   >
                     {selectedSession.sessionAddress || "N/A"}
@@ -309,6 +351,7 @@ const TabbedSessionDetails = ({
                       fontSize: 16,
                       fontWeight: "600",
                       color: "#4B5563",
+                      fontFamily: theme.fonts.bold,
                     }}
                   >
                     Download your diet plan
@@ -344,6 +387,7 @@ const TabbedSessionDetails = ({
                   fontWeight: "bold",
                   marginBottom: 6,
                   color: "#000",
+                  fontFamily: theme.fonts.medium,
                 }}
               >
                 Session Feedback
@@ -401,17 +445,23 @@ const TabbedSessionDetails = ({
             style={{
               color: "#fff",
               fontSize: 18,
-              fontWeight: "bold",
+              fontFamily: theme.fonts.bold,
               marginBottom: 8,
             }}
           >
             {selectedSession.trainer.name}
           </Text>
 
-          <Text style={{ color: "#eee", marginBottom: 4 }}>
+          <Text
+            style={{
+              color: "#eee",
+              marginBottom: 4,
+              fontFamily: theme.fonts.medium,
+            }}
+          >
             Gender: {selectedSession.trainer.sex}
           </Text>
-          <Text style={{ color: "#eee" }}>
+          <Text style={{ color: "#eee", fontFamily: theme.fonts.medium }}>
             DOB:{" "}
             {selectedSession.trainer.dob
               ? new Date(selectedSession.trainer.dob).toDateString()
@@ -516,14 +566,9 @@ const TabbedSessionDetails = ({
         style={{
           flexDirection: "row",
           justifyContent: "space-between",
-          backgroundColor: "transparent",
-          borderRadius: 12,
           marginHorizontal: 16,
           marginTop: 16,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
+          backgroundColor: "transparent",
         }}
       >
         {["info", "trainer", "workout"].map((tab) => {
@@ -533,22 +578,22 @@ const TabbedSessionDetails = ({
             info: (
               <MaterialIcons
                 name="info"
-                size={20}
-                color={isActive ? "#000" : "#555"}
+                size={22}
+                color={isActive ? "#fff" : "#555"}
               />
             ),
             trainer: (
               <FontAwesome5
                 name="user-tie"
-                size={18}
-                color={isActive ? "#000" : "#555"}
+                size={20}
+                color={isActive ? "#fff" : "#555"}
               />
             ),
             workout: (
               <FontAwesome
                 name="heartbeat"
-                size={20}
-                color={isActive ? "#000" : "#555"}
+                size={22}
+                color={isActive ? "#fff" : "#555"}
               />
             ),
           };
@@ -565,26 +610,28 @@ const TabbedSessionDetails = ({
               onPress={() => setActiveTab(tab)}
               style={{
                 flex: 1,
+                flexDirection: "row",
                 alignItems: "center",
-                paddingVertical: 12,
-                marginHorizontal: 4,
-                borderRadius: 10,
-                backgroundColor: "#fff",
-                borderWidth: isActive ? 1.5 : 1,
-                borderColor: isActive ? "#000" : "#ccc",
+                justifyContent: "center",
+                paddingVertical: 10,
+                marginHorizontal: 6,
+                borderRadius: 25,
+                backgroundColor: isActive ? "#4B32C3" : "#fff",
                 shadowColor: "#000",
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.1,
-                shadowRadius: 2,
-                elevation: 2,
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.15,
+                shadowRadius: 6,
+                elevation: 4,
               }}
             >
               {icons[tab]}
               <Text
                 style={{
-                  color: "#000",
-                  fontWeight: isActive ? "bold" : "500",
-                  marginTop: 4,
+                  color: isActive ? "#fff" : "#333",
+
+                  fontSize: 14,
+                  fontFamily: theme.fonts.bold,
+                  marginLeft: 8,
                 }}
               >
                 {labels[tab]}
@@ -593,6 +640,7 @@ const TabbedSessionDetails = ({
           );
         })}
       </View>
+
       <View
         style={{
           height: 1,

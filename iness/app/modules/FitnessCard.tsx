@@ -4,6 +4,7 @@ import { Ionicons, FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
+import theme from "../Theme/globalTheme";
 
 const FitnessGoalsCard = () => {
   const loading = useSelector((state: RootState) => state.loader.mainLoader);
@@ -105,11 +106,11 @@ const FitnessGoalsCard = () => {
 
   return (
     <View
-      style={{ padding: 0, marginTop: 6, width: "100%", alignSelf: "center" }}
+      style={{ padding: 0, marginTop: 14, width: "100%", alignSelf: "center" }}
     >
       {/* Sleep */}
       <View
-        style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}
+        style={{ flexDirection: "row", alignItems: "center", marginBottom: 6 }}
       >
         <Ionicons name="moon" size={16} color="#ADD8E6" style={{ width: 24 }} />
         {renderProgressBar(progressSleep, "#ADD8E6")}
@@ -118,6 +119,7 @@ const FitnessGoalsCard = () => {
             color: "#FFFFFF",
             fontSize: 10,
             width: 50,
+            fontFamily: theme.fonts.regular,
             textAlign: "right",
           }}
         >
@@ -127,7 +129,7 @@ const FitnessGoalsCard = () => {
 
       {/* Water */}
       <View
-        style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}
+        style={{ flexDirection: "row", alignItems: "center", marginBottom: 6 }}
       >
         <FontAwesome5
           name="glass-whiskey"
@@ -142,6 +144,7 @@ const FitnessGoalsCard = () => {
             fontSize: 10,
             width: 50,
             textAlign: "right",
+            fontFamily: theme.fonts.regular,
           }}
         >
           {currentDayTrackData.water?.waterIntake || 0}gls/{goalWater}gls
@@ -150,7 +153,7 @@ const FitnessGoalsCard = () => {
 
       {/* Steps */}
       <View
-        style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}
+        style={{ flexDirection: "row", alignItems: "center", marginBottom: 12 }}
       >
         <MaterialIcons
           name="directions-walk"
@@ -164,6 +167,7 @@ const FitnessGoalsCard = () => {
             color: "#FFFFFF",
             fontSize: 10,
             width: 50,
+            fontFamily: theme.fonts.regular,
             textAlign: "right",
           }}
         >
@@ -182,7 +186,7 @@ const FitnessGoalsCard = () => {
         <TouchableOpacity
           style={{
             backgroundColor: "#4A2A75",
-            paddingVertical: 6,
+            paddingVertical: 4,
             paddingHorizontal: 16,
             borderRadius: 20,
             borderColor: "#A4FF55",
@@ -190,7 +194,13 @@ const FitnessGoalsCard = () => {
           }}
           onPress={() => router.push("/dashboard/supportchat")}
         >
-          <Text style={{ color: "#A4FF55", fontSize: 12 }}>
+          <Text
+            style={{
+              color: "#A4FF55",
+              fontSize: 14,
+              fontFamily: theme.fonts.regular,
+            }}
+          >
             💬 Chat with us
           </Text>
         </TouchableOpacity>
@@ -205,7 +215,14 @@ const FitnessGoalsCard = () => {
           }}
           onPress={() => router.push("/(tabs)/dashboard/track")}
         >
-          <Text style={{ color: "#000000", fontWeight: "500", fontSize: 12 }}>
+          <Text
+            style={{
+              color: "#000000",
+              fontWeight: "500",
+              fontSize: 14,
+              fontFamily: theme.fonts.regular,
+            }}
+          >
             View Tracker
           </Text>
         </TouchableOpacity>

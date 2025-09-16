@@ -2,11 +2,11 @@ import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
-  StyleSheet,
   PermissionsAndroid,
   Platform,
   TouchableOpacity,
   InteractionManager,
+  Dimensions,
 } from "react-native";
 import {
   createAgoraRtcEngine,
@@ -27,6 +27,8 @@ interface VideoCallScreenProps {
   onCallEnd: () => void;
 }
 
+const { width, height } = Dimensions.get("window");
+
 export default function VideoCallScreen({
   appId,
   channelName,
@@ -37,14 +39,12 @@ export default function VideoCallScreen({
 }: VideoCallScreenProps) {
   const agoraEngineRef = useRef<IRtcEngine | null>(null);
   const [joined, setJoined] = useState(false);
-  const [remoteUid, setRemoteUid] = useState<number | null>(null);
+  const [remoteUids, setRemoteUids] = useState<number[]>([]);
   const [isMuted, setIsMuted] = useState(false);
   const [cameraOn, setCameraOn] = useState(true);
-  const [showLocalFull, setShowLocalFull] = useState(false);
   const [callStartTime, setCallStartTime] = useState<Date | null>(null);
   const [callDuration, setCallDuration] = useState<string>("00:00");
 
-  // Update call duration
   useEffect(() => {
     let timer: any;
     if (callStartTime) {
@@ -73,6 +73,7 @@ export default function VideoCallScreen({
 
   const setupAgora = async () => {
     await getPermission();
+
     const engine = createAgoraRtcEngine();
     agoraEngineRef.current = engine;
 
@@ -98,17 +99,17 @@ export default function VideoCallScreen({
 
     engine.registerEventHandler({
       onJoinChannelSuccess: (_, localUid) => {
+        console.log("✅ Joined channel, UID:", localUid);
         setJoined(true);
         setCallStartTime(new Date());
       },
       onUserJoined: (_, uid) => {
-        setRemoteUid(uid);
+        console.log("👤 Remote user joined:", uid);
+        setRemoteUids((prev) => [...new Set([...prev, uid])]);
       },
       onUserOffline: (_, uid) => {
-        setRemoteUid(null);
-      },
-      onError: (err) => {
-        console.error("❌ Agora error:", err);
+        console.log("❌ Remote user offline:", uid);
+        setRemoteUids((prev) => prev.filter((id) => id !== uid));
       },
     });
 
@@ -122,7 +123,7 @@ export default function VideoCallScreen({
   const endCall = async () => {
     onCallEnd();
     setJoined(false);
-    setRemoteUid(null);
+    setRemoteUids([]);
 
     InteractionManager.runAfterInteractions(async () => {
       try {
@@ -138,11 +139,10 @@ export default function VideoCallScreen({
       }
     });
   };
+
   useEffect(() => {
     setupAgora();
-
     return () => {
-      // just delegate cleanup here
       endCall();
     };
   }, []);
@@ -163,55 +163,166 @@ export default function VideoCallScreen({
     agoraEngineRef.current?.switchCamera();
   };
 
-  const swapViews = () => {
-    setShowLocalFull((prev) => !prev);
+  // 📌 Remote Layout Logic
+  const renderRemoteLayout = () => {
+    const count = remoteUids.length;
+
+    if (count === 0) {
+      return (
+        <Text
+          style={{
+            color: "#fff",
+            fontSize: 18,
+            textAlign: "center",
+            position: "absolute",
+            top: "50%",
+            left: 0,
+            right: 0,
+          }}
+        >
+          Waiting for remote users...
+        </Text>
+      );
+    }
+
+    if (count === 1) {
+      return (
+        <RtcSurfaceView
+          key={remoteUids[0]}
+          canvas={{ uid: remoteUids[0], renderMode: 1 }}
+          style={{
+            flex: 1,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "#111",
+          }}
+        />
+      );
+    }
+
+    if (count === 2) {
+      return (
+        <View style={{ flex: 1, flexDirection: "column" }}>
+          {remoteUids.map((uid) => (
+            <RtcSurfaceView
+              key={uid}
+              canvas={{ uid, renderMode: 1 }}
+              style={{
+                width: "100%",
+                height: height / 2,
+                backgroundColor: "#111",
+              }}
+            />
+          ))}
+        </View>
+      );
+    }
+
+    // More than 2 → grid
+    return (
+      <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+        {remoteUids.map((uid) => (
+          <RtcSurfaceView
+            key={uid}
+            canvas={{ uid, renderMode: 1 }}
+            style={{
+              width: width / 2,
+              height: height / 3,
+              backgroundColor: "#111",
+              borderWidth: 1,
+              borderColor: "#000",
+            }}
+          />
+        ))}
+      </View>
+    );
   };
 
   return (
-    <View style={styles.container}>
-      {/* Call Duration */}
+    <View style={{ flex: 1, backgroundColor: "#000" }}>
+      {/* Timer */}
       {joined && (
-        <View style={styles.timerContainer}>
-          <Text style={styles.timerText}>{callDuration}</Text>
+        <View
+          style={{
+            position: "absolute",
+            top: 40,
+            left: 16,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            borderRadius: 20,
+            zIndex: 10,
+          }}
+        >
+          <Text style={{ color: "#fff", fontSize: 16, fontWeight: "600" }}>
+            {callDuration}
+          </Text>
         </View>
       )}
 
-      {/* Video Area */}
-      <View style={styles.fullVideo}>
-        {showLocalFull ? (
-          isHost && (
-            <RtcSurfaceView
-              canvas={{ uid: 0, renderMode: 1 }}
-              style={styles.fullVideo}
-            />
-          )
-        ) : remoteUid !== null ? (
-          <RtcSurfaceView
-            canvas={{ uid: remoteUid, renderMode: 1 }}
-            style={[styles.fullVideo, { transform: [{ scaleX: -1 }] }]}
-          />
-        ) : (
-          <Text style={styles.statusText}>Waiting for remote user...</Text>
-        )}
-      </View>
+      {/* Remote Layout */}
+      {renderRemoteLayout()}
 
-      {/* Picture-in-Picture */}
-      {remoteUid !== null && isHost && (
-        <TouchableOpacity onPress={swapViews} style={styles.pipContainer}>
+      {/* Floating Local View */}
+      {isHost && (
+        <View
+          style={{
+            position: "absolute",
+            top: 40,
+            right: 20,
+            width: 120,
+            height: 160,
+            borderRadius: 10,
+            overflow: "hidden",
+            borderColor: "#fff",
+            borderWidth: 1,
+            zIndex: 10,
+          }}
+        >
           <RtcSurfaceView
-            canvas={{ uid: showLocalFull ? remoteUid : 0, renderMode: 1 }}
-            style={styles.pipVideo}
+            canvas={{ uid: 0, renderMode: 1 }}
+            style={{ width: "100%", height: "100%" }}
           />
-        </TouchableOpacity>
+        </View>
       )}
 
       {/* Controls */}
-      <View style={styles.controls}>
-        <TouchableOpacity style={styles.circleButton} onPress={toggleMute}>
+      <View
+        style={{
+          position: "absolute",
+          alignSelf: "center",
+          bottom: 40,
+          flexDirection: "row",
+          gap: 16,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <TouchableOpacity
+          style={{
+            backgroundColor: "#333",
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={toggleMute}
+        >
           <Ionicons name={isMuted ? "mic-off" : "mic"} size={24} color="#fff" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.circleButton} onPress={toggleCamera}>
+        <TouchableOpacity
+          style={{
+            backgroundColor: "#333",
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={toggleCamera}
+        >
           <Ionicons
             name={cameraOn ? "videocam" : "videocam-off"}
             size={24}
@@ -219,87 +330,34 @@ export default function VideoCallScreen({
           />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.circleButton} onPress={switchCamera}>
+        <TouchableOpacity
+          style={{
+            backgroundColor: "#333",
+            width: 56,
+            height: 56,
+            borderRadius: 28,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={switchCamera}
+        >
           <Ionicons name="camera-reverse-outline" size={24} color="#fff" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.endButton} onPress={endCall}>
+        <TouchableOpacity
+          style={{
+            backgroundColor: "#E53935",
+            width: 56,
+            height: 56,
+            borderRadius: 32,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          onPress={endCall}
+        >
           <Ionicons name="call" size={28} color="#fff" />
         </TouchableOpacity>
       </View>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000" },
-  fullVideo: { flex: 1, width: "100%", height: "100%" },
-  pipContainer: {
-    position: "absolute",
-    top: 40,
-    right: 20,
-    width: 120,
-    height: 160,
-    borderRadius: 10,
-    overflow: "hidden",
-    borderColor: "#fff",
-    borderWidth: 1,
-    zIndex: 10,
-  },
-  pipVideo: { width: "100%", height: "100%" },
-  controls: {
-    position: "absolute",
-    right: 16,
-    bottom: 40,
-    flexDirection: "column",
-    gap: 16,
-    alignItems: "center",
-  },
-  circleButton: {
-    backgroundColor: "#333",
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 5,
-    elevation: 6,
-  },
-  endButton: {
-    backgroundColor: "#E53935",
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.6,
-    shadowRadius: 6,
-    elevation: 8,
-    marginTop: 16,
-  },
-  statusText: {
-    color: "#fff",
-    fontSize: 18,
-    textAlign: "center",
-    position: "absolute",
-    top: "50%",
-    left: 0,
-    right: 0,
-  },
-  timerContainer: {
-    position: "absolute",
-    top: 40,
-    left: 16,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    zIndex: 10,
-  },
-  timerText: { color: "#fff", fontSize: 16, fontWeight: "600" },
-});

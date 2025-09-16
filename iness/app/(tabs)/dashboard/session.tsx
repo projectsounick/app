@@ -11,6 +11,7 @@ import BackHeader from "@/app/modules/BackHeader";
 import BannerCard from "@/app/modules/BannerCard";
 import useGetDataHook from "@/hooks/useFetchHook";
 import { otherService } from "@/app/services/singleService.service";
+import theme from "@/app/Theme/globalTheme";
 
 const BookSessionScreen = () => {
   const { data, loading, fetchData } = useGetDataHook(
@@ -18,8 +19,8 @@ const BookSessionScreen = () => {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
-      <SmallHeader title="Sessions" />
+    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+      <SmallHeader title="Sessions" weightShow={false} />
       <BackHeader />
 
       {loading ? (
@@ -31,7 +32,7 @@ const BookSessionScreen = () => {
       ) : data && data.length > 0 ? (
         <ScrollView
           contentContainerStyle={{
-            padding: 19,
+            paddingHorizontal: 18,
             paddingBottom: 40,
           }}
         >
@@ -39,8 +40,10 @@ const BookSessionScreen = () => {
             style={{
               fontSize: 16,
               fontWeight: "700",
+              textAlign: "center",
               marginBottom: 6,
               color: "#000",
+              fontFamily: theme.fonts.bold,
             }}
           >
             Pick What Suits You Best
@@ -51,6 +54,8 @@ const BookSessionScreen = () => {
               color: "#666",
               marginBottom: 16,
               lineHeight: 20,
+              textAlign: "center",
+              fontFamily: theme.fonts.medium,
             }}
           >
             Get expert guidance your way{"\n"}online or in person.
@@ -69,7 +74,7 @@ const BookSessionScreen = () => {
           </Text>
         </View>
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 

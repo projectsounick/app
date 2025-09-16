@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import theme from "../Theme/globalTheme";
 
 interface SessionCardRowProps {
   selectedSession: any;
@@ -92,13 +93,27 @@ const Card: React.FC<CardProps> = ({ icon, title, value, suffix }: any) => (
         color="#6A1B9A"
         style={{ marginRight: 4 }}
       />
-      <Text style={{ fontSize: 12, fontWeight: "500", color: "#444" }}>
+      <Text
+        style={{
+          fontSize: 14,
+          fontWeight: "500",
+          color: "#444",
+          fontFamily: theme.fonts.bold,
+        }}
+      >
         {title}
       </Text>
     </View>
 
     {/* Value */}
-    <Text style={{ fontSize: 18, fontWeight: "bold", color: "#6A1B9A" }}>
+    <Text
+      style={{
+        fontSize: 18,
+        fontWeight: "bold",
+        color: "#6A1B9A",
+        fontFamily: theme.fonts.medium,
+      }}
+    >
       {value}{" "}
       {suffix && <Text style={{ fontSize: 12, color: "#999" }}>{suffix}</Text>}
     </Text>

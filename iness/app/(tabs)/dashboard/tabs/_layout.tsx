@@ -30,7 +30,7 @@ export default function DashboardLayout() {
         options={{
           tabBarLabel: "Home",
 
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color }: any) => (
             <MaterialCommunityIcons
               name="home-variant"
               size={28}
@@ -44,7 +44,7 @@ export default function DashboardLayout() {
         name="train"
         options={{
           tabBarLabel: "Train",
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color }: any) => (
             <MaterialCommunityIcons name="fire" size={28} color={color} />
           ),
         }}
@@ -54,7 +54,7 @@ export default function DashboardLayout() {
         options={{
           tabBarLabel: "Feed",
 
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color }: any) => (
             <MaterialCommunityIcons
               name="account-group"
               size={28}
@@ -67,7 +67,7 @@ export default function DashboardLayout() {
         name="store"
         options={{
           tabBarLabel: "Store",
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color }: any) => (
             <MaterialCommunityIcons name="store" size={28} color={color} />
           ),
         }}
@@ -76,7 +76,7 @@ export default function DashboardLayout() {
         name="media"
         options={{
           tabBarLabel: "Media",
-          tabBarIcon: ({ color }) => (
+          tabBarIcon: ({ color }: any) => (
             <MaterialCommunityIcons
               name="play-circle"
               size={28}

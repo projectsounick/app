@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { View, Text, TouchableOpacity, ScrollView } from "react-native";
 import { Session } from "@/app/interfaces/sessionInterface";
 import Icon from "react-native-vector-icons/Feather";
+import theme from "@/app/Theme/globalTheme";
 
 const weekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
@@ -177,7 +178,8 @@ export default function DateBar({
                     width: itemWidth,
                     marginHorizontal: spacing / 2,
                     borderRadius: 6,
-                    height: 72,
+
+                    height: 78,
                     backgroundColor,
                     borderWidth: isSelected || isScheduled ? 0 : 1,
                     borderColor,
@@ -197,17 +199,30 @@ export default function DateBar({
                   <Text
                     style={{
                       color: textColor,
-                      fontWeight: "bold",
+                      fontFamily: theme.fonts.medium,
                       fontSize: 16,
                     }}
                   >
                     {item.day}
                   </Text>
 
-                  <Text style={{ color: subTextColor, fontSize: 12 }}>
+                  <Text
+                    style={{
+                      color: subTextColor,
+                      fontSize: 12,
+                      fontFamily: theme.fonts.medium,
+                    }}
+                  >
                     {item.label}
                   </Text>
-                  <Text style={{ color: subTextColor, fontSize: 12 }}>
+                  <Text
+                    style={{
+                      color: subTextColor,
+                      fontSize: 12,
+                      marginBottom: 4,
+                      fontFamily: theme.fonts.medium,
+                    }}
+                  >
                     (
                     {new Date(item.fullDate).toLocaleString("default", {
                       month: "short",

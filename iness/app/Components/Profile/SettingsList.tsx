@@ -112,7 +112,7 @@ export default function SettingsList() {
               style={{
                 fontSize: 16,
                 color: item.color || theme.colors.dark,
-                fontWeight: theme.fontWeights.bold,
+                fontFamily: theme.fonts.bold,
               }}
             >
               {item.label}
@@ -154,7 +154,7 @@ export default function SettingsList() {
             <Text
               style={{
                 fontSize: 18,
-                fontWeight: "bold",
+                fontFamily: theme.fonts.bold,
                 marginTop: 12,
                 marginBottom: 8,
               }}
@@ -166,6 +166,7 @@ export default function SettingsList() {
                 textAlign: "center",
                 color: "#555",
                 marginBottom: 20,
+                fontFamily: theme.fonts.medium,
               }}
             >
               Your account will be permanently deleted. This action cannot be
@@ -186,7 +187,7 @@ export default function SettingsList() {
                     marginRight: 8,
                   }}
                 >
-                  <Text>Cancel</Text>
+                  <Text style={{ fontFamily: theme.fonts.medium }}>Cancel</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
@@ -198,7 +199,11 @@ export default function SettingsList() {
                     backgroundColor: "red",
                   }}
                 >
-                  <Text style={{ color: "#fff" }}>Confirm</Text>
+                  <Text
+                    style={{ color: "#fff", fontFamily: theme.fonts.medium }}
+                  >
+                    Confirm
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}

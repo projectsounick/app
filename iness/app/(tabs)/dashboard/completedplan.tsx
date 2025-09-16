@@ -39,10 +39,7 @@ export default function CompletedPlan() {
   const { plan, dietPlanDetails, planStartDate, planEndDate } = completedPlan;
   const planItems = plan?.planItem;
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right", "bottom"]}
-    >
+    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <ImageBackground
         source={require("../../../assets/images/basicBackground.jpg")}
         style={{ flex: 1 }}
@@ -69,9 +66,10 @@ export default function CompletedPlan() {
               <Text
                 style={{
                   fontSize: 22,
-                  fontWeight: "700",
+
                   color: theme.colors.second,
                   marginBottom: 16,
+                  fontFamily: theme.fonts.bold,
                 }}
               >
                 {plan.title}
@@ -210,7 +208,7 @@ export default function CompletedPlan() {
           )}
         </ScrollView>
       </ImageBackground>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -228,7 +226,7 @@ export function Info({
   value,
   icon,
   labelColor = "#777",
-  valueColor = "#222",
+  valueColor = "#000",
   iconColor = "#777",
 }: InfoProps) {
   return (
@@ -244,9 +242,24 @@ export function Info({
             style={{ marginRight: 4 }}
           />
         )}
-        <Text style={{ fontSize: 13, color: labelColor }}>{label}</Text>
+        <Text
+          style={{
+            fontSize: 13,
+            color: labelColor,
+            fontFamily: theme.fonts.bold,
+          }}
+        >
+          {label}
+        </Text>
       </View>
-      <Text style={{ fontSize: 15, fontWeight: "600", color: valueColor }}>
+      <Text
+        style={{
+          fontSize: 15,
+
+          color: valueColor,
+          fontFamily: theme.fonts.regular,
+        }}
+      >
         {value}
       </Text>
     </View>
