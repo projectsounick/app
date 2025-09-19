@@ -11,7 +11,11 @@ export const podCastService = {
 //// Funciton for updating the user in using backend then storing in AsyncStorage----/
 async function getPodcasts(): Promise<ApiResponseInterface> {
   try {
-    return fetchWrapper.get(`${baseUrl}/get-podcasts`);
+    let response = await fetchWrapper.get(`${baseUrl}/get-podcasts`);
+
+    console.log("thsi data");
+    console.log(response.data.length);
+    return response;
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }

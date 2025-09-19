@@ -17,12 +17,12 @@ interface PodcastInterface {
   interactions: PodcastInteractions[];
   thumbnailImageLink: string;
   description: string;
-  likes: String[];
+  likes: string[];
 }
 
 interface PodcastVideoCardPropsInterface {
   podcast: PodcastInterface;
-  loading: boolean;
+
   loggedUser: UserData | null;
   updatePodcastData: (data: any) => void;
 }

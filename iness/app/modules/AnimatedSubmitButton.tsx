@@ -35,7 +35,7 @@ const AnimatedSubmitButton: React.FC<AnimatedSubmitButtonProps> = ({
       <Animated.View
         style={{
           transform: [{ scale: scaleAnim }],
-          backgroundColor: theme.colors.primary,
+          backgroundColor: "#67C694",
           borderRadius: 40,
           display: "flex",
           flexDirection: "row",

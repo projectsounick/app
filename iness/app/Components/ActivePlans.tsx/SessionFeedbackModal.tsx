@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { View, Text, Pressable, TextInput, ScrollView } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Modal from "react-native-modal";
+import { Session } from "@/app/interfaces/sessionInterface";
+import { sessionService } from "@/app/services/sessionService";
 const options = [
   { icon: "emoticon-happy-outline", label: "Good" },
   { icon: "star-circle-outline", label: "Excellent" },
@@ -12,22 +14,41 @@ const options = [
 const FeedbackModal = ({
   visible,
   onClose,
-  onSubmit,
-  sessionId,
+
+  currentSession,
+  setCurrentSession,
 }: {
   visible: boolean;
   onClose: () => void;
-  onSubmit: (feedback: string) => void;
-  sessionId?: string;
+
+  setCurrentSession: (session: Session | null) => void;
+  currentSession: Session | null;
 }) => {
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [customFeedback, setCustomFeedback] = useState("");
-
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
   const handleSelect = (label: string) => {
     setSelectedOption(label);
     if (label !== "Other") setCustomFeedback("");
   };
-
+  const submitFeedback = async (feedback: string) => {
+    if (!currentSession) return;
+    try {
+      setFeedbackLoading(true);
+      const params = {
+        sessionId: currentSession._id,
+        data: { sessionFeedback: feedback },
+      };
+      const response = await sessionService.updateSession(params);
+      if (response.success) {
+        setCurrentSession({ ...currentSession, sessionFeedback: feedback });
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setFeedbackLoading(false);
+    }
+  };
   return (
     <Modal
       isVisible={visible}
@@ -143,7 +164,7 @@ const FeedbackModal = ({
             </Pressable>
             <Pressable
               onPress={() =>
-                onSubmit(
+                submitFeedback(
                   selectedOption === "Other"
                     ? customFeedback
                     : selectedOption || ""

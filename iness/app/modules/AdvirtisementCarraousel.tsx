@@ -1,8 +1,8 @@
-import React from "react";
+import React, { memo } from "react";
 import { View, Text, Dimensions } from "react-native";
-import LinearGradient from "react-native-linear-gradient";
+import { LinearGradient } from "expo-linear-gradient";
 import theme from "../Theme/globalTheme";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -13,27 +13,27 @@ const DATA = [
   { icon: "🔥", line1: "Custom", line2: "Plans" },
 ];
 
-const StylishCarousel = () => {
+function StylishCarousel() {
   return (
     <View
       style={{
-        marginTop: 12,
-        borderRadius: 12,
+        borderRadius: 16,
         overflow: "hidden",
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
+        shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.1,
-        shadowRadius: 3,
-        elevation: 3,
+        shadowRadius: 6,
+        elevation: 4,
+        marginBottom: 16,
       }}
     >
       {/* Gradient Background */}
       <LinearGradient
-        colors={["#140A21", "#522987"]}
+        colors={["#736AD6", "#5A54C4"]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={{
-          borderRadius: 12,
+          borderRadius: 16,
           padding: 16,
         }}
       >
@@ -53,8 +53,8 @@ const StylishCarousel = () => {
           />
           <Text
             style={{
-              fontSize: theme.fontSizes.medium,
-              fontWeight: "bold",
+              fontSize: theme.fontSizes.regular,
+              fontFamily: theme.fonts.bold,
               color: "#fff",
             }}
           >
@@ -65,8 +65,8 @@ const StylishCarousel = () => {
         {/* Sub text */}
         <Text
           style={{
-            fontSize: theme.fontSizes.regularSmall,
-            color: "#eee",
+            fontSize: theme.fontSizes.small,
+            color: "#E6E6E6",
             marginBottom: 12,
           }}
         >
@@ -77,9 +77,9 @@ const StylishCarousel = () => {
         <View
           style={{
             backgroundColor: "#fff",
-            borderRadius: 12,
-            paddingVertical: 10, // reduced height
-            paddingHorizontal: 8,
+            borderRadius: 16,
+            paddingVertical: 12,
+            paddingHorizontal: 12,
           }}
         >
           <View
@@ -100,9 +100,9 @@ const StylishCarousel = () => {
               >
                 <Text
                   style={{
-                    fontSize: 18,
-                    color: theme.colors.primary,
-                    marginBottom: 2,
+                    fontSize: 20,
+                    color: "#736AD6",
+                    marginBottom: 4,
                   }}
                 >
                   {item.icon}
@@ -111,6 +111,7 @@ const StylishCarousel = () => {
                   style={{
                     color: theme.colors.dark,
                     fontSize: 12,
+                    fontFamily: theme.fonts.bold,
                     textAlign: "center",
                     lineHeight: 14,
                   }}
@@ -121,6 +122,7 @@ const StylishCarousel = () => {
                   style={{
                     color: theme.colors.dark,
                     fontSize: 12,
+                    fontFamily: theme.fonts.medium,
                     textAlign: "center",
                     lineHeight: 14,
                   }}
@@ -134,6 +136,6 @@ const StylishCarousel = () => {
       </LinearGradient>
     </View>
   );
-};
+}
 
-export default StylishCarousel;
+export default memo(StylishCarousel);

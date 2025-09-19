@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import {
   View,
   Text,
@@ -18,19 +18,22 @@ import { ImageWithLoader } from "./ImageWithLoader";
 import { router } from "expo-router";
 import { Blog } from "../interfaces/blogInterface";
 
-export default function BlogSliderCard() {
+function BlogSliderCard() {
   const blogs = useSelector((state: RootState) => state.blog.blogs);
 
   return (
-    <LinearGradient
-      colors={["#140A21", "#522987"]}
-      start={{ x: 0, y: 0 }}
+    <View
       style={{
         height: 210,
         paddingVertical: 16,
         paddingHorizontal: 12,
         borderRadius: 12,
-        marginTop: 12,
+        shadowColor: "#000",
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 3,
+        backgroundColor: "#fff",
+        marginBottom: 16,
       }}
     >
       {/* Fixed Header */}
@@ -53,29 +56,19 @@ export default function BlogSliderCard() {
             <MaterialCommunityIcons
               name="shield-check"
               size={20}
-              color="#fff"
+              color="#7771de"
               style={{ marginRight: 8 }}
             />
             <Text
               style={{
                 fontSize: theme.fontSizes.regular,
                 fontFamily: theme.fonts.bold,
-                color: theme.colors.text,
+                color: theme.colors.dark,
               }}
             >
               Read our Blogs
             </Text>
           </View>
-          <Text
-            style={{
-              fontSize: theme.fontSizes.small,
-              fontFamily: theme.fonts.bold,
-              color: theme.colors.text,
-              marginTop: 6,
-            }}
-          >
-            Explore expert tips, and practical guides to help you
-          </Text>
         </View>
       </View>
 
@@ -89,26 +82,24 @@ export default function BlogSliderCard() {
           <View
             key={index}
             style={{
-              backgroundColor: "#FFFFFF",
-              borderWidth: 1,
-              borderColor: "#D6B6FF",
+              backgroundColor: "#7771de", // dark background
               borderRadius: 12,
               marginRight: 12,
               width: 330,
               flexDirection: "row",
               alignItems: "center",
               justifyContent: "center",
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.08,
-              shadowRadius: 2,
-              elevation: 2,
+              shadowColor: "#7771de",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.2,
+              shadowRadius: 4,
+              elevation: 4,
+              padding: 8,
             }}
           >
             <View
               style={{
                 width: "95%",
-                display: "flex",
                 flexDirection: "row",
                 justifyContent: "space-between",
                 alignItems: "center",
@@ -126,27 +117,24 @@ export default function BlogSliderCard() {
                   width: "60%",
                 }}
               >
-                {/* Title */}
-                {/* Title */}
                 <Text
                   numberOfLines={3}
                   style={{
                     fontFamily: theme.fonts.bold,
                     fontSize: 12,
                     marginBottom: 6,
-                    color: theme.colors.dark,
+                    color: "#fff", // light text
                     flexShrink: 1,
                   }}
                 >
                   {item.title}
                 </Text>
 
-                {/* Know More Button */}
                 <TouchableOpacity
                   style={{
-                    backgroundColor: "#BDFF84",
-                    width: 114,
-                    height: 31,
+                    backgroundColor: "#67c694",
+                    paddingHorizontal: 30,
+                    paddingVertical: 6,
                     borderRadius: 16,
                     alignSelf: "flex-start",
                     justifyContent: "center",
@@ -164,7 +152,7 @@ export default function BlogSliderCard() {
                       fontFamily: theme.fonts.bold,
                       fontSize: 14,
                       textAlign: "center",
-                      color: theme.colors.dark,
+                      color: "#fff",
                     }}
                   >
                     Read
@@ -187,6 +175,8 @@ export default function BlogSliderCard() {
           </View>
         ))}
       </ScrollView>
-    </LinearGradient>
+    </View>
   );
 }
+
+export default memo(BlogSliderCard);

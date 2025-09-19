@@ -71,7 +71,7 @@ export default function MediaScreen() {
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
       edges={["left", "right"]}
     >
-      <SmallHeader title="Media" weightShow={false} />
+      {/* <SmallHeader title="Media" weightShow={false} />
       <ScrollView
         contentContainerStyle={{ padding: 20 }}
         scrollEventThrottle={16}
@@ -155,7 +155,7 @@ export default function MediaScreen() {
         )}
       </ScrollView>
 
-      {updateLoader && <FullScreenLoader />}
+      {updateLoader && <FullScreenLoader />} */}
     </SafeAreaView>
   );
 }

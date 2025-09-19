@@ -33,11 +33,29 @@ import HomeSimmerSkeleton from "@/app/modules/HomeSimmerSkeleton";
 import HealthReportUploader from "@/app/modules/UploadReportPdf";
 import OffersCards from "@/app/modules/OfferCard";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import SmallHeader from "@/app/modules/SmallHeader";
+import FloatingOptions from "@/app/modules/ButtonSection";
+import HealthDashboard from "@/app/modules/HealthCards";
+import BlogCarousel from "@/app/modules/BlogsCards";
+import SessionCarousel from "@/app/Components/Home/SessionCards";
+
+import PodcastMediaCard from "@/app/Components/Home/PodcastSection";
+import { podCastService } from "@/app/services/podcast.service";
+import { RootState } from "@/store";
+import SessionCalendarSheet from "@/app/modules/SessionCalendarSheet";
+import FeedbackModal from "@/app/Components/ActivePlans.tsx/SessionFeedbackModal";
+import { setCalendarSheetOpen } from "@/Slices/componentOpenSlice";
 
 const MainHeader = withAnimatedHeader(NameHeader);
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
   const [modalVisible, setModalVisible] = useState(false);
+  const [loggedUser, setLoggedUser] = useState(null);
+  const calendarSheetOpen = useSelector(
+    (state: RootState) => state.componentOpen.calendarSheetOpen
+  );
+  console.log(calendarSheetOpen);
+  const podCasts = useSelector((state: RootState) => state.podcast.podcasts);
   // Fetch user data and modal flag from AsyncStorage
   useEffect(() => {
     const fetchUserData = async () => {
@@ -46,7 +64,7 @@ const YourComponent = () => {
 
         if (userStr) {
           const user = JSON.parse(userStr);
-          console.log(user.healthReport);
+          setLoggedUser(user);
 
           if (user.healthReport == null) {
             console.log("went inside this");
@@ -83,13 +101,22 @@ const YourComponent = () => {
         sliceKey: "track" as SliceKey,
         fetchFunction: trackService.getCurrentDayTrackData,
       },
+      {
+        sliceKey: "podcast" as SliceKey,
+        fetchFunction: podCastService.getPodcasts,
+      },
     ],
     []
   );
   const { loading, setSnackbarMessage, setSnackbarVisible } =
     useFetchMultipleStoreDataHook(configs);
+  const [currentSession, setCurrentSession] = useState<any>(null);
 
-  const scrollY = new Animated.Value(0);
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false);
+
+  const onCloseSessionSheet = () => {
+    dispatch(setCalendarSheetOpen(!calendarSheetOpen));
+  };
   //// Fetching the plan data -----------------------------/
 
   //// Video call exists or not checking -----------------------------------------/
@@ -100,13 +127,13 @@ const YourComponent = () => {
       edges={["left", "right"]}
     >
       {/* Animated Header */}
-      <MainHeader scrollY={scrollY} title="Home" />
+      <SmallHeader weightShow={true} title={"Home"} />
       {/* Scrollable Content */}
       <ScrollView
         style={{ flex: 1 }}
         contentContainerStyle={{
           paddingTop: 10,
-          paddingBottom: 10,
+          marginBottom: 10,
           paddingHorizontal: 8, // ✅ Add horizontal spacing here
         }}
         // onScroll={Animated.event(
@@ -122,14 +149,22 @@ const YourComponent = () => {
         ) : (
           <>
             <OffersCards />
-            <SliderCard />
+            <FloatingOptions />
+            <SessionCarousel />
+            <HealthDashboard />
+            {podCasts && podCasts.length > 0 ? (
+              <PodcastMediaCard loggedUser={loggedUser} />
+            ) : null}
+
+            <BlogSliderCard />
+            {/* <SliderCard /> */}
             {/* <BannerCard cardData={trackingCardData} />
             <BannerCard cardData={bookSessionCardData} /> */}
-            <DualBannerCardRow
+            {/* <DualBannerCardRow
               firstCard={bookSessionCardData}
               secondCard={trackingCardData}
-            />
-            <BlogSliderCard />
+            /> */}
+
             <InfoCarousel />
             {modalVisible && (
               <HealthReportUploader
@@ -140,15 +175,36 @@ const YourComponent = () => {
             {/* <FeatureCarousel /> */}
           </>
         )}
-        <TransformationCards />
+
         <NotificationPermissionModal />
         {/* <VideoPromotionModal /> */}
       </ScrollView>
 
-      <Imagepicker />
       <AppUpdateBottomSheet />
+      {/* //// Calendar sheet component ---------------------------/ */}
+      {calendarSheetOpen && (
+        <SessionCalendarSheet
+          isVisible={calendarSheetOpen}
+          onClose={onCloseSessionSheet}
+          setCurrentSession={setCurrentSession}
+          currentSession={currentSession}
+          setShowFeedbackModal={setShowFeedbackModal}
+        />
+      )}
+      {/*  //// Feedback component---------------------------------------/ */}
+      {showFeedbackModal && (
+        <FeedbackModal
+          visible={showFeedbackModal}
+          onClose={() => setShowFeedbackModal(false)}
+          currentSession={currentSession}
+          setCurrentSession={setCurrentSession}
+        />
+      )}
     </SafeAreaView>
   );
 };
 
 export default YourComponent;
+function dispatch(arg0: any) {
+  throw new Error("Function not implemented.");
+}

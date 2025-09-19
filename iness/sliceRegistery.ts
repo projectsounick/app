@@ -10,6 +10,7 @@ import { setdietPlans } from "./Slices/dietPlanSlice";
 import { addToBlog } from "./Slices/blogSlice";
 import { setCategories, setProducts } from "./Slices/ecomSlice";
 import { setCurrentDateTrackData } from "./Slices/trackSlice";
+import { addPodcast, setPodcasts } from "./Slices/podcastSlice";
 export const sliceConfig = {
   media: {
     selectorKey: "mediaItems",
@@ -54,6 +55,10 @@ export const sliceConfig = {
   activeServices: {
     selectorKey: "plans",
     setAction: setServices,
+  },
+  podcast: {
+    selectorKey: "podcast",
+    setAction: setPodcasts,
   },
 } as const;
 

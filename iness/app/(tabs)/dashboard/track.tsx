@@ -370,7 +370,7 @@ export default function WellnessDashboard() {
               </View>
             </>
           )}
-          <AppleHealthSync />
+
           {modalVisible ? (
             <TrackerModal
               visible={modalVisible}

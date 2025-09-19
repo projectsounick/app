@@ -11,7 +11,7 @@ import {
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import Feather from "react-native-vector-icons/Feather";
-import { useNavigation, useRoute } from "@react-navigation/native";
+
 import { Product } from "@/app/interfaces/ecommerceInterface";
 import ProductModal from "@/app/Components/ecom/ProductBottomSheet";
 import SmallHeader from "@/app/modules/SmallHeader";
@@ -173,7 +173,7 @@ const CategoryProductsScreen = () => {
   };
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: "#F6F6F6" }}>
+    <View style={{ flex: 1, backgroundColor: "#F6F6F6" }}>
       {/* Header */}
       <SmallHeader title={"Products"} />
       <BackHeader />
@@ -219,7 +219,7 @@ const CategoryProductsScreen = () => {
           bgColor={color}
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 

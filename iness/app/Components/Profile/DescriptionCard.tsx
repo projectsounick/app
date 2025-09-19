@@ -133,7 +133,7 @@ export default function ProfileCard() {
   return (
     <TouchableOpacity
       style={{
-        backgroundColor: theme.colors.secondPrimary,
+        backgroundColor: "#7771de",
         borderRadius: 16,
         padding: 16,
         marginBottom: 20,

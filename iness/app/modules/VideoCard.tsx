@@ -38,7 +38,7 @@ if (
 //// Main function for the Video Card --------------------------------------------------------/
 const VideoCard = ({
   podcast,
-  loading,
+
   loggedUser,
   updatePodcastData,
 }: PodcastVideoCardPropsInterface) => {
@@ -182,7 +182,7 @@ const VideoCard = ({
             fontSize: theme.fontSizes.medium,
             fontWeight: theme.fontWeights.bold,
             marginTop: 12,
-            color: theme.colors.secondPrimary,
+            color: "#000",
             fontFamily: theme.fonts.bold,
           }}
         >

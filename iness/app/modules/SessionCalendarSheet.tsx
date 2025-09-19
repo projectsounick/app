@@ -23,6 +23,8 @@ import {
 import useGetDataHook from "@/hooks/useFetchHook";
 import { sessionService } from "../services/sessionService";
 import { Session } from "../interfaces/sessionInterface";
+import { useDispatch } from "react-redux";
+import { setCalendarSheetOpen } from "@/Slices/componentOpenSlice";
 
 const { height } = Dimensions.get("window");
 
@@ -41,6 +43,7 @@ function SessionCalendar({
   currentSession,
   setShowFeedbackModal,
 }: SessionCalendarProps) {
+  const dispatch = useDispatch();
   const { data: sessionData, loading } = useGetDataHook(
     sessionService.getSessions
   );
@@ -192,7 +195,7 @@ function SessionCalendar({
               {selectedDate ? "Session Details" : "Your Sessions"}
             </Text>
             <TouchableOpacity
-              onPress={onClose}
+              onPress={() => dispatch(setCalendarSheetOpen(false))}
               style={{
                 marginLeft: "auto",
                 padding: 6,

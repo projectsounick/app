@@ -9,11 +9,9 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { MaterialIcons } from "@expo/vector-icons";
+import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import { Product } from "@/app/interfaces/ecommerceInterface";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons";
-import Feather from "react-native-vector-icons/Feather";
-import BottomSheet from "@gorhom/bottom-sheet";
+
 import ProductBottomSheet from "./ProductBottomSheet";
 import ProductModal from "./ProductBottomSheet";
 const GroupedProductDisplay = () => {
@@ -60,11 +58,16 @@ const GroupedProductDisplay = () => {
       <TouchableOpacity
         key={item._id}
         style={{
-          width: 130,
-          borderRadius: 12,
+          width: 150,
+          borderRadius: 16,
           backgroundColor: "#fff",
           overflow: "hidden",
-          marginRight: 10,
+          marginRight: 12,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 6,
+          elevation: 3,
         }}
         onPress={() => handleCheck(item)}
       >
@@ -72,12 +75,12 @@ const GroupedProductDisplay = () => {
         <View
           style={{
             width: "100%",
-            height: 120,
+            height: 140,
             position: "relative",
-            justifyContent: "flex-end", // to push quantity to bottom
+            justifyContent: "flex-end",
           }}
         >
-          {/* Image as background */}
+          {/* Product Image */}
           {item.images && item.images.length > 0 ? (
             <Image
               source={{ uri: item.images[0] }}
@@ -98,51 +101,62 @@ const GroupedProductDisplay = () => {
                 left: 0,
                 width: "100%",
                 height: "100%",
-                backgroundColor: "#999",
+                backgroundColor: "#e0e0e0",
               }}
             />
           )}
+
+          {/* Overlay gradient for readability */}
+          <View
+            style={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: 50,
+              backgroundColor: "rgba(0,0,0,0.25)",
+            }}
+          />
 
           {/* Plus icon */}
           <TouchableOpacity
             style={{
               position: "absolute",
-              top: 6,
-              right: 6,
+              top: 8,
+              right: 8,
               backgroundColor: "#fff",
               borderRadius: 20,
-              width: 24,
-              height: 24,
+              padding: 3,
               alignItems: "center",
               justifyContent: "center",
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.1,
+              shadowOpacity: 0.15,
               shadowRadius: 2,
-              elevation: 2,
+              elevation: 3,
             }}
             onPress={() => handleCheck(item)}
           >
-            <Feather name="plus" size={12} color="#00A300" />
+            <AntDesign name="pluscircle" size={22} color="#67c694" />
           </TouchableOpacity>
 
-          {/* Quantity (Variation Label) */}
+          {/* Quantity / Variation Label */}
           {displayLabel && (
             <View
               style={{
-                backgroundColor: "#fff",
+                backgroundColor: "rgba(255,255,255,0.9)",
                 alignSelf: "center",
-                paddingHorizontal: 8,
-                paddingVertical: 2,
-                borderRadius: 10,
-                marginBottom: 6,
+                paddingHorizontal: 10,
+                paddingVertical: 3,
+                borderRadius: 12,
+                marginBottom: 8,
               }}
             >
               <Text
                 style={{
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: "600",
-                  color: "#333",
+                  color: "#222",
                 }}
               >
                 {displayLabel}
@@ -152,23 +166,23 @@ const GroupedProductDisplay = () => {
         </View>
 
         {/* Bottom Details */}
-        <View style={{ paddingHorizontal: 8, paddingVertical: 6 }}>
+        <View style={{ paddingHorizontal: 10, paddingVertical: 8 }}>
           <Text
             numberOfLines={2}
             style={{
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: "600",
-              color: "#000",
+              color: "#333",
             }}
           >
             {item.name}
           </Text>
           <Text
             style={{
-              fontSize: 11,
+              fontSize: 13,
               fontWeight: "700",
-              color: "#000",
-              marginTop: 2,
+              color: "#7771de",
+              marginTop: 4,
             }}
           >
             ₹{displayPrice}
@@ -184,7 +198,7 @@ const GroupedProductDisplay = () => {
         <View
           key={category}
           style={{
-            marginBottom: 28,
+            marginBottom: 16,
             padding: 16,
             backgroundColor: "#fff",
             borderRadius: 16,
@@ -197,7 +211,7 @@ const GroupedProductDisplay = () => {
               marginBottom: 4,
             }}
           >
-            <MaterialIcons name="shop" size={20} color="#6B46C1" />
+            <MaterialIcons name="shop" size={20} color="#000" />
             <Text
               style={{
                 fontSize: 16,
@@ -210,7 +224,7 @@ const GroupedProductDisplay = () => {
             </Text>
             <MaterialIcons
               name="chevron-right"
-              size={20}
+              size={22}
               color="#000"
               style={{ marginLeft: "auto" }}
             />

@@ -144,7 +144,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
         style={{
           position: "absolute",
           bottom: 0,
-          height: height * 0.88,
+          height: height * 0.75,
           width: "100%",
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
@@ -152,22 +152,36 @@ const ProductModal: React.FC<ProductModalProps> = ({
           padding: 16,
         }}
       >
+        <View
+          style={{
+            width: 40,
+            height: 4,
+            backgroundColor: "#ccc",
+            borderRadius: 2,
+            alignSelf: "center",
+            marginBottom: 12,
+          }}
+        />
+
         {/* Close Button */}
         <TouchableOpacity
           style={{
-            position: "absolute",
-            top: 16,
-            right: 16,
+            height: 40,
+            width: 40,
+            alignSelf: "flex-end",
             backgroundColor: "#eee",
             borderRadius: 20,
+            marginBottom: 20,
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "center",
             padding: 6,
             zIndex: 1,
           }}
           onPress={onClose}
         >
-          <Pressable>
-            <Ionicons name="close" size={22} color="black" />
-          </Pressable>
+          <Ionicons name="close" size={22} color="black" />
         </TouchableOpacity>
 
         {/* Image Carousel */}
@@ -262,17 +276,17 @@ const ProductModal: React.FC<ProductModalProps> = ({
                       setSelectedVariationId(v._id);
                     }}
                     style={{
-                      paddingHorizontal: 12,
+                      paddingHorizontal: 16,
                       paddingVertical: 6,
                       borderRadius: 20,
                       backgroundColor:
-                        selectedVariation === idx
-                          ? theme.colors.primary
-                          : "#eee",
+                        selectedVariation === idx ? "#67C694" : "#eee",
                     }}
                   >
                     <Text
                       style={{
+                        fontFamily: theme.fonts.regular,
+                        fontSize: 14,
                         color: selectedVariation === idx ? "#000" : "#000",
                       }}
                     >
@@ -299,6 +313,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
           onPress={() => {
             addingIntoToCart();
           }}
+          height={50}
         />
         <CustomSnackbar
           visible={snackbarOpen}

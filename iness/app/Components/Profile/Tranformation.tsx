@@ -33,7 +33,7 @@ export default function TransformationCard() {
       style={{
         backgroundColor: theme.colors.text,
         borderRadius: 16,
-        borderColor: theme.colors.secondPrimary,
+        borderColor: "#7771de",
         borderWidth: 1,
         padding: 16,
         marginBottom: 20,
