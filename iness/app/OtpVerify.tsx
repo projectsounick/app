@@ -263,7 +263,7 @@ const OTPInputScreen = () => {
           <AnimatedSubmitButton
             onPress={handleSubmit}
             title="Verify"
-            height={60}
+            height={50}
             loading={loading}
           />
         </View>

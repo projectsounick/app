@@ -1,3 +1,4 @@
+import theme from "@/app/Theme/globalTheme";
 import { setPlanTab } from "@/Slices/planSlice";
 import { RootState } from "@/store";
 import React from "react";
@@ -63,6 +64,7 @@ const PlansStatusCard = () => {
             color: isSelected ? "#fff" : "#7B61FF",
             fontSize: 13,
             fontWeight: "600",
+            fontFamily: theme.fonts.bold,
             marginBottom: 2,
           }}
         >
@@ -72,6 +74,7 @@ const PlansStatusCard = () => {
           style={{
             fontSize: 20,
             fontWeight: "bold",
+            fontFamily: theme.fonts.bold,
             color: isSelected ? "#fff" : "#7B61FF",
           }}
         >

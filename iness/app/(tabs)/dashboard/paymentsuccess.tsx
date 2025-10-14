@@ -300,6 +300,7 @@ const PaymentSuccessScreen = () => {
                   color: theme.colors.primary,
                   fontSize: 14,
                   fontWeight: "500",
+                  fontFamily: theme.fonts.medium,
                 }}
               >
                 Continue exploring

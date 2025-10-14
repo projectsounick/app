@@ -5,11 +5,13 @@ import {
   ScrollView,
   ImageBackground,
   Platform,
+  Dimensions,
 } from "react-native";
 import NormalHeader from "@/app/modules/NormalHeader";
 import theme from "@/app/Theme/globalTheme";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+const { height } = Dimensions.get("window");
+const topPadding = height * 0.05; // 2% of screen height
 ////// Main functional component for the policy screen ---------------------------------/
 export default function PolicyScreen() {
   const policies = [
@@ -46,10 +48,7 @@ export default function PolicyScreen() {
   ];
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right"]}
-    >
+    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <ImageBackground
         source={require("../../../assets/images/basicBackground.jpg")}
         resizeMode="cover"
@@ -61,8 +60,8 @@ export default function PolicyScreen() {
       >
         <View
           style={{
-            paddingTop: Platform.OS === "ios" ? "15%" : "4%",
             paddingLeft: 20,
+            marginTop: Platform.OS === "ios" ? topPadding : "4%",
           }}
         >
           <NormalHeader screenName="Policies" />
@@ -89,17 +88,29 @@ export default function PolicyScreen() {
               }}
             >
               <Text
-                style={{ fontSize: 18, fontWeight: "bold", marginBottom: 8 }}
+                style={{
+                  fontSize: 18,
+                  fontWeight: "bold",
+                  marginBottom: 8,
+                  fontFamily: theme.fonts.bold,
+                }}
               >
                 {policy.title}
               </Text>
-              <Text style={{ fontSize: 14, color: "#444", lineHeight: 20 }}>
+              <Text
+                style={{
+                  fontSize: 14,
+                  color: "#444",
+                  lineHeight: 20,
+                  fontFamily: theme.fonts.regular,
+                }}
+              >
                 {policy.content}
               </Text>
             </View>
           ))}
         </ScrollView>
       </ImageBackground>
-    </SafeAreaView>
+    </View>
   );
 }

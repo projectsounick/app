@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { View, Linking, TouchableOpacity, Text } from "react-native";
 import { useRouter } from "expo-router";
 
@@ -7,7 +7,7 @@ import SmallHeader from "@/app/modules/SmallHeader";
 
 import CartItemList from "@/app/Components/Cart/CartItemCard";
 import CartCheckoutCard from "@/app/Components/Cart/CartCheckoutCard";
-
+import PhonePePayment from "react-native-phonepe-pg";
 import BackHeader from "@/app/modules/BackHeader";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
@@ -55,47 +55,144 @@ export default function CartScreen() {
     router.replace("/dashboard/tabs/store");
   };
   const [dataFetchLogin, setDataFetchLogin] = useState(false);
+  const merchantId = "M23WC6W062GQI"; // your PhonePe merchantId
+  const flowId = "cart_flow_" + Date.now(); // unique identifier for this flow
 
+  useEffect(() => {
+    const initPhonePe = async () => {
+      try {
+        const result = await PhonePePayment.init(
+          "PRODUCTION",
+          merchantId,
+          flowId,
+          true // enable logging, set false in prod
+        );
+        console.log("PhonePe SDK initialized:", result);
+      } catch (error) {
+        console.log("PhonePe init error:", error);
+      }
+    };
+
+    initPhonePe();
+  }, []);
   // Function for placing the order ----------------------------.
+  // async function onplaceOrder(
+  //   address: string,
+  //   couponDetails: DiscountCoupon | null
+  // ) {
+  //   try {
+  //     let data = {
+  //       couponCode: couponDetails ? couponDetails.code : null,
+  //       address: address,
+  //     };
+  //     const response: any = await cartService.getPhonePeUrl(data);
+  //     console.log("this is cart response");
+
+  //      let {success,orderId,orderToken}=response
+  //     // const orderId = response?.data?.orderId;
+
+  //     // if (orderId) {
+  //     //   // Save redirect flag for later detection
+  //     //   await AsyncStorage.setItem("currentOrderId", orderId);
+
+  //     //   // Now redirect to web page that handles PhonePe payment
+  //     //   const websiteRedirectUrl = `http://iness.fitness/pay/${orderId}`;
+  //     //   Linking.openURL(websiteRedirectUrl); // Opens in external browser
+  //     // } else {
+  //     //   throw new Error("Missing orderId or redirect URL");
+  //     // }
+  //     if(response.success){
+  //          const merchantId = "M23WC6W062GQI";
+
+  //   // Your app's deep link callback (must match scheme in app.json)
+  //   const callbackUrl = `myapp://dashboard/paymentsuccess?orderId=${orderId}`;
+
+  //   // Construct PhonePe SDK deep link
+  //   const phonePeUrl = `phonepe://pg/v1/pay?orderToken=${encodeURIComponent(
+  //     orderToken
+  //   )}&merchantId=${merchantId}&callbackUrl=${encodeURIComponent(callbackUrl)}`;
+
+  //   console.log("Opening PhonePe:", phonePeUrl);
+
+  //   // Open PhonePe app
+  //   await Linking.openURL(phonePeUrl);
+  //     }else {
+  //       alert('Some error has happened')
+  //     }
+
+  //   } catch (error: any) {
+  //     console.log(error);
+
+  //     setSnackBarOpen(true);
+  //     setSnackbarMessage(error.message);
+  //   } finally {
+  //     setLoading(false);
+  //     setDeliveryAddress({
+  //       fullAddress: "",
+  //       city: "",
+  //       state: "",
+  //       pincode: "",
+  //     });
+  //     router.push("/(tabs)/dashboard/paymentsuccess");
+  //   }
+  // }
   async function onplaceOrder(
     address: string,
     couponDetails: DiscountCoupon | null
   ) {
     try {
-      let data = {
+      setLoading(true);
+
+      const data = {
         couponCode: couponDetails ? couponDetails.code : null,
         address: address,
       };
+
       const response: any = await cartService.getPhonePeUrl(data);
-      const orderId = response?.data?.orderId;
 
-      if (orderId) {
-        // Save redirect flag for later detection
-        await AsyncStorage.setItem("currentOrderId", orderId);
+      if (response.success) {
+        const { orderId, orderToken } = response;
+        const merchantId = "M23WC6W062GQI";
 
-        // Now redirect to web page that handles PhonePe payment
-        const websiteRedirectUrl = `http://iness.fitness/pay/${orderId}`;
-        Linking.openURL(websiteRedirectUrl); // Opens in external browser
+        // Construct request JSON as per SDK docs
+        const requestBody = {
+          orderId: orderId,
+          merchantId: merchantId,
+          token: orderToken,
+          paymentMode: {
+            type: "PAY_PAGE", // required for standard checkout
+          },
+        };
+
+        // Convert to string for startTransaction
+        const requestString = JSON.stringify(requestBody);
+
+        // Use SDK call
+        const txnResponse = await PhonePePayment.startTransaction(
+          requestString,
+          "myapp" // your app scheme from app.json
+        );
+
+        console.log("PhonePe txn response:", txnResponse);
+
+        if (txnResponse?.status === "SUCCESS") {
+          router.push(`/dashboard/paymentsuccess?orderId=${orderId}`);
+        } else if (txnResponse?.status === "FAILURE") {
+          alert("Transaction failed");
+        } else if (txnResponse?.status === "INTERRUPTED") {
+          alert("Transaction interrupted");
+        }
       } else {
-        throw new Error("Missing orderId or redirect URL");
+        alert("Some error happened");
       }
     } catch (error: any) {
-      console.log(error);
-
+      console.log("PhonePe error:", error);
       setSnackBarOpen(true);
       setSnackbarMessage(error.message);
     } finally {
       setLoading(false);
-      setDeliveryAddress({
-        fullAddress: "",
-        city: "",
-        state: "",
-        pincode: "",
-      });
-      router.push("/(tabs)/dashboard/paymentsuccess");
     }
   }
-
   return (
     <>
       {/* Header + Content */}

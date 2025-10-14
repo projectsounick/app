@@ -8,13 +8,17 @@ import {
   ImageBackground,
   ActivityIndicator,
   Modal,
+  Dimensions,
+  Platform,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { UserData } from "@/app/interfaces/UserInterface";
 import NormalHeader from "@/app/modules/NormalHeader";
 import theme from "@/app/Theme/globalTheme";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+const { height } = Dimensions.get("window");
+const topPadding = height * 0.05; // 2% of screen height
 
 const backgroundImage = require("../../../assets/images/basicBackground.jpg");
 const labelStyle = {
@@ -417,7 +421,13 @@ export default function EditOnboardingScreen() {
               </>
             )
           ) : (
-            <Text style={{ color: theme.colors.dark, fontSize: 16 }}>
+            <Text
+              style={{
+                color: theme.colors.dark,
+                fontSize: 16,
+                fontFamily: theme.fonts.medium,
+              }}
+            >
               {formValues[field] || "--"}
             </Text>
           )}
@@ -437,12 +447,14 @@ export default function EditOnboardingScreen() {
   };
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right"]}
-    >
+    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <ImageBackground source={backgroundImage} style={{ flex: 1 }}>
-        <View style={{ paddingTop: 20, paddingLeft: 20 }}>
+        <View
+          style={{
+            paddingLeft: 20,
+            marginTop: Platform.OS === "ios" ? topPadding : "4%",
+          }}
+        >
           <NormalHeader screenName="Profile Details" />
         </View>
         <ScrollView contentContainerStyle={{ padding: 16 }}>
@@ -476,6 +488,6 @@ export default function EditOnboardingScreen() {
           bgColor={theme.colors.primary}
         />
       </ImageBackground>
-    </SafeAreaView>
+    </View>
   );
 }

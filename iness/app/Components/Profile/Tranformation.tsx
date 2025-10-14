@@ -49,7 +49,11 @@ export default function TransformationCard() {
         }}
       >
         <Text
-          style={{ fontSize: 16, fontWeight: "bold", color: theme.colors.dark }}
+          style={{
+            fontSize: 16,
+            fontFamily: theme.fonts.bold,
+            color: theme.colors.dark,
+          }}
         >
           Daily Progress Photos
         </Text>
@@ -79,7 +83,7 @@ export default function TransformationCard() {
         style={{
           fontSize: 12,
           color: theme.colors.dark,
-          lineHeight: 24,
+          fontFamily: theme.fonts.medium,
           marginTop: 8,
         }}
       >

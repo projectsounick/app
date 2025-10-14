@@ -58,7 +58,7 @@ export default function TrainScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["left", "right", "bottom"]}
+      edges={["left", "right"]}
     >
       {loading ? (
         <View

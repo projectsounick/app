@@ -37,7 +37,6 @@ const SlotSelectionSection: React.FC<Props> = ({
           marginBottom: 12,
         }}
       >
-        {" "}
         <Icon name="clock" size={20} color="#5E3AEE" />
         <Text
           style={{

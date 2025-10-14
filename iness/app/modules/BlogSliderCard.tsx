@@ -26,7 +26,7 @@ export default function BlogSliderCard() {
       colors={["#140A21", "#522987"]}
       start={{ x: 0, y: 0 }}
       style={{
-        height: 190,
+        height: 210,
         paddingVertical: 16,
         paddingHorizontal: 12,
         borderRadius: 12,
@@ -42,26 +42,36 @@ export default function BlogSliderCard() {
         }}
       >
         <View>
-          <Text
+          <View
             style={{
-              fontSize: theme.fontSizes.regular,
-              fontWeight: "bold",
-              color: theme.colors.text,
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "flex-start",
+              alignItems: "center",
             }}
           >
             <MaterialCommunityIcons
-              name="run"
-              size={18}
-              color={theme.colors.primary}
+              name="shield-check"
+              size={20}
+              color="#fff"
+              style={{ marginRight: 8 }}
             />
-            Read our Blogs
-          </Text>
+            <Text
+              style={{
+                fontSize: theme.fontSizes.regular,
+                fontFamily: theme.fonts.bold,
+                color: theme.colors.text,
+              }}
+            >
+              Read our Blogs
+            </Text>
+          </View>
           <Text
             style={{
               fontSize: theme.fontSizes.small,
-              fontWeight: theme.fontWeights.regular,
+              fontFamily: theme.fonts.bold,
               color: theme.colors.text,
-              marginTop: 4,
+              marginTop: 6,
             }}
           >
             Explore expert tips, and practical guides to help you
@@ -73,7 +83,7 @@ export default function BlogSliderCard() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={{ marginTop: 8 }}
+        style={{ marginTop: 12 }}
       >
         {blogs.map((item: Blog, index) => (
           <View
@@ -102,7 +112,7 @@ export default function BlogSliderCard() {
                 flexDirection: "row",
                 justifyContent: "space-between",
                 alignItems: "center",
-                height: "95%",
+                height: "94%",
               }}
             >
               {/* Left Section */}
@@ -121,7 +131,7 @@ export default function BlogSliderCard() {
                 <Text
                   numberOfLines={3}
                   style={{
-                    fontWeight: theme.fontWeights.bold,
+                    fontFamily: theme.fonts.bold,
                     fontSize: 12,
                     marginBottom: 6,
                     color: theme.colors.dark,
@@ -134,9 +144,9 @@ export default function BlogSliderCard() {
                 {/* Know More Button */}
                 <TouchableOpacity
                   style={{
-                    backgroundColor: "#B4F455",
+                    backgroundColor: "#BDFF84",
                     width: 114,
-                    height: 28,
+                    height: 31,
                     borderRadius: 16,
                     alignSelf: "flex-start",
                     justifyContent: "center",
@@ -151,8 +161,8 @@ export default function BlogSliderCard() {
                 >
                   <Text
                     style={{
-                      fontWeight: theme.fontWeights.bold,
-                      fontSize: theme.fontSizes.small,
+                      fontFamily: theme.fonts.bold,
+                      fontSize: 14,
                       textAlign: "center",
                       color: theme.colors.dark,
                     }}

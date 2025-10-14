@@ -146,12 +146,12 @@ export default function SmallHeader({
         </View>
 
         {/* Center Title */}
-        <View style={{ width: "33%" }}>
+        <View>
           <Text
             style={{
               color: "white",
               fontWeight: "bold",
-              fontSize: theme.fontSizes.regularSmall,
+              fontSize: 14,
               textAlign: "center",
             }}
           >

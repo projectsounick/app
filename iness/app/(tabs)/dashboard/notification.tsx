@@ -11,18 +11,16 @@ import {
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import theme from "@/app/Theme/globalTheme";
-import {
-  getStoredNotifications,
-  deleteNotificationByIndex,
-} from "@/utils/notificationUtils";
-import { ActivityIndicator, Divider } from "react-native-paper";
+import { ActivityIndicator } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import VideoCallChecker from "@/app/modules/VideoCallJoinModal";
 import eventBus from "@/event";
 import { notificationService } from "@/app/services/notification.service";
 import CustomSnackbar from "@/app/modules/Snackbar";
+
 const { height } = Dimensions.get("window");
-const topPadding = height * 0.05; // 2
+const topPadding = height * 0.05;
+
 interface NotificationItem {
   title: string | null;
   body: string | null;
@@ -42,13 +40,11 @@ export default function NotificationScreen() {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  /// Fetch notifications from AsyncStorage
+  /// Fetch notifications
   async function fetchNotificationsFromLocal() {
     setLoading(true);
-
     try {
       const response = await notificationService.getNotification();
-
       if (response.success) {
         setNotifications(response.data);
       } else {
@@ -66,11 +62,10 @@ export default function NotificationScreen() {
   /// Delete single notification
   async function handleDelete(notificationId: string) {
     try {
-      setDeletingId(notificationId); // set loading for this one
+      setDeletingId(notificationId);
       const res = await notificationService.deleteNotification(notificationId);
 
       if (res.success) {
-        // Remove the notification from local state
         setNotifications((prev) =>
           prev.filter((n) => (n as any)._id !== notificationId)
         );
@@ -82,7 +77,7 @@ export default function NotificationScreen() {
       setSnackbarOpen(true);
       setSnackbarMessage("Something went wrong.");
     } finally {
-      setDeletingId(null); // reset loading state
+      setDeletingId(null);
     }
   }
 
@@ -97,12 +92,7 @@ export default function NotificationScreen() {
   useEffect(() => {
     fetchNotificationsFromLocal();
     eventBus.emit("clear-notifications");
-    return () => {};
   }, []);
-
-  function setSnackbarVisible(arg0: boolean): void {
-    throw new Error("Function not implemented.");
-  }
 
   return (
     <SafeAreaView
@@ -145,18 +135,19 @@ export default function NotificationScreen() {
             style={{
               color: "#333",
               fontSize: 22,
-              fontWeight: "bold",
+              fontFamily: theme.fonts.bold,
               marginLeft: 20,
             }}
           >
             Notifications
           </Text>
         </View>
+
+        {/* Loader */}
         {loading ? (
           <View
             style={{
-              display: "flex",
-              flexDirection: "row",
+              flex: 1,
               justifyContent: "center",
               alignItems: "center",
             }}
@@ -179,6 +170,7 @@ export default function NotificationScreen() {
                   fontSize: 16,
                   textAlign: "center",
                   marginTop: 40,
+                  fontFamily: theme.fonts.bold,
                 }}
               >
                 No notifications available.
@@ -188,23 +180,125 @@ export default function NotificationScreen() {
                 <View key={index} style={{ marginBottom: 16 }}>
                   <View
                     style={{
-                      backgroundColor: "rgba(255, 255, 255, 0.8)",
-                      borderRadius: 12,
-                      padding: 12,
+                      flexDirection: "row",
+                      alignItems: "flex-start",
+                      backgroundColor: "rgba(255, 255, 255, 0.95)",
+                      borderRadius: 16,
+                      padding: 14,
                       borderColor: theme.colors.cardLight,
                       borderWidth: 1,
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.05,
+                      shadowRadius: 6,
+                      elevation: 3,
                       position: "relative",
                     }}
                   >
-                    {/* Delete Icon */}
+                    {/* Notification Icon */}
+                    <View
+                      style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: 22,
+                        backgroundColor: "#fff",
+                        borderWidth: 1,
+                        borderColor: "#ddd",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        marginRight: 12,
+                      }}
+                    >
+                      <MaterialCommunityIcons
+                        name={
+                          item.data?.type === "video" ? "video" : "bell-outline"
+                        }
+                        size={22}
+                        color="#333"
+                      />
+                    </View>
+
+                    {/* Content */}
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={{
+                          color: theme.colors.secondPrimary,
+                          fontSize: 16,
+                          fontWeight: "700",
+                          marginBottom: 4,
+                          fontFamily: theme.fonts.bold,
+                        }}
+                      >
+                        {item.title}
+                      </Text>
+                      <Text
+                        style={{
+                          color: "#444",
+                          fontSize: 14,
+                          marginBottom: 6,
+                          lineHeight: 20,
+                          fontFamily: theme.fonts.medium,
+                        }}
+                      >
+                        {item.body}
+                      </Text>
+                      <Text
+                        style={{
+                          color: "#888",
+                          fontSize: 12,
+                          marginBottom: 8,
+                          fontFamily: theme.fonts.regular,
+                        }}
+                      >
+                        {new Date(item.createdAt).toLocaleString()}
+                      </Text>
+
+                      {/* Join Button */}
+                      {item.data?.type === "video" && (
+                        <TouchableOpacity
+                          onPress={() => openVideoCallModal(item.data)}
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            alignSelf: "flex-start",
+                            backgroundColor: theme.colors.primary,
+                            height: 30,
+                            width: 80,
+
+                            borderRadius: 20,
+                          }}
+                        >
+                          <MaterialCommunityIcons
+                            name="video"
+                            size={16}
+                            color="#000"
+                            style={{ marginRight: 6 }}
+                          />
+                          <Text
+                            style={{
+                              color: "#000",
+                              fontSize: 12,
+                              fontWeight: "600",
+                              fontFamily: theme.fonts.bold,
+                            }}
+                          >
+                            Join
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+
+                    {/* Delete Button */}
                     <TouchableOpacity
                       onPress={() => handleDelete((item as any)._id)}
                       style={{
                         position: "absolute",
-                        top: 8,
-                        right: 8,
-                        zIndex: 1,
-                        padding: 4,
+                        top: 10,
+                        right: 10,
+                        padding: 6,
+                        borderRadius: 20,
+                        backgroundColor: "rgba(0,0,0,0.05)",
                       }}
                       disabled={deletingId === (item as any)._id}
                     >
@@ -218,86 +312,25 @@ export default function NotificationScreen() {
                         />
                       )}
                     </TouchableOpacity>
-
-                    {/* Content */}
-                    <Text
-                      style={{
-                        color: theme.colors.secondPrimary,
-                        fontSize: 16,
-                        fontWeight: "600",
-                        marginBottom: 4,
-                      }}
-                    >
-                      {item.title}
-                    </Text>
-                    <Text
-                      style={{ color: "#444", fontSize: 14, marginBottom: 6 }}
-                    >
-                      {item.body}
-                    </Text>
-                    <Text
-                      style={{ color: "#888", fontSize: 12, marginBottom: 8 }}
-                    >
-                      {new Date(item.createdAt).toLocaleString()}
-                    </Text>
-
-                    {/* Join Video Button */}
-                    {item.data?.type === "video" && (
-                      <TouchableOpacity
-                        onPress={() => openVideoCallModal(item.data)}
-                        style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          alignSelf: "flex-start",
-                          backgroundColor: theme.colors.primary,
-                          paddingVertical: 6,
-                          paddingHorizontal: 16,
-                          borderRadius: 20,
-                        }}
-                      >
-                        <MaterialCommunityIcons
-                          name="video"
-                          size={16}
-                          color="#000"
-                          style={{ marginRight: 6 }}
-                        />
-                        <Text
-                          style={{
-                            color: "#000",
-                            fontSize: 12,
-                            fontWeight: "600",
-                          }}
-                        >
-                          Join
-                        </Text>
-                      </TouchableOpacity>
-                    )}
                   </View>
-
-                  <Divider
-                    style={{
-                      backgroundColor: "#ccc",
-                      height: 1,
-                      marginTop: 12,
-                    }}
-                  />
                 </View>
               ))
             )}
           </ScrollView>
         )}
-        {/* Notifications List */}
 
-        {/* Video Call Modal Slide-Up */}
+        {/* Video Call Modal */}
         <VideoCallChecker
           videoCallSchedule={videoCallSchedule}
           setVideoCallSchedule={setVideoCallSchedule}
         />
+
+        {/* Snackbar */}
         <CustomSnackbar
           visible={snackbarOpen}
           message={snackbarMessage}
           bgColor={theme.colors.primary}
-          onDismiss={() => setSnackbarVisible(false)}
+          onDismiss={() => setSnackbarOpen(false)}
         />
       </ImageBackground>
     </SafeAreaView>

@@ -322,6 +322,7 @@ const PlansInfo: React.FC<Props> = ({
             onPress={() => {
               addingIntoToCart("plan");
             }}
+            height={50}
           />
         </LinearGradient>
       </Animated.View>

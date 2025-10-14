@@ -16,6 +16,7 @@ import { VideoCallFrontend } from "../interfaces/videocallInterface";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomSnackbar from "./Snackbar";
 import theme from "../Theme/globalTheme";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 
 const { width } = Dimensions.get("window");
 
@@ -63,18 +64,37 @@ export default function VideoCallChecker({
 
       if (response.success) {
         let data: VideoCallFrontend = response.data;
-
         const { appId, channelName, participants, active } = data;
+
         if (active) {
           if (participants && participants.length > 0) {
-            setCallDetails({
-              appId,
-              channelName,
-              token: participants[0].token,
-              callId: participants[0].uid,
-            });
-            setShowVideoModal(true);
-            setVideoCallSchedule({ data: null, scheduled: false });
+            // ✅ get logged in user id from AsyncStorage
+            const userCheck =
+              await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+
+            if (userCheck.exists && userCheck.data) {
+              const myId = userCheck.data._id;
+
+              // ✅ find my participant details
+              const myParticipant = participants.find((p) => p.userId === myId);
+
+              if (myParticipant) {
+                setCallDetails({
+                  appId,
+                  channelName,
+                  token: myParticipant.token,
+                  callId: myParticipant.uid,
+                });
+                setShowVideoModal(true);
+                setVideoCallSchedule({ data: null, scheduled: false });
+              } else {
+                setSnackbarMessage("You are not a participant of this call");
+                setSnackbarVisible(true);
+              }
+            } else {
+              setSnackbarMessage("User not found in storage");
+              setSnackbarVisible(true);
+            }
           }
         } else {
           setVideoCallSchedule({ data: null, scheduled: false });
@@ -83,6 +103,7 @@ export default function VideoCallChecker({
         }
       }
     } catch (error) {
+      console.error(error);
       setMessage("Some error occurred");
     } finally {
       setLoading(false);

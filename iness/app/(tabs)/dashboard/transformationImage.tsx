@@ -198,7 +198,7 @@ export default function TransformationImage() {
                   <Text
                     style={{
                       fontSize: 14,
-                      fontWeight: "bold",
+                      fontFamily: theme.fonts.bold,
                       color: theme.colors.dark,
                       marginRight: 10,
                     }}
@@ -306,6 +306,7 @@ export default function TransformationImage() {
           loading={imageUploadLoader}
           onPress={pickImage}
           title="Upload Media"
+          height={50}
         />
 
         {/* ✅ Media viewer modals */}

@@ -132,11 +132,13 @@ const FullPlanDetails = () => {
                   ""
                 }
               >
-                <WorkoutSummaryCard
-                  sessions={sessions}
-                  selectedSession={selectedSession}
-                  setSelectedSession={setSelectedSession}
-                />
+                {sessions?.length ? (
+                  <WorkoutSummaryCard
+                    sessions={sessions}
+                    selectedSession={selectedSession}
+                    setSelectedSession={setSelectedSession}
+                  />
+                ) : null}
               </HeaderContent>
             }
           />

@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
+  Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
@@ -110,13 +111,28 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = ({}) => {
       );
 
       // Ask for camera permissions
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert(
-          "Permission Required",
-          "Camera access is needed to take a photo or video."
-        );
-        return;
+      // ✅ Request permissions only on Android
+      if (Platform.OS === "android") {
+        if (mode === "camera") {
+          const { status } = await ImagePicker.requestCameraPermissionsAsync();
+          if (status !== "granted") {
+            Alert.alert(
+              "Permission Required",
+              "Camera access is needed to take a photo or video."
+            );
+            return;
+          }
+        } else {
+          const { status } =
+            await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (status !== "granted") {
+            Alert.alert(
+              "Permission Required",
+              "Gallery access is needed to pick media."
+            );
+            return;
+          }
+        }
       }
       let result: ImagePicker.ImagePickerResult;
 

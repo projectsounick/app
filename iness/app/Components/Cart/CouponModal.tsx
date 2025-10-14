@@ -1,14 +1,18 @@
 import theme from "@/app/Theme/globalTheme";
+import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
   View,
   Text,
   TextInput,
-  Button,
-  StyleSheet,
   TouchableOpacity,
+  Modal,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Keyboard,
+  Platform,
 } from "react-native";
-import Modal from "react-native-modal";
+import { LinearGradient } from "expo-linear-gradient";
 
 interface CouponModalProps {
   visible: boolean;
@@ -27,60 +31,126 @@ const CouponModal: React.FC<CouponModalProps> = ({
 }) => {
   return (
     <Modal
-      isVisible={visible}
-      onBackdropPress={onClose}
-      style={{ justifyContent: "flex-end", margin: 0 }}
+      transparent
+      visible={visible}
+      animationType="slide"
+      onRequestClose={onClose}
     >
-      <View style={styles.modalContent}>
-        <Text style={styles.heading}>Apply Coupon</Text>
-        <TextInput
-          placeholder="Enter coupon code"
-          value={couponCode}
-          onChangeText={setCouponCode}
-          style={styles.input}
-        />
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => onApply(couponCode)}
-        >
-          <Text style={styles.buttonText}>Apply Coupon</Text>
-        </TouchableOpacity>
-      </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1, justifyContent: "flex-end" }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <View
+            style={{
+              flex: 1,
+              backgroundColor: "rgba(0,0,0,0.5)",
+              justifyContent: "flex-end",
+            }}
+          >
+            <LinearGradient
+              colors={["#140A21", "#522987"]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={{
+                padding: 20,
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
+              }}
+            >
+              {/* Dash handle */}
+              <View
+                style={{
+                  width: 50,
+                  height: 5,
+                  backgroundColor: "rgba(255,255,255,0.3)",
+                  borderRadius: 3,
+                  alignSelf: "center",
+                  marginBottom: 12,
+                }}
+              />
+
+              {/* Title + Close */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 15,
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: "600",
+                    color: "#fff",
+                    fontFamily: theme.fonts.bold,
+                  }}
+                >
+                  Apply Coupon
+                </Text>
+
+                <TouchableOpacity
+                  onPress={onClose}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 18,
+                    backgroundColor: "rgba(255,255,255,0.2)",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Ionicons name="close" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
+
+              {/* Input */}
+              <TextInput
+                placeholder="Enter coupon code"
+                placeholderTextColor="#ccc"
+                value={couponCode}
+                onChangeText={setCouponCode}
+                style={{
+                  backgroundColor: "#fff",
+                  borderRadius: 10,
+                  paddingHorizontal: 12,
+                  paddingVertical: 10,
+                  marginBottom: 15,
+                  fontFamily: theme.fonts.bold,
+                  fontSize: 16,
+                  color: "#000",
+                }}
+              />
+
+              {/* Apply Button */}
+              <TouchableOpacity
+                style={{
+                  backgroundColor: "#BDFF84",
+                  paddingVertical: 14,
+                  borderRadius: 30,
+                  alignItems: "center",
+                }}
+                onPress={() => onApply(couponCode)}
+              >
+                <Text
+                  style={{
+                    color: "#000",
+                    fontWeight: "700",
+                    fontSize: 16,
+                    fontFamily: theme.fonts.bold,
+                  }}
+                >
+                  Apply Coupon
+                </Text>
+              </TouchableOpacity>
+            </LinearGradient>
+          </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
-
-const styles = StyleSheet.create({
-  modalContent: {
-    backgroundColor: "#fff",
-    padding: 20,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
-  heading: {
-    fontSize: 18,
-    fontWeight: "600",
-    marginBottom: 10,
-  },
-  input: {
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 15,
-  },
-  button: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 12,
-    borderRadius: 16,
-    alignItems: "center",
-    marginTop: 10,
-  },
-  buttonText: {
-    color: "#000",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});
 
 export default CouponModal;

@@ -37,6 +37,7 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
             style={{
               color: isUser ? theme.colors.text : theme.colors.dark,
               fontSize: 14,
+              fontFamily: theme.fonts.medium,
             }}
           >
             {item.content.replace(/\\n/g, "\n")}

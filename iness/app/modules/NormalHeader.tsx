@@ -37,8 +37,9 @@ export default function NormalHeader({ screenName, rightIcon }: any) {
         <Text
           style={{
             fontSize: 22,
-            fontWeight: "bold",
+
             color: theme.colors.dark,
+            fontFamily: theme.fonts.bold,
           }}
         >
           {screenName}

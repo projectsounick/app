@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Modal, TextInput } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { CartItem } from "@/app/interfaces/cartInterface";
 import AnimatedDots from "./LoadingDots";
 import { DiscountCoupon } from "@/app/interfaces/otherInterfaces";
+import theme from "@/app/Theme/globalTheme";
 
 interface CartCheckoutSummaryProps {
   cartItems: CartItem[];
@@ -89,7 +90,7 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
             alignItems: "center",
             justifyContent: "space-between",
             paddingHorizontal: 16,
-            borderRadius: 12,
+            borderRadius: 30,
             height: 48,
 
             opacity: cartItems.length === 0 ? 0.6 : 1, // visual cue
@@ -100,16 +101,50 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
           ) : (
             <>
               <View>
-                <Text style={{ color: "#000", fontSize: 11 }}>Total</Text>
                 <Text
-                  style={{ color: "#000", fontWeight: "bold", fontSize: 16 }}
+                  style={{
+                    color: "#000",
+                    fontSize: 11,
+                    fontFamily: theme.fonts.bold,
+                  }}
+                >
+                  Total
+                </Text>
+                <Text
+                  style={{
+                    color: "#000",
+                    fontWeight: "bold",
+                    fontSize: 16,
+                    fontFamily: theme.fonts.bold,
+                  }}
                 >
                   ₹{totalAmount}
                 </Text>
               </View>
-              <Text style={{ color: "#000", fontWeight: "bold" }}>
-                Place Order ➔
-              </Text>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: "#000",
+                    fontWeight: "bold",
+                    fontFamily: theme.fonts.bold,
+                    fontSize: 16,
+                  }}
+                >
+                  Place Order
+                </Text>
+                <MaterialIcons
+                  name="arrow-forward-ios"
+                  size={18}
+                  color="#000"
+                  style={{ marginLeft: 2 }}
+                />
+              </View>
             </>
           )}
         </TouchableOpacity>

@@ -13,7 +13,20 @@ import { ActivityIndicator } from "react-native-paper";
 import { router } from "expo-router";
 
 //// Main function for the profile card ----------------------------------------------------/
+function calculateAge(dob: string | Date) {
+  const birthDate = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  const dayDiff = today.getDate() - birthDate.getDate();
 
+  // If birthday hasn't occurred yet this year, subtract 1
+  if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
+    age--;
+  }
+
+  return age;
+}
 export default function ProfileCard() {
   const [userDetails, setUserDetails] = useState<UserData | null>(null);
   const [imageUploadLoader, setimageUploadLoader] = useState(false);
@@ -194,20 +207,41 @@ export default function ProfileCard() {
             style={{
               color: theme.colors.text,
               fontSize: 16,
-              fontWeight: "bold",
+              fontFamily: theme.fonts.bold,
             }}
           >
             {userDetails?.name}
           </Text>
-          <Text style={{ color: theme.colors.text, fontSize: 14 }}>
+          <Text
+            style={{
+              color: theme.colors.text,
+              fontSize: 14,
+              fontFamily: theme.fonts.bold,
+            }}
+          >
             {userDetails?.phoneNumber}
           </Text>
         </View>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text style={{ color: theme.colors.text, fontSize: 14 }}>
-            Age: 28
+          <Text
+            style={{
+              color: theme.colors.text,
+              fontSize: 14,
+              fontFamily: theme.fonts.bold,
+            }}
+          >
+            Age:{" "}
+            {userDetails && userDetails.dob
+              ? calculateAge(userDetails.dob)
+              : "N/A"}
           </Text>
-          <Text style={{ color: theme.colors.text, fontSize: 14 }}>
+          <Text
+            style={{
+              color: theme.colors.text,
+              fontSize: 14,
+              fontFamily: theme.fonts.bold,
+            }}
+          >
             Sex: {userDetails?.sex}
           </Text>
         </View>

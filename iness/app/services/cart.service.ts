@@ -52,6 +52,7 @@ async function addCartItems(data: any): Promise<ApiResponseInterface> {
     throw new Error("Error updating user: " + error.message);
   }
 }
+
 async function updateCartItems(data: any): Promise<ApiResponseInterface> {
   try {
     let action = data.action;

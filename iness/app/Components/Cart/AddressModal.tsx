@@ -8,11 +8,11 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
-  ScrollView,
 } from "react-native";
-import { Modal } from "react-native-paper";
+import Modal from "react-native-modal";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import theme from "@/app/Theme/globalTheme";
 
 interface AddressModalProps {
   visible: boolean;
@@ -41,31 +41,43 @@ export default function AddressModal({
 }: AddressModalProps) {
   return (
     <Modal
-      visible={visible}
-      onDismiss={onClose}
-      contentContainerStyle={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 20,
-      }}
+      isVisible={visible}
+      onBackdropPress={onClose}
+      onSwipeComplete={onClose}
+      swipeDirection="down"
+      style={{ justifyContent: "flex-end", margin: 0 }}
+      avoidKeyboard
+      propagateSwipe
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ width: "100%" }}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 20 : 0}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <LinearGradient
             colors={["#140A21", "#522987"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={{
-              width: "100%",
-              borderRadius: 20,
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
               padding: 20,
+              paddingBottom: 40,
+              minHeight: 400,
             }}
           >
+            {/* Handle indicator */}
+            <View
+              style={{
+                width: 50,
+                height: 5,
+                backgroundColor: "rgba(255,255,255,0.5)",
+                borderRadius: 3,
+                alignSelf: "center",
+                marginBottom: 12,
+              }}
+            />
+
             {/* Header */}
             <View
               style={{
@@ -75,11 +87,28 @@ export default function AddressModal({
                 marginBottom: 16,
               }}
             >
-              <Text style={{ fontSize: 18, fontWeight: "bold", color: "#fff" }}>
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: "bold",
+                  color: "#fff",
+                  fontFamily: theme.fonts.bold,
+                }}
+              >
                 Enter Delivery Address
               </Text>
-              <TouchableOpacity onPress={onClose}>
-                <Ionicons name="close-circle" size={30} color="#fff" />
+              <TouchableOpacity
+                onPress={onClose}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                  backgroundColor: "rgba(255,255,255,0.15)", // subtle circular bg
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Ionicons name="close" size={20} color="#fff" />
               </TouchableOpacity>
             </View>
 
@@ -93,7 +122,6 @@ export default function AddressModal({
                 setAddress((prev: any) => ({ ...prev, fullAddress: text }))
               }
             />
-
             <TextInput
               placeholder="City"
               placeholderTextColor="#aaa"
@@ -103,7 +131,6 @@ export default function AddressModal({
                 setAddress((prev: any) => ({ ...prev, city: text }))
               }
             />
-
             <TextInput
               placeholder="State"
               placeholderTextColor="#aaa"
@@ -113,7 +140,6 @@ export default function AddressModal({
                 setAddress((prev: any) => ({ ...prev, state: text }))
               }
             />
-
             <TextInput
               placeholder="Pincode"
               placeholderTextColor="#aaa"
@@ -136,7 +162,14 @@ export default function AddressModal({
               }}
               onPress={() => onConfirm(address)}
             >
-              <Text style={{ color: "#000", fontWeight: "bold" }}>
+              <Text
+                style={{
+                  color: "#000",
+                  fontWeight: "bold",
+                  fontFamily: theme.fonts.bold,
+                  fontSize: 18,
+                }}
+              >
                 Place Now
               </Text>
             </TouchableOpacity>
@@ -154,6 +187,7 @@ const styles = {
     borderWidth: 1,
     borderRadius: 10,
     padding: 12,
+
     marginBottom: 16,
     fontSize: 16,
   },

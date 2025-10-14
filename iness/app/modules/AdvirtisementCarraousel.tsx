@@ -18,10 +18,8 @@ const StylishCarousel = () => {
     <View
       style={{
         marginTop: 12,
-        backgroundColor: "#FFFFFF",
         borderRadius: 12,
-        paddingVertical: 12,
-        paddingHorizontal: 16,
+        overflow: "hidden",
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
@@ -29,97 +27,111 @@ const StylishCarousel = () => {
         elevation: 3,
       }}
     >
-      <View
+      {/* Gradient Background */}
+      <LinearGradient
+        colors={["#140A21", "#522987"]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
         style={{
-          width: "100%",
-          flexDirection: "row",
-          alignItems: "center",
-          marginBottom: 8,
+          borderRadius: 12,
+          padding: 16,
         }}
       >
-        <MaterialCommunityIcons
-          name="shield-check"
-          size={20}
-          color={theme.colors.primary}
-          style={{ marginRight: 8 }}
-        />
+        {/* Heading */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 8,
+          }}
+        >
+          <MaterialCommunityIcons
+            name="shield-check"
+            size={20}
+            color="#fff"
+            style={{ marginRight: 8 }}
+          />
+          <Text
+            style={{
+              fontSize: theme.fontSizes.medium,
+              fontWeight: "bold",
+              color: "#fff",
+            }}
+          >
+            Why Choose Us
+          </Text>
+        </View>
+
+        {/* Sub text */}
         <Text
           style={{
-            fontSize: theme.fontSizes.medium,
-            fontWeight: "bold",
-            color: theme.colors.dark,
+            fontSize: theme.fontSizes.regularSmall,
+            color: "#eee",
+            marginBottom: 12,
           }}
         >
-          Why Choose us
+          Discover the key features that set us apart.
         </Text>
-      </View>
 
-      <Text
-        style={{
-          fontSize: theme.fontSizes.regularSmall,
-          color: theme.colors.medium,
-          marginBottom: 12,
-        }}
-      >
-        Discover the key features that set us apart.
-      </Text>
-
-      <View
-        style={{
-          width: "100%",
-          borderRadius: 12,
-          overflow: "hidden",
-        }}
-      >
-        <LinearGradient
-          colors={["#140A21", "#522987"]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
+        {/* White features strip */}
+        <View
           style={{
-            height: 100,
-            width: "100%",
-            flexDirection: "row",
-            justifyContent: "space-around",
-            alignItems: "center",
+            backgroundColor: "#fff",
             borderRadius: 12,
+            paddingVertical: 10, // reduced height
+            paddingHorizontal: 8,
           }}
         >
-          {DATA.map((item, index) => (
-            <View
-              key={index}
-              style={{
-                flexDirection: "column",
-                alignItems: "center",
-                width: screenWidth / 5,
-              }}
-            >
-              <Text style={{ fontSize: 18, color: "#fff", marginBottom: 4 }}>
-                {item.icon}
-              </Text>
-              <Text
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-around",
+              alignItems: "center",
+            }}
+          >
+            {DATA.map((item, index) => (
+              <View
+                key={index}
                 style={{
-                  color: "#fff",
-                  fontSize: 12,
-                  textAlign: "center",
-                  lineHeight: 14,
+                  flexDirection: "column",
+                  alignItems: "center",
+                  width: screenWidth / 5,
                 }}
               >
-                {item.line1}
-              </Text>
-              <Text
-                style={{
-                  color: "#fff",
-                  fontSize: 12,
-                  textAlign: "center",
-                  lineHeight: 14,
-                }}
-              >
-                {item.line2}
-              </Text>
-            </View>
-          ))}
-        </LinearGradient>
-      </View>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    color: theme.colors.primary,
+                    marginBottom: 2,
+                  }}
+                >
+                  {item.icon}
+                </Text>
+                <Text
+                  style={{
+                    color: theme.colors.dark,
+                    fontSize: 12,
+                    textAlign: "center",
+                    lineHeight: 14,
+                  }}
+                >
+                  {item.line1}
+                </Text>
+                <Text
+                  style={{
+                    color: theme.colors.dark,
+                    fontSize: 12,
+                    textAlign: "center",
+                    lineHeight: 14,
+                  }}
+                >
+                  {item.line2}
+                </Text>
+              </View>
+            ))}
+          </View>
+        </View>
+      </LinearGradient>
     </View>
   );
 };

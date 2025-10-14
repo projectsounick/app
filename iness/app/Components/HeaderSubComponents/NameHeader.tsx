@@ -1,4 +1,5 @@
 import FitnessGoalsCard from "@/app/modules/FitnessCard";
+import theme from "@/app/Theme/globalTheme";
 import { router } from "expo-router";
 import { TouchableOpacity, View } from "react-native";
 import { Text } from "react-native-paper";
@@ -10,14 +11,20 @@ export default function NameHeader({ userData }: any) {
       <Text
         style={{
           fontSize: 20,
-          fontWeight: "bold",
+          fontFamily: theme.fonts.bold,
           color: "white",
-          marginTop: 4,
+          marginTop: 8,
         }}
       >
         Namaste {userData?.name?.split(" ")[0]}! 🙏
       </Text>
-      <Text style={{ color: "white" }}>
+      <Text
+        style={{
+          color: "white",
+          fontFamily: theme.fonts.regular,
+          marginTop: 4,
+        }}
+      >
         Get ready to crush your fitness goals today.
       </Text>
 

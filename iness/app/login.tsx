@@ -259,7 +259,7 @@ const Login = () => {
                     onPress={() => {
                       if (isChecked) formikRef.current?.handleSubmit();
                     }}
-                    height={60}
+                    height={50}
                     title="Send OTP"
                   />
                 </View>
