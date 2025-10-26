@@ -66,7 +66,7 @@ async function updateCartItems(data: any): Promise<ApiResponseInterface> {
 
 //// Funciton for checking out the user cart details and getting the phonepe url ---------------/
 async function getPhonePeUrl(data: any) {
-  return fetchWrapper.post(`${baseUrl}/checkout-cart`, { ...data });
+  return fetchWrapper.post(`${baseUrl}/checkout-cartv2`, { ...data });
 }
 
 //// funciton for getting the order status -----------------------------------/

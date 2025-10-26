@@ -25,7 +25,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { clearCart } from "@/Slices/cartSlice";
 
 const PaymentSuccessScreen = () => {
+  console.log("PaymentSuccessScreen rendered");
   const router = useRouter();
+  const dispatch = useDispatch();
+
+  // Get orderId from URL params
+  const params = useLocalSearchParams();
+  console.log("URL params:", params);
+
 
   const slideUpAnim = useRef(new Animated.Value(50)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -34,8 +41,120 @@ const PaymentSuccessScreen = () => {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [recEiptLoading, setReceiptLoading] = useState(false);
+
+  // useEffect(() => {
+  //   fetchOrderStatus();
+  //   Animated.parallel([
+  //     Animated.timing(slideUpAnim, {
+  //       toValue: 0,
+  //       duration: 500,
+  //       useNativeDriver: true,
+  //     }),
+  //     Animated.timing(opacityAnim, {
+  //       toValue: 1,
+  //       duration: 500,
+  //       useNativeDriver: true,
+  //     }),
+  //   ]).start();
+  //   return () => {
+  //     setOrderId(null);
+  //     // AsyncStorage remove using promise
+  //     AsyncStorage.removeItem("currentOrderId")
+  //       .then(() => console.log("Order ID removed on unmount"))
+  //       .catch((e) => console.error("Failed to remove:", e));
+  //   };
+  // }, []);
+  //  async function fetchOrderStatus() {
+  //   try {
+  //     // Get orderId from AsyncStorage
+  //     const savedOrderId = await AsyncStorage.getItem("currentOrderId");
+
+  //     if (savedOrderId) {
+  //       setOrderId(savedOrderId);
+  //       setLoading(true);
+  //       try {
+  //         const response = await cartService.getOrderStatus(savedOrderId);
+  //         console.log("Order status response:", response);
+  //         if (response.success && response.data.staus === "success") {
+  //           setMessage("✅ Thank you! Payment successful.");
+  //           const activePlansResp = await planService.getActivePlans();
+  //           if (activePlansResp.success) {
+  //             setReciptShow(true);
+  //             dispatch(setActivePlans(activePlansResp.data));
+  //             dispatch(clearCart());
+  //           }
+  //         } else {
+  //           // Payment failed / incomplete
+  //           setMessage(
+  //             "⚠️ Your payment could not be processed. Please try again."
+  //           );
+  //           Alert.alert(
+  //             "⚠️ Payment Incomplete",
+  //             "Your payment could not be processed. Please try again.",
+  //             [{ text: "OK", onPress: () => console.log("Alert closed") }]
+  //           );
+  //         }
+  //       } catch (err) {
+  //         setMessage(
+  //           "⚠️ Your payment could not be processed. Please try again."
+  //         );
+  //         Alert.alert(
+  //           "❌ Error",
+  //           "Something went wrong. Please try again later.",
+  //           [{ text: "OK" }]
+  //         );
+  //       } finally {
+  //         setLoading(false);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     setMessage("Unable to process the payment");
+  //     Alert.alert(
+  //       "⚠️ Payment Incomplete",
+  //       "Your payment could not be processed. Please try again.",
+  //       [{ text: "OK", onPress: () => console.log("Alert closed") }]
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
+
+  
+
   useEffect(() => {
-    fetchOrderStatus();
+    // Get orderId from URL params OR AsyncStorage
+    const initOrderId = async () => {
+      let currentOrderId = null;
+
+      // First priority: Get from URL params
+      if (params.orderId) {
+        currentOrderId = Array.isArray(params.orderId)
+          ? params.orderId[0]
+          : params.orderId;
+        console.log("OrderId from URL params:", currentOrderId);
+      }
+      // Fallback: Get from AsyncStorage
+      else {
+        currentOrderId = await AsyncStorage.getItem("currentOrderId");
+        console.log("OrderId from AsyncStorage:", currentOrderId);
+      }
+
+      if (currentOrderId) {
+        setOrderId(currentOrderId);
+        // Save to AsyncStorage if not already there
+        await AsyncStorage.setItem("currentOrderId", currentOrderId);
+        // Fetch order status
+        await fetchOrderStatus(currentOrderId);
+      } else {
+        console.error("No orderId found!");
+        setMessage("⚠️ Order ID not found. Please contact support.");
+        setLoading(false);
+      }
+    };
+
+    initOrderId();
+
+    // Animations
     Animated.parallel([
       Animated.timing(slideUpAnim, {
         toValue: 0,
@@ -48,69 +167,64 @@ const PaymentSuccessScreen = () => {
         useNativeDriver: true,
       }),
     ]).start();
+
+    // Cleanup on unmount
     return () => {
-      setOrderId(null);
-      // AsyncStorage remove using promise
       AsyncStorage.removeItem("currentOrderId")
         .then(() => console.log("Order ID removed on unmount"))
         .catch((e) => console.error("Failed to remove:", e));
     };
-  }, []);
-  const dispatch = useDispatch();
-  async function fetchOrderStatus() {
+  }, [params.orderId]);
+
+  async function fetchOrderStatus(currentOrderId: string) {
     try {
-      // Get orderId from AsyncStorage
-      const savedOrderId = await AsyncStorage.getItem("currentOrderId");
+      console.log("Fetching order status for:", currentOrderId);
+      setLoading(true);
 
-      if (savedOrderId) {
-        setOrderId(savedOrderId);
-        setLoading(true);
+      const response = await cartService.getOrderStatus(currentOrderId);
+      console.log("Order status response:", response);
+
+      if (response.success && response.data.status === "success") {
+        setMessage("✅ Thank you! Payment successful.");
+
+        // Fetch active plans
         try {
-          const response = await cartService.getOrderStatus(savedOrderId);
-
-          if (response.success && response.data.staus === "success") {
-            setMessage("✅ Thank you! Payment successful.");
-            const activePlansResp = await planService.getActivePlans();
-            if (activePlansResp.success) {
-              setReciptShow(true);
-              dispatch(setActivePlans(activePlansResp.data));
-              dispatch(clearCart());
-            }
-          } else {
-            // Payment failed / incomplete
-            setMessage(
-              "⚠️ Your payment could not be processed. Please try again."
-            );
-            Alert.alert(
-              "⚠️ Payment Incomplete",
-              "Your payment could not be processed. Please try again.",
-              [{ text: "OK", onPress: () => console.log("Alert closed") }]
-            );
+          const activePlansResp = await planService.getActivePlans();
+          if (activePlansResp.success) {
+            setReciptShow(true);
+            dispatch(setActivePlans(activePlansResp.data));
+            dispatch(clearCart());
           }
-        } catch (err) {
-          setMessage(
-            "⚠️ Your payment could not be processed. Please try again."
-          );
-          Alert.alert(
-            "❌ Error",
-            "Something went wrong. Please try again later.",
-            [{ text: "OK" }]
-          );
-        } finally {
-          setLoading(false);
+        } catch (planError) {
+          console.error("Error fetching plans:", planError);
+          // Still show success as payment went through
         }
+      } else {
+        // Payment failed or incomplete
+        setMessage(
+          "⚠️ Your payment could not be processed. Please try again."
+        );
+        Alert.alert(
+          "⚠️ Payment Incomplete",
+          "Your payment could not be processed. Please try again.",
+          [{ text: "OK" }]
+        );
       }
     } catch (error) {
-      setMessage("Unable to process the payment");
+      console.error("Error fetching order status:", error);
+      setMessage(
+        "⚠️ Unable to verify payment status. Please contact support."
+      );
       Alert.alert(
-        "⚠️ Payment Incomplete",
-        "Your payment could not be processed. Please try again.",
-        [{ text: "OK", onPress: () => console.log("Alert closed") }]
+        "❌ Error",
+        "Something went wrong. Please try again later.",
+        [{ text: "OK" }]
       );
     } finally {
       setLoading(false);
     }
   }
+
   async function fetchReceipt(orderId: any) {
     try {
       setReceiptLoading(true);
