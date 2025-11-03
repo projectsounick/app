@@ -45,6 +45,9 @@ import { RootState } from "@/store";
 import SessionCalendarSheet from "@/app/modules/SessionCalendarSheet";
 import FeedbackModal from "@/app/Components/ActivePlans.tsx/SessionFeedbackModal";
 import { setCalendarSheetOpen } from "@/Slices/componentOpenSlice";
+import { sessionService } from "@/app/services/sessionService";
+import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
+import LoginJsxWrapper from "@/app/Hoc/LoginJsxWrapper";
 
 const MainHeader = withAnimatedHeader(NameHeader);
 //// Main functional component for the Dashboard screen ---------------------------------/
@@ -86,10 +89,6 @@ const YourComponent = () => {
   const configs = useMemo(
     () => [
       {
-        sliceKey: "plan" as SliceKey,
-        fetchFunction: planService.getAllPlans,
-      },
-      {
         sliceKey: "cart" as SliceKey,
         fetchFunction: cartService.getCartItems,
       },
@@ -104,6 +103,10 @@ const YourComponent = () => {
       {
         sliceKey: "podcast" as SliceKey,
         fetchFunction: podCastService.getPodcasts,
+      },
+      {
+        sliceKey: "session" as SliceKey,
+        fetchFunction: sessionService.getSessions,
       },
     ],
     []
@@ -150,13 +153,18 @@ const YourComponent = () => {
           <>
             <OffersCards />
             <FloatingOptions />
-            <SessionCarousel />
-            <HealthDashboard />
+            <LoginJsxWrapper loginButton={false} backButton={false}>
+              <SessionCarousel />
+            </LoginJsxWrapper>
+            <LoginJsxWrapper loginButton={false} backButton={false}>
+              <HealthDashboard />
+            </LoginJsxWrapper>
             {podCasts && podCasts.length > 0 ? (
               <PodcastMediaCard loggedUser={loggedUser} />
             ) : null}
 
             <BlogSliderCard />
+
             {/* <SliderCard /> */}
             {/* <BannerCard cardData={trackingCardData} />
             <BannerCard cardData={bookSessionCardData} /> */}

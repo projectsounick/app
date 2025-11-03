@@ -25,7 +25,8 @@ import {
 import { RootState } from "@/store";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import { useDispatch, useSelector } from "react-redux";
-
+import { withAuthGuard } from "@/app/Hoc/WithAuthGuardButton";
+const ProtectedAnimatedSubmitButton = withAuthGuard(AnimatedSubmitButton);
 const { width, height } = Dimensions.get("window");
 
 interface ProductModalProps {
@@ -307,12 +308,10 @@ const ProductModal: React.FC<ProductModalProps> = ({
         </ScrollView>
 
         {/* Add to Cart Button */}
-        <AnimatedSubmitButton
+        <ProtectedAnimatedSubmitButton
           loading={cartLoading}
           title="Add to cart"
-          onPress={() => {
-            addingIntoToCart();
-          }}
+          onPress={addingIntoToCart}
           height={50}
         />
         <CustomSnackbar

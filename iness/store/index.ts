@@ -1,4 +1,4 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, combineReducers } from "@reduxjs/toolkit";
 
 import mediaReducer from "../Slices/mediaSlice";
 import trackReducer from "../Slices/trackSlice";
@@ -10,19 +10,33 @@ import blogReducer from "../Slices/blogSlice";
 import ecoReducer from "../Slices/ecomSlice";
 import componentOpenReducer from "../Slices/componentOpenSlice";
 import podcastReducer from "../Slices/podcastSlice";
+import sessionReducer from "../Slices/Session";
+
+// combine all reducers first
+const appReducer = combineReducers({
+  media: mediaReducer,
+  track: trackReducer,
+  plan: planReducer,
+  cart: cartReducer,
+  dietPlan: dietPlanReducer,
+  loader: loaderReducer,
+  blog: blogReducer,
+  ecom: ecoReducer,
+  podcast: podcastReducer,
+  componentOpen: componentOpenReducer,
+  session: sessionReducer,
+});
+
+// root reducer that resets state on logout
+const rootReducer = (state: any, action: any) => {
+  if (action.type === "RESET_STORE") {
+    state = undefined; // clears all slices
+  }
+  return appReducer(state, action);
+};
+
 export const store = configureStore({
-  reducer: {
-    media: mediaReducer,
-    track: trackReducer,
-    plan: planReducer,
-    cart: cartReducer,
-    dietPlan: dietPlanReducer,
-    loader: loaderReducer,
-    blog: blogReducer,
-    ecom: ecoReducer,
-    podcast: podcastReducer,
-    componentOpen: componentOpenReducer,
-  },
+  reducer: rootReducer,
 });
 
 export type RootState = ReturnType<typeof store.getState>;

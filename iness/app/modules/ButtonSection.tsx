@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   ScrollView,
   Animated,
+  Alert,
 } from "react-native";
 import {
   Ionicons,
@@ -13,11 +14,14 @@ import {
   Entypo,
 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-
+import { useNavigation } from "expo-router";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import { userService } from "../services/user.service";
 function FloatingOptions() {
   const scrollRef: any = useRef(null);
   const [index, setIndex] = useState(0);
   const scaleAnim = useRef(new Animated.Value(1)).current;
+  const navigation = useNavigation();
 
   const options = [
     {
@@ -52,18 +56,18 @@ function FloatingOptions() {
     },
   ];
 
-  const loopedOptions = [...options, ...options]; // duplicate for infinite scroll
+  const loopedOptions = [...options, ...options]; // for infinite scroll
 
+  // auto-scroll animation
   useEffect(() => {
     const interval = setInterval(() => {
       setIndex((prev) => {
         const nextIndex = prev + 1;
-        const scrollToX = nextIndex * 90; // adjust for width
+        const scrollToX = nextIndex * 90;
         if (scrollRef.current) {
           scrollRef.current.scrollTo({ x: scrollToX, animated: true });
         }
 
-        // Animate scale
         Animated.sequence([
           Animated.timing(scaleAnim, {
             toValue: 1.1,
@@ -79,9 +83,7 @@ function FloatingOptions() {
 
         if (nextIndex >= options.length) {
           setTimeout(() => {
-            if (scrollRef.current) {
-              scrollRef.current.scrollTo({ x: 0, animated: false });
-            }
+            scrollRef.current?.scrollTo({ x: 0, animated: false });
           }, 400);
           return 0;
         }
@@ -92,6 +94,38 @@ function FloatingOptions() {
 
     return () => clearInterval(interval);
   }, []);
+
+  // 🔒 Auth check before navigating
+  const handleOptionPress = async (label: string) => {
+    try {
+      // Only "Consult" needs login check
+      if (label === "Consult") {
+        const response =
+          await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+
+        if (response.exists) {
+          navigation.navigate("supportchat" as never);
+        } else {
+          Alert.alert(
+            "Login Required",
+            "You need to log in to access this content.",
+            [
+              { text: "Cancel", style: "cancel" },
+              {
+                text: "Login",
+                onPress: () => userService.logout(),
+              },
+            ]
+          );
+        }
+      } else {
+        // Others go directly to train
+        navigation.navigate("train" as never);
+      }
+    } catch (error) {
+      console.error("Auth check failed:", error);
+    }
+  };
 
   return (
     <View
@@ -115,46 +149,51 @@ function FloatingOptions() {
         contentContainerStyle={{ paddingHorizontal: 16 }}
       >
         {loopedOptions.map((item: any, i) => (
-          <Animated.View
+          <TouchableOpacity
             key={i}
-            style={{
-              alignItems: "center",
-              marginRight: 16,
-              width: 80,
-              transform: [{ scale: scaleAnim }],
-            }}
+            activeOpacity={0.8}
+            onPress={() => handleOptionPress(item.label)}
           >
-            <LinearGradient
-              colors={item.bg}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+            <Animated.View
               style={{
-                width: 60,
-                height: 60,
-                borderRadius: 30,
-                justifyContent: "center",
                 alignItems: "center",
-                marginBottom: 6,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.3,
-                shadowRadius: 4,
-                elevation: 4,
+                marginRight: 16,
+                width: 80,
+                transform: [{ scale: scaleAnim }],
               }}
             >
-              {item.icon}
-            </LinearGradient>
-            <Text
-              style={{
-                fontSize: 12,
-                color: "#333",
-                textAlign: "center",
-                fontWeight: "600",
-              }}
-            >
-              {item.label}
-            </Text>
-          </Animated.View>
+              <LinearGradient
+                colors={item.bg}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={{
+                  width: 60,
+                  height: 60,
+                  borderRadius: 30,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  marginBottom: 6,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4,
+                  elevation: 4,
+                }}
+              >
+                {item.icon}
+              </LinearGradient>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: "#333",
+                  textAlign: "center",
+                  fontWeight: "600",
+                }}
+              >
+                {item.label}
+              </Text>
+            </Animated.View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
     </View>

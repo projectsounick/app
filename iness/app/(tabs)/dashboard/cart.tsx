@@ -22,6 +22,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddressModal from "@/app/Components/Cart/AddressModal";
 import CouponModal from "@/app/Components/Cart/CouponModal";
 import { DiscountCoupon } from "@/app/interfaces/otherInterfaces";
+import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
 
 export interface PhonePeTransactionResponse {
   success: boolean;
@@ -32,7 +33,7 @@ export interface PhonePeTransactionResponse {
 }
 
 ///// Main functional component for the cart screen -------------------------/
-export default function CartScreen() {
+function CartScreen() {
   //// getting the cart values from the store -------------------------/
   const cartItems = useSelector((state: RootState) => state.cart.cartItems);
 
@@ -49,8 +50,33 @@ export default function CartScreen() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const [snackbarOpen, setSnackBarOpen] = useState(false);
-  const [merchentId, setMerchenId] = useState(null);
+
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const handleAdd = () => {
+    router.replace("/dashboard/tabs/store");
+  };
+  const [dataFetchLogin, setDataFetchLogin] = useState(false);
+  const merchantId = "M23WC6W062GQI"; // your PhonePe merchantId
+  const flowId = "cart_flow_" + Date.now(); // unique identifier for this flow
+
+  useEffect(() => {
+    const initPhonePe = async () => {
+      try {
+        const result = await PhonePePayment.init(
+          "PRODUCTION",
+          merchantId,
+          flowId,
+          true // enable logging, set false in prod
+        );
+        console.log("PhonePe SDK initialized:", result);
+      } catch (error) {
+        console.log("PhonePe init error:", error);
+      }
+    };
+
+    initPhonePe();
+  }, []);
+  // Function for placing the order ----------------------------.
   async function onplaceOrder(
     address: string,
     couponDetails: DiscountCoupon | null
@@ -89,8 +115,63 @@ export default function CartScreen() {
       router.push("/(tabs)/dashboard/paymentsuccess");
     }
   }
-  const [dataFetchLogin, setDataFetchLogin] = useState(false);
+  // async function onplaceOrder(
+  //   address: string,
+  //   couponDetails: DiscountCoupon | null
+  // ) {
+  //   try {
+  //     setLoading(true);
 
+  //     const data = {
+  //       couponCode: couponDetails ? couponDetails.code : null,
+  //       address: address,
+  //     };
+
+  //     const response: any = await cartService.getPhonePeUrl(data);
+
+  //     if (response.success) {
+  //       const { orderId, orderToken } = response;
+  //       const merchantId = "M23WC6W062GQI";
+
+  //       // Construct request JSON as per SDK docs
+  //       const requestBody = {
+  //         orderId: orderId,
+  //         merchantId: merchantId,
+  //         token: orderToken,
+  //         paymentMode: {
+  //           type: "PAY_PAGE", // required for standard checkout
+  //         },
+  //       };
+
+  //       // Convert to string for startTransaction
+  //       const requestString = JSON.stringify(requestBody);
+
+  //       // Use SDK call
+  //       const txnResponse = await PhonePePayment.startTransaction(
+  //         requestString,
+  //         "myapp" // your app scheme from app.json
+  //       );
+
+  //       console.log("PhonePe txn response:", txnResponse);
+
+  //       if (txnResponse?.status === "SUCCESS") {
+  //         router.push(`/dashboard/paymentsuccess?orderId=${orderId}`);
+  //       } else if (txnResponse?.status === "FAILURE") {
+  //         alert("Transaction failed");
+  //       } else if (txnResponse?.status === "INTERRUPTED") {
+  //         alert("Transaction interrupted");
+  //       }
+  //     } else {
+  //       alert("Some error happened");
+  //     }
+  //   } catch (error: any) {
+  //     console.log("PhonePe error:", error);
+  //     setSnackBarOpen(true);
+  //     setSnackbarMessage(error.message);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // }
   return (
     <>
       {/* Header + Content */}
@@ -155,3 +236,4 @@ export default function CartScreen() {
     </>
   );
 }
+export default LoginWrapper(CartScreen);

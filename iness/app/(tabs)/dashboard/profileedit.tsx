@@ -478,6 +478,7 @@ export default function EditOnboardingScreen() {
               loading={loading}
               onPress={handleUpdate}
               title="Update"
+              height={50}
             />
           </View>
         </ScrollView>

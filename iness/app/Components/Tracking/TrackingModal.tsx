@@ -236,10 +236,10 @@ const TrackerModal = ({
             ) : (
               <TouchableOpacity
                 style={{
-                  backgroundColor: theme.colors.primary,
+                  backgroundColor: "#67c694",
                   paddingVertical: 12,
                   paddingHorizontal: 30,
-                  borderRadius: 10,
+                  borderRadius: 20,
                   width: 200,
 
                   marginTop: 10,
@@ -250,7 +250,7 @@ const TrackerModal = ({
               >
                 <Text
                   style={{
-                    color: theme.colors.dark,
+                    color: "#fff",
                     fontWeight: theme.fontWeights.bold,
                     textAlign: "center",
                     fontSize: theme.fontSizes.medium,

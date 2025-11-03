@@ -29,7 +29,6 @@ import SmallHeader from "@/app/modules/SmallHeader";
 //// Main functional component for the equipscreen ------------------------/
 
 export default function EquipScreen() {
-  const scrollY = useRef(new Animated.Value(0)).current;
   const configs = useMemo(
     () => [
       {

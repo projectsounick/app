@@ -43,20 +43,36 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = () => {
   const [currentSession, setCurrentSession] = useState<any>(null);
   const [feedbackLoading, setFeedbackLoading] = useState(false);
 
-  const toggleMenu = () => {
-    if (menuOpen) {
-      Animated.timing(animation, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }).start(() => setMenuOpen(false));
+  const toggleMenu = async () => {
+    const response =
+      await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+    if (response.exists) {
+      if (menuOpen) {
+        Animated.timing(animation, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }).start(() => setMenuOpen(false));
+      } else {
+        setMenuOpen(true);
+        Animated.timing(animation, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }).start();
+      }
     } else {
-      setMenuOpen(true);
-      Animated.timing(animation, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }).start();
+      Alert.alert(
+        "Login Required",
+        "You need to log in to access this content.",
+        [
+          { text: "Cancel", style: "cancel" },
+          {
+            text: "Login",
+            onPress: () => userService.logout(),
+          },
+        ]
+      );
     }
   };
 

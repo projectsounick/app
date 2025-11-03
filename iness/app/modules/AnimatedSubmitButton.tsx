@@ -53,7 +53,7 @@ const AnimatedSubmitButton: React.FC<AnimatedSubmitButtonProps> = ({
         ) : (
           <Text
             style={{
-              color: theme.colors.dark,
+              color: "#fff",
               textAlign: "center",
               fontWeight: theme.fontWeights?.bold,
               fontSize: 20,

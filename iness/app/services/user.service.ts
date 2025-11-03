@@ -6,6 +6,7 @@ import { config } from "../shared/config";
 import { fetchWrapper } from "../helpers/fetchWrapper";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { store } from "@/store";
 const baseUrl = `${config.apiUrl}/api`;
 ///// Exporting userservice functions --------------------------------------/
 export const userService = {
@@ -68,7 +69,15 @@ async function updateUser(userData: any): Promise<any> {
 
 async function logout() {
   try {
+    console.log("Logout called");
     await AsyncStorage.clear();
+
+    const keys = await AsyncStorage.getAllKeys();
+    console.log("Remaining keys after clear:", keys);
+
+    const user = await AsyncStorage.getItem("user");
+    console.log("User after clear:", user);
+    store.dispatch({ type: "RESET_STORE" });
     router.replace("/"); // Navigate to root (login/home) screen
   } catch (error) {
     console.error("Logout error:", error);

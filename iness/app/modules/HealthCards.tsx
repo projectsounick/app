@@ -17,33 +17,89 @@ import {
   AntDesign,
 } from "@expo/vector-icons";
 import theme from "../Theme/globalTheme";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/store";
+import { router } from "expo-router";
+import TrackerModal from "../Components/Tracking/TrackingModal";
+import CustomSnackbar from "./Snackbar";
+import { trackService } from "../services/track.service";
+import { updateTrackingField } from "@/Slices/trackSlice";
 
 function HealthDashboard() {
-  const [steps, setSteps] = useState(2000);
+  //// Store data -------------------------------------------------------/
+  const currentDayTrackData = useSelector(
+    (state: RootState) => state.track.currentDateTrackData
+  );
+  // Safely access values, defaulting to 0 if null
+  const stepsCount = currentDayTrackData.steps?.steps ?? 0;
+  const sleepDuration = currentDayTrackData.sleep?.sleepDuration ?? 0;
+  const waterIntake = currentDayTrackData.water?.waterIntake ?? 0;
   const stepsGoal = 10000;
-
-  const [sleep, setSleep] = useState(6);
+  const dispatch = useDispatch();
   const sleepGoal = 8;
 
-  const [water, setWater] = useState(1.5);
-  const waterGoal = 3;
+  const waterGoal = 10;
 
   const [modalVisible, setModalVisible] = useState(false);
-  const [activeCard, setActiveCard] = useState(null);
-  const [inputValue, setInputValue] = useState("");
+  const [openModalFor, setOpenModalFor] = useState<"sleep" | "steps" | "water">(
+    "sleep"
+  );
+  const [updateDataLoading, setUpdateDataLoading] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMsg, setSnackbarMsg] = useState("");
 
-  const openModal = (type: any) => {
-    setActiveCard(type);
-    setInputValue("");
+  const onClose = () => {
+    setModalVisible(false);
+  };
+  const openModal = (key: "sleep" | "steps" | "water") => {
+    setOpenModalFor(key);
     setModalVisible(true);
   };
 
-  const saveValue = () => {
-    if (activeCard === "steps") setSteps(Number(inputValue));
-    if (activeCard === "sleep") setSleep(Number(inputValue));
-    if (activeCard === "water") setWater(Number(inputValue));
-    setModalVisible(false);
-  };
+  async function updateTrackingData(
+    type: "sleep" | "steps" | "water",
+    value: number
+  ) {
+    try {
+      setUpdateDataLoading(true);
+      // Map "steps" to "walk", others remain the same
+      const apiType = type === "steps" ? "walk" : type;
+      // Get current day's existing value
+      const existingData: any = currentDayTrackData[type];
+
+      // Calculate new value: add new value to existing if present
+      let newValue = value;
+      if (existingData) {
+        if (type === "steps") newValue += existingData.steps || 0;
+        else if (type === "sleep") newValue += existingData.sleepDuration || 0;
+        else if (type === "water") newValue += existingData.waterIntake || 0;
+      }
+
+      // Call API: send _id if exists, so backend knows to update
+      const response = await trackService.updateTrackingData(
+        newValue,
+        Date.now(),
+        apiType
+      );
+
+      if (response.success && response.data) {
+        dispatch(
+          updateTrackingField({
+            type: type, // e.g., "steps", "sleep", "water"
+            data: response.data, // must include `_id`
+          })
+        );
+      } else {
+        setSnackbarMsg("Some error has happened, try again");
+        setSnackbarVisible(true);
+      }
+    } catch (error) {
+      setSnackbarVisible(true);
+      setSnackbarMsg("Some error has happened, try again");
+    } finally {
+      setUpdateDataLoading(false);
+    }
+  }
 
   return (
     <View style={{ flex: 1, marginBottom: 16 }}>
@@ -103,7 +159,7 @@ function HealthDashboard() {
           </View>
 
           <Progress.Bar
-            progress={steps / stepsGoal}
+            progress={stepsCount / stepsGoal}
             width={null}
             color="#7771de"
             unfilledColor="#E0E0E0"
@@ -111,18 +167,32 @@ function HealthDashboard() {
             height={8}
             borderRadius={4}
           />
-          <Text
+          <View
             style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
               marginTop: 8,
-              fontWeight: "500",
-              fontFamily: theme.fonts.regular,
             }}
           >
-            {steps}/{stepsGoal}
-          </Text>
-
+            <Text
+              style={{
+                fontWeight: "500",
+                fontFamily: theme.fonts.regular,
+              }}
+            >
+              {stepsCount}/{stepsGoal}
+            </Text>
+            <Ionicons
+              onPress={() => router.push("/(tabs)/dashboard/track")}
+              name="chevron-forward"
+              size={24}
+              color="#555"
+            />
+          </View>
           {/* Sync row */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -156,7 +226,7 @@ function HealthDashboard() {
               size={18}
               color="#7771de"
             />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
 
         {/* Sleep Card */}
@@ -207,7 +277,7 @@ function HealthDashboard() {
           </View>
 
           <Progress.Bar
-            progress={sleep / sleepGoal}
+            progress={sleepDuration / sleepGoal}
             width={null}
             color="#7771de"
             unfilledColor="#E0E0E0"
@@ -215,18 +285,33 @@ function HealthDashboard() {
             height={8}
             borderRadius={4}
           />
-          <Text
+
+          <View
             style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
               marginTop: 8,
-              fontWeight: "500",
-              fontFamily: theme.fonts.regular,
             }}
           >
-            {sleep}/{sleepGoal} hrs
-          </Text>
-
+            <Text
+              style={{
+                fontWeight: "500",
+                fontFamily: theme.fonts.regular,
+              }}
+            >
+              {sleepDuration}/{sleepGoal} hrs
+            </Text>
+            <Ionicons
+              onPress={() => router.push("/(tabs)/dashboard/track")}
+              name="chevron-forward"
+              size={24}
+              color="#555"
+            />
+          </View>
           {/* Sync row */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -260,7 +345,7 @@ function HealthDashboard() {
               size={18}
               color="#7771de"
             />
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
 
@@ -302,6 +387,7 @@ function HealthDashboard() {
               Water
             </Text>
           </View>
+
           <TouchableOpacity
             onPress={() => openModal("water")}
             style={{ padding: 6 }}
@@ -311,7 +397,7 @@ function HealthDashboard() {
         </View>
 
         <Progress.Bar
-          progress={water / waterGoal}
+          progress={waterIntake / waterGoal}
           width={null}
           color="#7771de"
           unfilledColor="#E0E0E0"
@@ -319,187 +405,51 @@ function HealthDashboard() {
           height={8}
           borderRadius={4}
         />
-        <Text
+        <View
           style={{
+            display: "flex",
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
             marginTop: 8,
-            fontWeight: "500",
-            fontFamily: theme.fonts.regular,
           }}
         >
-          {water}/{waterGoal} L
-        </Text>
+          <Text
+            style={{
+              fontWeight: "500",
+              fontFamily: theme.fonts.regular,
+            }}
+          >
+            {waterIntake}/{waterGoal} Glasses
+          </Text>
+          <Ionicons
+            onPress={() => router.push("/(tabs)/dashboard/track")}
+            name="chevron-forward"
+            size={24}
+            color="#555"
+          />
+        </View>
       </View>
 
       {/* BottomSheet Modal */}
-      <Modal
-        transparent={true}
-        visible={modalVisible}
-        animationType="slide"
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "flex-end",
-              backgroundColor: "rgba(0,0,0,0.3)",
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: "#fff",
-                borderTopLeftRadius: 16,
-                borderTopRightRadius: 16,
-                padding: 20,
-                minHeight: Dimensions.get("window").height * 0.3,
-                paddingBottom: 24,
-              }}
-            >
-              <ScrollView keyboardShouldPersistTaps="handled">
-                {/* Dash */}
-                <View
-                  style={{
-                    width: 40,
-                    height: 4,
-                    backgroundColor: "#ccc",
-                    borderRadius: 2,
-                    alignSelf: "center",
-                    marginBottom: 16,
-                  }}
-                />
+      {modalVisible ? (
+        <TrackerModal
+          visible={modalVisible}
+          onClose={onClose}
+          type={openModalFor}
+          onSubmit={updateTrackingData}
+          dataLoading={updateDataLoading}
+        />
+      ) : null}
 
-                {/* Header Row */}
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: 12,
-                  }}
-                >
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    {activeCard === "steps" && (
-                      <MaterialCommunityIcons
-                        name="walk"
-                        size={22}
-                        color="#7771de"
-                        style={{ marginRight: 6 }}
-                      />
-                    )}
-                    {activeCard === "sleep" && (
-                      <MaterialCommunityIcons
-                        name="moon-waning-crescent"
-                        size={22}
-                        color="#7771de"
-                        style={{ marginRight: 6 }}
-                      />
-                    )}
-                    {activeCard === "water" && (
-                      <MaterialCommunityIcons
-                        name="cup-water"
-                        size={22}
-                        color="#7771de"
-                        style={{ marginRight: 6 }}
-                      />
-                    )}
-                    <Text style={{ fontSize: 18, fontWeight: "600" }}>
-                      Add {activeCard}
-                    </Text>
-                  </View>
-
-                  {/* Close button */}
-                  <TouchableOpacity
-                    onPress={() => setModalVisible(false)}
-                    style={{
-                      backgroundColor: "#eee",
-                      borderRadius: 20,
-                      width: 34,
-                      height: 34,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Ionicons name="close" size={20} color="#000" />
-                  </TouchableOpacity>
-                </View>
-
-                {/* Input with icon */}
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    borderWidth: 1,
-                    borderColor: "#ccc",
-                    borderRadius: 8,
-                    paddingHorizontal: 10,
-                    marginBottom: 20,
-                  }}
-                >
-                  {activeCard === "steps" && (
-                    <MaterialCommunityIcons
-                      name="shoe-print"
-                      size={18}
-                      color="#888"
-                      style={{ marginRight: 6 }}
-                    />
-                  )}
-                  {activeCard === "sleep" && (
-                    <Ionicons
-                      name="bed-outline"
-                      size={18}
-                      color="#888"
-                      style={{ marginRight: 6 }}
-                    />
-                  )}
-                  {activeCard === "water" && (
-                    <Ionicons
-                      name="water-outline"
-                      size={18}
-                      color="#888"
-                      style={{ marginRight: 6 }}
-                    />
-                  )}
-                  <TextInput
-                    style={{ flex: 1, paddingVertical: 10 }}
-                    keyboardType="numeric"
-                    placeholder="Enter value"
-                    value={inputValue}
-                    onChangeText={setInputValue}
-                  />
-                </View>
-
-                {/* Save Button */}
-                <TouchableOpacity
-                  onPress={saveValue}
-                  style={{
-                    backgroundColor: "#67c694",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: 14,
-                    borderRadius: 30,
-                  }}
-                >
-                  <Ionicons
-                    name="checkmark-circle-outline"
-                    size={20}
-                    color="#fff"
-                    style={{ marginRight: 6 }}
-                  />
-                  <Text
-                    style={{ color: "#fff", fontWeight: "600", fontSize: 16 }}
-                  >
-                    Save
-                  </Text>
-                </TouchableOpacity>
-              </ScrollView>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
+      {snackbarVisible ? (
+        <CustomSnackbar
+          visible={snackbarVisible}
+          onDismiss={() => setSnackbarVisible(false)}
+          bgColor={theme.colors.primary}
+          message={snackbarMsg}
+        />
+      ) : null}
     </View>
   );
 }

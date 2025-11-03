@@ -1,5 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ImageBackground, Dimensions, Image } from "react-native";
+import {
+  View,
+  Text,
+  ImageBackground,
+  Dimensions,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import theme from "./Theme/globalTheme";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
@@ -68,6 +75,10 @@ const HomeScreen = () => {
     navigation.navigate("login");
   };
 
+  const handleSkip = () => {
+    router.push("/secondsplashscreen"); // ✅ skip to main app flow
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <ImageBackground
@@ -75,14 +86,40 @@ const HomeScreen = () => {
         style={{
           flex: 1,
           paddingHorizontal: theme.spacing.md,
-          justifyContent: "space-between", // ✅ push logo to top, button section to bottom
+          justifyContent: "space-between",
         }}
       >
+        {/* ✅ Skip Button (Top Right) */}
+        <TouchableOpacity
+          onPress={handleSkip}
+          style={{
+            position: "absolute",
+            top: 50,
+            right: 20,
+            backgroundColor: "rgba(0,0,0,0.4)",
+            paddingVertical: 6,
+            paddingHorizontal: 14,
+            borderRadius: 20,
+            zIndex: 10,
+          }}
+        >
+          <Text
+            style={{
+              color: "#fff",
+              fontWeight: "600",
+              fontSize: 14,
+              letterSpacing: 0.3,
+            }}
+          >
+            Skip Now
+          </Text>
+        </TouchableOpacity>
+
         {/* Logo section */}
         <View
           style={{
             alignItems: "center",
-            marginTop: height * 0.2, // ✅ 20% from top
+            marginTop: height * 0.2,
           }}
         >
           <Image
@@ -93,7 +130,6 @@ const HomeScreen = () => {
               resizeMode: "contain",
             }}
           />
-
           <Text
             allowFontScaling={false}
             style={{
@@ -112,7 +148,7 @@ const HomeScreen = () => {
         <View
           style={{
             alignItems: "center",
-            marginBottom: height * 0.15, // ✅ 30% from bottom
+            marginBottom: height * 0.15,
           }}
         >
           <Text

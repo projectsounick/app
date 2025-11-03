@@ -82,6 +82,7 @@ function CategoryGrid() {
               color: "#000",
               flex: 1,
               flexWrap: "wrap",
+              paddingHorizontal: 6,
             }}
           >
             {item.name}

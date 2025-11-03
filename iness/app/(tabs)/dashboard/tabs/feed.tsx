@@ -6,8 +6,9 @@ import SmallHeader from "@/app/modules/SmallHeader";
 import ImageSelectorModal from "@/app/modules/CommunitPostModal";
 import PostFeed from "@/app/Components/Community/CommunityFeed";
 import { communityService } from "@/app/services/community.service";
+import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
 
-const YourComponent = () => {
+function YourComponent() {
   const [posts, setPosts] = useState<any[]>([]);
   const [communityId, setCommunityId] = useState<any>(null);
   const [communitName, setCommunityName] = useState("");
@@ -63,6 +64,6 @@ const YourComponent = () => {
       )}
     </SafeAreaView>
   );
-};
+}
 
-export default YourComponent;
+export default LoginWrapper(YourComponent);

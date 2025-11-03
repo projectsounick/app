@@ -518,7 +518,7 @@ const CommunityPosts = ({
         <View
           style={{
             position: "absolute",
-            right: "6%",
+            right: "10%",
             top: "5%",
             backgroundColor: "#fff",
             borderRadius: 12,

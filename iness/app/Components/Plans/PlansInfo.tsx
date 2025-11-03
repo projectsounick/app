@@ -17,7 +17,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { PlanInterface } from "@/app/interfaces/planInterface";
 import DietPlanInfoModal from "@/app/modules/DietPlanModal";
-
+import { withAuthGuard } from "@/app/Hoc/WithAuthGuardButton";
+const ProtectedAnimatedSubmitButton = withAuthGuard(AnimatedSubmitButton);
 interface Props {
   screenWidth: number;
 
@@ -316,7 +317,7 @@ const PlansInfo: React.FC<Props> = ({
             })}
           </View>
 
-          <AnimatedSubmitButton
+          <ProtectedAnimatedSubmitButton
             loading={cartLoading}
             title="Add to cart"
             onPress={() => {

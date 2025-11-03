@@ -7,36 +7,40 @@ import {
   ScrollView,
   Image,
   FlatList,
-  ActivityIndicator,
 } from "react-native";
-import LinearGradient from "react-native-linear-gradient";
 import Icon from "react-native-vector-icons/Feather";
-import theme from "../Theme/globalTheme";
 
-interface CardData {
-  imgUrl: string;
-  otherImages?: string[];
-  title: string;
-  descItems: string[];
-  price: number;
-  sessionCount: number;
-}
-
-interface CustomModalProps {
+interface PlanModalProps {
   modalVisible: boolean;
   setModalVisible: (visible: boolean) => void;
-  cardData: CardData;
   addingIntoToCart: () => void;
   cartLoading: boolean;
+  cardData?: ServiceDetails | null;
 }
 
-export default function CustomModal({
+export interface ServiceDetails {
+  _id: string;
+  title: string;
+  descItems: string[];
+  imgUrl: string;
+  otherImages: string[];
+  price: number;
+  sessionCount: number;
+  isActive: boolean;
+  isCorporate: boolean;
+  isOnline: boolean;
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
+}
+
+export default function PlanModal({
   modalVisible,
   setModalVisible,
-  cardData,
   addingIntoToCart,
   cartLoading,
-}: CustomModalProps) {
+  cardData,
+}: PlanModalProps) {
   return (
     <Modal
       visible={modalVisible}
@@ -51,229 +55,290 @@ export default function CustomModal({
           backgroundColor: "rgba(0,0,0,0.6)",
         }}
       >
-        <LinearGradient
-          colors={["#3D0E7B", "#000000"]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
+        <View
           style={{
-            borderTopLeftRadius: 28,
-            borderTopRightRadius: 28,
-            maxHeight: "88%",
-            padding: 20,
+            backgroundColor: "#fff",
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            maxHeight: "80%",
+            paddingTop: 10,
+            paddingHorizontal: 20,
           }}
         >
-          {/* Handle bar */}
+          {/* Drag handle */}
           <View
             style={{
               width: 50,
-              height: 5,
-              backgroundColor: "rgba(255,255,255,0.3)",
+              height: 6,
+              backgroundColor: "#ccc",
               borderRadius: 3,
               alignSelf: "center",
-              marginBottom: 16,
+              marginBottom: "10%",
             }}
           />
 
-          {/* Close button */}
+          {/* Close Button */}
           <TouchableOpacity
             onPress={() => setModalVisible(false)}
             style={{
               position: "absolute",
-              top: 18,
-              right: 18,
+              top: 14,
+              right: 16,
+              zIndex: 10,
+              backgroundColor: "#f2f2f2",
               width: 36,
               height: 36,
               borderRadius: 18,
-              backgroundColor: "rgba(255,255,255,0.15)",
-              alignItems: "center",
               justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            <Icon name="x" size={20} color="#fff" />
+            <Icon name="x" size={20} color="#333" />
           </TouchableOpacity>
 
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Main Image */}
-            <Image
-              source={{ uri: cardData.imgUrl }}
-              style={{
-                width: "100%",
-                height: 260,
-                borderRadius: 14,
-                marginBottom: 18,
-              }}
-              resizeMode="contain"
-            />
+          {/* Scrollable content */}
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          >
+            {cardData ? (
+              <>
+                {/* Title */}
 
-            {/* More Images */}
-            {cardData &&
-              cardData?.otherImages &&
-              cardData.otherImages.length > 0 && (
+                {/* Plan Card */}
+                <View
+                  style={{
+                    backgroundColor: "#f9f9f9",
+                    borderRadius: 16,
+                    padding: 16,
+                    marginBottom: 20,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    shadowColor: "#000",
+                    shadowOpacity: 0.1,
+                    shadowRadius: 6,
+                    elevation: 3,
+                  }}
+                >
+                  {/* Left Info */}
+                  <View style={{ flex: 1, paddingRight: 10 }}>
+                    <Text
+                      style={{
+                        fontSize: 22,
+                        fontWeight: "700",
+                        textAlign: "left",
+                        marginBottom: 20,
+                        color: "#000",
+                      }}
+                    >
+                      {cardData.title}
+                    </Text>
+                    {cardData.descItems.length > 0 && (
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          marginTop: 10,
+                        }}
+                      >
+                        <Icon
+                          name="check-circle"
+                          size={16}
+                          color="#67C694"
+                          style={{ marginRight: 6 }}
+                        />
+                        <Text style={{ color: "#333", flex: 1 }}>
+                          {cardData.descItems[0]}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Right Image */}
+                  {cardData.imgUrl ? (
+                    <Image
+                      source={{ uri: cardData.imgUrl }}
+                      style={{
+                        width: 110,
+                        height: 150,
+                        resizeMode: "cover",
+                        borderRadius: 12,
+                      }}
+                    />
+                  ) : null}
+                </View>
+
+                {/* Top Stat Boxes */}
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    marginBottom: 20,
+                  }}
+                >
+                  <View
+                    style={{
+                      backgroundColor: "#736AD6",
+                      padding: 12,
+                      borderRadius: 12,
+                      flex: 1,
+                      marginRight: 10,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Icon name="activity" size={20} color="#fff" />
+                    <Text
+                      style={{
+                        fontWeight: "700",
+                        fontSize: 16,
+                        marginTop: 4,
+                        color: "#fff",
+                      }}
+                    >
+                      {cardData.sessionCount}
+                    </Text>
+                    <Text style={{ color: "#fff", fontSize: 12 }}>
+                      Sessions
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      backgroundColor: "#736AD6",
+                      padding: 12,
+                      borderRadius: 12,
+                      flex: 1,
+                      marginLeft: 10,
+                      alignItems: "center",
+                    }}
+                  >
+                    <Icon name="tag" size={20} color="#fff" />
+                    <Text
+                      style={{
+                        fontWeight: "700",
+                        fontSize: 16,
+                        marginTop: 4,
+                        color: "#fff",
+                      }}
+                    >
+                      ₹{cardData.price}
+                    </Text>
+                    <Text style={{ color: "#fff", fontSize: 12 }}>Price</Text>
+                  </View>
+                </View>
+
+                {/* Inside the Plan */}
                 <View style={{ marginBottom: 20 }}>
                   <Text
                     style={{
+                      fontWeight: "700",
                       fontSize: 16,
-                      fontWeight: "600",
                       marginBottom: 10,
-                      color: "#fff",
                     }}
                   >
-                    More Images
+                    Inside the plan
                   </Text>
-                  <FlatList
-                    data={cardData.otherImages}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    keyExtractor={(item, index) => index.toString()}
-                    renderItem={({ item }) => (
-                      <Image
-                        source={{ uri: item }}
-                        style={{
-                          width: 120,
-                          height: 120,
-                          borderRadius: 12,
-                          marginRight: 10,
-                          borderWidth: 1,
-                          borderColor: "rgba(255,255,255,0.1)",
-                        }}
-                        resizeMode="contain"
+                  {cardData.descItems.map((item, idx) => (
+                    <View
+                      key={idx}
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginBottom: 8,
+                      }}
+                    >
+                      <Icon
+                        name="check"
+                        size={16}
+                        color="#67C694"
+                        style={{ marginRight: 6 }}
                       />
-                    )}
-                  />
+                      <Text style={{ color: "#333", flex: 1 }}>{item}</Text>
+                    </View>
+                  ))}
                 </View>
-              )}
 
-            {/* Title */}
-            <Text
-              style={{
-                fontSize: 24,
-                fontWeight: "700",
-                marginBottom: 14,
-                color: "#fff",
-              }}
-            >
-              {cardData.title}
-            </Text>
-
-            {/* Price & Sessions */}
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 16,
-              }}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Icon
-                  name="tag"
-                  size={18}
-                  color="#BDFF84"
-                  style={{ marginRight: 6 }}
-                />
-                <Text
-                  style={{ fontSize: 17, fontWeight: "600", color: "#fff" }}
-                >
-                  ₹{cardData.price}
-                </Text>
-              </View>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <Icon
-                  name="calendar"
-                  size={16}
-                  color="#fff"
-                  style={{ marginRight: 6 }}
-                />
-                <Text
-                  style={{
-                    fontSize: 15,
-                    color: "rgba(255,255,255,0.8)",
-                  }}
-                >
-                  {cardData.sessionCount} Sessions
-                </Text>
-              </View>
-            </View>
-
-            {/* Description Items */}
-            {cardData.descItems.map((item, idx) => (
-              <View
-                key={idx}
+                {/* Other Images */}
+                {cardData.otherImages?.length > 0 && (
+                  <View>
+                    <Text
+                      style={{
+                        fontWeight: "700",
+                        fontSize: 16,
+                        marginBottom: 10,
+                      }}
+                    >
+                      More Images
+                    </Text>
+                    <FlatList
+                      horizontal
+                      data={cardData.otherImages}
+                      keyExtractor={(item, index) => index.toString()}
+                      renderItem={({ item }) => (
+                        <Image
+                          source={{ uri: item }}
+                          style={{
+                            width: 100,
+                            height: 100,
+                            marginRight: 10,
+                            borderRadius: 12,
+                            resizeMode: "contain",
+                          }}
+                        />
+                      )}
+                      showsHorizontalScrollIndicator={false}
+                    />
+                  </View>
+                )}
+              </>
+            ) : (
+              <Text
                 style={{
-                  flexDirection: "row",
-                  alignItems: "flex-start",
-                  marginBottom: 6,
+                  textAlign: "center",
+                  color: "#888",
+                  fontSize: 16,
+                  marginVertical: 40,
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: "#BDFF84",
-                    marginRight: 8,
-                    lineHeight: 20,
-                  }}
-                >
-                  •
-                </Text>
-                <Text
-                  style={{
-                    flex: 1,
-                    fontSize: 15,
-                    color: "rgba(255,255,255,0.9)",
-                    lineHeight: 20,
-                  }}
-                >
-                  {item}
-                </Text>
-              </View>
-            ))}
+                No plan available
+              </Text>
+            )}
+          </ScrollView>
 
-            {/* Confirm Button */}
+          {/* Fixed Bottom Button */}
+          <View
+            style={{
+              backgroundColor: "#fff",
+              padding: 20,
+              borderTopWidth: 1,
+              borderColor: "#eee",
+            }}
+          >
             <TouchableOpacity
               onPress={addingIntoToCart}
               style={{
-                marginTop: 26,
                 borderRadius: 30,
-                overflow: "hidden",
+                backgroundColor: "#67C694",
+                paddingVertical: 16,
+                alignItems: "center",
+                justifyContent: "center",
+                flexDirection: "row",
               }}
               activeOpacity={0.9}
             >
-              <LinearGradient
-                colors={["#BDFF84", "#89E665"]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={{
-                  paddingVertical: 16,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  borderRadius: 30,
-                }}
-              >
-                {cartLoading ? (
-                  <ActivityIndicator color={theme.colors.dark} />
-                ) : (
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    <Icon
-                      name="shopping-cart"
-                      size={18}
-                      color={theme.colors.dark}
-                      style={{ marginRight: 8 }}
-                    />
-                    <Text
-                      style={{
-                        color: theme.colors.dark,
-                        fontWeight: "700",
-                        fontSize: 16,
-                      }}
-                    >
-                      Confirm & Add to Cart
-                    </Text>
-                  </View>
-                )}
-              </LinearGradient>
+              <Icon
+                name="shopping-cart"
+                size={18}
+                color="#fff"
+                style={{ marginRight: 8 }}
+              />
+              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 16 }}>
+                {cartLoading ? "Adding..." : "Add to Cart"}
+              </Text>
             </TouchableOpacity>
-          </ScrollView>
-        </LinearGradient>
+          </View>
+        </View>
       </View>
     </Modal>
   );

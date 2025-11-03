@@ -17,6 +17,7 @@ import VideoCallChecker from "@/app/modules/VideoCallJoinModal";
 import eventBus from "@/event";
 import { notificationService } from "@/app/services/notification.service";
 import CustomSnackbar from "@/app/modules/Snackbar";
+import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
 
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.05;
@@ -28,7 +29,7 @@ interface NotificationItem {
   createdAt: string;
 }
 
-export default function NotificationScreen() {
+function NotificationScreen() {
   const router = useRouter();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [videoCallSchedule, setVideoCallSchedule] = useState<any>({
@@ -48,12 +49,8 @@ export default function NotificationScreen() {
       if (response.success) {
         setNotifications(response.data);
       } else {
-        setSnackbarOpen(true);
-        setSnackbarMessage("Some error has happened");
       }
     } catch (error) {
-      setSnackbarOpen(true);
-      setSnackbarMessage("Some error has happened");
     } finally {
       setLoading(false);
     }
@@ -336,3 +333,5 @@ export default function NotificationScreen() {
     </SafeAreaView>
   );
 }
+
+export default LoginWrapper(NotificationScreen);

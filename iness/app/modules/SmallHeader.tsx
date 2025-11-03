@@ -19,22 +19,29 @@ import { getStoredNotifications } from "@/utils/notificationUtils";
 
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.03;
+
 export default function SmallHeader({
   title,
   weightShow = true,
   bottomComponent,
+  showCart = true,
+  showBell = true,
+  showHistory = false,
 }: {
   title?: string;
   weightShow?: boolean;
   bottomComponent?: React.ReactNode;
+  showCart?: boolean;
+  showBell?: boolean;
+  showHistory?: boolean;
 }) {
-  /// Getting the stored cart data for the ------------------/
   const cartItems = useSelector((state: RootState) => state.cart.cartItems);
   const router = useRouter();
   const [profilePic, setProfilePic] = useState<string | null>(null);
-  const [weight, setWeight] = useState(null);
+  const [weight, setWeight] = useState<number | null>(null);
   const [notificationResponseLength, setNotificationResponseLength] =
     useState(0);
+
   useEffect(() => {
     const isMounted = { current: true };
 
@@ -51,7 +58,7 @@ export default function SmallHeader({
       const notificationResponse = await getStoredNotifications();
       if (isMounted.current) {
         setNotificationResponseLength(notificationResponse?.length ?? 0);
-        await getLoggedUser(); // update user state too
+        await getLoggedUser();
       }
     }
 
@@ -61,10 +68,8 @@ export default function SmallHeader({
       }
     }
 
-    // Initial fetch on mount
     getLoggedUser();
 
-    // Subscribe to events
     eventBus.on("notification-received", handleNotificationReceived);
     eventBus.on("clear-notifications", handleClearNotifications);
 
@@ -124,7 +129,7 @@ export default function SmallHeader({
               <Ionicons name="person" size={25} color={theme.colors.text} />
             )}
           </TouchableOpacity>
-          {weightShow ? (
+          {weightShow && weight ? (
             <View style={{ marginLeft: 8 }}>
               <View
                 style={{
@@ -137,8 +142,7 @@ export default function SmallHeader({
                 <Text
                   style={{ color: "white", fontSize: 14, marginHorizontal: 4 }}
                 >
-                  {weight ? weight : null}
-                  {""}kgs
+                  {weight ? weight : null}kgs
                 </Text>
               </View>
             </View>
@@ -170,56 +174,74 @@ export default function SmallHeader({
           }}
         >
           {/* Cart */}
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#411D6E",
-              borderRadius: 20,
-              padding: 8,
-              position: "relative",
-            }}
-            onPress={() => router.push("/dashboard/cart")}
-          >
-            <Feather name="shopping-cart" size={16} color="white" />
-            {cartItems && cartItems.length > 0 ? (
-              <View
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
-                  backgroundColor: "red",
-                  position: "absolute",
-                  top: 6,
-                  right: 6,
-                }}
-              />
-            ) : null}
-          </TouchableOpacity>
+          {showCart && (
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#411D6E",
+                borderRadius: 20,
+                padding: 8,
+                position: "relative",
+              }}
+              onPress={() => router.push("/dashboard/cart")}
+            >
+              <Feather name="shopping-cart" size={16} color="white" />
+              {cartItems && cartItems.length > 0 ? (
+                <View
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: "red",
+                    position: "absolute",
+                    top: 6,
+                    right: 6,
+                  }}
+                />
+              ) : null}
+            </TouchableOpacity>
+          )}
 
           {/* Bell */}
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#411D6E",
-              borderRadius: 20,
-              padding: 8,
-              position: "relative",
-            }}
-            onPress={() => router.push("/dashboard/notification")}
-          >
-            <Feather name="bell" size={16} color="#FFFA67" />
-            {notificationResponseLength > 0 ? (
-              <View
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
-                  backgroundColor: "red",
-                  position: "absolute",
-                  top: 6,
-                  right: 6,
-                }}
-              />
-            ) : null}
-          </TouchableOpacity>
+          {showBell && (
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#411D6E",
+                borderRadius: 20,
+                padding: 8,
+                position: "relative",
+              }}
+              onPress={() => router.push("/dashboard/notification")}
+            >
+              <Feather name="bell" size={16} color="#FFFA67" />
+              {notificationResponseLength > 0 ? (
+                <View
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: "red",
+                    position: "absolute",
+                    top: 6,
+                    right: 6,
+                  }}
+                />
+              ) : null}
+            </TouchableOpacity>
+          )}
+
+          {/* History */}
+          {showHistory && (
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#411D6E",
+                borderRadius: 20,
+                padding: 8,
+              }}
+              onPress={() => {}}
+            >
+              <Feather name="clock" size={16} color="white" />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 

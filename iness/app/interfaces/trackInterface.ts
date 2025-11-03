@@ -42,7 +42,7 @@ interface TrackingState {
   totalTrackData: TrackingData[];
 }
 
-export {
+export type {
   TrackingData,
   SleepData,
   StepsData,

@@ -223,27 +223,28 @@ export default function ProfileCard() {
           </Text>
         </View>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <Text
-            style={{
-              color: theme.colors.text,
-              fontSize: 14,
-              fontFamily: theme.fonts.bold,
-            }}
-          >
-            Age:{" "}
-            {userDetails && userDetails.dob
-              ? calculateAge(userDetails.dob)
-              : "N/A"}
-          </Text>
-          <Text
-            style={{
-              color: theme.colors.text,
-              fontSize: 14,
-              fontFamily: theme.fonts.bold,
-            }}
-          >
-            Sex: {userDetails?.sex}
-          </Text>
+          {userDetails && userDetails.dob ? (
+            <Text
+              style={{
+                color: theme.colors.text,
+                fontSize: 14,
+                fontFamily: theme.fonts.bold,
+              }}
+            >
+              Age: {calculateAge(userDetails.dob)}
+            </Text>
+          ) : null}
+          {userDetails && userDetails.sex ? (
+            <Text
+              style={{
+                color: theme.colors.text,
+                fontSize: 14,
+                fontFamily: theme.fonts.bold,
+              }}
+            >
+              Sex: {userDetails?.sex}
+            </Text>
+          ) : null}
         </View>
       </View>
     </TouchableOpacity>

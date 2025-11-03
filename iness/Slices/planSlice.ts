@@ -17,6 +17,7 @@ interface planState {
   // Add services state
   activeServices: UserActiveServiceWithDetails[];
   completedServices: UserActiveServiceWithDetails[];
+  availableServices: any[];
 }
 
 const initialState: planState = {
@@ -28,6 +29,7 @@ const initialState: planState = {
   activeManualPlan: null,
   activeServices: [],
   completedServices: [],
+  availableServices: [],
 };
 
 const planSlice = createSlice({
@@ -82,6 +84,9 @@ const planSlice = createSlice({
         (service) => service.isActive === false
       );
     },
+    setAvailableServices: (state, action: PayloadAction<any[]>) => {
+      state.availableServices = action.payload;
+    },
   },
 });
 
@@ -92,5 +97,6 @@ export const {
   setActivePlans,
   setActiveManualPlan,
   setServices,
+  setAvailableServices,
 } = planSlice.actions;
 export default planSlice.reducer;

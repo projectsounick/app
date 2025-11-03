@@ -52,3 +52,6 @@ export interface Session {
   userId: string;
   workouts: SessionWorkout[];
 }
+export interface SessionState {
+  sessions: Session[];
+}

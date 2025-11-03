@@ -18,30 +18,6 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 export default function DashboardLayout() {
   const insets = useSafeAreaInsets();
   const pathname = usePathname(); // ✅ get current active route
-  console.log("this ispathname");
-
-  console.log(pathname);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const animation = useRef(new Animated.Value(0)).current;
-
-  const toggleMenu = () => {
-    if (!menuOpen) {
-      Animated.timing(animation, {
-        toValue: 1,
-        duration: 300,
-        easing: Easing.out(Easing.exp),
-        useNativeDriver: true,
-      }).start();
-    } else {
-      Animated.timing(animation, {
-        toValue: 0,
-        duration: 300,
-        easing: Easing.in(Easing.exp),
-        useNativeDriver: true,
-      }).start();
-    }
-    setMenuOpen(!menuOpen);
-  };
 
   return (
     <View style={{ flex: 1, flexDirection: "row" }}>

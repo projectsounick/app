@@ -180,11 +180,11 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                   >
                     {podcast.podcastName}
                   </Text>
-                  <Ionicons
+                  {/* <Ionicons
                     name={likes.length > 0 ? "heart" : "heart-outline"}
                     size={22}
                     color={likes.length > 0 ? "#E86A92" : "#999"}
-                  />
+                  /> */}
                 </View>
 
                 {/* Description */}

@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import theme from "@/app/Theme/globalTheme";
-import { useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 
 const { height, width } = Dimensions.get("window");
@@ -51,14 +50,14 @@ export default function OnboardingMetricsModal({
     }
   }, [showIntroModal]);
 
-  const handleCancel = () => {
-    setShowIntroModal(false);
-    router.replace("/login");
-  };
-
   const handleProceed = () => {
     setShowIntroModal(false);
     // add any additional logic for Proceed here
+  };
+
+  const handleSkip = () => {
+    setShowIntroModal(false);
+    router.push("/secondsplashscreen"); // ✅ skip to main app flow
   };
 
   return (
@@ -80,7 +79,24 @@ export default function OnboardingMetricsModal({
         <View style={styles.handle} />
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          <Text style={styles.heading}>Why We Ask These Details</Text>
+          <View
+            style={{
+              width: "100%",
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Text style={styles.heading}>Why We Ask These Details</Text>
+            {/* Close icon at top-right */}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => setShowIntroModal(false)}
+            >
+              <Ionicons name="close" size={18} color="#fff" />
+            </TouchableOpacity>
+          </View>
 
           {/* Group 1 */}
           <View style={styles.point}>
@@ -130,14 +146,11 @@ export default function OnboardingMetricsModal({
           </Text>
         </ScrollView>
 
-        {/* Buttons: Proceed & Cancel */}
+        {/* Buttons: Proceed & Skip */}
         <View style={styles.buttonRow}>
           {/* Proceed Button */}
           <Animated.View
-            style={{
-              transform: [{ scale: scaleAnim }],
-              width: width * 0.45,
-            }}
+            style={{ transform: [{ scale: scaleAnim }], width: width * 0.45 }}
           >
             <TouchableOpacity
               style={{
@@ -161,7 +174,7 @@ export default function OnboardingMetricsModal({
             </TouchableOpacity>
           </Animated.View>
 
-          {/* Cancel Button */}
+          {/* Skip Button */}
           <TouchableOpacity
             style={{
               backgroundColor: "#FF4D4D",
@@ -171,7 +184,7 @@ export default function OnboardingMetricsModal({
               justifyContent: "center",
               alignItems: "center",
             }}
-            onPress={handleCancel}
+            onPress={handleSkip}
           >
             <Text
               style={{
@@ -180,7 +193,7 @@ export default function OnboardingMetricsModal({
                 fontWeight: "bold",
               }}
             >
-              Cancel
+              Skip
             </Text>
           </TouchableOpacity>
         </View>
@@ -205,6 +218,16 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     paddingHorizontal: 20,
     paddingBottom: 20,
+  },
+  closeButton: {
+    backgroundColor: "#666",
+    width: 26,
+    height: 26,
+    borderRadius: 26,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 5,
+    elevation: 5,
   },
   handle: {
     width: 50,

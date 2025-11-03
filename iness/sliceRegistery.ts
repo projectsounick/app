@@ -2,6 +2,7 @@ import { setMediaItems } from "./Slices/mediaSlice";
 import {
   setActiveManualPlan,
   setActivePlans,
+  setAvailableServices,
   setPlans,
   setServices,
 } from "./Slices/planSlice";
@@ -11,6 +12,7 @@ import { addToBlog } from "./Slices/blogSlice";
 import { setCategories, setProducts } from "./Slices/ecomSlice";
 import { setCurrentDateTrackData } from "./Slices/trackSlice";
 import { addPodcast, setPodcasts } from "./Slices/podcastSlice";
+import { setSessions } from "./Slices/Session";
 export const sliceConfig = {
   media: {
     selectorKey: "mediaItems",
@@ -59,6 +61,14 @@ export const sliceConfig = {
   podcast: {
     selectorKey: "podcast",
     setAction: setPodcasts,
+  },
+  session: {
+    selectorKey: "sessions",
+    setAction: setSessions,
+  },
+  availableSessions: {
+    selectorKey: "availableSessions",
+    setAction: setAvailableServices,
   },
 } as const;
 

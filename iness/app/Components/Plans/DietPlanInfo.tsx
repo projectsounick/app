@@ -10,7 +10,8 @@ import {
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
-
+import { withAuthGuard } from "@/app/Hoc/WithAuthGuardButton";
+const ProtectedAnimatedSubmitButton = withAuthGuard(AnimatedSubmitButton);
 interface Props {
   screenWidth: number;
   cartLoading: boolean;
@@ -235,12 +236,13 @@ const DietPlanInfo: React.FC<Props> = ({
               </TouchableOpacity>
             </View>
 
-            <AnimatedSubmitButton
+            <ProtectedAnimatedSubmitButton
               loading={cartLoading}
               title="Add to cart"
               onPress={() => {
                 addingIntoToCart("dietplan");
               }}
+              height={50}
             />
           </LinearGradient>
         </Animated.View>

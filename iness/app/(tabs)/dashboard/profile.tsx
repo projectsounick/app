@@ -17,11 +17,12 @@ import NormalHeader from "@/app/modules/NormalHeader";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome } from "@expo/vector-icons"; // You can also use Entypo, Ionicons etc.
+import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.05; // 2% of screen height
 
 //// Main funcitonal component for the Profile screen -------------------------/
-export default function ProfileScreen() {
+function ProfileScreen() {
   const openURL = (url: string) => {
     Linking.openURL(url).catch((err) =>
       console.error("Failed to open URL:", err)
@@ -134,3 +135,5 @@ export default function ProfileScreen() {
     </SafeAreaView>
   );
 }
+
+export default LoginWrapper(ProfileScreen);

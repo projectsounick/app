@@ -9,6 +9,7 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
 import theme from "@/app/Theme/globalTheme";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
@@ -17,6 +18,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { UserData } from "@/app/interfaces/UserInterface";
 import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { router } from "expo-router";
 
 // Main functional component for the Onboarding Name screen------------------------------------/
 const OnboardingName = ({ onNext }: { onNext: () => void }) => {

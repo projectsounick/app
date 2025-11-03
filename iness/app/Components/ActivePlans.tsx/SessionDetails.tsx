@@ -579,21 +579,21 @@ const TabbedSessionDetails = ({
               <MaterialIcons
                 name="info"
                 size={22}
-                color={isActive ? "#fff" : "#555"}
+                color={isActive ? "#000" : "#555"}
               />
             ),
             trainer: (
               <FontAwesome5
                 name="user-tie"
                 size={20}
-                color={isActive ? "#fff" : "#555"}
+                color={isActive ? "#000" : "#555"}
               />
             ),
             workout: (
               <FontAwesome
                 name="heartbeat"
                 size={22}
-                color={isActive ? "#fff" : "#555"}
+                color={isActive ? "#000" : "#555"}
               />
             ),
           };
@@ -616,7 +616,7 @@ const TabbedSessionDetails = ({
                 paddingVertical: 10,
                 marginHorizontal: 6,
                 borderRadius: 25,
-                backgroundColor: isActive ? "#4B32C3" : "#fff",
+                backgroundColor: isActive ? "#67C694" : "#fff",
                 shadowColor: "#000",
                 shadowOffset: { width: 0, height: 3 },
                 shadowOpacity: 0.15,
@@ -627,7 +627,7 @@ const TabbedSessionDetails = ({
               {icons[tab]}
               <Text
                 style={{
-                  color: isActive ? "#fff" : "#333",
+                  color: isActive ? "#000" : "#333",
 
                   fontSize: 14,
                   fontFamily: theme.fonts.bold,

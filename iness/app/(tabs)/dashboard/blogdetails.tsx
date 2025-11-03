@@ -66,7 +66,6 @@ export default function BlogDetailsScreen() {
         resizeMode="cover"
       >
         <View style={{ marginLeft: 20, marginTop: 10 }}>
-          {" "}
           <NormalHeader screenName="Blog" rightIcon={false} />
         </View>
 
