@@ -66,23 +66,32 @@ async function updateUser(userData: any): Promise<any> {
 }
 
 ///// Function for loging out the user ------------------------------------------------/
-
 async function logout() {
   try {
     console.log("Logout called");
+
     await AsyncStorage.clear();
-
-    const keys = await AsyncStorage.getAllKeys();
-    console.log("Remaining keys after clear:", keys);
-
-    const user = await AsyncStorage.getItem("user");
-    console.log("User after clear:", user);
     store.dispatch({ type: "RESET_STORE" });
-    router.replace("/"); // Navigate to root (login/home) screen
+
+    // ✅ Wait for layout mount and router availability
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        try {
+          if (router?.replace) {
+            router.replace("/"); // Navigate to root
+          } else {
+            console.warn("Router not ready yet, skipping navigation");
+          }
+        } catch (err) {
+          console.error("Router navigation failed:", err);
+        }
+      }, 150);
+    });
   } catch (error) {
     console.error("Logout error:", error);
   }
 }
+
 async function deleteaccount() {
   try {
     return fetchWrapper.delete(`${baseUrl}/delete-user`);

@@ -51,7 +51,7 @@ function YourComponent() {
         <>
           <SmallHeader
             weightShow={false}
-            title={communitName || "Iness Fitness Hub"}
+            title={communitName || "Fitness Hub"}
           />
           <PostFeed
             communityId={communityId}

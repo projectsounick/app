@@ -72,7 +72,14 @@ export interface Service {
   createdAt: string; // ISO date string when coming from API
   updatedAt: string; // ISO date string when coming from API
 }
-
+// Define interface for Streak
+export interface StreakInterface {
+  userId: string;
+  streaks: Date[];
+  totalStreak: number;
+  updatedAt: Date;
+  fetched?: boolean;
+}
 interface StorageAccountDetailsInterface {}
 export type {
   ApiResponseInterface,

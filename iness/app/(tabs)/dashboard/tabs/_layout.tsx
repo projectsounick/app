@@ -10,15 +10,25 @@ import {
   Animated,
   Easing,
   Dimensions,
+  Modal,
 } from "react-native";
 import Imagepicker from "@/app/modules/Imagepicker";
+import StreaksBottomSheet from "@/app/modules/StreakBottomSheet";
+import { useDispatch, useSelector } from "react-redux";
+import { setStreakModalShow } from "@/Slices/streakSlice";
+import { RootState } from "@/store";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function DashboardLayout() {
+  //// Streak modal show from the root ----------------------------/
+  const streakModalShow = useSelector(
+    (state: RootState) => state?.streak?.streakModalShow
+  );
+
   const insets = useSafeAreaInsets();
   const pathname = usePathname(); // ✅ get current active route
-
+  const dispatch = useDispatch();
   return (
     <View style={{ flex: 1, flexDirection: "row" }}>
       <Tabs
@@ -103,6 +113,18 @@ export default function DashboardLayout() {
           <Imagepicker />
         </View>
       )}
+      {streakModalShow ? (
+        <Modal
+          visible={streakModalShow}
+          transparent
+          animationType="slide"
+          onRequestClose={() => dispatch(setStreakModalShow(false))}
+        >
+          <StreaksBottomSheet
+            onClose={() => dispatch(setStreakModalShow(false))}
+          />
+        </Modal>
+      ) : null}
     </View>
   );
 }

@@ -1,10 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Animated, ScrollView } from "react-native";
 
-import SliderCard from "@/app/modules/SliderCard";
-
-import { bookSessionCardData, trackingCardData } from "@/utils/ModuletaticData";
-
 import withAnimatedHeader from "@/app/Hoc/MainHeader";
 import NameHeader from "@/app/Components/HeaderSubComponents/NameHeader";
 import { useDispatch, useSelector } from "react-redux";
@@ -48,7 +44,9 @@ import { setCalendarSheetOpen } from "@/Slices/componentOpenSlice";
 import { sessionService } from "@/app/services/sessionService";
 import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
 import LoginJsxWrapper from "@/app/Hoc/LoginJsxWrapper";
-
+import WeeklyActivityCard from "@/app/Components/Activity/WeeklyActivityCard";
+import { fetchStreak } from "@/app/services/streaks.service";
+import WeightTrackerBottomSheet from "@/app/Modals/WeightTrackModal";
 const MainHeader = withAnimatedHeader(NameHeader);
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
@@ -108,6 +106,10 @@ const YourComponent = () => {
         sliceKey: "session" as SliceKey,
         fetchFunction: sessionService.getSessions,
       },
+      {
+        sliceKey: "streak" as SliceKey,
+        fetchFunction: fetchStreak,
+      },
     ],
     []
   );
@@ -116,7 +118,7 @@ const YourComponent = () => {
   const [currentSession, setCurrentSession] = useState<any>(null);
 
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
-
+  const [weightTrackModalShow, setWeightTrackModalShow] = useState(false);
   const onCloseSessionSheet = () => {
     dispatch(setCalendarSheetOpen(!calendarSheetOpen));
   };
@@ -130,7 +132,11 @@ const YourComponent = () => {
       edges={["left", "right"]}
     >
       {/* Animated Header */}
-      <SmallHeader weightShow={true} title={"Home"} />
+      <SmallHeader
+        weightShow={true}
+        title={"Home"}
+        setWeightTrackModalShow={setWeightTrackModalShow}
+      />
       {/* Scrollable Content */}
       <ScrollView
         style={{ flex: 1 }}
@@ -159,6 +165,7 @@ const YourComponent = () => {
             <LoginJsxWrapper loginButton={false} backButton={false}>
               <HealthDashboard />
             </LoginJsxWrapper>
+            {/* <WeeklyActivityCard /> */}
             {podCasts && podCasts.length > 0 ? (
               <PodcastMediaCard loggedUser={loggedUser} />
             ) : null}
@@ -208,6 +215,12 @@ const YourComponent = () => {
           setCurrentSession={setCurrentSession}
         />
       )}
+      {weightTrackModalShow ? (
+        <WeightTrackerBottomSheet
+          visible={weightTrackModalShow}
+          onClose={() => setWeightTrackModalShow(!weightTrackModalShow)}
+        />
+      ) : null}
     </SafeAreaView>
   );
 };

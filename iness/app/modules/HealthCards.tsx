@@ -24,6 +24,8 @@ import TrackerModal from "../Components/Tracking/TrackingModal";
 import CustomSnackbar from "./Snackbar";
 import { trackService } from "../services/track.service";
 import { updateTrackingField } from "@/Slices/trackSlice";
+import { createStreak } from "../services/streaks.service";
+import { setStreakData } from "@/Slices/streakSlice";
 
 function HealthDashboard() {
   //// Store data -------------------------------------------------------/
@@ -83,6 +85,11 @@ function HealthDashboard() {
       );
 
       if (response.success && response.data) {
+        /// Update the streak -------------------------/
+        let responseStreak = await createStreak();
+        if (responseStreak.success) {
+          dispatch(setStreakData(responseStreak.data));
+        }
         dispatch(
           updateTrackingField({
             type: type, // e.g., "steps", "sleep", "water"

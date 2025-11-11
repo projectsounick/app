@@ -11,7 +11,7 @@ import ecoReducer from "../Slices/ecomSlice";
 import componentOpenReducer from "../Slices/componentOpenSlice";
 import podcastReducer from "../Slices/podcastSlice";
 import sessionReducer from "../Slices/Session";
-
+import streakReducer from "../Slices/streakSlice";
 // combine all reducers first
 const appReducer = combineReducers({
   media: mediaReducer,
@@ -22,6 +22,7 @@ const appReducer = combineReducers({
   loader: loaderReducer,
   blog: blogReducer,
   ecom: ecoReducer,
+  streak: streakReducer,
   podcast: podcastReducer,
   componentOpen: componentOpenReducer,
   session: sessionReducer,

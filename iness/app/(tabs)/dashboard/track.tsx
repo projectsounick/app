@@ -22,7 +22,9 @@ const topPadding = height * 0.05; // 2% of screen height
 import { updateTrackingField } from "@/Slices/trackSlice";
 import { RootState } from "@/store";
 import { SafeAreaView } from "react-native-safe-area-context";
-import AppleHealthSync from "@/app/modules/AppleHealthSync";
+
+import { createStreak } from "@/app/services/streaks.service";
+import { setStreakData } from "@/Slices/streakSlice";
 
 export default function WellnessDashboard() {
   const currentDayTrackData = useSelector(
@@ -103,6 +105,10 @@ export default function WellnessDashboard() {
       );
 
       if (response.success && response.data) {
+        let responseStreak = await createStreak();
+        if (responseStreak.success) {
+          dispatch(setStreakData(responseStreak.data));
+        }
         dispatch(
           updateTrackingField({
             type: type, // e.g., "steps", "sleep", "water"

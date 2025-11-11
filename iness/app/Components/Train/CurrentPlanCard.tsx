@@ -131,7 +131,7 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
                       }}
                     />
                     <Text
-                      numberOfLines={1}
+                      numberOfLines={2}
                       ellipsizeMode="tail"
                       style={{
                         fontSize: 14,

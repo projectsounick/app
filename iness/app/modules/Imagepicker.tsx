@@ -21,6 +21,8 @@ import { sessionService } from "../services/sessionService";
 import { setCalendarSheetOpen } from "@/Slices/componentOpenSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
+import { createStreak } from "../services/streaks.service";
+import { setStreakData } from "@/Slices/streakSlice";
 
 interface FloatingCameraButtonProps {}
 
@@ -183,6 +185,10 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = () => {
       await transformatiomImageService.addTransformationImages([
         { url: uploadedUrl },
       ]);
+      let responseStreak = await createStreak();
+      if (responseStreak.success) {
+        dispatch(setStreakData(responseStreak.data));
+      }
     } catch (err: any) {
       if (err !== "cancel") console.error(err);
     } finally {

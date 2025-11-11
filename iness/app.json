@@ -3,7 +3,7 @@
     "name": "iness",
     "slug": "iness",
     "jsEngine": "hermes",
-    "version": "1.0.24",
+    "version": "1.0.27",
     "orientation": "default",
     "notification": {
       "icon": "./assets/images/logonew.png",
@@ -18,7 +18,7 @@
       "icon": "./assets/images/logonew.png",
       "supportsTablet": false,
       "bundleIdentifier": "com.iness.fitness",
-      "buildNumber": "1.0.24",
+      "buildNumber": "1.0.27",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSMicrophoneUsageDescription": "We use the microphone for video recording.",
@@ -75,15 +75,7 @@
           }
         }
       ],
-      [
-        "react-native-health",
-        {
-          "isClinicalDataEnabled": true,
-          "healthSharePermission": "Custom health share permission",
-          "healthUpdatePermission": "Custom health update permission",
-          "healthClinicalDescription": "Custom health share permission for clinical data"
-        }
-      ],
+     
       "./plugins/with-phonepe"
     ],
     "experiments": {

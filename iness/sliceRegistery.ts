@@ -13,6 +13,7 @@ import { setCategories, setProducts } from "./Slices/ecomSlice";
 import { setCurrentDateTrackData } from "./Slices/trackSlice";
 import { addPodcast, setPodcasts } from "./Slices/podcastSlice";
 import { setSessions } from "./Slices/Session";
+import { setStreakData } from "./Slices/streakSlice";
 export const sliceConfig = {
   media: {
     selectorKey: "mediaItems",
@@ -69,6 +70,10 @@ export const sliceConfig = {
   availableSessions: {
     selectorKey: "availableSessions",
     setAction: setAvailableServices,
+  },
+  streak: {
+    selectorKey: "streak",
+    setAction: setStreakData,
   },
 } as const;
 

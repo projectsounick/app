@@ -19,7 +19,7 @@ const handleCalculator = () => router.push("/dashboard/calculator");
 const handleYourPurchases = () => router.push("/dashboard/purchases");
 const handlePreferences = () => router.push("/dashboard/preferences");
 const handleMeasurements = () => router.push("/dashboard/measurement");
-
+const handleWeightTrack = () => router.push("/(tabs)/dashboard/trackWeight");
 export default function SettingsList() {
   const [isModalVisible, setModalVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -44,6 +44,13 @@ export default function SettingsList() {
   };
 
   const settings = [
+    {
+      icon: "fitness", // progress icon
+      label: "Body Weight Track",
+      onPress:
+        // navigate to Weight Tracker screen
+        handleWeightTrack,
+    },
     { icon: "pricetags-outline", label: "Coupons", onPress: handleCoupons },
     {
       icon: "cart-outline",
