@@ -53,14 +53,14 @@ export default function NormalHeader({ screenName, rightIcon }: any) {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            backgroundColor: "#F3E8FF",
+            backgroundColor: "#67c694",
             paddingVertical: 6,
             paddingHorizontal: 12,
             borderRadius: 20,
           }}
         >
-          <Ionicons name="stats-chart-outline" size={20} color="#6C1B9B" />
-          <Text style={{ marginLeft: 6, color: "#6C1B9B", fontWeight: "bold" }}>
+          <Ionicons name="stats-chart-outline" size={20} color="#fff" />
+          <Text style={{ marginLeft: 6, color: "#fff", fontWeight: "bold" }}>
             History
           </Text>
         </TouchableOpacity>

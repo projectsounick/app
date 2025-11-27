@@ -175,11 +175,7 @@ function SessionCalendar({
 
   return (
     <Modal visible={isVisible} animationType="slide" transparent={true}>
-      <TouchableOpacity
-        activeOpacity={1}
-        onPress={onClose}
-        style={styles.backdrop}
-      >
+      <TouchableOpacity activeOpacity={1} style={styles.backdrop}>
         <View style={styles.bottomSheetContainer}>
           {/* Header */}
           <View style={styles.modalHeader}>

@@ -120,7 +120,7 @@ const YourComponent = () => {
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [weightTrackModalShow, setWeightTrackModalShow] = useState(false);
   const onCloseSessionSheet = () => {
-    dispatch(setCalendarSheetOpen(!calendarSheetOpen));
+    dispatch(setCalendarSheetOpen(false));
   };
   //// Fetching the plan data -----------------------------/
 
@@ -136,6 +136,7 @@ const YourComponent = () => {
         weightShow={true}
         title={"Home"}
         setWeightTrackModalShow={setWeightTrackModalShow}
+        showStreak={true}
       />
       {/* Scrollable Content */}
       <ScrollView

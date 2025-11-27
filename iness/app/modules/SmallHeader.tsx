@@ -31,6 +31,7 @@ export default function SmallHeader({
   showCart = true,
   showBell = true,
   showHistory = false,
+  showStreak = false,
 }: {
   setWeightTrackModalShow?: any;
   title?: string;
@@ -39,6 +40,7 @@ export default function SmallHeader({
   showCart?: boolean;
   showBell?: boolean;
   showHistory?: boolean;
+  showStreak?: boolean;
 }) {
   /// store data for the streaks ----------------------------------------/
   const streakCount = useSelector(
@@ -149,7 +151,7 @@ export default function SmallHeader({
                     alignItems: "center",
                     marginBottom: 2,
                   }}
-                  onPress={() => setWeightTrackModalShow(true)}
+                  onPress={() => router.push("/(tabs)/dashboard/trackWeight")}
                 >
                   <Feather name="arrow-up-right" size={14} color="lightgreen" />
                   <Text
@@ -191,6 +193,7 @@ export default function SmallHeader({
             }}
           >
             {/* 🔥 Streak Icon */}
+            {}
             <TouchableOpacity
               onPress={() => dispatch(setStreakModalShow(true))}
               activeOpacity={0.8}
@@ -204,6 +207,7 @@ export default function SmallHeader({
                 alignItems: "center",
                 backgroundColor: "rgba(255, 59, 59, 0.12)",
                 shadowColor: "#FF3B3B",
+                display: showStreak ? "flex" : "none",
                 shadowOpacity: 0.35,
                 shadowRadius: 3,
                 elevation: 3,

@@ -55,7 +55,7 @@ export default function AddressModal({
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <LinearGradient
-            colors={["#140A21", "#522987"]}
+            colors={["#2C1453", "#1C0E33"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={{

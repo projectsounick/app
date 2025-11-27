@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
   },
   turnOnButton: {
     flex: 1,
-    backgroundColor: "#4CAF50",
+    backgroundColor: "#67c694",
     paddingVertical: 14,
     borderRadius: 30,
     justifyContent: "center",

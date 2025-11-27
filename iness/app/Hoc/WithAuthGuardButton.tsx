@@ -134,13 +134,15 @@ const styles = StyleSheet.create({
   },
   cancelButton: {
     backgroundColor: "#E5E7EB",
+    borderRadius: 20,
   },
   cancelText: {
     color: "#374151",
     fontWeight: "600",
   },
   loginButton: {
-    backgroundColor: "#6D28D9",
+    backgroundColor: "#67c694",
+    borderRadius: 20,
   },
   loginText: {
     color: "#fff",

@@ -270,25 +270,33 @@ export default function SupportScreen() {
               <Ionicons
                 name="attach"
                 size={24}
-                color="#6C1B9B"
+                color="#67c694"
                 style={{ marginRight: 10 }}
               />
             </TouchableOpacity>
             <TextInput
               style={{
                 flex: 1,
-                backgroundColor: theme.colors.cardLight,
-                borderWidth: 1,
-                borderColor: theme.colors.secondPrimary,
-                padding: 10,
-                borderRadius: 20,
-                fontSize: 14,
+                backgroundColor: "#f5f5f5",
+                borderWidth: 0,
+                paddingVertical: 10,
+                paddingHorizontal: 16,
+                borderRadius: 25,
+                fontSize: 15,
+                color: "#333",
+                shadowColor: "#000",
+                shadowOpacity: 0.08,
+                shadowRadius: 4,
+                shadowOffset: { width: 0, height: 2 },
+                elevation: 2, // Android shadow
               }}
               placeholder="Type your message..."
+              placeholderTextColor="#999"
               value={inputText}
               onChangeText={setInputText}
               editable={!messageSendingLoader}
             />
+
             {messageSendingLoader ? (
               <View
                 style={{
@@ -305,7 +313,7 @@ export default function SupportScreen() {
                 <Ionicons
                   name="send"
                   size={24}
-                  color="#6C1B9B"
+                  color="#67c694"
                   style={{ marginLeft: 10 }}
                 />
               </TouchableOpacity>

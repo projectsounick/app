@@ -3,7 +3,7 @@
     "name": "iness",
     "slug": "iness",
     "jsEngine": "hermes",
-    "version": "1.0.27",
+    "version": "1.0.28",
     "orientation": "default",
     "notification": {
       "icon": "./assets/images/logonew.png",
@@ -18,7 +18,7 @@
       "icon": "./assets/images/logonew.png",
       "supportsTablet": false,
       "bundleIdentifier": "com.iness.fitness",
-      "buildNumber": "1.0.27",
+      "buildNumber": "1.0.28",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSMicrophoneUsageDescription": "We use the microphone for video recording.",
@@ -74,9 +74,7 @@
             "ndk": "26.1.10909125"
           }
         }
-      ],
-     
-      "./plugins/with-phonepe"
+      ]
     ],
     "experiments": {
       "typedRoutes": true

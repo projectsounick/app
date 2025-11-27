@@ -182,7 +182,7 @@ export default function WellnessDashboard() {
                       size={140}
                       width={12}
                       fill={progressSteps}
-                      tintColor="#FFD700"
+                      tintColor="#7771de"
                       backgroundColor="#f0f0f0"
                       duration={1200}
                     >
@@ -253,7 +253,7 @@ export default function WellnessDashboard() {
                         style={{
                           width: 12,
                           height: 12,
-                          backgroundColor: "#FFD700",
+                          backgroundColor: "#7771de",
                           marginRight: 6,
                         }}
                       />
@@ -264,7 +264,7 @@ export default function WellnessDashboard() {
               </View>
 
               {/* Summary */}
-              <View
+              {/* <View
                 style={{
                   flexDirection: "row",
                   justifyContent: "space-between",
@@ -295,14 +295,15 @@ export default function WellnessDashboard() {
                     </Text>
                   </View>
                 ))}
-              </View>
+              </View> */}
 
               {/* Tracker Cards */}
               <View
                 style={{
                   flexDirection: "row",
                   justifyContent: "space-between",
-                  marginBottom: 10,
+
+                  marginTop: 30,
                 }}
               >
                 {[
@@ -367,7 +368,7 @@ export default function WellnessDashboard() {
                       <Ionicons
                         name="add-circle"
                         size={28}
-                        color="#6C1B9B"
+                        color="#67c694"
                         style={{ marginTop: 8 }}
                       />
                     </TouchableOpacity>

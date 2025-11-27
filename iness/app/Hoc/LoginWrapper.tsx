@@ -80,16 +80,6 @@ export function LoginWrapper<P extends object>(
         {/* Lock Overlay (only if not logged in) */}
         {!isLoggedIn && (
           <>
-            {/* Back button */}
-            {backButton && (
-              <TouchableOpacity
-                onPress={handleBackPress}
-                style={styles.backButton}
-              >
-                <Ionicons name="arrow-back" size={22} color="#fff" />
-              </TouchableOpacity>
-            )}
-
             <View style={styles.overlay}>
               <TouchableOpacity
                 activeOpacity={0.8}
@@ -104,13 +94,54 @@ export function LoginWrapper<P extends object>(
                       You don’t have any account created with us.{"\n"}You need
                       to create one to access this page.
                     </Text>
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
 
-                    <TouchableOpacity
-                      onPress={handlePress}
-                      style={styles.loginButton}
+                        width: "100%",
+                      }}
                     >
-                      <Text style={styles.loginButtonText}>Login</Text>
-                    </TouchableOpacity>
+                      {backButton ? (
+                        <TouchableOpacity
+                          onPress={handleBackPress}
+                          activeOpacity={0.8}
+                          style={{
+                            backgroundColor: "#E5E7EB",
+                            borderRadius: 20,
+                            marginTop: 18,
+                            paddingVertical: 10,
+                            paddingHorizontal: 30,
+                          }}
+                        >
+                          <View
+                            style={{
+                              // counter-skew to keep text straight
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Text
+                              style={{
+                                color: "#374151",
+                                fontWeight: "600",
+                                fontSize: 14,
+                              }}
+                            >
+                              Cancel
+                            </Text>
+                          </View>
+                        </TouchableOpacity>
+                      ) : null}
+                      <TouchableOpacity
+                        onPress={handlePress}
+                        style={styles.loginButton}
+                      >
+                        <Text style={styles.loginButtonText}>Login</Text>
+                      </TouchableOpacity>
+                    </View>
                   </>
                 )}
               </TouchableOpacity>
@@ -131,12 +162,12 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: 40,
+    top: 60,
     left: 20,
     zIndex: 3,
     backgroundColor: "#1a1a1a",
     borderRadius: 24,
-    padding: 6,
+    padding: 10,
     elevation: 6,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },

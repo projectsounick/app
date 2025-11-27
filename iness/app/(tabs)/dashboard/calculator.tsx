@@ -156,13 +156,13 @@ export default function CalculatorScreen() {
           <TouchableOpacity
             onPress={calculateBMI}
             style={{
-              backgroundColor: theme.colors.primary,
+              backgroundColor: "#67c694",
               padding: 14,
               borderRadius: 30,
               alignItems: "center",
             }}
           >
-            <Text style={{ color: theme.colors.dark, fontWeight: "bold" }}>
+            <Text style={{ color: "#fff", fontWeight: "bold" }}>
               Calculate BMI
             </Text>
           </TouchableOpacity>
@@ -317,13 +317,13 @@ export default function CalculatorScreen() {
           <TouchableOpacity
             onPress={calculateBMR}
             style={{
-              backgroundColor: theme.colors.primary,
+              backgroundColor: "#67c694",
               padding: 14,
               borderRadius: 30,
               alignItems: "center",
             }}
           >
-            <Text style={{ color: theme.colors.dark, fontWeight: "bold" }}>
+            <Text style={{ color: "#fff", fontWeight: "bold" }}>
               Calculate BMR
             </Text>
           </TouchableOpacity>
@@ -394,13 +394,13 @@ export default function CalculatorScreen() {
                 onPress={() => setModalVisible(false)}
                 style={{
                   marginTop: 20,
-                  backgroundColor: theme.colors.link,
+                  backgroundColor: "#67c694",
                   padding: 10,
                   borderRadius: 8,
                   alignItems: "center",
                 }}
               >
-                <Text style={{ color: "#fff", fontWeight: "bold" }}>Close</Text>
+                <Text style={{ color: "#000", fontWeight: "bold" }}>Close</Text>
               </Pressable>
             </View>
           </View>
