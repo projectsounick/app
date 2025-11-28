@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { Animated, Dimensions, View, Text, Image } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import theme from "./Theme/globalTheme";
@@ -8,9 +8,9 @@ import { router } from "expo-router";
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 import { useNavigation } from "@react-navigation/native";
 const SecondSplashScreen = () => {
-  const progress = useRef(new Animated.Value(0)).current;
-  const logoOpacity = useRef(new Animated.Value(0)).current;
-  const combinedTranslateX = useRef(new Animated.Value(0)).current;
+  const progress = useMemo(() => new Animated.Value(0), []);
+  const logoOpacity = useMemo(() => new Animated.Value(0), []);
+  const combinedTranslateX = useMemo(() => new Animated.Value(0), []);
   const [showLetters, setShowLetters] = useState(false);
   const [visibleLetters, setVisibleLetters] = useState("");
   const [showCircle, setShowCircle] = useState(true);
@@ -72,6 +72,7 @@ const SecondSplashScreen = () => {
     };
 
     runAnimation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const strokeDashoffset = progress.interpolate({

@@ -42,6 +42,7 @@ const CommunityPosts = ({
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [visibleComments, setVisibleComments] = useState<
     Record<string, boolean>
   >({});
@@ -100,43 +101,67 @@ const CommunityPosts = ({
   }
 
   const fetchPosts = useCallback(
-    async (pageToFetch: number = 1) => {
+    async (pageToFetch: number = 1, append: boolean = false) => {
       try {
+        if (append) {
+          setLoadingMore(true);
+        } else {
+          setIsLoading(true);
+        }
+        
         let allPost = showMyPosts ? false : true;
         const response = await communityService.getCommunityPosts(
           communityId,
           pageToFetch,
-          20,
+          10,
           allPost
         );
 
         if (response.success) {
-          setPosts(response.data);
-          const totalPages = response.pagination.totalPages;
+          if (append) {
+            setPosts((prev: any[]) => [...prev, ...response.data]);
+          } else {
+            setPosts(response.data);
+          }
+          const totalPages = response.pagination?.totalPages || 0;
           setHasMore(pageToFetch < totalPages);
+          setPage(pageToFetch);
         }
       } catch (error) {
         console.error("Error fetching posts:", error);
       } finally {
         setIsLoading(false);
+        setLoadingMore(false);
       }
     },
-    [communityId, setPosts, showMyPosts]
+    [communityId, showMyPosts]
   );
 
   useFocusEffect(
     useCallback(() => {
       setIsLoading(true);
-      fetchPosts(page);
+      fetchPosts(1, false);
       return () => {
         // Screen is unfocused (navigated away)
-
         if (videoRef.current) {
           videoRef.current.stopAsync?.();
         }
       };
-    }, [page, showMyPosts])
+    }, [showMyPosts])
   );
+
+  const loadMorePosts = useCallback(() => {
+    if (!loadingMore && hasMore && !isLoading) {
+      fetchPosts(page + 1, true);
+    }
+  }, [page, hasMore, loadingMore, isLoading, fetchPosts]);
+
+  const handleEndReached = useCallback(() => {
+    if (!onEndReachedCalledDuringMomentum) {
+      loadMorePosts();
+      setOnEndReachedCalledDuringMomentum(true);
+    }
+  }, [onEndReachedCalledDuringMomentum, loadMorePosts]);
   async function toolTipAction(postDetails: any, type: string) {
     try {
       if (type === "complain") {
@@ -286,27 +311,6 @@ const CommunityPosts = ({
       });
   };
 
-  const PaginationControls = () => (
-    <View style={styles.paginationControls}>
-      <TouchableOpacity
-        style={[styles.pageButton, page === 1 && styles.disabledButton]}
-        onPress={() => setPage((prev) => Math.max(1, prev - 1))}
-        disabled={page === 1}
-      >
-        <Ionicons name="arrow-back" size={18} color="#000" />
-        <Text style={styles.pageButtonText}>Prev</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={[styles.pageButton, !hasMore && styles.disabledButton]}
-        onPress={() => setPage((prev) => prev + 1)}
-        disabled={!hasMore}
-      >
-        <Text style={styles.pageButtonText}>Next</Text>
-        <Ionicons name="arrow-forward" size={18} color="#000" />
-      </TouchableOpacity>
-    </View>
-  );
 
   const renderMedia = (postId: string, media: string[], type: string) => {
     if (!media?.length) return null;
@@ -656,13 +660,20 @@ const CommunityPosts = ({
             data={posts}
             keyExtractor={(item) => item._id}
             renderItem={renderPost}
+            onEndReached={handleEndReached}
+            onEndReachedThreshold={0.5}
+            onMomentumScrollBegin={() => setOnEndReachedCalledDuringMomentum(false)}
             ListFooterComponent={
-              isLoading ? (
-                <ActivityIndicator style={{ marginVertical: 10 }} />
+              loadingMore ? (
+                <View style={styles.loadingFooter}>
+                  <ActivityIndicator size="small" color={theme.colors.primary} />
+                  <Text style={styles.loadingText}>Loading more posts...</Text>
+                </View>
               ) : null
             }
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContent}
           />
-          <PaginationControls />
         </>
       )}
       {selectedMedia?.type === "image" && (
@@ -679,13 +690,33 @@ const CommunityPosts = ({
 export default CommunityPosts;
 
 const styles = StyleSheet.create({
+  listContent: {
+    paddingBottom: 20,
+  },
+  loadingFooter: {
+    paddingVertical: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  loadingText: {
+    marginTop: 8,
+    fontSize: 14,
+    color: theme.colors.mutedText,
+    fontFamily: theme.fonts.regular,
+  },
   card: {
-    backgroundColor: "#fff",
-    marginVertical: 10,
-    padding: 12,
-    borderRadius: 10,
-    elevation: 2,
-    marginHorizontal: 12,
+    backgroundColor: theme.colors.cardLight,
+    marginVertical: 12,
+    padding: 16,
+    borderRadius: 16,
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    marginHorizontal: 16,
+    borderWidth: 1,
+    borderColor: "rgba(189, 255, 132, 0.2)",
   },
   centerContent: {
     flex: 1,
@@ -714,10 +745,15 @@ const styles = StyleSheet.create({
   username: {
     fontWeight: "600",
     fontSize: 16,
+    color: theme.colors.dark,
+    fontFamily: theme.fonts.medium,
   },
   text: {
-    marginVertical: 8,
-    fontSize: 14,
+    marginVertical: 10,
+    fontSize: 15,
+    lineHeight: 22,
+    color: theme.colors.dark,
+    fontFamily: theme.fonts.regular,
   },
   mediaWrapper: {
     position: "relative",
@@ -751,12 +787,16 @@ const styles = StyleSheet.create({
   actions: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 10,
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0,0,0,0.05)",
   },
   iconText: {
-    marginLeft: 4,
-    fontSize: 13,
-    color: "#333",
+    marginLeft: 6,
+    fontSize: 14,
+    color: theme.colors.dark,
+    fontFamily: theme.fonts.medium,
   },
   commentSection: {
     marginTop: 10,
@@ -783,70 +823,6 @@ const styles = StyleSheet.create({
     padding: 6,
     borderRadius: 8,
     marginRight: 6,
-  },
-  paginationControls: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    backgroundColor: "#f9f9f9",
-    borderTopWidth: 0.5,
-    borderColor: "#ddd",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 4,
-  },
-
-  pageButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: 14,
-
-    paddingVertical: 8,
-    borderRadius: 25,
-    elevation: 2,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-  },
-
-  disabledButton: {
-    backgroundColor: "#bbb",
-    opacity: 0.6,
-  },
-
-  pageButtonText: {
-    color: "#000",
-    fontSize: 14,
-    fontWeight: "600",
-    marginHorizontal: 6,
-  },
-
-  pageNumberWrapper: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-
-  pageNumber: {
-    fontSize: 14,
-    color: "#555",
-    fontWeight: "500",
-  },
-
-  pageNumberHighlight: {
-    backgroundColor: theme.colors.primary,
-    color: "#000",
-    fontSize: 14,
-    fontWeight: "700",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
   },
   toggleButton: {
     paddingVertical: 8,
