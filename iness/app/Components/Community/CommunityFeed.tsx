@@ -25,6 +25,10 @@ import ImageViewerModal from "@/app/modules/ImageModel";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { userService } from "@/app/services/user.service";
 import { Post } from "@/app/interfaces/communityService";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+
+dayjs.extend(relativeTime);
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -33,11 +37,13 @@ const CommunityPosts = ({
   posts,
   communityName,
   setPosts,
+  onCreatePost,
 }: {
   communityId: string;
   communityName: string;
   posts: any[];
   setPosts: any;
+  onCreatePost?: () => void;
 }) => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -321,7 +327,7 @@ const CommunityPosts = ({
     };
 
     return (
-      <View style={{ width: "100%", alignItems: "center", marginBottom: 10 }}>
+      <View style={styles.mediaContainer}>
         <FlatList
           data={media}
           keyExtractor={(uri, idx) => `${uri}-${idx}`}
@@ -339,26 +345,13 @@ const CommunityPosts = ({
               type === "video";
 
             return (
-              <View
-                style={{
-                  width: 340,
-
-                  height: 300,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  gap: 10,
-                }}
-              >
+              <View style={styles.mediaItemWrapper}>
                 {isVideo ? (
                   <Video
                     ref={videoRef}
                     source={{ uri: mediaUrl }}
-                    style={{
-                      width: 300,
-                      height: 300,
-                      borderRadius: 10,
-                    }}
-                    resizeMode={ResizeMode.CONTAIN}
+                    style={styles.mediaImage}
+                    resizeMode={ResizeMode.COVER}
                     useNativeControls
                     shouldPlay
                   />
@@ -367,11 +360,7 @@ const CommunityPosts = ({
                     <Image
                       source={{ uri: mediaUrl }}
                       resizeMode="cover"
-                      style={{
-                        width: 300,
-                        height: 300,
-                        borderRadius: 10,
-                      }}
+                      style={styles.mediaImage}
                     />
                   </Pressable>
                 )}
@@ -380,24 +369,14 @@ const CommunityPosts = ({
           }}
         />
         {media.length > 1 && (
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "center",
-              marginTop: 8,
-            }}
-          >
+          <View style={styles.dotsContainer}>
             {media.map((_, idx) => (
               <View
                 key={idx}
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
-                  marginHorizontal: 4,
-                  backgroundColor:
-                    (activeMediaIndex[postId] || 0) === idx ? "#333" : "#bbb",
-                }}
+                style={[
+                  styles.dot,
+                  (activeMediaIndex[postId] || 0) === idx && styles.activeDot,
+                ]}
               />
             ))}
           </View>
@@ -408,17 +387,9 @@ const CommunityPosts = ({
 
   const renderPost = ({ item }: { item: any }) => (
     <View style={styles.card}>
-      <View
-        style={[
-          styles.header,
-          {
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          },
-        ]}
-      >
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
+      {/* Header - Instagram style */}
+      <View style={styles.header}>
+        <View style={styles.headerLeft}>
           {item.createdBy?.profilePic ? (
             <Image
               source={{ uri: item.createdBy.profilePic }}
@@ -426,82 +397,117 @@ const CommunityPosts = ({
               resizeMode="cover"
             />
           ) : (
-            <Ionicons
-              name="person-circle-outline"
-              size={40}
-              color="gray"
-              style={{ marginRight: 8 }}
-            />
+            <View style={styles.avatarPlaceholder}>
+              <Ionicons name="person" size={24} color="#999" />
+            </View>
           )}
-          <Text style={styles.username}>
-            {item.createdBy?.name || "Anonymous"}
-          </Text>
+          <View>
+            <Text style={styles.username}>
+              {item.createdBy?.name || "Anonymous"}
+            </Text>
+            {item.createdAt && (
+              <Text style={styles.timeText}>
+                {dayjs(item.createdAt).fromNow()}
+              </Text>
+            )}
+          </View>
         </View>
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
+        <TouchableOpacity
+          onPress={() => {
+            setShowMenuForPost((prev) =>
+              prev === item._id ? null : item._id
+            );
           }}
+          style={styles.menuButton}
         >
-          {showMyPosts && (
-            <>
-              {deleteloading.loading && deleteloading._id === item._id ? (
-                <View>
-                  <ActivityIndicator />
-                </View>
-              ) : (
-                <TouchableOpacity onPress={() => handleDelete(item._id)}>
-                  <Ionicons name="trash-outline" size={24} color="#000" />
-                </TouchableOpacity>
-              )}
-            </>
-          )}
-          <TouchableOpacity
-            onPress={() => {
-              setShowMenuForPost((prev) =>
-                prev === item._id ? null : item._id
-              );
-            }}
-          >
-            <Ionicons name="ellipsis-vertical" size={20} color="#000" />
-          </TouchableOpacity>
-        </View>
+          <Ionicons name="ellipsis-horizontal" size={24} color="#000" />
+        </TouchableOpacity>
       </View>
 
-      {item.text && <Text style={styles.text}>{item.text}</Text>}
+      {/* Media - Full width Instagram style */}
       {renderMedia(item._id, item.media, item.type)}
 
+      {/* Actions Row */}
       <View style={styles.actions}>
-        <TouchableOpacity onPress={() => handleToggleLike(item)}>
-          <Ionicons
-            name={item.likedByUser ? "heart" : "heart-outline"}
-            size={20}
-            color={item.likedByUser ? "red" : "#333"}
-          />
+        <View style={styles.actionsLeft}>
+          <TouchableOpacity 
+            onPress={() => handleToggleLike(item)}
+            style={styles.actionButton}
+          >
+            <Ionicons
+              name={item.likedByUser ? "heart" : "heart-outline"}
+              size={28}
+              color={item.likedByUser ? "#FF3040" : "#000"}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity 
+            onPress={() => toggleCommentSection(item._id)}
+            style={styles.actionButton}
+          >
+            <Ionicons name="chatbubble-outline" size={26} color="#000" />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.actionButton}>
+            <Ionicons name="paper-plane-outline" size={26} color="#000" />
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity style={styles.actionButton}>
+          <Ionicons name="bookmark-outline" size={26} color="#000" />
         </TouchableOpacity>
-        <Text style={styles.iconText}>{item.likeCount ?? 0}</Text>
-        {/* 
-        <TouchableOpacity
-          style={{ marginLeft: 16 }}
-          onPress={() => toggleCommentSection(item._id)}
-        >
-          <Ionicons name="chatbubble-outline" size={20} color="#333" />
-        </TouchableOpacity>
-        <Text style={styles.iconText}>{item.commentCount ?? 0}</Text> */}
       </View>
+
+      {/* Likes Count */}
+      {item.likeCount > 0 && (
+        <Text style={styles.likesText}>
+          {item.likeCount} {item.likeCount === 1 ? "like" : "likes"}
+        </Text>
+      )}
+
+      {/* Caption */}
+      {item.text && (
+        <View style={styles.captionContainer}>
+          <Text style={styles.caption}>
+            <Text style={styles.captionUsername}>
+              {item.createdBy?.name || "Anonymous"}{" "}
+            </Text>
+            {item.text}
+          </Text>
+        </View>
+      )}
+
+      {/* View Comments */}
+      {item.commentCount > 0 && (
+        <TouchableOpacity 
+          onPress={() => toggleCommentSection(item._id)}
+          style={styles.viewCommentsButton}
+        >
+          <Text style={styles.viewCommentsText}>
+            View all {item.commentCount} {item.commentCount === 1 ? "comment" : "comments"}
+          </Text>
+        </TouchableOpacity>
+      )}
 
       {visibleComments[item._id] && (
         <View style={styles.commentSection}>
-          {commentsMap[item._id]?.map((comment, idx) => (
-            <Text key={idx} style={styles.commentText}>
-              <Text style={styles.commentUser}>
-                {comment.user?.name || "User"}:{" "}
+          {commentsMap[item._id]?.slice(0, 2).map((comment, idx) => (
+            <View key={idx} style={styles.commentItem}>
+              <Text style={styles.commentText}>
+                <Text style={styles.commentUser}>
+                  {comment.user?.name || "User"}{" "}
+                </Text>
+                {comment.text}
               </Text>
-              {comment.text}
-            </Text>
+            </View>
           ))}
+          {commentsMap[item._id]?.length > 2 && (
+            <TouchableOpacity 
+              onPress={() => toggleCommentSection(item._id)}
+              style={styles.viewAllComments}
+            >
+              <Text style={styles.viewAllCommentsText}>
+                View all {commentsMap[item._id].length} comments
+              </Text>
+            </TouchableOpacity>
+          )}
 
           <View style={styles.commentInputWrapper}>
             <TextInput
@@ -510,10 +516,18 @@ const CommunityPosts = ({
                 setNewComments((prev) => ({ ...prev, [item._id]: text }))
               }
               placeholder="Add a comment..."
+              placeholderTextColor="#999"
               style={styles.commentInput}
             />
-            <TouchableOpacity onPress={() => handleCommentAdd(item._id)}>
-              <Ionicons name="send" size={20} color="#007BFF" />
+            <TouchableOpacity 
+              onPress={() => handleCommentAdd(item._id)}
+              disabled={!newComments[item._id]?.trim()}
+            >
+              <Ionicons 
+                name="send" 
+                size={20} 
+                color={newComments[item._id]?.trim() ? "#67C694" : "#999"} 
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -633,19 +647,7 @@ const CommunityPosts = ({
   );
 
   return (
-    <View style={{ flex: 1 }}>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "center",
-          alignItems: "center",
-
-          marginVertical: 10,
-          paddingHorizontal: 16,
-        }}
-      >
-        {/* Community Name with Icon */}
-      </View>
+    <View style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
       {isLoading && posts.length === 0 ? (
         <View style={styles.centerContent}>
           <ActivityIndicator size="large" color="#007BFF" />
@@ -691,7 +693,7 @@ export default CommunityPosts;
 
 const styles = StyleSheet.create({
   listContent: {
-    paddingBottom: 20,
+    paddingBottom: 0,
   },
   loadingFooter: {
     paddingVertical: 20,
@@ -705,18 +707,12 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.regular,
   },
   card: {
-    backgroundColor: theme.colors.cardLight,
-    marginVertical: 12,
-    padding: 16,
-    borderRadius: 16,
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    marginHorizontal: 16,
-    borderWidth: 1,
-    borderColor: "rgba(189, 255, 132, 0.2)",
+    backgroundColor: "#FFFFFF",
+    marginBottom: 0,
+    marginHorizontal: 0,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E0E0E0",
+    paddingBottom: 12,
   },
   centerContent: {
     flex: 1,
@@ -734,95 +730,180 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
+    justifyContent: "space-between",
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
   },
   avatar: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 8,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 10,
+    borderWidth: 1.5,
+    borderColor: "#E0E0E0",
+  },
+  avatarPlaceholder: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    marginRight: 10,
+    backgroundColor: "#F0F0F0",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: "#E0E0E0",
   },
   username: {
     fontWeight: "600",
-    fontSize: 16,
-    color: theme.colors.dark,
-    fontFamily: theme.fonts.medium,
+    fontSize: 14,
+    color: "#000",
+    fontFamily: theme.fonts.bold,
   },
-  text: {
-    marginVertical: 10,
-    fontSize: 15,
-    lineHeight: 22,
-    color: theme.colors.dark,
+  timeText: {
+    fontSize: 12,
+    color: "#999",
     fontFamily: theme.fonts.regular,
+    marginTop: 2,
   },
-  mediaWrapper: {
+  menuButton: {
+    padding: 4,
+  },
+  mediaContainer: {
+    width: "100%",
+    backgroundColor: "#000",
     position: "relative",
   },
-  mediaItem: {
-    width: 300,
-    height: 250,
-    borderRadius: 10,
-    overflow: "hidden",
-    marginBottom: 6,
+  mediaItemWrapper: {
+    width: screenWidth,
+    height: screenWidth,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  mediaImage: {
+    width: screenWidth,
+    height: screenWidth,
   },
   media: {
     width: "100%",
     height: "100%",
   },
   dotsContainer: {
+    position: "absolute",
+    bottom: 12,
+    left: 0,
+    right: 0,
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 6,
+    alignItems: "center",
   },
   dot: {
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#ccc",
-    margin: 4,
+    backgroundColor: "rgba(255,255,255,0.4)",
+    marginHorizontal: 3,
   },
   activeDot: {
-    backgroundColor: "#000",
+    backgroundColor: "#FFFFFF",
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   actions: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(0,0,0,0.05)",
+    justifyContent: "space-between",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
-  iconText: {
-    marginLeft: 6,
+  actionsLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  actionButton: {
+    padding: 4,
+  },
+  likesText: {
+    fontWeight: "600",
     fontSize: 14,
-    color: theme.colors.dark,
-    fontFamily: theme.fonts.medium,
+    color: "#000",
+    paddingHorizontal: 12,
+    marginTop: 4,
+    fontFamily: theme.fonts.bold,
+  },
+  captionContainer: {
+    paddingHorizontal: 12,
+    marginTop: 6,
+  },
+  caption: {
+    fontSize: 14,
+    lineHeight: 18,
+    color: "#000",
+    fontFamily: theme.fonts.regular,
+  },
+  captionUsername: {
+    fontWeight: "600",
+    fontFamily: theme.fonts.bold,
+    color: "#000",
+  },
+  viewCommentsButton: {
+    paddingHorizontal: 12,
+    marginTop: 4,
+  },
+  viewCommentsText: {
+    fontSize: 14,
+    color: "#999",
+    fontFamily: theme.fonts.regular,
   },
   commentSection: {
-    marginTop: 10,
+    paddingHorizontal: 12,
     paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
+    paddingBottom: 8,
+  },
+  commentItem: {
+    marginBottom: 8,
   },
   commentText: {
-    marginBottom: 4,
-    fontSize: 13,
+    fontSize: 14,
+    lineHeight: 18,
+    color: "#000",
+    fontFamily: theme.fonts.regular,
   },
   commentUser: {
     fontWeight: "600",
+    fontFamily: theme.fonts.bold,
+    color: "#000",
+  },
+  viewAllComments: {
+    marginTop: 4,
+    marginBottom: 8,
+  },
+  viewAllCommentsText: {
+    fontSize: 14,
+    color: "#999",
+    fontFamily: theme.fonts.regular,
   },
   commentInputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 6,
+    marginTop: 8,
+    paddingTop: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#F0F0F0",
   },
   commentInput: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: "#ccc",
-    padding: 6,
-    borderRadius: 8,
-    marginRight: 6,
+    fontSize: 14,
+    color: "#000",
+    fontFamily: theme.fonts.regular,
+    paddingVertical: 4,
+    marginRight: 8,
   },
   toggleButton: {
     paddingVertical: 8,

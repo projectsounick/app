@@ -32,8 +32,18 @@ import { communityService } from "../services/community.service";
 
 const screenWidth = Dimensions.get("window").width;
 
-const CustomPostModal = ({ setPosts, communityId }: any) => {
+interface CustomPostModalProps {
+  setPosts: any;
+  communityId: any;
+}
+
+const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostModalProps>(
+  ({ setPosts, communityId }, ref) => {
   const [modalVisible, setModalVisible] = useState(false);
+
+  React.useImperativeHandle(ref, () => ({
+    openModal: () => setModalVisible(true),
+  }));
   const [postType, setPostType] = useState<"text" | "image" | "video" | null>(
     null
   );
@@ -181,13 +191,6 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
 
   return (
     <>
-      <TouchableOpacity
-        style={styles.floatingButton}
-        onPress={() => setModalVisible(true)}
-      >
-        <Ionicons name="add-circle" size={54} color="#19002E" />
-      </TouchableOpacity>
-
       <Modal animationType="slide" transparent={true} visible={modalVisible}>
         <KeyboardAvoidingView
           behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -404,20 +407,16 @@ const CustomPostModal = ({ setPosts, communityId }: any) => {
       </Modal>
     </>
   );
-};
+});
+
+CustomPostModal.displayName = "CustomPostModal";
 
 export default CustomPostModal;
 
 const styles = StyleSheet.create({
-  floatingButton: {
-    position: "absolute",
-    bottom: "3%",
-    alignSelf: "center",
-    zIndex: 99,
-  },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.75)",
+    backgroundColor: "transparent",
     justifyContent: "flex-end",
   },
   modalContainer: {
@@ -431,7 +430,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 12,
     elevation: 10,
-    transition: "margin-bottom 0.3s ease",
   },
   scrollContent: {
     flexGrow: 1,

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { View, ActivityIndicator, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -13,6 +13,7 @@ function YourComponent() {
   const [communityId, setCommunityId] = useState<any>(null);
   const [communitName, setCommunityName] = useState("");
   const [loading, setLoading] = useState(true);
+  const createPostModalRef = useRef<{ openModal: () => void } | null>(null);
 
   useEffect(() => {
     const fetchCommunity = async () => {
@@ -38,7 +39,7 @@ function YourComponent() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      style={{ flex: 1, backgroundColor: "#FFFFFF" }}
       edges={["left", "right"]}
     >
       {loading ? (
@@ -52,14 +53,22 @@ function YourComponent() {
           <SmallHeader
             weightShow={false}
             title={communitName || "Fitness Hub"}
+            onCreatePost={() => createPostModalRef.current?.openModal()}
+            showCart={false}
+            showBell={false}
           />
           <PostFeed
             communityId={communityId}
             posts={posts}
             communityName={communitName}
             setPosts={setPosts}
+            onCreatePost={() => createPostModalRef.current?.openModal()}
           />
-          <ImageSelectorModal setPosts={setPosts} communityId={communityId} />
+          <ImageSelectorModal 
+            ref={createPostModalRef}
+            setPosts={setPosts} 
+            communityId={communityId} 
+          />
         </>
       )}
     </SafeAreaView>

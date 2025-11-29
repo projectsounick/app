@@ -32,6 +32,7 @@ export default function SmallHeader({
   showBell = true,
   showHistory = false,
   showStreak = false,
+  onCreatePost,
 }: {
   setWeightTrackModalShow?: any;
   title?: string;
@@ -41,6 +42,7 @@ export default function SmallHeader({
   showBell?: boolean;
   showHistory?: boolean;
   showStreak?: boolean;
+  onCreatePost?: () => void;
 }) {
   /// store data for the streaks ----------------------------------------/
   const streakCount = useSelector(
@@ -311,6 +313,24 @@ export default function SmallHeader({
                 }}
               >
                 <Feather name="clock" size={16} color="white" />
+              </TouchableOpacity>
+            )}
+
+            {/* Create Post Button */}
+            {onCreatePost && (
+              <TouchableOpacity
+                style={{
+                  backgroundColor: "#67C694",
+                  borderRadius: 20,
+                  padding: 8,
+                  width: 36,
+                  height: 36,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                onPress={onCreatePost}
+              >
+                <Ionicons name="add" size={20} color="#FFFFFF" />
               </TouchableOpacity>
             )}
           </View>
