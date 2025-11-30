@@ -20,6 +20,7 @@ const handleYourPurchases = () => router.push("/dashboard/purchases");
 const handlePreferences = () => router.push("/dashboard/preferences");
 const handleMeasurements = () => router.push("/dashboard/measurement");
 const handleWeightTrack = () => router.push("/(tabs)/dashboard/trackWeight");
+const handleCertificates = () => router.push("/dashboard/certificates");
 export default function SettingsList() {
   const [isModalVisible, setModalVisible] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -81,6 +82,11 @@ export default function SettingsList() {
       icon: "settings-outline",
       label: "Preferences",
       onPress: handlePreferences,
+    },
+    {
+      icon: "ribbon-outline",
+      label: "Our Certificates",
+      onPress: handleCertificates,
     },
     { icon: "document-text-outline", label: "Policy", onPress: handlePolicy },
     { icon: "log-out-outline", label: "Logout", onPress: handleLogout },

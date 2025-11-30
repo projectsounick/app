@@ -3,7 +3,6 @@ import { View, Text, ScrollView, Dimensions } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import theme from "@/app/Theme/globalTheme";
 import PlanCard from "@/app/modules/PlanCard";
 import SliderCard from "@/app/modules/SliderCard";
 
@@ -25,6 +24,36 @@ export default function AvailablePlans() {
 
   return (
     <ScrollView contentContainerStyle={{ paddingVertical: 8 }}>
+      {/* Main Header */}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 24,
+          paddingHorizontal: 4,
+        }}
+      >
+        <View
+          style={{
+            width: 40,
+            height: 3,
+            backgroundColor: "#9747FF",
+            borderRadius: 2,
+          }}
+        />
+        <Text
+          style={{
+            fontSize: 24,
+            fontWeight: "700",
+            color: "#000",
+            letterSpacing: -0.5,
+          }}
+        >
+          Available Plans
+        </Text>
+      </View>
+
       {/* Workout Plans by type */}
       {Object.entries(groupedPlans).map(
         ([typeTitle, planGroup], index: any) => (
@@ -34,20 +63,32 @@ export default function AvailablePlans() {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                marginBottom: 6,
+                marginBottom: 12,
               }}
             >
-              <MaterialCommunityIcons
-                name={icons[index % icons.length]}
-                size={20}
-                color={theme.colors.dark}
-                style={{ marginRight: 8 }}
-              />
+              <View
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 18,
+                  backgroundColor: "#9747FF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 12,
+                }}
+              >
+                <MaterialCommunityIcons
+                  name={icons[index % icons.length]}
+                  size={20}
+                  color="#FFFFFF"
+                />
+              </View>
               <Text
                 style={{
-                  fontSize: theme.fontSizes.medium,
-                  fontWeight: "bold",
-                  color: theme.colors.dark,
+                  fontSize: 18,
+                  fontWeight: "700",
+                  color: "#000",
+                  flex: 1,
                 }}
               >
                 {typeTitle}
@@ -57,9 +98,10 @@ export default function AvailablePlans() {
             {/* Description */}
             <Text
               style={{
-                fontSize: theme.fontSizes.regularSmall,
-                color: theme.colors.medium,
-                marginBottom: 10,
+                fontSize: 13,
+                color: "#666",
+                marginBottom: 16,
+                paddingLeft: 48,
               }}
             >
               Tailored plans for your personalized lifestyles.
@@ -96,20 +138,32 @@ export default function AvailablePlans() {
             style={{
               flexDirection: "row",
               alignItems: "center",
-              marginBottom: 6,
+              marginBottom: 12,
             }}
           >
-            <MaterialCommunityIcons
-              name="food-apple"
-              size={20}
-              color={theme.colors.dark}
-              style={{ marginRight: 8 }}
-            />
+            <View
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: "#9747FF",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 12,
+              }}
+            >
+              <MaterialCommunityIcons
+                name="food-apple"
+                size={20}
+                color="#FFFFFF"
+              />
+            </View>
             <Text
               style={{
-                fontSize: theme.fontSizes.medium,
-                fontWeight: "bold",
-                color: theme.colors.dark,
+                fontSize: 18,
+                fontWeight: "700",
+                color: "#000",
+                flex: 1,
               }}
             >
               Diet Plans
@@ -119,9 +173,10 @@ export default function AvailablePlans() {
           {/* Description */}
           <Text
             style={{
-              fontSize: theme.fontSizes.regularSmall,
-              color: theme.colors.medium,
-              marginBottom: 10,
+              fontSize: 13,
+              color: "#666",
+              marginBottom: 16,
+              paddingLeft: 48,
             }}
           >
             Curated meal plans to match your nutrition goals.
