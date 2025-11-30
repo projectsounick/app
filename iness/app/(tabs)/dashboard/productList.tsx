@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import Feather from "react-native-vector-icons/Feather";
+import { AntDesign } from "@expo/vector-icons";
 
 import { Product } from "@/app/interfaces/ecommerceInterface";
 import ProductModal from "@/app/Components/ecom/ProductBottomSheet";
@@ -23,7 +23,7 @@ const CARD_WIDTH = (screenWidth - 48) / 2; // 2 cards per row with 16px padding
 
 const CategoryProductsScreen = () => {
   const { category, color, categoryId }: any = useLocalSearchParams();
-
+  
   const products: Product[] = useSelector(
     (state: RootState) => state.ecom.products
   );
@@ -39,18 +39,39 @@ const CategoryProductsScreen = () => {
   }, [categoryId]);
 
   const categoryProducts = React.useMemo(() => {
-    if (!decodedCategoryId || !products.length) return [];
+    if (!decodedCategoryId || !products.length) {
+      return [];
+    }
+    
+    // Normalize the categoryId for comparison (remove any whitespace, convert to string)
+    const normalizedCategoryId = String(decodedCategoryId).trim().toLowerCase();
     
     return products.filter((item) => {
-      if (!item.category) return false;
+      if (!item.category) {
+        return false;
+      }
       
-      // Handle both string and object category._id
-      const itemCategoryId = typeof item.category === 'string' 
-        ? item.category 
-        : item.category._id;
+      // Handle different category formats
+      let itemCategoryId: string | null = null;
       
-      // Compare as strings, trimming any whitespace
-      return String(itemCategoryId).trim() === String(decodedCategoryId).trim();
+      if (typeof item.category === 'string') {
+        // Category is stored as string ID
+        itemCategoryId = item.category;
+      } else if (item.category && typeof item.category === 'object') {
+        // Category is populated object - try multiple possible fields
+        itemCategoryId = item.category._id 
+          || (item.category as any).id 
+          || (item.category as any).categoryId
+          || null;
+      }
+      
+      if (!itemCategoryId) {
+        return false;
+      }
+      
+      // Normalize and compare
+      const normalizedItemCategoryId = String(itemCategoryId).trim().toLowerCase();
+      return normalizedItemCategoryId === normalizedCategoryId;
     });
   }, [products, decodedCategoryId]);
 
@@ -70,62 +91,61 @@ const CategoryProductsScreen = () => {
     return (
       <TouchableOpacity
         key={item._id}
+        activeOpacity={0.8}
         style={{
           width: CARD_WIDTH,
-          height: 200,
-          borderRadius: 16,
+          height: 240,
+          borderRadius: 20,
           backgroundColor: "#FFFFFF",
           overflow: "hidden",
-          marginBottom: 16,
+          marginBottom: 20,
           marginRight: 16,
           shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 8,
-          elevation: 4,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.12,
+          shadowRadius: 12,
+          elevation: 5,
           borderWidth: 1,
-          borderColor: "#F0F0F0",
+          borderColor: "#F5F5F5",
         }}
         onPress={() => handleCheck(item)}
       >
-        {/* Top Section (Image + Quantity + Button) */}
+        {/* Image Container */}
         <View
           style={{
-            height: 120,
-            borderTopLeftRadius: 12,
-            borderTopRightRadius: 12,
+            height: 150,
+            width: "100%",
             position: "relative",
-            justifyContent: "flex-end",
+            justifyContent: "center",
             alignItems: "center",
+            backgroundColor: "#F8F8F8",
           }}
         >
-          {/* Background Image */}
+          {/* Product Image */}
           {item.images?.[0] ? (
             <Image
               source={{ uri: item.images[0] }}
               style={{
                 width: "100%",
                 height: "100%",
-                position: "absolute",
-                top: 0,
-                left: 0,
                 resizeMode: "contain",
               }}
             />
           ) : (
             <View
               style={{
-                backgroundColor: "#999",
                 width: "100%",
                 height: "100%",
-                position: "absolute",
-                top: 0,
-                left: 0,
+                backgroundColor: "#E0E0E0",
+                alignItems: "center",
+                justifyContent: "center",
               }}
-            />
+            >
+              <AntDesign name="picture" size={40} color="#999" />
+            </View>
           )}
 
-          {/* Plus/Check Button */}
+          {/* Plus Button */}
           <TouchableOpacity
             style={{
               position: "absolute",
@@ -145,26 +165,32 @@ const CategoryProductsScreen = () => {
             }}
             onPress={() => handleCheck(item)}
           >
-            <Feather name="plus" size={20} color="#67C694" />
+            <AntDesign name="pluscircle" size={22} color="#67C694" />
           </TouchableOpacity>
 
-          {/* Quantity (Variation Label) */}
+          {/* Variation Label Badge */}
           {displayLabel && (
             <View
               style={{
-                backgroundColor: "#fff",
-                paddingHorizontal: 8,
-                paddingVertical: 2,
+                position: "absolute",
+                bottom: 10,
+                left: 10,
+                backgroundColor: "#FFFFFF",
+                paddingHorizontal: 10,
+                paddingVertical: 5,
                 borderRadius: 10,
-                marginBottom: 6,
-                alignSelf: "center",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+                elevation: 2,
               }}
             >
               <Text
                 style={{
-                  fontSize: 10,
+                  fontSize: 11,
                   fontWeight: "600",
-                  color: "#333",
+                  color: "#9747FF",
                 }}
               >
                 {displayLabel}
@@ -173,29 +199,38 @@ const CategoryProductsScreen = () => {
           )}
         </View>
 
-        {/* Bottom Section */}
-        <View style={{ paddingHorizontal: 8, paddingVertical: 6 }}>
+        {/* Product Details */}
+        <View style={{ paddingHorizontal: 12, paddingVertical: 12 }}>
           <Text
             numberOfLines={2}
             style={{
+              fontSize: 13,
               fontWeight: "600",
               color: "#000",
-              fontSize: 10,
+              marginBottom: 8,
+              lineHeight: 18,
             }}
           >
             {item.name}
           </Text>
 
-          <Text
+          <View
             style={{
-              fontSize: 14,
-              fontWeight: "700",
-              color: "#9747FF",
-              marginTop: 4,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            ₹{displayPrice}
-          </Text>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "700",
+                color: "#9747FF",
+              }}
+            >
+              ₹{displayPrice}
+            </Text>
+          </View>
         </View>
       </TouchableOpacity>
     );
@@ -206,25 +241,54 @@ const CategoryProductsScreen = () => {
       {/* Header */}
       <SmallHeader title={"Products"} />
       <BackHeader />
-      {/* Products Heading */}
-      <View style={{ paddingHorizontal: 16 }}>
-        <Text
+      
+      {/* Category Header Section */}
+      <View style={{ paddingHorizontal: 16, marginTop: 16, marginBottom: 24 }}>
+        <View
           style={{
-            fontSize: 20,
-            fontWeight: "bold",
-            color: "#333",
-            textAlign: "center",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 8,
           }}
         >
-          {category}
-        </Text>
+          <Text
+            style={{
+              fontSize: 24,
+              fontWeight: "700",
+              color: "#000",
+              letterSpacing: -0.5,
+            }}
+          >
+            {category}
+          </Text>
+          <View
+            style={{
+              width: 40,
+              height: 3,
+              backgroundColor: "#9747FF",
+              borderRadius: 2,
+            }}
+          />
+        </View>
+        {categoryProducts.length > 0 && (
+          <Text
+            style={{
+              fontSize: 14,
+              color: "#666",
+              marginTop: 4,
+            }}
+          >
+            {categoryProducts.length} {categoryProducts.length === 1 ? 'product' : 'products'} available
+          </Text>
+        )}
       </View>
       {/* Product Grid */}
       <FlatList
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingTop: 16,
-          paddingBottom: 8, // reduce from 16 to 8 or 0
+          paddingTop: 8,
+          paddingBottom: 40,
           flexGrow: 1,
         }}
         data={categoryProducts}
@@ -232,12 +296,50 @@ const CategoryProductsScreen = () => {
         numColumns={2}
         renderItem={({ item, index }) => renderProductCard({ item, index })}
         showsVerticalScrollIndicator={false}
+        columnWrapperStyle={{
+          justifyContent: "space-between",
+        }}
         ListEmptyComponent={() => (
-          <View style={{ alignItems: "center", justifyContent: "center", marginTop: 60, paddingHorizontal: 20 }}>
-            <Text style={{ textAlign: "center", fontSize: 16, fontWeight: "600", color: "#666", marginBottom: 8 }}>
+          <View 
+            style={{ 
+              alignItems: "center", 
+              justifyContent: "center", 
+              marginTop: 80, 
+              paddingHorizontal: 20 
+            }}
+          >
+            <View
+              style={{
+                width: 80,
+                height: 80,
+                borderRadius: 40,
+                backgroundColor: "#F8F8F8",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 20,
+              }}
+            >
+              <AntDesign name="inbox" size={40} color="#999" />
+            </View>
+            <Text 
+              style={{ 
+                textAlign: "center", 
+                fontSize: 18, 
+                fontWeight: "700", 
+                color: "#000", 
+                marginBottom: 8 
+              }}
+            >
               No products available
             </Text>
-            <Text style={{ textAlign: "center", fontSize: 14, color: "#999" }}>
+            <Text 
+              style={{ 
+                textAlign: "center", 
+                fontSize: 14, 
+                color: "#666",
+                lineHeight: 20,
+              }}
+            >
               Check back later for new products in this category
             </Text>
           </View>

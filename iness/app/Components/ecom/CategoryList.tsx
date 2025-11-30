@@ -19,7 +19,7 @@ interface Props {
 // Removed colorful backgrounds - using white cards with theme accents
 
 function CategoryGrid() {
-  const navigation = useNavigation();
+
   const router = useRouter();
   const renderItem = ({ item, index }: { item: Category; index: number }) => {
     return (
@@ -42,11 +42,12 @@ function CategoryGrid() {
           borderWidth: 1,
           borderColor: "#F5F5F5",
         }}
-        onPress={() =>
+        onPress={() =>{
+          console.log('item', item);
           router.push(
-            `/dashboard/productList?category=${encodeURIComponent(item.name)}&color=#FFFFFF&categoryId=${encodeURIComponent(item._id)}`
+            `/dashboard/productList?category=${encodeURIComponent(item.name)}&categoryId=${encodeURIComponent(item._id)}`
           )
-        }
+        }}
       >
         {/* Image Container with Background */}
         <View 
