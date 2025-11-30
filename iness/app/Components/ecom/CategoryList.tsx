@@ -3,7 +3,7 @@ import { View, Text, Image, TouchableOpacity, FlatList, Dimensions } from "react
 import { MaterialIcons } from "@expo/vector-icons"; // for the arrow icon
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { useNavigation } from "@react-navigation/native";
+
 import { useRouter } from "expo-router";
 
 interface Category {

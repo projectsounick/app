@@ -17,14 +17,15 @@ import {
   ImageBackground,
   Modal,
 } from "react-native";
+const {filter} = require("bad-words");
 import { Ionicons } from "@expo/vector-icons";
 import { ResizeMode, Video } from "expo-av";
-import { Filter } from "bad-words";
+
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { captureRef } from "react-native-view-shot";
 
-const filter = new Filter();
+
 import { communityService } from "@/app/services/community.service";
 import { useFocusEffect } from "expo-router";
 import theme from "@/app/Theme/globalTheme";

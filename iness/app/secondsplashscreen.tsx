@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, View, Text, Image } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import theme from "./Theme/globalTheme";
@@ -6,16 +6,14 @@ import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 
 import { router } from "expo-router";
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-import { useNavigation } from "@react-navigation/native";
 const SecondSplashScreen = () => {
-  const progress = useMemo(() => new Animated.Value(0), []);
-  const logoOpacity = useMemo(() => new Animated.Value(0), []);
-  const combinedTranslateX = useMemo(() => new Animated.Value(0), []);
+  const [progress] = useState(() => new Animated.Value(0));
+  const [logoOpacity] = useState(() => new Animated.Value(0));
+  const [combinedTranslateX] = useState(() => new Animated.Value(0));
+
   const [showLetters, setShowLetters] = useState(false);
   const [visibleLetters, setVisibleLetters] = useState("");
   const [showCircle, setShowCircle] = useState(true);
-
-  const navigation = useNavigation<any>();
   const CIRCLE_RADIUS = 80;
   const CIRCLE_LENGTH = 2 * Math.PI * CIRCLE_RADIUS;
   const LETTER_DELAY = 300;
