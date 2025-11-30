@@ -12,10 +12,17 @@ import {
   ScrollView,
   Pressable,
   Alert,
+  Share,
+  Platform,
+  ImageBackground,
+  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { ResizeMode, Video } from "expo-av";
 import { Filter } from "bad-words";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
+import { captureRef } from "react-native-view-shot";
 
 const filter = new Filter();
 import { communityService } from "@/app/services/community.service";
@@ -78,6 +85,10 @@ const CommunityPosts = ({
   );
   const [selected, setSelected] = useState("All Posts"); // default
   const [open, setOpen] = useState(false);
+  const [sharePreviewVisible, setSharePreviewVisible] = useState(false);
+  const [shareImageUrl, setShareImageUrl] = useState<string | null>(null);
+  const [sharePostText, setSharePostText] = useState<string>("");
+  const sharePreviewRef = useRef<View>(null);
 
   const options = ["All Posts", "My Posts"];
 
@@ -280,6 +291,96 @@ const CommunityPosts = ({
     }
   };
 
+  const handleShareFromPreview = async () => {
+    try {
+      if (!shareImageUrl || !sharePreviewRef.current) {
+        Alert.alert("Error", "Unable to capture image. Please try again.");
+        return;
+      }
+
+      // Wait a bit for the view to render
+      await new Promise(resolve => setTimeout(resolve, 300));
+
+      // Capture the view with logo and Instagram handle overlay
+      const uri = await captureRef(sharePreviewRef.current, {
+        format: "jpg",
+        quality: 0.9,
+        result: "tmpfile",
+      });
+
+      if (!uri) {
+        Alert.alert("Error", "Failed to capture image. Please try again.");
+        return;
+      }
+
+      const instagramHandle = "https://www.instagram.com/iness_wellness360_app?igsh=MTlodmZuOXQ0OW9wYQ==";
+      const shareText = sharePostText 
+        ? `🏋️ ${sharePostText}\n\n💪 Follow us: ${instagramHandle}\n\n#Iness #Fitness #Wellness`
+        : `🏋️ Check out this post from Iness!\n\n💪 Follow us: ${instagramHandle}\n\n#Iness #Fitness #Wellness`;
+
+      // Close preview modal
+      setSharePreviewVisible(false);
+
+      // Share the captured image with overlays
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, {
+          mimeType: "image/jpeg",
+          dialogTitle: "Share to Instagram",
+          UTI: "public.jpeg",
+        });
+      } else {
+        await Share.share({
+          message: shareText,
+          title: "Share from Iness",
+          url: Platform.OS === "ios" ? uri : undefined,
+        });
+      }
+    } catch (error: any) {
+      console.error("Error capturing and sharing:", error);
+      Alert.alert("Error", "Failed to share image. Please try again.");
+      setSharePreviewVisible(false);
+    }
+  };
+
+  const handleSharePost = async (post: any) => {
+    try {
+      // If post has media (image/video), show preview with overlay
+      if (post.media && post.media.length > 0) {
+        const mediaUrl = post.media[0];
+        const isVideo = post.type === "video" || mediaUrl.includes("video") || mediaUrl.endsWith(".mp4");
+
+        if (!isVideo) {
+          // For images: show preview modal with logo and Instagram handle overlay
+          setShareImageUrl(mediaUrl);
+          setSharePostText(post.text || "");
+          setSharePreviewVisible(true);
+        } else {
+          // For videos, share with Instagram handle
+          const instagramHandle = "https://www.instagram.com/iness_wellness360_app?igsh=MTlodmZuOXQ0OW9wYQ==";
+          const shareText = post.text 
+            ? `🏋️ ${post.text}\n\n🎥 Watch: ${mediaUrl}\n\n💪 Follow us: ${instagramHandle}\n\n#Iness #Fitness #Wellness`
+            : `🏋️ Check out this video from Iness!\n\n🎥 ${mediaUrl}\n\n💪 Follow us: ${instagramHandle}\n\n#Iness #Fitness #Wellness`;
+          await Share.share({
+            message: shareText,
+            title: "Share from Iness",
+            url: Platform.OS === "ios" ? mediaUrl : undefined,
+          });
+        }
+      } else {
+        // Text-only post
+        const instagramHandle = "https://www.instagram.com/iness_wellness360_app?igsh=MTlodmZuOXQ0OW9wYQ==";
+        const shareText = `🏋️ ${post.text}\n\n💪 Follow us: ${instagramHandle}\n\n#Iness #Fitness #Wellness`;
+        await Share.share({
+          message: shareText,
+          title: "Share from Iness",
+        });
+      }
+    } catch (error: any) {
+      console.error("Error sharing post:", error);
+      Alert.alert("Error", "Failed to share post. Please try again.");
+    }
+  };
+
   const handleToggleLike = async (post: Post) => {
     let { _id: postId, createdBy } = post;
 
@@ -440,19 +541,24 @@ const CommunityPosts = ({
               color={item.likedByUser ? "#FF3040" : "#000"}
             />
           </TouchableOpacity>
-          <TouchableOpacity 
+          {/* Comment icon commented out */}
+          {/* <TouchableOpacity 
             onPress={() => toggleCommentSection(item._id)}
             style={styles.actionButton}
           >
             <Ionicons name="chatbubble-outline" size={26} color="#000" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.actionButton}>
+          </TouchableOpacity> */}
+          <TouchableOpacity 
+            onPress={() => handleSharePost(item)}
+            style={styles.actionButton}
+          >
             <Ionicons name="paper-plane-outline" size={26} color="#000" />
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.actionButton}>
+        {/* Bookmark icon commented out */}
+        {/* <TouchableOpacity style={styles.actionButton}>
           <Ionicons name="bookmark-outline" size={26} color="#000" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Likes Count */}
@@ -643,6 +749,7 @@ const CommunityPosts = ({
           </TouchableOpacity>
         </View>
       )}
+
     </View>
   );
 
@@ -685,11 +792,72 @@ const CommunityPosts = ({
           imageUrl={selectedMedia.url}
         />
       )}
+
+      {/* Share Preview Modal with Logo and Instagram Handle Overlay */}
+      <Modal
+        visible={sharePreviewVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setSharePreviewVisible(false)}
+      >
+        <View style={styles.shareModalOverlay}>
+          <View style={styles.shareModalContainer}>
+            <Text style={styles.shareModalTitle}>Preview Share</Text>
+            <Text style={styles.shareModalSubtitle}>
+              Logo and Instagram handle will be visible when shared
+            </Text>
+            
+            <View 
+              ref={sharePreviewRef}
+              collapsable={false}
+              style={styles.sharePreviewContainer}
+            >
+              <ImageBackground
+                source={{ uri: shareImageUrl || "" }}
+                style={styles.shareImageBackground}
+                resizeMode="cover"
+              >
+                {/* Logo Overlay - Top Left */}
+                <View style={styles.logoOverlay}>
+                  <Image
+                    source={require("@/assets/images/logowithoutbackground.png")}
+                    style={styles.shareLogo}
+                    resizeMode="contain"
+                  />
+                </View>
+
+                {/* Instagram Handle Overlay - Bottom Right */}
+                <View style={styles.instagramHandleOverlay}>
+                  <Text style={styles.instagramHandleText}>
+                    @iness_wellness360_app
+                  </Text>
+                  <Text style={styles.instagramHandleLink}>
+                    instagram.com/iness_wellness360_app
+                  </Text>
+                </View>
+              </ImageBackground>
+            </View>
+
+            <View style={styles.shareModalActions}>
+              <TouchableOpacity
+                style={styles.shareCancelButton}
+                onPress={() => setSharePreviewVisible(false)}
+              >
+                <Text style={styles.shareCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.shareConfirmButton}
+                onPress={handleShareFromPreview}
+              >
+                <Text style={styles.shareConfirmButtonText}>Share</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
-
-export default CommunityPosts;
 
 const styles = StyleSheet.create({
   listContent: {
@@ -955,4 +1123,122 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 12,
   },
+  shareModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  shareModalContainer: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 20,
+    width: "90%",
+    maxWidth: 500,
+    alignItems: "center",
+  },
+  shareModalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 8,
+    color: "#000",
+    fontFamily: theme.fonts.bold,
+  },
+  shareModalSubtitle: {
+    fontSize: 14,
+    color: "#666",
+    marginBottom: 20,
+    textAlign: "center",
+    fontFamily: theme.fonts.regular,
+  },
+  sharePreviewContainer: {
+    width: screenWidth * 0.8,
+    height: screenWidth * 0.8,
+    borderRadius: 12,
+    overflow: "hidden",
+    backgroundColor: "#000",
+  },
+  shareImageBackground: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "space-between",
+  },
+  logoOverlay: {
+    position: "absolute",
+    top: 16,
+    left: 16,
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    borderRadius: 12,
+    padding: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  shareLogo: {
+    width: 50,
+    height: 50,
+  },
+  instagramHandleOverlay: {
+    position: "absolute",
+    bottom: 16,
+    right: 16,
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
+    borderRadius: 12,
+    padding: 12,
+    alignItems: "flex-end",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  instagramHandleText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "700",
+    fontFamily: theme.fonts.bold,
+    marginBottom: 2,
+  },
+  instagramHandleLink: {
+    color: "#67C694",
+    fontSize: 9,
+    fontFamily: theme.fonts.regular,
+  },
+  shareModalActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    marginTop: 20,
+    gap: 12,
+  },
+  shareCancelButton: {
+    flex: 1,
+    padding: 14,
+    backgroundColor: "#F0F0F0",
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  shareCancelButtonText: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "600",
+    fontFamily: theme.fonts.medium,
+  },
+  shareConfirmButton: {
+    flex: 1,
+    padding: 14,
+    backgroundColor: "#67C694",
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  shareConfirmButtonText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontWeight: "700",
+    fontFamily: theme.fonts.bold,
+  },
 });
+
+export default CommunityPosts;
