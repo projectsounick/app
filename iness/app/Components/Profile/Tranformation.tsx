@@ -24,7 +24,7 @@ export default function TransformationCard() {
     snackbarVisible,
     snackbarMessage,
     setSnackbarVisible,
-    setSnackbarMessage,
+   
     setData,
   } = useGetDataHook(transformatiomImageService.getTransformationImages);
 

@@ -9,6 +9,7 @@ import {
   ImageBackground,
   ScrollView,
   Alert,
+  Platform,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import theme from "@/app/Theme/globalTheme";
@@ -69,34 +70,55 @@ export default function TransformationImage() {
     }));
   };
 
-  const pickImage = async () => {
-    setImageUploadLoader(true);
-
-    // Ask for permission first
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert(
-        "Permission required",
-        "We need permission to access your media library to upload images or videos.",
-        [{ text: "OK" }]
-      );
-      setImageUploadLoader(false);
-      return;
-    }
-
-    // Launch the picker
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      quality: 0.8,
-      videoMaxDuration: 60,
-    });
-
-    if (result.canceled) {
-      setImageUploadLoader(false);
-      return;
-    }
-
+  const pickImage = async (mode: "camera" | "gallery") => {
+    
     try {
+      setImageUploadLoader(true);
+      const mediaType = await new Promise<"image" | "video">(
+        (resolve, reject) => {
+          Alert.alert("Capture Type", "Choose what you want to capture", [
+            { text: "Photo", onPress: () => resolve("image") },
+            { text: "Video", onPress: () => resolve("video") },
+            {
+              text: "Cancel",
+              style: "cancel",
+              onPress: () => reject("cancel"),
+            },
+          ]);
+        }
+      );
+
+      if (Platform.OS === "android") {
+        if (mode === "camera") {
+          const { status } = await ImagePicker.requestCameraPermissionsAsync();
+          if (status !== "granted") return;
+        } else {
+          const { status } =
+            await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (status !== "granted") return;
+        }
+      }
+
+      const result =
+        mode === "camera"
+          ? await ImagePicker.launchCameraAsync({
+              mediaTypes:
+                mediaType === "image"
+                  ? ImagePicker.MediaTypeOptions.Images
+                  : ImagePicker.MediaTypeOptions.Videos,
+              quality: 0.8,
+              videoMaxDuration: 60,
+            })
+          : await ImagePicker.launchImageLibraryAsync({
+              mediaTypes: ImagePicker.MediaTypeOptions.All,
+              quality: 0.8,
+            });
+
+      if (result.canceled || !result.assets || result.assets.length === 0)
+        return;
+      const asset = result.assets[0];
+      const fileUri = asset.uri;
+      const type = asset.type ?? "image";
       const storageDetails = await userService.getStorageAccountDetails(
         "transformationImages"
       );
@@ -117,9 +139,7 @@ export default function TransformationImage() {
       }
 
       const userId = userData.data._id;
-      const asset = result.assets[0];
-      const fileUri = asset.uri;
-      const type = asset.type;
+      
       const ext =
         fileUri.split(".").pop() || (type === "video" ? "mp4" : "jpg");
       const fileName = `${userId}_${Date.now()}.${ext}`;
@@ -304,7 +324,7 @@ export default function TransformationImage() {
 
         <AnimatedSubmitButton
           loading={imageUploadLoader}
-          onPress={pickImage}
+          onPress={() => pickImage("gallery")}
           title="Upload Media"
           height={50}
         />

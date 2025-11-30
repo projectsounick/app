@@ -146,18 +146,21 @@ const BookSessionDetailsScreen = () => {
   }, []);
   return (
     <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpg")} // Adjust path as needed
+      source={require("../../../assets/images/basicBackground.jpg")}
       style={{ flex: 1 }}
       resizeMode="cover"
     >
       <SafeAreaView
         style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-        edges={["top", "left", "right", "bottom"]}
+        edges={["top", "left", "right"]}
       >
         <View style={{ paddingLeft: 20, paddingTop: 20 }}>
           <NormalHeader screenName="Preferences" />
         </View>
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 20 }}>
+        <ScrollView
+          contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+          showsVerticalScrollIndicator={false}
+        >
           <ChooseDateSection
             selectedDate={selectedDate}
             onDateChange={setSelectedDate}
@@ -170,9 +173,10 @@ const BookSessionDetailsScreen = () => {
                 flexDirection: "row",
                 justifyContent: "center",
                 alignItems: "center",
+                paddingVertical: 40,
               }}
             >
-              <ActivityIndicator />
+              <ActivityIndicator color="#9747FF" size="large" />
             </View>
           ) : (
             <SlotSelectionSection
@@ -192,17 +196,29 @@ const BookSessionDetailsScreen = () => {
             }
           />
         </ScrollView>
-        <AnimatedSubmitButton
-          loading={false}
-          title={preferences ? "Request to Change" : "Add"}
-          onPress={handleUpdate}
-        />
+        <View
+          style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            padding: 20,
+            backgroundColor: "transparent",
+          }}
+        >
+          <AnimatedSubmitButton
+            loading={loading}
+            title={preferences ? "Request to Change" : "Add"}
+            onPress={handleUpdate}
+            height={50}
+          />
+        </View>
       </SafeAreaView>
       <CustomSnackbar
         visible={snackbarOpen}
         message={snackbarMessage}
         onDismiss={() => setSnackbarOpen(false)}
-        bgColor={theme.colors.primary}
+        bgColor="#67C694"
       />
     </ImageBackground>
   );

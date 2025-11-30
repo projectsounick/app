@@ -1,4 +1,3 @@
-import theme from "@/app/Theme/globalTheme";
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
@@ -20,29 +19,45 @@ const SlotSelectionSection: React.FC<Props> = ({
   return (
     <View
       style={{
-        borderWidth: 1,
-        borderColor: theme.colors.secondPrimary,
-        borderRadius: 12,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 20,
         padding: 16,
-        backgroundColor: theme.colors.text,
         marginBottom: 16,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 12,
+        elevation: 5,
+        borderWidth: 1,
+        borderColor: "#F5F5F5",
       }}
     >
-      {/* Header with icon on right */}
+      {/* Header */}
       <View
         style={{
           flexDirection: "row",
-          justifyContent: "flex-start",
           alignItems: "center",
           marginBottom: 12,
         }}
       >
-        <Icon name="clock" size={20} color="#5E3AEE" />
+        <View
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: "#9747FF",
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 10,
+          }}
+        >
+          <Icon name="clock" size={18} color="#FFFFFF" />
+        </View>
         <Text
           style={{
-            fontSize: theme.fontSizes.medium,
-            color: theme.colors.dark,
-            marginLeft: 6,
+            fontSize: 16,
+            fontWeight: "700",
+            color: "#000",
           }}
         >
           Available Slots
@@ -50,27 +65,43 @@ const SlotSelectionSection: React.FC<Props> = ({
       </View>
 
       {/* Slot buttons */}
-      <View style={{ flexDirection: "row", gap: 12, flexWrap: "wrap" }}>
+      <View
+        style={{
+          flexDirection: "row",
+          gap: 10,
+          flexWrap: "wrap",
+          paddingTop: 10,
+          borderTopWidth: 1,
+          borderTopColor: "#F0F0F0",
+        }}
+      >
         {visibleSlots.map((slot, index) => (
           <TouchableOpacity
             key={index}
             onPress={() => onSelectSlot(slot)}
             style={{
               backgroundColor:
-                selectedSlot === slot ? theme.colors.primary : "#F3F4F6",
-              paddingVertical: 8,
-              paddingHorizontal: 14,
-              borderRadius: 20,
-              borderWidth: 1,
-              borderColor: selectedSlot === slot ? "#34D399" : "transparent",
-              width: 150, // Fixed width for uniform size
+                selectedSlot === slot ? "#9747FF" : "#F8F8F8",
+              paddingVertical: 10,
+              paddingHorizontal: 18,
+              borderRadius: 16,
+              borderWidth: 2,
+              borderColor:
+                selectedSlot === slot ? "#9747FF" : "transparent",
+              minWidth: 110,
               alignItems: "center",
+              shadowColor: selectedSlot === slot ? "#9747FF" : "transparent",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: selectedSlot === slot ? 0.3 : 0,
+              shadowRadius: 4,
+              elevation: selectedSlot === slot ? 3 : 0,
             }}
           >
             <Text
               style={{
-                color: selectedSlot === slot ? "#065F46" : "#000",
-                fontSize: 12,
+                color: selectedSlot === slot ? "#FFFFFF" : "#333",
+                fontSize: 13,
+                fontWeight: "600",
               }}
             >
               {slot}
@@ -86,17 +117,26 @@ const SlotSelectionSection: React.FC<Props> = ({
           style={{
             flexDirection: "row",
             alignItems: "center",
-            marginTop: 10,
+            marginTop: 12,
             alignSelf: "flex-end",
+            paddingVertical: 6,
+            paddingHorizontal: 10,
           }}
         >
-          <Text style={{ color: "#5E3AEE", fontSize: 14, marginRight: 4 }}>
+          <Text
+            style={{
+              color: "#9747FF",
+              fontSize: 14,
+              fontWeight: "600",
+              marginRight: 4,
+            }}
+          >
             {isExpanded ? "Show less" : "Show all"}
           </Text>
           <Icon
             name={isExpanded ? "chevron-up" : "chevron-down"}
             size={18}
-            color="#5E3AEE"
+            color="#9747FF"
           />
         </TouchableOpacity>
       )}

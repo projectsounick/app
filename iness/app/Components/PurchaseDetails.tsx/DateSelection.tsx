@@ -1,10 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Platform } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
+import { View, Text, TouchableOpacity } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
-import { ThemeContext } from "@react-navigation/native";
-import theme from "@/app/Theme/globalTheme";
 import Icon from "react-native-vector-icons/Feather";
 
 interface Props {
@@ -29,55 +26,92 @@ const ChooseDateSection: React.FC<Props> = ({
   };
 
   return (
-    <LinearGradient
-      colors={["#E1CAFF", "#FFFFFF"]}
-      start={{ x: 0.5, y: 0 }}
-      end={{ x: 0.5, y: 1 }}
+    <View
       style={{
-        borderRadius: 12,
-        borderWidth: 1,
-        borderColor: theme.colors.secondPrimary,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 20,
+        padding: 16,
         marginBottom: 16,
-        paddingHorizontal: 16,
-        paddingVertical: 16,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 12,
+        elevation: 5,
+        borderWidth: 1,
+        borderColor: "#F5F5F5",
       }}
     >
       <View
-        style={{ flexDirection: "row", alignItems: "center", marginBottom: 6 }}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          marginBottom: 12,
+        }}
       >
-        <Icon
-          name="calendar"
-          size={20}
-          color="rgba(151, 71, 255, 1)"
-          style={{ marginRight: 6 }}
-        />
+        <View
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: "#9747FF",
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 10,
+          }}
+        >
+          <Icon name="calendar" size={18} color="#FFFFFF" />
+        </View>
         <Text
           style={{
-            fontSize: theme.fontSizes.medium,
-            color: theme.colors.dark, // black text
-            fontWeight: theme.fontWeights.regular,
+            fontSize: 16,
+            fontWeight: "700",
+            color: "#000",
           }}
         >
           Choose a date
         </Text>
       </View>
 
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <Text style={{ fontSize: 20, fontWeight: "600", color: "#000" }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingTop: 10,
+          borderTopWidth: 1,
+          borderTopColor: "#F0F0F0",
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: "600",
+            color: "#000",
+            flex: 1,
+          }}
+        >
           {moment(selectedDate).format("MMMM D, YYYY")}
         </Text>
         <TouchableOpacity
           onPress={showDatePicker}
           style={{
-            backgroundColor: preferences ? "#A78BFA" : "#8B5CF6", // lighter shade when disabled
-            paddingVertical: 6,
-            paddingHorizontal: 14,
+            backgroundColor: preferences ? "#CCCCCC" : "#9747FF",
+            paddingVertical: 8,
+            paddingHorizontal: 18,
             borderRadius: 20,
-            opacity: preferences ? 0.6 : 1, // optional: also dim the button when disabled
+            opacity: preferences ? 0.6 : 1,
           }}
           disabled={preferences}
         >
-          <Text style={{ color: "#fff", fontWeight: "600" }}>Change</Text>
+          <Text
+            style={{
+              color: "#fff",
+              fontWeight: "600",
+              fontSize: 13,
+            }}
+          >
+            Change
+          </Text>
         </TouchableOpacity>
       </View>
 
@@ -88,7 +122,7 @@ const ChooseDateSection: React.FC<Props> = ({
         onConfirm={handleConfirm}
         onCancel={hideDatePicker}
       />
-    </LinearGradient>
+    </View>
   );
 };
 

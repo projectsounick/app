@@ -13,16 +13,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
 import NormalHeader from "@/app/modules/NormalHeader";
 import TrackerModal from "@/app/Components/Tracking/TrackingModal";
-import theme from "@/app/Theme/globalTheme";
 import { trackService } from "@/app/services/track.service";
-import { ActivityIndicator, Snackbar } from "react-native-paper"; // install react-native-paper or use your existing Snackbar
+import { ActivityIndicator } from "react-native-paper";
 const { height } = Dimensions.get("window");
 import CustomSnackbar from "@/app/modules/Snackbar";
-const topPadding = height * 0.05; // 2% of screen height
+const topPadding = height * 0.05;
 import { updateTrackingField } from "@/Slices/trackSlice";
 import { RootState } from "@/store";
 import { SafeAreaView } from "react-native-safe-area-context";
-
 import { createStreak } from "@/app/services/streaks.service";
 import { setStreakData } from "@/Slices/streakSlice";
 
@@ -150,23 +148,31 @@ export default function WellnessDashboard() {
           {dataLoading ? (
             <View
               style={{
-                display: "flex",
-                flexDirection: "row",
+                flex: 1,
                 justifyContent: "center",
                 alignItems: "center",
-                height: "100%",
+                padding: 20,
               }}
             >
-              <ActivityIndicator color={theme.colors.secondPrimary} size={20} />
+              <ActivityIndicator color="#9747FF" size="large" />
             </View>
           ) : (
             <>
-              {/* Progress Circle */}
+              {/* Progress Circle Card */}
               <View
                 style={{
+                  backgroundColor: "#FFFFFF",
+                  borderRadius: 20,
+                  padding: 20,
+                  marginBottom: 20,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.12,
+                  shadowRadius: 12,
+                  elevation: 5,
+                  borderWidth: 1,
+                  borderColor: "#F5F5F5",
                   alignItems: "center",
-                  justifyContent: "center",
-                  marginBottom: 10,
                 }}
               >
                 <AnimatedCircularProgress
@@ -174,7 +180,7 @@ export default function WellnessDashboard() {
                   width={14}
                   fill={progressSleep}
                   tintColor="#ADD8E6"
-                  backgroundColor="#eaeaea"
+                  backgroundColor="#F0F0F0"
                   duration={1200}
                 >
                   {() => (
@@ -182,8 +188,8 @@ export default function WellnessDashboard() {
                       size={140}
                       width={12}
                       fill={progressSteps}
-                      tintColor="#7771de"
-                      backgroundColor="#f0f0f0"
+                      tintColor="#9747FF"
+                      backgroundColor="#F0F0F0"
                       duration={1200}
                     >
                       {() => (
@@ -191,8 +197,8 @@ export default function WellnessDashboard() {
                           <Text
                             style={{
                               fontSize: 28,
-                              fontWeight: "bold",
-                              color: "#6C1B9B",
+                              fontWeight: "700",
+                              color: "#9747FF",
                               textAlign: "center",
                             }}
                           >
@@ -207,6 +213,7 @@ export default function WellnessDashboard() {
                               fontSize: 14,
                               color: "#666",
                               textAlign: "center",
+                              fontWeight: "500",
                             }}
                           >
                             {(progressSteps / 10).toFixed(1)}/10
@@ -220,45 +227,64 @@ export default function WellnessDashboard() {
                 <View
                   style={{
                     flexDirection: "row",
-                    justifyContent: "space-around",
-                    width: "60%",
-                    marginTop: 16,
+                    justifyContent: "center",
+                    gap: 24,
+                    marginTop: 20,
+                    paddingTop: 16,
+                    borderTopWidth: 1,
+                    borderTopColor: "#F0F0F0",
+                    width: "100%",
                   }}
                 >
-                  <View style={{ flexDirection: "row", alignItems: "center" }}>
-                    {/* Sleep */}
+                  {/* Sleep */}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                    }}
+                  >
                     <View
                       style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        marginRight: 20,
+                        width: 12,
+                        height: 12,
+                        borderRadius: 6,
+                        backgroundColor: "#ADD8E6",
+                        marginRight: 6,
+                      }}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: "#666",
+                        fontWeight: "500",
                       }}
                     >
-                      <View
-                        style={{
-                          width: 12,
-                          height: 12,
-                          backgroundColor: "#ADD8E6",
-                          marginRight: 6,
-                        }}
-                      />
-                      <Text style={{ fontSize: 16, color: "#666" }}>Sleep</Text>
-                    </View>
+                      Sleep
+                    </Text>
+                  </View>
 
-                    {/* Steps */}
+                  {/* Steps */}
+                  <View
+                    style={{ flexDirection: "row", alignItems: "center" }}
+                  >
                     <View
-                      style={{ flexDirection: "row", alignItems: "center" }}
+                      style={{
+                        width: 12,
+                        height: 12,
+                        borderRadius: 6,
+                        backgroundColor: "#9747FF",
+                        marginRight: 6,
+                      }}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        color: "#666",
+                        fontWeight: "500",
+                      }}
                     >
-                      <View
-                        style={{
-                          width: 12,
-                          height: 12,
-                          backgroundColor: "#7771de",
-                          marginRight: 6,
-                        }}
-                      />
-                      <Text style={{ fontSize: 16, color: "#666" }}>Steps</Text>
-                    </View>
+                      Steps
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -302,8 +328,7 @@ export default function WellnessDashboard() {
                 style={{
                   flexDirection: "row",
                   justifyContent: "space-between",
-
-                  marginTop: 30,
+                  gap: 12,
                 }}
               >
                 {[
@@ -312,51 +337,80 @@ export default function WellnessDashboard() {
                     value: `${currentDayTrackData.steps?.steps || 0}/10000`,
                     key: "steps",
                     icon: "walk-outline",
-                    color: "#2196F3",
+                    color: "#9747FF",
                   },
                   {
                     label: "Sleep",
                     value: `${currentDayTrackData.sleep?.sleepDuration || 0}/12 hrs`,
                     key: "sleep",
                     icon: "bed-outline",
-                    color: "#4CAF50",
+                    color: "#9747FF",
                   },
                   {
                     label: "Water",
                     value: `${currentDayTrackData.water?.waterIntake || 0}/10 glasses`,
                     key: "water",
                     icon: "water-outline",
-                    color: "#00BFA5",
+                    color: "#9747FF",
                   },
                 ].map((tracker: any, i) => (
                   <View
                     key={i}
                     style={{
-                      backgroundColor: theme.colors.cardLight,
+                      backgroundColor: "#FFFFFF",
                       padding: 16,
-                      borderRadius: 14,
+                      borderRadius: 16,
                       alignItems: "center",
                       flex: 1,
-                      marginHorizontal: 4, // spacing between cards
-                      elevation: 3, // adds shadow on Android
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 8,
+                      elevation: 3,
+                      borderWidth: 1,
+                      borderColor: "#F5F5F5",
                     }}
                   >
                     {/* Icon */}
-                    <Ionicons
-                      name={tracker.icon}
-                      size={28}
-                      color={tracker.color}
-                      style={{ marginBottom: 8 }}
-                    />
+                    <View
+                      style={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 24,
+                        backgroundColor: "#F8F8F8",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: 12,
+                      }}
+                    >
+                      <Ionicons
+                        name={tracker.icon}
+                        size={24}
+                        color={tracker.color}
+                      />
+                    </View>
 
                     {/* Label */}
-                    <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: "700",
+                        color: "#000",
+                        marginBottom: 6,
+                      }}
+                    >
                       {tracker.label}
                     </Text>
 
                     {/* Value */}
                     <Text
-                      style={{ fontSize: 14, color: "#666", marginVertical: 4 }}
+                      style={{
+                        fontSize: 12,
+                        color: "#666",
+                        marginBottom: 12,
+                        textAlign: "center",
+                      }}
+                      numberOfLines={2}
                     >
                       {tracker.value}
                     </Text>
@@ -364,13 +418,16 @@ export default function WellnessDashboard() {
                     {/* Add Button */}
                     <TouchableOpacity
                       onPress={() => openModal(tracker.key as any)}
+                      style={{
+                        width: 36,
+                        height: 36,
+                        borderRadius: 18,
+                        backgroundColor: "#67C694",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
                     >
-                      <Ionicons
-                        name="add-circle"
-                        size={28}
-                        color="#67c694"
-                        style={{ marginTop: 8 }}
-                      />
+                      <Ionicons name="add" size={20} color="#FFFFFF" />
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -392,7 +449,7 @@ export default function WellnessDashboard() {
             <CustomSnackbar
               visible={snackbarVisible}
               onDismiss={() => setSnackbarVisible(false)}
-              bgColor={theme.colors.primary}
+              bgColor="#67C694"
               message={snackbarMsg}
             />
           ) : null}

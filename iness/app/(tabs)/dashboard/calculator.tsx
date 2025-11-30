@@ -12,7 +12,6 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import NormalHeader from "@/app/modules/NormalHeader";
-import theme from "@/app/Theme/globalTheme";
 import { SafeAreaView } from "react-native-safe-area-context";
 const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const { height } = Dimensions.get("window");
@@ -66,345 +65,452 @@ export default function CalculatorScreen() {
     <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <ImageBackground
         source={backgroundImg}
-        style={{ flex: 1, padding: 20 }}
+        style={{ flex: 1 }}
         resizeMode="cover"
       >
-        <View
-          style={{
-            marginTop: Platform.OS === "ios" ? topPadding : "4%",
-          }}
-        >
-          <NormalHeader screenName="Health Calculator" />
-        </View>
-
-        {/* BMI Calculator */}
-        <View
-          style={{
-            backgroundColor: theme.colors.cardLight,
-            padding: 20,
-            borderRadius: 16,
-            marginBottom: 24,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 4,
-            minHeight: 250,
-            justifyContent: "space-between",
-          }}
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+          edges={[ "left", "right"]}
         >
           <View
             style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 16,
+              paddingLeft: 20,
+              marginTop: Platform.OS === "ios" ? topPadding : "4%",
             }}
           >
-            <Text
-              style={{
-                fontSize: 22,
-
-                color: theme.colors.dark,
-                flex: 1,
-                fontFamily: theme.fonts.bold,
-              }}
-            >
-              BMI Calculator
-            </Text>
-            <TouchableOpacity onPress={() => showInfo("bmi")}>
-              <Ionicons
-                name="information-circle-outline"
-                size={24}
-                color={theme.colors.link}
-              />
-            </TouchableOpacity>
+            <NormalHeader screenName="Health Calculator" />
           </View>
 
-          <TextInput
-            placeholder="Height (cm)"
-            placeholderTextColor={theme.colors.mutedText}
-            value={height}
-            onChangeText={setHeight}
-            keyboardType="numeric"
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: 10,
-              padding: 12,
-              fontFamily: theme.fonts.regular,
-              marginBottom: 10,
-              borderWidth: 1,
-              borderColor: "#ddd",
-            }}
-          />
-          <TextInput
-            placeholder="Weight (kg)"
-            placeholderTextColor={theme.colors.mutedText}
-            value={weight}
-            onChangeText={setWeight}
-            keyboardType="numeric"
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: 10,
-              fontFamily: theme.fonts.regular,
-              padding: 12,
-              marginBottom: 14,
-              borderWidth: 1,
-              borderColor: "#ddd",
-            }}
-          />
-
-          <TouchableOpacity
-            onPress={calculateBMI}
-            style={{
-              backgroundColor: "#67c694",
-              padding: 14,
-              borderRadius: 30,
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: "#fff", fontWeight: "bold" }}>
-              Calculate BMI
-            </Text>
-          </TouchableOpacity>
-
-          {bmi && (
+          <View style={{ padding: 20, paddingBottom: 40 }}>
+            {/* BMI Calculator */}
             <View
               style={{
-                marginTop: 20,
-                alignItems: "center",
-                width: "100%",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "center",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "600",
-                  color: theme.colors.secondPrimary,
-                  textAlign: "center",
-                  fontFamily: theme.fonts.bold,
-                }}
-              >
-                Your BMI is:
-              </Text>
-              <Text
-                style={{
-                  fontSize: 26,
-                  fontWeight: "bold",
-                  color: theme.colors.dark,
-                  textAlign: "center",
-                  fontFamily: theme.fonts.medium,
-                }}
-              >
-                {bmi.toFixed(2)}
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* BMR Calculator */}
-        <View
-          style={{
-            backgroundColor: theme.colors.cardLight,
-            padding: 20,
-            borderRadius: 16,
-            marginBottom: 30,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.1,
-            shadowRadius: 4,
-            elevation: 4,
-            minHeight: 270,
-            justifyContent: "space-between",
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 16,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 22,
-                fontWeight: "bold",
-                color: theme.colors.dark,
-                flex: 1,
-                fontFamily: theme.fonts.bold,
-              }}
-            >
-              BMR Calculator
-            </Text>
-            <TouchableOpacity onPress={() => showInfo("bmr")}>
-              <Ionicons
-                name="information-circle-outline"
-                size={24}
-                color={theme.colors.link}
-              />
-            </TouchableOpacity>
-          </View>
-
-          <TextInput
-            placeholder="Age"
-            placeholderTextColor={theme.colors.mutedText}
-            value={age}
-            onChangeText={setAge}
-            keyboardType="numeric"
-            style={{
-              backgroundColor: "#fff",
-              borderRadius: 10,
-              padding: 12,
-              marginBottom: 12,
-              borderWidth: 1,
-              fontFamily: theme.fonts.medium,
-              borderColor: "#ddd",
-            }}
-          />
-
-          <View style={{ flexDirection: "row", marginBottom: 14 }}>
-            <TouchableOpacity
-              onPress={() => setGender("male")}
-              style={{
-                flex: 1,
-                padding: 12,
-                marginRight: 6,
-                backgroundColor:
-                  gender === "male" ? theme.colors.secondPrimary : "#fff",
-                borderRadius: 10,
-                alignItems: "center",
-
+                backgroundColor: "#FFFFFF",
+                borderRadius: 20,
+                padding: 16,
+                marginBottom: 16,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.12,
+                shadowRadius: 12,
+                elevation: 5,
                 borderWidth: 1,
-                borderColor: "#ccc",
+                borderColor: "#F5F5F5",
               }}
             >
-              <Text
+              <View
                 style={{
-                  color: gender === "male" ? "#fff" : theme.colors.dark,
-                  fontFamily: theme.fonts.medium,
-                }}
-              >
-                Male
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => setGender("female")}
-              style={{
-                flex: 1,
-                padding: 12,
-                marginLeft: 6,
-                backgroundColor:
-                  gender === "female" ? theme.colors.secondPrimary : "#fff",
-                borderRadius: 10,
-                alignItems: "center",
-                borderWidth: 1,
-                borderColor: "#ccc",
-              }}
-            >
-              <Text
-                style={{
-                  color: gender === "female" ? "#fff" : theme.colors.dark,
-                  fontFamily: theme.fonts.medium,
-                }}
-              >
-                Female
-              </Text>
-            </TouchableOpacity>
-          </View>
-
-          <TouchableOpacity
-            onPress={calculateBMR}
-            style={{
-              backgroundColor: "#67c694",
-              padding: 14,
-              borderRadius: 30,
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ color: "#fff", fontWeight: "bold" }}>
-              Calculate BMR
-            </Text>
-          </TouchableOpacity>
-
-          {bmr && (
-            <View style={{ marginTop: 20, alignItems: "center" }}>
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "600",
-                  color: theme.colors.secondPrimary,
-                }}
-              >
-                Your BMR is:
-              </Text>
-              <Text
-                style={{
-                  fontSize: 26,
-                  fontWeight: "bold",
-                  color: theme.colors.dark,
-                }}
-              >
-                {bmr.toFixed(0)} kcal/day
-              </Text>
-            </View>
-          )}
-        </View>
-
-        {/* Modal */}
-        <Modal
-          visible={modalVisible}
-          transparent
-          animationType="slide"
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: "#000000aa",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: "#fff",
-                padding: 20,
-                borderRadius: 12,
-                width: "85%",
-              }}
-            >
-              <Ionicons
-                name="information-circle-outline"
-                size={40}
-                color={theme.colors.secondPrimary}
-                style={{ alignSelf: "center", marginBottom: 10 }}
-              />
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: theme.colors.normal,
-                  textAlign: "center",
-                }}
-              >
-                {modalContent}
-              </Text>
-              <Pressable
-                onPress={() => setModalVisible(false)}
-                style={{
-                  marginTop: 20,
-                  backgroundColor: "#67c694",
-                  padding: 10,
-                  borderRadius: 8,
+                  flexDirection: "row",
                   alignItems: "center",
+                  marginBottom: 12,
                 }}
               >
-                <Text style={{ color: "#000", fontWeight: "bold" }}>Close</Text>
-              </Pressable>
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 18,
+                    backgroundColor: "#9747FF",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 10,
+                  }}
+                >
+                  <Ionicons name="calculator" size={18} color="#FFFFFF" />
+                </View>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "700",
+                    color: "#000",
+                    flex: 1,
+                  }}
+                >
+                  BMI Calculator
+                </Text>
+                <TouchableOpacity onPress={() => showInfo("bmi")}>
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={22}
+                    color="#9747FF"
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <View
+                style={{
+                  paddingTop: 10,
+                  borderTopWidth: 1,
+                  borderTopColor: "#F0F0F0",
+                }}
+              >
+                <TextInput
+                  placeholder="Height (cm)"
+                  placeholderTextColor="#999"
+                  value={height}
+                  onChangeText={setHeight}
+                  keyboardType="numeric"
+                  style={{
+                    backgroundColor: "#F8F8F8",
+                    borderRadius: 12,
+                    padding: 12,
+                    marginBottom: 12,
+                    borderWidth: 1,
+                    borderColor: "#E0E0E0",
+                    fontSize: 15,
+                    color: "#000",
+                  }}
+                />
+                <TextInput
+                  placeholder="Weight (kg)"
+                  placeholderTextColor="#999"
+                  value={weight}
+                  onChangeText={setWeight}
+                  keyboardType="numeric"
+                  style={{
+                    backgroundColor: "#F8F8F8",
+                    borderRadius: 12,
+                    padding: 12,
+                    marginBottom: 14,
+                    borderWidth: 1,
+                    borderColor: "#E0E0E0",
+                    fontSize: 15,
+                    color: "#000",
+                  }}
+                />
+
+                <TouchableOpacity
+                  onPress={calculateBMI}
+                  style={{
+                    backgroundColor: "#67C694",
+                    paddingVertical: 12,
+                    paddingHorizontal: 20,
+                    borderRadius: 20,
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontWeight: "600",
+                      fontSize: 15,
+                    }}
+                  >
+                    Calculate BMI
+                  </Text>
+                </TouchableOpacity>
+
+                {bmi && (
+                  <View
+                    style={{
+                      marginTop: 16,
+                      paddingTop: 16,
+                      borderTopWidth: 1,
+                      borderTopColor: "#F0F0F0",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: "600",
+                        color: "#666",
+                        marginBottom: 4,
+                      }}
+                    >
+                      Your BMI is:
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 28,
+                        fontWeight: "700",
+                        color: "#9747FF",
+                      }}
+                    >
+                      {bmi.toFixed(2)}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            </View>
+
+            {/* BMR Calculator */}
+            <View
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderRadius: 20,
+                padding: 16,
+                marginBottom: 16,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.12,
+                shadowRadius: 12,
+                elevation: 5,
+                borderWidth: 1,
+                borderColor: "#F5F5F5",
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 12,
+                }}
+              >
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 18,
+                    backgroundColor: "#9747FF",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 10,
+                  }}
+                >
+                  <Ionicons name="flame" size={18} color="#FFFFFF" />
+                </View>
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: "700",
+                    color: "#000",
+                    flex: 1,
+                  }}
+                >
+                  BMR Calculator
+                </Text>
+                <TouchableOpacity onPress={() => showInfo("bmr")}>
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={22}
+                    color="#9747FF"
+                  />
+                </TouchableOpacity>
+              </View>
+
+              <View
+                style={{
+                  paddingTop: 10,
+                  borderTopWidth: 1,
+                  borderTopColor: "#F0F0F0",
+                }}
+              >
+                <TextInput
+                  placeholder="Age"
+                  placeholderTextColor="#999"
+                  value={age}
+                  onChangeText={setAge}
+                  keyboardType="numeric"
+                  style={{
+                    backgroundColor: "#F8F8F8",
+                    borderRadius: 12,
+                    padding: 12,
+                    marginBottom: 12,
+                    borderWidth: 1,
+                    borderColor: "#E0E0E0",
+                    fontSize: 15,
+                    color: "#000",
+                  }}
+                />
+
+                <View
+                  style={{
+                    flexDirection: "row",
+                    marginBottom: 14,
+                    gap: 10,
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={() => setGender("male")}
+                    style={{
+                      flex: 1,
+                      paddingVertical: 12,
+                      paddingHorizontal: 16,
+                      backgroundColor:
+                        gender === "male" ? "#9747FF" : "#F8F8F8",
+                      borderRadius: 12,
+                      alignItems: "center",
+                      borderWidth: 2,
+                      borderColor:
+                        gender === "male" ? "#9747FF" : "transparent",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: gender === "male" ? "#FFFFFF" : "#333",
+                        fontWeight: "600",
+                        fontSize: 14,
+                      }}
+                    >
+                      Male
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setGender("female")}
+                    style={{
+                      flex: 1,
+                      paddingVertical: 12,
+                      paddingHorizontal: 16,
+                      backgroundColor:
+                        gender === "female" ? "#9747FF" : "#F8F8F8",
+                      borderRadius: 12,
+                      alignItems: "center",
+                      borderWidth: 2,
+                      borderColor:
+                        gender === "female" ? "#9747FF" : "transparent",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: gender === "female" ? "#FFFFFF" : "#333",
+                        fontWeight: "600",
+                        fontSize: 14,
+                      }}
+                    >
+                      Female
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <TouchableOpacity
+                  onPress={calculateBMR}
+                  style={{
+                    backgroundColor: "#67C694",
+                    paddingVertical: 12,
+                    paddingHorizontal: 20,
+                    borderRadius: 20,
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontWeight: "600",
+                      fontSize: 15,
+                    }}
+                  >
+                    Calculate BMR
+                  </Text>
+                </TouchableOpacity>
+
+                {bmr && (
+                  <View
+                    style={{
+                      marginTop: 16,
+                      paddingTop: 16,
+                      borderTopWidth: 1,
+                      borderTopColor: "#F0F0F0",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: "600",
+                        color: "#666",
+                        marginBottom: 4,
+                      }}
+                    >
+                      Your BMR is:
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 28,
+                        fontWeight: "700",
+                        color: "#9747FF",
+                      }}
+                    >
+                      {bmr.toFixed(0)} kcal/day
+                    </Text>
+                  </View>
+                )}
+              </View>
             </View>
           </View>
-        </Modal>
+
+          {/* Modal */}
+          <Modal
+            visible={modalVisible}
+            transparent
+            animationType="fade"
+            onRequestClose={() => setModalVisible(false)}
+          >
+            <View
+              style={{
+                flex: 1,
+                backgroundColor: "rgba(0,0,0,0.5)",
+                justifyContent: "center",
+                alignItems: "center",
+                padding: 20,
+              }}
+            >
+              <View
+                style={{
+                  backgroundColor: "#FFFFFF",
+                  padding: 24,
+                  borderRadius: 20,
+                  width: "90%",
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.25,
+                  shadowRadius: 12,
+                  elevation: 8,
+                }}
+              >
+                <View
+                  style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 25,
+                    backgroundColor: "#9747FF",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    alignSelf: "center",
+                    marginBottom: 16,
+                  }}
+                >
+                  <Ionicons
+                    name="information-circle"
+                    size={28}
+                    color="#FFFFFF"
+                  />
+                </View>
+                <Text
+                  style={{
+                    fontSize: 15,
+                    color: "#333",
+                    textAlign: "center",
+                    lineHeight: 22,
+                    marginBottom: 20,
+                  }}
+                >
+                  {modalContent}
+                </Text>
+                <Pressable
+                  onPress={() => setModalVisible(false)}
+                  style={{
+                    backgroundColor: "#67C694",
+                    paddingVertical: 12,
+                    paddingHorizontal: 24,
+                    borderRadius: 20,
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#FFFFFF",
+                      fontWeight: "600",
+                      fontSize: 15,
+                    }}
+                  >
+                    Close
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+          </Modal>
+        </SafeAreaView>
       </ImageBackground>
     </View>
   );

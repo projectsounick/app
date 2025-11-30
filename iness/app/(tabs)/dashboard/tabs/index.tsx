@@ -47,7 +47,7 @@ import LoginJsxWrapper from "@/app/Hoc/LoginJsxWrapper";
 import WeeklyActivityCard from "@/app/Components/Activity/WeeklyActivityCard";
 import { fetchStreak } from "@/app/services/streaks.service";
 import WeightTrackerBottomSheet from "@/app/Modals/WeightTrackModal";
-const MainHeader = withAnimatedHeader(NameHeader);
+
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
   const [modalVisible, setModalVisible] = useState(false);
@@ -55,6 +55,7 @@ const YourComponent = () => {
   const calendarSheetOpen = useSelector(
     (state: RootState) => state.componentOpen.calendarSheetOpen
   );
+  const dispatch = useDispatch();
   console.log(calendarSheetOpen);
   const podCasts = useSelector((state: RootState) => state.podcast.podcasts);
   // Fetch user data and modal flag from AsyncStorage
@@ -227,6 +228,4 @@ const YourComponent = () => {
 };
 
 export default YourComponent;
-function dispatch(arg0: any) {
-  throw new Error("Function not implemented.");
-}
+

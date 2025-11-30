@@ -1,7 +1,5 @@
-import theme from "@/app/Theme/globalTheme";
 import React from "react";
 import { View, Text, TouchableOpacity, TextInput } from "react-native";
-import { Divider } from "react-native-paper";
 import Icon from "react-native-vector-icons/Feather";
 
 interface Props {
@@ -24,29 +22,59 @@ const PlaceSelectionSection: React.FC<Props> = ({
   return (
     <View
       style={{
-        borderWidth: 1,
-        borderColor: theme.colors.secondPrimary,
-        borderRadius: 12,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 20,
         padding: 16,
         marginBottom: 16,
-        backgroundColor: theme.colors.text,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.12,
+        shadowRadius: 12,
+        elevation: 5,
+        borderWidth: 1,
+        borderColor: "#F5F5F5",
       }}
     >
       <View
-        style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          marginBottom: 12,
+        }}
       >
-        <Icon
-          name="map-pin"
-          size={18}
-          color="#5E3AEE"
-          style={{ marginRight: 6 }}
-        />
-        <Text style={{ fontSize: theme.fontSizes.medium, color: "#000" }}>
+        <View
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 18,
+            backgroundColor: "#9747FF",
+            alignItems: "center",
+            justifyContent: "center",
+            marginRight: 10,
+          }}
+        >
+          <Icon name="map-pin" size={18} color="#FFFFFF" />
+        </View>
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: "700",
+            color: "#000",
+          }}
+        >
           Place
         </Text>
       </View>
 
-      <View style={{ flexDirection: "row", marginBottom: 2 }}>
+      <View
+        style={{
+          flexDirection: "row",
+          marginBottom: 12,
+          paddingTop: 10,
+          borderTopWidth: 1,
+          borderTopColor: "#F0F0F0",
+        }}
+      >
         {["Home"].map((p) => (
           <View
             key={p}
@@ -54,13 +82,16 @@ const PlaceSelectionSection: React.FC<Props> = ({
               flex: 1,
               alignItems: "center",
               justifyContent: "center",
-              marginRight: 10,
+              paddingVertical: 10,
+              paddingHorizontal: 16,
+              backgroundColor: "#F8F8F8",
+              borderRadius: 12,
             }}
           >
             <Text
               style={{
-                fontSize: 16,
-                fontWeight: "500",
+                fontSize: 15,
+                fontWeight: "600",
                 color: "#000",
               }}
             >
@@ -69,43 +100,39 @@ const PlaceSelectionSection: React.FC<Props> = ({
           </View>
         ))}
       </View>
-      <Divider
-        style={{
-          width: "80%",
-          height: 1,
-          backgroundColor: "#E5E7EB", // or any light gray
-          alignSelf: "center",
-          marginBottom: 20, // optional spacing
-        }}
-      />
 
       <View
         style={{
-          padding: 12,
-          borderRadius: 10,
           flexDirection: "row",
           alignItems: "center",
-          justifyContent: "space-between",
+          backgroundColor: preferences ? "#F8F8F8" : "#FFFFFF",
+          borderRadius: 12,
+          borderWidth: 1,
+          borderColor: preferences ? "#E0E0E0" : "#E0E0E0",
+          paddingHorizontal: 14,
+          paddingVertical: 10,
         }}
       >
         <TextInput
           value={addressMap[place] || ""}
           onChangeText={(text) => onAddressChange(place, text)}
           placeholder={`Enter ${place} Address`}
+          placeholderTextColor="#999"
           editable={!preferences}
           style={{
             flex: 1,
-            fontSize: 14,
+            fontSize: 15,
             color: preferences ? "#888" : "#000",
-            backgroundColor: preferences ? "#f0f0f0" : "#fff",
-            padding: 8,
-            borderRadius: 6,
-            borderWidth: 1, // ✅ add this
-            borderColor: preferences ? "#ccc" : "#999", // ✅ light gray for disabled, darker for enabled
+            paddingVertical: 4,
           }}
         />
 
-        <Icon name="edit" size={18} color="#888" style={{ marginLeft: 2 }} />
+        <Icon
+          name="edit"
+          size={18}
+          color={preferences ? "#999" : "#9747FF"}
+          style={{ marginLeft: 8 }}
+        />
       </View>
     </View>
   );

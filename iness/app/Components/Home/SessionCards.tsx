@@ -310,9 +310,7 @@ const UpcomingSessionsCard = () => {
                           borderRadius: 16,
                           alignSelf: "flex-start",
                         }}
-                        onPress={() =>
-                          router.push("/(tabs)/dashboard/tabs/train")
-                        }
+                        onPress={() => dispatch(setCalendarSheetOpen(true))}
                       >
                         <Text
                           style={{

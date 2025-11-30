@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -48,6 +48,13 @@ function SessionCalendar({
     sessionService.getSessions
   );
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+
+  // Reset selected date when modal closes
+  useEffect(() => {
+    if (!isVisible) {
+      setSelectedDate(null);
+    }
+  }, [isVisible]);
 
   // Filter only active sessions
   const activeSessions = sessionData?.filter(
