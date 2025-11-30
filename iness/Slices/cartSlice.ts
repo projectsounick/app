@@ -35,11 +35,22 @@ const cartSlice = createSlice({
       } else if (action.payload.plan) {
         // Plan case
         const existingPlan = state.cartItems.find(
-          (item) => item.plan?.planItemId === action.payload.productId
+          (item) => item.plan?.planItemId === action.payload.plan?.planItemId
         );
 
         if (existingPlan) {
           existingPlan.quantity += action.payload.quantity;
+        } else {
+          state.cartItems.push(action.payload);
+        }
+      } else if (action.payload.dietPlanId) {
+        // Diet Plan case
+        const existingDietPlan = state.cartItems.find(
+          (item) => item.dietPlanId === action.payload.dietPlanId
+        );
+
+        if (existingDietPlan) {
+          existingDietPlan.quantity += action.payload.quantity;
         } else {
           state.cartItems.push(action.payload);
         }

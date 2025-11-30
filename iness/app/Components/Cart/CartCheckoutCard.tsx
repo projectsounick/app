@@ -19,10 +19,11 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
   onPlaceOrder,
   loading,
 }) => {
-  const subtotal = cartItems.reduce(
-    (sum, item: any) => sum + item?.price * item.quantity,
-    0
-  );
+  const subtotal = cartItems.reduce((sum, item: any) => {
+    const price = typeof item?.price === 'number' ? item.price : 0;
+    const quantity = typeof item?.quantity === 'number' ? item.quantity : 0;
+    return sum + (price * quantity);
+  }, 0);
   let couponePrice = couponDetails?.discountPrice
     ? couponDetails?.discountPrice
     : 0;

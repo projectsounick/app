@@ -157,7 +157,7 @@ export function formateFetchedCartItems(cartItems: RawCartItem[]): CartItem[] {
       const cartItem: CartItem = {
         _id: item._id,
         name: dietPlanDetails.title,
-        price: dietPlanDetails.price,
+        price: typeof dietPlanDetails.price === 'number' ? dietPlanDetails.price : 0,
         type: "dietPlan",
         imgUrl: dietPlanDetails.imgUrl,
         quantity: item.quantity,
