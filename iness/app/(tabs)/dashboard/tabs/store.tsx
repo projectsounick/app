@@ -9,7 +9,6 @@ import {
   FlatList,
 } from "react-native";
 
-import theme from "@/app/Theme/globalTheme";
 import withAnimatedHeader from "@/app/Hoc/MainHeader";
 import NameHeader from "@/app/Components/HeaderSubComponents/NameHeader";
 import {
@@ -51,7 +50,7 @@ export default function EquipScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      style={{ flex: 1, backgroundColor: "#FFFFFF" }}
       edges={["left", "right"]}
     >
       {/* Header */}
@@ -66,21 +65,21 @@ export default function EquipScreen() {
             marginTop: "40%",
           }}
         >
-          <ActivityIndicator />
+          <ActivityIndicator color="#9747FF" />
         </View>
       ) : (
         <FlatList
           data={components}
           keyExtractor={(item) => item.key}
           renderItem={({ item }) => (
-            <View style={{ paddingLeft: 16, paddingRight: 16 }}>
+            <View style={{ paddingHorizontal: 16 }}>
               {item.component}
             </View>
           )}
           showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
         />
       )}
-      {/* Coming Soon Content */}
     </SafeAreaView>
   );
 }

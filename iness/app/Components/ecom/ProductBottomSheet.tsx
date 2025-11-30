@@ -14,7 +14,6 @@ import {
 import { Product } from "@/app/interfaces/ecommerceInterface";
 import { Ionicons } from "@expo/vector-icons";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
-import theme from "@/app/Theme/globalTheme";
 import { cartService } from "@/app/services/cart.service";
 import { addToCart } from "@/Slices/cartSlice";
 import {
@@ -135,7 +134,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
         <View
           style={{
             flex: 1,
-            backgroundColor: "rgba(0,0,0,0.4)",
+            backgroundColor: "rgba(0,0,0,0.5)",
             justifyContent: "flex-end",
           }}
         />
@@ -147,46 +146,45 @@ const ProductModal: React.FC<ProductModalProps> = ({
           bottom: 0,
           height: height * 0.75,
           width: "100%",
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          backgroundColor: "#fff",
-          padding: 16,
+          borderTopLeftRadius: 24,
+          borderTopRightRadius: 24,
+          backgroundColor: "#FFFFFF",
+          padding: 20,
         }}
       >
         <View
           style={{
-            width: 40,
-            height: 4,
-            backgroundColor: "#ccc",
-            borderRadius: 2,
+            width: 50,
+            height: 5,
+            backgroundColor: "#000000",
+            borderRadius: 3,
             alignSelf: "center",
-            marginBottom: 12,
+            marginBottom: 16,
           }}
         />
 
         {/* Close Button */}
         <TouchableOpacity
           style={{
-            height: 40,
-            width: 40,
+            height: 36,
+            width: 36,
             alignSelf: "flex-end",
-            backgroundColor: "#eee",
-            borderRadius: 20,
-            marginBottom: 20,
+            backgroundColor: "#F5F5F5",
+            borderRadius: 18,
+            marginBottom: 16,
             display: "flex",
             flexDirection: "row",
             justifyContent: "center",
             alignItems: "center",
-            padding: 6,
             zIndex: 1,
           }}
           onPress={onClose}
         >
-          <Ionicons name="close" size={22} color="black" />
+          <Ionicons name="close" size={20} color="#000" />
         </TouchableOpacity>
 
         {/* Image Carousel */}
-        <View style={{ height: 220, marginBottom: 16 }}>
+        <View style={{ height: 240, marginBottom: 20, borderRadius: 16, overflow: "hidden", backgroundColor: "#F8F8F8" }}>
           <ScrollView
             horizontal
             pagingEnabled
@@ -195,8 +193,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
             scrollEventThrottle={16}
             ref={imageScrollRef}
             style={{
-              backgroundColor: bgColor,
-              borderRadius: 12,
+              borderRadius: 16,
             }}
           >
             {selectedProduct.images.map((imgUrl, index) => (
@@ -204,7 +201,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                 key={index}
                 source={{ uri: imgUrl }}
                 resizeMode="contain"
-                style={{ width: width - 32, height: 220 }}
+                style={{ width: width - 40, height: 240 }}
               />
             ))}
           </ScrollView>
@@ -227,7 +224,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   width: 8,
                   height: 8,
                   borderRadius: 4,
-                  backgroundColor: index === activeIndex ? "#000" : "#ccc",
+                  backgroundColor: index === activeIndex ? "#9747FF" : "#D0D0D0",
                   marginHorizontal: 4,
                 }}
               />
@@ -241,7 +238,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
           contentContainerStyle={{ paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 4 }}>
+          <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 8, color: "#000" }}>
             {selectedProduct.name}
           </Text>
 
@@ -249,12 +246,12 @@ const ProductModal: React.FC<ProductModalProps> = ({
           <Pressable onPress={toggleDescription}>
             <Text
               numberOfLines={showFullDescription ? undefined : 3}
-              style={{ fontSize: 14, color: "#444", marginBottom: 8 }}
+              style={{ fontSize: 14, color: "#666", marginBottom: 8, lineHeight: 20 }}
             >
               {selectedProduct.description}
             </Text>
             {!showFullDescription && (
-              <Text style={{ color: "#007AFF", marginBottom: 12 }}>
+              <Text style={{ color: "#9747FF", marginBottom: 16, fontWeight: "500" }}>
                 Read more
               </Text>
             )}
@@ -262,13 +259,13 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
           {/* Variations */}
           {variationType && variations && variations.length > 0 && (
-            <View style={{ marginBottom: 16 }}>
+            <View style={{ marginBottom: 20 }}>
               <Text
-                style={{ fontSize: 16, fontWeight: "600", marginBottom: 8 }}
+                style={{ fontSize: 16, fontWeight: "600", marginBottom: 12, color: "#000" }}
               >
                 {variationType}
               </Text>
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
                 {variations.map((v, idx) => (
                   <Pressable
                     key={idx}
@@ -277,18 +274,20 @@ const ProductModal: React.FC<ProductModalProps> = ({
                       setSelectedVariationId(v._id);
                     }}
                     style={{
-                      paddingHorizontal: 16,
-                      paddingVertical: 6,
-                      borderRadius: 20,
+                      paddingHorizontal: 18,
+                      paddingVertical: 10,
+                      borderRadius: 12,
                       backgroundColor:
-                        selectedVariation === idx ? "#67C694" : "#eee",
+                        selectedVariation === idx ? "#9747FF" : "#F5F5F5",
+                      borderWidth: selectedVariation === idx ? 0 : 1,
+                      borderColor: "#E0E0E0",
                     }}
                   >
                     <Text
                       style={{
-                        fontFamily: theme.fonts.regular,
                         fontSize: 14,
-                        color: selectedVariation === idx ? "#000" : "#000",
+                        color: selectedVariation === idx ? "#FFFFFF" : "#000",
+                        fontWeight: selectedVariation === idx ? "600" : "500",
                       }}
                     >
                       {v.label}
@@ -302,9 +301,11 @@ const ProductModal: React.FC<ProductModalProps> = ({
           {/* Quantity Control */}
 
           {/* Price */}
-          <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 32 }}>
-            ₹{((price ?? 0) * quantity).toFixed(2)}
-          </Text>
+          <View style={{ marginBottom: 24, paddingTop: 16, borderTopWidth: 1, borderTopColor: "#F0F0F0" }}>
+            <Text style={{ fontSize: 24, fontWeight: "bold", color: "#9747FF" }}>
+              ₹{((price ?? 0) * quantity).toFixed(2)}
+            </Text>
+          </View>
         </ScrollView>
 
         {/* Add to Cart Button */}
@@ -318,7 +319,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
           visible={snackbarOpen}
           message={snackbarMessage}
           onDismiss={() => setSnackbarOpen(false)}
-          bgColor={theme.colors.primary}
+          bgColor="#67C694"
         />
       </View>
     </Modal>

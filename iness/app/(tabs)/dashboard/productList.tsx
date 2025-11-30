@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -28,9 +28,31 @@ const CategoryProductsScreen = () => {
     (state: RootState) => state.ecom.products
   );
 
-  const categoryProducts = products.filter(
-    (item) => item.category._id === categoryId
-  );
+  // Decode categoryId if it's URL encoded
+  const decodedCategoryId = React.useMemo(() => {
+    if (!categoryId) return null;
+    try {
+      return decodeURIComponent(String(categoryId));
+    } catch {
+      return String(categoryId);
+    }
+  }, [categoryId]);
+
+  const categoryProducts = React.useMemo(() => {
+    if (!decodedCategoryId || !products.length) return [];
+    
+    return products.filter((item) => {
+      if (!item.category) return false;
+      
+      // Handle both string and object category._id
+      const itemCategoryId = typeof item.category === 'string' 
+        ? item.category 
+        : item.category._id;
+      
+      // Compare as strings, trimming any whitespace
+      return String(itemCategoryId).trim() === String(decodedCategoryId).trim();
+    });
+  }, [products, decodedCategoryId]);
 
   const [showModal, setShowModal] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
@@ -50,12 +72,19 @@ const CategoryProductsScreen = () => {
         key={item._id}
         style={{
           width: CARD_WIDTH,
-          height: 180,
-          borderRadius: 12,
-          backgroundColor: "#fff",
+          height: 200,
+          borderRadius: 16,
+          backgroundColor: "#FFFFFF",
           overflow: "hidden",
           marginBottom: 16,
           marginRight: 16,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+          elevation: 4,
+          borderWidth: 1,
+          borderColor: "#F0F0F0",
         }}
         onPress={() => handleCheck(item)}
       >
@@ -100,23 +129,23 @@ const CategoryProductsScreen = () => {
           <TouchableOpacity
             style={{
               position: "absolute",
-              top: 6,
-              right: 6,
-              backgroundColor: "#fff",
-              borderRadius: 30,
-              width: 34,
-              height: 34,
+              top: 8,
+              right: 8,
+              backgroundColor: "#FFFFFF",
+              borderRadius: 20,
+              width: 32,
+              height: 32,
               alignItems: "center",
               justifyContent: "center",
               shadowColor: "#000",
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.1,
-              shadowRadius: 2,
-              elevation: 2,
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.15,
+              shadowRadius: 4,
+              elevation: 4,
             }}
             onPress={() => handleCheck(item)}
           >
-            <Feather name="plus" size={22} color="#00A300" />
+            <Feather name="plus" size={20} color="#67C694" />
           </TouchableOpacity>
 
           {/* Quantity (Variation Label) */}
@@ -159,10 +188,10 @@ const CategoryProductsScreen = () => {
 
           <Text
             style={{
-              fontSize: 11,
+              fontSize: 14,
               fontWeight: "700",
-              color: "#000",
-              marginTop: 2,
+              color: "#9747FF",
+              marginTop: 4,
             }}
           >
             ₹{displayPrice}
@@ -173,7 +202,7 @@ const CategoryProductsScreen = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#F6F6F6" }}>
+    <View style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
       {/* Header */}
       <SmallHeader title={"Products"} />
       <BackHeader />
@@ -204,9 +233,14 @@ const CategoryProductsScreen = () => {
         renderItem={({ item, index }) => renderProductCard({ item, index })}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={() => (
-          <Text style={{ textAlign: "center", marginTop: 40, color: "#999" }}>
-            No products found in this category.
-          </Text>
+          <View style={{ alignItems: "center", justifyContent: "center", marginTop: 60, paddingHorizontal: 20 }}>
+            <Text style={{ textAlign: "center", fontSize: 16, fontWeight: "600", color: "#666", marginBottom: 8 }}>
+              No products available
+            </Text>
+            <Text style={{ textAlign: "center", fontSize: 14, color: "#999" }}>
+              Check back later for new products in this category
+            </Text>
+          </View>
         )}
       />
 
@@ -216,7 +250,7 @@ const CategoryProductsScreen = () => {
           visible={showModal}
           onClose={() => setShowModal(false)}
           selectedProduct={product}
-          bgColor={color}
+          bgColor="#FFFFFF"
         />
       )}
     </View>

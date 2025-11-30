@@ -1,9 +1,8 @@
 import React, { memo } from "react";
-import { View, Text, Image, TouchableOpacity, FlatList } from "react-native";
+import { View, Text, Image, TouchableOpacity, FlatList, Dimensions } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons"; // for the arrow icon
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import theme from "@/app/Theme/globalTheme";
 import { useNavigation } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 
@@ -17,50 +16,55 @@ interface Props {
   categories: Category[];
 }
 
-const bgColors = [
-  "#FFE600", // yellow
-  "#00E0FF", // cyan
-  "#C1FF72", // light green
-  "#70EFFF", // sky
-  "#FFA1F5", // pink
-  "#FFD166", // orange
-  "#9B89FF", // purple
-  "#80FFDB", // mint
-  "#FCFFA6", // light yellow
-  "#9DFCFF", // powder blue
-];
+// Removed colorful backgrounds - using white cards with theme accents
 
 function CategoryGrid() {
   const navigation = useNavigation();
   const router = useRouter();
   const renderItem = ({ item, index }: { item: Category; index: number }) => {
-    const backgroundColor = bgColors[index % bgColors.length];
-
     return (
       <TouchableOpacity
         key={item._id}
+        activeOpacity={0.8}
         style={{
-          width: 137,
-          height: 137,
-          borderRadius: 12,
-          backgroundColor,
-          padding: 8,
-          margin: 8,
+          width: (Dimensions.get("window").width - 48) / 2,
+          height: 160,
+          borderRadius: 20,
+          backgroundColor: "#FFFFFF",
+          padding: 16,
+          marginBottom: 16,
           justifyContent: "space-between",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.12,
+          shadowRadius: 12,
+          elevation: 5,
+          borderWidth: 1,
+          borderColor: "#F5F5F5",
         }}
         onPress={() =>
           router.push(
-            `/dashboard/productList?category=${encodeURIComponent(item.name)}&color=${encodeURIComponent(backgroundColor)}&categoryId=${encodeURIComponent(item._id)}`
+            `/dashboard/productList?category=${encodeURIComponent(item.name)}&color=#FFFFFF&categoryId=${encodeURIComponent(item._id)}`
           )
         }
       >
-        {/* Image in top-right corner */}
-        <View style={{ alignItems: "flex-end" }}>
+        {/* Image Container with Background */}
+        <View 
+          style={{ 
+            alignItems: "center", 
+            justifyContent: "center",
+            height: 90,
+            marginBottom: 8,
+            backgroundColor: "#F8F8F8",
+            borderRadius: 12,
+            overflow: "hidden",
+          }}
+        >
           <Image
             source={{ uri: item.image }}
             style={{
-              width: 95, // increased size
-              height: 75,
+              width: 80,
+              height: 80,
               resizeMode: "contain",
             }}
           />
@@ -72,22 +76,35 @@ function CategoryGrid() {
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",
-            marginTop: 6,
+            paddingTop: 8,
+            borderTopWidth: 1,
+            borderTopColor: "#F0F0F0",
           }}
         >
           <Text
+            numberOfLines={1}
             style={{
-              fontSize: 12,
+              fontSize: 14,
               fontWeight: "600",
               color: "#000",
               flex: 1,
-              flexWrap: "wrap",
-              paddingHorizontal: 6,
+              marginRight: 8,
             }}
           >
             {item.name}
           </Text>
-          <MaterialIcons name="chevron-right" size={18} color="#000" />
+          <View
+            style={{
+              width: 24,
+              height: 24,
+              borderRadius: 12,
+              backgroundColor: "#9747FF",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <MaterialIcons name="chevron-right" size={16} color="#FFFFFF" />
+          </View>
         </View>
       </TouchableOpacity>
     );
@@ -97,62 +114,37 @@ function CategoryGrid() {
     (state: RootState) => state.ecom.categories
   );
   return (
-    <View style={{ marginTop: 10 }}>
+    <View style={{ marginTop: 24, marginBottom: 8 }}>
       {categories.length > 0 ? (
         <>
+          {/* Header Section */}
           <View
             style={{
               flexDirection: "row",
               alignItems: "center",
-              marginBottom: 4,
+              justifyContent: "space-between",
+              marginBottom: 20,
+              paddingHorizontal: 4,
             }}
           >
-            {/* Left Line with Dot */}
-            <View
-              style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
-            >
-              <Text style={{ color: "#000", fontSize: 22 }}>•</Text>
-              <View
-                style={{
-                  height: 1,
-                  backgroundColor: "#999",
-                  flex: 1,
-                  marginRight: 4,
-                }}
-              />
-            </View>
-
-            {/* Center Title */}
             <Text
               style={{
-                fontSize: 20,
+                fontSize: 24,
                 fontWeight: "700",
-                color: "#222",
-                marginHorizontal: 12,
+                color: "#000",
+                letterSpacing: -0.5,
               }}
             >
-              Categories
+              Shop by Category
             </Text>
-
-            {/* Right Line with Dot */}
             <View
               style={{
-                flex: 1,
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
+                width: 40,
+                height: 3,
+                backgroundColor: "#9747FF",
+                borderRadius: 2,
               }}
-            >
-              <View
-                style={{
-                  height: 1,
-                  backgroundColor: "#999",
-                  flex: 1,
-                  marginLeft: 4,
-                }}
-              />
-              <Text style={{ color: "#000", fontSize: 22 }}>•</Text>
-            </View>
+            />
           </View>
 
           <FlatList
@@ -163,7 +155,9 @@ function CategoryGrid() {
             contentContainerStyle={{ paddingBottom: 40 }}
             columnWrapperStyle={{
               justifyContent: "space-between",
+              paddingHorizontal: 4,
             }}
+            scrollEnabled={false}
           />
         </>
       ) : (

@@ -21,8 +21,6 @@ const GroupedProductDisplay = () => {
   const [showModal, setShowModal] = useState(false);
   const [product, setProduct] = useState<Product | null>(null);
 
-  const [bgColor, setBgColor] = useState("#FFE600");
-
   // Group products by category
   const groupedProducts = products.reduce(
     (acc, product) => {
@@ -35,17 +33,8 @@ const GroupedProductDisplay = () => {
   );
   const handleCheck = (product: Product) => {
     setProduct(product);
-    setBgColor("#FFE600");
     setShowModal(true);
   };
-
-  const bgColors = [
-    "#FFE600", // yellow
-    "#00E0FF", // cyan
-    "#C1FF72", // light green
-    "#70EFFF", // sky
-    "#80FFDB", // mint
-  ];
 
   const renderProductCard = (item: Product, index: number) => {
     const hasVariation = item.variations && item.variations.length > 0;
@@ -57,17 +46,20 @@ const GroupedProductDisplay = () => {
     return (
       <TouchableOpacity
         key={item._id}
+        activeOpacity={0.8}
         style={{
-          width: 150,
-          borderRadius: 16,
-          backgroundColor: "#fff",
+          width: 160,
+          borderRadius: 18,
+          backgroundColor: "#FFFFFF",
           overflow: "hidden",
-          marginRight: 12,
+          marginRight: 16,
           shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.08,
-          shadowRadius: 6,
-          elevation: 3,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.12,
+          shadowRadius: 12,
+          elevation: 5,
+          borderWidth: 1,
+          borderColor: "#F5F5F5",
         }}
         onPress={() => handleCheck(item)}
       >
@@ -75,9 +67,11 @@ const GroupedProductDisplay = () => {
         <View
           style={{
             width: "100%",
-            height: 140,
+            height: 150,
             position: "relative",
-            justifyContent: "flex-end",
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "#F8F8F8",
           }}
         >
           {/* Product Image */}
@@ -85,38 +79,24 @@ const GroupedProductDisplay = () => {
             <Image
               source={{ uri: item.images[0] }}
               style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
                 width: "100%",
                 height: "100%",
-                resizeMode: "cover",
+                resizeMode: "contain",
               }}
             />
           ) : (
             <View
               style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
                 width: "100%",
                 height: "100%",
-                backgroundColor: "#e0e0e0",
+                backgroundColor: "#E0E0E0",
+                alignItems: "center",
+                justifyContent: "center",
               }}
-            />
+            >
+              <MaterialIcons name="image" size={40} color="#999" />
+            </View>
           )}
-
-          {/* Overlay gradient for readability */}
-          <View
-            style={{
-              position: "absolute",
-              bottom: 0,
-              left: 0,
-              right: 0,
-              height: 50,
-              backgroundColor: "rgba(0,0,0,0.25)",
-            }}
-          />
 
           {/* Plus icon */}
           <TouchableOpacity
@@ -124,39 +104,46 @@ const GroupedProductDisplay = () => {
               position: "absolute",
               top: 8,
               right: 8,
-              backgroundColor: "#fff",
+              backgroundColor: "#FFFFFF",
               borderRadius: 20,
-              padding: 3,
+              width: 32,
+              height: 32,
               alignItems: "center",
               justifyContent: "center",
               shadowColor: "#000",
-              shadowOffset: { width: 0, height: 1 },
+              shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.15,
-              shadowRadius: 2,
-              elevation: 3,
+              shadowRadius: 4,
+              elevation: 4,
             }}
             onPress={() => handleCheck(item)}
           >
-            <AntDesign name="pluscircle" size={22} color="#67c694" />
+            <AntDesign name="pluscircle" size={22} color="#67C694" />
           </TouchableOpacity>
 
-          {/* Quantity / Variation Label */}
+          {/* Variation Label Badge */}
           {displayLabel && (
             <View
               style={{
-                backgroundColor: "rgba(255,255,255,0.9)",
-                alignSelf: "center",
-                paddingHorizontal: 10,
-                paddingVertical: 3,
-                borderRadius: 12,
-                marginBottom: 8,
+                position: "absolute",
+                bottom: 8,
+                left: 8,
+                backgroundColor: "#FFFFFF",
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                borderRadius: 8,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+                elevation: 2,
               }}
             >
               <Text
                 style={{
-                  fontSize: 11,
+                  fontSize: 10,
                   fontWeight: "600",
-                  color: "#222",
+                  color: "#9747FF",
                 }}
               >
                 {displayLabel}
@@ -166,86 +153,165 @@ const GroupedProductDisplay = () => {
         </View>
 
         {/* Bottom Details */}
-        <View style={{ paddingHorizontal: 10, paddingVertical: 8 }}>
+        <View style={{ paddingHorizontal: 12, paddingVertical: 12 }}>
           <Text
             numberOfLines={2}
             style={{
-              fontSize: 12,
+              fontSize: 13,
               fontWeight: "600",
-              color: "#333",
+              color: "#000",
+              marginBottom: 6,
+              lineHeight: 18,
             }}
           >
             {item.name}
           </Text>
-          <Text
+          <View
             style={{
-              fontSize: 13,
-              fontWeight: "700",
-              color: "#7771de",
-              marginTop: 4,
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
             }}
           >
-            ₹{displayPrice}
-          </Text>
+            <Text
+              style={{
+                fontSize: 16,
+                fontWeight: "700",
+                color: "#9747FF",
+              }}
+            >
+              ₹{displayPrice}
+            </Text>
+          </View>
         </View>
       </TouchableOpacity>
     );
   };
 
   return (
-    <View>
+    <View style={{ marginTop: 32, marginBottom: 8 }}>
+      {/* Header Section */}
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 24,
+          paddingHorizontal: 4,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 24,
+            fontWeight: "700",
+            color: "#000",
+            letterSpacing: -0.5,
+          }}
+        >
+          Featured Products
+        </Text>
+        <View
+          style={{
+            width: 40,
+            height: 3,
+            backgroundColor: "#9747FF",
+            borderRadius: 2,
+          }}
+        />
+      </View>
+
+      {/* Products by Category */}
       {Object.entries(groupedProducts).map(([category, products]) => (
         <View
           key={category}
           style={{
-            marginBottom: 16,
-            padding: 16,
-            backgroundColor: "#fff",
-            borderRadius: 16,
+            marginBottom: 28,
+            padding: 20,
+            backgroundColor: "#FFFFFF",
+            borderRadius: 20,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.1,
+            shadowRadius: 12,
+            elevation: 4,
+            borderWidth: 1,
+            borderColor: "#F5F5F5",
           }}
         >
+          {/* Category Header */}
           <View
             style={{
               flexDirection: "row",
               alignItems: "center",
-              marginBottom: 4,
+              marginBottom: 16,
+              paddingBottom: 12,
+              borderBottomWidth: 1,
+              borderBottomColor: "#F0F0F0",
             }}
           >
-            <MaterialIcons name="shop" size={20} color="#000" />
-            <Text
+            <View
               style={{
-                fontSize: 16,
-                fontWeight: "700",
-                color: "#000",
-                marginLeft: 6,
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: "#9747FF",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 12,
               }}
             >
-              Shop {category}
+              <MaterialIcons name="shop" size={20} color="#FFFFFF" />
+            </View>
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "700",
+                color: "#000",
+                flex: 1,
+              }}
+            >
+              {category}
             </Text>
-            <MaterialIcons
-              name="chevron-right"
-              size={22}
-              color="#000"
-              style={{ marginLeft: "auto" }}
-            />
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                backgroundColor: "#F8F8F8",
+                paddingHorizontal: 12,
+                paddingVertical: 6,
+                borderRadius: 12,
+              }}
+            >
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: "600",
+                  color: "#9747FF",
+                  marginRight: 4,
+                }}
+              >
+                {products.length}
+              </Text>
+              <Text
+                style={{
+                  fontSize: 12,
+                  fontWeight: "500",
+                  color: "#666",
+                }}
+              >
+                items
+              </Text>
+            </View>
           </View>
 
-          <Text
-            style={{
-              fontSize: 12,
-              color: "#666",
-              marginBottom: 12,
-            }}
-          >
-            Premium products designed to fit your everyday needs.
-          </Text>
-
+          {/* Products List */}
           <FlatList
             horizontal
             showsHorizontalScrollIndicator={false}
             data={products}
             keyExtractor={(item) => item._id}
             renderItem={({ item, index }) => renderProductCard(item, index)}
+            contentContainerStyle={{ paddingRight: 4 }}
           />
         </View>
       ))}
@@ -255,7 +321,7 @@ const GroupedProductDisplay = () => {
           visible={showModal}
           onClose={() => setShowModal(false)}
           selectedProduct={product}
-          bgColor={bgColor}
+          bgColor="#FFFFFF"
         />
       )}
     </View>
