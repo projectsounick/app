@@ -52,46 +52,50 @@ function CartScreen() {
   const [snackbarOpen, setSnackBarOpen] = useState(false);
 
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const handleAdd = () => {
-    router.replace("/dashboard/tabs/store");
-  };
+
   const [dataFetchLogin, setDataFetchLogin] = useState(false);
-  const merchantId = "M23WC6W062GQI"; // your PhonePe merchantId
-  const flowId = "cart_flow_" + Date.now(); // unique identifier for this flow
+  // const merchantId = "M23WC6W062GQI"; // your PhonePe merchantId
+  // const flowId = "cart_flow_" + Date.now(); // unique identifier for this flow
 
-  useEffect(() => {
-    const initPhonePe = async () => {
-      try {
-        const result = await PhonePePayment.init(
-          "PRODUCTION",
-          merchantId,
-          flowId,
-          true // enable logging, set false in prod
-        );
-        console.log("PhonePe SDK initialized:", result);
-      } catch (error) {
-        console.log("PhonePe init error:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const initPhonePe = async () => {
+  //     try {
+  //       const result = await PhonePePayment.init(
+  //         "PRODUCTION",
+  //         merchantId,
+  //         flowId,
+  //         true // enable logging, set false in prod
+  //       );
+  //       console.log("PhonePe SDK initialized:", result);
+  //     } catch (error) {
+  //       console.log("PhonePe init error:", error);
+  //     }
+  //   };
 
-    initPhonePe();
-  }, []);
+  //   initPhonePe();
+  // }, []);
   // Function for placing the order ----------------------------.
   async function onplaceOrder(
     address: string,
     couponDetails: DiscountCoupon | null
   ) {
     try {
+      setLoading(true);
       let data = {
         couponCode: couponDetails ? couponDetails.code : null,
         address: address,
       };
+    
+      
       const response: any = await cartService.getPhonePeUrl(data);
+      console.log(response);
       const orderId = response?.data?.orderId;
 
       if (orderId) {
         // Save redirect flag for later detection
         await AsyncStorage.setItem("currentOrderId", orderId);
+        // Clear any previous error messages
+        await AsyncStorage.removeItem("paymentError");
 
         // Now redirect to web page that handles PhonePe payment
         const websiteRedirectUrl = `http://iness.fitness/pay/${orderId}`;
@@ -101,9 +105,15 @@ function CartScreen() {
       }
     } catch (error: any) {
       console.log(error);
-
-      setSnackBarOpen(true);
-      setSnackbarMessage(error.message);
+      
+      // Store error message in AsyncStorage
+      const errorMessage = error?.message || "Something went wrong. Please try again.";
+      await AsyncStorage.setItem("paymentError", errorMessage);
+      // Clear orderId if it exists
+      await AsyncStorage.removeItem("currentOrderId");
+      
+      // Redirect to payment success page to show error
+      router.push("/(tabs)/dashboard/paymentsuccess");
     } finally {
       setLoading(false);
       setDeliveryAddress({
@@ -112,7 +122,6 @@ function CartScreen() {
         state: "",
         pincode: "",
       });
-      router.push("/(tabs)/dashboard/paymentsuccess");
     }
   }
   // async function onplaceOrder(

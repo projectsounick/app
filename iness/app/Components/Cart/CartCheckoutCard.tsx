@@ -86,7 +86,7 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
           disabled={cartItems.length === 0}
           style={{
             flex: 1,
-            backgroundColor: cartItems.length === 0 ? "#cccccc" : "#A4F77F",
+            backgroundColor: cartItems.length === 0 ? "#cccccc" : "#67c694",
             flexDirection: "row",
             alignItems: "center",
             justifyContent: "space-between",

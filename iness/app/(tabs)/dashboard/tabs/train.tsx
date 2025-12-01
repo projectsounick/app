@@ -23,7 +23,7 @@ const MainHeader = withAnimatedHeader(
 
 export default function TrainScreen() {
   const scrollY = useRef(new Animated.Value(0)).current;
-  const selectedTab = useSelector((state: RootState) => state.plan.planTab);
+
 
   const [activeTab, setActiveTab] = useState<"available" | "current">(
     "current"
@@ -94,9 +94,9 @@ export default function TrainScreen() {
           <SmallHeader
             weightShow={false}
             title={"Plans"}
-            showHistory={true}
-            showCart={false}
-            showBell={false}
+            showHistory={false}
+            showCart={true}
+            showBell={true}
           />
 
           {/* Toggle Tabs */}

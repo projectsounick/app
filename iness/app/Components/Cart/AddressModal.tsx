@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,11 +8,52 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  ScrollView,
+  FlatList,
 } from "react-native";
 import Modal from "react-native-modal";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import theme from "@/app/Theme/globalTheme";
+
+const INDIAN_STATES = [
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chhattisgarh",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
+  "Andaman and Nicobar Islands",
+  "Chandigarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi",
+  "Jammu and Kashmir",
+  "Ladakh",
+  "Lakshadweep",
+  "Puducherry",
+];
 
 interface AddressModalProps {
   visible: boolean;
@@ -39,6 +80,8 @@ export default function AddressModal({
   address,
   setAddress,
 }: AddressModalProps) {
+  const [showStatePicker, setShowStatePicker] = useState(false);
+
   return (
     <Modal
       isVisible={visible}
@@ -131,15 +174,29 @@ export default function AddressModal({
                 setAddress((prev: any) => ({ ...prev, city: text }))
               }
             />
-            <TextInput
-              placeholder="State"
-              placeholderTextColor="#aaa"
+            {/* State Dropdown */}
+            <TouchableOpacity
+              onPress={() => setShowStatePicker(true)}
               style={styles.input}
-              value={address.state}
-              onChangeText={(text) =>
-                setAddress((prev: any) => ({ ...prev, state: text }))
-              }
-            />
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 16,
+                    color: address.state ? "#000" : "#aaa",
+                  }}
+                >
+                  {address.state || "Select State"}
+                </Text>
+                <Ionicons name="chevron-down" size={20} color="#aaa" />
+              </View>
+            </TouchableOpacity>
             <TextInput
               placeholder="Pincode"
               placeholderTextColor="#aaa"
@@ -154,7 +211,7 @@ export default function AddressModal({
             {/* Button */}
             <TouchableOpacity
               style={{
-                backgroundColor: "rgba(189, 255, 132, 1)",
+                backgroundColor: "#67c694",
                 padding: 16,
                 borderRadius: 26,
                 alignItems: "center",
@@ -176,6 +233,102 @@ export default function AddressModal({
           </LinearGradient>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>
+
+      {/* State Picker Modal */}
+      <Modal
+        isVisible={showStatePicker}
+        onBackdropPress={() => setShowStatePicker(false)}
+        style={{ justifyContent: "flex-end", margin: 0 }}
+        backdropOpacity={0.5}
+      >
+        <View
+          style={{
+            backgroundColor: "#fff",
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            maxHeight: "70%",
+            paddingBottom: 20,
+          }}
+        >
+          {/* Header */}
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              padding: 20,
+              borderBottomWidth: 1,
+              borderBottomColor: "#E0E0E0",
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                fontWeight: "700",
+                color: "#000",
+              }}
+            >
+              Select State
+            </Text>
+            <TouchableOpacity
+              onPress={() => setShowStatePicker(false)}
+              style={{
+                width: 36,
+                height: 36,
+                borderRadius: 18,
+                backgroundColor: "#F5F5F5",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Ionicons name="close" size={20} color="#000" />
+            </TouchableOpacity>
+          </View>
+
+          {/* States List */}
+          <FlatList
+            data={INDIAN_STATES}
+            keyExtractor={(item) => item}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                onPress={() => {
+                  setAddress((prev: any) => ({ ...prev, state: item }));
+                  setShowStatePicker(false);
+                }}
+                style={{
+                  padding: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: "#F5F5F5",
+                  backgroundColor:
+                    address.state === item ? "#F3E5F5" : "#FFFFFF",
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: "#000",
+                      fontWeight: address.state === item ? "600" : "400",
+                    }}
+                  >
+                    {item}
+                  </Text>
+                  {address.state === item && (
+                    <Ionicons name="checkmark" size={20} color="#9747FF" />
+                  )}
+                </View>
+              </TouchableOpacity>
+            )}
+            style={{ maxHeight: 400 }}
+          />
+        </View>
+      </Modal>
     </Modal>
   );
 }

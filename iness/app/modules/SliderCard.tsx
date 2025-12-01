@@ -4,16 +4,13 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
-  Image,
   Dimensions,
-  Modal,
   Alert,
   ImageBackground,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-import theme from "../Theme/globalTheme";
 
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
@@ -32,7 +29,6 @@ import { userService } from "../services/user.service";
 
 export default function SliderCard() {
   const cartItems = useSelector((state: RootState) => state.cart.cartItems);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedService, setSelectedService] = useState<ServiceDetails | null>(
     null
@@ -119,102 +115,98 @@ export default function SliderCard() {
   };
   return (
     <>
-      <View>
+      <View style={{ marginBottom: 24 }}>
+        {/* Header with icon on left, two text items vertically on right */}
         <View
           style={{
             flexDirection: "row",
             alignItems: "center",
-            marginBottom: 6,
+        
           }}
         >
-          <MaterialCommunityIcons
-            name="briefcase-check"
-            size={24}
-            style={{ marginRight: 8 }}
-            color="#333"
-          />
-
-          <Text
+          <View
             style={{
-              fontSize: theme.fontSizes.medium,
-              fontWeight: "bold",
-              color: theme.colors.dark,
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              backgroundColor: "#9747FF",
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 12,
             }}
           >
-            Our Services
-          </Text>
-        </View>
-
-        {/* Description */}
-        <Text
-          style={{
-            fontSize: theme.fontSizes.regularSmall,
-            color: theme.colors.medium,
-            marginBottom: 10,
-          }}
-        >
-          Curated meal plans to match your nutrition goals.
-        </Text>
-      </View>
-      <View
-        style={{
-          height: 220,
-          backgroundColor: "#fff",
-          paddingTop: 19,
-          paddingBottom: 19,
-          paddingLeft: 14,
-          borderRadius: 12,
-        }}
-      >
-        {/* Fixed Header */}
-
-        {/* Horizontal Scrollable Cards */}
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {availableServices.map((item: any, index) => (
-            <View
-              key={index}
+            <MaterialCommunityIcons
+              name="briefcase-check"
+              size={20}
+              color="#FFFFFF"
+            />
+          </View>
+          <View style={{ flex: 1 }}>
+            <Text
               style={{
-                width: 340,
-                height: 180,
-                borderRadius: 12,
-                marginRight: 12,
-                overflow: "hidden",
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.15,
-                shadowRadius: 4,
-                elevation: 4,
+                fontSize: 18,
+                fontWeight: "700",
+                color: "#000",
+                marginBottom: 2,
               }}
             >
-              {/* Image Background */}
+              Our Services
+            </Text>
+            <Text
+              style={{
+                fontSize: 13,
+                color: "#666",
+              }}
+            >
+              Professional services tailored to your needs.
+            </Text>
+          </View>
+        </View>
+      </View>
+      {/* Horizontal Scrollable Cards */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{
+          justifyContent:
+            availableServices.length === 1 ? "center" : "flex-start",
+          paddingRight: 12,
+        }}
+      >
+        {availableServices.map((item: any, index) => (
+          <View
+            key={index}
+            style={{
+              marginRight: index === availableServices.length - 1 ? 0 : 12,
+              width: 280,
+              height: 209,
+              borderRadius: 16,
+              overflow: "hidden",
+              backgroundColor: "#736AD6",
+            }}
+          >
+            {/* Image Background */}
+            {item.imgUrl ? (
               <ImageBackground
-                source={
-                  item.imgUrl
-                    ? { uri: item.imgUrl }
-                    : require("../../assets/images/track.png")
-                }
+                source={{ uri: item.imgUrl }}
                 style={{ flex: 1 }}
-                imageStyle={{ borderRadius: 12 }}
+                resizeMode="cover"
               >
-                {/* Overlay Gradient */}
+                {/* Dark gradient overlay */}
                 <LinearGradient
-                  colors={["rgba(0,0,0,0.75)", "rgba(0,0,0,0.2)"]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 0, y: 1 }}
-                  style={{ flex: 1, padding: 12 }}
+                  colors={["rgba(0,0,0,0.6)", "rgba(0,0,0,0.2)"]}
+                  style={{ flex: 1, padding: 16, justifyContent: "space-between" }}
                 >
-                  {/* Container for Title, Description, and Button */}
                   <View style={{ flex: 1, justifyContent: "space-between" }}>
-                    {/* Title */}
                     <Text
                       style={{
-                        fontFamily: theme.fonts.bold,
-                        fontSize: 18,
+                        fontWeight: "700",
+                        fontSize: 16,
                         color: "#fff",
-                        textShadowColor: "rgba(0,0,0,0.9)",
-                        textShadowOffset: { width: 0, height: 1 },
-                        textShadowRadius: 3,
                         marginBottom: 6,
+                        textShadowColor: "rgba(0,0,0,0.8)",
+                        textShadowOffset: { width: 1, height: 1 },
+                        textShadowRadius: 4,
                       }}
                       numberOfLines={2}
                       ellipsizeMode="tail"
@@ -222,42 +214,38 @@ export default function SliderCard() {
                       {item.title}
                     </Text>
 
-                    {/* Description - always fixed height space */}
-                    <View style={{ minHeight: 40 }}>
+                    <View>
                       {item.descItems
-                        ?.slice(0, 2)
-                        .map((desc: string, i: number) => (
+                        ?.slice(0, 3)
+                        .map((desc: string, idx: number) => (
                           <View
-                            key={i}
+                            key={idx}
                             style={{
                               flexDirection: "row",
-                              alignItems: "center",
-                              marginBottom: 4,
+                              alignItems: "flex-start",
+                              marginBottom: 8,
                             }}
                           >
                             <View
                               style={{
-                                width: 6,
-                                height: 6,
-                                borderRadius: 3,
-                                backgroundColor: "rgba(255,255,255,0.95)",
+                                width: 11,
+                                height: 11,
+                                borderRadius: 5.5,
+                                backgroundColor: "rgba(255,255,255,0.7)",
                                 marginRight: 6,
-                                alignSelf: "flex-start",
-                                marginTop: "2%",
+                                marginTop: 2,
                               }}
                             />
                             <Text
                               style={{
-                                fontSize: 13,
                                 color: "#fff",
-                                flexShrink: 1,
-                                lineHeight: 18,
-                                fontWeight: "500",
-                                textShadowColor: "rgba(0,0,0,0.85)",
+                                fontSize: 12,
+                                flex: 1,
+                                textShadowColor: "rgba(0,0,0,0.7)",
                                 textShadowOffset: { width: 0, height: 1 },
-                                textShadowRadius: 2,
+                                textShadowRadius: 3,
                               }}
-                              numberOfLines={2}
+                              numberOfLines={1}
                               ellipsizeMode="tail"
                             >
                               {desc}
@@ -266,21 +254,20 @@ export default function SliderCard() {
                         ))}
                     </View>
 
-                    {/* Check Details Button - aligned to bottom */}
                     <TouchableOpacity
                       style={{
-                        backgroundColor: "#67C694",
-                        width: SCREEN_WIDTH * 0.32,
+                        backgroundColor: "rgba(103,198,148,0.9)",
+                        width: SCREEN_WIDTH * 0.3,
                         height: SCREEN_WIDTH * 0.08,
-                        borderRadius: (SCREEN_WIDTH * 0.08) / 2,
+                        borderRadius: (SCREEN_WIDTH * 0.1) / 2,
                         justifyContent: "center",
                         alignItems: "center",
                         marginTop: 4,
-                        shadowColor: "#000", // shadow color
-                        shadowOffset: { width: 0, height: 3 }, // x/y offset
-                        shadowOpacity: 0.3, // how opaque the shadow is
-                        shadowRadius: 4, // blur radius
-                        elevation: 5, // for Android shadow
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 3 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 4,
+                        elevation: 5,
                       }}
                       onPress={() => {
                         setModalVisible(true);
@@ -289,10 +276,13 @@ export default function SliderCard() {
                     >
                       <Text
                         style={{
-                          fontFamily: theme.fonts.bold,
-                          fontSize: SCREEN_WIDTH * 0.036,
-                          color: "#fff",
+                          fontWeight: "700",
+                          fontSize: 13,
                           textAlign: "center",
+                          color: "#fff",
+                          textShadowColor: "rgba(0,0,0,0.6)",
+                          textShadowOffset: { width: 0, height: 1 },
+                          textShadowRadius: 2,
                         }}
                       >
                         Check Details
@@ -301,10 +291,33 @@ export default function SliderCard() {
                   </View>
                 </LinearGradient>
               </ImageBackground>
-            </View>
-          ))}
-        </ScrollView>
-      </View>
+            ) : (
+              // fallback if no image
+              <View
+                style={{
+                  flex: 1,
+                  backgroundColor: "#736AD6",
+                  padding: 16,
+                  justifyContent: "space-between",
+                }}
+              >
+                <Text
+                  style={{
+                    fontWeight: "700",
+                    fontSize: 16,
+                    color: "#fff",
+                    marginBottom: 6,
+                  }}
+                  numberOfLines={2}
+                  ellipsizeMode="tail"
+                >
+                  {item.title}
+                </Text>
+              </View>
+            )}
+          </View>
+        ))}
+      </ScrollView>
       <CustomModal
         modalVisible={modalVisible}
         setModalVisible={setModalVisible}

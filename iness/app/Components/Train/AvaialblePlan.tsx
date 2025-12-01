@@ -34,15 +34,7 @@ export default function AvailablePlans() {
           paddingHorizontal: 4,
         }}
       >
-        <View
-          style={{
-            width: 40,
-            height: 3,
-            backgroundColor: "#9747FF",
-            borderRadius: 2,
-          }}
-        />
-        <Text
+         <Text
           style={{
             fontSize: 24,
             fontWeight: "700",
@@ -52,6 +44,15 @@ export default function AvailablePlans() {
         >
           Available Plans
         </Text>
+        <View
+          style={{
+            width: 40,
+            height: 3,
+            backgroundColor: "#9747FF",
+            borderRadius: 2,
+          }}
+        />
+       
       </View>
 
       {/* Workout Plans by type */}
@@ -63,7 +64,7 @@ export default function AvailablePlans() {
               style={{
                 flexDirection: "row",
                 alignItems: "center",
-                marginBottom: 12,
+                marginBottom: 24,
               }}
             >
               <View
@@ -83,6 +84,7 @@ export default function AvailablePlans() {
                   color="#FFFFFF"
                 />
               </View>
+              <View style={{display: "flex", flexDirection: "column", justifyContent: "space-between"}}>
               <Text
                 style={{
                   fontSize: 18,
@@ -93,19 +95,21 @@ export default function AvailablePlans() {
               >
                 {typeTitle}
               </Text>
-            </View>
-
-            {/* Description */}
-            <Text
+              <Text
               style={{
                 fontSize: 13,
                 color: "#666",
-                marginBottom: 16,
-                paddingLeft: 48,
+               
+               
               }}
             >
               Tailored plans for your personalized lifestyles.
             </Text>
+            </View>
+            </View>
+
+            {/* Description */}
+           
 
             {/* Horizontal scroll of plans */}
             <ScrollView
@@ -138,7 +142,7 @@ export default function AvailablePlans() {
             style={{
               flexDirection: "row",
               alignItems: "center",
-              marginBottom: 12,
+              marginBottom: 24,
             }}
           >
             <View
@@ -158,6 +162,7 @@ export default function AvailablePlans() {
                 color="#FFFFFF"
               />
             </View>
+            <View style={{display: "flex", flexDirection: "column", justifyContent: "space-between"}}>
             <Text
               style={{
                 fontSize: 18,
@@ -168,19 +173,21 @@ export default function AvailablePlans() {
             >
               Diet Plans
             </Text>
-          </View>
-
-          {/* Description */}
-          <Text
+            <Text
             style={{
               fontSize: 13,
               color: "#666",
-              marginBottom: 16,
-              paddingLeft: 48,
+           
             }}
           >
             Curated meal plans to match your nutrition goals.
           </Text>
+            </View>
+        
+          </View>
+
+          {/* Description */}
+         
 
           {/* Horizontal scroll of diet plans */}
           <ScrollView

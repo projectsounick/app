@@ -32,7 +32,7 @@ async function getDietPlans(): Promise<{
   data: PlanInterface[];
   success: boolean;
 }> {
-  let respone = await fetchWrapper.get(`${config.apiUrl}/api/get-diet-plan`);
+  let respone = await fetchWrapper.get(`${config.apiUrl}/api/get-diet-plan?isActive=true`);
 
   return respone;
 }
