@@ -55,36 +55,38 @@ export default function OnboardingCard({
         onPress={() => updateState(option)}
         activeOpacity={0.9}
         style={{
-          backgroundColor: "#fff",
+          backgroundColor: "#FFFFFF",
           height,
-          marginBottom: 18,
-          borderWidth: isSelected ? 2 : 0,
-          borderColor: isSelected ? theme.colors.secondPrimary : "transparent",
-          borderRadius: 12,
+          marginBottom: 16,
+          borderRadius: 20,
           flexDirection: icon || description ? "row" : "column",
           alignItems: "center",
           justifyContent: icon || description ? "flex-start" : "center",
-          paddingHorizontal: 12,
-
-          elevation: 3, // Android shadow
-
-          // iOS shadow:
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
+          paddingHorizontal: 20,
+          paddingVertical: 16,
+          borderWidth: isSelected ? 2 : 1,
+          borderColor: isSelected ? "#9747FF" : "#F5F5F5",
         }}
       >
         {/* Icon if exists */}
         {icon && (
-          <MaterialCommunityIcons
-            name={icon}
-            size={20}
-            color={theme.colors.secondPrimary}
+          <View
             style={{
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: "#F0F0F0",
+              alignItems: "center",
+              justifyContent: "center",
               marginRight: 12,
             }}
-          />
+          >
+            <MaterialCommunityIcons
+              name={icon}
+              size={22}
+              color="#9747FF"
+            />
+          </View>
         )}
 
         {/* Label + Description */}
@@ -97,10 +99,9 @@ export default function OnboardingCard({
         >
           <Text
             style={{
-              fontSize: fontSize ? fontSize : 28,
+              fontSize: fontSize ? fontSize : 20,
               fontWeight: "600",
-              color: theme.colors.dark,
-              fontFamily: theme.fonts.bold,
+              color: "#000",
               textAlign: icon || description ? "left" : "center",
             }}
           >
@@ -111,10 +112,11 @@ export default function OnboardingCard({
             <Text
               style={{
                 marginTop: 4,
-                fontSize: 12,
-                color: theme.colors.grey,
+                fontSize: 14,
+                color: "#666",
                 fontWeight: "400",
                 textAlign: "left",
+                lineHeight: 20,
               }}
             >
               {description}

@@ -222,6 +222,7 @@ export default function PaymentScreen() {
           {item.cartItems.map((c: any, index: number) => (
             <Text
               key={index}
+
               style={{
                 fontSize: 13,
                 color: "#333",

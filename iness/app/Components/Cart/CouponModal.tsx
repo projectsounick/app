@@ -1,4 +1,3 @@
-import theme from "@/app/Theme/globalTheme";
 import { Ionicons } from "@expo/vector-icons";
 import React from "react";
 import {
@@ -12,7 +11,6 @@ import {
   Keyboard,
   Platform,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 
 interface CouponModalProps {
   visible: boolean;
@@ -49,12 +47,12 @@ const CouponModal: React.FC<CouponModalProps> = ({
               justifyContent: "flex-end",
             }}
           >
-            <LinearGradient
-              colors={["#140A21", "#522987"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
+            <View
               style={{
-                padding: 20,
+                backgroundColor: "#FFFFFF",
+                paddingHorizontal: 20,
+                paddingTop: 20,
+                paddingBottom: 40,
                 borderTopLeftRadius: 20,
                 borderTopRightRadius: 20,
               }}
@@ -64,88 +62,102 @@ const CouponModal: React.FC<CouponModalProps> = ({
                 style={{
                   width: 50,
                   height: 5,
-                  backgroundColor: "rgba(255,255,255,0.3)",
+                  backgroundColor: "#ccc",
                   borderRadius: 3,
                   alignSelf: "center",
-                  marginBottom: 12,
+                  marginBottom: 20,
                 }}
               />
 
-              {/* Title + Close */}
-              <View
+              {/* Close Button - Top Right */}
+              <TouchableOpacity
+                onPress={onClose}
                 style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
+                  position: "absolute",
+                  top: 18,
+                  right: 20,
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: "#F0F0F0",
                   alignItems: "center",
-                  marginBottom: 15,
+                  justifyContent: "center",
+                  zIndex: 10,
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontWeight: "600",
-                    color: "#fff",
-                    fontFamily: theme.fonts.bold,
-                  }}
-                >
-                  Apply Coupon
-                </Text>
+                <Ionicons name="close" size={20} color="#000" />
+              </TouchableOpacity>
 
-                <TouchableOpacity
-                  onPress={onClose}
+              {/* Icon Container */}
+              <View style={{ alignItems: "center", marginBottom: 20 }}>
+                <View
                   style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 18,
-                    backgroundColor: "rgba(255,255,255,0.2)",
+                    width: 80,
+                    height: 80,
+                    borderRadius: 40,
+                    backgroundColor: "#FFF3E0",
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <Ionicons name="close" size={20} color="#fff" />
-                </TouchableOpacity>
+                  <Ionicons name="ticket-outline" size={40} color="#FF9800" />
+                </View>
               </View>
+
+              {/* Title */}
+              <Text
+                style={{
+                  fontSize: 24,
+                  fontWeight: "700",
+                  color: "#000",
+                  textAlign: "center",
+                  marginBottom: 20,
+                }}
+              >
+                Apply Coupon
+              </Text>
 
               {/* Input */}
               <TextInput
                 placeholder="Enter coupon code"
-                placeholderTextColor="#ccc"
+                placeholderTextColor="#999"
                 value={couponCode}
                 onChangeText={setCouponCode}
                 style={{
-                  backgroundColor: "#fff",
-                  borderRadius: 10,
-                  paddingHorizontal: 12,
-                  paddingVertical: 10,
-                  marginBottom: 15,
-                  fontFamily: theme.fonts.bold,
+                  backgroundColor: "#F8F8F8",
+                  borderRadius: 16,
+                  paddingHorizontal: 16,
+                  paddingVertical: 16,
+                  marginBottom: 20,
                   fontSize: 16,
                   color: "#000",
+                  borderWidth: 1,
+                  borderColor: "#E0E0E0",
                 }}
               />
 
               {/* Apply Button */}
               <TouchableOpacity
                 style={{
-                  backgroundColor: "#BDFF84",
-                  paddingVertical: 14,
+                  backgroundColor: "#67C694",
+                  paddingVertical: 16,
                   borderRadius: 30,
                   alignItems: "center",
+                  justifyContent: "center",
                 }}
                 onPress={() => onApply(couponCode)}
               >
                 <Text
                   style={{
-                    color: "#000",
+                    color: "#FFFFFF",
                     fontWeight: "700",
                     fontSize: 16,
-                    fontFamily: theme.fonts.bold,
                   }}
                 >
                   Apply Coupon
                 </Text>
               </TouchableOpacity>
-            </LinearGradient>
+            </View>
           </View>
         </TouchableWithoutFeedback>
       </KeyboardAvoidingView>

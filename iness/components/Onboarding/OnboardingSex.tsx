@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Dimensions } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import theme from "@/app/Theme/globalTheme";
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
+import { View, Text, TouchableOpacity, Dimensions, ScrollView } from "react-native";
 import OnboardingCard from "@/app/modules/OnboardingCard";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import CustomSnackbar from "@/app/modules/Snackbar";
@@ -26,8 +23,8 @@ const OnboardingSex = ({
   /// Custom hook to load data from AsyncStorage-----------------------/
   useLoadFromAsyncStorage<UserData, any>({
     key: "user",
-    property: "sex", // or "age"
-    setter: setSex, // or setAge
+    property: "sex",
+    setter: setSex,
   });
   //// Function to handle the Next button click
   const handleNext = () => {
@@ -54,36 +51,66 @@ const OnboardingSex = ({
       style={{
         flex: 1,
         justifyContent: "space-between",
-        paddingHorizontal: "5%",
-        paddingBottom: "5%",
-        paddingTop: "10%",
       }}
     >
-      {/* Question + Options */}
-      <View>
-        <OnboardingHeading>What is your{"\n"}Gender?</OnboardingHeading>
-        {["Male", "Female"].map((option, index) => (
-          <OnboardingCard
-            key={option}
-            index={index}
-            option={option}
-            state={sex}
-            updateState={updateState}
-            height={screenHeight * 0.1} // 10% of screen height
-          />
-        ))}
-      </View>
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 20,
+          paddingBottom: 20,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Question + Options */}
+        <View>
+          <OnboardingHeading>What is your{"\n"}Gender?</OnboardingHeading>
+          {["Male", "Female"].map((option, index) => (
+            <OnboardingCard
+              key={option}
+              index={index}
+              option={option}
+              state={sex}
+              updateState={updateState}
+              height={screenHeight * 0.12}
+            />
+          ))}
+        </View>
+      </ScrollView>
 
-      {/* Next Button */}
-      <AnimatedSubmitButton
-        loading={false}
-        height={50}
-        onPress={handleNext}
-        title="Next"
-      />
+      {/* Next Button - Always at bottom */}
+      <View
+        style={{
+          paddingHorizontal: 20,
+          paddingBottom: 30,
+          paddingTop: 20,
+          backgroundColor: "transparent",
+        }}
+      >
+        <TouchableOpacity
+          onPress={handleNext}
+          disabled={!sex}
+          style={{
+            backgroundColor: sex ? "#67C694" : "#E0E0E0",
+            borderRadius: 30,
+            paddingVertical: 16,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: sex ? "#FFFFFF" : "#999",
+              fontSize: 16,
+              fontWeight: "700",
+            }}
+          >
+            Next
+          </Text>
+        </TouchableOpacity>
+      </View>
       <CustomSnackbar
         visible={snackbarVisible}
-        bgColor={theme.colors.red}
+        bgColor="#FF6B6B"
         message={snackbarMessage}
         onDismiss={() => setSnackbarVisible(false)}
       />

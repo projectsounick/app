@@ -12,41 +12,15 @@ import {
   Platform,
 } from "react-native";
 
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { UserData } from "@/app/interfaces/UserInterface";
 import NormalHeader from "@/app/modules/NormalHeader";
-import theme from "@/app/Theme/globalTheme";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
+import { SafeAreaView } from "react-native-safe-area-context";
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.05; // 2% of screen height
 
 const backgroundImage = require("../../../assets/images/basicBackground.jpg");
-const labelStyle = {
-  color: theme.colors.dark,
-  marginBottom: 4,
-  fontSize: theme.fontSizes.medium,
-};
-
-const inputStyle = {
-  backgroundColor: "#fff",
-  borderRadius: 6,
-  padding: 10,
-  color: theme.colors.dark,
-  borderWidth: 1,
-  borderColor: theme.colors.secondPrimary,
-  flex: 1,
-};
-const commonFieldStyle: any = {
-  backgroundColor: theme.colors.cardLight,
-  borderRadius: 10,
-  padding: 12,
-  marginBottom: 12,
-  borderWidth: 1,
-  borderColor: theme.colors.secondPrimary,
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-};
 
 // Option imports
 import {
@@ -56,11 +30,9 @@ import {
   goalOptionsOnboarding,
   activityLevelOptions,
 } from "../../../utils/onboardingStaticValues";
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { userService } from "@/app/services/user.service";
 import CustomSnackbar from "@/app/modules/Snackbar";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 // Custom dropdown modal
 const DropdownModal = ({
@@ -86,14 +58,29 @@ const DropdownModal = ({
     >
       <View
         style={{
-          backgroundColor: "#fff",
-          borderTopLeftRadius: 16,
-          borderTopRightRadius: 16,
-          padding: 16,
+          backgroundColor: "#FFFFFF",
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          padding: 20,
           maxHeight: "50%",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: -2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+          elevation: 10,
         }}
       >
-        <ScrollView>
+        <View
+          style={{
+            width: 40,
+            height: 4,
+            backgroundColor: "#E0E0E0",
+            borderRadius: 2,
+            alignSelf: "center",
+            marginBottom: 16,
+          }}
+        />
+        <ScrollView showsVerticalScrollIndicator={false}>
           {options.map((option) => (
             <TouchableOpacity
               key={option}
@@ -102,12 +89,20 @@ const DropdownModal = ({
                 onClose();
               }}
               style={{
-                paddingVertical: 12,
+                paddingVertical: 16,
                 borderBottomWidth: 1,
-                borderBottomColor: "#eee",
+                borderBottomColor: "#F5F5F5",
               }}
             >
-              <Text style={{ fontSize: 16 }}>{option}</Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: "#000",
+                  fontWeight: "500",
+                }}
+              >
+                {option}
+              </Text>
             </TouchableOpacity>
           ))}
         </ScrollView>
@@ -229,22 +224,80 @@ export default function EditOnboardingScreen() {
           return [];
       }
     };
-    if (field === "weight" && editFields[field]) {
+    if (field === "weight") {
       const weightValue = formValues.weight?.replace(/[^0-9.]/g, "") || ""; // Extract number
       const weightUnit = formValues.weight?.includes("lbs") ? "lbs" : "kg"; // Default to kg if not present
 
       return (
-        <View key={field} style={commonFieldStyle}>
-          <View style={{ flex: 1 }}>
-            <Text style={labelStyle}>{label}</Text>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+        <View
+          key={field}
+          style={{
+            backgroundColor: "#FFFFFF",
+            borderRadius: 20,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.12,
+            shadowRadius: 12,
+            elevation: 5,
+            borderWidth: 1,
+            borderColor: "#F5F5F5",
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 12,
+            }}
+          >
+            <Text
+              style={{
+                color: "#000",
+                fontSize: 16,
+                fontWeight: "600",
+              }}
+            >
+              {label}
+            </Text>
+            <TouchableOpacity
+              onPress={() => toggleEdit(field)}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: "#F0F0F0",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Ionicons
+                name={editFields[field] ? "checkmark" : "pencil"}
+                size={18}
+                color={editFields[field] ? "#67C694" : "#9747FF"}
+              />
+            </TouchableOpacity>
+          </View>
+          {editFields[field] ? (
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
               <TextInput
                 value={weightValue}
                 onChangeText={(text) =>
                   handleChange("weight", `${text}${weightUnit}`)
                 }
                 keyboardType="numeric"
-                style={inputStyle}
+                style={{
+                  flex: 1,
+                  backgroundColor: "#F8F8F8",
+                  borderRadius: 12,
+                  padding: 14,
+                  color: "#000",
+                  borderWidth: 1,
+                  borderColor: "#E0E0E0",
+                  fontSize: 15,
+                }}
               />
               <TouchableOpacity
                 onPress={() => {
@@ -254,106 +307,234 @@ export default function EditOnboardingScreen() {
                   handleChange("weight", `${numberOnly}${newUnit}`);
                 }}
                 style={{
-                  marginLeft: 10,
-                  backgroundColor: theme.colors.cardLight,
-                  paddingHorizontal: 10,
-                  paddingVertical: 8,
-                  borderRadius: 8,
-                  borderWidth: 1,
-                  borderColor: theme.colors.secondPrimary,
+                  backgroundColor: "#9747FF",
+                  paddingHorizontal: 16,
+                  paddingVertical: 14,
+                  borderRadius: 12,
+                  minWidth: 60,
+                  alignItems: "center",
                 }}
               >
-                <Text>{weightUnit}</Text>
+                <Text
+                  style={{
+                    color: "#FFFFFF",
+                    fontWeight: "600",
+                    fontSize: 14,
+                  }}
+                >
+                  {weightUnit}
+                </Text>
               </TouchableOpacity>
             </View>
-          </View>
-          <TouchableOpacity
-            onPress={() => toggleEdit(field)}
-            style={{ marginLeft: 10 }}
-          >
-            <MaterialCommunityIcons
-              name="square-edit-outline"
-              size={20}
-              color={theme.colors.dark}
-            />
-          </TouchableOpacity>
+          ) : (
+            <Text
+              style={{
+                color: "#666",
+                fontSize: 15,
+                lineHeight: 22,
+              }}
+            >
+              {formValues.weight || "--"}
+            </Text>
+          )}
         </View>
       );
     }
     if (field === "dob") {
       return (
-        <View key={field} style={commonFieldStyle}>
-          <View style={{ flex: 1 }}>
-            <Text style={labelStyle}>{label}</Text>
-
-            <TouchableOpacity
-              onPress={() => setDobPickerVisible(true)}
+        <View
+          key={field}
+          style={{
+            backgroundColor: "#FFFFFF",
+            borderRadius: 20,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.12,
+            shadowRadius: 12,
+            elevation: 5,
+            borderWidth: 1,
+            borderColor: "#F5F5F5",
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 12,
+            }}
+          >
+            <Text
               style={{
-                ...inputStyle,
+                color: "#000",
+                fontSize: 16,
+                fontWeight: "600",
+              }}
+            >
+              {label}
+            </Text>
+            <TouchableOpacity
+              onPress={() => toggleEdit(field)}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: "#F0F0F0",
+                alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <Text style={{ color: theme.colors.dark }}>
-                {formValues.dob
-                  ? new Date(formValues.dob).toLocaleDateString()
-                  : "Select Date of Birth"}
-              </Text>
+              <Ionicons
+                name={editFields[field] ? "checkmark" : "pencil"}
+                size={18}
+                color={editFields[field] ? "#67C694" : "#9747FF"}
+              />
             </TouchableOpacity>
-
-            <DateTimePickerModal
-              isVisible={dobPickerVisible}
-              mode="date"
-              date={
-                formValues.dob
-                  ? new Date(formValues.dob)
-                  : new Date("2000-01-01")
-              }
-              maximumDate={new Date()} // restrict future DOBs
-              onConfirm={(date) => {
-                const isoDate = date.toISOString().split("T")[0]; // format YYYY-MM-DD
-                handleChange("dob", isoDate);
-                setDobPickerVisible(false);
-              }}
-              onCancel={() => setDobPickerVisible(false)}
-            />
           </View>
+          {editFields[field] ? (
+            <>
+              <TouchableOpacity
+                onPress={() => setDobPickerVisible(true)}
+                style={{
+                  backgroundColor: "#F8F8F8",
+                  borderRadius: 12,
+                  padding: 14,
+                  borderWidth: 1,
+                  borderColor: "#E0E0E0",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                }}
+              >
+                <Text
+                  style={{
+                    color: formValues.dob ? "#000" : "#999",
+                    fontSize: 15,
+                  }}
+                >
+                  {formValues.dob
+                    ? new Date(formValues.dob).toLocaleDateString()
+                    : "Select Date of Birth"}
+                </Text>
+                <Ionicons name="calendar-outline" size={20} color="#9747FF" />
+              </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => toggleEdit(field)}
-            style={{ marginLeft: 10 }}
-          >
-            <MaterialCommunityIcons
-              name="square-edit-outline"
-              size={20}
-              color={theme.colors.dark}
-            />
-          </TouchableOpacity>
+              <DateTimePickerModal
+                isVisible={dobPickerVisible}
+                mode="date"
+                date={
+                  formValues.dob
+                    ? new Date(formValues.dob)
+                    : new Date("2000-01-01")
+                }
+                maximumDate={new Date()} // restrict future DOBs
+                onConfirm={(date) => {
+                  const isoDate = date.toISOString().split("T")[0]; // format YYYY-MM-DD
+                  handleChange("dob", isoDate);
+                  setDobPickerVisible(false);
+                }}
+                onCancel={() => setDobPickerVisible(false)}
+              />
+            </>
+          ) : (
+            <Text
+              style={{
+                color: "#666",
+                fontSize: 15,
+                lineHeight: 22,
+              }}
+            >
+              {formValues.dob
+                ? new Date(formValues.dob).toLocaleDateString()
+                : "--"}
+            </Text>
+          )}
         </View>
       );
     }
 
-    if (field === "height" && editFields[field]) {
+    if (field === "height") {
       return (
-        <View key={field} style={commonFieldStyle}>
-          <View style={{ flex: 1 }}>
-            <Text style={labelStyle}>{label}</Text>
+        <View
+          key={field}
+          style={{
+            backgroundColor: "#FFFFFF",
+            borderRadius: 20,
+            padding: 20,
+            marginBottom: 16,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: 0.12,
+            shadowRadius: 12,
+            elevation: 5,
+            borderWidth: 1,
+            borderColor: "#F5F5F5",
+          }}
+        >
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: 12,
+            }}
+          >
+            <Text
+              style={{
+                color: "#000",
+                fontSize: 16,
+                fontWeight: "600",
+              }}
+            >
+              {label}
+            </Text>
+            <TouchableOpacity
+              onPress={() => toggleEdit(field)}
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: "#F0F0F0",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Ionicons
+                name={editFields[field] ? "checkmark" : "pencil"}
+                size={18}
+                color={editFields[field] ? "#67C694" : "#9747FF"}
+              />
+            </TouchableOpacity>
+          </View>
+          {editFields[field] ? (
             <TextInput
               value={formValues[field] || ""}
               onChangeText={(text) => handleChange(field, text)}
               placeholder="e.g. 170cm or 5'6"
-              style={inputStyle}
+              placeholderTextColor="#999"
+              style={{
+                backgroundColor: "#F8F8F8",
+                borderRadius: 12,
+                padding: 14,
+                color: "#000",
+                borderWidth: 1,
+                borderColor: "#E0E0E0",
+                fontSize: 15,
+              }}
             />
-          </View>
-          <TouchableOpacity
-            onPress={() => toggleEdit(field)}
-            style={{ marginLeft: 10 }}
-          >
-            <MaterialCommunityIcons
-              name="square-edit-outline"
-              size={20}
-              color={theme.colors.dark}
-            />
-          </TouchableOpacity>
+          ) : (
+            <Text
+              style={{
+                color: "#666",
+                fontSize: 15,
+                lineHeight: 22,
+              }}
+            >
+              {formValues[field] || "--"}
+            </Text>
+          )}
         </View>
       );
     }
@@ -362,132 +543,199 @@ export default function EditOnboardingScreen() {
       <View
         key={field}
         style={{
-          backgroundColor: theme.colors.cardLight,
-          borderRadius: 10,
-          padding: 12,
-          marginBottom: 12,
+          backgroundColor: "#FFFFFF",
+          borderRadius: 20,
+          padding: 20,
+          marginBottom: 16,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.12,
+          shadowRadius: 12,
+          elevation: 5,
           borderWidth: 1,
-          borderColor: theme.colors.secondPrimary,
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
+          borderColor: "#F5F5F5",
         }}
       >
-        <View style={{ flex: 1 }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            marginBottom: 12,
+          }}
+        >
           <Text
             style={{
-              color: theme.colors.dark,
-              marginBottom: 4,
-              fontSize: theme.fontSizes.medium,
+              color: "#000",
+              fontSize: 16,
+              fontWeight: "600",
             }}
           >
             {label === "Sex" ? "Gender" : label}
           </Text>
-          {editFields[field] ? (
-            isTextInput ? (
-              <TextInput
-                value={formValues[field] || ""}
-                onChangeText={(text) => handleChange(field, text)}
+          <TouchableOpacity
+            onPress={() => toggleEdit(field)}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: 16,
+              backgroundColor: "#F0F0F0",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Ionicons
+              name={editFields[field] ? "checkmark" : "pencil"}
+              size={18}
+              color={editFields[field] ? "#67C694" : "#9747FF"}
+            />
+          </TouchableOpacity>
+        </View>
+        {editFields[field] ? (
+          isTextInput ? (
+            <TextInput
+              value={formValues[field] || ""}
+              onChangeText={(text) => handleChange(field, text)}
+              style={{
+                backgroundColor: "#F8F8F8",
+                borderRadius: 12,
+                padding: 14,
+                color: "#000",
+                borderWidth: 1,
+                borderColor: "#E0E0E0",
+                fontSize: 15,
+              }}
+            />
+          ) : (
+            <>
+              <TouchableOpacity
+                onPress={() => setDropdownVisible(field)}
                 style={{
-                  backgroundColor: "#fff", // white or light background for form feel
-                  borderRadius: 6,
-                  padding: 10,
-                  color: theme.colors.dark,
+                  backgroundColor: "#F8F8F8",
+                  borderRadius: 12,
+                  padding: 14,
                   borderWidth: 1,
-                  borderColor: theme.colors.secondPrimary, // consistent with your app theme
+                  borderColor: "#E0E0E0",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                 }}
-              />
-            ) : (
-              <>
-                <TouchableOpacity
-                  onPress={() => setDropdownVisible(field)}
+              >
+                <Text
                   style={{
-                    backgroundColor: theme.colors.cardLight,
-                    borderRadius: 6,
-                    padding: 10,
+                    color: formValues[field] ? "#000" : "#999",
+                    fontSize: 15,
                   }}
                 >
-                  <Text style={{ color: theme.colors.dark }}>
-                    {formValues[field] || "Select an option"}
-                  </Text>
-                </TouchableOpacity>
+                  {formValues[field] || "Select an option"}
+                </Text>
+                <Ionicons name="chevron-down" size={20} color="#9747FF" />
+              </TouchableOpacity>
 
-                <DropdownModal
-                  visible={dropdownVisible === field}
-                  onClose={() => setDropdownVisible(null)}
-                  options={getOptions()}
-                  onSelect={(option) => handleChange(field, option)}
-                />
-              </>
-            )
-          ) : (
-            <Text
-              style={{
-                color: theme.colors.dark,
-                fontSize: 16,
-                fontFamily: theme.fonts.medium,
-              }}
-            >
-              {formValues[field] || "--"}
-            </Text>
-          )}
-        </View>
-        <TouchableOpacity
-          onPress={() => toggleEdit(field)}
-          style={{ marginLeft: 10 }}
-        >
-          <MaterialCommunityIcons
-            name="square-edit-outline"
-            size={20}
-            color={theme.colors.dark}
-          />
-        </TouchableOpacity>
+              <DropdownModal
+                visible={dropdownVisible === field}
+                onClose={() => setDropdownVisible(null)}
+                options={getOptions()}
+                onSelect={(option) => handleChange(field, option)}
+              />
+            </>
+          )
+        ) : (
+          <Text
+            style={{
+              color: "#666",
+              fontSize: 15,
+              lineHeight: 22,
+            }}
+          >
+            {formValues[field] || "--"}
+          </Text>
+        )}
       </View>
     );
   };
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
-      <ImageBackground source={backgroundImage} style={{ flex: 1 }}>
-        <View
-          style={{
-            paddingLeft: 20,
-            marginTop: Platform.OS === "ios" ? topPadding : "4%",
-          }}
+      <ImageBackground
+        source={backgroundImage}
+        style={{ flex: 1 }}
+        resizeMode="cover"
+      >
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+          edges={["left", "right"]}
         >
-          <NormalHeader screenName="Profile Details" />
-        </View>
-        <ScrollView contentContainerStyle={{ padding: 16 }}>
-          {renderEditableField("Name", "name")}
-          {renderEditableField("Sex", "sex")}
-          {renderEditableField("Weight", "weight")}
-          {renderEditableField("Height", "height")}
-          {renderEditableField("Date of Birth", "dob")}
-
-          {renderEditableField("Primary Goal", "goal")}
-          {renderEditableField("Time Commitment", "timeCommitment")}
-          {renderEditableField(
-            "Preferred Workout Time",
-            "preferredWorkoutTime"
-          )}
-          {renderEditableField("Workout Preferences", "workoutPreferences")}
-          {renderEditableField("Activity Level", "activityLevel")}
-
-          <View style={{ marginTop: 30, alignItems: "center" }}>
-            <AnimatedSubmitButton
-              loading={loading}
-              onPress={handleUpdate}
-              title="Update"
-              height={50}
-            />
+          <View
+            style={{
+              paddingLeft: 20,
+              marginTop: Platform.OS === "ios" ? topPadding : "4%",
+            }}
+          >
+            <NormalHeader screenName="Profile Details" />
           </View>
-        </ScrollView>
-        <CustomSnackbar
-          onDismiss={() => setSnackbarVisible(false)}
-          visible={snackbarVisible}
-          message={snackbarMessage}
-          bgColor={theme.colors.primary}
-        />
+          <ScrollView
+            style={{ flex: 1 }}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              padding: 20,
+              paddingBottom: 40,
+            }}
+          >
+            {renderEditableField("Name", "name")}
+            {renderEditableField("Sex", "sex")}
+            {renderEditableField("Weight", "weight")}
+            {renderEditableField("Height", "height")}
+            {renderEditableField("Date of Birth", "dob")}
+
+            {renderEditableField("Primary Goal", "goal")}
+            {renderEditableField("Time Commitment", "timeCommitment")}
+            {renderEditableField(
+              "Preferred Workout Time",
+              "preferredWorkoutTime"
+            )}
+            {renderEditableField("Workout Preferences", "workoutPreferences")}
+            {renderEditableField("Activity Level", "activityLevel")}
+
+            <TouchableOpacity
+              onPress={handleUpdate}
+              disabled={loading}
+              style={{
+                backgroundColor: "#67C694",
+                borderRadius: 16,
+                paddingVertical: 16,
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: 20,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.2,
+                shadowRadius: 8,
+                elevation: 5,
+              }}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text
+                  style={{
+                    color: "#FFFFFF",
+                    fontSize: 16,
+                    fontWeight: "700",
+                  }}
+                >
+                  Update Profile
+                </Text>
+              )}
+            </TouchableOpacity>
+          </ScrollView>
+          <CustomSnackbar
+            onDismiss={() => setSnackbarVisible(false)}
+            visible={snackbarVisible}
+            message={snackbarMessage}
+            bgColor="#67C694"
+          />
+        </SafeAreaView>
       </ImageBackground>
     </View>
   );

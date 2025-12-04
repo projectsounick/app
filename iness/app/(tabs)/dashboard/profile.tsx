@@ -45,7 +45,7 @@ function ProfileScreen() {
           }}
         >
           {/* Header */}
-          <NormalHeader screenName="Profile" />
+          <NormalHeader screenName="Profile" showSupportChat={true} />
         </View>
         <ScrollView
           style={{ flex: 1 }}

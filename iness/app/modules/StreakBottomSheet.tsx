@@ -10,7 +10,6 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { Calendar } from "react-native-calendars";
-import { LinearGradient } from "expo-linear-gradient";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 
@@ -45,7 +44,9 @@ export default function StreaksBottomSheet({
     x: Math.random() * width,
     rotate: new Animated.Value(Math.random() * 360),
     fall: new Animated.Value(-Math.random() * height),
-    color: ["#FF3B3B", "#FF9E00", "#FFD700"][Math.floor(Math.random() * 3)],
+    color: ["#FF3B3B", "#FF9E00", "#FFD700", "#67C694"][
+      Math.floor(Math.random() * 4)
+    ],
     size: Math.random() * 10 + 6,
     delay: Math.random() * 1000,
   }));
@@ -106,26 +107,27 @@ export default function StreaksBottomSheet({
         />
       ))}
 
-      <LinearGradient
-        colors={["#2C1453", "#1C0E33"]}
+      <View
         style={{
           height: height * 0.7,
-          borderTopLeftRadius: 25,
-          borderTopRightRadius: 25,
-          padding: 20,
+          backgroundColor: "#FFFFFF",
+          borderTopLeftRadius: 20,
+          borderTopRightRadius: 20,
+          paddingHorizontal: 20,
+          paddingTop: 20,
+          paddingBottom: 30,
           overflow: "hidden",
         }}
       >
         {/* Dash Handle */}
         <View
           style={{
-            width: 45,
+            width: 50,
             height: 5,
-            backgroundColor: "rgba(255,255,255,0.4)",
+            backgroundColor: "#ccc",
             borderRadius: 3,
             alignSelf: "center",
-            marginTop: 4,
-            marginBottom: 10,
+            marginBottom: 20,
           }}
         />
 
@@ -136,37 +138,54 @@ export default function StreaksBottomSheet({
             position: "absolute",
             top: 18,
             right: 20,
-            backgroundColor: "rgba(255,255,255,0.2)",
-            borderRadius: 20,
-            padding: 6,
+            backgroundColor: "#F0F0F0",
+            borderRadius: 16,
+            width: 32,
+            height: 32,
+            justifyContent: "center",
+            alignItems: "center",
+            zIndex: 10,
           }}
         >
-          <Ionicons name="close" size={20} color="#fff" />
+          <Ionicons name="close" size={20} color="#000" />
         </TouchableOpacity>
 
-        <View style={{ alignItems: "center", marginTop: 20, zIndex: 2 }}>
-          <Ionicons name="flame" size={64} color="#FF3B3B" />
+        <View style={{ alignItems: "center", marginTop: 10, zIndex: 2 }}>
+          <View
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              backgroundColor: "#FFEBEE",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 16,
+            }}
+          >
+            <Ionicons name="flame" size={40} color="#FF3B3B" />
+          </View>
           <Text
             style={{
-              fontSize: 22,
-              fontWeight: "bold",
-              color: "#fff",
-              marginTop: 10,
+              fontSize: 28,
+              fontWeight: "700",
+              color: "#000",
+              marginTop: 8,
             }}
           >
             {totalStreak}-Day Streak 🔥
           </Text>
           <Text
             style={{
-              color: "#BFAAFF",
+              color: "#666",
               textAlign: "center",
-              marginTop: 6,
-              fontSize: 14,
+              marginTop: 8,
+              fontSize: 15,
               paddingHorizontal: 40,
+              lineHeight: 22,
             }}
           >
             {totalStreak && totalStreak !== 0
-              ? "You’re unstoppable! Keep your streak alive by showing up every day."
+              ? "You're unstoppable! Keep your streak alive by showing up every day."
               : "Start your streak today!"}
           </Text>
         </View>
@@ -174,24 +193,28 @@ export default function StreaksBottomSheet({
         <ScrollView
           contentContainerStyle={{
             marginTop: 20,
-            paddingBottom: 40,
+            paddingBottom: 20,
             zIndex: 2,
           }}
         >
           <Calendar
             theme={{
-              backgroundColor: "transparent",
-              calendarBackground: "transparent",
-              dayTextColor: "#fff",
-              monthTextColor: "#fff",
-              arrowColor: "#FF9E00",
-              todayTextColor: "#FFFA67",
+              backgroundColor: "#FFFFFF",
+              calendarBackground: "#FFFFFF",
+              dayTextColor: "#000",
+              monthTextColor: "#000",
+              arrowColor: "#9747FF",
+              todayTextColor: "#67C694",
               textDayFontWeight: "600",
+              textMonthFontWeight: "700",
+              textDayHeaderFontWeight: "600",
+              selectedDayBackgroundColor: "#9747FF",
+              selectedDayTextColor: "#FFFFFF",
             }}
             markedDates={markedDates}
           />
         </ScrollView>
-      </LinearGradient>
+      </View>
     </View>
   );
 }

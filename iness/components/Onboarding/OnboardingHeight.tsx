@@ -11,11 +11,11 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
+import { Ionicons } from "@expo/vector-icons";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import CustomSnackbar from "@/app/modules/Snackbar";
-import theme from "@/app/Theme/globalTheme";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
 
 const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
@@ -81,28 +81,63 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
           >
             <OnboardingHeading>What is your{`\n`}height?</OnboardingHeading>
 
-            <View style={styles.pickerRow}>
-              {/* Feet Picker */}
-              <TouchableOpacity
-                style={styles.pickerButton}
-                onPress={() => openModal("feet")}
-              >
-                <Text style={styles.pickerText}>
-                  {heightFeet ?? "Select ft"}
-                </Text>
-              </TouchableOpacity>
-              <Text style={styles.unit}>ft</Text>
+            <View
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderRadius: 20,
+                padding: 24,
+                marginTop: 20,
+                borderWidth: 1,
+                borderColor: "#F5F5F5",
+              }}
+            >
+              <View style={styles.pickerRow}>
+                {/* Feet Picker */}
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: "#666",
+                      marginBottom: 8,
+                      fontWeight: "500",
+                    }}
+                  >
+                    Feet
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.pickerButton}
+                    onPress={() => openModal("feet")}
+                  >
+                    <Text style={styles.pickerText}>
+                      {heightFeet ?? "Select"}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color="#9747FF" />
+                  </TouchableOpacity>
+                </View>
 
-              {/* Inches Picker */}
-              <TouchableOpacity
-                style={styles.pickerButton}
-                onPress={() => openModal("inches")}
-              >
-                <Text style={styles.pickerText}>
-                  {heightInches ?? "Select in"}
-                </Text>
-              </TouchableOpacity>
-              <Text style={styles.unit}>in</Text>
+                {/* Inches Picker */}
+                <View style={{ flex: 1, marginLeft: 8 }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: "#666",
+                      marginBottom: 8,
+                      fontWeight: "500",
+                    }}
+                  >
+                    Inches
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.pickerButton}
+                    onPress={() => openModal("inches")}
+                  >
+                    <Text style={styles.pickerText}>
+                      {heightInches ?? "Select"}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color="#9747FF" />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
 
             <Text style={styles.hintText}>
@@ -110,18 +145,51 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
             </Text>
           </ScrollView>
 
-          <View style={styles.bottomButton}>
-            <AnimatedSubmitButton
-              loading={loading}
+          {/* Bottom Button - Always at bottom */}
+          <View
+            style={{
+              paddingHorizontal: 20,
+              paddingBottom: 30,
+              paddingTop: 20,
+              backgroundColor: "transparent",
+            }}
+          >
+            <TouchableOpacity
               onPress={handleNext}
-              height={50}
-              title="Next"
-            />
+              disabled={loading || !heightFeet || !heightInches}
+              style={{
+                backgroundColor:
+                  loading || !heightFeet || !heightInches
+                    ? "#E0E0E0"
+                    : "#67C694",
+                borderRadius: 30,
+                paddingVertical: 16,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text
+                  style={{
+                    color:
+                      loading || !heightFeet || !heightInches
+                        ? "#999"
+                        : "#FFFFFF",
+                    fontSize: 16,
+                    fontWeight: "700",
+                  }}
+                >
+                  Next
+                </Text>
+              )}
+            </TouchableOpacity>
           </View>
 
           <CustomSnackbar
             visible={snackbarVisible}
-            bgColor={theme.colors.red}
+            bgColor="#FF6B6B"
             message={snackbarMessage}
             onDismiss={() => setSnackbarVisible(false)}
           />
@@ -133,26 +201,8 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
             transparent
             onRequestClose={() => setModalVisible(false)}
           >
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: "rgba(0,0,0,0.4)",
-                justifyContent: "flex-end",
-              }}
-            >
-              {/* Bottom sheet container */}
-              <View
-                style={{
-                  backgroundColor: "#fff",
-                  maxHeight: "60%",
-                  borderTopLeftRadius: 20,
-                  borderTopRightRadius: 20,
-                  paddingHorizontal: 20,
-                  paddingTop: 10,
-                  paddingBottom: 20,
-                }}
-              >
-                {/* Handle dash (inline) */}
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
                 <View
                   style={{
                     width: 50,
@@ -160,69 +210,30 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
                     backgroundColor: "#ccc",
                     borderRadius: 3,
                     alignSelf: "center",
-                    marginBottom: 10,
+                    marginBottom: 15,
+                    marginTop: 10,
                   }}
                 />
-
-                {/* Title */}
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontFamily: theme.fonts.bold,
-                    marginBottom: 10,
-                    textAlign: "center",
-                  }}
-                >
+                <Text style={styles.modalTitle}>
                   Select {modalType === "feet" ? "Feet" : "Inches"}
                 </Text>
-
-                {/* Options list */}
                 <FlatList
                   data={getOptions()}
                   keyExtractor={(item) => item}
                   renderItem={({ item }) => (
                     <TouchableOpacity
-                      style={{
-                        paddingVertical: 15,
-                        borderBottomWidth: 1,
-                        borderBottomColor: "#eee",
-                      }}
+                      style={styles.option}
                       onPress={() => selectValue(item)}
                     >
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          textAlign: "center",
-                          fontFamily: theme.fonts.medium,
-                        }}
-                      >
-                        {item}
-                      </Text>
+                      <Text style={styles.optionText}>{item}</Text>
                     </TouchableOpacity>
                   )}
                 />
-
-                {/* Cancel button */}
                 <TouchableOpacity
-                  style={{
-                    marginTop: 10,
-                    paddingVertical: 15,
-                    backgroundColor: "#FF4D4D",
-                    borderRadius: 40,
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
+                  style={styles.closeButton}
                   onPress={() => setModalVisible(false)}
                 >
-                  <Text
-                    style={{
-                      color: "#fff",
-                      fontSize: 16,
-                      fontFamily: theme.fonts.bold,
-                    }}
-                  >
-                    Cancel
-                  </Text>
+                  <Text style={styles.closeButtonText}>Cancel</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -241,48 +252,36 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   scrollContent: {
-    paddingTop: 60,
-    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingHorizontal: 20,
     paddingBottom: 20,
     flexGrow: 1,
   },
-
   pickerRow: {
     flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 30,
+    justifyContent: "space-between",
   },
   pickerButton: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    paddingVertical: 12,
+    borderColor: "#E0E0E0",
+    borderRadius: 12,
+    paddingVertical: 14,
     paddingHorizontal: 16,
-    minWidth: 80,
+    backgroundColor: "#F8F8F8",
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
   },
   pickerText: {
-    fontSize: 18,
+    fontSize: 16,
     color: "#000",
-    fontFamily: theme.fonts.medium,
-  },
-  unit: {
-    marginHorizontal: 8,
-    fontSize: 18,
-    color: "#7D4CFF",
-    fontFamily: theme.fonts.bold,
+    fontWeight: "500",
   },
   hintText: {
     textAlign: "center",
     color: "#666",
     fontSize: 14,
-    fontFamily: theme.fonts.regular,
-    marginTop: 8,
-  },
-  bottomButton: {
-    paddingHorizontal: 24,
-    paddingBottom: 30,
+    marginTop: 16,
   },
   modalOverlay: {
     flex: 1,
@@ -290,7 +289,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingBottom: 20,
@@ -298,31 +297,35 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: "600",
+    fontWeight: "700",
     padding: 15,
     textAlign: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "#F5F5F5",
+    color: "#000",
   },
   option: {
-    padding: 15,
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "#F5F5F5",
     alignItems: "center",
   },
   optionText: {
-    fontSize: 18,
+    fontSize: 16,
+    color: "#000",
+    fontWeight: "500",
   },
   closeButton: {
-    backgroundColor: "#ff4d4d",
+    backgroundColor: "#67C694",
     marginHorizontal: 20,
-    padding: 15,
-    borderRadius: 10,
+    padding: 16,
+    borderRadius: 16,
     marginTop: 10,
   },
   closeButtonText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 16,
     textAlign: "center",
+    fontWeight: "700",
   },
 });

@@ -1,7 +1,6 @@
 import { CartItem } from "@/app/interfaces/cartInterface";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import { cartService } from "@/app/services/cart.service";
-import theme from "@/app/Theme/globalTheme";
 import useServiceWithSnackbar from "@/hooks/usePostDataHook";
 import {
   removeFromCart,
@@ -115,13 +114,11 @@ export default function CartItemList({
   return (
     <View
       style={{
-        backgroundColor: "#fff",
-        padding: 16,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
-        elevation: 3,
+        backgroundColor: "#FFFFFF",
+        padding: 20,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: "#F5F5F5",
       }}
     >
       {/* Header */}
@@ -130,15 +127,14 @@ export default function CartItemList({
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 8,
+          marginBottom: 20,
         }}
       >
         <Text
           style={{
-            fontSize: 16,
-            fontWeight: "bold",
+            fontSize: 20,
+            fontWeight: "700",
             color: "#000",
-            fontFamily: theme.fonts.bold,
           }}
         >
           Your Items
@@ -152,23 +148,30 @@ export default function CartItemList({
             flexDirection: "row",
             justifyContent: "center",
             alignItems: "center",
+            paddingVertical: 40,
           }}
         >
-          <ActivityIndicator />
+          <ActivityIndicator color="#67C694" />
         </View>
       ) : (
         <>
           {items.length === 0 ? (
-            <Text
+            <View
               style={{
-                color: "#888",
-                fontStyle: "italic",
-                fontSize: 14,
-                fontFamily: theme.fonts.bold,
+                paddingVertical: 40,
+                alignItems: "center",
               }}
             >
-              There is nothing available in the cart.
-            </Text>
+              <Text
+                style={{
+                  color: "#666",
+                  fontSize: 15,
+                  fontWeight: "500",
+                }}
+              >
+                There is nothing available in the cart.
+              </Text>
+            </View>
           ) : (
             <ScrollView
               style={{ maxHeight: 500 }}
@@ -182,6 +185,11 @@ export default function CartItemList({
                       flexDirection: "row",
                       alignItems: "flex-start",
                       marginBottom: 16,
+                      backgroundColor: "#FFFFFF",
+                      borderRadius: 16,
+                      padding: 12,
+                      borderWidth: 1,
+                      borderColor: "#F5F5F5",
                     }}
                   >
                     {/* Image */}
@@ -189,9 +197,9 @@ export default function CartItemList({
                       style={{
                         width: 80,
                         height: 80,
-                        borderRadius: 8,
+                        borderRadius: 12,
                         marginRight: 12,
-                        backgroundColor: "#ccc",
+                        backgroundColor: "#F0F0F0",
                         overflow: "hidden",
                       }}
                     >
@@ -200,7 +208,6 @@ export default function CartItemList({
                         style={{
                           width: "100%",
                           height: "100%",
-                          borderRadius: 8,
                         }}
                         resizeMode="cover"
                       />
@@ -213,11 +220,10 @@ export default function CartItemList({
                         numberOfLines={2}
                         ellipsizeMode="tail"
                         style={{
-                          fontSize: 14,
+                          fontSize: 15,
                           fontWeight: "600",
                           color: "#000",
-                          marginBottom: 6,
-                          fontFamily: theme.fonts.bold,
+                          marginBottom: 8,
                         }}
                       >
                         {item.name}
@@ -233,18 +239,19 @@ export default function CartItemList({
                       >
                         {loading ? (
                           <View>
-                            <ActivityIndicator />
+                            <ActivityIndicator color="#67C694" size="small" />
                           </View>
                         ) : (
                           <View
                             style={{
                               flexDirection: "row",
                               alignItems: "center",
-                              backgroundColor: "#F2E7FE",
-                              borderRadius: 14,
-                              paddingHorizontal: 8,
-                              height: 28,
-                              opacity: 0.5,
+                              backgroundColor: "#F8F8F8",
+                              borderRadius: 12,
+                              paddingHorizontal: 4,
+                              height: 32,
+                              borderWidth: 1,
+                              borderColor: "#E0E0E0",
                             }}
                           >
                             <TouchableOpacity
@@ -254,19 +261,33 @@ export default function CartItemList({
                                   : true
                               }
                               onPress={() => updateCart(item._id, "decrement")}
+                              style={{
+                                paddingHorizontal: 8,
+                                paddingVertical: 4,
+                              }}
                             >
                               <Text
                                 style={{
-                                  fontSize: 16,
-                                  color: item.plan?.planId ? "#aaa" : "#9747FF",
-                                  paddingHorizontal: 6,
+                                  fontSize: 18,
+                                  color:
+                                    item.product && item.quantity >= 2
+                                      ? "#9747FF"
+                                      : "#CCC",
+                                  fontWeight: "600",
                                 }}
                               >
                                 -
                               </Text>
                             </TouchableOpacity>
 
-                            <Text style={{ fontSize: 14, color: "#000" }}>
+                            <Text
+                              style={{
+                                fontSize: 15,
+                                color: "#000",
+                                fontWeight: "600",
+                                paddingHorizontal: 12,
+                              }}
+                            >
                               {item.quantity}
                             </Text>
 
@@ -277,12 +298,19 @@ export default function CartItemList({
                                   : true
                               }
                               onPress={() => updateCart(item._id, "increment")}
+                              style={{
+                                paddingHorizontal: 8,
+                                paddingVertical: 4,
+                              }}
                             >
                               <Text
                                 style={{
-                                  fontSize: 16,
-                                  color: item.plan?.planId ? "#aaa" : "#9747FF",
-                                  paddingHorizontal: 6,
+                                  fontSize: 18,
+                                  color:
+                                    item.product && item.quantity >= 1
+                                      ? "#9747FF"
+                                      : "#CCC",
+                                  fontWeight: "600",
                                 }}
                               >
                                 +
@@ -294,14 +322,13 @@ export default function CartItemList({
 
                         {/* Price and delete icon */}
                         <View
-                          style={{ flexDirection: "row", alignItems: "center" }}
+                          style={{ flexDirection: "row", alignItems: "center", gap: 12 }}
                         >
                           <Text
                             style={{
-                              fontSize: 14,
-                              fontWeight: "600",
+                              fontSize: 16,
+                              fontWeight: "700",
                               color: "#000",
-                              marginRight: 10,
                             }}
                           >
                             ₹{(item?.price ?? 0) * (item?.quantity ?? 1)}
@@ -309,11 +336,19 @@ export default function CartItemList({
 
                           <TouchableOpacity
                             onPress={() => deleteItem(item._id)}
+                            style={{
+                              width: 32,
+                              height: 32,
+                              borderRadius: 16,
+                              backgroundColor: "#FFEBEE",
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
                           >
                             <Ionicons
                               name="trash-outline"
                               size={18}
-                              color="red"
+                              color="#FF6B6B"
                             />
                           </TouchableOpacity>
                         </View>
@@ -335,31 +370,55 @@ export default function CartItemList({
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
-            marginTop: 10,
+            marginTop: 20,
+            padding: 16,
+            backgroundColor: "#F8F8F8",
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: "#E0E0E0",
           }}
         >
-          <Text
-            style={{
-              color: "#000",
-              fontSize: 13,
-              fontFamily: theme.fonts.bold,
-            }}
-          >
-            Coupon Applied{" "}
-            <Text style={{ color: "green", fontWeight: "bold" }}>
+          <View style={{ flex: 1 }}>
+            <Text
+              style={{
+                color: "#000",
+                fontSize: 14,
+                fontWeight: "600",
+                marginBottom: 4,
+              }}
+            >
+              Coupon Applied
+            </Text>
+            <Text
+              style={{
+                color: "#67C694",
+                fontSize: 14,
+                fontWeight: "700",
+              }}
+            >
               - ₹{couponDetails.discountPrice} OFF
             </Text>
-          </Text>
+          </View>
           <TouchableOpacity
             onPress={() => setCouponDetails(null)}
             style={{
-              backgroundColor: "#F2E7FE",
-              paddingHorizontal: 14,
-              paddingVertical: 6,
-              borderRadius: 16,
+              backgroundColor: "#FFFFFF",
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: "#E0E0E0",
             }}
           >
-            <Text style={{ color: "#9747FF", fontWeight: "600" }}>Remove</Text>
+            <Text
+              style={{
+                color: "#FF6B6B",
+                fontWeight: "600",
+                fontSize: 14,
+              }}
+            >
+              Remove
+            </Text>
           </TouchableOpacity>
         </View>
       ) : (
@@ -368,14 +427,19 @@ export default function CartItemList({
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
-            marginTop: 10,
+            marginTop: 20,
+            padding: 16,
+            backgroundColor: "#F8F8F8",
+            borderRadius: 16,
+            borderWidth: 1,
+            borderColor: "#E0E0E0",
           }}
         >
           <Text
             style={{
               color: "#000",
-              fontSize: 13,
-              fontFamily: theme.fonts.regular,
+              fontSize: 14,
+              fontWeight: "500",
             }}
           >
             Have a coupon?
@@ -383,17 +447,19 @@ export default function CartItemList({
           <TouchableOpacity
             onPress={onAddItem}
             style={{
-              backgroundColor: "#F2E7FE",
-              paddingHorizontal: 14,
-              paddingVertical: 6,
-              borderRadius: 16,
+              backgroundColor: "#FFFFFF",
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              borderRadius: 12,
+              borderWidth: 1,
+              borderColor: "#9747FF",
             }}
           >
             <Text
               style={{
                 color: "#9747FF",
                 fontWeight: "600",
-                fontFamily: theme.fonts.regular,
+                fontSize: 14,
               }}
             >
               Add +
@@ -405,7 +471,7 @@ export default function CartItemList({
       <CustomSnackbar
         visible={snackbarVisible}
         message={snackbarMessage}
-        bgColor={theme.colors.primary}
+        bgColor="#67C694"
         onDismiss={() => setSnackbarVisible(false)}
       />
       {couponVisible ? (

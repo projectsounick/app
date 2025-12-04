@@ -30,7 +30,7 @@ interface UserData {
     sleepSync: boolean;
     lastSync: Date;
   };
-  expoPushToken: string;
+  expoPushToken: string | null;
 }
 
 export type { UserData };

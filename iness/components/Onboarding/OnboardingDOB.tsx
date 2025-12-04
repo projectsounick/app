@@ -8,12 +8,12 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   StyleSheet,
+  ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import theme from "@/app/Theme/globalTheme";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -52,56 +52,114 @@ const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.container}>
-          {/* Top content */}
-          <View style={styles.content}>
-            <OnboardingHeading>
-              What is your{`\n`}date of birth?
-            </OnboardingHeading>
-
-            <TouchableOpacity
-              onPress={showDatePicker}
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingHorizontal: 20,
+              paddingTop: 20,
+            }}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* Top content */}
+            <View
               style={{
-                flexDirection: "row",
+                flex: 1,
+                justifyContent: "center",
                 alignItems: "center",
-                justifyContent: "space-between",
-                borderWidth: 1,
-                borderColor: "#ccc",
-                borderRadius: 10,
-                paddingHorizontal: 20, // more horizontal padding
-                paddingVertical: 12,
-                backgroundColor: "#fff",
-                marginVertical: 10,
-                width: "90%", // wider box
-                alignSelf: "center",
+                paddingHorizontal: 20,
               }}
             >
-              <Text
+              <OnboardingHeading>
+                What is your{`\n`}date of birth?
+              </OnboardingHeading>
+
+              <View
                 style={{
-                  fontSize: 16,
-                  color: "#333",
-                  fontFamily: theme.fonts.medium,
+                  backgroundColor: "#FFFFFF",
+                  borderRadius: 20,
+                  padding: 30,
+                  width: "100%",
+                  marginTop: 20,
+                  marginBottom: 20,
+                  borderWidth: 1,
+                  borderColor: "#F5F5F5",
                 }}
               >
-                {dob.toLocaleDateString("en-GB")}
-              </Text>
-              <Ionicons
-                name="calendar"
-                size={24}
-                color="#333"
-                style={{ marginLeft: 15 }} // space between text and icon
-              />
-            </TouchableOpacity>
-            <Text style={styles.hint}>DD/MM/YYYY</Text>
-          </View>
+                <TouchableOpacity
+                  onPress={showDatePicker}
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    backgroundColor: "#F8F8F8",
+                    borderRadius: 16,
+                    paddingHorizontal: 16,
+                    paddingVertical: 16,
+                    borderWidth: 1,
+                    borderColor: "#E0E0E0",
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      color: "#000",
+                      fontWeight: "500",
+                    }}
+                  >
+                    {dob.toLocaleDateString("en-GB")}
+                  </Text>
+                  <View
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 18,
+                      backgroundColor: "#F0F0F0",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Ionicons name="calendar-outline" size={20} color="#9747FF" />
+                  </View>
+                </TouchableOpacity>
+              </View>
+              <Text style={styles.hint}>DD/MM/YYYY</Text>
+            </View>
+          </ScrollView>
 
-          {/* Bottom fixed button */}
-          <View style={styles.bottomButton}>
-            <AnimatedSubmitButton
-              loading={loading}
+          {/* Bottom Button - Always at bottom */}
+          <View
+            style={{
+              paddingHorizontal: 20,
+              paddingBottom: 30,
+              paddingTop: 20,
+              backgroundColor: "transparent",
+            }}
+          >
+            <TouchableOpacity
               onPress={handleNext}
-              title="Next"
-              height={50}
-            />
+              disabled={loading}
+              style={{
+                backgroundColor: loading ? "#E0E0E0" : "#67C694",
+                borderRadius: 30,
+                paddingVertical: 16,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text
+                  style={{
+                    color: loading ? "#999" : "#FFFFFF",
+                    fontSize: 16,
+                    fontWeight: "700",
+                  }}
+                >
+                  Next
+                </Text>
+              )}
+            </TouchableOpacity>
           </View>
 
           {/* Modal Picker */}
@@ -116,7 +174,7 @@ const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
 
           <CustomSnackbar
             visible={snackbarVisible}
-            bgColor={theme.colors.red}
+            bgColor="#FF6B6B"
             message={snackbarMessage}
             onDismiss={() => setSnackbarVisible(false)}
           />
@@ -129,39 +187,13 @@ const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 24,
-    paddingVertical: 40,
     justifyContent: "space-between",
-  },
-  content: {
-    alignItems: "center",
-    marginTop: 40,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#000",
-    textAlign: "center",
   },
   hint: {
     marginTop: 8,
-    fontSize: 12,
-    color: "#7D4CFF",
-    fontFamily: theme.fonts.medium,
-  },
-  dobBox: {
-    marginTop: 20,
-    borderBottomWidth: 1,
-    borderColor: "#ccc",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-  },
-  dobText: {
-    fontSize: 18,
-    color: "#000",
-  },
-  bottomButton: {
-    paddingBottom: 30,
+    fontSize: 14,
+    color: "#666",
+    fontWeight: "500",
   },
 });
 

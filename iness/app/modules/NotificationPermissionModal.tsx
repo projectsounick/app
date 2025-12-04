@@ -13,12 +13,12 @@ import {
   Dimensions,
   ActivityIndicator,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { userService } from "../services/user.service";
-import theme from "../Theme/globalTheme";
 
 const { height, width } = Dimensions.get("window");
 const MODAL_DISMISSED_FLAG_KEY = "notificationModalDismissed";
@@ -174,27 +174,33 @@ export default function NotificationPermissionBottomSheet() {
           { transform: [{ translateY: slideAnim }] },
         ]}
       >
-        <View
-          style={{
-            width: 50,
-            height: 5,
-            backgroundColor: "#ccc",
-            borderRadius: 3,
-            alignSelf: "center",
-            marginTop: 2,
-            marginBottom: 10,
-          }}
-        />
+        <View style={styles.handle} />
+
+        <View style={styles.iconContainer}>
+          <View
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              backgroundColor: "#E8F5E9",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Ionicons name="notifications-outline" size={40} color="#67C694" />
+          </View>
+        </View>
 
         <Text style={styles.title}>Turn On Notifications</Text>
         <Text style={styles.message}>
-          Enable notifications to receive important updates and reminders.
+          Enable notifications to receive important updates and reminders about
+          your fitness journey.
         </Text>
 
         {loading ? (
           <ActivityIndicator
             size="large"
-            color="#4CAF50"
+            color="#67C694"
             style={{ marginVertical: 20 }}
           />
         ) : (
@@ -221,67 +227,75 @@ export default function NotificationPermissionBottomSheet() {
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "#00000088",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContainer: {
     position: "absolute",
     bottom: 0,
     width: "100%",
-    padding: 24,
-    backgroundColor: "#1A1A2E",
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 30,
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: -5 },
-    elevation: 10,
+  },
+  handle: {
+    width: 50,
+    height: 5,
+    backgroundColor: "#ccc",
+    borderRadius: 3,
+    alignSelf: "center",
+    marginBottom: 20,
+  },
+  iconContainer: {
+    alignItems: "center",
+    marginBottom: 20,
   },
   title: {
-    fontSize: 22,
-    fontFamily: theme.fonts.bold,
-    color: "#fff",
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#000",
     marginBottom: 12,
     textAlign: "center",
   },
   message: {
     fontSize: 15,
-    color: "#ccc",
-    fontFamily: theme.fonts.medium,
+    color: "#666",
     textAlign: "center",
-    marginBottom: 24,
+    marginBottom: 30,
+    lineHeight: 22,
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    gap: 16,
+    gap: 12,
   },
   turnOnButton: {
     flex: 1,
-    backgroundColor: "#67c694",
-    paddingVertical: 14,
+    backgroundColor: "#67C694",
+    paddingVertical: 16,
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
   },
   turnOnText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: "700",
   },
   maybeLaterButton: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: "#fff",
-    paddingVertical: 14,
+    backgroundColor: "#F0F0F0",
+    paddingVertical: 16,
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
   },
   maybeLaterText: {
-    color: "#fff",
+    color: "#666",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "700",
   },
 });

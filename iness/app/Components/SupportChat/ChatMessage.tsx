@@ -16,28 +16,35 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
   return (
     <View
       style={{
-        marginVertical: 6,
+        marginVertical: 8,
         alignSelf: isUser ? "flex-end" : "flex-start",
         alignItems: isUser ? "flex-end" : "flex-start",
         maxWidth: "80%",
+        paddingHorizontal: 4,
       }}
     >
       <View
         style={{
-          backgroundColor: isUser
-            ? theme.colors.secondPrimary
-            : theme.colors.primary,
-          padding: 12,
-          borderRadius: 12,
+          backgroundColor: isUser ? "#67C694" : "#FFFFFF",
+          padding: 14,
+          borderRadius: 16,
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
+          elevation: 3,
+          borderWidth: isUser ? 0 : 1,
+          borderColor: "#F0F0F0",
         }}
       >
         {/* Text Content */}
         {item.content ? (
           <Text
             style={{
-              color: isUser ? theme.colors.text : theme.colors.dark,
-              fontSize: 14,
-              fontFamily: theme.fonts.medium,
+              color: isUser ? "#FFFFFF" : "#000",
+              fontSize: 15,
+              fontWeight: "500",
+              lineHeight: 20,
             }}
           >
             {item.content.replace(/\\n/g, "\n")}
@@ -112,7 +119,14 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
         )}
       </View>
 
-      <Text style={{ fontSize: 10, color: "#888", marginTop: 4 }}>
+      <Text
+        style={{
+          fontSize: 11,
+          color: "#999",
+          marginTop: 4,
+          paddingHorizontal: 4,
+        }}
+      >
         {item.date}
       </Text>
     </View>

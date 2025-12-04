@@ -199,13 +199,28 @@ const HealthReportUploader = ({
                 fontSize: 14,
                 fontFamily: theme.fonts.medium,
                 color: "#666",
-                marginBottom: 20,
+                marginBottom: 12,
                 lineHeight: 20,
               }}
             >
               Uploading your health report helps us analyze your fitness data
               and provide personalized recommendations. Please select a PDF file
               from your device.
+            </Text>
+            <Text
+              style={{
+                textAlign: "center",
+                fontSize: 11,
+                fontFamily: theme.fonts.regular,
+                color: "#999",
+                marginBottom: 20,
+                lineHeight: 16,
+                fontStyle: "italic",
+              }}
+            >
+              Note: Recommendations provided are for informational purposes only
+              and are not a substitute for professional medical advice. Always
+              consult with a qualified healthcare provider.
             </Text>
 
             {loading ? (

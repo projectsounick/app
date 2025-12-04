@@ -158,7 +158,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
               >
                 <Feather name="arrow-up-right" size={14} color="lightgreen" />
                 <Text style={{ color: "#fff" }}>
-                  {parseInt(userData?.weight)} kgs
+                  {userData?.weight ? parseFloat(userData.weight.toString()).toFixed(1) : "0.0"} kgs
                 </Text>
               </View>
             </View>

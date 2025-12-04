@@ -1,13 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Dimensions } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import theme from "@/app/Theme/globalTheme";
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import OnboardingCard from "@/app/modules/OnboardingCard";
-import {
-  activityLevelOptions,
-  goalOptionsOnboarding,
-} from "@/utils/onboardingStaticValues";
+import { activityLevelOptions } from "@/utils/onboardingStaticValues";
 import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
 import { UserData } from "@/app/interfaces/UserInterface";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
@@ -28,8 +22,8 @@ const ActivityLevel = ({
   /// Custom hook to load data from AsyncStorage-----------------------/
   useLoadFromAsyncStorage<UserData, any>({
     key: "user",
-    property: "activityLevel", // or "age"
-    setter: setactivityLevel, // or setAge
+    property: "activityLevel",
+    setter: setactivityLevel,
   });
 
   const handleNext = () => {
@@ -48,12 +42,17 @@ const ActivityLevel = ({
     <View
       style={{
         flex: 1,
-        paddingHorizontal: "5%",
-        paddingBottom: "2%",
-        paddingTop: "4%",
+        justifyContent: "space-between",
       }}
     >
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 20,
+          paddingBottom: 20,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
         <OnboardingHeading> Typical day for {"\n"} you?</OnboardingHeading>
         {activityLevelOptions.map(
           ({ label, icon, description }: any, index) => (
@@ -66,19 +65,43 @@ const ActivityLevel = ({
               description={description}
               updateState={updateState}
               fontSize={16}
-              height={70} // smaller height passed here
+              height={70}
             />
           )
         )}
       </ScrollView>
 
-      {/* Next Button */}
-      <AnimatedSubmitButton
-        loading={loading}
-        onPress={handleNext}
-        title="Next"
-        height={50}
-      />
+      {/* Next Button - Always at bottom */}
+      <View
+        style={{
+          paddingHorizontal: 20,
+          paddingBottom: 30,
+          paddingTop: 20,
+          backgroundColor: "transparent",
+        }}
+      >
+        <TouchableOpacity
+          onPress={handleNext}
+          disabled={loading || !activityLevel}
+          style={{
+            backgroundColor: loading || !activityLevel ? "#E0E0E0" : "#67C694",
+            borderRadius: 30,
+            paddingVertical: 16,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: loading || !activityLevel ? "#999" : "#FFFFFF",
+              fontSize: 16,
+              fontWeight: "700",
+            }}
+          >
+            {loading ? "Loading..." : "Next"}
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

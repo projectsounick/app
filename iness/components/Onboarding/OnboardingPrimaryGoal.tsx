@@ -1,8 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Dimensions } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import theme from "@/app/Theme/globalTheme";
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import OnboardingCard from "@/app/modules/OnboardingCard";
 import { goalOptionsOnboarding } from "@/utils/onboardingStaticValues";
 import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
@@ -22,8 +19,8 @@ const OnboardingPrimaryGoal = ({
   /// Custom hook to load data from AsyncStorage-----------------------/
   useLoadFromAsyncStorage<UserData, any>({
     key: "user",
-    property: "goal", // or "age"
-    setter: setGoal, // or setAge
+    property: "goal",
+    setter: setGoal,
   });
 
   const handleNext = () => {
@@ -43,11 +40,17 @@ const OnboardingPrimaryGoal = ({
     <View
       style={{
         flex: 1,
-        paddingHorizontal: "5%",
-        paddingBottom: "2%",
+        justifyContent: "space-between",
       }}
     >
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 20,
+          paddingBottom: 20,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
         <OnboardingHeading>Primary fitness {"\n"} goal?</OnboardingHeading>
         {goalOptionsOnboarding.map(({ label, icon }: any, index) => (
           <OnboardingCard
@@ -57,19 +60,43 @@ const OnboardingPrimaryGoal = ({
             state={goal}
             icon={icon}
             updateState={updateState}
-            height={70} // smaller height passed here
+            height={70}
             fontSize={16}
           />
         ))}
       </ScrollView>
 
-      {/* Next Button */}
-      <AnimatedSubmitButton
-        loading={false}
-        onPress={handleNext}
-        title="Next"
-        height={50}
-      />
+      {/* Next Button - Always at bottom */}
+      <View
+        style={{
+          paddingHorizontal: 20,
+          paddingBottom: 30,
+          paddingTop: 20,
+          backgroundColor: "transparent",
+        }}
+      >
+        <TouchableOpacity
+          onPress={handleNext}
+          disabled={!goal.trim()}
+          style={{
+            backgroundColor: goal.trim() ? "#67C694" : "#E0E0E0",
+            borderRadius: 30,
+            paddingVertical: 16,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: goal.trim() ? "#FFFFFF" : "#999",
+              fontSize: 16,
+              fontWeight: "700",
+            }}
+          >
+            Next
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

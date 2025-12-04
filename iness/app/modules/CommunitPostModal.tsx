@@ -22,7 +22,6 @@ import * as ImagePicker from "expo-image-picker";
 import { ResizeMode, Video } from "expo-av";
 import { ActivityIndicator } from "react-native-paper";
 
-import theme from "../Theme/globalTheme";
 import { uploadToAzureFromExpo } from "@/utils/azureUtils";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { userService } from "../services/user.service";
@@ -77,7 +76,9 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
   }, []);
 
   const handleScroll = (event: any) => {
-    const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
+    const itemWidth = screenWidth - 40;
+    const offsetX = event.nativeEvent.contentOffset.x;
+    const index = Math.round(offsetX / itemWidth);
     setCurrentMediaIndex(index);
   };
 
@@ -105,6 +106,10 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
       const selectedUris = result.assets.map((asset) => asset.uri);
       setMedia((prev) => [...prev, ...selectedUris]);
     }
+  };
+
+  const handleRemoveMedia = (index: number) => {
+    setMedia((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handlePost = async () => {
@@ -189,6 +194,13 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
     }
   };
 
+  const handleClose = () => {
+    setModalVisible(false);
+    setPostType(null);
+    setMedia([]);
+    setCaption("");
+  };
+
   return (
     <>
       <Modal animationType="slide" transparent={true} visible={modalVisible}>
@@ -208,23 +220,38 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                   },
                 ]}
               >
-                {/* Dash Handle */}
-                <View style={styles.dash} />
+                {/* Top Handle Bar */}
+                <View style={styles.handleBar} />
 
-                <Text style={styles.modalTitle}>Create a Post</Text>
+                {/* Header with Close Button */}
+                <View style={styles.headerContainer}>
+                  <View style={styles.iconContainer}>
+                    <Ionicons name="create-outline" size={24} color="#9747FF" />
+                  </View>
+                  <Text style={styles.modalTitle}>Create a Post</Text>
+                  <TouchableOpacity
+                    onPress={handleClose}
+                    style={styles.closeButton}
+                  >
+                    <Ionicons name="close" size={20} color="#000" />
+                  </TouchableOpacity>
+                </View>
 
                 <ScrollView
-                  showsVerticalScrollIndicator={false}
+                  showsVerticalScrollIndicator={true}
                   keyboardShouldPersistTaps="handled"
                   contentContainerStyle={styles.scrollContent}
+                  nestedScrollEnabled={true}
+                  bounces={true}
+                  scrollEnabled={true}
                 >
                   {/* Post Type Options */}
                   <View style={styles.optionContainer}>
                     {[
-                      { type: "text", icon: "text-outline" },
-                      { type: "image", icon: "image-outline" },
-                      { type: "video", icon: "videocam-outline" },
-                    ].map(({ type, icon }) => (
+                      { type: "text", icon: "text-outline", label: "Text" },
+                      { type: "image", icon: "image-outline", label: "Image" },
+                      { type: "video", icon: "videocam-outline", label: "Video" },
+                    ].map(({ type, icon, label }) => (
                       <TouchableOpacity
                         key={type}
                         style={[
@@ -236,37 +263,33 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                           setMedia([]);
                         }}
                       >
-                        <Ionicons
-                          name={icon as any}
-                          size={20}
-                          color={
-                            postType === type
-                              ? "#FFFFFF"
-                              : theme.colors.secondPrimary
-                          }
-                          style={{ marginRight: 6 }}
-                        />
+                        <View
+                          style={[
+                            styles.optionIconContainer,
+                            postType === type && styles.optionIconContainerSelected,
+                          ]}
+                        >
+                          <Ionicons
+                            name={icon as any}
+                            size={20}
+                            color={postType === type ? "#9747FF" : "#666"}
+                          />
+                        </View>
                         <Text
                           style={[
                             styles.optionButtonText,
                             postType === type && styles.optionButtonTextSelected,
                           ]}
                         >
-                          {type.charAt(0).toUpperCase() + type.slice(1)}
+                          {label}
                         </Text>
                       </TouchableOpacity>
                     ))}
                   </View>
 
-                  {/* Caption for text post */}
-                  {postType === "text" && (
+                  {/* Caption Input */}
+                  {postType && (
                     <View style={styles.inputContainer}>
-                      <Ionicons
-                        name="create-outline"
-                        size={20}
-                        color={theme.colors.secondPrimary}
-                        style={styles.inputIcon}
-                      />
                       <TextInput
                         placeholder="Write your caption..."
                         placeholderTextColor="#999"
@@ -282,66 +305,63 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                   {(postType === "image" || postType === "video") &&
                     media.length > 0 && (
                       <View style={styles.sliderContainer}>
-                        <View style={styles.inputContainer}>
-                          <Ionicons
-                            name="create-outline"
-                            size={20}
-                            color={theme.colors.secondPrimary}
-                            style={styles.inputIcon}
-                          />
-                          <TextInput
-                            placeholder="Write your caption..."
-                            placeholderTextColor="#999"
-                            multiline
-                            style={styles.captionInput}
-                            value={caption}
-                            onChangeText={setCaption}
-                          />
+                        <View style={styles.mediaScrollWrapper}>
+                          <ScrollView
+                            horizontal
+                            pagingEnabled={false}
+                            showsHorizontalScrollIndicator={false}
+                            onScroll={handleScroll}
+                            scrollEventThrottle={16}
+                            nestedScrollEnabled={true}
+                            bounces={true}
+                            decelerationRate={0.9}
+                            snapToInterval={screenWidth - 40}
+                            snapToAlignment="start"
+                            directionalLockEnabled={true}
+                            contentContainerStyle={styles.mediaListContent}
+                            style={styles.mediaFlatList}
+                            scrollEnabled={true}
+                          >
+                            {media.map((item, index) => (
+                              <View key={index} style={styles.mediaItem}>
+                                {postType === "video" ? (
+                                  <Video
+                                    source={{ uri: item }}
+                                    style={styles.media}
+                                    useNativeControls
+                                    resizeMode={ResizeMode.COVER}
+                                  />
+                                ) : (
+                                  <Image
+                                    source={{ uri: item }}
+                                    style={styles.media}
+                                    resizeMode="cover"
+                                  />
+                                )}
+                                <TouchableOpacity
+                                  onPress={() => handleRemoveMedia(index)}
+                                  style={styles.removeMediaButton}
+                                >
+                                  <Ionicons name="close-circle" size={24} color="#fff" />
+                                </TouchableOpacity>
+                              </View>
+                            ))}
+                          </ScrollView>
                         </View>
 
-                    <FlatList
-                      data={media}
-                      keyExtractor={(_, index) => index.toString()}
-                      horizontal
-                      pagingEnabled
-                      showsHorizontalScrollIndicator={false}
-                      onScroll={handleScroll}
-                      scrollEventThrottle={14}
-                      renderItem={({ item }) => (
-                        <View style={styles.mediaItem}>
-                          {postType === "video" ? (
-                            <Video
-                              source={{ uri: item }}
-                              style={styles.media}
-                              useNativeControls
-                              resizeMode={ResizeMode.COVER}
+                        <View style={styles.dotsContainer}>
+                          {media.map((_, i) => (
+                            <View
+                              key={i}
+                              style={[
+                                styles.dot,
+                                i === currentMediaIndex && styles.activeDot,
+                              ]}
                             />
-                          ) : (
-                            <Pressable>
-                              <Image
-                                source={{ uri: item }}
-                                style={styles.media}
-                                resizeMode="cover"
-                              />
-                            </Pressable>
-                          )}
+                          ))}
                         </View>
-                      )}
-                    />
-
-                    <View style={styles.dotsContainer}>
-                      {media.map((_, i) => (
-                        <View
-                          key={i}
-                          style={[
-                            styles.dot,
-                            i === currentMediaIndex && styles.activeDot,
-                          ]}
-                        />
-                      ))}
-                    </View>
-                  </View>
-                )}
+                      </View>
+                    )}
 
                   {/* Upload Button */}
                   {(postType === "image" || postType === "video") && (
@@ -355,7 +375,7 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                         color="#FFFFFF"
                       />
                       <Text style={styles.uploadButtonText}>
-                        Upload {postType}
+                        {media.length > 0 ? "Add More" : `Upload ${postType}`}
                       </Text>
                     </TouchableOpacity>
                   )}
@@ -365,19 +385,8 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                 <View style={styles.actionRow}>
                   <TouchableOpacity
                     style={styles.cancelButton}
-                    onPress={() => {
-                      setModalVisible(false);
-                      setPostType(null);
-                      setMedia([]);
-                      setCaption("");
-                    }}
+                    onPress={handleClose}
                   >
-                    <Ionicons
-                      name="close-outline"
-                      size={20}
-                      color={theme.colors.dark}
-                      style={{ marginRight: 6 }}
-                    />
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
 
@@ -387,8 +396,12 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                     </View>
                   ) : (
                     <TouchableOpacity
-                      style={styles.postButton}
+                      style={[
+                        styles.postButton,
+                        (!postType || (!caption && media.length === 0)) && styles.postButtonDisabled,
+                      ]}
                       onPress={handlePost}
+                      disabled={!postType || (!caption && media.length === 0)}
                     >
                       <Ionicons
                         name="send-outline"
@@ -416,159 +429,187 @@ export default CustomPostModal;
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: "transparent",
+    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "flex-end",
   },
   modalContainer: {
     backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    padding: 24,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
     maxHeight: "92%",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 12,
-    elevation: 10,
+    borderWidth: 1,
+    borderColor: "#F5F5F5",
   },
-  scrollContent: {
-    flexGrow: 1,
-    paddingBottom: 10,
-  },
-  inputContainer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 16,
-  },
-  inputIcon: {
-    marginTop: 16,
-    marginRight: 8,
-  },
-  dash: {
-    width: 60,
-    height: 6,
-    backgroundColor: "#000000",
-    borderRadius: 3,
+  handleBar: {
+    width: 40,
+    height: 4,
+    backgroundColor: "#D0D0D0",
+    borderRadius: 2,
     alignSelf: "center",
     marginBottom: 20,
   },
+  headerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 24,
+    position: "relative",
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#E3F2FD",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
   modalTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "700",
-    marginBottom: 20,
-    fontFamily: theme.fonts.bold,
-    textAlign: "center",
-    color: theme.colors.dark,
-    letterSpacing: 0.5,
+    color: "#000",
+    flex: 1,
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#F0F0F0",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
+  mediaListContent: {
+    paddingLeft: 20,
+    paddingRight: 20,
   },
   optionContainer: {
     flexDirection: "row",
-    justifyContent: "space-around",
-    marginBottom: 15,
+    justifyContent: "space-between",
+    marginBottom: 20,
+    gap: 12,
   },
   optionButton: {
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 25,
-    borderWidth: 2,
-    borderColor: theme.colors.secondPrimary,
-    backgroundColor: "transparent",
-    minWidth: 100,
-    flexDirection: "row",
+    flex: 1,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
   },
   optionButtonSelected: {
-    backgroundColor: theme.colors.secondPrimary,
-    borderColor: theme.colors.secondPrimary,
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    borderWidth: 2,
+    borderColor: "#9747FF",
+    backgroundColor: "#FFFFFF",
+  },
+  optionIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#F8F8F8",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  optionIconContainerSelected: {
+    backgroundColor: "#F3E8FF",
   },
   optionButtonText: {
-    color: theme.colors.secondPrimary,
-    fontFamily: theme.fonts.medium,
-    fontSize: 15,
+    color: "#666",
+    fontSize: 13,
+    fontWeight: "600",
   },
   optionButtonTextSelected: {
-    color: "#FFFFFF",
-    fontFamily: theme.fonts.bold,
-    fontSize: 15,
+    color: "#9747FF",
+    fontWeight: "700",
+  },
+  inputContainer: {
+    marginBottom: 16,
   },
   captionInput: {
-    backgroundColor: "#fff",
+    backgroundColor: "#F8F8F8",
     borderRadius: 16,
     padding: 16,
     textAlignVertical: "top",
-    fontSize: 16,
-    borderWidth: 1.5,
-    borderColor: "rgba(151, 71, 255, 0.2)",
-    fontFamily: theme.fonts.regular,
-    color: theme.colors.dark,
+    fontSize: 15,
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
+    color: "#000",
     minHeight: 120,
-    flex: 1,
   },
   sliderContainer: {
-    marginBottom: 12,
+    marginBottom: 16,
+  },
+  mediaScrollWrapper: {
+    width: "100%",
+  },
+  mediaFlatList: {
+    flexGrow: 0,
   },
   mediaItem: {
-    width: screenWidth - 80,
+    width: screenWidth - 40,
     height: 280,
-    borderRadius: 20,
-    marginHorizontal: 10,
+    borderRadius: 16,
+    marginRight: 0,
     overflow: "hidden",
     backgroundColor: "#000",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 8,
-    borderWidth: 1.5,
-    borderColor: "rgba(151, 71, 255, 0.2)",
+    borderWidth: 1,
+    borderColor: "#F5F5F5",
+    position: "relative",
   },
   media: {
     width: "100%",
     height: "100%",
   },
+  removeMediaButton: {
+    position: "absolute",
+    top: 12,
+    right: 12,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   dotsContainer: {
     flexDirection: "row",
     justifyContent: "center",
-    marginTop: 8,
+    marginTop: 12,
   },
   dot: {
-    width: 8,
-    height: 8,
-    backgroundColor: "#ccc",
-    borderRadius: 4,
+    width: 6,
+    height: 6,
+    backgroundColor: "#D0D0D0",
+    borderRadius: 3,
     marginHorizontal: 4,
   },
   activeDot: {
-    backgroundColor: theme.colors.secondPrimary,
-    width: 10,
-    height: 10,
+    backgroundColor: "#9747FF",
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   uploadButton: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#67C694",
-    padding: 14,
-    borderRadius: 25,
+    paddingVertical: 16,
+    borderRadius: 30,
     justifyContent: "center",
-    marginTop: 12,
-    shadowColor: "#67C694",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    marginTop: 8,
   },
   uploadButtonText: {
     color: "#FFFFFF",
     fontWeight: "700",
     marginLeft: 8,
     fontSize: 16,
-    fontFamily: theme.fonts.bold,
   },
   actionRow: {
     flexDirection: "row",
@@ -576,44 +617,38 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: "rgba(0,0,0,0.05)",
+    borderTopColor: "#F5F5F5",
+    gap: 12,
   },
   cancelButton: {
-    padding: 14,
-    backgroundColor: "#fff",
-    borderRadius: 25,
+    paddingVertical: 16,
+    backgroundColor: "#F0F0F0",
+    borderRadius: 30,
     flex: 1,
-    marginRight: 12,
-    borderWidth: 2,
-    borderColor: "rgba(0,0,0,0.1)",
-    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
   },
   cancelButtonText: {
-    color: theme.colors.dark,
-    textAlign: "center",
-    fontFamily: theme.fonts.medium,
+    color: "#666",
+    fontWeight: "600",
     fontSize: 16,
   },
   postButton: {
-    padding: 14,
+    paddingVertical: 16,
     backgroundColor: "#67C694",
-    borderRadius: 25,
+    borderRadius: 30,
     flex: 1,
-    shadowColor: "#67C694",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
   },
+  postButtonDisabled: {
+    backgroundColor: "#D0D0D0",
+    opacity: 0.6,
+  },
   postButtonText: {
     color: "#FFFFFF",
-    textAlign: "center",
-    fontFamily: theme.fonts.bold,
+    fontWeight: "700",
     fontSize: 16,
   },
 });

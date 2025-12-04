@@ -10,7 +10,6 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import theme from "@/app/Theme/globalTheme";
 import { useRouter } from "expo-router";
 
 const { height, width } = Dimensions.get("window");
@@ -86,6 +85,7 @@ export default function OnboardingMetricsModal({
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
+              marginBottom: 20,
             }}
           >
             <Text style={styles.heading}>Why We Ask These Details</Text>
@@ -94,107 +94,145 @@ export default function OnboardingMetricsModal({
               style={styles.closeButton}
               onPress={() => setShowIntroModal(false)}
             >
-              <Ionicons name="close" size={18} color="#fff" />
+              <Ionicons name="close" size={20} color="#000" />
             </TouchableOpacity>
           </View>
 
           {/* Group 1 */}
-          <View style={styles.point}>
-            <MaterialCommunityIcons
-              name="human-male-height"
-              size={28}
-              color="#4A90E2"
-            />
-            <Text style={styles.pointText}>
-              Height, weight, and age help us calculate your BMI, track
-              progress, and tailor safe workout intensities.
-            </Text>
+          <View style={styles.pointCard}>
+            <View
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: "#E3F2FD",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 16,
+              }}
+            >
+              <MaterialCommunityIcons
+                name="human-male-height"
+                size={24}
+                color="#9747FF"
+              />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.pointText}>
+                Height, weight, and age help us calculate your BMI, track
+                progress, and tailor safe workout intensities.
+              </Text>
+            </View>
           </View>
 
           {/* Group 2 */}
-          <View style={styles.point}>
-            <Ionicons name="fitness" size={26} color="#50C878" />
-            <Text style={styles.pointText}>
-              Your goals and current activity level allow us to design programs
-              that match your lifestyle and progress pace.
-            </Text>
+          <View style={styles.pointCard}>
+            <View
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: "#E8F5E9",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 16,
+              }}
+            >
+              <Ionicons name="fitness" size={24} color="#67C694" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.pointText}>
+                Your goals and current activity level allow us to design programs
+                that match your lifestyle and progress pace.
+              </Text>
+            </View>
           </View>
 
           {/* Group 3 */}
-          <View style={styles.point}>
-            <Ionicons name="medkit" size={26} color="#FF6B6B" />
-            <Text style={styles.pointText}>
-              Medical history helps avoid risky exercises and keeps your plan
-              safe and effective.
-            </Text>
+          <View style={styles.pointCard}>
+            <View
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: "#FFEBEE",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 16,
+              }}
+            >
+              <Ionicons name="medkit" size={24} color="#FF6B6B" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.pointText}>
+                Medical history helps avoid risky exercises and keeps your plan
+                safe and effective.
+              </Text>
+            </View>
           </View>
 
           {/* Group 4 */}
-          <View style={styles.point}>
-            <Ionicons name="restaurant" size={26} color="#FFA500" />
-            <Text style={styles.pointText}>
-              Dietary preferences ensure that when you upload your daily images,
-              we can identify your eating habits and inform you about what’s
-              good or needs improvement.
-            </Text>
+          <View style={styles.pointCard}>
+            <View
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 24,
+                backgroundColor: "#FFF3E0",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 16,
+              }}
+            >
+              <Ionicons name="restaurant" size={24} color="#FF9800" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.pointText}>
+                Dietary preferences ensure that when you upload your daily images,
+                we can identify your eating habits and inform you about what's
+                good or needs improvement.
+              </Text>
+            </View>
           </View>
 
           {/* Disclaimer */}
-          <Text style={styles.disclaimer}>
-            * Any other information you provide will also be used solely to
-            optimize your personalized fitness regime.
-          </Text>
+          <View
+            style={{
+              backgroundColor: "#F8F8F8",
+              borderRadius: 12,
+              padding: 16,
+              marginTop: 16,
+              borderWidth: 1,
+              borderColor: "#F5F5F5",
+            }}
+          >
+            <Text style={styles.disclaimer}>
+              * Any other information you provide will also be used solely to
+              optimize your personalized fitness regime.
+            </Text>
+          </View>
         </ScrollView>
 
         {/* Buttons: Proceed & Skip */}
         <View style={styles.buttonRow}>
           {/* Proceed Button */}
           <Animated.View
-            style={{ transform: [{ scale: scaleAnim }], width: width * 0.45 }}
+            style={{ transform: [{ scale: scaleAnim }], flex: 1, marginRight: 8 }}
           >
             <TouchableOpacity
-              style={{
-                backgroundColor: theme.colors.primary,
-                borderRadius: 40,
-                height: 50,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
+              style={styles.proceedButton}
               onPress={handleProceed}
             >
-              <Text
-                style={{
-                  color: theme.colors.dark,
-                  fontWeight: theme.fontWeights?.bold,
-                  fontSize: 18,
-                }}
-              >
-                Proceed
-              </Text>
+              <Text style={styles.proceedButtonText}>Proceed</Text>
             </TouchableOpacity>
           </Animated.View>
 
           {/* Skip Button */}
           <TouchableOpacity
-            style={{
-              backgroundColor: "#FF4D4D",
-              width: width * 0.45,
-              height: 50,
-              borderRadius: 40,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
+            style={styles.skipButton}
             onPress={handleSkip}
           >
-            <Text
-              style={{
-                color: "#fff",
-                fontSize: 18,
-                fontWeight: "bold",
-              }}
-            >
-              Skip
-            </Text>
+            <Text style={styles.skipButtonText}>Skip</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>
@@ -205,14 +243,14 @@ export default function OnboardingMetricsModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalContainer: {
     position: "absolute",
     bottom: 0,
     width: "100%",
-    height: height * 0.65,
-    backgroundColor: "#fff",
+    height: height * 0.7,
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     overflow: "hidden",
@@ -220,14 +258,12 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   closeButton: {
-    backgroundColor: "#666",
-    width: 26,
-    height: 26,
-    borderRadius: 26,
+    backgroundColor: "#F0F0F0",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 5,
-    elevation: 5,
   },
   handle: {
     width: 50,
@@ -235,45 +271,76 @@ const styles = StyleSheet.create({
     backgroundColor: "#ccc",
     borderRadius: 3,
     alignSelf: "center",
-    marginVertical: 8,
+    marginTop: 10,
+    marginBottom: 10,
   },
   content: {
     flex: 1,
   },
   heading: {
-    fontSize: 20,
-    marginBottom: 20,
-    textAlign: "left",
-    fontFamily: theme.fonts.bold,
-    marginTop: 20,
-    color: "#222",
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#000",
+    flex: 1,
   },
-  point: {
+  pointCard: {
     flexDirection: "row",
     alignItems: "flex-start",
     marginBottom: 16,
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#F5F5F5",
   },
   pointText: {
     flex: 1,
     fontSize: 15,
-    marginLeft: 12,
-    lineHeight: 20,
-    textAlign: "justify",
-    fontFamily: theme.fonts.regular,
-    color: "#444",
+    lineHeight: 22,
+    color: "#333",
+    fontWeight: "400",
   },
   disclaimer: {
-    marginTop: 10,
     fontSize: 13,
     fontStyle: "italic",
     color: "#666",
     textAlign: "center",
-    fontFamily: theme.fonts.regular,
+    lineHeight: 18,
   },
   buttonRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginTop: 15,
-    gap: 10,
+    marginTop: 20,
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: "#F5F5F5",
+  },
+  proceedButton: {
+    backgroundColor: "#67C694",
+    borderRadius: 30,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
+    marginRight: 8,
+  },
+  proceedButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 16,
+  },
+  skipButton: {
+    backgroundColor: "#F0F0F0",
+    borderRadius: 30,
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    flex: 1,
+    marginLeft: 8,
+  },
+  skipButtonText: {
+    color: "#666",
+    fontWeight: "700",
+    fontSize: 16,
   },
 });

@@ -23,6 +23,7 @@ import { RootState } from "@/store";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { createStreak } from "@/app/services/streaks.service";
 import { setStreakData } from "@/Slices/streakSlice";
+import { router } from "expo-router";
 
 export default function WellnessDashboard() {
   const currentDayTrackData = useSelector(
@@ -431,6 +432,79 @@ export default function WellnessDashboard() {
                     </TouchableOpacity>
                   </View>
                 ))}
+              </View>
+
+              {/* Medical Disclaimer */}
+              <View
+                style={{
+                  backgroundColor: "#FFFFFF",
+                  borderRadius: 20,
+                  padding: 16,
+                  marginTop: 16,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.12,
+                  shadowRadius: 12,
+                  elevation: 5,
+                  borderWidth: 1,
+                  borderColor: "#F5F5F5",
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 8,
+                  }}
+                >
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={20}
+                    color="#9747FF"
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "700",
+                      color: "#000",
+                    }}
+                  >
+                    Health Goals & Information
+                  </Text>
+                </View>
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: "#666",
+                    lineHeight: 18,
+                    marginBottom: 8,
+                  }}
+                >
+                  The wellness goals displayed (steps, sleep, water) are general
+                  guidelines. Individual needs may vary. These recommendations
+                  are not a substitute for professional medical advice.
+                </Text>
+                <TouchableOpacity
+                  onPress={() =>
+                    router.push({ pathname: "/dashboard/medicalcitations" } as any)
+                  }
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginTop: 4,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: "#9747FF",
+                      fontWeight: "600",
+                    }}
+                  >
+                    View Medical Citations & Sources →
+                  </Text>
+                </TouchableOpacity>
               </View>
             </>
           )}

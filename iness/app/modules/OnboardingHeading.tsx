@@ -1,6 +1,5 @@
 import React, { useEffect, useRef } from "react";
 import { Animated, Text, StyleSheet } from "react-native";
-import theme from "../Theme/globalTheme";
 
 export default function OnboardingHeading({
   children,
@@ -51,10 +50,9 @@ export default function OnboardingHeading({
 const styles = StyleSheet.create({
   headingText: {
     fontSize: 32,
-    fontWeight: "bold",
+    fontWeight: "700",
     textAlign: "center",
-    marginBottom: 25,
-    fontFamily: theme.fonts.bold,
-    color: theme.colors.dark,
+    marginBottom: 30,
+    color: "#000",
   },
 });

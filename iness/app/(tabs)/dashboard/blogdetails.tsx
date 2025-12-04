@@ -2,28 +2,30 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  TouchableOpacity,
+
   ScrollView,
   ImageBackground,
   Platform,
   Image,
   ActivityIndicator,
+  Dimensions,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-
+import { Ionicons } from "@expo/vector-icons";
 import theme from "@/app/Theme/globalTheme";
-
+const { height } = Dimensions.get("window");
+const topPadding = height * 0.05;
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Blog } from "@/app/interfaces/blogInterface";
 import { blogService } from "@/app/services/blog.Service";
 import CustomSnackbar from "@/app/modules/Snackbar";
-import BackHeader from "@/app/modules/BackHeader";
+
 import NormalHeader from "@/app/modules/NormalHeader";
 
 export default function BlogDetailsScreen() {
   const { id } = useLocalSearchParams();
 
-  const router = useRouter();
+
   const [blogData, setBlogData] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -58,14 +60,18 @@ export default function BlogDetailsScreen() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right", "bottom"]}
+      edges={[ "left", "right", ]}
     >
       <ImageBackground
         source={require("../../../assets/images/basicBackground.jpg")} // ✅ replace with your background
         style={{ flex: 1 }}
         resizeMode="cover"
       >
-        <View style={{ marginLeft: 20, marginTop: 10 }}>
+        <View style={{     flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 24,
+            paddingLeft: 20,
+            marginTop: Platform.OS === "ios" ? topPadding : "4%", }}>
           <NormalHeader screenName="Blog" rightIcon={false} />
         </View>
 
@@ -172,6 +178,60 @@ export default function BlogDetailsScreen() {
 
                 return null;
               })}
+
+              {/* Medical Disclaimer for Health-Related Content */}
+              <View
+                style={{
+                  backgroundColor: "#FFFFFF",
+                  borderRadius: 16,
+                  padding: 16,
+                  marginTop: 24,
+                  marginBottom: 16,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 8,
+                  elevation: 3,
+                  borderWidth: 1,
+                  borderColor: "#F0F0F0",
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 8,
+                  }}
+                >
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={18}
+                    color="#9747FF"
+                    style={{ marginRight: 8 }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontWeight: "700",
+                      color: "#000",
+                    }}
+                  >
+                    Medical Information Disclaimer
+                  </Text>
+                </View>
+                <Text
+                  style={{
+                    fontSize: 11,
+                    color: "#666",
+                    lineHeight: 16,
+                  }}
+                >
+                  If this blog contains health or medical information, please note
+                  that it is for informational purposes only and is not intended as
+                  medical advice. Always consult with a qualified healthcare
+                  provider for personalized medical guidance.
+                </Text>
+              </View>
             </ScrollView>
           )
         )}

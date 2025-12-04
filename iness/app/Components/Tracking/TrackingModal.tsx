@@ -8,15 +8,13 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import {
   Ionicons,
   FontAwesome5,
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import { ActivityIndicator } from "react-native-paper";
-import theme from "@/app/Theme/globalTheme";
 
 const { height } = Dimensions.get("window");
 
@@ -65,27 +63,48 @@ const TrackerModal = ({
     switch (type) {
       case "sleep":
         return (
-          <Ionicons
-            name="bed-outline"
-            size={42}
-            color={theme.colors.secondPrimary}
-          />
+          <View
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              backgroundColor: "#E3F2FD",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Ionicons name="bed-outline" size={40} color="#9747FF" />
+          </View>
         );
       case "steps":
         return (
-          <FontAwesome5
-            name="walking"
-            size={42}
-            color={theme.colors.secondPrimary}
-          />
+          <View
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              backgroundColor: "#E8F5E9",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <FontAwesome5 name="walking" size={36} color="#67C694" />
+          </View>
         );
       case "water":
         return (
-          <MaterialCommunityIcons
-            name="cup-water"
-            size={42}
-            color={theme.colors.secondPrimary}
-          />
+          <View
+            style={{
+              width: 80,
+              height: 80,
+              borderRadius: 40,
+              backgroundColor: "#E0F2F1",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <MaterialCommunityIcons name="cup-water" size={40} color="#26A69A" />
+          </View>
         );
       default:
         return null;
@@ -103,6 +122,19 @@ const TrackerModal = ({
     }
   };
 
+  const getTitle = () => {
+    switch (type) {
+      case "sleep":
+        return "Add Sleep";
+      case "steps":
+        return "Add Steps";
+      case "water":
+        return "Add Water";
+      default:
+        return "";
+    }
+  };
+
   return (
     <Modal visible={visible} transparent animationType="fade">
       <KeyboardAvoidingView
@@ -113,26 +145,27 @@ const TrackerModal = ({
           backgroundColor: "rgba(0,0,0,0.5)",
         }}
       >
-        <LinearGradient
-          colors={["#2C1453", "#1C0E33"]}
+        <View
           style={{
-            height: 340,
-            borderTopLeftRadius: 25,
-            borderTopRightRadius: 25,
-            padding: 20,
+            height: type === "water" ? 400 : 370,
+            backgroundColor: "#FFFFFF",
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            paddingHorizontal: 20,
+            paddingTop: 20,
+            paddingBottom: 40,
             overflow: "hidden",
           }}
         >
           {/* Handle Bar */}
           <View
             style={{
-              width: 45,
+              width: 50,
               height: 5,
-              backgroundColor: "rgba(255,255,255,0.4)",
+              backgroundColor: "#ccc",
               borderRadius: 3,
               alignSelf: "center",
-              marginTop: 4,
-              marginBottom: 10,
+              marginBottom: 20,
             }}
           />
 
@@ -143,26 +176,30 @@ const TrackerModal = ({
               position: "absolute",
               top: 18,
               right: 20,
-              backgroundColor: "rgba(255,255,255,0.2)",
-              borderRadius: 20,
-              padding: 6,
+              backgroundColor: "#F0F0F0",
+              borderRadius: 16,
+              width: 32,
+              height: 32,
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 10,
             }}
           >
-            <Ionicons name="close" size={20} color="#fff" />
+            <Ionicons name="close" size={20} color="#000" />
           </TouchableOpacity>
 
           {/* Content */}
-          <View style={{ alignItems: "center", marginTop: 25 }}>
+          <View style={{ alignItems: "center", marginTop: 10 }}>
             {getIcon()}
             <Text
               style={{
-                fontSize: 22,
-                fontWeight: "bold",
-                color: "#fff",
-                marginTop: 10,
+                fontSize: 24,
+                fontWeight: "700",
+                color: "#000",
+                marginTop: 16,
               }}
             >
-              Add {type.charAt(0).toUpperCase() + type.slice(1)}
+              {getTitle()}
             </Text>
 
             {type === "water" ? (
@@ -170,53 +207,82 @@ const TrackerModal = ({
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  marginVertical: 25,
+                  marginVertical: 30,
                 }}
               >
                 <TouchableOpacity
                   style={{
-                    backgroundColor: "#67c694",
-                    borderRadius: 25,
-                    padding: 12,
-                    marginHorizontal: 20,
+                    backgroundColor: "#67C694",
+                    borderRadius: 30,
+                    width: 50,
+                    height: 50,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginRight: 20,
                   }}
                   onPress={decrement}
                 >
                   <Text
                     style={{
-                      color: "#fff",
-                      fontSize: 22,
-                      fontWeight: "bold",
+                      color: "#FFFFFF",
+                      fontSize: 24,
+                      fontWeight: "700",
                     }}
                   >
                     -
                   </Text>
                 </TouchableOpacity>
 
-                <Text
+                <View
                   style={{
-                    fontSize: 18,
-                    fontWeight: "600",
-                    color: "#fff",
+                    backgroundColor: "#F8F8F8",
+                    borderRadius: 16,
+                    paddingVertical: 16,
+                    paddingHorizontal: 24,
+                    minWidth: 120,
+                    alignItems: "center",
+                    borderWidth: 1,
+                    borderColor: "#E0E0E0",
                   }}
                 >
-                  {values.water} Glasses
-                </Text>
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: "700",
+                      color: "#000",
+                    }}
+                  >
+                    {values.water}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontWeight: "500",
+                      color: "#666",
+                      marginTop: 4,
+                    }}
+                  >
+                    Glasses
+                  </Text>
+                </View>
 
                 <TouchableOpacity
                   style={{
-                    backgroundColor: "#67c694",
-                    borderRadius: 25,
-                    padding: 12,
-                    marginHorizontal: 20,
+                    backgroundColor: "#67C694",
+                    borderRadius: 30,
+                    width: 50,
+                    height: 50,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginLeft: 20,
                   }}
                   onPress={increment}
                 >
                   <Text
                     style={{
-                      color: "#fff",
-                      fontSize: 22,
-                      fontWeight: "bold",
+                      color: "#FFFFFF",
+                      fontSize: 24,
+                      fontWeight: "700",
                     }}
                   >
                     +
@@ -227,17 +293,17 @@ const TrackerModal = ({
               <TextInput
                 keyboardType="numeric"
                 placeholder={getPlaceholder()}
-                placeholderTextColor="rgba(255,255,255,0.6)"
+                placeholderTextColor="#999"
                 style={{
-                  width: "85%",
+                  width: "100%",
                   borderWidth: 1,
-                  borderColor: "rgba(255,255,255,0.3)",
-                  borderRadius: 12,
-                  padding: 12,
-                  marginVertical: 20,
+                  borderColor: "#E0E0E0",
+                  borderRadius: 16,
+                  padding: 16,
+                  marginVertical: 30,
                   fontSize: 16,
-                  color: "#fff",
-                  backgroundColor: "rgba(255,255,255,0.1)",
+                  color: "#000",
+                  backgroundColor: "#F8F8F8",
                 }}
                 value={values[type]}
                 onChangeText={handleChange}
@@ -245,24 +311,27 @@ const TrackerModal = ({
             )}
 
             {dataLoading ? (
-              <ActivityIndicator color="#fff" />
+              <ActivityIndicator color="#67C694" size="large" style={{ marginTop: 10, marginBottom: 0 }} />
             ) : (
               <TouchableOpacity
                 style={{
-                  backgroundColor: "#67c694",
-                  paddingVertical: 12,
-                  borderRadius: 20,
-                  width: 180,
+                  backgroundColor: "#67C694",
+                  paddingVertical: 16,
+                  borderRadius: 30,
+                  width: "100%",
                   marginTop: 10,
+                  alignItems: "center",
+                  justifyContent: "center",
+            
                 }}
                 onPress={() => handleAdd(type)}
               >
                 <Text
                   style={{
-                    color: "#fff",
-                    fontWeight: theme.fontWeights.bold,
+                    color: "#FFFFFF",
+                    fontWeight: "700",
                     textAlign: "center",
-                    fontSize: theme.fontSizes.medium,
+                    fontSize: 16,
                   }}
                 >
                   Save
@@ -270,7 +339,7 @@ const TrackerModal = ({
               </TouchableOpacity>
             )}
           </View>
-        </LinearGradient>
+        </View>
       </KeyboardAvoidingView>
     </Modal>
   );

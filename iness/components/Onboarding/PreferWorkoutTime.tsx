@@ -1,19 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, Dimensions } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import theme from "@/app/Theme/globalTheme";
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import OnboardingCard from "@/app/modules/OnboardingCard";
 import {
-  onboardingCommitmentOptions,
   onboardingPreferredWorkoutTimeOptions,
 } from "@/utils/onboardingStaticValues";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { UserData } from "@/app/interfaces/UserInterface";
 import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
-
-const screenHeight = Dimensions.get("window").height;
 
 //// Main functional component for the PreferredWorkout Time screen--------------------/
 const PreferredWorkoutTime = ({
@@ -28,8 +22,8 @@ const PreferredWorkoutTime = ({
   /// Custom hook to load data from AsyncStorage-----------------------/
   useLoadFromAsyncStorage<UserData, any>({
     key: "user",
-    property: "preferredWorkoutTime", // or "age"
-    setter: setPreferredWorkoutTime, // or setAge
+    property: "preferredWorkoutTime",
+    setter: setPreferredWorkoutTime,
   });
 
   const handleNext = () => {
@@ -48,12 +42,17 @@ const PreferredWorkoutTime = ({
     <View
       style={{
         flex: 1,
-        paddingHorizontal: "5%",
-        paddingBottom: "2%",
-        paddingTop: "4%",
+        justifyContent: "space-between",
       }}
     >
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 20,
+          paddingBottom: 20,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
         <OnboardingHeading>
           When do you {"\n"} prefer to workout?
         </OnboardingHeading>
@@ -66,20 +65,44 @@ const PreferredWorkoutTime = ({
               option={item}
               state={preferredWorkoutTime}
               updateState={updateState}
-              height={70} // 10% of screen height
+              height={70}
               fontSize={16}
             />
           )
         )}
       </ScrollView>
 
-      {/* Next Button */}
-      <AnimatedSubmitButton
-        loading={false}
-        onPress={handleNext}
-        title="Next"
-        height={50}
-      />
+      {/* Next Button - Always at bottom */}
+      <View
+        style={{
+          paddingHorizontal: 20,
+          paddingBottom: 30,
+          paddingTop: 20,
+          backgroundColor: "transparent",
+        }}
+      >
+        <TouchableOpacity
+          onPress={handleNext}
+          disabled={!preferredWorkoutTime.trim()}
+          style={{
+            backgroundColor: preferredWorkoutTime.trim() ? "#67C694" : "#E0E0E0",
+            borderRadius: 30,
+            paddingVertical: 16,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: preferredWorkoutTime.trim() ? "#FFFFFF" : "#999",
+              fontSize: 16,
+              fontWeight: "700",
+            }}
+          >
+            Next
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

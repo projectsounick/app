@@ -16,8 +16,6 @@ import Modal from "react-native-modal";
 import Animated, { FadeInUp } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-import theme from "./Theme/globalTheme";
 import OnboardingName from "@/components/Onboarding/OnboardingName";
 import OnboardingSex from "@/components/Onboarding/OnboardingSex";
 import OnboardingPrimaryGoal from "@/components/Onboarding/OnboardingPrimaryGoal";
@@ -135,75 +133,86 @@ const OnboardingScreen = () => {
     ((currentStep + 1) / onboardingSteps.length) *
     (Dimensions.get("window").width - 90);
 
-  // Info points for modal
+  const backgroundImg = require("../assets/images/basicBackground.jpg");
 
   return (
     <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <ImageBackground
-        source={require("../assets/images/onboardingBackground.jpg")}
+        source={backgroundImg}
         style={{ flex: 1 }}
+        resizeMode="cover"
       >
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === "ios" ? "padding" : undefined}
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+          edges={["left", "right"]}
         >
-          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-            <View style={{ flex: 1, paddingTop: "15%", paddingHorizontal: 20 }}>
-              {/* Row with Back Button + Progress Bar */}
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 30,
-                }}
-              >
-                <TouchableOpacity
-                  onPress={handleBack}
-                  style={{
-                    backgroundColor: "#000",
-                    width: 35,
-                    height: 35,
-                    borderRadius: 18,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginRight: 10,
-                  }}
-                >
-                  <Ionicons name="arrow-back" size={18} color="#fff" />
-                </TouchableOpacity>
-
+          <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+          >
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+              <View style={{ flex: 1, paddingTop: "8%", paddingHorizontal: 20 }}>
+                {/* Row with Back Button + Progress Bar */}
                 <View
                   style={{
-                    flex: 1,
-                    height: 6,
-                    backgroundColor: "#eee",
-                    borderRadius: 5,
-                    overflow: "hidden",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 30,
                   }}
                 >
+                  <TouchableOpacity
+                    onPress={handleBack}
+                    style={{
+                      backgroundColor: "#FFFFFF",
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 12,
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 4,
+                      elevation: 3,
+                    }}
+                  >
+                    <Ionicons name="arrow-back" size={20} color="#000" />
+                  </TouchableOpacity>
+
                   <View
                     style={{
-                      height: 6,
-                      width: progressWidth,
-                      backgroundColor: theme.colors.secondPrimary,
-                      borderRadius: 5,
+                      flex: 1,
+                      height: 8,
+                      backgroundColor: "#F0F0F0",
+                      borderRadius: 10,
+                      overflow: "hidden",
                     }}
-                  />
+                  >
+                    <View
+                      style={{
+                        height: 8,
+                        width: progressWidth,
+                        backgroundColor: "#9747FF",
+                        borderRadius: 10,
+                      }}
+                    />
+                  </View>
                 </View>
+
+                {/* Step Content */}
+                <View style={{ flex: 1 }}>{renderStepComponent(loading)}</View>
+
+                <CustomSnackbar
+                  visible={snackbarVisible}
+                  message={snackbarMessage}
+                  bgColor="#67C694"
+                  onDismiss={() => setSnackbarVisible(false)}
+                />
               </View>
-
-              {/* Step Content */}
-              <View style={{ flex: 1 }}>{renderStepComponent(loading)}</View>
-
-              <CustomSnackbar
-                visible={snackbarVisible}
-                message={snackbarMessage}
-                bgColor={theme.colors.primary}
-                onDismiss={() => setSnackbarVisible(false)}
-              />
-            </View>
-          </TouchableWithoutFeedback>
-        </KeyboardAvoidingView>
+            </TouchableWithoutFeedback>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
       </ImageBackground>
 
       {/* Intro Modal */}

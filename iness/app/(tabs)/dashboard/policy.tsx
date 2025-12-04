@@ -7,9 +7,10 @@ import {
   Platform,
   Dimensions,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import NormalHeader from "@/app/modules/NormalHeader";
-import theme from "@/app/Theme/globalTheme";
 import { SafeAreaView } from "react-native-safe-area-context";
+const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.05; // 2% of screen height
 ////// Main functional component for the policy screen ---------------------------------/
@@ -47,69 +48,118 @@ export default function PolicyScreen() {
     },
   ];
 
+  const getIconForPolicy = (title: string) => {
+    switch (title) {
+      case "Privacy Policy":
+        return "lock-closed-outline";
+      case "Data Usage":
+        return "analytics-outline";
+      case "Security":
+        return "shield-checkmark-outline";
+      case "User Responsibilities":
+        return "person-outline";
+      case "Contact & Grievances":
+        return "mail-outline";
+      case "Changes to Policy":
+        return "document-text-outline";
+      default:
+        return "information-circle-outline";
+    }
+  };
+
   return (
     <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <ImageBackground
-        source={require("../../../assets/images/basicBackground.jpg")}
+        source={backgroundImg}
+        style={{ flex: 1 }}
         resizeMode="cover"
-        style={{
-          flex: 1,
-          justifyContent: "flex-start",
-          backgroundColor: "#000",
-        }}
       >
-        <View
-          style={{
-            paddingLeft: 20,
-            marginTop: Platform.OS === "ios" ? topPadding : "4%",
-          }}
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+          edges={["left", "right"]}
         >
-          <NormalHeader screenName="Policies" />
-        </View>
+          <View
+            style={{
+              paddingLeft: 20,
+              marginTop: Platform.OS === "ios" ? topPadding : "4%",
+            }}
+          >
+            <NormalHeader screenName="Policies" />
+          </View>
 
-        <ScrollView
-          style={{ flex: 1, padding: 20 }}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 20 }} // 👈 Add this
-        >
-          {policies.map((policy, index) => (
-            <View
-              key={index}
-              style={{
-                backgroundColor: theme.colors.cardLight,
-                padding: 15,
-                borderRadius: 12,
-                marginBottom: index === policies.length ? 25 : 15,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.1,
-                shadowRadius: 2,
-                elevation: 2,
-              }}
-            >
-              <Text
+          <ScrollView
+            style={{ flex: 1 }}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              padding: 20,
+              paddingBottom: 40,
+            }}
+          >
+            {policies.map((policy, index) => (
+              <View
+                key={index}
                 style={{
-                  fontSize: 18,
-                  fontWeight: "bold",
-                  marginBottom: 8,
-                  fontFamily: theme.fonts.bold,
+                  backgroundColor: "#FFFFFF",
+                  padding: 20,
+                  borderRadius: 20,
+                  marginBottom: 16,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 4 },
+                  shadowOpacity: 0.12,
+                  shadowRadius: 12,
+                  elevation: 5,
+                  borderWidth: 1,
+                  borderColor: "#F5F5F5",
                 }}
               >
-                {policy.title}
-              </Text>
-              <Text
-                style={{
-                  fontSize: 14,
-                  color: "#444",
-                  lineHeight: 20,
-                  fontFamily: theme.fonts.regular,
-                }}
-              >
-                {policy.content}
-              </Text>
-            </View>
-          ))}
-        </ScrollView>
+                <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginBottom: 12,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      backgroundColor: "#F0F0F0",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 12,
+                    }}
+                  >
+                    <Ionicons
+                      name={getIconForPolicy(policy.title) as any}
+                      size={22}
+                      color="#9747FF"
+                    />
+                  </View>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: "700",
+                      color: "#000",
+                      flex: 1,
+                    }}
+                  >
+                    {policy.title}
+                  </Text>
+                </View>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    color: "#666",
+                    lineHeight: 22,
+                  }}
+                >
+                  {policy.content}
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+        </SafeAreaView>
       </ImageBackground>
     </View>
   );

@@ -11,11 +11,11 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
+  ActivityIndicator,
 } from "react-native";
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
+import { Ionicons } from "@expo/vector-icons";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import CustomSnackbar from "@/app/modules/Snackbar";
-import theme from "@/app/Theme/globalTheme";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
 
 const OnboardingWeight = ({ onNext }: { onNext: () => void }) => {
@@ -84,24 +84,59 @@ const OnboardingWeight = ({ onNext }: { onNext: () => void }) => {
           >
             <OnboardingHeading>What is your{`\n`}weight?</OnboardingHeading>
 
-            <View style={styles.pickerRow}>
-              {/* Kg Picker */}
-              <TouchableOpacity
-                style={styles.pickerButton}
-                onPress={() => openModal("kg")}
-              >
-                <Text style={styles.pickerText}>{kg ?? "Select kg"}</Text>
-              </TouchableOpacity>
-              <Text style={styles.unit}>Kg</Text>
+            <View
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderRadius: 20,
+                padding: 24,
+                marginTop: 20,
+                borderWidth: 1,
+                borderColor: "#F5F5F5",
+              }}
+            >
+              <View style={styles.pickerRow}>
+                {/* Kg Picker */}
+                <View style={{ flex: 1, marginRight: 8 }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: "#666",
+                      marginBottom: 8,
+                      fontWeight: "500",
+                    }}
+                  >
+                    Kilograms
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.pickerButton}
+                    onPress={() => openModal("kg")}
+                  >
+                    <Text style={styles.pickerText}>{kg ?? "Select"}</Text>
+                    <Ionicons name="chevron-down" size={20} color="#9747FF" />
+                  </TouchableOpacity>
+                </View>
 
-              {/* Gram Picker */}
-              <TouchableOpacity
-                style={styles.pickerButton}
-                onPress={() => openModal("grams")}
-              >
-                <Text style={styles.pickerText}>{grams ?? "Select g"}</Text>
-              </TouchableOpacity>
-              <Text style={styles.unit}>g</Text>
+                {/* Gram Picker */}
+                <View style={{ flex: 1, marginLeft: 8 }}>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: "#666",
+                      marginBottom: 8,
+                      fontWeight: "500",
+                    }}
+                  >
+                    Grams
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.pickerButton}
+                    onPress={() => openModal("grams")}
+                  >
+                    <Text style={styles.pickerText}>{grams ?? "Select"}</Text>
+                    <Ionicons name="chevron-down" size={20} color="#9747FF" />
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
 
             <Text style={styles.hintText}>
@@ -109,18 +144,46 @@ const OnboardingWeight = ({ onNext }: { onNext: () => void }) => {
             </Text>
           </ScrollView>
 
-          <View style={styles.bottomButton}>
-            <AnimatedSubmitButton
-              loading={loading}
+          {/* Bottom Button - Always at bottom */}
+          <View
+            style={{
+              paddingHorizontal: 20,
+              paddingBottom: 30,
+              paddingTop: 20,
+              backgroundColor: "transparent",
+            }}
+          >
+            <TouchableOpacity
               onPress={handleNext}
-              title="Next"
-              height={50}
-            />
+              disabled={loading || !kg || !grams}
+              style={{
+                backgroundColor:
+                  loading || !kg || !grams ? "#E0E0E0" : "#67C694",
+                borderRadius: 30,
+                paddingVertical: 16,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {loading ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text
+                  style={{
+                    color: loading || !kg || !grams ? "#999" : "#FFFFFF",
+                    fontSize: 16,
+                    fontWeight: "700",
+                  }}
+                >
+                  Next
+                </Text>
+              )}
+            </TouchableOpacity>
           </View>
 
           <CustomSnackbar
             visible={snackbarVisible}
-            bgColor={theme.colors.red}
+            bgColor="#FF6B6B"
             message={snackbarMessage}
             onDismiss={() => setSnackbarVisible(false)}
           />
@@ -134,6 +197,17 @@ const OnboardingWeight = ({ onNext }: { onNext: () => void }) => {
           >
             <View style={styles.modalOverlay}>
               <View style={styles.modalContent}>
+                <View
+                  style={{
+                    width: 50,
+                    height: 5,
+                    backgroundColor: "#ccc",
+                    borderRadius: 3,
+                    alignSelf: "center",
+                    marginBottom: 15,
+                    marginTop: 10,
+                  }}
+                />
                 <Text style={styles.modalTitle}>
                   Select {modalType === "kg" ? "Kg" : "Grams"}
                 </Text>
@@ -172,53 +246,36 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   scrollContent: {
-    paddingTop: 60,
-    paddingHorizontal: 24,
+    paddingTop: 20,
+    paddingHorizontal: 20,
     paddingBottom: 20,
     flexGrow: 1,
   },
-  title: {
-    fontSize: 26,
-    fontWeight: "bold",
-    color: "#000",
-    textAlign: "center",
-  },
   pickerRow: {
     flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 30,
+    justifyContent: "space-between",
   },
   pickerButton: {
     borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 8,
-    paddingVertical: 12,
+    borderColor: "#E0E0E0",
+    borderRadius: 12,
+    paddingVertical: 14,
     paddingHorizontal: 16,
-    minWidth: 80,
+    backgroundColor: "#F8F8F8",
+    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
   },
   pickerText: {
-    fontSize: 18,
+    fontSize: 16,
     color: "#000",
-    fontFamily: theme.fonts.medium,
-  },
-  unit: {
-    marginHorizontal: 8,
-    fontSize: 18,
-    color: "#7D4CFF",
-    fontFamily: theme.fonts.bold,
+    fontWeight: "500",
   },
   hintText: {
     textAlign: "center",
     color: "#666",
     fontSize: 14,
-    fontFamily: theme.fonts.regular,
-    marginTop: 8,
-  },
-  bottomButton: {
-    paddingHorizontal: 24,
-    paddingBottom: 30,
+    marginTop: 16,
   },
   modalOverlay: {
     flex: 1,
@@ -226,7 +283,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     paddingBottom: 20,
@@ -234,31 +291,35 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 20,
-    fontWeight: "600",
+    fontWeight: "700",
     padding: 15,
     textAlign: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "#F5F5F5",
+    color: "#000",
   },
   option: {
-    padding: 15,
+    padding: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "#F5F5F5",
     alignItems: "center",
   },
   optionText: {
-    fontSize: 18,
+    fontSize: 16,
+    color: "#000",
+    fontWeight: "500",
   },
   closeButton: {
-    backgroundColor: "#ff4d4d",
+    backgroundColor: "#67C694",
     marginHorizontal: 20,
-    padding: 15,
-    borderRadius: 30,
+    padding: 16,
+    borderRadius: 16,
     marginTop: 10,
   },
   closeButtonText: {
-    color: "#fff",
+    color: "#FFFFFF",
     fontSize: 16,
     textAlign: "center",
+    fontWeight: "700",
   },
 });

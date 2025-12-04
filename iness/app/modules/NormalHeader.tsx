@@ -4,11 +4,21 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router"; // or useNavigation from @react-navigation/native
 import theme from "../Theme/globalTheme";
 
-export default function NormalHeader({ screenName, rightIcon }: any) {
+interface NormalHeaderProps {
+  screenName: string;
+  rightIcon?: boolean;
+  showSupportChat?: boolean;
+}
+
+export default function NormalHeader({ screenName, rightIcon, showSupportChat }: NormalHeaderProps) {
   const router = useRouter();
 
   const handleRightIconPress = () => {
     router.push("/dashboard/trackhistory");
+  };
+
+  const handleSupportChatPress = () => {
+    router.push("/dashboard/supportchat");
   };
 
   return (
@@ -46,25 +56,38 @@ export default function NormalHeader({ screenName, rightIcon }: any) {
         </Text>
       </View>
 
-      {/* Right Icon */}
-      {rightIcon ? (
-        <TouchableOpacity
-          onPress={handleRightIconPress}
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            backgroundColor: "#67c694",
-            paddingVertical: 6,
-            paddingHorizontal: 12,
-            borderRadius: 20,
-          }}
-        >
-          <Ionicons name="stats-chart-outline" size={20} color="#fff" />
-          <Text style={{ marginLeft: 6, color: "#fff", fontWeight: "bold" }}>
-            History
-          </Text>
-        </TouchableOpacity>
-      ) : null}
+      {/* Right Icons */}
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12, paddingRight: 20 }}>
+        {showSupportChat ? (
+          <TouchableOpacity
+            onPress={handleSupportChatPress}
+            style={{
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Ionicons name="chatbubble-ellipses-outline" size={24} color={theme.colors.dark} />
+          </TouchableOpacity>
+        ) : null}
+        {rightIcon ? (
+          <TouchableOpacity
+            onPress={handleRightIconPress}
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              backgroundColor: "#67c694",
+              paddingVertical: 6,
+              paddingHorizontal: 12,
+              borderRadius: 20,
+            }}
+          >
+            <Ionicons name="stats-chart-outline" size={20} color="#fff" />
+            <Text style={{ marginLeft: 6, color: "#fff", fontWeight: "bold" }}>
+              History
+            </Text>
+          </TouchableOpacity>
+        ) : null}
+      </View>
     </View>
   );
 }

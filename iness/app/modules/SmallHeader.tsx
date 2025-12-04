@@ -163,7 +163,7 @@ export default function SmallHeader({
                       marginHorizontal: 4,
                     }}
                   >
-                    {weight ? weight : null}kgs
+                    {weight ? parseFloat(weight.toString()).toFixed(1) : null}kgs
                   </Text>
                 </TouchableOpacity>
               </View>

@@ -1,16 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, Dimensions } from "react-native";
-
-import theme from "@/app/Theme/globalTheme";
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
+import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import OnboardingCard from "@/app/modules/OnboardingCard";
 import { workoutPreferenceOptions } from "@/utils/onboardingStaticValues";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { UserData } from "@/app/interfaces/UserInterface";
 import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
-
-const screenHeight = Dimensions.get("window").height;
 
 //// Main functional component for the Workout Preferences screen--------------------/
 const WorkoutPreferences = ({
@@ -53,12 +48,17 @@ const WorkoutPreferences = ({
     <View
       style={{
         flex: 1,
-        paddingHorizontal: "5%",
-        paddingBottom: "2%",
-        paddingTop: "4%",
+        justifyContent: "space-between",
       }}
     >
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={{
+          paddingHorizontal: 20,
+          paddingTop: 20,
+          paddingBottom: 20,
+        }}
+        showsVerticalScrollIndicator={false}
+      >
         <OnboardingHeading>
           Favourite type of{"\n"}
           workout?
@@ -78,12 +78,38 @@ const WorkoutPreferences = ({
         ))}
       </ScrollView>
 
-      <AnimatedSubmitButton
-        loading={false}
-        onPress={handleNext}
-        title="Next"
-        height={50}
-      />
+      {/* Next Button - Always at bottom */}
+      <View
+        style={{
+          paddingHorizontal: 20,
+          paddingBottom: 30,
+          paddingTop: 20,
+          backgroundColor: "transparent",
+        }}
+      >
+        <TouchableOpacity
+          onPress={handleNext}
+          disabled={workoutPreferences.length === 0}
+          style={{
+            backgroundColor:
+              workoutPreferences.length > 0 ? "#67C694" : "#E0E0E0",
+            borderRadius: 30,
+            paddingVertical: 16,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text
+            style={{
+              color: workoutPreferences.length > 0 ? "#FFFFFF" : "#999",
+              fontSize: 16,
+              fontWeight: "700",
+            }}
+          >
+            Next
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };

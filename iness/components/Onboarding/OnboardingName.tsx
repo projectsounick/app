@@ -3,22 +3,19 @@ import {
   View,
   Text,
   TextInput,
-  ImageBackground,
   KeyboardAvoidingView,
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
-import theme from "@/app/Theme/globalTheme";
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
+import { Ionicons } from "@expo/vector-icons";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import { LinearGradient } from "expo-linear-gradient";
 import { UserData } from "@/app/interfaces/UserInterface";
 import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { router } from "expo-router";
+import CustomSnackbar from "@/app/modules/Snackbar";
 
 // Main functional component for the Onboarding Name screen------------------------------------/
 const OnboardingName = ({ onNext }: { onNext: () => void }) => {
@@ -27,8 +24,8 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
   // Function to update user data in AsyncStorage
   useLoadFromAsyncStorage<UserData, any>({
     key: "user",
-    property: "name", // or "age"
-    setter: setName, // or setAge
+    property: "name",
+    setter: setName,
   });
 
   const handleNext = () => {
@@ -47,104 +44,126 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
       keyboardVerticalOffset={60}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            justifyContent: "space-between",
-            paddingHorizontal: 20,
-            paddingVertical: 40,
-          }}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* Centered Content */}
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
+        <View style={{ flex: 1 }}>
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
               paddingHorizontal: 20,
+              paddingTop: 20,
             }}
+            keyboardShouldPersistTaps="handled"
           >
-            {/* Card */}
+            {/* Centered Content */}
             <View
               style={{
-                backgroundColor: "#fff",
-                borderRadius: 16,
-                padding: 30,
-                width: "100%",
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.1,
-                shadowRadius: 8,
-                elevation: 5,
-                marginBottom: 24,
+                flex: 1,
+                justifyContent: "center",
                 alignItems: "center",
+                paddingHorizontal: 20,
+              }}
+            >
+              {/* Card */}
+              <View
+                style={{
+                  backgroundColor: "#FFFFFF",
+                  borderRadius: 20,
+                  padding: 30,
+                  width: "100%",
+                  marginBottom: 30,
+                  alignItems: "center",
+                  borderWidth: 1,
+                  borderColor: "#F5F5F5",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 28,
+                    fontWeight: "700",
+                    color: "#000",
+                    textAlign: "center",
+                  }}
+                >
+                  What should we call you?
+                </Text>
+              </View>
+
+              {/* Input with Icon */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  height: 56,
+                  borderRadius: 16,
+                  paddingHorizontal: 16,
+                  backgroundColor: "#F8F8F8",
+                  borderWidth: 1,
+                  borderColor: "#E0E0E0",
+                  width: "100%",
+                }}
+              >
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 18,
+                    backgroundColor: "#F0F0F0",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 12,
+                  }}
+                >
+                  <Ionicons name="person-outline" size={20} color="#9747FF" />
+                </View>
+                <TextInput
+                  placeholder="Enter your name"
+                  placeholderTextColor="#999"
+                  value={name}
+                  onChangeText={setName}
+                  returnKeyType="done"
+                  style={{
+                    flex: 1,
+                    fontSize: 16,
+                    color: "#000",
+                    backgroundColor: "transparent",
+                    paddingVertical: 0,
+                  }}
+                />
+              </View>
+            </View>
+          </ScrollView>
+
+          {/* Bottom Button - Always at bottom */}
+          <View
+            style={{
+              paddingHorizontal: 20,
+              paddingBottom: 30,
+              paddingTop: 20,
+              backgroundColor: "transparent",
+            }}
+          >
+            <TouchableOpacity
+              onPress={handleNext}
+              disabled={!name.trim()}
+              style={{
+                backgroundColor: name.trim() ? "#67C694" : "#E0E0E0",
+                borderRadius: 30,
+                paddingVertical: 16,
+                alignItems: "center",
+                justifyContent: "center",
               }}
             >
               <Text
                 style={{
-                  fontSize: 26,
+                  color: name.trim() ? "#FFFFFF" : "#999",
+                  fontSize: 16,
                   fontWeight: "700",
-                  color: "#333",
-                  textAlign: "center",
-                  fontFamily: theme.fonts.bold,
                 }}
               >
-                What should we call you?
+                Next
               </Text>
-            </View>
-
-            {/* Input with Icon */}
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                height: 50,
-                borderRadius: 12,
-                paddingHorizontal: 16,
-                backgroundColor: "#fff",
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.08,
-                shadowRadius: 4,
-                elevation: 3,
-                width: "100%",
-              }}
-            >
-              <MaterialCommunityIcons
-                name="account-outline"
-                size={24}
-                color="#888"
-                style={{ marginRight: 12 }}
-              />
-              <TextInput
-                placeholder="Enter your name"
-                placeholderTextColor="#aaa"
-                value={name}
-                onChangeText={setName}
-                returnKeyType="done"
-                style={{
-                  flex: 1,
-                  fontSize: 16,
-                  color: "#333",
-                  backgroundColor: "transparent",
-                  paddingVertical: 0,
-                  fontFamily: theme.fonts.regular,
-                }}
-              />
-            </View>
+            </TouchableOpacity>
           </View>
-
-          {/* Bottom Button */}
-          <View style={{ marginTop: 40 }}>
-            <AnimatedSubmitButton
-              loading={false}
-              onPress={handleNext}
-              title="Next"
-              height={50}
-            />
-          </View>
-        </ScrollView>
+        </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );

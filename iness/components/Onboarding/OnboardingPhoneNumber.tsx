@@ -8,12 +8,11 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
+  TouchableOpacity,
 } from "react-native";
-import theme from "@/app/Theme/globalTheme";
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
+import { Ionicons } from "@expo/vector-icons";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import OnboardingHeading from "@/app/modules/OnboardingHeading";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import CustomSnackbar from "@/app/modules/Snackbar";
 
 // Main functional component
 const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
@@ -55,7 +54,6 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
       asyncStorageUtils.updateUserDataInAsyncStorage({
         phoneNumber: formattedPhoneNumber,
       });
-    } else {
     }
     onNext();
   };
@@ -67,130 +65,156 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
       keyboardVerticalOffset={60}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            justifyContent: "space-between",
-            paddingHorizontal: 20,
-            paddingVertical: 40,
-          }}
-          keyboardShouldPersistTaps="handled"
-        >
-          {/* Centered Content */}
+        <View style={{ flex: 1 }}>
+          <ScrollView
+            contentContainerStyle={{
+              flexGrow: 1,
+              paddingHorizontal: 20,
+              paddingTop: 20,
+            }}
+            keyboardShouldPersistTaps="handled"
+          >
+            {/* Centered Content */}
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                paddingHorizontal: 20,
+              }}
+            >
+              {/* Heading */}
+              <View
+                style={{
+                  backgroundColor: "#FFFFFF",
+                  borderRadius: 20,
+                  padding: 30,
+                  width: "100%",
+                  marginBottom: 30,
+                  alignItems: "center",
+                  borderWidth: 1,
+                  borderColor: "#F5F5F5",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 28,
+                    fontWeight: "700",
+                    color: "#000",
+                    textAlign: "center",
+                  }}
+                >
+                  Your Contact{"\n"}Number?
+                </Text>
+                <Text
+                  style={{
+                    textAlign: "center",
+                    fontSize: 14,
+                    color: "#666",
+                    marginTop: 8,
+                  }}
+                >
+                  (optional)
+                </Text>
+              </View>
+
+              {/* Input with Icon */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#F8F8F8",
+                  borderRadius: 16,
+                  paddingHorizontal: 16,
+                  height: 56,
+                  width: "100%",
+                  borderWidth: 1,
+                  borderColor: phoneNumberError ? "#FF6B6B" : "#E0E0E0",
+                  marginBottom: phoneNumberError ? 8 : 0,
+                }}
+              >
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 18,
+                    backgroundColor: "#F0F0F0",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 12,
+                  }}
+                >
+                  <Ionicons name="call-outline" size={20} color="#9747FF" />
+                </View>
+                <TextInput
+                  value={phoneNumber}
+                  onChangeText={(text) => {
+                    setphoneNumber(text);
+                    if (phoneNumberError) validatePhoneNumber();
+                  }}
+                  placeholder="Enter your number"
+                  placeholderTextColor="#999"
+                  style={{
+                    flex: 1,
+                    fontSize: 16,
+                    color: "#000",
+                    backgroundColor: "transparent",
+                    paddingVertical: 0,
+                  }}
+                  returnKeyType="done"
+                  keyboardType="number-pad"
+                  maxLength={10}
+                />
+              </View>
+
+              {/* Error message */}
+              {phoneNumberError ? (
+                <Text
+                  style={{
+                    color: "#FF6B6B",
+                    fontSize: 14,
+                    marginTop: 8,
+                    alignSelf: "flex-start",
+                    marginLeft: 20,
+                  }}
+                >
+                  {phoneNumberError}
+                </Text>
+              ) : null}
+            </View>
+          </ScrollView>
+
+          {/* Bottom Button - Always at bottom */}
           <View
             style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
               paddingHorizontal: 20,
+              paddingBottom: 30,
+              paddingTop: 20,
+              backgroundColor: "transparent",
             }}
           >
-            {/* Heading */}
-            <View
-              style={{
-                backgroundColor: "#fff",
-                borderRadius: 16,
-                padding: 30,
-                width: "100%",
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.1,
-                shadowRadius: 8,
-                elevation: 5,
-                marginBottom: 24,
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 26,
-                  fontWeight: "700",
-                  color: "#333",
-                  textAlign: "center",
-                  fontFamily: theme.fonts.bold,
-                }}
-              >
-                Your Contact{"\n"}Number?
-              </Text>
-              <Text
-                style={{
-                  textAlign: "center",
-                  fontSize: 12,
-                  color: "#888",
-                  marginTop: 4,
-                  fontFamily: theme.fonts.regular,
-                }}
-              >
-                (optional)
-              </Text>
-            </View>
-
-            {/* Input with Icon */}
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "#fff",
-                borderRadius: 12,
-                paddingHorizontal: 16,
-                height: 50,
-                width: "100%",
-                borderWidth: 1,
-                borderColor: "#ccc",
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.08,
-                shadowRadius: 4,
-                elevation: 3,
-                marginBottom: phoneNumberError ? 4 : 16,
-              }}
-            >
-              <MaterialCommunityIcons
-                name="phone-outline"
-                size={24}
-                color="#888"
-                style={{ marginRight: 12 }}
-              />
-              <TextInput
-                value={phoneNumber}
-                onChangeText={(text) => {
-                  setphoneNumber(text);
-                  if (phoneNumberError) validatePhoneNumber();
-                }}
-                placeholder="Enter your number"
-                placeholderTextColor="#aaa"
-                style={{
-                  flex: 1,
-                  fontSize: 16,
-                  color: "#333",
-                  backgroundColor: "transparent",
-                  paddingVertical: 0,
-                  fontFamily: theme.fonts.regular,
-                }}
-                returnKeyType="done"
-                keyboardType="number-pad"
-                maxLength={10}
-              />
-            </View>
-
-            {/* Error message */}
-            {phoneNumberError ? (
-              <Text style={{ color: "red", fontSize: 14, marginBottom: 16 }}>
-                {phoneNumberError}
-              </Text>
-            ) : null}
-          </View>
-
-          {/* Bottom Button */}
-          <View style={{ marginTop: 40 }}>
-            <AnimatedSubmitButton
-              loading={false}
-              height={50}
+            <TouchableOpacity
               onPress={handleNext}
-              title={phoneNumber === "" ? "Skip" : "Next"}
-            />
+              style={{
+                backgroundColor: "#67C694",
+                borderRadius: 30,
+                paddingVertical: 16,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: "#FFFFFF",
+                  fontSize: 16,
+                  fontWeight: "700",
+                }}
+              >
+                {phoneNumber === "" ? "Skip" : "Next"}
+              </Text>
+            </TouchableOpacity>
           </View>
-        </ScrollView>
+        </View>
       </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );

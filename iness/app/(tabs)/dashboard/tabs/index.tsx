@@ -194,7 +194,7 @@ const YourComponent = () => {
         )}
 
         <NotificationPermissionModal />
-        {/* <VideoPromotionModal /> */}
+        <VideoPromotionModal />
       </ScrollView>
 
       <AppUpdateBottomSheet />
