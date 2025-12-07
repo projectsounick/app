@@ -20,6 +20,8 @@ export const userService = {
   addUserComplain,
   getActiveDietPlans,
   blockUser,
+  googleSignIn,
+  appleSignIn,
 };
 
 //// Function for sending the otp to the user ---------------/
@@ -167,5 +169,43 @@ async function getActiveDietPlans() {
     return fetchWrapper.get(`${baseUrl}/get-active-diets`);
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
+  }
+}
+
+//// Function for Google Sign-In ---------------/
+async function googleSignIn(data: {
+  idToken: string;
+  expoPushToken?: string;
+}): Promise<ApiResponseInterface> {
+  try {
+    let response = await fetchWrapper.post(`${baseUrl}/google-signin`, {
+      idToken: data.idToken,
+      expoPushToken: data.expoPushToken,
+    });
+    return response;
+  } catch (error: any) {
+    throw new Error("Error with Google sign-in: " + error.message);
+  }
+}
+
+//// Function for Apple Sign-In ---------------/
+async function appleSignIn(data: {
+  identityToken: string;
+  userIdentifier: string;
+  email?: string;
+  fullName?: { givenName?: string; familyName?: string };
+  expoPushToken?: string;
+}): Promise<ApiResponseInterface> {
+  try {
+    let response = await fetchWrapper.post(`${baseUrl}/apple-signin`, {
+      identityToken: data.identityToken,
+      userIdentifier: data.userIdentifier,
+      email: data.email,
+      fullName: data.fullName,
+      expoPushToken: data.expoPushToken,
+    });
+    return response;
+  } catch (error: any) {
+    throw new Error("Error with Apple sign-in: " + error.message);
   }
 }

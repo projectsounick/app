@@ -10,10 +10,9 @@ import {
   Keyboard,
   ScrollView,
   FlatList,
+  Modal,
 } from "react-native";
-import Modal from "react-native-modal";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import theme from "@/app/Theme/globalTheme";
 
 const INDIAN_STATES = [
@@ -84,39 +83,213 @@ export default function AddressModal({
 
   return (
     <Modal
-      isVisible={visible}
-      onBackdropPress={onClose}
-      onSwipeComplete={onClose}
-      swipeDirection="down"
-      style={{ justifyContent: "flex-end", margin: 0 }}
-      avoidKeyboard
-      propagateSwipe
+      transparent
+      visible={visible}
+      animationType="slide"
+      onRequestClose={onClose}
     >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 20 : 0}
+        style={{ flex: 1, justifyContent: "flex-end" }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-          <LinearGradient
-            colors={["#2C1453", "#1C0E33"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <View
             style={{
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              padding: 20,
-              paddingBottom: 40,
-              minHeight: 400,
+              flex: 1,
+              backgroundColor: "rgba(0,0,0,0.5)",
+              justifyContent: "flex-end",
             }}
           >
-            {/* Handle indicator */}
+            <View
+              style={{
+                backgroundColor: "#FFFFFF",
+                paddingHorizontal: 20,
+                paddingTop: 20,
+                paddingBottom: 40,
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
+                maxHeight: "90%",
+              }}
+            >
+              {/* Dash handle */}
+              <View
+                style={{
+                  width: 50,
+                  height: 5,
+                  backgroundColor: "#ccc",
+                  borderRadius: 3,
+                  alignSelf: "center",
+                  marginBottom: 20,
+                }}
+              />
+
+              {/* Close Button - Top Right */}
+              <TouchableOpacity
+                onPress={onClose}
+                style={{
+                  position: "absolute",
+                  top: 18,
+                  right: 20,
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: "#F0F0F0",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 10,
+                }}
+              >
+                <Ionicons name="close" size={20} color="#000" />
+              </TouchableOpacity>
+
+              {/* Icon Container */}
+              <View style={{ alignItems: "center", marginBottom: 20 }}>
+                <View
+                  style={{
+                    width: 80,
+                    height: 80,
+                    borderRadius: 40,
+                    backgroundColor: "#E3F2FD",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Ionicons name="location-outline" size={40} color="#2196F3" />
+                </View>
+              </View>
+
+              {/* Title */}
+              <Text
+                style={{
+                  fontSize: 24,
+                  fontWeight: "700",
+                  color: "#000",
+                  textAlign: "center",
+                  marginBottom: 24,
+                }}
+              >
+                Enter Delivery Address
+              </Text>
+
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                style={{ maxHeight: 400 }}
+              >
+
+                {/* Inputs */}
+                <TextInput
+                  placeholder="Full Address"
+                  placeholderTextColor="#999"
+                  style={styles.input}
+                  value={address.fullAddress}
+                  onChangeText={(text) =>
+                    setAddress((prev: any) => ({ ...prev, fullAddress: text }))
+                  }
+                />
+                <TextInput
+                  placeholder="City"
+                  placeholderTextColor="#999"
+                  style={styles.input}
+                  value={address.city}
+                  onChangeText={(text) =>
+                    setAddress((prev: any) => ({ ...prev, city: text }))
+                  }
+                />
+                {/* State Dropdown */}
+                <TouchableOpacity
+                  onPress={() => setShowStatePicker(true)}
+                  style={styles.input}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontSize: 16,
+                        color: address.state ? "#000" : "#999",
+                      }}
+                    >
+                      {address.state || "Select State"}
+                    </Text>
+                    <Ionicons name="chevron-down" size={20} color="#999" />
+                  </View>
+                </TouchableOpacity>
+                <TextInput
+                  placeholder="Pincode"
+                  placeholderTextColor="#999"
+                  style={styles.input}
+                  value={address.pincode}
+                  keyboardType="numeric"
+                  onChangeText={(text) =>
+                    setAddress((prev: any) => ({ ...prev, pincode: text }))
+                  }
+                />
+              </ScrollView>
+
+              {/* Button */}
+              <TouchableOpacity
+                style={{
+                  backgroundColor: "#67C694",
+                  paddingVertical: 16,
+                  borderRadius: 30,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginTop: 20,
+                }}
+                onPress={() => onConfirm(address)}
+              >
+                <Text
+                  style={{
+                    color: "#000",
+                    fontWeight: "700",
+                    fontSize: 16,
+                  }}
+                >
+                  Place Order
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+
+      {/* State Picker Modal */}
+      <Modal
+        transparent
+        visible={showStatePicker}
+        animationType="slide"
+        onRequestClose={() => setShowStatePicker(false)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.5)",
+            justifyContent: "flex-end",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderTopLeftRadius: 20,
+              borderTopRightRadius: 20,
+              maxHeight: "70%",
+              paddingBottom: 20,
+            }}
+          >
+            {/* Dash handle */}
             <View
               style={{
                 width: 50,
                 height: 5,
-                backgroundColor: "rgba(255,255,255,0.5)",
+                backgroundColor: "#ccc",
                 borderRadius: 3,
                 alignSelf: "center",
+                marginTop: 12,
                 marginBottom: 12,
               }}
             />
@@ -127,163 +300,35 @@ export default function AddressModal({
                 flexDirection: "row",
                 justifyContent: "space-between",
                 alignItems: "center",
-                marginBottom: 16,
+                paddingHorizontal: 20,
+                paddingVertical: 16,
+                borderBottomWidth: 1,
+                borderBottomColor: "#E0E0E0",
               }}
             >
               <Text
                 style={{
-                  fontSize: 18,
-                  fontWeight: "bold",
-                  color: "#fff",
-                  fontFamily: theme.fonts.bold,
+                  fontSize: 20,
+                  fontWeight: "700",
+                  color: "#000",
                 }}
               >
-                Enter Delivery Address
+                Select State
               </Text>
               <TouchableOpacity
-                onPress={onClose}
+                onPress={() => setShowStatePicker(false)}
                 style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 18,
-                  backgroundColor: "rgba(255,255,255,0.15)", // subtle circular bg
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: "#F0F0F0",
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <Ionicons name="close" size={20} color="#fff" />
+                <Ionicons name="close" size={20} color="#000" />
               </TouchableOpacity>
             </View>
-
-            {/* Inputs */}
-            <TextInput
-              placeholder="Full Address"
-              placeholderTextColor="#aaa"
-              style={styles.input}
-              value={address.fullAddress}
-              onChangeText={(text) =>
-                setAddress((prev: any) => ({ ...prev, fullAddress: text }))
-              }
-            />
-            <TextInput
-              placeholder="City"
-              placeholderTextColor="#aaa"
-              style={styles.input}
-              value={address.city}
-              onChangeText={(text) =>
-                setAddress((prev: any) => ({ ...prev, city: text }))
-              }
-            />
-            {/* State Dropdown */}
-            <TouchableOpacity
-              onPress={() => setShowStatePicker(true)}
-              style={styles.input}
-            >
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Text
-                  style={{
-                    fontSize: 16,
-                    color: address.state ? "#000" : "#aaa",
-                  }}
-                >
-                  {address.state || "Select State"}
-                </Text>
-                <Ionicons name="chevron-down" size={20} color="#aaa" />
-              </View>
-            </TouchableOpacity>
-            <TextInput
-              placeholder="Pincode"
-              placeholderTextColor="#aaa"
-              style={styles.input}
-              value={address.pincode}
-              keyboardType="numeric"
-              onChangeText={(text) =>
-                setAddress((prev: any) => ({ ...prev, pincode: text }))
-              }
-            />
-
-            {/* Button */}
-            <TouchableOpacity
-              style={{
-                backgroundColor: "#67c694",
-                padding: 16,
-                borderRadius: 26,
-                alignItems: "center",
-                marginTop: 20,
-              }}
-              onPress={() => onConfirm(address)}
-            >
-              <Text
-                style={{
-                  color: "#000",
-                  fontWeight: "bold",
-                  fontFamily: theme.fonts.bold,
-                  fontSize: 18,
-                }}
-              >
-                Place Now
-              </Text>
-            </TouchableOpacity>
-          </LinearGradient>
-        </TouchableWithoutFeedback>
-      </KeyboardAvoidingView>
-
-      {/* State Picker Modal */}
-      <Modal
-        isVisible={showStatePicker}
-        onBackdropPress={() => setShowStatePicker(false)}
-        style={{ justifyContent: "flex-end", margin: 0 }}
-        backdropOpacity={0.5}
-      >
-        <View
-          style={{
-            backgroundColor: "#fff",
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-            maxHeight: "70%",
-            paddingBottom: 20,
-          }}
-        >
-          {/* Header */}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              padding: 20,
-              borderBottomWidth: 1,
-              borderBottomColor: "#E0E0E0",
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "700",
-                color: "#000",
-              }}
-            >
-              Select State
-            </Text>
-            <TouchableOpacity
-              onPress={() => setShowStatePicker(false)}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 18,
-                backgroundColor: "#F5F5F5",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Ionicons name="close" size={20} color="#000" />
-            </TouchableOpacity>
-          </View>
 
           {/* States List */}
           <FlatList
@@ -327,6 +372,7 @@ export default function AddressModal({
             )}
             style={{ maxHeight: 400 }}
           />
+          </View>
         </View>
       </Modal>
     </Modal>
@@ -335,13 +381,14 @@ export default function AddressModal({
 
 const styles = {
   input: {
-    backgroundColor: "#fff",
-    borderColor: "#ddd",
+    backgroundColor: "#F8F8F8",
+    borderColor: "#E0E0E0",
     borderWidth: 1,
-    borderRadius: 10,
-    padding: 12,
-
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
     marginBottom: 16,
     fontSize: 16,
+    color: "#000",
   },
 };

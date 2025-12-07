@@ -83,7 +83,8 @@
       "router": { "origin": false },
       "eas": {
         "projectId": "d80cbfa4-17b7-44ae-9955-a47743e5be15"
-      }
+      },
+      "googleClientId": "YOUR_GOOGLE_CLIENT_ID_HERE"
     },
     "owner": "surjayan"
   }
