@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Modal,
   View,
@@ -10,6 +10,7 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
+import * as NavigationBar from "expo-navigation-bar";
 import {
   Ionicons,
   FontAwesome5,
@@ -135,10 +136,26 @@ const TrackerModal = ({
     }
   };
 
+  // Hide navigation bar when modal opens
+  useEffect(() => {
+    if (visible && Platform.OS === "android") {
+      NavigationBar.setVisibilityAsync("hidden");
+      NavigationBar.setBehaviorAsync("overlay-swipe");
+    } else if (!visible && Platform.OS === "android") {
+      NavigationBar.setVisibilityAsync("hidden");
+    }
+  }, [visible]);
+
   return (
-    <Modal visible={visible} transparent animationType="fade">
+    <Modal 
+      visible={visible} 
+      transparent 
+      animationType="fade"
+      presentationStyle="overFullScreen"
+      statusBarTranslucent={true}
+    >
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{
           flex: 1,
           justifyContent: "flex-end",
@@ -153,7 +170,7 @@ const TrackerModal = ({
             borderTopRightRadius: 20,
             paddingHorizontal: 20,
             paddingTop: 20,
-            paddingBottom: 40,
+            paddingBottom: Platform.OS === "android" ? 20 : 40,
             overflow: "hidden",
           }}
         >

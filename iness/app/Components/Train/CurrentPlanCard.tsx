@@ -5,9 +5,12 @@ import {
   TouchableOpacity,
   Image,
   ImageBackground,
+  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface PlanCardProps {
   id?: string;
@@ -165,18 +168,18 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
             {/* Button */}
             <TouchableOpacity
               style={{
-                backgroundColor: "#67C694",
-                height: 42,
-                width: 130,
-                borderRadius: 21,
+                backgroundColor: "rgba(103,198,148,0.9)",
+                width: SCREEN_WIDTH * 0.3,
+                height: SCREEN_WIDTH * 0.08,
+                borderRadius: (SCREEN_WIDTH * 0.1) / 2,
                 justifyContent: "center",
                 alignItems: "center",
                 alignSelf: "flex-start",
                 shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.25,
+                shadowOffset: { width: 0, height: 3 },
+                shadowOpacity: 0.3,
                 shadowRadius: 4,
-                elevation: 4,
+                elevation: 5,
               }}
               onPress={handlePress}
             >
@@ -184,7 +187,10 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
                 style={{
                   color: "#fff",
                   fontWeight: "700",
-                  fontSize: 16,
+                  fontSize: 14,
+                  textShadowColor: "rgba(0,0,0,0.6)",
+                  textShadowOffset: { width: 0, height: 1 },
+                  textShadowRadius: 2,
                 }}
               >
                 {isActive ? "Continue" : "Check"}

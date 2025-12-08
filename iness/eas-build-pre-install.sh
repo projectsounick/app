@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# EAS Build Hook: Write google-services.json before build
+# Place this file in the project root
+
+set -euo pipefail
+
+# Create the directory if it doesn't exist
+mkdir -p android/app
+
+# Write google-services.json from EAS environment variable
+if [ -n "${GOOGLE_SERVICES_JSON:-}" ]; then
+  echo "${GOOGLE_SERVICES_JSON}" > android/app/google-services.json
+  echo "✅ google-services.json created from EAS environment variable"
+else
+  echo "⚠️  GOOGLE_SERVICES_JSON environment variable not found"
+  exit 1
+fi
+

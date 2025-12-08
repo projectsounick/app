@@ -23,7 +23,7 @@ export default function AvailablePlans() {
   const icons: any = ["food-apple", "weight-lifter", "run", "heart-pulse"];
 
   return (
-    <ScrollView contentContainerStyle={{ paddingVertical: 8 }}>
+    <View style={{ paddingVertical: 8 }}>
       {/* Main Header */}
       <View
         style={{
@@ -211,6 +211,6 @@ export default function AvailablePlans() {
       )}
       {/* ///// Card for the services ------------------------------------/ */}
       <SliderCard />
-    </ScrollView>
+    </View>
   );
 }

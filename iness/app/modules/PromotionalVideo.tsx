@@ -106,9 +106,12 @@ const PromoVideoModal = () => {
               {/* Header */}
               <View style={styles.headerContainer}>
                 <View style={styles.iconContainer}>
-                  <Ionicons name="videocam-outline" size={24} color="#9747FF" />
+                  <Ionicons name="play-circle" size={28} color="#67C694" />
                 </View>
-                <Text style={styles.modalTitle}>Promotional Video</Text>
+                <View style={styles.titleContainer}>
+                  <Text style={styles.modalTitle}>Watch & Learn</Text>
+                  <Text style={styles.modalSubtitle}>Discover what's new</Text>
+                </View>
                 <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
                   <Ionicons name="close" size={20} color="#000" />
                 </TouchableOpacity>
@@ -119,7 +122,10 @@ const PromoVideoModal = () => {
           {/* Fullscreen Header */}
           {isFullscreen && (
             <View style={styles.fullscreenHeader}>
-              <Text style={styles.fullscreenTitle}>Promotional Video</Text>
+              <View style={styles.fullscreenTitleContainer}>
+                <Ionicons name="play-circle" size={24} color="#67C694" style={{ marginRight: 8 }} />
+                <Text style={styles.fullscreenTitle}>Watch & Learn</Text>
+              </View>
               <TouchableOpacity onPress={handleClose} style={styles.fullscreenCloseButton}>
                 <Ionicons name="close" size={24} color="#FFFFFF" />
               </TouchableOpacity>
@@ -130,8 +136,11 @@ const PromoVideoModal = () => {
           <View style={[styles.videoContainer, isFullscreen && styles.videoContainerFullscreen]}>
             {loading ? (
               <View style={styles.loaderContainer}>
-                <ActivityIndicator size="large" color="#67C694" />
-                <Text style={styles.loadingText}>Loading video...</Text>
+                <View style={styles.loaderIconContainer}>
+                  <Ionicons name="play-circle" size={48} color="#67C694" />
+                </View>
+                <ActivityIndicator size="large" color="#67C694" style={{ marginTop: 16 }} />
+                <Text style={styles.loadingText}>Preparing your video...</Text>
               </View>
             ) : videoUrl ? (
               <View style={[styles.videoWrapper, isFullscreen && styles.videoWrapperFullscreen]}>
@@ -170,7 +179,7 @@ const PromoVideoModal = () => {
                     <View style={styles.controlIconContainer}>
                       <Ionicons
                         name={isFullscreen ? "contract" : "expand"}
-                        size={24}
+                        size={18}
                         color="#FFFFFF"
                       />
                     </View>
@@ -199,7 +208,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: 10,
   },
   overlayPressable: {
     ...StyleSheet.absoluteFillObject,
@@ -208,8 +217,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
     width: "100%",
-    maxWidth: Dimensions.get("window").width - 40,
-    maxHeight: Dimensions.get("window").height * 0.85,
+    maxWidth: Dimensions.get("window").width - 20,
+    maxHeight: Dimensions.get("window").height * 0.6,
+    height: Dimensions.get("window").height * 0.55,
     borderWidth: 1,
     borderColor: "#F5F5F5",
     overflow: "hidden",
@@ -223,35 +233,43 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   handleBar: {
-    width: 40,
-    height: 4,
-    backgroundColor: "#D0D0D0",
-    borderRadius: 2,
+    width: 50,
+    height: 5,
+    backgroundColor: "#ccc",
+    borderRadius: 3,
     alignSelf: "center",
-    marginTop: 12,
-    marginBottom: 20,
+    marginTop: 8,
+    marginBottom: 12,
   },
   headerContainer: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 12,
     position: "relative",
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#E3F2FD",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#E8F5E9",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
+  titleContainer: {
+    flex: 1,
+  },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "700",
     color: "#000",
-    flex: 1,
+    marginBottom: 4,
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    fontWeight: "400",
+    color: "#666",
   },
   closeButton: {
     width: 32,
@@ -262,9 +280,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   videoContainer: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-    minHeight: 200,
+    paddingHorizontal: 10,
+    marginBottom: 12,
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -278,8 +296,8 @@ const styles = StyleSheet.create({
   },
   videoWrapper: {
     width: "100%",
-    aspectRatio: 16 / 9,
-    borderRadius: 16,
+    height: "100%",
+    borderRadius: 12,
     overflow: "hidden",
     backgroundColor: "#000",
     position: "relative",
@@ -305,10 +323,10 @@ const styles = StyleSheet.create({
     zIndex: 5,
   },
   playPauseIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: "rgba(0,0,0,0.6)",
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "transparent",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -324,21 +342,32 @@ const styles = StyleSheet.create({
     // Touchable area
   },
   controlIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: "rgba(0,0,0,0.6)",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(103, 198, 148, 0.9)",
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   loaderContainer: {
     alignItems: "center",
     justifyContent: "center",
     padding: 40,
   },
+  loaderIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#E8F5E9",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
   loadingText: {
-    marginTop: 16,
-    fontSize: 15,
+    marginTop: 20,
+    fontSize: 16,
     color: "#666",
     fontWeight: "500",
   },
@@ -367,17 +396,23 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.5)",
     zIndex: 20,
   },
+  fullscreenTitleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   fullscreenTitle: {
     fontSize: 18,
     fontWeight: "700",
     color: "#FFFFFF",
   },
   fullscreenCloseButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.25)",
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
   },
 });

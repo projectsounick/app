@@ -64,60 +64,67 @@ interface CardProps {
   suffix?: string;
 }
 
-const Card: React.FC<CardProps> = ({ icon, title, value, suffix }: any) => (
-  <View
-    style={{
-      backgroundColor: "#fff",
-      borderRadius: 12,
-      padding: 12,
-      flex: 1,
-      height: 80,
-      justifyContent: "center",
-      borderWidth: 1.2,
-      borderColor: "#E0E0E0",
-      shadowColor: "#000",
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
-      elevation: 2,
-      marginHorizontal: 4,
-    }}
-  >
-    {/* Headline with Icon */}
+const Card: React.FC<CardProps> = ({ icon, title, value, suffix }: any) => {
+  const isLongValue = typeof value === "number" && value > 99;
+  
+  return (
     <View
-      style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}
-    >
-      <MaterialCommunityIcons
-        name={icon}
-        size={16}
-        color="#6A1B9A"
-        style={{ marginRight: 4 }}
-      />
-      <Text
-        style={{
-          fontSize: 14,
-          fontWeight: "500",
-          color: "#444",
-          fontFamily: theme.fonts.bold,
-        }}
-      >
-        {title}
-      </Text>
-    </View>
-
-    {/* Value */}
-    <Text
       style={{
-        fontSize: 18,
-        fontWeight: "bold",
-        color: "#6A1B9A",
-        fontFamily: theme.fonts.medium,
+        backgroundColor: "#fff",
+        borderRadius: 12,
+        padding: 10,
+        flex: 1,
+        minHeight: 75,
+        justifyContent: "center",
+        borderWidth: 1.2,
+        borderColor: "#E0E0E0",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+        marginHorizontal: 4,
       }}
     >
-      {value}{" "}
-      {suffix && <Text style={{ fontSize: 12, color: "#999" }}>{suffix}</Text>}
-    </Text>
-  </View>
-);
+      {/* Headline with Icon */}
+      <View
+        style={{ flexDirection: "row", alignItems: "center", marginBottom: 4 }}
+      >
+        <MaterialCommunityIcons
+          name={icon}
+          size={14}
+          color="#6A1B9A"
+          style={{ marginRight: 4 }}
+        />
+        <Text
+          style={{
+            fontSize: 12,
+            fontWeight: "500",
+            color: "#444",
+            fontFamily: theme.fonts.bold,
+            flex: 1,
+          }}
+          numberOfLines={1}
+        >
+          {title}
+        </Text>
+      </View>
+
+      {/* Value */}
+      <Text
+        style={{
+          fontSize: isLongValue ? 14 : 16,
+          fontWeight: "bold",
+          color: "#6A1B9A",
+          fontFamily: theme.fonts.medium,
+        }}
+        numberOfLines={1}
+      >
+        {value}{" "}
+        {suffix && <Text style={{ fontSize: 10, color: "#999" }}>{suffix}</Text>}
+      </Text>
+    </View>
+  );
+};
 
 export default SessionCardRow;

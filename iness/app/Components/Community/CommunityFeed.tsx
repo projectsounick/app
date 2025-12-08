@@ -862,7 +862,7 @@ const CommunityPosts = ({
 
 const styles = StyleSheet.create({
   listContent: {
-    paddingBottom: 0,
+    paddingBottom: 100,
   },
   loadingFooter: {
     paddingVertical: 20,

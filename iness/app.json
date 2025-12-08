@@ -3,7 +3,7 @@
     "name": "iness",
     "slug": "iness",
     "jsEngine": "hermes",
-    "version": "1.0.33",
+    "version": "1.0.35",
     "orientation": "default",
     "notification": {
       "icon": "./assets/images/logonew.png",
@@ -18,7 +18,7 @@
       "icon": "./assets/images/logonew.png",
       "supportsTablet": false,
       "bundleIdentifier": "com.iness.fitness",
-      "buildNumber": "1.0.33",
+      "buildNumber": "1.0.35",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSMicrophoneUsageDescription": "We use the microphone for video recording.",
@@ -32,9 +32,16 @@
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "versionCode": 23,
+      "versionCode": 25,
       "googleServicesFile": "./android/app/google-services.json",
-      "permissions": ["NOTIFICATIONS"],
+      "permissions": [
+        "NOTIFICATIONS",
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_MEDIA_IMAGES",
+        "READ_MEDIA_VIDEO",
+        "READ_MEDIA_AUDIO"
+      ],
       "intentFilters": [
         {
           "action": "VIEW",
@@ -43,8 +50,8 @@
         }
       ],
       "useNextNotificationsApi": true,
-
-      "package": "com.iness.fitness"
+      "package": "com.iness.fitness",
+      "privacy": "https://iness.fitness/policy"
     },
     "web": {
       "bundler": "metro",
@@ -60,10 +67,9 @@
           "imageWidth": 200
         }
       ],
-
       "expo-video",
       "expo-notifications",
-
+      "react-native-edge-to-edge",
       [
         "expo-build-properties",
         {
@@ -83,8 +89,7 @@
       "router": { "origin": false },
       "eas": {
         "projectId": "d80cbfa4-17b7-44ae-9955-a47743e5be15"
-      },
-      "googleClientId": "YOUR_GOOGLE_CLIENT_ID_HERE"
+      }
     },
     "owner": "surjayan"
   }

@@ -11,7 +11,7 @@ import { planService } from "@/app/services/plan.service";
 import { cartService } from "@/app/services/cart.service";
 
 import { ActivityIndicator } from "react-native-paper";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { blogService } from "@/app/services/blog.Service";
 import BlogSliderCard from "@/app/modules/BlogSliderCard";
 import { trackService } from "@/app/services/track.service";
@@ -56,6 +56,7 @@ const YourComponent = () => {
     (state: RootState) => state.componentOpen.calendarSheetOpen
   );
   const dispatch = useDispatch();
+  const insets = useSafeAreaInsets();
   console.log(calendarSheetOpen);
   const podCasts = useSelector((state: RootState) => state.podcast.podcasts);
   // Fetch user data and modal flag from AsyncStorage
@@ -144,7 +145,7 @@ const YourComponent = () => {
         style={{ flex: 1 }}
         contentContainerStyle={{
           paddingTop: 10,
-          marginBottom: 10,
+          paddingBottom: 80 + Math.max(insets.bottom, 8), // Account for tab bar height + safe area
           paddingHorizontal: 8, // ✅ Add horizontal spacing here
         }}
         // onScroll={Animated.event(

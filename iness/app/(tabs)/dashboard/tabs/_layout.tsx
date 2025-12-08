@@ -37,11 +37,14 @@ export default function DashboardLayout() {
           tabBarActiveTintColor: "#fff",
           tabBarInactiveTintColor: "#888",
           tabBarStyle: {
-            paddingBottom: 2 + insets.bottom,
-            paddingTop: 6,
+            paddingBottom: Math.max(insets.bottom, 8),
+            paddingTop: 8,
             borderTopWidth: 0,
-            height: 50 + insets.bottom,
+            height: 60 + Math.max(insets.bottom, 8),
             backgroundColor: "transparent",
+            position: "absolute",
+            elevation: 0,
+            shadowOpacity: 0,
           },
           headerShown: false,
           tabBarBackground: () => (
@@ -105,8 +108,8 @@ export default function DashboardLayout() {
         <View
           style={{
             position: "absolute",
-            bottom: 15 + insets.bottom,
-            left: SCREEN_WIDTH / 2 - 35, // center
+            bottom: 30 + Math.max(insets.bottom, 8), // Button center aligns with tab bar top: half (30px) above, half inside
+            left: SCREEN_WIDTH / 2 - 30, // center (button width is 60, so half is 30)
             zIndex: 100,
           }}
         >

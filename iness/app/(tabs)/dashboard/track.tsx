@@ -145,14 +145,21 @@ export default function WellnessDashboard() {
           <NormalHeader screenName="Track" rightIcon={true} />
         </View>
         {/* History Icon Button */}
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 80 }}>
+        <ScrollView 
+          contentContainerStyle={{ 
+            paddingHorizontal: 16, 
+            paddingTop: 16,
+            paddingBottom: 100 
+          }}
+          showsVerticalScrollIndicator={false}
+        >
           {dataLoading ? (
             <View
               style={{
                 flex: 1,
                 justifyContent: "center",
                 alignItems: "center",
-                padding: 20,
+                padding: 40,
               }}
             >
               <ActivityIndicator color="#9747FF" size="large" />
@@ -163,61 +170,64 @@ export default function WellnessDashboard() {
               <View
                 style={{
                   backgroundColor: "#FFFFFF",
-                  borderRadius: 20,
-                  padding: 20,
-                  marginBottom: 20,
+                  borderRadius: 24,
+                  padding: 16,
+                  marginBottom: 24,
                   shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.12,
-                  shadowRadius: 12,
-                  elevation: 5,
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 16,
+                  elevation: 3,
                   borderWidth: 1,
                   borderColor: "#F5F5F5",
                   alignItems: "center",
                 }}
               >
                 <AnimatedCircularProgress
-                  size={200}
+                  size={160}
                   width={14}
                   fill={progressSleep}
-                  tintColor="#ADD8E6"
+                  tintColor="#67C694"
                   backgroundColor="#F0F0F0"
                   duration={1200}
+                  rotation={0}
                 >
                   {() => (
                     <AnimatedCircularProgress
-                      size={140}
+                      size={120}
                       width={12}
                       fill={progressSteps}
                       tintColor="#9747FF"
                       backgroundColor="#F0F0F0"
                       duration={1200}
+                      rotation={0}
                     >
                       {() => (
-                        <View>
+                        <View style={{ alignItems: "center" }}>
                           <Text
                             style={{
-                              fontSize: 28,
+                              fontSize: 24,
                               fontWeight: "700",
                               color: "#9747FF",
                               textAlign: "center",
+                              marginBottom: 2,
                             }}
                           >
                             {currentDayTrackData.steps?.steps
                               ? `${(
                                   currentDayTrackData.steps.steps / 1000
-                                ).toFixed(0)}K`
+                                ).toFixed(1)}K`
                               : "0K"}
                           </Text>
                           <Text
                             style={{
-                              fontSize: 14,
-                              color: "#666",
+                              fontSize: 11,
+                              color: "#999",
                               textAlign: "center",
                               fontWeight: "500",
                             }}
                           >
-                            {(progressSteps / 10).toFixed(1)}/10
+                            Steps
                           </Text>
                         </View>
                       )}
@@ -229,9 +239,9 @@ export default function WellnessDashboard() {
                   style={{
                     flexDirection: "row",
                     justifyContent: "center",
-                    gap: 24,
-                    marginTop: 20,
-                    paddingTop: 16,
+                    gap: 32,
+                    marginTop: 16,
+                    paddingTop: 12,
                     borderTopWidth: 1,
                     borderTopColor: "#F0F0F0",
                     width: "100%",
@@ -246,22 +256,33 @@ export default function WellnessDashboard() {
                   >
                     <View
                       style={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: 6,
-                        backgroundColor: "#ADD8E6",
-                        marginRight: 6,
+                        width: 14,
+                        height: 14,
+                        borderRadius: 7,
+                        backgroundColor: "#67C694",
+                        marginRight: 8,
                       }}
                     />
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        color: "#666",
-                        fontWeight: "500",
-                      }}
-                    >
-                      Sleep
-                    </Text>
+                    <View>
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          color: "#666",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Sleep
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 11,
+                          color: "#999",
+                          marginTop: 2,
+                        }}
+                      >
+                        {currentDayTrackData.sleep?.sleepDuration || 0}h
+                      </Text>
+                    </View>
                   </View>
 
                   {/* Steps */}
@@ -270,22 +291,33 @@ export default function WellnessDashboard() {
                   >
                     <View
                       style={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: 6,
+                        width: 14,
+                        height: 14,
+                        borderRadius: 7,
                         backgroundColor: "#9747FF",
-                        marginRight: 6,
+                        marginRight: 8,
                       }}
                     />
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        color: "#666",
-                        fontWeight: "500",
-                      }}
-                    >
-                      Steps
-                    </Text>
+                    <View>
+                      <Text
+                        style={{
+                          fontSize: 13,
+                          color: "#666",
+                          fontWeight: "600",
+                        }}
+                      >
+                        Steps
+                      </Text>
+                      <Text
+                        style={{
+                          fontSize: 11,
+                          color: "#999",
+                          marginTop: 2,
+                        }}
+                      >
+                        {currentDayTrackData.steps?.steps || 0}
+                      </Text>
+                    </View>
                   </View>
                 </View>
               </View>
@@ -327,115 +359,166 @@ export default function WellnessDashboard() {
               {/* Tracker Cards */}
               <View
                 style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  gap: 12,
+                  gap: 16,
                 }}
               >
                 {[
                   {
                     label: "Steps",
-                    value: `${currentDayTrackData.steps?.steps || 0}/10000`,
+                    current: currentDayTrackData.steps?.steps || 0,
+                    goal: 10000,
                     key: "steps",
                     icon: "walk-outline",
                     color: "#9747FF",
+                    bgColor: "#F3EDFF",
                   },
                   {
                     label: "Sleep",
-                    value: `${currentDayTrackData.sleep?.sleepDuration || 0}/12 hrs`,
+                    current: currentDayTrackData.sleep?.sleepDuration || 0,
+                    goal: 12,
+                    unit: "hrs",
                     key: "sleep",
-                    icon: "bed-outline",
-                    color: "#9747FF",
+                    icon: "moon-outline",
+                    color: "#67C694",
+                    bgColor: "#E8F5E9",
                   },
                   {
                     label: "Water",
-                    value: `${currentDayTrackData.water?.waterIntake || 0}/10 glasses`,
+                    current: currentDayTrackData.water?.waterIntake || 0,
+                    goal: 10,
+                    unit: "glasses",
                     key: "water",
                     icon: "water-outline",
-                    color: "#9747FF",
+                    color: "#4FC3F7",
+                    bgColor: "#E3F2FD",
                   },
-                ].map((tracker: any, i) => (
-                  <View
-                    key={i}
-                    style={{
-                      backgroundColor: "#FFFFFF",
-                      padding: 16,
-                      borderRadius: 16,
-                      alignItems: "center",
-                      flex: 1,
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 8,
-                      elevation: 3,
-                      borderWidth: 1,
-                      borderColor: "#F5F5F5",
-                    }}
-                  >
-                    {/* Icon */}
+                ].map((tracker: any, i) => {
+                  const progress = Math.min((tracker.current / tracker.goal) * 100, 100);
+                  return (
                     <View
+                      key={i}
                       style={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 24,
-                        backgroundColor: "#F8F8F8",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginBottom: 12,
+                        backgroundColor: "#FFFFFF",
+                        padding: 20,
+                        borderRadius: 20,
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.08,
+                        shadowRadius: 12,
+                        elevation: 2,
+                        borderWidth: 1,
+                        borderColor: "#F5F5F5",
                       }}
                     >
-                      <Ionicons
-                        name={tracker.icon}
-                        size={24}
-                        color={tracker.color}
-                      />
+                      {/* Header Row */}
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          marginBottom: 16,
+                        }}
+                      >
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            flex: 1,
+                          }}
+                        >
+                          <View
+                            style={{
+                              width: 48,
+                              height: 48,
+                              borderRadius: 24,
+                              backgroundColor: tracker.bgColor,
+                              alignItems: "center",
+                              justifyContent: "center",
+                              marginRight: 12,
+                            }}
+                          >
+                            <Ionicons
+                              name={tracker.icon}
+                              size={24}
+                              color={tracker.color}
+                            />
+                          </View>
+                          <View style={{ flex: 1 }}>
+                            <Text
+                              style={{
+                                fontSize: 15,
+                                fontWeight: "700",
+                                color: "#000",
+                                marginBottom: 4,
+                              }}
+                            >
+                              {tracker.label}
+                            </Text>
+                            <Text
+                              style={{
+                                fontSize: 13,
+                                color: "#666",
+                              }}
+                            >
+                              {tracker.current}{tracker.unit ? ` ${tracker.unit}` : ""} / {tracker.goal}{tracker.unit ? ` ${tracker.unit}` : ""}
+                            </Text>
+                          </View>
+                        </View>
+                        <TouchableOpacity
+                          onPress={() => openModal(tracker.key as any)}
+                          style={{
+                            width: 44,
+                            height: 44,
+                            borderRadius: 22,
+                            backgroundColor: "#67C694",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            shadowColor: "#67C694",
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.3,
+                            shadowRadius: 4,
+                            elevation: 3,
+                          }}
+                        >
+                          <Ionicons name="add" size={22} color="#FFFFFF" />
+                        </TouchableOpacity>
+                      </View>
+
+                      {/* Progress Bar */}
+                      <View
+                        style={{
+                          height: 8,
+                          backgroundColor: "#F0F0F0",
+                          borderRadius: 4,
+                          overflow: "hidden",
+                        }}
+                      >
+                        <View
+                          style={{
+                            height: "100%",
+                            width: `${progress}%`,
+                            backgroundColor: tracker.color,
+                            borderRadius: 4,
+                          }}
+                        />
+                      </View>
+                      <Text
+                        style={{
+                          fontSize: 11,
+                          color: "#999",
+                          marginTop: 8,
+                          textAlign: "right",
+                        }}
+                      >
+                        {progress.toFixed(0)}% Complete
+                      </Text>
                     </View>
-
-                    {/* Label */}
-                    <Text
-                      style={{
-                        fontSize: 14,
-                        fontWeight: "700",
-                        color: "#000",
-                        marginBottom: 6,
-                      }}
-                    >
-                      {tracker.label}
-                    </Text>
-
-                    {/* Value */}
-                    <Text
-                      style={{
-                        fontSize: 12,
-                        color: "#666",
-                        marginBottom: 12,
-                        textAlign: "center",
-                      }}
-                      numberOfLines={2}
-                    >
-                      {tracker.value}
-                    </Text>
-
-                    {/* Add Button */}
-                    <TouchableOpacity
-                      onPress={() => openModal(tracker.key as any)}
-                      style={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: 18,
-                        backgroundColor: "#67C694",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                    >
-                      <Ionicons name="add" size={20} color="#FFFFFF" />
-                    </TouchableOpacity>
-                  </View>
-                ))}
+                  );
+                })}
               </View>
 
               {/* Medical Disclaimer */}
-              <View
+              {/* <View
                 style={{
                   backgroundColor: "#FFFFFF",
                   borderRadius: 20,
@@ -505,7 +588,7 @@ export default function WellnessDashboard() {
                     View Medical Citations & Sources →
                   </Text>
                 </TouchableOpacity>
-              </View>
+              </View> */}
             </>
           )}
 

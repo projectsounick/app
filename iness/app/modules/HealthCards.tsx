@@ -151,7 +151,7 @@ function HealthDashboard() {
                 style={{
                   marginLeft: 6,
                   fontFamily: theme.fonts.bold,
-                  fontSize: theme.fonts.regular,
+                  fontSize: theme.fontSizes.regular,
                 }}
               >
                 Steps

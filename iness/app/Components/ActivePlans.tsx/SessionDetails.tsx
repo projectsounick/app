@@ -43,41 +43,11 @@ const TabbedSessionDetails = ({
   const [showModal, setShowModal] = useState(false);
 
   const {
-    callService,
     loading,
     snackbarVisible,
-    setLoading,
     snackbarMessage,
-    setSnackbarMessage,
     setSnackbarVisible,
   } = useServiceWithSnackbar(sessionService.updateSession);
-
-  const submitFeedback = async (feedback: string) => {
-    try {
-      setLoading(true);
-      const params = {
-        sessionId: selectedSession?._id || null,
-        data: {
-          sessionFeedback: feedback,
-        },
-      };
-
-      const response = await callService(params);
-      setShowModal(false);
-      if (response.success) {
-        setSelectedSession((prev: any) => ({
-          ...prev,
-          sessionFeedback: feedback,
-        }));
-      } else {
-        setSnackbarVisible(false);
-        setSnackbarMessage("Failed to submit the feedback");
-      }
-    } catch (error) {
-    } finally {
-      setLoading(false);
-    }
-  };
   const renderInfoTab = () => {
     if (!selectedSession)
       return (
@@ -143,42 +113,51 @@ const TabbedSessionDetails = ({
           colors={["#9C56F6", "#3A1B63"]}
           style={{
             borderRadius: 16,
-            padding: 16,
+            padding: 12,
             margin: 16,
           }}
         >
           <Text
             style={{
               color: "#fff",
-              fontSize: 18,
+              fontSize: 16,
               fontWeight: "bold",
-              marginBottom: 12,
+              marginBottom: 10,
               fontFamily: theme.fonts.bold,
             }}
           >
             Session Information
           </Text>
-          <View style={{ marginBottom: 12, paddingHorizontal: 2 }}>
-            {/* First Row */}
-            <View style={{ flexDirection: "row", marginBottom: 10 }}>
+          <View style={{ marginBottom: 8, paddingHorizontal: 2 }}>
+            {/* First Row - Date, Time, Duration */}
+            <View style={{ flexDirection: "row", marginBottom: 10, justifyContent: "space-between", alignItems: "center" }}>
               {/* Date */}
               <View
-                style={{ flex: 1, flexDirection: "row", alignItems: "center" }}
+                style={{ 
+                  flex: 1, 
+                  flexDirection: "row", 
+                  alignItems: "center",
+                }}
               >
                 <MaterialCommunityIcons
                   name="calendar-month-outline"
-                  size={16}
+                  size={12}
                   color="#eee"
-                  style={{ marginRight: 2 }}
+                  style={{ marginRight: 4 }}
                 />
                 <Text
                   style={{
                     color: "#eee",
-                    fontSize: 12,
+                    fontSize: 10,
                     fontFamily: theme.fonts.medium,
+                    flex: 1,
                   }}
+                  numberOfLines={1}
                 >
-                  {new Date(selectedSession.sessionDate).toDateString()}
+                  {new Date(selectedSession.sessionDate).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })}
                 </Text>
               </View>
 
@@ -193,16 +172,17 @@ const TabbedSessionDetails = ({
               >
                 <MaterialCommunityIcons
                   name="clock-outline"
-                  size={16}
+                  size={12}
                   color="#eee"
-                  style={{ marginRight: 2 }}
+                  style={{ marginRight: 4 }}
                 />
                 <Text
                   style={{
                     color: "#eee",
-                    fontSize: 12,
+                    fontSize: 10,
                     fontFamily: theme.fonts.medium,
                   }}
+                  numberOfLines={1}
                 >
                   {selectedSession.sessionTime}
                 </Text>
@@ -219,24 +199,25 @@ const TabbedSessionDetails = ({
               >
                 <MaterialCommunityIcons
                   name="timer-outline"
-                  size={16}
+                  size={12}
                   color="#eee"
-                  style={{ marginRight: 2 }}
+                  style={{ marginRight: 4 }}
                 />
                 <Text
                   style={{
                     color: "#eee",
-                    fontSize: 12,
+                    fontSize: 10,
                     fontFamily: theme.fonts.medium,
                   }}
+                  numberOfLines={1}
                 >
-                  {selectedSession.sessionDuration} mins
+                  {selectedSession.sessionDuration}m
                 </Text>
               </View>
             </View>
 
-            {/* Second Row */}
-            <View style={{ flexDirection: "row", marginBottom: 10 }}>
+            {/* Second Row - Type, Status */}
+            <View style={{ flexDirection: "row", marginBottom: 8, justifyContent: "space-between", alignItems: "center" }}>
               {/* Type */}
               <View
                 style={{
@@ -247,16 +228,17 @@ const TabbedSessionDetails = ({
               >
                 <MaterialCommunityIcons
                   name="account-group-outline"
-                  size={16}
+                  size={12}
                   color="#eee"
-                  style={{ marginRight: 2 }}
+                  style={{ marginRight: 4 }}
                 />
                 <Text
                   style={{
                     color: "#eee",
-                    fontSize: 12,
+                    fontSize: 10,
                     fontFamily: theme.fonts.medium,
                   }}
+                  numberOfLines={1}
                 >
                   {selectedSession.sessionType}
                 </Text>
@@ -268,57 +250,56 @@ const TabbedSessionDetails = ({
                   flex: 1,
                   flexDirection: "row",
                   alignItems: "center",
-                  justifyContent: "center",
+                  justifyContent: "flex-end",
                 }}
               >
                 <MaterialCommunityIcons
                   name="progress-check"
-                  size={16}
+                  size={12}
                   color="#eee"
-                  style={{ marginRight: 2 }}
+                  style={{ marginRight: 4 }}
                 />
                 <Text
                   style={{
                     color: "#eee",
-                    fontSize: 12,
+                    fontSize: 10,
                     fontFamily: theme.fonts.medium,
                   }}
+                  numberOfLines={1}
                 >
                   {selectedSession.sessionStatus}
                 </Text>
               </View>
-
-              {/* Address (only for offline) */}
-              {selectedSession.sessionType === "offline" ? (
-                <View
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "flex-end",
-                  }}
-                >
-                  <MaterialCommunityIcons
-                    name="map-marker-outline"
-                    size={16}
-                    color="#eee"
-                    style={{ marginRight: 2 }}
-                  />
-                  <Text
-                    style={{
-                      color: "#eee",
-                      fontSize: 12,
-                      fontFamily: theme.fonts.medium,
-                    }}
-                    numberOfLines={1}
-                  >
-                    {selectedSession.sessionAddress || "N/A"}
-                  </Text>
-                </View>
-              ) : (
-                <View style={{ flex: 1 }} />
-              )}
             </View>
+
+            {/* Address (only for offline) */}
+            {selectedSession.sessionType === "offline" ? (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 4,
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="map-marker-outline"
+                  size={12}
+                  color="#eee"
+                  style={{ marginRight: 4 }}
+                />
+                <Text
+                  style={{
+                    color: "#eee",
+                    fontSize: 10,
+                    fontFamily: theme.fonts.medium,
+                    flex: 1,
+                  }}
+                  numberOfLines={1}
+                >
+                  {selectedSession.sessionAddress || "N/A"}
+                </Text>
+              </View>
+            ) : null}
           </View>
 
           {/* Diet Plan Download Button */}
@@ -331,35 +312,38 @@ const TabbedSessionDetails = ({
                 activeOpacity={0.9}
                 style={{
                   backgroundColor: "#fff",
-                  padding: 16,
-                  borderRadius: 12,
-                  marginTop: 12,
+                  paddingVertical: 10,
+                  paddingHorizontal: 12,
+                  borderRadius: 10,
+                  marginTop: 8,
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "space-between",
                 }}
               >
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
                   <MaterialCommunityIcons
                     name="food-apple"
-                    size={24}
+                    size={18}
                     color="#7C3AED"
                   />
                   <Text
                     style={{
-                      marginLeft: 10,
-                      fontSize: 16,
+                      marginLeft: 8,
+                      fontSize: 13,
                       fontWeight: "600",
                       color: "#4B5563",
                       fontFamily: theme.fonts.bold,
+                      flex: 1,
                     }}
+                    numberOfLines={1}
                   >
-                    Download your diet plan
+                    Download diet plan
                   </Text>
                 </View>
                 <Ionicons
                   name="cloud-download-outline"
-                  size={24}
+                  size={18}
                   color="#4B5563"
                 />
               </TouchableOpacity>
@@ -408,8 +392,8 @@ const TabbedSessionDetails = ({
         <FeedbackModal
           visible={showModal}
           onClose={() => setShowModal(false)}
-          onSubmit={submitFeedback}
-          sessionId={selectedSession._id}
+          currentSession={selectedSession}
+          setCurrentSession={setSelectedSession}
         />
         <CustomSnackbar
           visible={snackbarVisible}
@@ -578,22 +562,22 @@ const TabbedSessionDetails = ({
             info: (
               <MaterialIcons
                 name="info"
-                size={22}
-                color={isActive ? "#000" : "#555"}
+                size={18}
+                color={isActive ? "#FFFFFF" : "#555"}
               />
             ),
             trainer: (
               <FontAwesome5
                 name="user-tie"
-                size={20}
-                color={isActive ? "#000" : "#555"}
+                size={16}
+                color={isActive ? "#FFFFFF" : "#555"}
               />
             ),
             workout: (
               <FontAwesome
                 name="heartbeat"
-                size={22}
-                color={isActive ? "#000" : "#555"}
+                size={18}
+                color={isActive ? "#FFFFFF" : "#555"}
               />
             ),
           };
@@ -613,25 +597,25 @@ const TabbedSessionDetails = ({
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "center",
-                paddingVertical: 10,
-                marginHorizontal: 6,
-                borderRadius: 25,
+                paddingVertical: 8,
+                paddingHorizontal: 8,
+                marginHorizontal: 4,
+                borderRadius: 20,
                 backgroundColor: isActive ? "#67C694" : "#fff",
                 shadowColor: "#000",
-                shadowOffset: { width: 0, height: 3 },
-                shadowOpacity: 0.15,
-                shadowRadius: 6,
-                elevation: 4,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.12,
+                shadowRadius: 4,
+                elevation: 3,
               }}
             >
               {icons[tab]}
               <Text
                 style={{
-                  color: isActive ? "#000" : "#333",
-
-                  fontSize: 14,
+                  color: isActive ? "#FFFFFF" : "#333",
+                  fontSize: 12,
                   fontFamily: theme.fonts.bold,
-                  marginLeft: 8,
+                  marginLeft: 6,
                 }}
               >
                 {labels[tab]}

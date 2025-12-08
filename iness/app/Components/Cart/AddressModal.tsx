@@ -106,7 +106,7 @@ export default function AddressModal({
                 backgroundColor: "#FFFFFF",
                 paddingHorizontal: 20,
                 paddingTop: 20,
-                paddingBottom: 40,
+                paddingBottom: 20,
                 borderTopLeftRadius: 20,
                 borderTopRightRadius: 20,
                 maxHeight: "90%",
@@ -174,7 +174,9 @@ export default function AddressModal({
 
               <ScrollView
                 showsVerticalScrollIndicator={false}
-                style={{ maxHeight: 400 }}
+                style={{ maxHeight: 350 }}
+                contentContainerStyle={{ paddingBottom: 10 }}
+                keyboardShouldPersistTaps="handled"
               >
 
                 {/* Inputs */}
@@ -239,13 +241,13 @@ export default function AddressModal({
                   borderRadius: 30,
                   alignItems: "center",
                   justifyContent: "center",
-                  marginTop: 20,
+                  marginTop: 12,
                 }}
                 onPress={() => onConfirm(address)}
               >
                 <Text
                   style={{
-                    color: "#000",
+                    color: "#FFFFFF",
                     fontWeight: "700",
                     fontSize: 16,
                   }}

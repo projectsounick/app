@@ -13,7 +13,6 @@ import {
   Modal,
   TouchableWithoutFeedback,
   Keyboard,
-  ActivityIndicator,
 } from "react-native";
 import { Formik } from "formik";
 import { useRouter } from "expo-router";
@@ -31,31 +30,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import Checkbox from "expo-checkbox";
 import { Ionicons } from "@expo/vector-icons";
-import * as AuthSession from "expo-auth-session";
-import * as AppleAuthentication from "expo-apple-authentication";
-import * as WebBrowser from "expo-web-browser";
-import Constants from "expo-constants";
-import { registerForPushNotificationsAsync } from "@/utils/notificationUtils";
 
-// Complete the auth session
-WebBrowser.maybeCompleteAuthSession();
-
-// Get Google Client ID from environment or app config
-const getGoogleClientId = () => {
-  // Try process.env first (works with .env file)
-  if (process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID) {
-    return process.env.EXPO_PUBLIC_GOOGLE_CLIENT_ID;
-  }
-  // Fallback to app.json extra config
-  const extra = Constants.expoConfig?.extra as any;
-  return extra?.googleClientId || "";
-};
 //// Main functional component for the Login screen ///// -----------------------------------/
 const Login = () => {
   const formikRef = React.useRef<any>(null);
   const [isChecked, setIsChecked] = useState(false);
   const [policyVisible, setPolicyVisible] = useState(false);
-  const [socialLoading, setSocialLoading] = useState<"google" | "apple" | null>(null);
 
   const router = useRouter();
   /// Custom hook to handle the service call and snackbar visibility---/
@@ -97,144 +77,6 @@ const Login = () => {
     }
   }
 
-  // /// Function to handle Google Sign-In ---/
-  // const handleGoogleSignIn = async () => {
-  //   try {
-  //     setSocialLoading("google");
-  //     
-  //     // Get expo push token
-  //     const pushToken = await registerForPushNotificationsAsync();
-
-  //     // Get Google Client ID from config
-  //     const googleClientId = getGoogleClientId();
-  //     if (!googleClientId) {
-  //       setSnackbarMessage("Google Sign-In is not configured. Please set Google Client ID in app.json or .env file");
-  //       setSnackbarVisible(true);
-  //       setSocialLoading(null);
-  //       return;
-  //     }
-
-  //     // Configure Google OAuth redirect URI
-  //     const redirectUri = AuthSession.makeRedirectUri();
-
-  //     // Google OAuth discovery endpoints
-  //     const discovery = {
-  //       authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-  //       tokenEndpoint: "https://oauth2.googleapis.com/token",
-  //       revocationEndpoint: "https://oauth2.googleapis.com/revoke",
-  //     };
-
-  //     const request = new AuthSession.AuthRequest({
-  //       clientId: googleClientId,
-  //       scopes: ["openid", "profile", "email"],
-  //       responseType: AuthSession.ResponseType.IdToken,
-  //       redirectUri,
-  //       usePKCE: false,
-  //     });
-
-  //     const result = await request.promptAsync(discovery);
-
-  //     if (result.type === "success") {
-  //       const { id_token } = result.params;
-  //       
-  //       if (id_token) {
-  //         const response = await userService.googleSignIn({
-  //           idToken: id_token,
-  //           expoPushToken: pushToken,
-  //         });
-
-  //         if (response?.success && response?.data) {
-  //           await asyncStorageUtils.storeUserInAsyncStorage(response.data);
-  //           
-  //           // Navigate based on onboarding status
-  //           if (response.data.onboarding) {
-  //             router.replace("/(tabs)/dashboard/tabs");
-  //           } else {
-  //             router.replace("/Onboarding");
-  //           }
-  //         } else {
-  //           setSnackbarMessage(response?.message || "Google sign-in failed");
-  //           setSnackbarVisible(true);
-  //         }
-  //       }
-  //     } else if (result.type === "error") {
-  //       setSnackbarMessage("Google sign-in was cancelled");
-  //       setSnackbarVisible(true);
-  //     }
-  //   } catch (error: any) {
-  //     console.error("Google sign-in error:", error);
-  //     setSnackbarMessage(error.message || "Google sign-in failed");
-  //     setSnackbarVisible(true);
-  //   } finally {
-  //     setSocialLoading(null);
-  //   }
-  // };
-
-  // /// Function to handle Apple Sign-In ---/
-  // const handleAppleSignIn = async () => {
-  //   try {
-  //     setSocialLoading("apple");
-  //     
-  //     // Check if Apple Authentication is available
-  //     const isAvailable = await AppleAuthentication.isAvailableAsync();
-  //     if (!isAvailable) {
-  //       setSnackbarMessage("Apple Sign-In is not available on this device");
-  //       setSnackbarVisible(true);
-  //       setSocialLoading(null);
-  //       return;
-  //     }
-
-  //     // Get expo push token
-  //     const pushToken = await registerForPushNotificationsAsync();
-
-  //     // Request Apple authentication
-  //     const credential = await AppleAuthentication.signInAsync({
-  //       requestedScopes: [
-  //         AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-  //         AppleAuthentication.AppleAuthenticationScope.EMAIL,
-  //       ],
-  //     });
-
-  //     if (credential.identityToken) {
-  //       const response = await userService.appleSignIn({
-  //         identityToken: credential.identityToken,
-  //         userIdentifier: credential.user,
-  //         email: credential.email || undefined,
-  //         fullName: credential.fullName
-  //           ? {
-  //               givenName: credential.fullName.givenName || undefined,
-  //               familyName: credential.fullName.familyName || undefined,
-  //             }
-  //           : undefined,
-  //         expoPushToken: pushToken,
-  //       });
-
-  //       if (response?.success && response?.data) {
-  //         await asyncStorageUtils.storeUserInAsyncStorage(response.data);
-  //         
-  //         // Navigate based on onboarding status
-  //         if (response.data.onboarding) {
-  //           router.replace("/(tabs)/dashboard/tabs");
-  //         } else {
-  //           router.replace("/Onboarding");
-  //         }
-  //       } else {
-  //         setSnackbarMessage(response?.message || "Apple sign-in failed");
-  //         setSnackbarVisible(true);
-  //       }
-  //     }
-  //   } catch (error: any) {
-  //     if (error.code === "ERR_CANCELED") {
-  //       // User cancelled, do nothing
-  //     } else {
-  //       console.error("Apple sign-in error:", error);
-  //       setSnackbarMessage(error.message || "Apple sign-in failed");
-  //       setSnackbarVisible(true);
-  //     }
-  //   } finally {
-  //     setSocialLoading(null);
-  //   }
-  // };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -385,128 +227,6 @@ const Login = () => {
                     </>
                   )}
                 </Formik>
-
-                {/* Social Sign-In Buttons - Commented out for now
-                <View style={{ marginTop: 24, width: "100%" }}>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginVertical: 20,
-                    }}
-                  >
-                    <View
-                      style={{
-                        flex: 1,
-                        height: 1,
-                        backgroundColor: "#E0E0E0",
-                      }}
-                    />
-                    <Text
-                      style={{
-                        marginHorizontal: 16,
-                        fontSize: 14,
-                        color: "#666",
-                        fontWeight: "500",
-                      }}
-                    >
-                      OR
-                    </Text>
-                    <View
-                      style={{
-                        flex: 1,
-                        height: 1,
-                        backgroundColor: "#E0E0E0",
-                      }}
-                    />
-                  </View>
-
-                  <View
-                    style={{
-                      flexDirection: Platform.OS === "ios" ? "row" : "column",
-                      width: "100%",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <TouchableOpacity
-                      onPress={handleGoogleSignIn}
-                      disabled={socialLoading !== null}
-                      activeOpacity={0.7}
-                      style={{
-                        width: Platform.OS === "ios" ? "48%" : "100%",
-                        height: 50,
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        backgroundColor: "#FFFFFF",
-                        borderWidth: 1,
-                        borderColor: "#E0E0E0",
-                        borderRadius: 16,
-                        paddingVertical: 10,
-                        paddingHorizontal: 12,
-                        marginRight: Platform.OS === "ios" ? 6 : 0,
-                        marginBottom: Platform.OS === "ios" ? 0 : 12,
-                        shadowColor: "#000",
-                        shadowOffset: {
-                          width: 0,
-                          height: 1,
-                        },
-                        shadowOpacity: 0.05,
-                        shadowRadius: 2,
-                        elevation: 2,
-                        opacity: socialLoading !== null ? 0.6 : 1,
-                      }}
-                    >
-                      {socialLoading === "google" ? (
-                        <ActivityIndicator size="small" color="#4285F4" />
-                      ) : (
-                        <Ionicons name="logo-google" size={22} color="#4285F4" />
-                      )}
-                    </TouchableOpacity>
-
-                    {Platform.OS === "ios" && (
-                      <TouchableOpacity
-                        onPress={handleAppleSignIn}
-                        disabled={socialLoading !== null}
-                        activeOpacity={0.7}
-                        style={{
-                          width: "48%",
-                          height: 50,
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          backgroundColor: "#000000",
-                          borderRadius: 16,
-                          paddingVertical: 10,
-                          paddingHorizontal: 12,
-                          marginLeft: 6,
-                          shadowColor: "#000",
-                          shadowOffset: {
-                            width: 0,
-                            height: 1,
-                          },
-                          shadowOpacity: 0.1,
-                          shadowRadius: 2,
-                          elevation: 2,
-                          opacity: socialLoading !== null ? 0.6 : 1,
-                        }}
-                      >
-                        {socialLoading === "apple" ? (
-                          <ActivityIndicator size="small" color="#FFFFFF" />
-                        ) : (
-                          <Ionicons
-                            name="logo-apple"
-                            size={22}
-                            color="#FFFFFF"
-                          />
-                        )}
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                </View>
-                */}
               </View>
 
               <View style={{ marginTop: 24 }}>

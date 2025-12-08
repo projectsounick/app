@@ -188,7 +188,7 @@ export default function TrainScreen() {
             style={{ flex: 1 }}
             contentContainerStyle={{
               paddingTop: 10,
-              paddingBottom: 10,
+              paddingBottom: 100,
               paddingHorizontal: 16,
             }}
             onScroll={Animated.event(
@@ -196,6 +196,8 @@ export default function TrainScreen() {
               { useNativeDriver: false }
             )}
             scrollEventThrottle={16}
+            showsVerticalScrollIndicator={true}
+            nestedScrollEnabled={true}
           >
             {activeTab === "current" ? (
               <CurrentPlans isActive={true} />

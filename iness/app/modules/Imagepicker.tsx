@@ -213,7 +213,7 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = () => {
               style={styles.iconButton}
               activeOpacity={0.8}
             >
-              <Ionicons name={btn.icon} size={24} color="#fff" />
+              <Ionicons name={btn.icon} size={20} color="#fff" />
             </TouchableOpacity>
           </Animated.View>
         );
@@ -229,7 +229,7 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = () => {
         ) : (
           <Ionicons
             name={menuOpen ? "close" : "flash-outline"}
-            size={30}
+            size={26}
             color="#fff"
           />
         )}
@@ -249,9 +249,9 @@ const styles = StyleSheet.create({
     paddingBottom: 0, // distance from bottom
   },
   floatingButton: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     backgroundColor: "#67c694",
     justifyContent: "center",
     alignItems: "center",
@@ -266,9 +266,9 @@ const styles = StyleSheet.create({
     zIndex: 99,
   },
   iconButton: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: "#67c694",
     justifyContent: "center",
     alignItems: "center",
