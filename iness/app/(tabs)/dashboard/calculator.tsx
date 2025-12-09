@@ -83,7 +83,7 @@ export default function CalculatorScreen() {
         resizeMode="cover"
       >
         <SafeAreaView
-          style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+          style={{ flex: 1, backgroundColor: "transparent" }}
           edges={["left", "right"]}
         >
           <View

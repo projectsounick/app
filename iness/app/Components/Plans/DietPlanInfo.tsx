@@ -51,7 +51,7 @@ const DietPlanInfo: React.FC<Props> = ({
 
   return (
     <>
-      <View style={{ flex: 1, backgroundColor: "#fff", paddingHorizontal: 20 }}>
+      <View style={{ flex: 1, backgroundColor: "#F8F8F8", paddingHorizontal: 16 }}>
         <ScrollView
           contentContainerStyle={{
             paddingTop: 20,
@@ -59,46 +59,148 @@ const DietPlanInfo: React.FC<Props> = ({
           }}
           showsVerticalScrollIndicator={false}
         >
-          <Text
+          {/* Overview Card */}
+          <View
             style={{
-              fontSize: 20,
-              fontWeight: "700",
-              marginBottom: 12,
-              color: "#000",
+              backgroundColor: "#FFFFFF",
+              borderRadius: 20,
+              padding: 20,
+              marginBottom: 16,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.05,
+              shadowRadius: 4,
+              elevation: 2,
+              borderWidth: 1,
+              borderColor: "#F5F5F5",
             }}
           >
-            Overview
-          </Text>
-          <Text
-            style={{
-              fontSize: 15,
-              color: "#333",
-              lineHeight: 22,
-              marginBottom: 20,
-            }}
-          >
-            {planDetails?.desc}
-          </Text>
-
-          {/* Desc Items */}
-          {planDetails?.descItems && (
-            <View>
-              <Text
-                style={{ fontSize: 18, fontWeight: "bold", marginBottom: 12 }}
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <View
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: "#F3EDFF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 12,
+                }}
               >
-                What it provides.
+                <Ionicons name="information-circle" size={18} color="#9747FF" />
+              </View>
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: "700",
+                  color: "#000",
+                }}
+              >
+                Overview
               </Text>
+            </View>
+            <Text
+              style={{
+                fontSize: 15,
+                color: "#666",
+                lineHeight: 22,
+              }}
+            >
+              {planDetails?.desc}
+            </Text>
+          </View>
+
+          {/* Desc Items Card */}
+          {planDetails?.descItems && (
+            <View
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderRadius: 20,
+                padding: 20,
+                marginBottom: 16,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+                borderWidth: 1,
+                borderColor: "#F5F5F5",
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 16,
+                }}
+              >
+                <View
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    backgroundColor: "#E8F5E9",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 12,
+                  }}
+                >
+                  <Ionicons name="checkmark-circle" size={18} color="#67C694" />
+                </View>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: "700",
+                    color: "#000",
+                  }}
+                >
+                  What it provides
+                </Text>
+              </View>
               {planDetails.descItems.map((item: string, idx: number) => (
                 <View
                   key={idx}
                   style={{
                     flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 10,
+                    alignItems: "flex-start",
+                    marginBottom: 14,
                   }}
                 >
-                  <Ionicons name="checkmark-circle" size={18} color="#22C55E" />
-                  <Text style={{ marginLeft: 8, fontSize: 14 }}>{item}</Text>
+                  <View
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: 12,
+                      backgroundColor: "#E8F5E9",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 12,
+                      marginTop: 1,
+                    }}
+                  >
+                    <Ionicons
+                      name="checkmark"
+                      size={14}
+                      color="#67C694"
+                    />
+                  </View>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      color: "#333",
+                      flex: 1,
+                      lineHeight: 22,
+                      fontWeight: "500",
+                    }}
+                  >
+                    {item}
+                  </Text>
                 </View>
               ))}
             </View>
@@ -110,27 +212,46 @@ const DietPlanInfo: React.FC<Props> = ({
               onPress={() => Linking.openURL(currentPlan.dietPlanUrl)}
               activeOpacity={0.9}
               style={{
-                backgroundColor: theme.colors.cardLight,
-                padding: 16,
-                borderRadius: 16,
-                marginTop: 24,
+                backgroundColor: "#FFFFFF",
+                padding: 20,
+                borderRadius: 20,
+                marginTop: 8,
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "space-between",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+                borderWidth: 1,
+                borderColor: "#F5F5F5",
               }}
             >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <MaterialCommunityIcons
-                  name="food-apple"
-                  size={24}
-                  color="#7C3AED"
-                />
+              <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                <View
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
+                    backgroundColor: "#E8F5E9",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 12,
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="food-apple"
+                    size={20}
+                    color="#67C694"
+                  />
+                </View>
                 <Text
                   style={{
-                    marginLeft: 10,
                     fontSize: 16,
                     fontWeight: "600",
-                    color: "#4B5563",
+                    color: "#000",
+                    flex: 1,
                   }}
                 >
                   Download your diet plan
@@ -138,8 +259,8 @@ const DietPlanInfo: React.FC<Props> = ({
               </View>
               <Ionicons
                 name="cloud-download-outline"
-                size={24}
-                color="#4B5563"
+                size={22}
+                color="#9747FF"
               />
             </TouchableOpacity>
           )}
@@ -160,79 +281,116 @@ const DietPlanInfo: React.FC<Props> = ({
             setBottomSectionHeight(event.nativeEvent.layout.height)
           }
         >
-          <LinearGradient
-            colors={["#140A21", "#522987"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+          <View
             style={{
-              padding: 20,
+              backgroundColor: "#FFFFFF",
+              paddingTop: 12,
+              paddingLeft: Math.min(20, screenWidth * 0.05),
+              paddingRight: Math.min(20, screenWidth * 0.05),
+              paddingBottom: 12,
               borderTopLeftRadius: 24,
               borderTopRightRadius: 24,
-              flexDirection: "column",
-              alignItems: "center",
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: -2 },
+              shadowOpacity: 0.1,
+              shadowRadius: 8,
+              elevation: 8,
+              borderTopWidth: 1,
+              borderLeftWidth: 1,
+              borderRightWidth: 1,
+              borderColor: "#F5F5F5",
             }}
           >
             <View
               style={{
                 flexDirection: "row",
                 justifyContent: "center",
-                width: 310,
-                gap: 10,
+                marginBottom: 12,
               }}
             >
               <TouchableOpacity
                 onPress={() => {
                   setSelectedPlanItem(currentPlan._id);
                 }}
-                activeOpacity={0.8}
+                activeOpacity={0.7}
                 style={{
-                  flex: 1,
+                  width: "100%",
+                  maxWidth: Math.min(400, screenWidth * 0.9),
                   backgroundColor:
                     selectedPlanItem === currentPlan._id
-                      ? "#E0E7FF"
-                      : "#F3F4F6",
-                  borderWidth: selectedPlanItem === currentPlan._id ? 2 : 0,
+                      ? "#F3EDFF"
+                      : "#FFFFFF",
+                  borderWidth: selectedPlanItem === currentPlan._id ? 2 : 1.5,
                   borderColor:
                     selectedPlanItem === currentPlan._id
-                      ? "#8B5CF6"
-                      : "transparent",
-                  borderRadius: 16,
-                  padding: 12,
-                  alignItems: "center",
+                      ? "#9747FF"
+                      : "#E0E0E0",
+                  borderRadius: 14,
+                  padding: 10,
+                  paddingVertical: 12,
+                  shadowColor: selectedPlanItem === currentPlan._id ? "#9747FF" : "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: selectedPlanItem === currentPlan._id ? 0.15 : 0.08,
+                  shadowRadius: selectedPlanItem === currentPlan._id ? 6 : 4,
+                  elevation: selectedPlanItem === currentPlan._id ? 4 : 2,
+                  transform: [{ scale: selectedPlanItem === currentPlan._id ? 1.02 : 1 }],
                 }}
               >
                 <View
                   style={{
-                    width: "100%",
                     flexDirection: "row",
                     justifyContent: "space-between",
-                    alignItems: "center",
+                    alignItems: "flex-start",
+                    marginBottom: 6,
                   }}
                 >
-                  <Text style={{ fontSize: 14, fontWeight: "600" }}>
-                    {planDetails.duration} {planDetails.durationType}
-                  </Text>
+                  <View style={{ flex: 1 }}>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontWeight: "700",
+                        color: "#000",
+                        marginBottom: 1,
+                      }}
+                    >
+                      {planDetails.duration} {planDetails.durationType}
+                    </Text>
+                  </View>
                   <View
                     style={{
-                      backgroundColor: "#9333EA",
-                      borderRadius: 999,
-                      padding: 2,
+                      width: 20,
+                      height: 20,
+                      borderRadius: 10,
+                      backgroundColor: selectedPlanItem === currentPlan._id ? "#9747FF" : "#E0E0E0",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderWidth: selectedPlanItem === currentPlan._id ? 0 : 2,
+                      borderColor: "#9747FF",
                     }}
                   >
-                    <Ionicons name="checkmark" size={14} color="white" />
+                    {selectedPlanItem === currentPlan._id && (
+                      <Ionicons name="checkmark" size={12} color="#FFFFFF" />
+                    )}
                   </View>
                 </View>
-                <Text
+                <View
                   style={{
-                    fontSize: 18,
-                    fontWeight: "700",
-                    marginVertical: 4,
-                    textAlign: "left",
-                    width: "100%",
+                    flexDirection: "row",
+                    alignItems: "baseline",
+                    marginBottom: 6,
                   }}
                 >
-                  ₹ {planDetails.price}
-                </Text>
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: "700",
+                      color: "#9747FF",
+                      marginRight: 4,
+                    }}
+                  >
+                    ₹{planDetails.price}
+                  </Text>
+                </View>
               </TouchableOpacity>
             </View>
 
@@ -244,7 +402,7 @@ const DietPlanInfo: React.FC<Props> = ({
               }}
               height={50}
             />
-          </LinearGradient>
+          </View>
         </Animated.View>
       )}
     </>

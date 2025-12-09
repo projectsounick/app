@@ -59,7 +59,7 @@ const PlansInfo: React.FC<Props> = ({
   return (
     <>
       {/* Main Scrollable Section */}
-      <View style={{ flex: 1, backgroundColor: "#fff", paddingHorizontal: 20 }}>
+      <View style={{ flex: 1, backgroundColor: "#F8F8F8", paddingHorizontal: 16 }}>
         <ScrollView
           contentContainerStyle={{
             paddingTop: 20,
@@ -67,50 +67,143 @@ const PlansInfo: React.FC<Props> = ({
           }}
           showsVerticalScrollIndicator={false}
         >
-          {/* Overview */}
-          <Text
+          {/* Overview Card */}
+          <View
             style={{
-              fontSize: 20,
-              fontWeight: "700",
-              marginBottom: 12,
-              color: "#000",
+              backgroundColor: "#FFFFFF",
+              borderRadius: 20,
+              padding: 20,
+              marginBottom: 16,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.05,
+              shadowRadius: 4,
+              elevation: 2,
+              borderWidth: 1,
+              borderColor: "#F5F5F5",
             }}
           >
-            Overview
-          </Text>
-          <Text
-            style={{
-              fontSize: 15,
-              color: "#333",
-              lineHeight: 22,
-              marginBottom: 20,
-            }}
-          >
-            {currentPlan?.planType.desc}
-          </Text>
-
-          <View>
-            <Text
-              style={{ fontSize: 18, fontWeight: "bold", marginBottom: 12 }}
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
             >
-              What it provides.
+              <View
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: "#F3EDFF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 12,
+                }}
+              >
+                <Ionicons name="information-circle" size={18} color="#9747FF" />
+              </View>
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: "700",
+                  color: "#000",
+                }}
+              >
+                Overview
+              </Text>
+            </View>
+            <Text
+              style={{
+                fontSize: 15,
+                color: "#666",
+                lineHeight: 22,
+              }}
+            >
+              {currentPlan?.planType.desc}
             </Text>
+          </View>
+
+          {/* What it provides Card */}
+          <View
+            style={{
+              backgroundColor: "#FFFFFF",
+              borderRadius: 20,
+              padding: 20,
+              marginBottom: 16,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.05,
+              shadowRadius: 4,
+              elevation: 2,
+              borderWidth: 1,
+              borderColor: "#F5F5F5",
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 16,
+              }}
+            >
+              <View
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: "#E8F5E9",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 12,
+                }}
+              >
+                <Ionicons name="checkmark-circle" size={18} color="#67C694" />
+              </View>
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: "700",
+                  color: "#000",
+                }}
+              >
+                What it provides
+              </Text>
+            </View>
             {currentPlan?.descItems.map((item, idx) => (
               <View
                 key={idx}
                 style={{
                   flexDirection: "row",
-                  alignItems: "center",
-                  marginBottom: 10,
+                  alignItems: "flex-start",
+                  marginBottom: 14,
                 }}
               >
-                <Ionicons name="checkmark-circle" size={18} color="#22C55E" />
+                <View
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: 12,
+                    backgroundColor: "#E8F5E9",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 12,
+                    marginTop: 1,
+                  }}
+                >
+                  <Ionicons
+                    name="checkmark"
+                    size={14}
+                    color="#67C694"
+                  />
+                </View>
                 <Text
                   style={{
-                    marginLeft: 8,
                     fontSize: 14,
-                    flexShrink: 1,
-                    flexWrap: "wrap",
+                    color: "#333",
+                    flex: 1,
+                    lineHeight: 22,
+                    fontWeight: "500",
                   }}
                 >
                   {item}
@@ -122,37 +215,80 @@ const PlansInfo: React.FC<Props> = ({
             <DietPlanInfoModal dietPlan={currentPlan.dietPlanDetails} />
           ) : null}
           {currentPlan?.otherImages?.length > 0 && (
-            <>
-              <Text
+            <View
+              style={{
+                backgroundColor: "#FFFFFF",
+                borderRadius: 20,
+                padding: 20,
+                marginBottom: 16,
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+                borderWidth: 1,
+                borderColor: "#F5F5F5",
+              }}
+            >
+              <View
                 style={{
-                  fontSize: 18,
-                  fontWeight: "bold",
-                  marginVertical: 16,
-                  color: "#000",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 16,
                 }}
               >
-                Plan Gallery
-              </Text>
+                <View
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    backgroundColor: "#F3EDFF",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 12,
+                  }}
+                >
+                  <Ionicons name="images" size={18} color="#9747FF" />
+                </View>
+                <Text
+                  style={{
+                    fontSize: 18,
+                    fontWeight: "700",
+                    color: "#000",
+                  }}
+                >
+                  Plan Gallery
+                </Text>
+              </View>
 
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingVertical: 10 }}
+                contentContainerStyle={{ paddingVertical: 4 }}
               >
                 {currentPlan.otherImages.map(
                   (imgUrl: string, index: number) => (
                     <TouchableOpacity
                       key={index}
                       onPress={() => setSelectedImage(imgUrl)}
-                      style={{ marginRight: 12 }}
+                      style={{
+                        marginRight: 12,
+                        borderRadius: 12,
+                        overflow: "hidden",
+                        backgroundColor: "#F8F8F8",
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 4,
+                        elevation: 2,
+                      }}
                     >
                       <Image
                         source={{ uri: imgUrl }}
                         style={{
-                          width: 120,
-                          height: 80,
-                          borderRadius: 8,
-                          backgroundColor: "#eee",
+                          width: 140,
+                          height: 100,
+                          borderRadius: 12,
                         }}
                         resizeMode="cover"
                       />
@@ -160,45 +296,45 @@ const PlansInfo: React.FC<Props> = ({
                   )
                 )}
               </ScrollView>
-
-              {/* Modal to view full image */}
-              <Modal visible={!!selectedImage} transparent animationType="fade">
-                <View
-                  style={{
-                    flex: 1,
-                    backgroundColor: "rgba(0,0,0,0.85)",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  <TouchableOpacity
-                    style={{
-                      position: "absolute",
-                      top: 40,
-                      right: 20,
-                      zIndex: 2,
-                    }}
-                    onPress={() => setSelectedImage(null)}
-                  >
-                    <Ionicons name="close" size={30} color="#fff" />
-                  </TouchableOpacity>
-                  {selectedImage ? (
-                    <Image
-                      source={{ uri: selectedImage }}
-                      style={{
-                        width: "90%",
-                        height: "70%",
-                        resizeMode: "contain",
-                        borderRadius: 12,
-                      }}
-                    />
-                  ) : null}
-                </View>
-              </Modal>
-            </>
+            </View>
           )}
         </ScrollView>
       </View>
+
+      {/* Modal to view full image */}
+      <Modal visible={!!selectedImage} transparent animationType="fade">
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.85)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              position: "absolute",
+              top: 40,
+              right: 20,
+              zIndex: 2,
+            }}
+            onPress={() => setSelectedImage(null)}
+          >
+            <Ionicons name="close" size={30} color="#fff" />
+          </TouchableOpacity>
+          {selectedImage ? (
+            <Image
+              source={{ uri: selectedImage }}
+              style={{
+                width: "90%",
+                height: "70%",
+                resizeMode: "contain",
+                borderRadius: 12,
+              }}
+            />
+          ) : null}
+        </View>
+      </Modal>
 
       {/* Fixed Bottom Section - Full Width Gradient */}
       <Animated.View
@@ -213,105 +349,160 @@ const PlansInfo: React.FC<Props> = ({
           setBottomSectionHeight(event.nativeEvent.layout.height);
         }}
       >
-        <LinearGradient
-          colors={["#140A21", "#522987"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+        <View
           style={{
-            paddingTop: 20,
-            paddingLeft: 20,
-            paddingRight: 20,
+            backgroundColor: "#FFFFFF",
+            paddingTop: 12,
+            paddingLeft: Math.min(20, screenWidth * 0.05),
+            paddingRight: Math.min(20, screenWidth * 0.05),
+            paddingBottom: 12,
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
+            shadowColor: "#000",
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 8,
+            borderTopWidth: 1,
+            borderLeftWidth: 1,
+            borderRightWidth: 1,
+            borderColor: "#F5F5F5",
           }}
         >
           {/* Pricing Cards */}
           <View
             style={{
-              flexDirection: "row",
+              flexDirection: currentPlan?.planItems.length === 1 ? "row" : "row",
               justifyContent:
                 currentPlan?.planItems.length === 1
                   ? "center"
                   : "space-between",
               gap: 10,
+              marginBottom: 12,
             }}
           >
             {currentPlan?.planItems.map((plan, idx) => {
               const isSelected = selectedPlanItem === plan._id;
               const isSingle = currentPlan.planItems.length === 1;
+              const cardWidth = isSingle 
+                ? Math.min(180, screenWidth * 0.45)
+                : (screenWidth - Math.min(40, screenWidth * 0.1) * 2 - 10) / 2;
 
               return (
                 <TouchableOpacity
                   key={idx}
                   onPress={() => setSelectedPlanItem(plan._id)}
-                  activeOpacity={0.8}
+                  activeOpacity={0.7}
                   style={{
-                    width: isSingle ? 150 : "100%",
+                    width: isSingle ? cardWidth : undefined,
                     flex: isSingle ? 0 : 1,
-                    backgroundColor: isSelected ? "#E0E7FF" : "#F3F4F6",
-                    borderWidth: isSelected ? 2 : 0,
-                    borderColor: isSelected ? "#8B5CF6" : "transparent",
-                    borderRadius: 16,
-                    padding: 12,
-                    alignItems: "center",
+                    backgroundColor: isSelected ? "#F3EDFF" : "#FFFFFF",
+                    borderWidth: isSelected ? 2 : 1.5,
+                    borderColor: isSelected ? "#9747FF" : "#E0E0E0",
+                    borderRadius: 14,
+                    padding: 10,
+                    paddingVertical: 12,
+                    shadowColor: isSelected ? "#9747FF" : "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: isSelected ? 0.15 : 0.08,
+                    shadowRadius: isSelected ? 6 : 4,
+                    elevation: isSelected ? 4 : 2,
+                    transform: [{ scale: isSelected ? 1.02 : 1 }],
                   }}
                 >
                   <View
                     style={{
-                      width: "100%",
                       flexDirection: "row",
                       justifyContent: "space-between",
-                      alignItems: "center",
+                      alignItems: "flex-start",
+                      marginBottom: 6,
+                    }}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={{
+                          fontSize: 12,
+                          fontWeight: "700",
+                          color: "#000",
+                          marginBottom: 1,
+                        }}
+                      >
+                        {plan.duration} {plan.durationType}
+                      </Text>
+                      {plan.sessionCount != null && (
+                        <Text
+                          style={{
+                            fontSize: 10,
+                            color: "#666",
+                            fontWeight: "400",
+                          }}
+                        >
+                          {plan.sessionCount} sessions
+                        </Text>
+                      )}
+                    </View>
+                    <View
+                      style={{
+                        width: 20,
+                        height: 20,
+                        borderRadius: 10,
+                        backgroundColor: isSelected ? "#9747FF" : "#E0E0E0",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        borderWidth: isSelected ? 0 : 2,
+                        borderColor: "#9747FF",
+                      }}
+                    >
+                      {isSelected && (
+                        <Ionicons name="checkmark" size={12} color="#FFFFFF" />
+                      )}
+                    </View>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "baseline",
+                      marginBottom: 6,
                     }}
                   >
                     <Text
                       style={{
-                        fontSize: 12,
-                        fontWeight: "600",
-                        color: "#111827",
+                        fontSize: 20,
+                        fontWeight: "700",
+                        color: "#9747FF",
+                        marginRight: 4,
                       }}
                     >
-                      {plan.duration} {plan.durationType}
-                      {plan.sessionCount != null && (
-                        <Text style={{ fontSize: 8, color: "#6B7280" }}>
-                          {" "}
-                          ({plan.sessionCount} sessions)
-                        </Text>
-                      )}
+                      ₹{plan.price}
                     </Text>
-                    {isSelected && (
-                      <View
-                        style={{
-                          backgroundColor: "#9333EA",
-                          borderRadius: 999,
-                          padding: 2,
-                        }}
-                      >
-                        <Ionicons name="checkmark" size={14} color="white" />
-                      </View>
-                    )}
                   </View>
-                  <Text
+                  <View
                     style={{
-                      fontSize: 18,
-                      fontWeight: "700",
-                      marginVertical: 4,
-                      textAlign: "left",
-                      width: "100%",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      backgroundColor: isSelected ? "#FFFFFF" : "#F8F8F8",
+                      paddingHorizontal: 6,
+                      paddingVertical: 3,
+                      borderRadius: 6,
+                      alignSelf: "flex-start",
                     }}
                   >
-                    ₹ {plan.price}
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: 12,
-                      color: theme.colors.dark,
-                      textAlign: "left",
-                      width: "100%",
-                    }}
-                  >
-                    {plan.isOnline ? "Online" : "Offline"}
-                  </Text>
+                    <Ionicons
+                      name={plan.isOnline ? "videocam" : "location"}
+                      size={11}
+                      color={isSelected ? "#9747FF" : "#666"}
+                      style={{ marginRight: 3 }}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 10,
+                        color: isSelected ? "#9747FF" : "#666",
+                        fontWeight: "600",
+                      }}
+                    >
+                      {plan.isOnline ? "Online" : "Offline"}
+                    </Text>
+                  </View>
                 </TouchableOpacity>
               );
             })}
@@ -325,7 +516,7 @@ const PlansInfo: React.FC<Props> = ({
             }}
             height={50}
           />
-        </LinearGradient>
+        </View>
       </Animated.View>
     </>
   );

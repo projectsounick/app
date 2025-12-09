@@ -12,12 +12,12 @@ import {
 } from "react-native";
 
 import { Calendar, DateData } from "react-native-calendars";
-import Icon from "react-native-vector-icons/MaterialIcons";
 import {
   AntDesign,
   Entypo,
   FontAwesome5,
   MaterialIcons,
+  Ionicons,
 } from "@expo/vector-icons";
 
 import useGetDataHook from "@/hooks/useFetchHook";
@@ -104,24 +104,76 @@ function SessionCalendar({
 
     return (
       <View style={styles.card}>
-        {planTitle && <Text style={styles.planTitle}>{planTitle}</Text>}
+        {planTitle && (
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              marginBottom: 16,
+            }}
+          >
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: "#F3EDFF",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 12,
+              }}
+            >
+              <Ionicons name="calendar" size={18} color="#9747FF" />
+            </View>
+            <Text style={styles.planTitle}>{planTitle}</Text>
+          </View>
+        )}
 
         {/* Header */}
         <View style={styles.headerRow}>
           <View style={styles.headerLeft}>
-            <View style={[styles.dot, { backgroundColor: session.color }]} />
+            <View
+              style={{
+                width: 24,
+                height: 24,
+                borderRadius: 12,
+                backgroundColor: session.color || "#9747FF",
+                marginRight: 10,
+              }}
+            />
             <Text style={styles.sessionType}>
               {session.sessionType.toUpperCase()} Session
             </Text>
           </View>
-          <Text style={[styles.sessionStatus, { color: session.color }]}>
-            {session.sessionStatus}
-          </Text>
+          <View
+            style={{
+              backgroundColor: session.color ? `${session.color}20` : "#F3EDFF",
+              paddingHorizontal: 10,
+              paddingVertical: 4,
+              borderRadius: 12,
+            }}
+          >
+            <Text style={[styles.sessionStatus, { color: session.color || "#9747FF" }]}>
+              {session.sessionStatus}
+            </Text>
+          </View>
         </View>
 
         {/* Date & Time */}
         <View style={styles.infoRow}>
-          <MaterialIcons name="date-range" size={20} color="#6c5ce7" />
+          <View
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 14,
+              backgroundColor: "#F3EDFF",
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 10,
+            }}
+          >
+            <MaterialIcons name="date-range" size={16} color="#9747FF" />
+          </View>
           <Text style={styles.infoText}>
             {new Date(session.sessionDate).toLocaleString("en-IN", {
               timeZone: "Asia/Kolkata",
@@ -134,7 +186,19 @@ function SessionCalendar({
           </Text>
         </View>
         <View style={styles.infoRow}>
-          <Entypo name="clock" size={20} color="#6c5ce7" />
+          <View
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 14,
+              backgroundColor: "#F3EDFF",
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 10,
+            }}
+          >
+            <Entypo name="clock" size={16} color="#9747FF" />
+          </View>
           <Text style={styles.infoText}>
             {session.sessionTime} ({session.sessionDuration})
           </Text>
@@ -142,7 +206,19 @@ function SessionCalendar({
 
         {session.sessionAddress && (
           <View style={styles.infoRow}>
-            <FontAwesome5 name="map-marker-alt" size={20} color="#6c5ce7" />
+            <View
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: 14,
+                backgroundColor: "#F3EDFF",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 10,
+              }}
+            >
+              <FontAwesome5 name="map-marker-alt" size={14} color="#9747FF" />
+            </View>
             <Text style={styles.infoText}>{session.sessionAddress}</Text>
           </View>
         )}
@@ -150,13 +226,27 @@ function SessionCalendar({
         {/* Trainer Info */}
         {session.trainer && (
           <View style={styles.trainerRow}>
-            {session.trainer.profilePic && (
+            {session.trainer.profilePic ? (
               <Image
                 source={{ uri: session.trainer.profilePic }}
                 style={styles.trainerImage}
               />
+            ) : (
+              <View
+                style={{
+                  width: 50,
+                  height: 50,
+                  borderRadius: 25,
+                  backgroundColor: "#F3EDFF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 12,
+                }}
+              >
+                <Ionicons name="person" size={24} color="#9747FF" />
+              </View>
             )}
-            <View>
+            <View style={{ flex: 1 }}>
               <Text style={styles.trainerName}>{session.trainer.name}</Text>
               <Text style={styles.trainerEmail}>{session.trainer.email}</Text>
             </View>
@@ -172,6 +262,12 @@ function SessionCalendar({
           }}
           style={styles.feedbackButton}
         >
+          <Ionicons
+            name="chatbubble-ellipses"
+            size={18}
+            color="#FFFFFF"
+            style={{ marginRight: 8 }}
+          />
           <Text style={styles.feedbackButtonText}>
             {session.sessionFeedback ? "Edit Feedback" : "Add Feedback"}
           </Text>
@@ -184,14 +280,25 @@ function SessionCalendar({
     <Modal visible={isVisible} animationType="slide" transparent={true}>
       <TouchableOpacity activeOpacity={1} style={styles.backdrop}>
         <View style={styles.bottomSheetContainer}>
+          {/* Drag Handle */}
+          <View style={styles.dragHandle} />
+          
           {/* Header */}
           <View style={styles.modalHeader}>
             {selectedDate && (
               <TouchableOpacity
                 onPress={() => setSelectedDate(null)}
-                style={{ marginRight: 16 }}
+                style={{
+                  marginRight: 16,
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: "#F5F5F5",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
               >
-                <AntDesign name="arrowleft" size={24} color="#333" />
+                <AntDesign name="arrowleft" size={18} color="#666" />
               </TouchableOpacity>
             )}
             <Text style={styles.modalTitle}>
@@ -201,24 +308,28 @@ function SessionCalendar({
               onPress={() => dispatch(setCalendarSheetOpen(false))}
               style={{
                 marginLeft: "auto",
-                padding: 6,
-                backgroundColor: "#eee", // circular background color
-                borderRadius: 20, // make it circular
-                width: 36,
-                height: 36,
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: "#FFFFFF",
                 justifyContent: "center",
                 alignItems: "center",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.1,
+                shadowRadius: 2,
+                elevation: 2,
               }}
             >
-              <Icon name="close" size={20} color="#333" />
+              <Ionicons name="close" size={18} color="#666" />
             </TouchableOpacity>
           </View>
 
           {/* Loader */}
           {loading && (
             <View style={styles.loader}>
-              <ActivityIndicator size="large" color="#6c5ce7" />
-              <Text style={{ marginTop: 10, color: "#555" }}>
+              <ActivityIndicator size="large" color="#9747FF" />
+              <Text style={{ marginTop: 10, color: "#666", fontSize: 14, fontWeight: "500" }}>
                 Loading sessions...
               </Text>
             </View>
@@ -232,12 +343,14 @@ function SessionCalendar({
               markedDates={markedDates}
               onDayPress={onDayPress}
               theme={{
-                todayTextColor: "#6c5ce7",
-                arrowColor: "#6c5ce7",
-                monthTextColor: "#333",
+                todayTextColor: "#9747FF",
+                arrowColor: "#9747FF",
+                monthTextColor: "#000",
                 textDayFontWeight: "500",
-                textMonthFontWeight: "600",
+                textMonthFontWeight: "700",
                 textDayHeaderFontWeight: "600",
+                selectedDayBackgroundColor: "#9747FF",
+                selectedDayTextColor: "#FFFFFF",
               }}
               style={{ marginBottom: 10 }}
             />
@@ -264,21 +377,39 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   bottomSheetContainer: {
-    maxHeight: height * 0.6,
-    backgroundColor: "#fff",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+    maxHeight: height * 0.85,
+    backgroundColor: "#F8F8F8",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
     padding: 20,
+    paddingTop: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  dragHandle: {
+    width: 40,
+    height: 4,
+    backgroundColor: "#D0D0D0",
+    borderRadius: 2,
+    alignSelf: "center",
+    marginBottom: 12,
   },
   modalHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#333",
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#000",
+    flex: 1,
   },
   loader: {
     flex: 1,
@@ -287,58 +418,84 @@ const styles = StyleSheet.create({
   },
   card: {
     width: "100%",
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     padding: 20,
     borderRadius: 20,
-    marginBottom: 20,
+    marginBottom: 16,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#F5F5F5",
   },
   planTitle: {
     fontSize: 18,
-    textAlign: "center",
-    fontWeight: "800",
-    color: "#444",
-    marginBottom: 20,
+    fontWeight: "700",
+    color: "#000",
+    flex: 1,
   },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F0F0F0",
   },
   headerLeft: { flexDirection: "row", alignItems: "center" },
-  dot: { width: 14, height: 14, borderRadius: 7, marginRight: 10 },
-  sessionType: { fontSize: 14, fontWeight: "700", color: "#333" },
+  sessionType: { fontSize: 14, fontWeight: "700", color: "#000" },
   sessionStatus: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: "700",
     textTransform: "uppercase",
   },
-  infoRow: { flexDirection: "row", alignItems: "center", marginBottom: 10 },
-  infoText: { marginLeft: 8, fontSize: 14, color: "#555" },
-  trainerRow: {
+  infoRow: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 12,
-    paddingTop: 8,
-    borderTopWidth: 1,
-    borderTopColor: "#eee",
   },
-  trainerImage: { width: 50, height: 50, borderRadius: 25, marginRight: 12 },
-  trainerName: { fontSize: 16, fontWeight: "600", color: "#333" },
-  trainerEmail: { fontSize: 13, color: "#777" },
-  feedbackButton: {
-    marginTop: 12,
-    backgroundColor: "#6c5ce7",
-    padding: 12,
-    borderRadius: 12,
+  infoText: { fontSize: 14, color: "#666", flex: 1, lineHeight: 20 },
+  trainerRow: {
+    flexDirection: "row",
     alignItems: "center",
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#F0F0F0",
   },
-  feedbackButtonText: { color: "#fff", fontWeight: "600" },
+  trainerImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 12,
+    borderWidth: 2,
+    borderColor: "#F5F5F5",
+  },
+  trainerName: { fontSize: 15, fontWeight: "700", color: "#000", marginBottom: 2 },
+  trainerEmail: { fontSize: 13, color: "#666" },
+  feedbackButton: {
+    marginTop: 16,
+    backgroundColor: "#67C694",
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    borderRadius: 16,
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    shadowColor: "#67C694",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  feedbackButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 15,
+  },
 });
 
 export default SessionCalendar;

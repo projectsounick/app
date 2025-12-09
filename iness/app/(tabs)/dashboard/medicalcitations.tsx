@@ -86,7 +86,7 @@ export default function MedicalCitationsScreen() {
         resizeMode="cover"
       >
         <SafeAreaView
-          style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+          style={{ flex: 1, backgroundColor: "transparent" }}
           edges={["left", "right"]}
         >
           <View
@@ -128,16 +128,16 @@ export default function MedicalCitationsScreen() {
               >
                 <View
                   style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 18,
-                    backgroundColor: "#FF6B6B",
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    backgroundColor: "#FFEBEE",
                     alignItems: "center",
                     justifyContent: "center",
-                    marginRight: 10,
+                    marginRight: 12,
                   }}
                 >
-                  <Ionicons name="warning" size={18} color="#FFFFFF" />
+                  <Ionicons name="warning" size={18} color="#F44336" />
                 </View>
                 <Text
                   style={{
@@ -195,16 +195,16 @@ export default function MedicalCitationsScreen() {
                 >
                   <View
                     style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 18,
-                      backgroundColor: "#9747FF",
+                      width: 32,
+                      height: 32,
+                      borderRadius: 16,
+                      backgroundColor: "#F3EDFF",
                       alignItems: "center",
                       justifyContent: "center",
-                      marginRight: 10,
+                      marginRight: 12,
                     }}
                   >
-                    <Ionicons name="document-text" size={18} color="#FFFFFF" />
+                    <Ionicons name="document-text" size={18} color="#9747FF" />
                   </View>
                   <Text
                     style={{
@@ -343,16 +343,16 @@ export default function MedicalCitationsScreen() {
               >
                 <View
                   style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 18,
-                    backgroundColor: "#67C694",
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    backgroundColor: "#E8F5E9",
                     alignItems: "center",
                     justifyContent: "center",
-                    marginRight: 10,
+                    marginRight: 12,
                   }}
                 >
-                  <Ionicons name="library" size={18} color="#FFFFFF" />
+                  <Ionicons name="library" size={18} color="#67C694" />
                 </View>
                 <Text
                   style={{
@@ -389,12 +389,23 @@ export default function MedicalCitationsScreen() {
                     borderColor: "#E0E0E0",
                   }}
                 >
-                  <Ionicons
-                    name="globe-outline"
-                    size={18}
-                    color="#9747FF"
-                    style={{ marginRight: 10 }}
-                  />
+                  <View
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 14,
+                      backgroundColor: "#F3EDFF",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 10,
+                    }}
+                  >
+                    <Ionicons
+                      name="globe-outline"
+                      size={16}
+                      color="#9747FF"
+                    />
+                  </View>
                   <Text
                     style={{
                       fontSize: 13,
@@ -425,12 +436,23 @@ export default function MedicalCitationsScreen() {
                     borderColor: "#E0E0E0",
                   }}
                 >
-                  <Ionicons
-                    name="globe-outline"
-                    size={18}
-                    color="#9747FF"
-                    style={{ marginRight: 10 }}
-                  />
+                  <View
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 14,
+                      backgroundColor: "#F3EDFF",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 10,
+                    }}
+                  >
+                    <Ionicons
+                      name="globe-outline"
+                      size={16}
+                      color="#9747FF"
+                    />
+                  </View>
                   <Text
                     style={{
                       fontSize: 13,
@@ -460,12 +482,23 @@ export default function MedicalCitationsScreen() {
                     borderColor: "#E0E0E0",
                   }}
                 >
-                  <Ionicons
-                    name="globe-outline"
-                    size={18}
-                    color="#9747FF"
-                    style={{ marginRight: 10 }}
-                  />
+                  <View
+                    style={{
+                      width: 28,
+                      height: 28,
+                      borderRadius: 14,
+                      backgroundColor: "#F3EDFF",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 10,
+                    }}
+                  >
+                    <Ionicons
+                      name="globe-outline"
+                      size={16}
+                      color="#9747FF"
+                    />
+                  </View>
                   <Text
                     style={{
                       fontSize: 13,

@@ -30,7 +30,7 @@ function ProfileScreen() {
   };
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      style={{ flex: 1, backgroundColor: "transparent" }}
       edges={["left", "right"]}
     >
       <ImageBackground
