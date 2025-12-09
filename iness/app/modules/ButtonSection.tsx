@@ -25,34 +25,34 @@ function FloatingOptions() {
 
   const options = [
     {
-      icon: <Ionicons name="fitness" size={28} color="#fff" />,
+      icon: <Ionicons name="fitness" size={24} color="#fff" />,
       label: "Do Yoga",
-      bg: ["#8E2DE2", "#4A00E0"],
+      bg: ["#9747FF", "#7B2CBF"],
     },
     {
-      icon: <MaterialIcons name="fitness-center" size={28} color="#fff" />,
+      icon: <MaterialIcons name="fitness-center" size={24} color="#fff" />,
       label: "Weight Train",
-      bg: ["#FF416C", "#FF4B2B"],
+      bg: ["#67C694", "#4CAF50"],
     },
     {
-      icon: <FontAwesome5 name="chalkboard-teacher" size={26} color="#fff" />,
+      icon: <FontAwesome5 name="chalkboard-teacher" size={22} color="#fff" />,
       label: "Offline Class",
-      bg: ["#00C9FF", "#92FE9D"],
+      bg: ["#4FC3F7", "#29B6F6"],
     },
     {
-      icon: <Ionicons name="videocam" size={28} color="#fff" />,
+      icon: <Ionicons name="videocam" size={24} color="#fff" />,
       label: "Online Class",
-      bg: ["#f7971e", "#ffd200"],
+      bg: ["#9747FF", "#7B2CBF"],
     },
     {
-      icon: <Entypo name="chat" size={28} color="#fff" />,
+      icon: <Entypo name="chat" size={24} color="#fff" />,
       label: "Consult",
-      bg: ["#fc5c7d", "#6a82fb"],
+      bg: ["#67C694", "#4CAF50"],
     },
     {
-      icon: <MaterialIcons name="self-improvement" size={28} color="#fff" />,
+      icon: <MaterialIcons name="self-improvement" size={24} color="#fff" />,
       label: "Meditate",
-      bg: ["#11998e", "#38ef7d"],
+      bg: ["#4FC3F7", "#29B6F6"],
     },
   ];
 
@@ -130,15 +130,17 @@ function FloatingOptions() {
   return (
     <View
       style={{
-        backgroundColor: "#fff",
-        borderRadius: 16,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 20,
         paddingVertical: 16,
         marginBottom: 16,
         shadowColor: "#000",
-        shadowOpacity: 0.08,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 2 },
-        elevation: 4,
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 4,
+        elevation: 2,
+        borderWidth: 1,
+        borderColor: "#F5F5F5",
       }}
     >
       <ScrollView
@@ -173,11 +175,11 @@ function FloatingOptions() {
                   justifyContent: "center",
                   alignItems: "center",
                   marginBottom: 6,
-                  shadowColor: "#000",
+                  shadowColor: item.bg[0],
                   shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.3,
+                  shadowOpacity: 0.2,
                   shadowRadius: 4,
-                  elevation: 4,
+                  elevation: 3,
                 }}
               >
                 {item.icon}

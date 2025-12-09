@@ -80,15 +80,18 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
   return (
     <View
       style={{
-        backgroundColor: "#fff",
-        borderRadius: 16,
-        padding: 16,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 20,
+        paddingVertical: 16,
+        paddingHorizontal: 16,
         marginBottom: 16,
         shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 3 },
-        elevation: 4,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+        elevation: 3,
+        borderWidth: 1,
+        borderColor: "#F5F5F5",
       }}
     >
       {/* Header */}
@@ -101,17 +104,29 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <MaterialCommunityIcons
-            name="podcast"
-            size={22}
-            color="#000"
-            style={{ marginRight: 8 }}
-          />
+          <View
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 17,
+              backgroundColor: "#F3EDFF",
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 12,
+            }}
+          >
+            <MaterialCommunityIcons
+              name="podcast"
+              size={16}
+              color="#9747FF"
+            />
+          </View>
           <Text
             style={{
-              fontSize: theme.fontSizes.regular,
+              fontSize: 18,
               fontFamily: theme.fonts.bold,
-              color: theme.colors.dark,
+              color: "#000",
+              fontWeight: "700",
             }}
           >
             Media / Podcasts
@@ -126,13 +141,14 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
             style={{
               fontSize: 14,
               fontFamily: theme.fonts.medium,
-              color: "#000",
+              color: "#666",
               marginRight: 4,
+              fontWeight: "600",
             }}
           >
             See All
           </Text>
-          <Ionicons name="chevron-forward" size={18} color="#000" />
+          <Ionicons name="chevron-forward" size={16} color="#666" />
         </TouchableOpacity>
       </View>
 
@@ -140,94 +156,136 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingRight: SPACING }}
+        contentContainerStyle={{ paddingRight: 16 }}
       >
         {podCasts.map((podcast, index) => (
-          <View
+          <TouchableOpacity
             key={podcast._id ?? `podcast-${index}`}
+            onPress={() => {
+              setVisible(true);
+              setSelectedMedia(podcast);
+            }}
             style={{
-              width: CARD_WIDTH,
-              marginRight: SPACING,
-              backgroundColor: "#f9f9f9",
-              borderRadius: 16,
+              width: 320,
+              marginRight: 16,
+              backgroundColor: "#FFFFFF",
+              borderRadius: 20,
               overflow: "hidden",
               shadowColor: "#000",
-              shadowOpacity: 0.05,
-              shadowRadius: 6,
-              shadowOffset: { width: 0, height: 3 },
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.08,
+              shadowRadius: 12,
               elevation: 3,
+              borderWidth: 1,
+              borderColor: "#F5F5F5",
             }}
           >
             {/* Thumbnail */}
-            <Image
-              source={{ uri: podcast.thumbnailImageLink }}
-              style={{ width: "100%", height: 140 }}
-              resizeMode="cover"
-            />
+            <View
+              style={{
+                width: "100%",
+                height: 180,
+                backgroundColor: "#F8F8F8",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Image
+                source={{ uri: podcast.thumbnailImageLink }}
+                style={{ width: "100%", height: "100%" }}
+                resizeMode="contain"
+              />
+            </View>
 
             {/* Content */}
-            <View style={{ padding: 12 }}>
+            <View style={{ padding: 16 }}>
               <Text
                 style={{
                   fontSize: 16,
                   fontFamily: theme.fonts.bold,
-                  color: theme.colors.dark,
-                  marginBottom: 4,
+                  color: "#000",
+                  marginBottom: 8,
+                  fontWeight: "700",
                 }}
                 numberOfLines={1}
               >
                 {podcast.podcastName}
               </Text>
               <Text
-                style={{ fontSize: 13, color: "#555", marginBottom: 6 }}
+                style={{
+                  fontSize: 14,
+                  color: "#666",
+                  marginBottom: 8,
+                  fontWeight: "500",
+                  lineHeight: 20,
+                }}
                 numberOfLines={2}
               >
                 {podcast.description}
               </Text>
-              <Text
+              <View
                 style={{
-                  fontSize: 12,
-                  color: "#E86A92",
-                  fontFamily: theme.fonts.medium,
-                  marginBottom: 8,
-                }}
-              >
-                {podcast.category}
-              </Text>
-
-              <TouchableOpacity
-                style={{
-                  backgroundColor: "#67c694",
-                  paddingVertical: 8,
-                  paddingHorizontal: 16,
-                  borderRadius: 16,
                   flexDirection: "row",
                   alignItems: "center",
-                  justifyContent: "center",
-                }}
-                onPress={() => {
-                  setVisible(true);
-                  setSelectedMedia(podcast);
+                  justifyContent: "space-between",
+                  marginTop: 4,
                 }}
               >
-                <Ionicons
-                  name="play-circle"
-                  size={20}
-                  color="#fff"
-                  style={{ marginRight: 8 }}
-                />
                 <Text
                   style={{
-                    color: "#fff",
-                    fontFamily: theme.fonts.bold,
-                    fontSize: 14,
+                    fontSize: 12,
+                    color: "#67C694",
+                    fontFamily: theme.fonts.medium,
+                    fontWeight: "600",
+                    backgroundColor: "#E8F5E9",
+                    paddingVertical: 4,
+                    paddingHorizontal: 10,
+                    borderRadius: 12,
                   }}
                 >
-                  Watch
+                  {podcast.category}
                 </Text>
-              </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={{
+                    backgroundColor: "#67C694",
+                    paddingVertical: 10,
+                    paddingHorizontal: 20,
+                    borderRadius: 16,
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    shadowColor: "#67C694",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}
+                  onPress={() => {
+                    setVisible(true);
+                    setSelectedMedia(podcast);
+                  }}
+                >
+                  <Ionicons
+                    name="play-circle"
+                    size={14}
+                    color="#fff"
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text
+                    style={{
+                      color: "#fff",
+                      fontFamily: theme.fonts.bold,
+                      fontSize: 14,
+                      fontWeight: "700",
+                    }}
+                  >
+                    Watch
+                  </Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
 

@@ -1,5 +1,12 @@
 import React, { memo } from "react";
-import { View, Text, Image, TouchableOpacity, FlatList, Dimensions } from "react-native";
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  FlatList,
+  useWindowDimensions,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons"; // for the arrow icon
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
@@ -19,15 +26,20 @@ interface Props {
 // Removed colorful backgrounds - using white cards with theme accents
 
 function CategoryGrid() {
-
   const router = useRouter();
+  const { width } = useWindowDimensions();
+  const horizontalPadding = width < 500 ? 12 : 16;
+  const isSingleColumn = width < 480;
+  const cardWidth = isSingleColumn
+    ? width - horizontalPadding * 2
+    : (width - horizontalPadding * 2 - 12) / 2;
   const renderItem = ({ item, index }: { item: Category; index: number }) => {
     return (
       <TouchableOpacity
         key={item._id}
         activeOpacity={0.8}
         style={{
-          width: (Dimensions.get("window").width - 48) / 2,
+          width: cardWidth,
           height: 160,
           borderRadius: 20,
           backgroundColor: "#FFFFFF",
@@ -115,18 +127,24 @@ function CategoryGrid() {
     (state: RootState) => state.ecom.categories
   );
   return (
-    <View style={{ marginTop: 24, marginBottom: 8 }}>
+    <View
+      style={{
+        marginTop: 24,
+        marginBottom: 8,
+        paddingHorizontal: horizontalPadding,
+      }}
+    >
       {categories.length > 0 ? (
         <>
           {/* Header Section */}
           <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 20,
-              paddingHorizontal: 4,
-            }}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 20,
+            paddingHorizontal: horizontalPadding,
+          }}
           >
             <Text
               style={{
@@ -152,11 +170,11 @@ function CategoryGrid() {
             data={categories}
             renderItem={renderItem}
             keyExtractor={(item) => item._id}
-            numColumns={2}
+            numColumns={isSingleColumn ? 1 : 2}
             contentContainerStyle={{ paddingBottom: 40 }}
             columnWrapperStyle={{
-              justifyContent: "space-between",
-              paddingHorizontal: 4,
+              justifyContent: isSingleColumn ? "flex-start" : "space-between",
+              paddingHorizontal: isSingleColumn ? 0 : horizontalPadding,
             }}
             scrollEnabled={false}
           />

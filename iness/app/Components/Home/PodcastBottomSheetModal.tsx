@@ -12,7 +12,7 @@ import {
   Share,
   Platform,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Video, ResizeMode } from "expo-av";
 import { captureRef } from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
@@ -142,7 +142,7 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
             shadowColor: "#000",
             shadowOffset: { width: 0, height: -4 },
             shadowOpacity: 0.1,
-            shadowRadius: 8,
+            shadowRadius: 16,
             elevation: 10,
           }}
         >
@@ -154,24 +154,49 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                 alignItems: "center",
               }}
             >
-              <Text style={{ color: "#000", fontSize: 16, fontWeight: "600" }}>
+              <View
+                style={{
+                  width: 80,
+                  height: 80,
+                  borderRadius: 40,
+                  backgroundColor: "#F3EDFF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 16,
+                }}
+              >
+                <MaterialCommunityIcons name="podcast" size={40} color="#9747FF" />
+              </View>
+              <Text
+                style={{
+                  color: "#000",
+                  fontSize: 18,
+                  fontWeight: "700",
+                  marginBottom: 8,
+                }}
+              >
                 No podcast selected
               </Text>
               <TouchableOpacity
                 style={{
                   marginTop: 12,
-                  paddingHorizontal: 20,
-                  paddingVertical: 10,
+                  paddingHorizontal: 24,
+                  paddingVertical: 12,
                   backgroundColor: "#67C694",
-                  borderRadius: 20,
+                  borderRadius: 16,
+                  shadowColor: "#67C694",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4,
+                  elevation: 3,
                 }}
                 onPress={onClose}
               >
                 <Text
                   style={{
                     color: "#fff",
-                    fontWeight: "600",
-                    fontSize: 14,
+                    fontWeight: "700",
+                    fontSize: 16,
                   }}
                 >
                   Close
@@ -180,15 +205,15 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
             </View>
           ) : (
             <>
-              {/* Dash */}
+              {/* Handle Bar */}
               <View
                 style={{
-                  width: 40,
-                  height: 4,
-                  backgroundColor: "#000000",
-                  borderRadius: 2,
+                  width: 50,
+                  height: 5,
+                  backgroundColor: "#ccc",
+                  borderRadius: 3,
                   alignSelf: "center",
-                  marginBottom: 16,
+                  marginBottom: 20,
                 }}
               />
 
@@ -198,19 +223,37 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                   flexDirection: "row",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  marginBottom: 16,
+                  marginBottom: 20,
                 }}
               >
-                <View style={{ width: 40 }} />
-                <Text
-                  style={{
-                    fontSize: 18,
-                    fontWeight: "700",
-                    color: "#000",
-                  }}
-                >
-                  Podcast
-                </Text>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <View
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      backgroundColor: "#F3EDFF",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 12,
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name="podcast"
+                      size={20}
+                      color="#9747FF"
+                    />
+                  </View>
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontWeight: "700",
+                      color: "#000",
+                    }}
+                  >
+                    Podcast
+                  </Text>
+                </View>
                 <View
                   style={{
                     flexDirection: "row",
@@ -220,28 +263,28 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                   <TouchableOpacity
                     onPress={handleSharePodcast}
                     style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 18,
-                      backgroundColor: "#F8F8F8",
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      backgroundColor: "#E8F5E9",
                       justifyContent: "center",
                       alignItems: "center",
                     }}
                   >
-                    <Ionicons name="share-outline" size={20} color="#9747FF" />
+                    <Ionicons name="share-outline" size={20} color="#67C694" />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 18,
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
                       backgroundColor: "#F8F8F8",
                       justifyContent: "center",
                       alignItems: "center",
                     }}
                     onPress={onClose}
                   >
-                    <Ionicons name="close" size={20} color="#333" />
+                    <Ionicons name="close" size={20} color="#666" />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -255,16 +298,10 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                 <View
                   style={{
                     width: "100%",
-                    height: 220,
-                    borderRadius: 16,
-                    marginBottom: 20,
-                    overflow: "hidden",
-                    backgroundColor: "#000",
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 4 },
-                    shadowOpacity: 0.2,
-                    shadowRadius: 8,
-                    elevation: 5,
+                    height: 240,
+                    marginBottom: 24,
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
                 >
                   {!showVideo ? (
@@ -274,26 +311,32 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                         height: "100%",
                         justifyContent: "center",
                         alignItems: "center",
+                        position: "relative",
                       }}
                       onPress={() => setShowVideo(true)}
                     >
                       <Image
                         source={{ uri: podcast.thumbnailImageLink }}
                         style={{ width: "100%", height: "100%" }}
-                        resizeMode="cover"
+                        resizeMode="contain"
                       />
                       <View
                         style={{
                           position: "absolute",
-                          width: 60,
-                          height: 60,
-                          borderRadius: 30,
-                          backgroundColor: "rgba(151, 71, 255, 0.9)",
+                          width: 70,
+                          height: 70,
+                          borderRadius: 35,
+                          backgroundColor: "#9747FF",
                           justifyContent: "center",
                           alignItems: "center",
+                          shadowColor: "#9747FF",
+                          shadowOffset: { width: 0, height: 4 },
+                          shadowOpacity: 0.4,
+                          shadowRadius: 8,
+                          elevation: 5,
                         }}
                       >
-                        <Ionicons name="play" size={32} color="#FFFFFF" />
+                        <Ionicons name="play" size={36} color="#FFFFFF" />
                       </View>
                     </TouchableOpacity>
                   ) : (
@@ -313,36 +356,44 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                 {/* Title */}
                 <View
                   style={{
-                    marginBottom: 12,
+                    marginBottom: 16,
                   }}
                 >
                   <Text
                     style={{
-                      fontSize: 20,
+                      fontSize: 22,
                       fontWeight: "700",
                       color: "#000",
-                      marginBottom: 8,
+                      lineHeight: 30,
                     }}
                   >
                     {podcast.podcastName}
                   </Text>
                 </View>
 
-                {/* Description */}
+                {/* Description Card */}
                 <View
                   style={{
-                    backgroundColor: "#F8F8F8",
-                    borderRadius: 12,
-                    padding: 14,
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: 20,
+                    padding: 20,
                     marginBottom: 12,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 12,
+                    elevation: 3,
+                    borderWidth: 1,
+                    borderColor: "#F5F5F5",
                   }}
                 >
                   <Text
                     numberOfLines={expandedDesc ? undefined : 3}
                     style={{
-                      fontSize: 14,
+                      fontSize: 15,
                       color: "#666",
-                      lineHeight: 20,
+                      lineHeight: 24,
+                      fontWeight: "400",
                     }}
                   >
                     {podcast.description}
@@ -351,7 +402,7 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                     <TouchableOpacity
                       onPress={() => setExpandedDesc(!expandedDesc)}
                       style={{
-                        marginTop: 8,
+                        marginTop: 12,
                         alignSelf: "flex-start",
                       }}
                     >
@@ -359,7 +410,7 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                         style={{
                           fontSize: 14,
                           color: "#9747FF",
-                          fontWeight: "600",
+                          fontWeight: "700",
                         }}
                       >
                         {expandedDesc ? "Show less" : "Show more"}
@@ -394,34 +445,57 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
           <View
             style={{
               backgroundColor: "#FFFFFF",
-              borderRadius: 20,
+              borderRadius: 24,
               padding: 24,
               width: "90%",
               maxWidth: 400,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.25,
-              shadowRadius: 12,
+              shadowOpacity: 0.15,
+              shadowRadius: 16,
               elevation: 8,
+              borderWidth: 1,
+              borderColor: "#F5F5F5",
             }}
           >
-            <Text
+            <View
               style={{
-                fontSize: 18,
-                fontWeight: "700",
-                color: "#000",
-                marginBottom: 4,
-                textAlign: "center",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                marginBottom: 12,
               }}
             >
-              Preview Share
-            </Text>
+              <View
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 20,
+                  backgroundColor: "#F3EDFF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 12,
+                }}
+              >
+                <Ionicons name="share-social" size={20} color="#9747FF" />
+              </View>
+              <Text
+                style={{
+                  fontSize: 20,
+                  fontWeight: "700",
+                  color: "#000",
+                }}
+              >
+                Preview Share
+              </Text>
+            </View>
             <Text
               style={{
-                fontSize: 13,
+                fontSize: 14,
                 color: "#666",
                 marginBottom: 20,
                 textAlign: "center",
+                fontWeight: "500",
               }}
             >
               Logo and Instagram handle will be visible when shared
@@ -522,16 +596,17 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
               <TouchableOpacity
                 style={{
                   flex: 1,
-                  padding: 14,
-                  backgroundColor: "#F0F0F0",
-                  borderRadius: 12,
+                  padding: 16,
+                  backgroundColor: "#F8F8F8",
+                  borderRadius: 16,
                   alignItems: "center",
+                  marginRight: 8,
                 }}
                 onPress={() => setSharePreviewVisible(false)}
               >
                 <Text
                   style={{
-                    color: "#000",
+                    color: "#666",
                     fontSize: 16,
                     fontWeight: "600",
                   }}
@@ -542,10 +617,15 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
               <TouchableOpacity
                 style={{
                   flex: 1,
-                  padding: 14,
+                  padding: 16,
                   backgroundColor: "#67C694",
-                  borderRadius: 12,
+                  borderRadius: 16,
                   alignItems: "center",
+                  shadowColor: "#67C694",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4,
+                  elevation: 3,
                 }}
                 onPress={handleShareFromPreview}
               >

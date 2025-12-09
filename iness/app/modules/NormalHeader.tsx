@@ -76,13 +76,13 @@ export default function NormalHeader({ screenName, rightIcon, showSupportChat }:
               flexDirection: "row",
               alignItems: "center",
               backgroundColor: "#67c694",
-              paddingVertical: 6,
-              paddingHorizontal: 12,
-              borderRadius: 20,
+              paddingVertical: 4,
+              paddingHorizontal: 8,
+              borderRadius: 16,
             }}
           >
-            <Ionicons name="stats-chart-outline" size={20} color="#fff" />
-            <Text style={{ marginLeft: 6, color: "#fff", fontWeight: "bold" }}>
+            <Ionicons name="stats-chart-outline" size={16} color="#fff" />
+            <Text style={{ marginLeft: 4, color: "#fff", fontWeight: "600", fontSize: 12 }}>
               History
             </Text>
           </TouchableOpacity>

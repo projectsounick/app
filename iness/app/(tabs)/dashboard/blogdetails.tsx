@@ -67,11 +67,12 @@ export default function BlogDetailsScreen() {
         style={{ flex: 1 }}
         resizeMode="cover"
       >
-        <View style={{     flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 24,
-            paddingLeft: 20,
-            marginTop: Platform.OS === "ios" ? topPadding : "4%", }}>
+        <View
+          style={{
+            paddingHorizontal: 20,
+            marginTop: Platform.OS === "ios" ? topPadding : "4%",
+          }}
+        >
           <NormalHeader screenName="Blog" rightIcon={false} />
         </View>
 
@@ -84,7 +85,7 @@ export default function BlogDetailsScreen() {
               paddingHorizontal: 20,
             }}
           >
-            <ActivityIndicator size="large" color="#A4FF55" />
+            <ActivityIndicator size="large" color="#9747FF" />
             <Text style={{ marginTop: 10, color: "#666" }}>
               Loading blog...
             </Text>
@@ -93,125 +94,187 @@ export default function BlogDetailsScreen() {
           blogData && (
             <ScrollView
               contentContainerStyle={{
-                paddingHorizontal: 20,
+                paddingHorizontal: 16,
+                paddingTop: 16,
                 paddingBottom: 100,
               }}
               showsVerticalScrollIndicator={false}
             >
-              {/* Blog Title */}
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "bold",
-                  color: "#222",
-                  marginBottom: 10,
-                  textAlign: "center", // Center-align for better aesthetics
-                }}
-              >
-                {blogData.title}
-              </Text>
-
-              {/* Blog Cover Image */}
+              {/* Blog Cover Image Card */}
               {blogData.coverImage && (
-                <Image
-                  source={{ uri: blogData.coverImage }}
+                <View
                   style={{
-                    width: "100%",
-                    height: 200,
-                    borderRadius: 12,
-                    marginBottom: 16,
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: 24,
+                    overflow: "hidden",
+                    marginBottom: 24,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 16,
+                    elevation: 3,
+                    borderWidth: 1,
+                    borderColor: "#F5F5F5",
                   }}
-                  resizeMode="contain"
-                />
+                >
+                  <Image
+                    source={{ uri: blogData.coverImage }}
+                    style={{
+                      width: "100%",
+                      height: 240,
+                    }}
+                    resizeMode="contain"
+                  />
+                </View>
               )}
 
-              {/* Blog Content Loop */}
-              {blogData?.content?.map((item, index) => {
-                if (item.contentType === "heading") {
-                  return (
-                    <Text
-                      key={index}
-                      style={{
-                        fontSize: 14,
-                        fontWeight: "700",
-                        color: theme.colors.dark,
-                        marginTop: 16,
-                        marginBottom: 6,
-                      }}
-                    >
-                      {item.contentData}
-                    </Text>
-                  );
-                }
+              {/* Blog Title Card */}
+              <View
+                style={{
+                  backgroundColor: "#FFFFFF",
+                  borderRadius: 20,
+                  padding: 20,
+                  marginBottom: 24,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 12,
+                  elevation: 3,
+                  borderWidth: 1,
+                  borderColor: "#F5F5F5",
+                }}
+              >
+                <Text
+                  style={{
+                    fontSize: 22,
+                    fontWeight: "700",
+                    color: "#000",
+                    lineHeight: 30,
+                  }}
+                >
+                  {blogData.title}
+                </Text>
+              </View>
 
-                if (item.contentType === "text") {
-                  return (
-                    <Text
-                      key={index}
-                      style={{
-                        fontSize: 10,
-                        lineHeight: 22,
-                        color: "#333",
-                        marginBottom: 12,
-                      }}
-                    >
-                      {item.contentData}
-                    </Text>
-                  );
-                }
+              {/* Blog Content Card */}
+              <View
+                style={{
+                  backgroundColor: "#FFFFFF",
+                  borderRadius: 20,
+                  padding: 20,
+                  marginBottom: 24,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 12,
+                  elevation: 3,
+                  borderWidth: 1,
+                  borderColor: "#F5F5F5",
+                }}
+              >
+                {/* Blog Content Loop */}
+                {blogData?.content?.map((item, index) => {
+                  if (item.contentType === "heading") {
+                    return (
+                      <Text
+                        key={index}
+                        style={{
+                          fontSize: 18,
+                          fontWeight: "700",
+                          color: "#000",
+                          marginTop: index > 0 ? 24 : 0,
+                          marginBottom: 12,
+                        }}
+                      >
+                        {item.contentData}
+                      </Text>
+                    );
+                  }
 
-                if (item.contentType === "image") {
-                  return (
-                    <Image
-                      key={index}
-                      source={{ uri: item.contentData }}
-                      style={{
-                        width: "100%",
-                        height: 180,
-                        borderRadius: 10,
-                        marginBottom: 16,
-                      }}
-                      resizeMode="contain"
-                    />
-                  );
-                }
+                  if (item.contentType === "text") {
+                    return (
+                      <Text
+                        key={index}
+                        style={{
+                          fontSize: 15,
+                          lineHeight: 24,
+                          color: "#666",
+                          marginBottom: 16,
+                          fontWeight: "400",
+                        }}
+                      >
+                        {item.contentData}
+                      </Text>
+                    );
+                  }
 
-                return null;
-              })}
+                  if (item.contentType === "image") {
+                    return (
+                      <View
+                        key={index}
+                        style={{
+                          marginVertical: 16,
+                          borderRadius: 16,
+                          overflow: "hidden",
+                          backgroundColor: "#F8F8F8",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <Image
+                          source={{ uri: item.contentData }}
+                          style={{
+                            width: "100%",
+                            height: 220,
+                          }}
+                          resizeMode="contain"
+                        />
+                      </View>
+                    );
+                  }
+
+                  return null;
+                })}
+              </View>
 
               {/* Medical Disclaimer for Health-Related Content */}
               <View
                 style={{
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 16,
-                  padding: 16,
-                  marginTop: 24,
+                  backgroundColor: "#F3EDFF",
+                  borderRadius: 20,
+                  padding: 20,
                   marginBottom: 16,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 8,
-                  elevation: 3,
                   borderWidth: 1,
-                  borderColor: "#F0F0F0",
+                  borderColor: "#E8D5FF",
                 }}
               >
                 <View
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    marginBottom: 8,
+                    marginBottom: 12,
                   }}
                 >
-                  <Ionicons
-                    name="information-circle-outline"
-                    size={18}
-                    color="#9747FF"
-                    style={{ marginRight: 8 }}
-                  />
+                  <View
+                    style={{
+                      width: 40,
+                      height: 40,
+                      borderRadius: 20,
+                      backgroundColor: "#9747FF",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 12,
+                    }}
+                  >
+                    <Ionicons
+                      name="information-circle"
+                      size={22}
+                      color="#FFFFFF"
+                    />
+                  </View>
                   <Text
                     style={{
-                      fontSize: 13,
+                      fontSize: 16,
                       fontWeight: "700",
                       color: "#000",
                     }}
@@ -221,9 +284,10 @@ export default function BlogDetailsScreen() {
                 </View>
                 <Text
                   style={{
-                    fontSize: 11,
+                    fontSize: 14,
                     color: "#666",
-                    lineHeight: 16,
+                    lineHeight: 20,
+                    fontWeight: "500",
                   }}
                 >
                   If this blog contains health or medical information, please note

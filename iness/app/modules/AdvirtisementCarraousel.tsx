@@ -17,27 +17,27 @@ function StylishCarousel() {
   return (
     <View
       style={{
-        borderRadius: 16,
+        borderRadius: 18,
         overflow: "hidden",
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.1,
-        shadowRadius: 6,
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.12,
+        shadowRadius: 8,
         elevation: 4,
         marginBottom: 16,
+        backgroundColor: "#fff",
+        borderWidth: 0.5,
+        borderColor: "#EFEFEF",
       }}
     >
-      {/* Gradient Background */}
       <LinearGradient
         colors={["#736AD6", "#5A54C4"]}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={{
-          borderRadius: 16,
-          padding: 16,
+          padding: 18,
         }}
       >
-        {/* Heading */}
         <View
           style={{
             flexDirection: "row",
@@ -45,12 +45,24 @@ function StylishCarousel() {
             marginBottom: 8,
           }}
         >
-          <MaterialCommunityIcons
-            name="shield-check"
-            size={20}
-            color="#fff"
-            style={{ marginRight: 8 }}
-          />
+          <View
+            style={{
+              width: 42,
+              height: 42,
+              borderRadius: 21,
+              backgroundColor: "#ffffff20",
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 10,
+            }}
+          >
+            <MaterialCommunityIcons
+              name="shield-check"
+              size={22}
+              color="#fff"
+              style={{ marginRight: 0 }}
+            />
+          </View>
           <Text
             style={{
               fontSize: theme.fontSizes.regular,
@@ -62,24 +74,25 @@ function StylishCarousel() {
           </Text>
         </View>
 
-        {/* Sub text */}
         <Text
           style={{
             fontSize: theme.fontSizes.small,
             color: "#E6E6E6",
-            marginBottom: 12,
+            marginBottom: 14,
+            lineHeight: 18,
           }}
         >
-          Discover the key features that set us apart.
+          Discover the key features that set us apart in the wellness space.
         </Text>
 
-        {/* White features strip */}
         <View
           style={{
             backgroundColor: "#fff",
-            borderRadius: 16,
-            paddingVertical: 12,
-            paddingHorizontal: 12,
+            borderRadius: 14,
+            paddingVertical: 10,
+            paddingHorizontal: 10,
+            borderWidth: 1,
+            borderColor: "#F2F2F2",
           }}
         >
           <View
@@ -95,7 +108,7 @@ function StylishCarousel() {
                 style={{
                   flexDirection: "column",
                   alignItems: "center",
-                  width: screenWidth / 5,
+                  width: screenWidth / 5.2,
                 }}
               >
                 <Text

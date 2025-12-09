@@ -13,11 +13,10 @@ import {
 import * as NavigationBar from "expo-navigation-bar";
 import {
   Ionicons,
-  FontAwesome5,
-  MaterialCommunityIcons,
+
 } from "@expo/vector-icons";
 
-const { height } = Dimensions.get("window");
+
 
 const TrackerModal = ({
   visible,
@@ -69,12 +68,12 @@ const TrackerModal = ({
               width: 80,
               height: 80,
               borderRadius: 40,
-              backgroundColor: "#E3F2FD",
+              backgroundColor: "#E8F5E9", // Matches card bgColor
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Ionicons name="bed-outline" size={40} color="#9747FF" />
+            <Ionicons name="moon-outline" size={40} color="#67C694" /> 
           </View>
         );
       case "steps":
@@ -84,12 +83,12 @@ const TrackerModal = ({
               width: 80,
               height: 80,
               borderRadius: 40,
-              backgroundColor: "#E8F5E9",
+              backgroundColor: "#F3EDFF", // Matches card bgColor
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <FontAwesome5 name="walking" size={36} color="#67C694" />
+            <Ionicons name="walk-outline" size={40} color="#9747FF" /> 
           </View>
         );
       case "water":
@@ -99,12 +98,12 @@ const TrackerModal = ({
               width: 80,
               height: 80,
               borderRadius: 40,
-              backgroundColor: "#E0F2F1",
+              backgroundColor: "#E3F2FD", // Matches card bgColor
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <MaterialCommunityIcons name="cup-water" size={40} color="#26A69A" />
+            <Ionicons name="water-outline" size={40} color="#4FC3F7" /> 
           </View>
         );
       default:
@@ -112,7 +111,7 @@ const TrackerModal = ({
     }
   };
 
-  const getPlaceholder = () => {
+  const getPlaceholder = (): string => {
     switch (type) {
       case "sleep":
         return "Enter hours of sleep";
@@ -123,7 +122,7 @@ const TrackerModal = ({
     }
   };
 
-  const getTitle = () => {
+  const getTitle = (): string => {
     switch (type) {
       case "sleep":
         return "Add Sleep";
@@ -269,7 +268,7 @@ const TrackerModal = ({
                       color: "#000",
                     }}
                   >
-                    {values.water}
+                    {values.water || "0"}
                   </Text>
                   <Text
                     style={{
@@ -322,7 +321,7 @@ const TrackerModal = ({
                   color: "#000",
                   backgroundColor: "#F8F8F8",
                 }}
-                value={values[type]}
+                value={values[type] || ""}
                 onChangeText={handleChange}
               />
             )}

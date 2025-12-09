@@ -10,11 +10,8 @@ import {
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import theme from "../Theme/globalTheme";
-import { LinearGradient } from "expo-linear-gradient";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-
-import { ImageWithLoader } from "./ImageWithLoader";
 import { router } from "expo-router";
 import { Blog } from "../interfaces/blogInterface";
 
@@ -24,16 +21,18 @@ function BlogSliderCard() {
   return (
     <View
       style={{
-        height: 210,
         paddingVertical: 16,
-        paddingHorizontal: 12,
-        borderRadius: 12,
+        paddingHorizontal: 16,
+        borderRadius: 20,
         shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
         elevation: 3,
-        backgroundColor: "#fff",
+        backgroundColor: "#FFFFFF",
         marginBottom: 16,
+        borderWidth: 1,
+        borderColor: "#F5F5F5",
       }}
     >
       {/* Fixed Header */}
@@ -42,33 +41,42 @@ function BlogSliderCard() {
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
+          marginBottom: 16,
         }}
       >
-        <View>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+          }}
+        >
           <View
             style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "flex-start",
+              width: 34,
+              height: 34,
+              borderRadius: 17,
+              backgroundColor: "#F3EDFF",
               alignItems: "center",
+              justifyContent: "center",
+              marginRight: 12,
             }}
           >
             <MaterialCommunityIcons
-              name="shield-check"
-              size={20}
-              color="#7771de"
-              style={{ marginRight: 8 }}
+              name="book-open-variant"
+              size={16}
+              color="#9747FF"
             />
-            <Text
-              style={{
-                fontSize: theme.fontSizes.regular,
-                fontFamily: theme.fonts.bold,
-                color: theme.colors.dark,
-              }}
-            >
-              Read our Blogs
-            </Text>
           </View>
+          <Text
+            style={{
+              fontSize: 18,
+              fontFamily: theme.fonts.bold,
+              color: "#000",
+              fontWeight: "700",
+            }}
+          >
+            Read our Blogs
+          </Text>
         </View>
       </View>
 
@@ -76,103 +84,111 @@ function BlogSliderCard() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        style={{ marginTop: 12 }}
+        contentContainerStyle={{ paddingRight: 16 }}
       >
         {blogs.map((item: Blog, index) => (
-          <View
+          <TouchableOpacity
             key={index}
+            onPress={() =>
+              router.push({
+                pathname: "/(tabs)/dashboard/blogdetails",
+                params: { id: item._id },
+              })
+            }
             style={{
-              backgroundColor: "#7771de", // dark background
-              borderRadius: 12,
-              marginRight: 12,
-              width: 330,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              shadowColor: "#7771de",
+              backgroundColor: "#FFFFFF",
+              borderRadius: 20,
+              marginRight: 16,
+              width: 320,
+              shadowColor: "#000",
               shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.2,
-              shadowRadius: 4,
-              elevation: 4,
-              padding: 8,
+              shadowOpacity: 0.08,
+              shadowRadius: 12,
+              elevation: 3,
+              borderWidth: 1,
+              borderColor: "#F5F5F5",
+              overflow: "hidden",
             }}
           >
+            {/* Image Section */}
             <View
               style={{
-                width: "95%",
-                flexDirection: "row",
-                justifyContent: "space-between",
+                width: "100%",
+                height: 180,
+                backgroundColor: "#F8F8F8",
+                position: "relative",
                 alignItems: "center",
-                height: "94%",
+                justifyContent: "center",
               }}
             >
-              {/* Left Section */}
-              <View
+              <Image
+                source={{ uri: item.coverImage }}
                 style={{
-                  flex: 1,
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                  height: "90%",
-                  width: "60%",
+                  width: "100%",
+                  height: "100%",
                 }}
-              >
+                resizeMode="contain"
+              />
+            </View>
+
+            {/* Content Section */}
+            <View
+              style={{
+                padding: 16,
+                flexDirection: "row",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+              }}
+            >
+              {/* Left Section - Title */}
+              <View style={{ flex: 1, marginRight: 12 }}>
                 <Text
-                  numberOfLines={3}
+                  numberOfLines={2}
                   style={{
-                    fontFamily: theme.fonts.bold,
-                    fontSize: 12,
-                    marginBottom: 6,
-                    color: "#fff", // light text
-                    flexShrink: 1,
+                    fontSize: 16,
+                    fontWeight: "700",
+                    color: "#000",
+                    marginBottom: 12,
+                    lineHeight: 22,
                   }}
                 >
                   {item.title}
                 </Text>
-
-                <TouchableOpacity
-                  style={{
-                    backgroundColor: "#67c694",
-                    paddingHorizontal: 30,
-                    paddingVertical: 6,
-                    borderRadius: 16,
-                    alignSelf: "flex-start",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                  onPress={() =>
-                    router.push({
-                      pathname: "/(tabs)/dashboard/blogdetails",
-                      params: { id: item._id },
-                    })
-                  }
-                >
-                  <Text
-                    style={{
-                      fontFamily: theme.fonts.bold,
-                      fontSize: 14,
-                      textAlign: "center",
-                      color: "#fff",
-                    }}
-                  >
-                    Read
-                  </Text>
-                </TouchableOpacity>
               </View>
 
-              {/* Right Section - Image */}
-              <View
+              {/* Right Section - Button */}
+              <TouchableOpacity
                 style={{
-                  height: "95%",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  width: "40%",
+                  backgroundColor: "#67C694",
+                  paddingVertical: 10,
+                  paddingHorizontal: 20,
+                  borderRadius: 16,
+                  alignSelf: "flex-start",
+                  shadowColor: "#67C694",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4,
+                  elevation: 3,
                 }}
+                onPress={() =>
+                  router.push({
+                    pathname: "/(tabs)/dashboard/blogdetails",
+                    params: { id: item._id },
+                  })
+                }
               >
-                <ImageWithLoader uri={item.coverImage} />
-              </View>
+                <Text
+                  style={{
+                    fontSize: 14,
+                    fontWeight: "700",
+                    color: "#FFFFFF",
+                  }}
+                >
+                  Read
+                </Text>
+              </TouchableOpacity>
             </View>
-          </View>
+          </TouchableOpacity>
         ))}
       </ScrollView>
     </View>

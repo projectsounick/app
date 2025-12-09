@@ -79,15 +79,18 @@ const UpcomingSessionsCard = () => {
   return (
     <View
       style={{
-        backgroundColor: "#fff",
-        borderRadius: 16,
-        padding: 16,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 20,
+        paddingVertical: 16,
+        paddingHorizontal: 16,
         marginBottom: 16,
         shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
-        shadowRadius: 6,
-        shadowOffset: { width: 0, height: 3 },
-        elevation: 4,
+        shadowRadius: 4,
+        elevation: 2,
+        borderWidth: 1,
+        borderColor: "#F5F5F5",
       }}
     >
       {/* Header */}
@@ -100,17 +103,29 @@ const UpcomingSessionsCard = () => {
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          <MaterialCommunityIcons
-            name="calendar-clock"
-            size={22}
-            color="#000"
-            style={{ marginRight: 8 }}
-          />
+          <View
+            style={{
+              width: 34,
+              height: 34,
+              borderRadius: 17,
+              backgroundColor: "#F3EDFF",
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 12,
+            }}
+          >
+            <MaterialCommunityIcons
+              name="calendar-clock"
+              size={16}
+              color="#9747FF"
+            />
+          </View>
           <Text
             style={{
-              fontSize: theme.fontSizes.regular,
+              fontSize: 18,
               fontFamily: theme.fonts.bold,
-              color: theme.colors.dark,
+              color: "#000",
+              fontWeight: "700",
             }}
           >
             Upcoming Sessions
@@ -126,13 +141,14 @@ const UpcomingSessionsCard = () => {
               style={{
                 fontSize: 14,
                 fontFamily: theme.fonts.medium,
-                color: "#000",
+                color: "#666",
                 marginRight: 4,
+                fontWeight: "600",
               }}
             >
               See All
             </Text>
-            <Ionicons name="chevron-forward" size={18} color="#000" />
+            <Ionicons name="chevron-forward" size={16} color="#666" />
           </TouchableOpacity>
         )}
       </View>
@@ -141,34 +157,56 @@ const UpcomingSessionsCard = () => {
       {latestSessions.length === 0 ? (
         <View
           style={{
-            justifyContent: "center",
+            backgroundColor: "#FFFFFF",
+            borderRadius: 20,
+            padding: 40,
             alignItems: "center",
-            paddingVertical: 40,
+            borderWidth: 1,
+            borderColor: "#F5F5F5",
           }}
         >
+          <View
+            style={{
+              width: 50,
+              height: 50,
+              borderRadius: 25,
+              backgroundColor: "#F3EDFF",
+              alignItems: "center",
+              justifyContent: "center",
+              marginBottom: 16,
+            }}
+          >
+            <MaterialCommunityIcons
+              name="calendar-clock"
+              size={22}
+              color="#9747FF"
+            />
+          </View>
           <Text
             style={{
               fontSize: 16,
               fontFamily: theme.fonts.bold,
-              color: "#333",
+              color: "#666",
               textAlign: "center",
               marginBottom: 16,
+              fontWeight: "600",
             }}
           >
             You do not have any sessions with us right now
           </Text>
 
           <TouchableOpacity
-            onPress={() => router.push("/(tabs)/dashboard/plan")} // replace with your booking screen
+            onPress={() => router.push("/(tabs)/dashboard/plan")}
             style={{
               backgroundColor: "#67C694",
-              paddingVertical: 10,
-              paddingHorizontal: 30,
-              borderRadius: 20,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.3,
-              shadowRadius: 4,
+              paddingVertical: 12,
+              paddingHorizontal: 32,
+              borderRadius: 16,
+              shadowColor: "#67C694",
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.15,
+              shadowRadius: 2,
+              elevation: 2,
             }}
           >
             <Text
@@ -176,6 +214,7 @@ const UpcomingSessionsCard = () => {
                 color: "#fff",
                 fontSize: 14,
                 fontFamily: theme.fonts.bold,
+                fontWeight: "700",
               }}
             >
               Get Now
@@ -183,7 +222,7 @@ const UpcomingSessionsCard = () => {
           </TouchableOpacity>
         </View>
       ) : (
-        <View style={{ height: 140 }}>
+        <View style={{ height: 160 }}>
           <Animated.ScrollView
             ref={scrollRef}
             horizontal
@@ -228,126 +267,185 @@ const UpcomingSessionsCard = () => {
                     transform: [{ scale }, { translateY }],
                   }}
                 >
-                  <View
+                  <TouchableOpacity
+                    onPress={() => dispatch(setCalendarSheetOpen(true))}
                     style={{
-                      flexDirection: "row",
-                      backgroundColor: "#736AD6",
-                      borderRadius: 16,
+                      backgroundColor: "#FFFFFF",
+                      borderRadius: 20,
                       padding: 16,
-                      shadowColor: "#736AD6",
-                      shadowOffset: { width: 0, height: 4 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 6,
-                      elevation: 3,
-                      justifyContent: "flex-start",
-                      alignItems: "center",
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.05,
+                      shadowRadius: 4,
+                      elevation: 2,
+                      borderWidth: 1,
+                      borderColor: "#F5F5F5",
                       position: "relative",
                     }}
                   >
-                    {/* Session Status Tag */}
+                    {/* Session Status Badge */}
                     <View
                       style={{
                         position: "absolute",
-                        top: 0,
-                        right: 16,
+                        top: 12,
+                        right: 12,
                         backgroundColor:
                           session.sessionStatus === "completed"
-                            ? "#4CAF50"
+                            ? "#E8F5E9"
                             : session.sessionStatus === "missed"
-                              ? "#F44336"
-                              : "#FFC107",
-                        paddingHorizontal: 12,
-                        paddingVertical: 6,
-                        borderBottomLeftRadius: 12,
+                              ? "#FFEBEE"
+                              : "#FFF3E0",
+                        paddingHorizontal: 10,
+                        paddingVertical: 4,
+                        borderRadius: 12,
                       }}
                     >
                       <Text
                         style={{
-                          color: "#fff",
-                          fontSize: 12,
+                          color:
+                            session.sessionStatus === "completed"
+                              ? "#4CAF50"
+                              : session.sessionStatus === "missed"
+                                ? "#F44336"
+                                : "#FF9800",
+                          fontSize: 11,
                           fontFamily: theme.fonts.bold,
                           textTransform: "uppercase",
+                          fontWeight: "700",
                         }}
                       >
                         {session.sessionStatus}
                       </Text>
                     </View>
 
-                    {/* Left Info Section */}
+                    {/* Content Section */}
                     <View
                       style={{
-                        flex: 1,
-                        justifyContent: "space-between",
-                        width: "60%",
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginTop: 8,
                       }}
                     >
-                      <Text
+                      {/* Trainer Image */}
+                      <View
                         style={{
-                          fontSize: 16,
-                          fontFamily: theme.fonts.bold,
-                          color: "#fff",
-                          marginBottom: 4,
+                          width: 70,
+                          height: 70,
+                          borderRadius: 35,
+                          marginRight: 12,
+                          overflow: "hidden",
+                          backgroundColor: "#F8F8F8",
                         }}
                       >
-                        {session.trainer.name}
-                      </Text>
-                      <Text
-                        style={{ fontSize: 14, color: "#fff", marginBottom: 2 }}
-                      >
-                        {session.sessionType.toUpperCase()}
-                      </Text>
-                      <Text
-                        style={{ fontSize: 14, color: "#fff", marginBottom: 8 }}
-                      >
-                        {formatDateTime(session.sessionDate)}
-                      </Text>
+                        <Image
+                          source={
+                            session.trainer?.profilePic
+                              ? { uri: session.trainer.profilePic }
+                              : require("../../../assets/images/track.png")
+                          }
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            resizeMode: "cover",
+                          }}
+                        />
+                      </View>
 
-                      <TouchableOpacity
-                        style={{
-                          backgroundColor: "#67C694",
-                          paddingVertical: 6,
-                          paddingHorizontal: 20,
-                          borderRadius: 16,
-                          alignSelf: "flex-start",
-                        }}
-                        onPress={() => dispatch(setCalendarSheetOpen(true))}
-                      >
+                      {/* Info Section */}
+                      <View style={{ flex: 1 }}>
                         <Text
                           style={{
-                            color: "#fff",
+                            fontSize: 16,
                             fontFamily: theme.fonts.bold,
-                            fontSize: 14,
+                            color: "#000",
+                            marginBottom: 6,
+                            fontWeight: "700",
+                          }}
+                          numberOfLines={1}
+                        >
+                          {session.trainer.name}
+                        </Text>
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            marginBottom: 4,
                           }}
                         >
-                          View More
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
+                          <Ionicons
+                            name={
+                              session.sessionType === "online"
+                                ? "videocam-outline"
+                                : "location-outline"
+                            }
+                            size={12}
+                            color="#666"
+                            style={{ marginRight: 4 }}
+                          />
+                          <Text
+                            style={{
+                              fontSize: 12,
+                              color: "#666",
+                              fontWeight: "500",
+                              textTransform: "uppercase",
+                            }}
+                          >
+                            {session.sessionType}
+                          </Text>
+                        </View>
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            marginBottom: 12,
+                          }}
+                        >
+                          <Ionicons
+                            name="time-outline"
+                            size={12}
+                            color="#666"
+                            style={{ marginRight: 4 }}
+                          />
+                          <Text
+                            style={{
+                              fontSize: 12,
+                              color: "#666",
+                              fontWeight: "500",
+                            }}
+                          >
+                            {formatDateTime(session.sessionDate)}
+                          </Text>
+                        </View>
 
-                    {/* Trainer Image */}
-                    <View
-                      style={{
-                        justifyContent: "flex-end",
-                        alignItems: "center",
-                        width: "40%",
-                        height: "100%",
-                      }}
-                    >
-                      <Image
-                        source={
-                          session.trainer?.profilePic
-                            ? { uri: session.trainer.profilePic }
-                            : require("../../../assets/images/track.png")
-                        }
-                        style={{
-                          width: 80,
-                          height: 80,
-                          borderRadius: 40,
-                          resizeMode: "cover",
-                        }}
-                      />
+                        <TouchableOpacity
+                          style={{
+                            backgroundColor: "#67C694",
+                            paddingVertical: 8,
+                            paddingHorizontal: 16,
+                            borderRadius: 12,
+                            alignSelf: "flex-start",
+                            shadowColor: "#67C694",
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.3,
+                            shadowRadius: 4,
+                            elevation: 3,
+                          }}
+                          onPress={() => dispatch(setCalendarSheetOpen(true))}
+                        >
+                          <Text
+                            style={{
+                              color: "#fff",
+                              fontFamily: theme.fonts.bold,
+                              fontSize: 13,
+                              fontWeight: "700",
+                            }}
+                          >
+                            View Details
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
                     </View>
-                  </View>
+                  </TouchableOpacity>
                 </Animated.View>
               );
             })}

@@ -109,31 +109,29 @@ function HealthDashboard() {
   }
 
   return (
-    <View style={{ flex: 1, marginBottom: 16 }}>
-      {/* Section Title */}
-
+    <View style={{ marginBottom: 16 }}>
       {/* Row with Steps & Sleep */}
       <View
         style={{
           flexDirection: "row",
-
           justifyContent: "space-between",
+          gap: 12,
         }}
       >
         {/* Steps Card */}
-
         <View
           style={{
             flex: 1,
-
-            borderRadius: 12,
+            backgroundColor: "#FFFFFF",
+            borderRadius: 20,
             padding: 16,
-            marginRight: 8,
             shadowColor: "#000",
+            shadowOffset: { width: 0, height: 1 },
             shadowOpacity: 0.05,
             shadowRadius: 4,
-            elevation: 3,
-            backgroundColor: "#fff",
+            elevation: 2,
+            borderWidth: 1,
+            borderColor: "#F5F5F5",
           }}
         >
           {/* Header Row */}
@@ -142,16 +140,33 @@ function HealthDashboard() {
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
-              marginBottom: 8,
+              marginBottom: 12,
             }}
           >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <MaterialCommunityIcons name="walk" size={20} color="#140A21" />
+              <View
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: "#F3EDFF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 8,
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="walk"
+                  size={14}
+                  color="#9747FF"
+                />
+              </View>
               <Text
                 style={{
-                  marginLeft: 6,
                   fontFamily: theme.fonts.bold,
-                  fontSize: theme.fontSizes.regular,
+                  fontSize: 15,
+                  fontWeight: "700",
+                  color: "#000",
                 }}
               >
                 Steps
@@ -161,42 +176,42 @@ function HealthDashboard() {
               onPress={() => openModal("steps")}
               style={{ padding: 6 }}
             >
-              <AntDesign name="pluscircle" size={24} color="#67c694" />
+              <AntDesign name="pluscircle" size={22} color="#67c694" />
             </TouchableOpacity>
           </View>
 
           <Progress.Bar
             progress={stepsCount / stepsGoal}
             width={null}
-            color="#7771de"
-            unfilledColor="#E0E0E0"
+            color="#9747FF"
+            unfilledColor="#F0F0F0"
             borderWidth={0}
             height={8}
             borderRadius={4}
           />
           <View
             style={{
-              display: "flex",
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
-              marginTop: 8,
+              marginTop: 10,
             }}
           >
             <Text
               style={{
-                fontWeight: "500",
+                fontWeight: "600",
                 fontFamily: theme.fonts.regular,
+                fontSize: 13,
+                color: "#666",
               }}
             >
-              {stepsCount}/{stepsGoal}
+              {stepsCount.toLocaleString()}/{stepsGoal.toLocaleString()}
             </Text>
-            <Ionicons
+            <TouchableOpacity
               onPress={() => router.push("/(tabs)/dashboard/track")}
-              name="chevron-forward"
-              size={24}
-              color="#555"
-            />
+            >
+              <Ionicons name="chevron-forward" size={16} color="#999" />
+            </TouchableOpacity>
           </View>
           {/* Sync row */}
           {/* <TouchableOpacity
@@ -213,7 +228,7 @@ function HealthDashboard() {
               ) : (
                 <MaterialCommunityIcons
                   name="google-fit"
-                  size={18}
+                  size={16}
                   color="#7771de"
                 />
               )}
@@ -240,14 +255,16 @@ function HealthDashboard() {
         <View
           style={{
             flex: 1,
-            backgroundColor: "#fff",
-            borderRadius: 12,
+            backgroundColor: "#FFFFFF",
+            borderRadius: 20,
             padding: 16,
-            marginLeft: 8,
             shadowColor: "#000",
+            shadowOffset: { width: 0, height: 1 },
             shadowOpacity: 0.05,
             shadowRadius: 4,
-            elevation: 3,
+            elevation: 2,
+            borderWidth: 1,
+            borderColor: "#F5F5F5",
           }}
         >
           {/* Header Row */}
@@ -256,20 +273,33 @@ function HealthDashboard() {
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
-              marginBottom: 8,
+              marginBottom: 12,
             }}
           >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <MaterialCommunityIcons
-                name="moon-waning-crescent"
-                size={20}
-                color="#140A21"
-              />
+              <View
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: 16,
+                  backgroundColor: "#F3EDFF",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 8,
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="moon-waning-crescent"
+                  size={14}
+                  color="#9747FF"
+                />
+              </View>
               <Text
                 style={{
-                  marginLeft: 6,
-                  fontWeight: "600",
+                  fontWeight: "700",
                   fontFamily: theme.fonts.bold,
+                  fontSize: 15,
+                  color: "#000",
                 }}
               >
                 Sleep
@@ -279,15 +309,15 @@ function HealthDashboard() {
               onPress={() => openModal("sleep")}
               style={{ padding: 6 }}
             >
-              <AntDesign name="pluscircle" size={24} color="#67c694" />
+              <AntDesign name="pluscircle" size={22} color="#67c694" />
             </TouchableOpacity>
           </View>
 
           <Progress.Bar
             progress={sleepDuration / sleepGoal}
             width={null}
-            color="#7771de"
-            unfilledColor="#E0E0E0"
+            color="#9747FF"
+            unfilledColor="#F0F0F0"
             borderWidth={0}
             height={8}
             borderRadius={4}
@@ -295,27 +325,27 @@ function HealthDashboard() {
 
           <View
             style={{
-              display: "flex",
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
-              marginTop: 8,
+              marginTop: 10,
             }}
           >
             <Text
               style={{
-                fontWeight: "500",
+                fontWeight: "600",
                 fontFamily: theme.fonts.regular,
+                fontSize: 13,
+                color: "#666",
               }}
             >
               {sleepDuration}/{sleepGoal} hrs
             </Text>
-            <Ionicons
+            <TouchableOpacity
               onPress={() => router.push("/(tabs)/dashboard/track")}
-              name="chevron-forward"
-              size={24}
-              color="#555"
-            />
+            >
+              <Ionicons name="chevron-forward" size={16} color="#999" />
+            </TouchableOpacity>
           </View>
           {/* Sync row */}
           {/* <TouchableOpacity
@@ -332,7 +362,7 @@ function HealthDashboard() {
               ) : (
                 <MaterialCommunityIcons
                   name="google-fit"
-                  size={18}
+                  size={16}
                   color="#7771de"
                 />
               )}
@@ -359,15 +389,17 @@ function HealthDashboard() {
       {/* Water Card */}
       <View
         style={{
-          marginTop: 16,
-          backgroundColor: "#fff",
-          borderRadius: 12,
-
+          marginTop: 12,
+          backgroundColor: "#FFFFFF",
+          borderRadius: 20,
           padding: 16,
           shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
           shadowOpacity: 0.05,
           shadowRadius: 4,
-          elevation: 3,
+          elevation: 2,
+          borderWidth: 1,
+          borderColor: "#F5F5F5",
         }}
       >
         <View
@@ -375,20 +407,33 @@ function HealthDashboard() {
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: 8,
+            marginBottom: 12,
           }}
         >
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <MaterialCommunityIcons
-              name="cup-water"
-              size={20}
-              color="#140A21"
-            />
+            <View
+              style={{
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                backgroundColor: "#F3EDFF",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 8,
+              }}
+            >
+              <MaterialCommunityIcons
+                name="cup-water"
+                size={14}
+                color="#9747FF"
+              />
+            </View>
             <Text
               style={{
-                marginLeft: 6,
-                fontWeight: "600",
+                fontWeight: "700",
                 fontFamily: theme.fonts.bold,
+                fontSize: 15,
+                color: "#000",
               }}
             >
               Water
@@ -406,35 +451,35 @@ function HealthDashboard() {
         <Progress.Bar
           progress={waterIntake / waterGoal}
           width={null}
-          color="#7771de"
-          unfilledColor="#E0E0E0"
+          color="#9747FF"
+          unfilledColor="#F0F0F0"
           borderWidth={0}
           height={8}
           borderRadius={4}
         />
         <View
           style={{
-            display: "flex",
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
-            marginTop: 8,
+            marginTop: 10,
           }}
         >
           <Text
             style={{
-              fontWeight: "500",
+              fontWeight: "600",
               fontFamily: theme.fonts.regular,
+              fontSize: 13,
+              color: "#666",
             }}
           >
             {waterIntake}/{waterGoal} Glasses
           </Text>
-          <Ionicons
+          <TouchableOpacity
             onPress={() => router.push("/(tabs)/dashboard/track")}
-            name="chevron-forward"
-            size={24}
-            color="#555"
-          />
+          >
+            <Ionicons name="chevron-forward" size={18} color="#999" />
+          </TouchableOpacity>
         </View>
       </View>
 

@@ -1,617 +1,612 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
   ScrollView,
-  ImageBackground,
-  Platform,
   Dimensions,
+  ImageBackground,
+  Animated,
+  Platform,
 } from "react-native";
-import { AnimatedCircularProgress } from "react-native-circular-progress";
+import { LineChart } from "react-native-chart-kit";
 import { Ionicons } from "@expo/vector-icons";
+import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
-import NormalHeader from "@/app/modules/NormalHeader";
-import TrackerModal from "@/app/Components/Tracking/TrackingModal";
-import { trackService } from "@/app/services/track.service";
-import { ActivityIndicator } from "react-native-paper";
-const { height } = Dimensions.get("window");
-import CustomSnackbar from "@/app/modules/Snackbar";
-const topPadding = height * 0.05;
-import { updateTrackingField } from "@/Slices/trackSlice";
 import { RootState } from "@/store";
+import NormalHeader from "@/app/modules/NormalHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { createStreak } from "@/app/services/streaks.service";
-import { setStreakData } from "@/Slices/streakSlice";
-import { router } from "expo-router";
+import { trackService } from "@/app/services/track.service";
+import {
+  setCurrentDateTrackData,
+  setTotalTrackData,
+} from "@/Slices/trackSlice";
+import { ActivityIndicator } from "react-native-paper";
 
-export default function WellnessDashboard() {
-  const currentDayTrackData = useSelector(
-    (state: RootState) => state.track.currentDateTrackData
-  );
+const screenWidth = Dimensions.get("window").width;
+
+const tabNames = ["Sleep", "Steps", "Water"] as const;
+type TabType = (typeof tabNames)[number];
+
+const getChartConfig = (tab: TabType) => {
+  const colors = {
+    Sleep: { primary: "#67C694", gradient: "#E8F5E9" },
+    Steps: { primary: "#9747FF", gradient: "#F3EDFF" },
+    Water: { primary: "#4FC3F7", gradient: "#E3F2FD" },
+  };
+  const color = colors[tab];
+  
+  return {
+    backgroundGradientFrom: "#FFFFFF",
+    backgroundGradientTo: "#FFFFFF",
+    color: (opacity = 1) => {
+      const rgb = tab === "Sleep" ? "103, 198, 148" : tab === "Steps" ? "151, 71, 255" : "79, 195, 247";
+      return `rgba(${rgb}, ${opacity})`;
+    },
+    labelColor: () => "#666",
+    strokeWidth: 3,
+    propsForDots: {
+      r: "6",
+      strokeWidth: "2",
+      stroke: color.primary,
+    },
+  };
+};
+
+interface TrackingData {
+  steps: { steps: number; date: string; userId: string; _id: string } | null;
+  sleep: {
+    sleepDuration: number;
+    date: string;
+    userId: string;
+    _id: string;
+  } | null;
+  water: {
+    waterIntake: number;
+    date: string;
+    userId: string;
+    _id: string;
+  } | null;
+}
+
+interface ChartPoint {
+  date: string;
+  value: number;
+}
+
+export default function TrackingGraphPage() {
+  const [selectedTab, setSelectedTab] = useState<TabType>("Sleep");
+  const [monthOffset, setMonthOffset] = useState(0);
+  const currentMonth = dayjs().add(monthOffset, "month");
+  const normalizeDate = (dateStr: string) =>
+    new Date(dateStr).toLocaleDateString("en-CA");
+  const [loading, setLoading] = useState(false);
   const dispatch = useDispatch();
-  const [distanceDetails, setDistanceDetails] = useState({
-    calorie: 0,
-    coveredDistance: 0,
-  });
-  const [modalVisible, setModalVisible] = useState(false);
-  const [openModalFor, setOpenModalFor] = useState<"sleep" | "steps" | "water">(
-    "sleep"
+  const totalTrackData = useSelector(
+    (state: RootState) => state.track.totalTrackData as TrackingData[]
   );
-
-  const [snackbarVisible, setSnackbarVisible] = useState(false);
-  const [snackbarMsg, setSnackbarMsg] = useState("");
-  const [dataLoading, setDataLoading] = useState(false);
-  const openModal = (key: "sleep" | "steps" | "water") => {
-    setOpenModalFor(key);
-    setModalVisible(true);
-  };
-
-  const [updateDataLoading, setUpdateDataLoading] = useState(false);
-  const onClose = () => {
-    setModalVisible(false);
-  };
-
-  const goalSteps = 10000;
-  const goalSleep = 12;
-  const progressSteps = Math.min(
-    ((currentDayTrackData.steps?.steps || 0) / goalSteps) * 100,
-    100
-  );
-  const progressSleep = Math.min(
-    ((currentDayTrackData.sleep?.sleepDuration || 0) / goalSleep) * 100,
-    100
-  );
-
-  //// Function for calculating the distance and the calorie burnt
-  // const calculateDistanceDetailsAndUpdate = (additionalSteps: number) => {
-  //   const totalSteps = data.steps + additionalSteps;
-
-  //   const newCalories = totalSteps * 0.04; // approx 0.04 calories per step
-  //   const newDistance = totalSteps * 0.0008; // approx 0.0008 km per step
-
-  //   setData((prev) => ({ ...prev, steps: totalSteps }));
-  //   setDistanceDetails({
-  //     calorie: parseFloat(newCalories.toFixed(0)), // rounded to nearest integer
-  //     coveredDistance: parseFloat(newDistance.toFixed(2)), // 2 decimal places
-  //   });
-  // };
-
-  async function updateTrackingData(
-    type: "sleep" | "steps" | "water",
-    value: number
-  ) {
+  // ✅ Fetch tracking data
+  const fetchData = async () => {
+    setLoading(true);
     try {
-      setUpdateDataLoading(true);
-      // Map "steps" to "walk", others remain the same
-      const apiType = type === "steps" ? "walk" : type;
-      // Get current day's existing value
-      const existingData: any = currentDayTrackData[type];
+      const today = new Date();
+      const formatDate = (d: Date) => d.toLocaleDateString("en-CA");
 
-      // Calculate new value: add new value to existing if present
-      let newValue = value;
-      if (existingData) {
-        if (type === "steps") newValue += existingData.steps || 0;
-        else if (type === "sleep") newValue += existingData.sleepDuration || 0;
-        else if (type === "water") newValue += existingData.waterIntake || 0;
-      }
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const startDate = formatDate(startOfMonth);
+      const endDate = formatDate(today);
 
-      // Call API: send _id if exists, so backend knows to update
-      const response = await trackService.updateTrackingData(
-        newValue,
-        Date.now(),
-        apiType
-      );
+      const [stepsRes, sleepRes, waterRes] = await Promise.all([
+        trackService.getTrackingData("walk", startDate, endDate),
+        trackService.getTrackingData("sleep", startDate, endDate),
+        trackService.getTrackingData("water", startDate, endDate),
+      ]);
 
-      if (response.success && response.data) {
-        let responseStreak = await createStreak();
-        if (responseStreak.success) {
-          dispatch(setStreakData(responseStreak.data));
-        }
-        dispatch(
-          updateTrackingField({
-            type: type, // e.g., "steps", "sleep", "water"
-            data: response.data, // must include `_id`
-          })
+      if (stepsRes.success && sleepRes.success && waterRes.success) {
+        const stepsData = stepsRes.data || [];
+        const sleepData = sleepRes.data || [];
+        const waterData = waterRes.data || [];
+
+        const dateMap: { [date: string]: TrackingData } = {};
+
+        stepsData.forEach((item: any) => {
+          const date = normalizeDate(item.date);
+          if (!dateMap[date])
+            dateMap[date] = { steps: null, sleep: null, water: null };
+          dateMap[date].steps = item;
+        });
+
+        sleepData.forEach((item: any) => {
+          const date = normalizeDate(item.date);
+          if (!dateMap[date])
+            dateMap[date] = { steps: null, sleep: null, water: null };
+          dateMap[date].sleep = item;
+        });
+
+        waterData.forEach((item: any) => {
+          const date = normalizeDate(item.date);
+          if (!dateMap[date])
+            dateMap[date] = { steps: null, sleep: null, water: null };
+          dateMap[date].water = item;
+        });
+
+        const totalTrackArray: TrackingData[] = Object.values(dateMap).sort(
+          (a, b) => {
+            const dateA = a.steps?.date || a.sleep?.date || a.water?.date || "";
+            const dateB = b.steps?.date || b.sleep?.date || b.water?.date || "";
+            return new Date(dateA).getTime() - new Date(dateB).getTime();
+          }
         );
-      } else {
-        setSnackbarMsg("Some error has happened, try again");
-        setSnackbarVisible(true);
+
+        const todayStr = formatDate(today);
+        const todayData = dateMap[todayStr] || {
+          steps: null,
+          sleep: null,
+          water: null,
+        };
+
+        // ✅ update redux
+        dispatch(setTotalTrackData(totalTrackArray));
+        dispatch(setCurrentDateTrackData(todayData));
       }
-    } catch (error) {
-      setSnackbarVisible(true);
-      setSnackbarMsg("Some error has happened, try again");
+    } catch (err) {
+      console.error("Failed to load tracking data", err);
     } finally {
-      setUpdateDataLoading(false);
+      setLoading(false);
     }
-  }
+  };
+
+  // ✅ Run on mount (or when user opens graph page)
+  useEffect(() => {
+    if (totalTrackData.length === 0) {
+      fetchData();
+    }
+  }, []);
+
+  const { sleepData, stepsData, waterData } = useMemo(() => {
+    const sleepData: ChartPoint[] = [];
+    const stepsData: ChartPoint[] = [];
+    const waterData: ChartPoint[] = [];
+
+    totalTrackData.forEach((entry) => {
+      if (entry.sleep?.date && entry.sleep.sleepDuration != null) {
+        sleepData.push({
+          date: entry.sleep.date,
+          value: entry.sleep.sleepDuration,
+        });
+      }
+      if (entry.steps?.date && entry.steps.steps != null) {
+        stepsData.push({ date: entry.steps.date, value: entry.steps.steps });
+      }
+      if (entry.water?.date && entry.water.waterIntake != null) {
+        waterData.push({
+          date: entry.water.date,
+          value: entry.water.waterIntake,
+        });
+      }
+    });
+
+    return { sleepData, stepsData, waterData };
+  }, [totalTrackData]);
+
+  const filterMonthData = (dataArray: ChartPoint[]): ChartPoint[] =>
+    dataArray
+      .filter((d) => dayjs(d.date).isSame(currentMonth, "month"))
+      .sort((a, b) => dayjs(a.date).unix() - dayjs(b.date).unix());
+
+  const getGraphData = () => {
+    let dataset: ChartPoint[] = [];
+
+    if (selectedTab === "Sleep") dataset = filterMonthData(sleepData);
+    else if (selectedTab === "Steps") dataset = filterMonthData(stepsData);
+    else if (selectedTab === "Water") dataset = filterMonthData(waterData);
+
+    if (dataset.length === 0) {
+      return {
+        labels: ["No data"],
+        datasets: [{ data: [0] }],
+      };
+    }
+
+    const labels = dataset.map((d) => dayjs(d.date).format("D"));
+    const values = dataset.map((d) => d.value);
+
+    return {
+      labels,
+      datasets: [{ data: values }],
+    };
+  };
+
+  const getSelectedData = () => {
+    if (selectedTab === "Sleep") return filterMonthData(sleepData);
+    if (selectedTab === "Steps") return filterMonthData(stepsData);
+    return filterMonthData(waterData);
+  };
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    fadeAnim.setValue(0);
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 1000,
+      useNativeDriver: true,
+    }).start();
+  }, [selectedTab, monthOffset]);
+  const { height } = Dimensions.get("window");
+  const topPadding = height * 0.05;
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["left", "right"]}
-    >
+    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <ImageBackground
         source={require("../../../assets/images/basicBackground.jpg")}
-        style={{ flex: 1 }}
         resizeMode="cover"
+        style={{ flex: 1 }}
       >
-        <View
-          style={{
-            paddingHorizontal: 20,
-            marginTop: Platform.OS === "ios" ? topPadding : "4%",
-          }}
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+          edges={["left", "right"]}
         >
-          <NormalHeader screenName="Track" rightIcon={true} />
-        </View>
-        {/* History Icon Button */}
-        <ScrollView 
-          contentContainerStyle={{ 
-            paddingHorizontal: 16, 
-            paddingTop: 16,
-            paddingBottom: 100 
-          }}
-          showsVerticalScrollIndicator={false}
-        >
-          {dataLoading ? (
+          {loading ? (
             <View
               style={{
                 flex: 1,
                 justifyContent: "center",
                 alignItems: "center",
-                padding: 40,
               }}
             >
               <ActivityIndicator color="#9747FF" size="large" />
             </View>
           ) : (
-            <>
-              {/* Progress Circle Card */}
+            <ScrollView
+              style={{ flex: 1 }}
+              showsVerticalScrollIndicator={false}
+            >
               <View
                 style={{
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 24,
-                  padding: 16,
-                  marginBottom: 24,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.08,
-                  shadowRadius: 16,
-                  elevation: 3,
-                  borderWidth: 1,
-                  borderColor: "#F5F5F5",
-                  alignItems: "center",
+                  paddingHorizontal: 20,
+                  marginTop: Platform.OS === "ios" ? topPadding : "4%",
                 }}
               >
-                <AnimatedCircularProgress
-                  size={160}
-                  width={14}
-                  fill={progressSleep}
-                  tintColor="#67C694"
-                  backgroundColor="#F0F0F0"
-                  duration={1200}
-                  rotation={0}
-                >
-                  {() => (
-                    <AnimatedCircularProgress
-                      size={120}
-                      width={12}
-                      fill={progressSteps}
-                      tintColor="#9747FF"
-                      backgroundColor="#F0F0F0"
-                      duration={1200}
-                      rotation={0}
-                    >
-                      {() => (
-                        <View style={{ alignItems: "center" }}>
-                          <Text
-                            style={{
-                              fontSize: 24,
-                              fontWeight: "700",
-                              color: "#9747FF",
-                              textAlign: "center",
-                              marginBottom: 2,
-                            }}
-                          >
-                            {currentDayTrackData.steps?.steps
-                              ? `${(
-                                  currentDayTrackData.steps.steps / 1000
-                                ).toFixed(1)}K`
-                              : "0K"}
-                          </Text>
-                          <Text
-                            style={{
-                              fontSize: 11,
-                              color: "#999",
-                              textAlign: "center",
-                              fontWeight: "500",
-                            }}
-                          >
-                            Steps
-                          </Text>
-                        </View>
-                      )}
-                    </AnimatedCircularProgress>
-                  )}
-                </AnimatedCircularProgress>
+                <NormalHeader screenName="Track" />
+              </View>
 
+              <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 100 }}>
+                {/* Tabs */}
                 <View
                   style={{
                     flexDirection: "row",
-                    justifyContent: "center",
-                    gap: 32,
-                    marginTop: 16,
-                    paddingTop: 12,
-                    borderTopWidth: 1,
-                    borderTopColor: "#F0F0F0",
-                    width: "100%",
+                    justifyContent: "space-between",
+                    marginBottom: 24,
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: 20,
+                    padding: 4,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 12,
+                    elevation: 3,
+                    borderWidth: 1,
+                    borderColor: "#F5F5F5",
                   }}
                 >
-                  {/* Sleep */}
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 14,
-                        height: 14,
-                        borderRadius: 7,
-                        backgroundColor: "#67C694",
-                        marginRight: 8,
-                      }}
-                    />
-                    <View>
-                      <Text
+                  {tabNames.map((tab) => {
+                    const isSelected = selectedTab === tab;
+                    const tabColors = {
+                      Sleep: { bg: "#E8F5E9", text: "#67C694" },
+                      Steps: { bg: "#F3EDFF", text: "#9747FF" },
+                      Water: { bg: "#E3F2FD", text: "#4FC3F7" },
+                    };
+                    const color = tabColors[tab];
+                    
+                    return (
+                      <TouchableOpacity
+                        key={tab}
+                        onPress={() => setSelectedTab(tab)}
                         style={{
-                          fontSize: 13,
-                          color: "#666",
-                          fontWeight: "600",
-                        }}
-                      >
-                        Sleep
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: 11,
-                          color: "#999",
-                          marginTop: 2,
-                        }}
-                      >
-                        {currentDayTrackData.sleep?.sleepDuration || 0}h
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Steps */}
-                  <View
-                    style={{ flexDirection: "row", alignItems: "center" }}
-                  >
-                    <View
-                      style={{
-                        width: 14,
-                        height: 14,
-                        borderRadius: 7,
-                        backgroundColor: "#9747FF",
-                        marginRight: 8,
-                      }}
-                    />
-                    <View>
-                      <Text
-                        style={{
-                          fontSize: 13,
-                          color: "#666",
-                          fontWeight: "600",
-                        }}
-                      >
-                        Steps
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: 11,
-                          color: "#999",
-                          marginTop: 2,
-                        }}
-                      >
-                        {currentDayTrackData.steps?.steps || 0}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              </View>
-
-              {/* Summary */}
-              {/* <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginBottom: 10,
-                  backgroundColor: theme.colors.cardLight,
-                  paddingTop: 10,
-                  paddingBottom: 10,
-                  borderRadius: 14,
-                }}
-              >
-                {[
-                  { label: "Cal", value: 486 },
-                  { label: "Distance", value: "9.2km" },
-                  { label: "Minutes", value: "30:40" },
-                ].map((item, i) => (
-                  <View key={i} style={{ alignItems: "center", flex: 1 }}>
-                    <Text
-                      style={{
-                        fontWeight: "bold",
-                        fontSize: 16,
-                        color: "#333",
-                      }}
-                    >
-                      {item.value}
-                    </Text>
-                    <Text style={{ color: "#999", fontSize: 12 }}>
-                      {item.label}
-                    </Text>
-                  </View>
-                ))}
-              </View> */}
-
-              {/* Tracker Cards */}
-              <View
-                style={{
-                  gap: 16,
-                }}
-              >
-                {[
-                  {
-                    label: "Steps",
-                    current: currentDayTrackData.steps?.steps || 0,
-                    goal: 10000,
-                    key: "steps",
-                    icon: "walk-outline",
-                    color: "#9747FF",
-                    bgColor: "#F3EDFF",
-                  },
-                  {
-                    label: "Sleep",
-                    current: currentDayTrackData.sleep?.sleepDuration || 0,
-                    goal: 12,
-                    unit: "hrs",
-                    key: "sleep",
-                    icon: "moon-outline",
-                    color: "#67C694",
-                    bgColor: "#E8F5E9",
-                  },
-                  {
-                    label: "Water",
-                    current: currentDayTrackData.water?.waterIntake || 0,
-                    goal: 10,
-                    unit: "glasses",
-                    key: "water",
-                    icon: "water-outline",
-                    color: "#4FC3F7",
-                    bgColor: "#E3F2FD",
-                  },
-                ].map((tracker: any, i) => {
-                  const progress = Math.min((tracker.current / tracker.goal) * 100, 100);
-                  return (
-                    <View
-                      key={i}
-                      style={{
-                        backgroundColor: "#FFFFFF",
-                        padding: 20,
-                        borderRadius: 20,
-                        shadowColor: "#000",
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.08,
-                        shadowRadius: 12,
-                        elevation: 2,
-                        borderWidth: 1,
-                        borderColor: "#F5F5F5",
-                      }}
-                    >
-                      {/* Header Row */}
-                      <View
-                        style={{
-                          flexDirection: "row",
+                          flex: 1,
+                          paddingVertical: 12,
+                          paddingHorizontal: 12,
+                          borderRadius: 16,
+                          backgroundColor: isSelected ? color.bg : "transparent",
                           alignItems: "center",
-                          justifyContent: "space-between",
-                          marginBottom: 16,
+                          flexDirection: "row",
+                          justifyContent: "center",
+                          gap: 6,
                         }}
                       >
-                        <View
+                        <Ionicons
+                          name={
+                            tab === "Sleep"
+                              ? "moon-outline"
+                              : tab === "Steps"
+                                ? "walk-outline"
+                                : "water-outline"
+                          }
+                          size={18}
+                          color={isSelected ? color.text : "#999"}
+                        />
+                        <Text
                           style={{
-                            flexDirection: "row",
-                            alignItems: "center",
-                            flex: 1,
+                            color: isSelected ? color.text : "#666",
+                            fontWeight: isSelected ? "700" : "600",
+                            fontSize: 14,
                           }}
                         >
-                          <View
-                            style={{
-                              width: 48,
-                              height: 48,
-                              borderRadius: 24,
-                              backgroundColor: tracker.bgColor,
-                              alignItems: "center",
-                              justifyContent: "center",
-                              marginRight: 12,
-                            }}
-                          >
-                            <Ionicons
-                              name={tracker.icon}
-                              size={24}
-                              color={tracker.color}
-                            />
-                          </View>
-                          <View style={{ flex: 1 }}>
-                            <Text
-                              style={{
-                                fontSize: 15,
-                                fontWeight: "700",
-                                color: "#000",
-                                marginBottom: 4,
-                              }}
-                            >
-                              {tracker.label}
-                            </Text>
-                            <Text
-                              style={{
-                                fontSize: 13,
-                                color: "#666",
-                              }}
-                            >
-                              {tracker.current}{tracker.unit ? ` ${tracker.unit}` : ""} / {tracker.goal}{tracker.unit ? ` ${tracker.unit}` : ""}
-                            </Text>
-                          </View>
-                        </View>
+                          {tab}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+
+                {/* Month Switcher Card */}
+                <View
+                  style={{
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: 20,
+                    padding: 16,
+                    marginBottom: 24,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 12,
+                    elevation: 3,
+                    borderWidth: 1,
+                    borderColor: "#F5F5F5",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  {(() => {
+                    const arrowColors = {
+                      Sleep: "#67C694",
+                      Steps: "#9747FF",
+                      Water: "#4FC3F7",
+                    };
+                    const arrowColor = arrowColors[selectedTab];
+                    
+                    return (
+                      <>
                         <TouchableOpacity
-                          onPress={() => openModal(tracker.key as any)}
+                          onPress={() => setMonthOffset((prev) => prev - 1)}
                           style={{
                             width: 44,
                             height: 44,
                             borderRadius: 22,
-                            backgroundColor: "#67C694",
+                            backgroundColor: "#F8F8F8",
                             alignItems: "center",
                             justifyContent: "center",
-                            shadowColor: "#67C694",
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.3,
-                            shadowRadius: 4,
-                            elevation: 3,
                           }}
                         >
-                          <Ionicons name="add" size={22} color="#FFFFFF" />
+                          <Ionicons
+                            name="chevron-back"
+                            size={22}
+                            color={arrowColor}
+                          />
                         </TouchableOpacity>
-                      </View>
-
-                      {/* Progress Bar */}
-                      <View
-                        style={{
-                          height: 8,
-                          backgroundColor: "#F0F0F0",
-                          borderRadius: 4,
-                          overflow: "hidden",
-                        }}
-                      >
-                        <View
+                        <Text
                           style={{
-                            height: "100%",
-                            width: `${progress}%`,
-                            backgroundColor: tracker.color,
-                            borderRadius: 4,
+                            fontSize: 17,
+                            fontWeight: "700",
+                            color: "#000",
                           }}
-                        />
-                      </View>
-                      <Text
-                        style={{
-                          fontSize: 11,
-                          color: "#999",
-                          marginTop: 8,
-                          textAlign: "right",
-                        }}
-                      >
-                        {progress.toFixed(0)}% Complete
-                      </Text>
-                    </View>
-                  );
-                })}
-              </View>
+                        >
+                          {currentMonth.format("MMMM YYYY")}
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => setMonthOffset((prev) => prev + 1)}
+                          style={{
+                            width: 44,
+                            height: 44,
+                            borderRadius: 22,
+                            backgroundColor: "#F8F8F8",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <Ionicons
+                            name="chevron-forward"
+                            size={22}
+                            color={arrowColor}
+                          />
+                        </TouchableOpacity>
+                      </>
+                    );
+                  })()}
+                </View>
 
-              {/* Medical Disclaimer */}
-              {/* <View
-                style={{
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 20,
-                  padding: 16,
-                  marginTop: 16,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.12,
-                  shadowRadius: 12,
-                  elevation: 5,
-                  borderWidth: 1,
-                  borderColor: "#F5F5F5",
-                }}
-              >
+                {/* Chart Card */}
                 <View
                   style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 8,
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: 24,
+                    padding: 20,
+                    marginBottom: 24,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 16,
+                    elevation: 3,
+                    borderWidth: 1,
+                    borderColor: "#F5F5F5",
                   }}
                 >
-                  <Ionicons
-                    name="information-circle-outline"
-                    size={20}
-                    color="#9747FF"
-                    style={{ marginRight: 8 }}
-                  />
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      fontWeight: "700",
-                      color: "#000",
-                    }}
-                  >
-                    Health Goals & Information
-                  </Text>
+                  <Animated.View style={{ opacity: fadeAnim }}>
+                    <LineChart
+                      data={getGraphData()}
+                      width={screenWidth - 72}
+                      height={220}
+                      chartConfig={getChartConfig(selectedTab)}
+                      bezier
+                      withShadow={false}
+                      style={{ borderRadius: 16 }}
+                    />
+                  </Animated.View>
                 </View>
-                <Text
-                  style={{
-                    fontSize: 12,
-                    color: "#666",
-                    lineHeight: 18,
-                    marginBottom: 8,
-                  }}
-                >
-                  The wellness goals displayed (steps, sleep, water) are general
-                  guidelines. Individual needs may vary. These recommendations
-                  are not a substitute for professional medical advice.
-                </Text>
-                <TouchableOpacity
-                  onPress={() =>
-                    router.push({ pathname: "/dashboard/medicalcitations" } as any)
-                  }
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginTop: 4,
-                  }}
-                >
-                  <Text
+
+                {/* Records Section */}
+                {getSelectedData().length > 0 && (
+                  <View
                     style={{
-                      fontSize: 12,
-                      color: "#9747FF",
-                      fontWeight: "600",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginBottom: 16,
                     }}
                   >
-                    View Medical Citations & Sources →
-                  </Text>
-                </TouchableOpacity>
-              </View> */}
-            </>
+                    {(() => {
+                      const colors = {
+                        Sleep: "#67C694",
+                        Steps: "#9747FF",
+                        Water: "#4FC3F7",
+                      };
+                      return (
+                        <View
+                          style={{
+                            width: 4,
+                            height: 24,
+                            backgroundColor: colors[selectedTab],
+                            borderRadius: 2,
+                            marginRight: 12,
+                          }}
+                        />
+                      );
+                    })()}
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "700",
+                        color: "#000",
+                      }}
+                    >
+                      {selectedTab} Records
+                    </Text>
+                  </View>
+                )}
+
+                {getSelectedData().length === 0 ? (
+                  <View
+                    style={{
+                      backgroundColor: "#FFFFFF",
+                      borderRadius: 20,
+                      padding: 40,
+                      alignItems: "center",
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: 0.08,
+                      shadowRadius: 12,
+                      elevation: 3,
+                      borderWidth: 1,
+                      borderColor: "#F5F5F5",
+                    }}
+                  >
+                    <Ionicons name="bar-chart-outline" size={48} color="#999" />
+                    <Text
+                      style={{
+                        textAlign: "center",
+                        color: "#666",
+                        marginTop: 12,
+                        fontSize: 14,
+                        fontWeight: "500",
+                      }}
+                    >
+                      No data available for this month
+                    </Text>
+                  </View>
+                ) : (
+                  <View style={{ marginBottom: 20 }}>
+                    {getSelectedData().map((item, index) => {
+                      const colors = {
+                        Sleep: { bg: "#E8F5E9", icon: "#67C694", text: "#67C694" },
+                        Steps: { bg: "#F3EDFF", icon: "#9747FF", text: "#9747FF" },
+                        Water: { bg: "#E3F2FD", icon: "#4FC3F7", text: "#4FC3F7" },
+                      };
+                      const color = colors[selectedTab];
+                      
+                      return (
+                        <View
+                          key={index}
+                          style={{
+                            backgroundColor: "#FFFFFF",
+                            padding: 16,
+                            marginBottom: 12,
+                            borderRadius: 20,
+                            shadowColor: "#000",
+                            shadowOffset: { width: 0, height: 2 },
+                            shadowOpacity: 0.08,
+                            shadowRadius: 12,
+                            elevation: 3,
+                            borderWidth: 1,
+                            borderColor: "#F5F5F5",
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                              flex: 1,
+                            }}
+                          >
+                            <View
+                              style={{
+                                width: 48,
+                                height: 48,
+                                borderRadius: 24,
+                                backgroundColor: color.bg,
+                                alignItems: "center",
+                                justifyContent: "center",
+                                marginRight: 12,
+                              }}
+                            >
+                              <Ionicons
+                                name={
+                                  selectedTab === "Sleep"
+                                    ? "moon-outline"
+                                    : selectedTab === "Steps"
+                                      ? "walk-outline"
+                                      : "water-outline"
+                                }
+                                size={24}
+                                color={color.icon}
+                              />
+                            </View>
+                            <Text
+                              style={{
+                                color: "#000",
+                                fontWeight: "600",
+                                fontSize: 15,
+                              }}
+                            >
+                              {dayjs(item.date).format("MMM D, YYYY")}
+                            </Text>
+                          </View>
+
+                          <Text
+                            style={{
+                              fontSize: 16,
+                              fontWeight: "700",
+                              color: color.text,
+                            }}
+                          >
+                            {selectedTab === "Sleep"
+                              ? `${item.value} hrs`
+                              : selectedTab === "Steps"
+                                ? `${item.value.toLocaleString()} steps`
+                                : `${item.value} glasses`}
+                          </Text>
+                        </View>
+                      );
+                    })}
+                  </View>
+                )}
+              </View>
+            </ScrollView>
           )}
-
-          {modalVisible ? (
-            <TrackerModal
-              visible={modalVisible}
-              onClose={onClose}
-              type={openModalFor}
-              onSubmit={updateTrackingData}
-              dataLoading={dataLoading}
-            />
-          ) : null}
-
-          {snackbarVisible ? (
-            <CustomSnackbar
-              visible={snackbarVisible}
-              onDismiss={() => setSnackbarVisible(false)}
-              bgColor="#67C694"
-              message={snackbarMsg}
-            />
-          ) : null}
-        </ScrollView>
+        </SafeAreaView>
       </ImageBackground>
-    </SafeAreaView>
+    </View>
   );
 }

@@ -9,7 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import theme from "@/app/Theme/globalTheme";
 import { ActivityIndicator } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -18,6 +18,8 @@ import eventBus from "@/event";
 import { notificationService } from "@/app/services/notification.service";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
+import NormalHeader from "@/app/modules/NormalHeader";
+import dayjs from "dayjs";
 
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.05;
@@ -104,40 +106,11 @@ function NotificationScreen() {
         {/* Header */}
         <View
           style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 24,
-            paddingLeft: 20,
+            paddingHorizontal: 20,
             marginTop: Platform.OS === "ios" ? topPadding : "4%",
           }}
         >
-          <TouchableOpacity
-            onPress={() => router.back()}
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 20,
-              backgroundColor: theme.colors.dark,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <MaterialCommunityIcons
-              name="chevron-left"
-              size={25}
-              color={theme.colors.text}
-            />
-          </TouchableOpacity>
-          <Text
-            style={{
-              color: "#333",
-              fontSize: 22,
-              fontFamily: theme.fonts.bold,
-              marginLeft: 20,
-            }}
-          >
-            Notifications
-          </Text>
+          <NormalHeader screenName="Notifications" />
         </View>
 
         {/* Loader */}
@@ -149,169 +122,207 @@ function NotificationScreen() {
               alignItems: "center",
             }}
           >
-            <ActivityIndicator />
+            <ActivityIndicator color="#9747FF" size="large" />
           </View>
         ) : (
           <ScrollView
             contentContainerStyle={{
               paddingBottom: 100,
-              paddingTop: 2,
+              paddingTop: 16,
               paddingHorizontal: 16,
             }}
             showsVerticalScrollIndicator={false}
           >
             {notifications.length === 0 ? (
-              <Text
+              <View
                 style={{
-                  color: "#888",
-                  fontSize: 16,
-                  textAlign: "center",
+                  backgroundColor: "#FFFFFF",
+                  borderRadius: 20,
+                  padding: 40,
+                  alignItems: "center",
                   marginTop: 40,
-                  fontFamily: theme.fonts.bold,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 12,
+                  elevation: 3,
+                  borderWidth: 1,
+                  borderColor: "#F5F5F5",
                 }}
               >
-                No notifications available.
-              </Text>
+                <Ionicons name="notifications-outline" size={48} color="#999" />
+                <Text
+                  style={{
+                    color: "#666",
+                    fontSize: 16,
+                    fontWeight: "600",
+                    marginTop: 12,
+                    textAlign: "center",
+                  }}
+                >
+                  No notifications available
+                </Text>
+              </View>
             ) : (
-              notifications.map((item, index) => (
-                <View key={index} style={{ marginBottom: 16 }}>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "flex-start",
-                      backgroundColor: "rgba(255, 255, 255, 0.95)",
-                      borderRadius: 16,
-                      padding: 14,
-                      borderColor: theme.colors.cardLight,
-                      borderWidth: 1,
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.05,
-                      shadowRadius: 6,
-                      elevation: 3,
-                      position: "relative",
-                    }}
-                  >
-                    {/* Notification Icon */}
+              notifications.map((item, index) => {
+                const isVideoCall = item.data?.type === "video";
+                const iconColor = isVideoCall ? "#9747FF" : "#67C694";
+                const iconBg = isVideoCall ? "#F3EDFF" : "#E8F5E9";
+                
+                return (
+                  <View key={index} style={{ marginBottom: 12 }}>
                     <View
                       style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 22,
-                        backgroundColor: "#fff",
+                        backgroundColor: "#FFFFFF",
+                        borderRadius: 20,
+                        padding: 16,
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.08,
+                        shadowRadius: 12,
+                        elevation: 3,
                         borderWidth: 1,
-                        borderColor: "#ddd",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        marginRight: 12,
+                        borderColor: "#F5F5F5",
+                        position: "relative",
                       }}
                     >
-                      <MaterialCommunityIcons
-                        name={
-                          item.data?.type === "video" ? "video" : "bell-outline"
-                        }
-                        size={22}
-                        color="#333"
-                      />
-                    </View>
-
-                    {/* Content */}
-                    <View style={{ flex: 1 }}>
-                      <Text
+                      <View
                         style={{
-                          color: theme.colors.secondPrimary,
-                          fontSize: 16,
-                          fontWeight: "700",
-                          marginBottom: 4,
-                          fontFamily: theme.fonts.bold,
+                          flexDirection: "row",
+                          alignItems: "flex-start",
                         }}
                       >
-                        {item.title}
-                      </Text>
-                      <Text
-                        style={{
-                          color: "#444",
-                          fontSize: 14,
-                          marginBottom: 6,
-                          lineHeight: 20,
-                          fontFamily: theme.fonts.medium,
-                        }}
-                      >
-                        {item.body}
-                      </Text>
-                      <Text
-                        style={{
-                          color: "#888",
-                          fontSize: 12,
-                          marginBottom: 8,
-                          fontFamily: theme.fonts.regular,
-                        }}
-                      >
-                        {new Date(item.createdAt).toLocaleString()}
-                      </Text>
-
-                      {/* Join Button */}
-                      {item.data?.type === "video" && (
-                        <TouchableOpacity
-                          onPress={() => openVideoCallModal(item.data)}
+                        {/* Notification Icon */}
+                        <View
                           style={{
-                            flexDirection: "row",
-                            alignItems: "center",
+                            width: 48,
+                            height: 48,
+                            borderRadius: 24,
+                            backgroundColor: iconBg,
                             justifyContent: "center",
-                            alignSelf: "flex-start",
-                            backgroundColor: theme.colors.primary,
-                            height: 30,
-                            width: 80,
-
-                            borderRadius: 20,
+                            alignItems: "center",
+                            marginRight: 12,
                           }}
                         >
-                          <MaterialCommunityIcons
-                            name="video"
-                            size={16}
-                            color="#000"
-                            style={{ marginRight: 6 }}
+                          <Ionicons
+                            name={
+                              isVideoCall
+                                ? "videocam-outline"
+                                : "notifications-outline"
+                            }
+                            size={24}
+                            color={iconColor}
                           />
-                          <Text
+                        </View>
+
+                        {/* Content */}
+                        <View style={{ flex: 1 }}>
+                          {/* Title and Delete Icon Row */}
+                          <View
                             style={{
-                              color: "#000",
-                              fontSize: 12,
-                              fontWeight: "600",
-                              fontFamily: theme.fonts.bold,
+                              flexDirection: "row",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                              marginBottom: 6,
                             }}
                           >
-                            Join
-                          </Text>
-                        </TouchableOpacity>
-                      )}
-                    </View>
+                            <Text
+                              style={{
+                                color: "#000",
+                                fontSize: 16,
+                                fontWeight: "700",
+                                flex: 1,
+                                paddingRight: 8,
+                              }}
+                              numberOfLines={2}
+                            >
+                              {item.title}
+                            </Text>
+                            <TouchableOpacity
+                              onPress={() => handleDelete((item as any)._id)}
+                              style={{
+                                width: 32,
+                                height: 32,
+                                borderRadius: 16,
+                                backgroundColor: "#F8F8F8",
+                                justifyContent: "center",
+                                alignItems: "center",
+                                marginLeft: 8,
+                              }}
+                              disabled={deletingId === (item as any)._id}
+                            >
+                              {deletingId === (item as any)._id ? (
+                                <ActivityIndicator size={16} color="#666" />
+                              ) : (
+                                <Ionicons
+                                  name="trash-outline"
+                                  size={18}
+                                  color="#666"
+                                />
+                              )}
+                            </TouchableOpacity>
+                          </View>
 
-                    {/* Delete Button */}
-                    <TouchableOpacity
-                      onPress={() => handleDelete((item as any)._id)}
-                      style={{
-                        position: "absolute",
-                        top: 10,
-                        right: 10,
-                        padding: 6,
-                        borderRadius: 20,
-                        backgroundColor: "rgba(0,0,0,0.05)",
-                      }}
-                      disabled={deletingId === (item as any)._id}
-                    >
-                      {deletingId === (item as any)._id ? (
-                        <ActivityIndicator size={16} color="#000" />
-                      ) : (
-                        <MaterialCommunityIcons
-                          name="delete"
-                          size={18}
-                          color="#000"
-                        />
-                      )}
-                    </TouchableOpacity>
+                          <Text
+                            style={{
+                              color: "#666",
+                              fontSize: 14,
+                              lineHeight: 20,
+                              marginBottom: 8,
+                              fontWeight: "500",
+                            }}
+                          >
+                            {item.body}
+                          </Text>
+                          <Text
+                            style={{
+                              color: "#999",
+                              fontSize: 12,
+                              fontWeight: "500",
+                            }}
+                          >
+                            {dayjs(item.createdAt).format("MMM D, YYYY • h:mm A")}
+                          </Text>
+
+                          {/* Join Button */}
+                          {isVideoCall && (
+                            <TouchableOpacity
+                              onPress={() => openVideoCallModal(item.data)}
+                              style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                alignSelf: "flex-start",
+                                backgroundColor: "#9747FF",
+                                paddingVertical: 8,
+                                paddingHorizontal: 16,
+                                borderRadius: 20,
+                                marginTop: 12,
+                              }}
+                            >
+                              <Ionicons
+                                name="videocam"
+                                size={16}
+                                color="#FFFFFF"
+                                style={{ marginRight: 6 }}
+                              />
+                              <Text
+                                style={{
+                                  color: "#FFFFFF",
+                                  fontSize: 13,
+                                  fontWeight: "700",
+                                }}
+                              >
+                                Join Call
+                              </Text>
+                            </TouchableOpacity>
+                          )}
+                        </View>
+                      </View>
+                    </View>
                   </View>
-                </View>
-              ))
+                );
+              })
             )}
           </ScrollView>
         )}
