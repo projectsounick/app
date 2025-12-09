@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, ScrollView, Image } from "react-native";
+import { View, Text, ScrollView, Image, ImageBackground, Dimensions, Platform } from "react-native";
 import VideoCard from "@/app/modules/VideoCard";
-
-import SmallHeader from "@/app/modules/SmallHeader";
+import NormalHeader from "@/app/modules/NormalHeader";
 import { PodcastInterface } from "@/app/interfaces/podcastsInterface";
 import { podCastService } from "@/app/services/podcast.service";
 import useGetDataHook from "@/hooks/useFetchHook";
 import SimmerSkeletonCard from "@/app/modules/SimmerCard";
-
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import theme from "@/app/Theme/globalTheme";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import { UserData } from "@/app/interfaces/UserInterface";
@@ -17,7 +16,9 @@ import useFetchStoreDataHook from "@/hooks/useStoreFetchHook";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import BackHeader from "@/app/modules/BackHeader";
+
+const { height } = Dimensions.get("window");
+const topPadding = height * 0.05;
 ///// Main funcitonal component for the Media Screen ---------------------------/
 export default function MediaScreen() {
   const mediaItems = useSelector((state: RootState) => state.podcast.podcasts);
@@ -60,90 +61,123 @@ export default function MediaScreen() {
     // }
   }
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["left", "right"]}
-    >
-      <SmallHeader title="Media" weightShow={false} />
-      <BackHeader />
-      <ScrollView
-        contentContainerStyle={{ padding: 20 }}
-        scrollEventThrottle={16}
+    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+      <ImageBackground
+        source={require("../../../assets/images/basicBackground.jpg")}
+        style={{ flex: 1 }}
+        resizeMode="cover"
       >
-        {mediaItems.length === 0 && loggedUser ? (
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: "transparent" }}
+          edges={["left", "right"]}
+        >
           <View
             style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-              padding: 20,
+              paddingLeft: 20,
+              marginTop: Platform.OS === "ios" ? topPadding : "4%",
             }}
           >
-            <View
-              style={{
-                height: "80%",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "space-evenly",
-                alignItems: "center",
-              }}
-            >
+            <NormalHeader screenName="Media" />
+          </View>
+
+          <ScrollView
+            contentContainerStyle={{ padding: 20, paddingTop: 0 }}
+            scrollEventThrottle={16}
+            showsVerticalScrollIndicator={false}
+          >
+            {mediaItems.length === 0 && loggedUser ? (
               <View
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "center",
+                  flex: 1,
                   alignItems: "center",
+                  justifyContent: "center",
+                  padding: 40,
+                  minHeight: height * 0.6,
                 }}
               >
-                <Text
+                <View
                   style={{
-                    fontSize: theme.fontSizes.medium,
-                    fontFamily: theme.fonts.bold,
-                    color: theme.colors.normal,
-
-                    textAlign: "center",
-                    marginBottom: 4,
+                    backgroundColor: "#FFFFFF",
+                    borderRadius: 24,
+                    padding: 32,
+                    alignItems: "center",
+                    width: "100%",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 12,
+                    elevation: 3,
+                    borderWidth: 1,
+                    borderColor: "#F5F5F5",
                   }}
                 >
-                  No Medial available
-                </Text>
+                  <View
+                    style={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: 40,
+                      backgroundColor: "#F3EDFF",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginBottom: 20,
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name="podcast"
+                      size={40}
+                      color="#9747FF"
+                    />
+                  </View>
 
-                <Text
-                  style={{
-                    fontSize: theme.fontSizes.regularSmall,
-                    fontWeight: "500",
-                    color: theme.colors.dark,
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      fontFamily: theme.fonts.bold,
+                      color: "#000",
+                      textAlign: "center",
+                      marginBottom: 8,
+                    }}
+                  >
+                    No Media Available
+                  </Text>
 
-                    textAlign: "center",
-                  }}
-                >
-                  we will update soon
-                </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontFamily: theme.fonts.regular,
+                      color: "#666",
+                      textAlign: "center",
+                      marginBottom: 24,
+                    }}
+                  >
+                    We will update soon
+                  </Text>
+
+                  <Image
+                    source={require("../../../assets/images/placeholderMedia.png")}
+                    style={{
+                      width: 200,
+                      height: 200,
+                      resizeMode: "contain",
+                    }}
+                  />
+                </View>
               </View>
-              <Image
-                source={require("../../../assets/images/placeholderMedia.png")}
-                style={{
-                  width: 250,
-                  height: 250,
-                  resizeMode: "contain",
-                }}
-              />
-            </View>
-          </View>
-        ) : (
-          mediaItems.map((item: PodcastInterface, index: number) => (
-            <VideoCard
-              key={index}
-              podcast={item}
-              updatePodcastData={updatePodcastData}
-              loggedUser={loggedUser}
-            />
-          ))
-        )}
-      </ScrollView>
+            ) : (
+              mediaItems.map((item: PodcastInterface, index: number) => (
+                <VideoCard
+                  key={index}
+                  podcast={item}
+                  updatePodcastData={updatePodcastData}
+                  loggedUser={loggedUser}
+                />
+              ))
+            )}
+          </ScrollView>
 
-      {updateLoader && <FullScreenLoader />}
-    </SafeAreaView>
+          {updateLoader && <FullScreenLoader />}
+        </SafeAreaView>
+      </ImageBackground>
+    </View>
   );
 }

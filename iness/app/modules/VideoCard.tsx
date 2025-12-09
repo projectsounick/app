@@ -115,19 +115,24 @@ const VideoCard = ({
   return (
     <View
       style={{
-        backgroundColor: "#000",
+        backgroundColor: "#FFFFFF",
         marginBottom: 20,
-        borderRadius: 16,
-        elevation: 3,
+        borderRadius: 20,
         overflow: "hidden",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+        elevation: 3,
+        borderWidth: 1,
+        borderColor: "#F5F5F5",
       }}
     >
       {/* Thumbnail or Video */}
       <View
         style={{
           position: "relative",
-
-          width: 380,
+          width: "100%",
           height: 220,
         }}
       >
@@ -171,19 +176,18 @@ const VideoCard = ({
       {/* Podcast Details */}
       <View
         style={{
-          backgroundColor: theme.colors.text,
-          padding: 10,
-          borderBottomStartRadius: 10,
-          borderBottomEndRadius: 10,
+          backgroundColor: "#FFFFFF",
+          padding: 16,
         }}
       >
         <Text
           style={{
-            fontSize: theme.fontSizes.medium,
-            fontWeight: theme.fontWeights.bold,
-            marginTop: 12,
+            fontSize: 18,
+            fontWeight: "700",
+            marginTop: 4,
             color: "#000",
             fontFamily: theme.fonts.bold,
+            marginBottom: 8,
           }}
         >
           {podcast.podcastName}
@@ -192,10 +196,11 @@ const VideoCard = ({
         {/* Collapsible Description */}
         <Text
           style={{
-            marginTop: 6,
-            fontSize: theme.fontSizes.small,
-            color: theme.colors.dark,
-            fontFamily: theme.fonts.meidium,
+            marginTop: 4,
+            fontSize: 14,
+            color: "#666",
+            fontFamily: theme.fonts.regular,
+            lineHeight: 20,
           }}
           numberOfLines={expandedIndex === podcast._id ? undefined : 2}
         >
@@ -209,10 +214,11 @@ const VideoCard = ({
         >
           <Text
             style={{
-              color: "#1E90FF",
-              fontWeight: "500",
-              marginTop: 4,
+              color: "#67C694",
+              fontWeight: "600",
+              marginTop: 6,
               fontFamily: theme.fonts.medium,
+              fontSize: 13,
             }}
           >
             {expandedIndex === podcast._id ? "Show Less" : "Show More"}
@@ -231,18 +237,26 @@ const VideoCard = ({
           <TouchableOpacity
             onPress={() => handleLike(podcast)}
             style={{ flexDirection: "row", alignItems: "center" }}
+            activeOpacity={0.7}
           >
             {loggedUser?._id && podcast.likes.includes(loggedUser._id) ? (
-              <AntDesign name={"heart"} size={18} color={"red"} />
+              <AntDesign name={"heart"} size={20} color={"#F44336"} />
             ) : (
-              <AntDesign name={"hearto"} size={18} color={"#444"} />
+              <AntDesign name={"hearto"} size={20} color={"#666"} />
             )}
-            <Text style={{ marginLeft: 6, color: "#444" }}>
+            <Text
+              style={{
+                marginLeft: 8,
+                color: "#666",
+                fontSize: 14,
+                fontFamily: theme.fonts.medium,
+              }}
+            >
               {podcast.likes ? podcast.likes.length : 0}
             </Text>
           </TouchableOpacity>
           {showTooltipForPost === podcast._id ? (
-            <ActivityIndicator />
+            <ActivityIndicator size="small" color="#67C694" />
           ) : (
             <TouchableOpacity
               onPress={() => {
@@ -258,8 +272,9 @@ const VideoCard = ({
                   ]
                 );
               }}
+              activeOpacity={0.7}
             >
-              <Ionicons name="ellipsis-vertical" size={20} color="#000" />
+              <Ionicons name="ellipsis-vertical" size={20} color="#666" />
             </TouchableOpacity>
           )}
         </View>

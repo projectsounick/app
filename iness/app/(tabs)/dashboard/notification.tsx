@@ -20,6 +20,11 @@ import CustomSnackbar from "@/app/modules/Snackbar";
 import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
 import NormalHeader from "@/app/modules/NormalHeader";
 import dayjs from "dayjs";
+import {
+  handleNotificationNavigation,
+  getNotificationIcon,
+  NotificationData,
+} from "@/app/utils/notificationRouter";
 
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.05;
@@ -86,6 +91,20 @@ function NotificationScreen() {
       data: data,
       scheduled: true,
     });
+  }
+
+  /// Handle notification click
+  function handleNotificationClick(notification: NotificationItem) {
+    const notificationData: NotificationData = notification.data || {};
+    
+    // Special handling for video calls
+    if (notificationData.type === "video") {
+      openVideoCallModal(notificationData);
+      return;
+    }
+
+    // Use the router utility for navigation
+    handleNotificationNavigation(router, notificationData);
   }
 
   useEffect(() => {
@@ -165,13 +184,15 @@ function NotificationScreen() {
               </View>
             ) : (
               notifications.map((item, index) => {
-                const isVideoCall = item.data?.type === "video";
-                const iconColor = isVideoCall ? "#9747FF" : "#67C694";
-                const iconBg = isVideoCall ? "#F3EDFF" : "#E8F5E9";
+                const notificationData: NotificationData = item.data || {};
+                const { icon, color: iconColor, bgColor: iconBg } = getNotificationIcon(notificationData);
+                const isVideoCall = notificationData.type === "video";
                 
                 return (
                   <View key={index} style={{ marginBottom: 12 }}>
-                    <View
+                    <TouchableOpacity
+                      activeOpacity={0.7}
+                      onPress={() => handleNotificationClick(item)}
                       style={{
                         backgroundColor: "#FFFFFF",
                         borderRadius: 20,
@@ -204,15 +225,19 @@ function NotificationScreen() {
                             marginRight: 12,
                           }}
                         >
-                          <Ionicons
-                            name={
-                              isVideoCall
-                                ? "videocam-outline"
-                                : "notifications-outline"
-                            }
-                            size={24}
-                            color={iconColor}
-                          />
+                          {notificationData.type === "podcast" ? (
+                            <MaterialCommunityIcons
+                              name={icon as any}
+                              size={24}
+                              color={iconColor}
+                            />
+                          ) : (
+                            <Ionicons
+                              name={icon as any}
+                              size={24}
+                              color={iconColor}
+                            />
+                          )}
                         </View>
 
                         {/* Content */}
@@ -288,29 +313,38 @@ function NotificationScreen() {
                           {isVideoCall && (
                             <TouchableOpacity
                               onPress={() => openVideoCallModal(item.data)}
+                              activeOpacity={0.8}
                               style={{
                                 flexDirection: "row",
                                 alignItems: "center",
                                 justifyContent: "center",
                                 alignSelf: "flex-start",
-                                backgroundColor: "#9747FF",
-                                paddingVertical: 8,
-                                paddingHorizontal: 16,
-                                borderRadius: 20,
+                                backgroundColor: "#E8F5E9",
+                                paddingVertical: 10,
+                                paddingHorizontal: 20,
+                                borderRadius: 25,
                                 marginTop: 12,
+                                borderWidth: 1,
+                                borderColor: "#67C694",
+                                shadowColor: "#67C694",
+                                shadowOffset: { width: 0, height: 2 },
+                                shadowOpacity: 0.15,
+                                shadowRadius: 6,
+                                elevation: 3,
                               }}
                             >
                               <Ionicons
                                 name="videocam"
                                 size={16}
-                                color="#FFFFFF"
+                                color="#67C694"
                                 style={{ marginRight: 6 }}
                               />
                               <Text
                                 style={{
-                                  color: "#FFFFFF",
-                                  fontSize: 13,
+                                  color: "#67C694",
+                                  fontSize: 14,
                                   fontWeight: "700",
+                                  fontFamily: theme.fonts.bold,
                                 }}
                               >
                                 Join Call
@@ -319,7 +353,7 @@ function NotificationScreen() {
                           )}
                         </View>
                       </View>
-                    </View>
+                    </TouchableOpacity>
                   </View>
                 );
               })

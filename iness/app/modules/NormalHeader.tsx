@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Text, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router"; // or useNavigation from @react-navigation/native
+import { useRouter, usePathname } from "expo-router";
+import { useNavigation } from "@react-navigation/native";
 import theme from "../Theme/globalTheme";
 
 interface NormalHeaderProps {
@@ -13,12 +14,23 @@ interface NormalHeaderProps {
 export default function NormalHeader({ screenName, rightIcon, showSupportChat }: NormalHeaderProps) {
   const router = useRouter();
 
-  const handleRightIconPress = () => {
-    router.push("/dashboard/trackhistory");
-  };
+  const navigation = useNavigation();
+
+
 
   const handleSupportChatPress = () => {
     router.push("/dashboard/supportchat");
+  };
+
+  const handleBackPress = () => {
+    // Check if we can go back using React Navigation
+    if (navigation.canGoBack()) {
+      // There's a screen to go back to, use router.back()
+      router.back();
+    } else {
+      // No screen to go back to, navigate to dashboard
+      router.push("/dashboard/tabs" as any);
+    }
   };
 
   return (
@@ -39,7 +51,7 @@ export default function NormalHeader({ screenName, rightIcon, showSupportChat }:
             padding: 4,
             marginRight: 10,
           }}
-          onPress={() => router.back()}
+          onPress={handleBackPress}
         >
           <Ionicons name="arrow-back" size={20} color={theme.colors.text} />
         </TouchableOpacity>
@@ -69,7 +81,7 @@ export default function NormalHeader({ screenName, rightIcon, showSupportChat }:
             <Ionicons name="chatbubble-ellipses-outline" size={24} color={theme.colors.dark} />
           </TouchableOpacity>
         ) : null}
-        {rightIcon ? (
+        {/* {rightIcon ? (
           <TouchableOpacity
             onPress={handleRightIconPress}
             style={{
@@ -86,7 +98,7 @@ export default function NormalHeader({ screenName, rightIcon, showSupportChat }:
               History
             </Text>
           </TouchableOpacity>
-        ) : null}
+        ) : null} */}
       </View>
     </View>
   );

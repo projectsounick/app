@@ -177,3 +177,70 @@ export const deleteNotificationByIndex = async (indexToDelete: number) => {
     console.error("❌ Failed to delete notification:", error);
   }
 };
+
+/// Function for storing pending navigation from notification tap (when app is closed)
+const PENDING_NAVIGATION_KEY = "pending_notification_navigation";
+const NAVIGATION_PROCESSING_KEY = "navigation_processing"; // Flag to prevent multiple navigations
+
+export const storePendingNavigation = async (notificationData: any) => {
+  try {
+    await AsyncStorage.setItem(
+      PENDING_NAVIGATION_KEY,
+      JSON.stringify({
+        data: notificationData,
+        timestamp: new Date().toISOString(),
+      })
+    );
+    // Clear processing flag when storing new navigation
+    await AsyncStorage.removeItem(NAVIGATION_PROCESSING_KEY);
+  } catch (error) {
+    console.error("❌ Failed to store pending navigation:", error);
+  }
+};
+
+/// Check if navigation is already being processed
+export const isNavigationProcessing = async (): Promise<boolean> => {
+  try {
+    const processing = await AsyncStorage.getItem(NAVIGATION_PROCESSING_KEY);
+    return processing === "true";
+  } catch (error) {
+    return false;
+  }
+};
+
+/// Mark navigation as processing
+export const setNavigationProcessing = async (value: boolean) => {
+  try {
+    if (value) {
+      await AsyncStorage.setItem(NAVIGATION_PROCESSING_KEY, "true");
+    } else {
+      await AsyncStorage.removeItem(NAVIGATION_PROCESSING_KEY);
+    }
+  } catch (error) {
+    console.error("❌ Failed to set navigation processing flag:", error);
+  }
+};
+
+/// Function for getting pending navigation
+export const getPendingNavigation = async (): Promise<{
+  data: any;
+  timestamp: string;
+} | null> => {
+  try {
+    const stored = await AsyncStorage.getItem(PENDING_NAVIGATION_KEY);
+    if (!stored) return null;
+    return JSON.parse(stored);
+  } catch (error) {
+    console.error("❌ Failed to get pending navigation:", error);
+    return null;
+  }
+};
+
+/// Function for clearing pending navigation
+export const clearPendingNavigation = async () => {
+  try {
+    await AsyncStorage.removeItem(PENDING_NAVIGATION_KEY);
+  } catch (error) {
+    console.error("❌ Failed to clear pending navigation:", error);
+  }
+};

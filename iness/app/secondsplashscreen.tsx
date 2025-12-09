@@ -3,6 +3,7 @@ import { Animated, Dimensions, View, Text, Image } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import theme from "./Theme/globalTheme";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+// Removed unused imports - navigation is handled in dashboard component
 
 import { router } from "expo-router";
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
@@ -58,12 +59,14 @@ const SecondSplashScreen = () => {
               }, index * LETTER_DELAY);
             });
 
-            // ⏳ Navigate after all animations + 2 second buffer
+            // ⏳ Navigate after all animations
             const totalAnimationTime =
               2000 + 800 + FULL_TEXT.length * LETTER_DELAY;
             setTimeout(() => {
               router.replace("/(tabs)/dashboard/tabs");
-            }, totalAnimationTime); // extra 2s delay
+              // Don't check for navigation here - let the dashboard component handle it
+              // after it's fully loaded
+            }, totalAnimationTime);
           });
         });
       });
