@@ -53,9 +53,7 @@ export default function DateBar({
     )
   );
 
-  const [currentMonth, setCurrentMonth] = useState(() =>
-    getMonthName(selectedSession?.sessionDate)
-  );
+
 
   const days = sessions
     .filter((s) => !!s.sessionDate)
@@ -94,7 +92,7 @@ export default function DateBar({
     if (session) {
       setSelectedSession(session);
       setSelectedDay(getDayNumber(session.sessionDate));
-      setCurrentMonth(getMonthName(session.sessionDate));
+     
     }
   }, [sessions]);
 
@@ -105,7 +103,7 @@ export default function DateBar({
     );
     if (session) {
       setSelectedSession(session);
-      setCurrentMonth(getMonthName(session.sessionDate));
+
     }
   };
 
@@ -114,22 +112,20 @@ export default function DateBar({
       style={{
         flexDirection: "column",
         alignItems: "center",
+ 
       }}
     >
-      {/* Month Display */}
-
       {/* Days Scroll */}
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         {/* Left Arrow */}
         <TouchableOpacity style={{ paddingRight: 8 }}>
-          <Icon name="chevron-left" size={30} color="#BDFF84" />
+          <Icon name="chevron-left" size={30} color="#2F8C62" />
         </TouchableOpacity>
 
         {/* Scroll Container */}
         <View
           style={{
             flex: 1,
-
             justifyContent: "center",
             alignItems: "center",
           }}
@@ -140,32 +136,41 @@ export default function DateBar({
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{
               paddingHorizontal: 2,
-              justifyContent: "flex-start", // aligns items to start
+              justifyContent: "flex-start",
             }}
           >
-            {days.map((item, index) => {
+            {days.map((item) => {
               const isSelected = item.day === selectedDay;
-              const isScheduled = item.sessionStatus === "scheduled";
-              const isCompleted = item.sessionStatus === "completed";
+              const isScheduled =
+                (item.sessionStatus || "").toLowerCase() === "scheduled";
+              const isCompleted =
+                (item.sessionStatus || "").toLowerCase() === "completed";
+              const today =
+                new Date(item.fullDate).toDateString() ===
+                new Date().toDateString();
 
-              let backgroundColor = "transparent";
-              let borderColor = "#fff";
-              let textColor = "#fff";
-              let subTextColor = "#ccc";
+              let backgroundColor = "#FFFFFF";
+              let borderColor = "#E8E8E8";
+              let textColor = "#111";
+              let subTextColor = "#666";
+              let borderWidth = 1;
 
               if (isScheduled) {
-                backgroundColor = "orange";
-                borderColor = "orange";
-                textColor = "#000";
-                subTextColor = "#000";
+                backgroundColor = "#FFFFFF";
+                borderColor = "#E8E8E8";
+                textColor = "#111";
+                subTextColor = "#666";
               } else if (isSelected) {
-                backgroundColor = "#C6FF00";
-                borderColor = "#C6FF00";
-                textColor = "#000";
-                subTextColor = "#000";
+                backgroundColor = "#FFFFFF";
+                borderColor = "#9747FF";
+                borderWidth = 2;
+                textColor = "#111";
+                subTextColor = "#666";
               } else if (isCompleted) {
-                borderColor = "#C6FF00";
-                textColor = "#C6FF00";
+                backgroundColor = "#FFFFFF";
+                borderColor = "#E8E8E8";
+                textColor = "#111";
+                subTextColor = "#666";
               }
 
               return (
@@ -174,33 +179,43 @@ export default function DateBar({
                   onPress={() => handleDayPress(item.day)}
                   style={{
                     alignItems: "center",
-                    justifyContent: "space-evenly",
+                    justifyContent: "center",
                     width: itemWidth,
                     marginHorizontal: spacing / 2,
-                    borderRadius: 6,
-
-                    height: 78,
+                    borderRadius: 12,
+                    height: 60,
                     backgroundColor,
-                    borderWidth: isSelected || isScheduled ? 0 : 1,
+                    borderWidth,
                     borderColor,
+                    shadowColor: isSelected ? "#9747FF" : "rgba(0,0,0,0.06)",
+                    shadowOffset: { width: 0, height: isSelected ? 3 : 2 },
+                    shadowOpacity: isSelected ? 0.25 : 0.1,
+                    shadowRadius: isSelected ? 6 : 4,
+                    elevation: isSelected ? 4 : 2,
+                    transform: [{ scale: isSelected ? 1.02 : 1 }],
+                    paddingVertical: 8,
                   }}
+                  activeOpacity={0.8}
                 >
-                  {/* Dot placeholder */}
-                  <View
-                    style={{
-                      width: 6,
-                      height: 6,
-                      borderRadius: 6,
-                      backgroundColor: isSelected ? "#000" : "transparent", // show dot only if selected
-                      marginBottom: 4,
-                    }}
-                  />
-
+                    {today ? (
+                      <View
+                        style={{
+                          position: "absolute",
+                          top: 4,
+                          right: 4,
+                          width: 6,
+                          height: 6,
+                          borderRadius: 3,
+                          backgroundColor: "#2F8C62",
+                        }}
+                      />
+                    ) : null}
                   <Text
                     style={{
                       color: textColor,
                       fontFamily: theme.fonts.medium,
-                      fontSize: 16,
+                      fontSize: 15,
+                      marginBottom: 2,
                     }}
                   >
                     {item.day}
@@ -209,7 +224,7 @@ export default function DateBar({
                   <Text
                     style={{
                       color: subTextColor,
-                      fontSize: 12,
+                      fontSize: 11,
                       fontFamily: theme.fonts.medium,
                     }}
                   >
@@ -218,16 +233,13 @@ export default function DateBar({
                   <Text
                     style={{
                       color: subTextColor,
-                      fontSize: 12,
-                      marginBottom: 4,
+                      fontSize: 10,
                       fontFamily: theme.fonts.medium,
                     }}
                   >
-                    (
                     {new Date(item.fullDate).toLocaleString("default", {
                       month: "short",
                     })}
-                    )
                   </Text>
                 </TouchableOpacity>
               );
@@ -237,7 +249,7 @@ export default function DateBar({
 
         {/* Right Arrow */}
         <TouchableOpacity style={{ paddingLeft: 8 }}>
-          <Icon name="chevron-right" size={30} color="#BDFF84" />
+          <Icon name="chevron-right" size={30} color="#2F8C62" />
         </TouchableOpacity>
       </View>
     </View>
