@@ -6,6 +6,8 @@ interface ApiResponseInterface<T = any> {
   success: boolean;
   statusCode: number;
   data: T;
+  hasMore?: boolean;
+  lastId?: string;
 }
 
 interface AsyncStorageCheckResult<T> {

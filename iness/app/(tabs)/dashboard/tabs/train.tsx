@@ -31,29 +31,37 @@ export default function TrainScreen() {
 
   const configs: any = useMemo(
     () => [
-      {
-        sliceKey: "dietPlan" as SliceKey,
-        fetchFunction: planService.getDietPlans,
-      },
-      {
-        sliceKey: "plan" as SliceKey,
-        fetchFunction: planService.getAllPlans,
-      },
+      // High priority - needed for "Current Plans" tab (default view)
       {
         sliceKey: "activePlans" as SliceKey,
         fetchFunction: planService.getActivePlans,
+        priority: "high" as const,
       },
       {
         sliceKey: "activeManualPlan" as SliceKey,
         fetchFunction: manualWorkoutPlanService.getUserActiveManualPlan,
+        priority: "high" as const,
       },
       {
         sliceKey: "activeServices" as SliceKey,
         fetchFunction: sessionService.getServices,
+        priority: "high" as const,
+      },
+      // Lower priority - needed for "Available Plans" tab
+      {
+        sliceKey: "dietPlan" as SliceKey,
+        fetchFunction: planService.getDietPlans,
+        priority: "low" as const,
+      },
+      {
+        sliceKey: "plan" as SliceKey,
+        fetchFunction: planService.getAllPlans,
+        priority: "low" as const,
       },
       {
         sliceKey: "availableSessions" as SliceKey,
         fetchFunction: otherService.getAvailableServices,
+        priority: "low" as const,
       },
     ],
     []

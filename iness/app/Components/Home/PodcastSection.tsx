@@ -15,51 +15,12 @@ import { PodcastInterface } from "@/app/interfaces/podcastsInterface";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { setPodcasts } from "@/Slices/podcastSlice";
+import { PAGINATION_LIMITS } from "@/app/shared/paginationLimits";
 
 import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = width * 0.7;
-const SPACING = 14;
 
-const demoPodcasts: PodcastInterface[] = [
-  {
-    _id: "p1",
-    podcastName: "Mindful Fitness",
-    podcastLink: "https://example.com/podcast1",
-    category: "Health",
-    createdBy: "u1",
-    interactions: [],
-    thumbnailImageLink:
-      "https://images.unsplash.com/photo-1603415526960-f8f0d1c16c49?w=600",
-    description: "Learn how mindfulness can improve your workouts.",
-    likes: [],
-  },
-  {
-    _id: "p2",
-    podcastName: "Strength Talks",
-    podcastLink: "https://example.com/podcast2",
-    category: "Workout",
-    createdBy: "u2",
-    interactions: [],
-    thumbnailImageLink:
-      "https://images.unsplash.com/photo-1558611848-73f7eb4001a1?w=600",
-    description: "Exploring strength training and personal stories.",
-    likes: [],
-  },
-  {
-    _id: "p3",
-    podcastName: "Healthy Habits",
-    podcastLink: "https://example.com/podcast3",
-    category: "Lifestyle",
-    createdBy: "u3",
-    interactions: [],
-    thumbnailImageLink:
-      "https://images.unsplash.com/photo-1544717305-996b815c338c?w=600",
-    description: "Tips and habits to build a healthier lifestyle and many more",
-    likes: [],
-  },
-];
 interface PodcastMediaCardInterface {
   loggedUser: UserData | null;
 }
@@ -158,7 +119,7 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{ paddingRight: 16 }}
       >
-        {podCasts.map((podcast, index) => (
+        {podCasts.slice(0, PAGINATION_LIMITS.PODCAST_INITIAL).map((podcast, index) => (
           <TouchableOpacity
             key={podcast._id ?? `podcast-${index}`}
             onPress={() => {

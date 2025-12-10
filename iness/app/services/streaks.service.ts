@@ -36,8 +36,7 @@ export async function fetchStreak(): Promise<{
     const response = await fetchWrapper.get(
       `${config.apiUrl}/api/fetch-streaks`
     );
-    console.log("streak response");
-    console.log(response);
+
     return response;
   } catch (error: any) {
     console.error("Error in fetchStreak:", error);

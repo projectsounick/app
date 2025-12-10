@@ -27,6 +27,15 @@ const podcastSlice = createSlice({
       state.podcasts = action.payload;
     },
 
+    // ✅ Append podcasts (for pagination - prevents duplicates)
+    appendPodcasts: (state, action: PayloadAction<PodcastInterface[]>) => {
+      const newPodcasts = action.payload;
+      const existingIds = new Set(state.podcasts.map(p => p._id));
+      // Only add podcasts that don't already exist
+      const uniqueNewPodcasts = newPodcasts.filter(p => p._id && !existingIds.has(p._id));
+      state.podcasts = [...state.podcasts, ...uniqueNewPodcasts];
+    },
+
     // ✅ Update a podcast (replace with new data)
     updatePodcast: (state, action: PayloadAction<PodcastInterface>) => {
       const index = state.podcasts.findIndex(
@@ -89,6 +98,7 @@ const podcastSlice = createSlice({
 export const {
   addPodcast,
   setPodcasts,
+  appendPodcasts,
   updatePodcast,
   removePodcast,
   addComment,

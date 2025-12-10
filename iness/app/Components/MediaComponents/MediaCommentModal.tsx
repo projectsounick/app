@@ -29,11 +29,17 @@ const MediaComponentModal: React.FC<MediaComponentModalProps> = ({
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   function addingComment(podcast: PodcastInterface) {
-    if (commentInput == "") {
+    if (commentInput.trim() === "") {
       setSnackbarVisible(true);
       setSnackbarMessage("Comment can not be empty");
+      return;
     }
-    let comment = commentInput;
+    if (!podcast?._id) {
+      setSnackbarVisible(true);
+      setSnackbarMessage("Invalid podcast");
+      return;
+    }
+    let comment = commentInput.trim();
     setCommentInput("");
 
     handleAddComment({ podcastId: podcast._id, comment: comment });
@@ -96,29 +102,43 @@ const MediaComponentModal: React.FC<MediaComponentModalProps> = ({
               style={{ flexGrow: 0, maxHeight: 250, marginBottom: 16 }}
               nestedScrollEnabled
             >
-              {podcast.interactions.map((item, index) => (
-                <View
-                  key={index}
-                  style={{
-                    flexDirection: "row",
-                    marginBottom: 8,
-                    backgroundColor: "#F5F5F5",
-                    padding: 8,
-                    borderRadius: 6,
-                  }}
-                >
-                  <Text
+              {podcast?.interactions && Array.isArray(podcast.interactions) && podcast.interactions.length > 0 ? (
+                podcast.interactions.map((item, index) => (
+                  <View
+                    key={index}
                     style={{
-                      fontWeight: "bold",
-                      color: "#333",
-                      marginRight: 4,
+                      flexDirection: "row",
+                      marginBottom: 8,
+                      backgroundColor: "#F5F5F5",
+                      padding: 8,
+                      borderRadius: 6,
                     }}
                   >
-                    {item.userName}:
+                    <Text
+                      style={{
+                        fontWeight: "bold",
+                        color: "#333",
+                        marginRight: 4,
+                      }}
+                    >
+                      {item.userName}:
+                    </Text>
+                    <Text style={{ color: "#444", flex: 1 }}>{item.comment}</Text>
+                  </View>
+                ))
+              ) : (
+                <View
+                  style={{
+                    padding: 16,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Text style={{ color: "#999", fontSize: 14 }}>
+                    No comments yet. Be the first to comment!
                   </Text>
-                  <Text style={{ color: "#444", flex: 1 }}>{item.comment}</Text>
                 </View>
-              ))}
+              )}
             </ScrollView>
 
             <View

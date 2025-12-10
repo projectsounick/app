@@ -2,8 +2,7 @@ import React, { useEffect, useMemo, useState, useRef } from "react";
 import { View, Animated, ScrollView } from "react-native";
 import { usePathname } from "expo-router";
 
-import withAnimatedHeader from "@/app/Hoc/MainHeader";
-import NameHeader from "@/app/Components/HeaderSubComponents/NameHeader";
+
 import { useDispatch, useSelector } from "react-redux";
 
 import useFetchMultipleStoreDataHook from "@/hooks/useMultipleDataStoreHook";
@@ -11,7 +10,7 @@ import { SliceKey } from "@/sliceRegistery";
 import { planService } from "@/app/services/plan.service";
 import { cartService } from "@/app/services/cart.service";
 
-import { ActivityIndicator } from "react-native-paper";
+
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { blogService } from "@/app/services/blog.Service";
 import BlogSliderCard from "@/app/modules/BlogSliderCard";
@@ -20,12 +19,12 @@ import { trackService } from "@/app/services/track.service";
 import NotificationPermissionModal from "@/app/modules/NotificationPermissionModal";
 import VideoPromotionModal from "@/app/modules/PromotionalVideo";
 
-import Imagepicker from "@/app/modules/Imagepicker";
-import { manualWorkoutPlanService } from "@/app/services/manualWorkoutPlan";
+
+
 import AppUpdateBottomSheet from "@/app/modules/AndroidVersionUpdateModal";
-import DualBannerCardRow from "@/app/modules/HorizontalCards";
+
 import InfoCarousel from "@/app/modules/AdvirtisementCarraousel";
-import TransformationCards from "@/app/modules/TransformationCards";
+
 import HomeSimmerSkeleton from "@/app/modules/HomeSimmerSkeleton";
 import HealthReportUploader from "@/app/modules/UploadReportPdf";
 import OffersCards from "@/app/modules/OfferCard";
@@ -43,9 +42,9 @@ import SessionCalendarSheet from "@/app/modules/SessionCalendarSheet";
 import FeedbackModal from "@/app/Components/ActivePlans.tsx/SessionFeedbackModal";
 import { setCalendarSheetOpen } from "@/Slices/componentOpenSlice";
 import { sessionService } from "@/app/services/sessionService";
-import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
+
 import LoginJsxWrapper from "@/app/Hoc/LoginJsxWrapper";
-import WeeklyActivityCard from "@/app/Components/Activity/WeeklyActivityCard";
+
 import { fetchStreak } from "@/app/services/streaks.service";
 import WeightTrackerBottomSheet from "@/app/Modals/WeightTrackModal";
 import eventBus from "@/event";
@@ -203,21 +202,16 @@ const YourComponent = () => {
         }
 
         const pending = await getPendingNavigation();
-        console.log("Checked for pending navigation:", {
-          hasPending: !!pending,
-          retryCount,
-          isRetry: retry,
-          currentPath: pathname,
-        });
+       
         
         if (!pending) {
           // No pending navigation, but retry a few times in case it's being stored
           if (retryCount < maxRetries && !retry) {
             retryCount++;
-            console.log(`Retrying navigation check (${retryCount}/${maxRetries})...`);
+
             setTimeout(() => checkPendingNavigation(true), 1000);
           } else {
-            console.log("No pending navigation found after retries");
+
             navigationHandledRef.current = true;
           }
           return;

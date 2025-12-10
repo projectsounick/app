@@ -196,7 +196,7 @@ const UpcomingSessionsCard = () => {
           </Text>
 
           <TouchableOpacity
-            onPress={() => router.push("/(tabs)/dashboard/plan")}
+            onPress={() => router.push("/(tabs)/dashboard/tabs/train")}
             style={{
               backgroundColor: "#67C694",
               paddingVertical: 12,
