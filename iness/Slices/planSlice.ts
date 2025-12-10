@@ -4,12 +4,16 @@ import {
 } from "@/app/interfaces/activeManualPlan";
 import { PlanInterface } from "@/app/interfaces/planInterface";
 import { PodcastInterface } from "@/app/interfaces/podcastsInterface";
-import { UserActiveServiceWithDetails } from "@/app/interfaces/serviceInterface";
+import {
+  ServiceDetails,
+  UserActiveServiceWithDetails,
+} from "@/app/interfaces/serviceInterface";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface planState {
   plans: PlanInterface[];
   currentPlan: PlanInterface | null;
+  currentService: ServiceDetails | null;
   planTab: string | null;
   activePlans: any[];
   completedPlans: any[];
@@ -23,6 +27,7 @@ interface planState {
 const initialState: planState = {
   plans: [],
   currentPlan: null,
+  currentService: null,
   planTab: "current",
   activePlans: [],
   completedPlans: [],
@@ -41,6 +46,12 @@ const planSlice = createSlice({
     },
     setCurrentPlan: (state, action: PayloadAction<any>) => {
       state.currentPlan = action.payload;
+    },
+    setCurrentService: (
+      state,
+      action: PayloadAction<ServiceDetails | null>
+    ) => {
+      state.currentService = action.payload;
     },
     setPlanTab: (state, action: PayloadAction<any>) => {
       state.planTab = action.payload;
@@ -93,6 +104,7 @@ const planSlice = createSlice({
 export const {
   setPlans,
   setCurrentPlan,
+  setCurrentService,
   setPlanTab,
   setActivePlans,
   setActiveManualPlan,

@@ -59,7 +59,9 @@ const PlansInfo: React.FC<Props> = ({
   return (
     <>
       {/* Main Scrollable Section */}
-      <View style={{ flex: 1, backgroundColor: "#F8F8F8", paddingHorizontal: 16 }}>
+      <View
+        style={{ flex: 1, backgroundColor: "#F6F8F7", paddingHorizontal: 16 }}
+      >
         <ScrollView
           contentContainerStyle={{
             paddingTop: 20,
@@ -95,13 +97,13 @@ const PlansInfo: React.FC<Props> = ({
                   width: 32,
                   height: 32,
                   borderRadius: 16,
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: "#E8F5E9",
                   alignItems: "center",
                   justifyContent: "center",
                   marginRight: 12,
                 }}
               >
-                <Ionicons name="information-circle" size={18} color="#9747FF" />
+                <Ionicons name="information-circle" size={18} color="#2F8C62" />
               </View>
               <Text
                 style={{
@@ -227,7 +229,7 @@ const PlansInfo: React.FC<Props> = ({
                 shadowRadius: 4,
                 elevation: 2,
                 borderWidth: 1,
-                borderColor: "#F5F5F5",
+                borderColor: "#F1F3F1",
               }}
             >
               <View
@@ -248,7 +250,7 @@ const PlansInfo: React.FC<Props> = ({
                     marginRight: 12,
                   }}
                 >
-                  <Ionicons name="images" size={18} color="#9747FF" />
+                <Ionicons name="images" size={18} color="#2F8C62" />
                 </View>
                 <Text
                   style={{
@@ -264,7 +266,7 @@ const PlansInfo: React.FC<Props> = ({
               <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{ paddingVertical: 4 }}
+                contentContainerStyle={{ paddingVertical: 4, gap: 12 }}
               >
                 {currentPlan.otherImages.map(
                   (imgUrl: string, index: number) => (
@@ -272,25 +274,26 @@ const PlansInfo: React.FC<Props> = ({
                       key={index}
                       onPress={() => setSelectedImage(imgUrl)}
                       style={{
-                        marginRight: 12,
                         borderRadius: 12,
                         overflow: "hidden",
-                        backgroundColor: "#F8F8F8",
+                        backgroundColor: "#FFFFFF",
                         shadowColor: "#000",
                         shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.1,
+                        shadowOpacity: 0.08,
                         shadowRadius: 4,
                         elevation: 2,
+                        borderWidth: 1,
+                        borderColor: "#EEF3EE",
                       }}
                     >
                       <Image
                         source={{ uri: imgUrl }}
                         style={{
-                          width: 140,
-                          height: 100,
+                          width: 170,
+                          height: 120,
                           borderRadius: 12,
                         }}
-                        resizeMode="cover"
+                        resizeMode="contain"
                       />
                     </TouchableOpacity>
                   )
@@ -396,13 +399,13 @@ const PlansInfo: React.FC<Props> = ({
                   style={{
                     width: isSingle ? cardWidth : undefined,
                     flex: isSingle ? 0 : 1,
-                    backgroundColor: isSelected ? "#F3EDFF" : "#FFFFFF",
+                    backgroundColor: isSelected ? "#E8F5E9" : "#FFFFFF",
                     borderWidth: isSelected ? 2 : 1.5,
-                    borderColor: isSelected ? "#9747FF" : "#E0E0E0",
+                    borderColor: isSelected ? "#67C694" : "#E0E0E0",
                     borderRadius: 14,
                     padding: 10,
                     paddingVertical: 12,
-                    shadowColor: isSelected ? "#9747FF" : "#000",
+                    shadowColor: isSelected ? "#67C694" : "#000",
                     shadowOffset: { width: 0, height: 2 },
                     shadowOpacity: isSelected ? 0.15 : 0.08,
                     shadowRadius: isSelected ? 6 : 4,
@@ -446,11 +449,11 @@ const PlansInfo: React.FC<Props> = ({
                         width: 20,
                         height: 20,
                         borderRadius: 10,
-                        backgroundColor: isSelected ? "#9747FF" : "#E0E0E0",
+                        backgroundColor: isSelected ? "#67C694" : "#E0E0E0",
                         alignItems: "center",
                         justifyContent: "center",
                         borderWidth: isSelected ? 0 : 2,
-                        borderColor: "#9747FF",
+                        borderColor: "#67C694",
                       }}
                     >
                       {isSelected && (
@@ -469,7 +472,7 @@ const PlansInfo: React.FC<Props> = ({
                       style={{
                         fontSize: 20,
                         fontWeight: "700",
-                        color: "#9747FF",
+                        color: "#2F8C62",
                         marginRight: 4,
                       }}
                     >
@@ -480,7 +483,7 @@ const PlansInfo: React.FC<Props> = ({
                     style={{
                       flexDirection: "row",
                       alignItems: "center",
-                      backgroundColor: isSelected ? "#FFFFFF" : "#F8F8F8",
+                      backgroundColor: isSelected ? "#FFFFFF" : "#F7F9F8",
                       paddingHorizontal: 6,
                       paddingVertical: 3,
                       borderRadius: 6,
@@ -490,13 +493,13 @@ const PlansInfo: React.FC<Props> = ({
                     <Ionicons
                       name={plan.isOnline ? "videocam" : "location"}
                       size={11}
-                      color={isSelected ? "#9747FF" : "#666"}
+                      color={isSelected ? "#2F8C62" : "#666"}
                       style={{ marginRight: 3 }}
                     />
                     <Text
                       style={{
                         fontSize: 10,
-                        color: isSelected ? "#9747FF" : "#666",
+                        color: isSelected ? "#2F8C62" : "#666",
                         fontWeight: "600",
                       }}
                     >

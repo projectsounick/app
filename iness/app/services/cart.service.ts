@@ -29,7 +29,8 @@ async function getCartItems(): Promise<ApiResponseInterface> {
    let response = await fetchWrapper.get(
       `${baseUrl}/get-cart?userId=${userId}&isDeleted=${isDeleted}`
     );
-
+console.log("cart items response");
+console.log(response.data[0]);
     return response;
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);

@@ -134,6 +134,7 @@ export function formateFetchedCartItems(cartItems: RawCartItem[]): CartItem[] {
     const plan = item.plan;
     const dietPlanDetails = item.dietPlanDetails;
     const product: any = item.product;
+    const serviceDetails = item.serviceDetails;
 
     if (plan && plan.planItem) {
       const selectedPlanItem = plan.planItem;
@@ -152,6 +153,19 @@ export function formateFetchedCartItems(cartItems: RawCartItem[]): CartItem[] {
         isDeleted: item.isDeleted ?? false,
       };
 
+      formattedCartItems.push(cartItem);
+    } else if (serviceDetails) {
+      // Handle service cart items
+      const cartItem: CartItem = {
+        _id: item._id,
+        name: serviceDetails.title,
+        price: typeof serviceDetails.price === 'number' ? serviceDetails.price : 0,
+        type: "service",
+        imgUrl: serviceDetails.imgUrl || "",
+        quantity: item.quantity,
+        serviceId: item.serviceId || serviceDetails._id,
+        isDeleted: item.isDeleted ?? false,
+      };
       formattedCartItems.push(cartItem);
     } else if (dietPlanDetails) {
       const cartItem: CartItem = {

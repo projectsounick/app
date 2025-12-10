@@ -1,6 +1,6 @@
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
-import HeaderContent from "@/app/modules/HeaderContent";
 import SmallHeader from "@/app/modules/SmallHeader";
+import BackHeader from "@/app/modules/BackHeader";
 import theme from "@/app/Theme/globalTheme";
 import { RootState } from "@/store";
 import { convertToCartItem, isProductAddableToCart } from "@/utils/cartUtils";
@@ -101,18 +101,11 @@ const WorkoutPlanScreen = () => {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      style={{ flex: 1, backgroundColor: "#F6F8F7" }}
       edges={["left", "right", "bottom"]}
     >
-      <SmallHeader
-        title="Overview"
-        bottomComponent={
-          <HeaderContent
-            title={currentPlan ? currentPlan?.planType?.title : "Diet Plan"}
-            subtitle={currentPlan?.title ? currentPlan.title : ""}
-          />
-        }
-      />
+      <SmallHeader title="Plan Details" />
+      <BackHeader />
       {currentPlan?.planType ? (
         <PlansInfo
           screenWidth={screenWidth}

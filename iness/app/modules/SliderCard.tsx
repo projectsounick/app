@@ -1,118 +1,29 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
   ScrollView,
   TouchableOpacity,
   Dimensions,
-  Alert,
   ImageBackground,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 
-import CustomModal from "./ServiceDetailsModal";
-import { ServiceDetails } from "../interfaces/serviceInterface";
-import {
-  convertToServiceCartItem,
-  isServiceAddableToCart,
-} from "@/utils/cartUtils";
-import { cartService } from "../services/cart.service";
-import { addToCart } from "@/Slices/cartSlice";
 import { LinearGradient } from "expo-linear-gradient";
-import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import { userService } from "../services/user.service";
+import { setCurrentService } from "@/Slices/planSlice";
 
 export default function SliderCard() {
-  const cartItems = useSelector((state: RootState) => state.cart.cartItems);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedService, setSelectedService] = useState<ServiceDetails | null>(
-    null
-  );
-  const [cartLoading, setCardLoading] = useState(false);
   const dispatch = useDispatch();
+  const router = useRouter();
   const availableServices = useSelector(
     (state: RootState) => state.plan.availableServices
   );
-  const addingIntoToCart = async () => {
-    try {
-      setCardLoading(true);
-
-      // 1️⃣ Check if user exists
-      const userDataString =
-        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-      if (!userDataString.exists) {
-        Alert.alert(
-          "Login Required",
-          "You need to log in to add a plan to the cart.",
-          [
-            { text: "Cancel", style: "cancel" },
-            {
-              text: "Login",
-              onPress: () => userService.logout(), // or navigate to login
-            },
-          ]
-        );
-        return; // stop execution if user not logged in
-      }
-
-      // 2️⃣ Check if a service is selected
-      if (!selectedService) {
-        Alert.alert(
-          "No Plan Selected",
-          "Please select a plan before continuing."
-        );
-        return;
-      }
-
-      // 3️⃣ Check if the plan already exists in cart
-      const alreadyExistsInCart = isServiceAddableToCart(
-        cartItems,
-        selectedService._id
-      );
-
-      if (alreadyExistsInCart) {
-        Alert.alert("Info", "This plan is already in your cart.");
-        return;
-      }
-
-      // 4️⃣ Prepare API call
-      const apiObject = {
-        serviceId: selectedService._id,
-      };
-
-      // 5️⃣ Call the API
-      const cartDbResponse = await cartService.addCartItems(apiObject);
-
-      if (!cartDbResponse.success) {
-        throw new Error(cartDbResponse.message);
-      }
-
-      // 6️⃣ Update cart in Redux
-      const updatedCartItem = convertToServiceCartItem(
-        selectedService,
-        cartDbResponse.data
-      );
-
-      const finalItem = {
-        ...updatedCartItem,
-        _id: cartDbResponse.data._id,
-      };
-
-      setModalVisible(false);
-      dispatch(addToCart(finalItem));
-
-      Alert.alert("Success", "Plan added to cart successfully!");
-    } catch (error: any) {
-      Alert.alert("Error", error.message || "Something went wrong.");
-    } finally {
-      setCardLoading(false);
-    }
-  };
   return (
     <>
       <View style={{ marginBottom: 24 }}>
@@ -270,8 +181,11 @@ export default function SliderCard() {
                         elevation: 5,
                       }}
                       onPress={() => {
-                        setModalVisible(true);
-                        setSelectedService(item);
+                    dispatch(setCurrentService(item));
+                    router.push({
+                      pathname: "/dashboard/servicedetails",
+                      params: { serviceId: item._id },
+                    });
                       }}
                     >
                       <Text
@@ -318,13 +232,6 @@ export default function SliderCard() {
           </View>
         ))}
       </ScrollView>
-      <CustomModal
-        modalVisible={modalVisible}
-        setModalVisible={setModalVisible}
-        cardData={selectedService}
-        addingIntoToCart={addingIntoToCart}
-        cartLoading={cartLoading}
-      />
     </>
   );
 }

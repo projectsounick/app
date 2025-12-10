@@ -211,8 +211,10 @@ export default function CartItemList({
                         height: imageSize,
                         borderRadius: 10,
                         marginRight: spacing,
-                        backgroundColor: "#F0F0F0",
-                        overflow: "hidden",
+                      backgroundColor: "#FFFFFF",
+                      overflow: "hidden",
+                      alignItems: "center",
+                      justifyContent: "center",
                       }}
                     >
                       <Image
@@ -221,7 +223,7 @@ export default function CartItemList({
                           width: "100%",
                           height: "100%",
                         }}
-                        resizeMode="cover"
+                      resizeMode="contain"
                       />
                     </View>
 

@@ -30,6 +30,7 @@ interface RawCartItem {
   isBought?: boolean;
   isDeleted?: boolean;
   quantity: number;
+  serviceId?: string;
   plan?: {
     _id: string;
     title: string;
@@ -41,6 +42,15 @@ interface RawCartItem {
     };
   };
   product?: {};
+  serviceDetails?: {
+    _id: string;
+    title: string;
+    imgUrl: string;
+    price: number;
+    sessionCount?: number;
+    isOnline?: boolean;
+    isCorporate?: boolean;
+  };
   dietPlanDetails?: {
     _id: string;
     title: string;
