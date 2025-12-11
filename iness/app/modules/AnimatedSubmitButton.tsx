@@ -46,6 +46,12 @@ const AnimatedSubmitButton: React.FC<AnimatedSubmitButtonProps> = ({
           alignItems: "center",
           marginTop: 33,
           height: height,
+          // Elevation / Shadow
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.35,
+          shadowRadius: 10,
+          elevation: 12,
         }}
       >
         {loading ? (

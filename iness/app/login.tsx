@@ -9,8 +9,6 @@ import {
   Platform,
   Dimensions,
   TouchableOpacity,
-  ScrollView,
-  Modal,
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
@@ -22,20 +20,20 @@ import useServiceWithSnackbar from "@/hooks/usePostDataHook";
 import { userService } from "./services/user.service";
 import AnimatedSubmitButton from "./modules/AnimatedSubmitButton";
 import CustomSnackbar from "./modules/Snackbar";
+import PrivacyPolicyModal from "./modules/PrivacyPolicyModal";
 
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import NormalHeader from "./modules/NormalHeader";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import Checkbox from "expo-checkbox";
-import { Ionicons } from "@expo/vector-icons";
 
 //// Main functional component for the Login screen ///// -----------------------------------/
 const Login = () => {
   const formikRef = React.useRef<any>(null);
   const [isChecked, setIsChecked] = useState(false);
   const [policyVisible, setPolicyVisible] = useState(false);
+  const [emailValue, setEmailValue] = useState("");
 
   const router = useRouter();
   /// Custom hook to handle the service call and snackbar visibility---/
@@ -184,10 +182,12 @@ const Login = () => {
                             placeholder="Enter email"
                             placeholderTextColor="#888"
                             value={values.email}
-                            underlineColorAndroid="transparent" // 👈 Add this line
-                            onChangeText={(text) =>
-                              handleChange("email")(text.toLowerCase())
-                            }
+                            underlineColorAndroid="transparent"
+                            onChangeText={(text) => {
+                              const lowerText = text.toLowerCase();
+                              handleChange("email")(lowerText);
+                              setEmailValue(lowerText);
+                            }}
                             onBlur={handleBlur("email")}
                             keyboardType="email-address"
                             textContentType="emailAddress" // 🔐 Helps iOS recognize input type
@@ -229,25 +229,39 @@ const Login = () => {
                 </Formik>
               </View>
 
-              <View style={{ marginTop: 24 }}>
+              <View style={{ marginTop: 24, width: "100%" }}>
+                {/* Privacy Policy Checkbox */}
                 <View
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    marginTop: 16,
+                    marginBottom: 16,
                     justifyContent: "center",
                   }}
                 >
                   <Checkbox
                     value={isChecked}
                     onValueChange={setIsChecked}
-                    color={isChecked ? "#000" : undefined}
+                    color={isChecked ? "#67C694" : undefined}
+                    style={{
+                      borderRadius: 4,
+                      width: 18,
+                      height: 18,
+                    }}
                   />
-                  <Text style={{ marginLeft: 8, fontSize: 14 }}>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      color: "#000",
+                      marginLeft: 10,
+                      fontFamily: theme.fonts.regular,
+                    }}
+                  >
                     I accept the{" "}
                     <Text
                       style={{
-                        color: theme.colors.dark,
+                        color: "#9747FF",
+                        fontFamily: theme.fonts.medium,
                         textDecorationLine: "underline",
                       }}
                       onPress={() => setPolicyVisible(true)}
@@ -256,13 +270,20 @@ const Login = () => {
                     </Text>
                   </Text>
                 </View>
-                <View style={{ opacity: !isChecked ? 0.5 : 1 }}>
+
+                <View
+                  style={{
+                    opacity: !isChecked || !emailValue.trim() ? 0.5 : 1,
+                  }}
+                >
                   <AnimatedSubmitButton
                     loading={loading}
                     onPress={() => {
-                      if (isChecked) formikRef.current?.handleSubmit();
+                      if (isChecked && emailValue.trim()) {
+                        formikRef.current?.handleSubmit();
+                      }
                     }}
-                    height={50}
+                    height={56}
                     title="Send OTP"
                   />
                 </View>
@@ -278,122 +299,11 @@ const Login = () => {
             onDismiss={() => setSnackbarVisible(false)}
           />
         </ImageBackground>
-        <Modal
+        <PrivacyPolicyModal
           visible={policyVisible}
-          animationType="slide"
-          onRequestClose={() => setPolicyVisible(false)}
-          transparent={true}
-        >
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: "rgba(0,0,0,0.3)",
-              justifyContent: "flex-end",
-            }}
-          >
-            <View
-              style={{
-                height: "85%",
-                backgroundColor: "#fff",
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-                paddingTop: 20,
-                overflow: "hidden",
-              }}
-            >
-              <SafeAreaView style={{ flex: 1 }}>
-                {/* Header */}
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    paddingHorizontal: 20,
-                    marginBottom: 10,
-                  }}
-                >
-                  <Text style={{ fontSize: 22, fontWeight: "bold" }}>
-                    Privacy Policy
-                  </Text>
-                  <TouchableOpacity onPress={() => setPolicyVisible(false)}>
-                    <Ionicons name="close" size={24} color="#333" />
-                  </TouchableOpacity>
-                </View>
-
-                {/* Content */}
-                <ScrollView
-                  style={{ paddingHorizontal: 20 }}
-                  showsVerticalScrollIndicator={false}
-                >
-                  <Text style={{ fontSize: 14, color: "#444", lineHeight: 22 }}>
-                    Last updated: 11-06-2025{"\n\n"}
-                    We collect personal data including your name, email, phone
-                    number, gender, age, address, fitness goals, health-related
-                    data, and payment information. We may also collect data
-                    about your usage of the app and device-related information
-                    to improve your experience.
-                    {"\n\n"}2. Permissions We Request{"\n"}- Camera Access: Used
-                    to upload profile pictures.{"\n"}- Notifications: For
-                    workout reminders, updates.{"\n\n"}
-                    3. How We Use Your Information{"\n"}- Provide personalized
-                    experiences{"\n"}- Offer support, process payments, improve
-                    app performance{"\n\n"}
-                    4. Data Security{"\n"}- We use encryption and industry
-                    protocols, but no system is 100% secure.{"\n\n"}
-                    5. Sharing Your Information{"\n"}- Only with your consent or
-                    legal compliance. Never sold.{"\n\n"}
-                    6. Your Rights{"\n"}- Update or delete data. Revoke
-                    permissions anytime.{"\n\n"}
-                    7. Changes to This Policy{"\n"}- Updated here and via email.
-                    {"\n\n"}Additional:{"\n"}- Data is shared only with trusted
-                    vendors under confidentiality.{"\n"}- You can opt-out of
-                    promotional messages anytime.{"\n"}- Contact:
-                    founder@iness.fitness{"\n\n"}
-                    Cancellation Policy:{"\n"}- Must be requested within 24
-                    hours of purchase.{"\n"}- No refund once a plan has started
-                    or content has been accessed.{"\n"}- Refunds only for
-                    eligible cases with proof.
-                    {"\n"}- Refund requests: founder@iness.fitness{"\n\n"}
-                    Refunds are NOT applicable on: - Online Training Programs -
-                    Custom Diet/Workout Plans - Live/Recorded Classes - Active
-                    Memberships
-                    {"\n\n"}
-                    8. User Conduct & Content Policy{"\n"}- By using this app,
-                    you agree to our Terms of Service (EULA).{"\n"}- There is
-                    zero tolerance for objectionable content or abusive users.
-                    {"\n"}- Any violation of these terms may result in account
-                    suspension or termination without notice.
-                    {"\n\n"}
-                    Thank you for trusting Iness Fitness.
-                  </Text>
-
-                  {/* Close Button */}
-                  <TouchableOpacity
-                    onPress={() => setPolicyVisible(false)}
-                    style={{
-                      marginTop: 30,
-                      paddingVertical: 14,
-                      borderRadius: 12,
-                      backgroundColor: theme.colors.primary,
-                      alignItems: "center",
-                      marginBottom: 40,
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: "#fff",
-                        fontWeight: "bold",
-                        fontSize: 16,
-                      }}
-                    >
-                      Close
-                    </Text>
-                  </TouchableOpacity>
-                </ScrollView>
-              </SafeAreaView>
-            </View>
-          </View>
-        </Modal>
+          onClose={() => setPolicyVisible(false)}
+          onAccept={() => setIsChecked(true)}
+        />
       </View>
     </TouchableWithoutFeedback>
   );

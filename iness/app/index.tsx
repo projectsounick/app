@@ -144,17 +144,18 @@ const HomeScreen = () => {
           </Text>
         </View>
 
-        {/* Bottom section */}
+        {/* Bottom section - positioned at absolute bottom */}
         <View
           style={{
             alignItems: "center",
-            marginBottom: height * 0.15,
+            paddingBottom: 40,
+            paddingHorizontal: 16,
           }}
         >
           <Text
             allowFontScaling={false}
             style={{
-              fontSize: 40,
+              fontSize: 36,
               fontWeight: theme.fontWeights.bold as any,
               color: theme.colors.text,
               fontFamily: theme.fonts.bold,
@@ -166,9 +167,9 @@ const HomeScreen = () => {
           <Text
             allowFontScaling={false}
             style={{
-              fontSize: 25,
+              fontSize: 22,
               fontWeight: "400",
-              marginTop: "2%",
+              marginTop: 8,
               color: theme.colors.text,
               fontFamily: theme.fonts.regular,
             }}
@@ -183,7 +184,8 @@ const HomeScreen = () => {
               color: theme.colors.mutedText,
               fontFamily: theme.fonts.regular,
               textAlign: "center",
-              marginTop: 33,
+              marginTop: 24,
+              lineHeight: 18,
             }}
           >
             Personal Coaching | Sustainable Diet Plans | FitTube | Fitness
@@ -194,7 +196,7 @@ const HomeScreen = () => {
             loading={false}
             onPress={handlePress}
             title="Login"
-            height={60}
+            height={50}
           />
         </View>
       </ImageBackground>
