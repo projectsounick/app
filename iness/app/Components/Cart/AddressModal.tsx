@@ -11,8 +11,10 @@ import {
   ScrollView,
   FlatList,
   Modal,
+  StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import theme from "@/app/Theme/globalTheme";
 
 const INDIAN_STATES = [
@@ -94,166 +96,132 @@ export default function AddressModal({
         keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
       >
         <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <View
-            style={{
-              flex: 1,
-              backgroundColor: "rgba(0,0,0,0.5)",
-              justifyContent: "flex-end",
-            }}
-          >
-            <View
-              style={{
-                backgroundColor: "#FFFFFF",
-                paddingHorizontal: 20,
-                paddingTop: 20,
-                paddingBottom: 20,
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-                maxHeight: "90%",
-              }}
-            >
-              {/* Dash handle */}
-              <View
-                style={{
-                  width: 50,
-                  height: 5,
-                  backgroundColor: "#ccc",
-                  borderRadius: 3,
-                  alignSelf: "center",
-                  marginBottom: 20,
-                }}
-              />
+          <View style={styles.overlay}>
+            <View style={styles.modalContent}>
+              {/* Dash Handle */}
+              <View style={styles.dashHandle} />
 
-              {/* Close Button - Top Right */}
-              <TouchableOpacity
-                onPress={onClose}
-                style={{
-                  position: "absolute",
-                  top: 18,
-                  right: 20,
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
-                  backgroundColor: "#F0F0F0",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 10,
-                }}
-              >
-                <Ionicons name="close" size={20} color="#000" />
+              {/* Close Button */}
+              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+                <Ionicons name="close" size={20} color="#1A1A1A" />
               </TouchableOpacity>
 
-              {/* Icon Container */}
-              <View style={{ alignItems: "center", marginBottom: 20 }}>
-                <View
-                  style={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: 40,
-                    backgroundColor: "#E3F2FD",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Ionicons name="location-outline" size={40} color="#2196F3" />
+              {/* Icon */}
+              <View style={styles.iconWrapper}>
+                <View style={styles.modalIconContainer}>
+                  <MaterialCommunityIcons
+                    name="map-marker-outline"
+                    size={36}
+                    color="#9747FF"
+                  />
                 </View>
               </View>
 
               {/* Title */}
-              <Text
-                style={{
-                  fontSize: 24,
-                  fontWeight: "700",
-                  color: "#000",
-                  textAlign: "center",
-                  marginBottom: 24,
-                }}
-              >
-                Enter Delivery Address
-              </Text>
+              <Text style={styles.modalTitle}>Enter Delivery Address</Text>
 
+              {/* Form */}
               <ScrollView
                 showsVerticalScrollIndicator={false}
-                style={{ maxHeight: 350 }}
+                style={styles.formContainer}
                 contentContainerStyle={{ paddingBottom: 10 }}
                 keyboardShouldPersistTaps="handled"
               >
+                {/* Full Address */}
+                <View style={styles.inputRow}>
+                  <View style={styles.inputIconContainer}>
+                    <MaterialCommunityIcons
+                      name="home-outline"
+                      size={18}
+                      color="#9747FF"
+                    />
+                  </View>
+                  <TextInput
+                    placeholder="Full Address"
+                    placeholderTextColor="#999"
+                    style={styles.input}
+                    value={address.fullAddress}
+                    onChangeText={(text) =>
+                      setAddress((prev: any) => ({ ...prev, fullAddress: text }))
+                    }
+                  />
+                </View>
 
-                {/* Inputs */}
-                <TextInput
-                  placeholder="Full Address"
-                  placeholderTextColor="#999"
-                  style={styles.input}
-                  value={address.fullAddress}
-                  onChangeText={(text) =>
-                    setAddress((prev: any) => ({ ...prev, fullAddress: text }))
-                  }
-                />
-                <TextInput
-                  placeholder="City"
-                  placeholderTextColor="#999"
-                  style={styles.input}
-                  value={address.city}
-                  onChangeText={(text) =>
-                    setAddress((prev: any) => ({ ...prev, city: text }))
-                  }
-                />
+                {/* City */}
+                <View style={styles.inputRow}>
+                  <View style={styles.inputIconContainer}>
+                    <MaterialCommunityIcons
+                      name="city-variant-outline"
+                      size={18}
+                      color="#9747FF"
+                    />
+                  </View>
+                  <TextInput
+                    placeholder="City"
+                    placeholderTextColor="#999"
+                    style={styles.input}
+                    value={address.city}
+                    onChangeText={(text) =>
+                      setAddress((prev: any) => ({ ...prev, city: text }))
+                    }
+                  />
+                </View>
+
                 {/* State Dropdown */}
-                <TouchableOpacity
-                  onPress={() => setShowStatePicker(true)}
-                  style={styles.input}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
+                <View style={styles.inputRow}>
+                  <View style={styles.inputIconContainer}>
+                    <MaterialCommunityIcons
+                      name="map-outline"
+                      size={18}
+                      color="#9747FF"
+                    />
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => setShowStatePicker(true)}
+                    style={styles.dropdownInput}
                   >
                     <Text
-                      style={{
-                        fontSize: 16,
-                        color: address.state ? "#000" : "#999",
-                      }}
+                      style={[
+                        styles.dropdownText,
+                        !address.state && { color: "#999" },
+                      ]}
                     >
                       {address.state || "Select State"}
                     </Text>
-                    <Ionicons name="chevron-down" size={20} color="#999" />
+                    <View style={styles.dropdownArrow}>
+                      <Ionicons name="chevron-down" size={16} color="#9747FF" />
+                    </View>
+                  </TouchableOpacity>
+                </View>
+
+                {/* Pincode */}
+                <View style={styles.inputRow}>
+                  <View style={styles.inputIconContainer}>
+                    <MaterialCommunityIcons
+                      name="numeric"
+                      size={18}
+                      color="#9747FF"
+                    />
                   </View>
-                </TouchableOpacity>
-                <TextInput
-                  placeholder="Pincode"
-                  placeholderTextColor="#999"
-                  style={styles.input}
-                  value={address.pincode}
-                  keyboardType="numeric"
-                  onChangeText={(text) =>
-                    setAddress((prev: any) => ({ ...prev, pincode: text }))
-                  }
-                />
+                  <TextInput
+                    placeholder="Pincode"
+                    placeholderTextColor="#999"
+                    style={styles.input}
+                    value={address.pincode}
+                    keyboardType="numeric"
+                    onChangeText={(text) =>
+                      setAddress((prev: any) => ({ ...prev, pincode: text }))
+                    }
+                  />
+                </View>
               </ScrollView>
 
-              {/* Button */}
+              {/* Place Order Button */}
               <TouchableOpacity
-                style={{
-                  backgroundColor: "#67C694",
-                  paddingVertical: 16,
-                  borderRadius: 30,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginTop: 12,
-                }}
+                style={styles.placeOrderButton}
                 onPress={() => onConfirm(address)}
               >
-                <Text
-                  style={{
-                    color: "#FFFFFF",
-                    fontWeight: "700",
-                    fontSize: 16,
-                  }}
-                >
-                  Place Order
-                </Text>
+                <Text style={styles.placeOrderButtonText}>Place Order</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -267,113 +235,67 @@ export default function AddressModal({
         animationType="slide"
         onRequestClose={() => setShowStatePicker(false)}
       >
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            justifyContent: "flex-end",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "#FFFFFF",
-              borderTopLeftRadius: 20,
-              borderTopRightRadius: 20,
-              maxHeight: "70%",
-              paddingBottom: 20,
-            }}
-          >
-            {/* Dash handle */}
-            <View
-              style={{
-                width: 50,
-                height: 5,
-                backgroundColor: "#ccc",
-                borderRadius: 3,
-                alignSelf: "center",
-                marginTop: 12,
-                marginBottom: 12,
-              }}
-            />
+        <View style={styles.pickerOverlay}>
+          <View style={styles.pickerContent}>
+            {/* Dash Handle */}
+            <View style={styles.dashHandle} />
 
             {/* Header */}
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                paddingHorizontal: 20,
-                paddingVertical: 16,
-                borderBottomWidth: 1,
-                borderBottomColor: "#E0E0E0",
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 20,
-                  fontWeight: "700",
-                  color: "#000",
-                }}
-              >
-                Select State
-              </Text>
+            <View style={styles.pickerHeader}>
+              <View style={styles.pickerHeaderLeft}>
+                <View style={styles.pickerIconContainer}>
+                  <MaterialCommunityIcons
+                    name="map-outline"
+                    size={20}
+                    color="#9747FF"
+                  />
+                </View>
+                <Text style={styles.pickerTitle}>Select State</Text>
+              </View>
               <TouchableOpacity
                 onPress={() => setShowStatePicker(false)}
-                style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
-                  backgroundColor: "#F0F0F0",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
+                style={styles.closeBtn}
               >
-                <Ionicons name="close" size={20} color="#000" />
+                <Ionicons name="close" size={20} color="#1A1A1A" />
               </TouchableOpacity>
             </View>
 
-          {/* States List */}
-          <FlatList
-            data={INDIAN_STATES}
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => {
-                  setAddress((prev: any) => ({ ...prev, state: item }));
-                  setShowStatePicker(false);
-                }}
-                style={{
-                  padding: 16,
-                  borderBottomWidth: 1,
-                  borderBottomColor: "#F5F5F5",
-                  backgroundColor:
-                    address.state === item ? "#F3E5F5" : "#FFFFFF",
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      color: "#000",
-                      fontWeight: address.state === item ? "600" : "400",
+            {/* States List */}
+            <FlatList
+              data={INDIAN_STATES}
+              keyExtractor={(item) => item}
+              showsVerticalScrollIndicator={false}
+              renderItem={({ item }) => {
+                const isSelected = address.state === item;
+                return (
+                  <TouchableOpacity
+                    onPress={() => {
+                      setAddress((prev: any) => ({ ...prev, state: item }));
+                      setShowStatePicker(false);
                     }}
+                    style={[
+                      styles.stateItem,
+                      isSelected && styles.stateItemSelected,
+                    ]}
                   >
-                    {item}
-                  </Text>
-                  {address.state === item && (
-                    <Ionicons name="checkmark" size={20} color="#9747FF" />
-                  )}
-                </View>
-              </TouchableOpacity>
-            )}
-            style={{ maxHeight: 400 }}
-          />
+                    <Text
+                      style={[
+                        styles.stateText,
+                        isSelected && styles.stateTextSelected,
+                      ]}
+                    >
+                      {item}
+                    </Text>
+                    {isSelected && (
+                      <View style={styles.checkmarkContainer}>
+                        <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                );
+              }}
+              style={{ maxHeight: 400 }}
+            />
           </View>
         </View>
       </Modal>
@@ -381,16 +303,200 @@ export default function AddressModal({
   );
 }
 
-const styles = {
-  input: {
-    backgroundColor: "#F8F8F8",
-    borderColor: "#E0E0E0",
-    borderWidth: 1,
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    marginBottom: 16,
-    fontSize: 16,
-    color: "#000",
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
   },
-};
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 30,
+    maxHeight: "90%",
+  },
+  dashHandle: {
+    width: 50,
+    height: 5,
+    backgroundColor: "#E0E0E0",
+    borderRadius: 3,
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+  closeBtn: {
+    position: "absolute",
+    top: 16,
+    right: 20,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#F5F5F5",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  iconWrapper: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  modalIconContainer: {
+    width: 70,
+    height: 70,
+    borderRadius: 20,
+    backgroundColor: "#F3EDFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    textAlign: "center",
+    marginBottom: 20,
+    fontFamily: theme.fonts.bold,
+  },
+  formContainer: {
+    maxHeight: 300,
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  inputIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#F3EDFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    backgroundColor: "#FAFAFA",
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+    fontSize: 14,
+    color: "#1A1A1A",
+    fontFamily: theme.fonts.regular,
+  },
+  dropdownInput: {
+    flex: 1,
+    backgroundColor: "#FAFAFA",
+    borderRadius: 12,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  dropdownText: {
+    fontSize: 14,
+    color: "#1A1A1A",
+    fontFamily: theme.fonts.regular,
+  },
+  dropdownArrow: {
+    width: 24,
+    height: 24,
+    borderRadius: 8,
+    backgroundColor: "#F3EDFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  placeOrderButton: {
+    backgroundColor: "#67C694",
+    paddingVertical: 16,
+    borderRadius: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 16,
+  },
+  placeOrderButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 16,
+    fontFamily: theme.fonts.bold,
+  },
+  // State Picker Modal
+  pickerOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  pickerContent: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 20,
+    maxHeight: "70%",
+  },
+  pickerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F5F5F5",
+  },
+  pickerHeaderLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  pickerIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#F3EDFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  pickerTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    fontFamily: theme.fonts.bold,
+  },
+  stateItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 14,
+    borderRadius: 12,
+    marginBottom: 6,
+    backgroundColor: "#FAFAFA",
+  },
+  stateItemSelected: {
+    backgroundColor: "#F3EDFF",
+    borderWidth: 1,
+    borderColor: "#9747FF",
+  },
+  stateText: {
+    fontSize: 14,
+    color: "#1A1A1A",
+    fontFamily: theme.fonts.regular,
+  },
+  stateTextSelected: {
+    fontWeight: "600",
+    color: "#9747FF",
+    fontFamily: theme.fonts.medium,
+  },
+  checkmarkContainer: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#9747FF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});

@@ -1,12 +1,24 @@
 import React, { useEffect, useRef } from "react";
-import { Animated, Text, StyleSheet } from "react-native";
+import { Animated, View, Text, StyleSheet } from "react-native";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import theme from "../Theme/globalTheme";
+
+interface OnboardingHeadingProps {
+  children: React.ReactNode;
+  subtitle?: string;
+  icon?: string;
+  step?: number;
+  totalSteps?: number;
+}
 
 export default function OnboardingHeading({
   children,
-}: {
-  children: React.ReactNode;
-}) {
-  const translateY = useRef(new Animated.Value(40)).current;
+  subtitle,
+  icon,
+  step,
+  totalSteps,
+}: OnboardingHeadingProps) {
+  const translateY = useRef(new Animated.Value(30)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const scale = useRef(new Animated.Value(0.95)).current;
 
@@ -14,18 +26,18 @@ export default function OnboardingHeading({
     Animated.parallel([
       Animated.timing(opacity, {
         toValue: 1,
-        duration: 800,
+        duration: 600,
         useNativeDriver: true,
       }),
       Animated.spring(translateY, {
         toValue: 0,
-        friction: 6,
+        friction: 8,
         tension: 100,
         useNativeDriver: true,
       }),
       Animated.spring(scale, {
         toValue: 1,
-        friction: 5,
+        friction: 6,
         tension: 80,
         useNativeDriver: true,
       }),
@@ -33,26 +45,92 @@ export default function OnboardingHeading({
   }, []);
 
   return (
-    <Animated.Text
+    <Animated.View
       style={[
-        styles.headingText,
+        styles.container,
         {
           opacity,
           transform: [{ translateY }, { scale }],
         },
       ]}
     >
-      {children}
-    </Animated.Text>
+      {/* Icon */}
+      {icon && (
+        <View style={styles.iconContainer}>
+          <MaterialCommunityIcons name={icon} size={32} color="#9747FF" />
+        </View>
+      )}
+
+      {/* Main Heading */}
+      <Text style={styles.headingText}>{children}</Text>
+
+      {/* Subtitle */}
+      {subtitle && <Text style={styles.subtitleText}>{subtitle}</Text>}
+
+      {/* Step indicator */}
+      {step && totalSteps && (
+        <View style={styles.stepContainer}>
+          <View style={styles.stepBadge}>
+            <Text style={styles.stepText}>
+              Step {step} of {totalSteps}
+            </Text>
+          </View>
+        </View>
+      )}
+    </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
+  container: {
+    alignItems: "center",
+    marginBottom: 28,
+    paddingHorizontal: 10,
+  },
+  iconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: "#F3EDFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+    shadowColor: "#9747FF",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 4,
+  },
   headingText: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: "700",
     textAlign: "center",
-    marginBottom: 30,
-    color: "#000",
+    color: "#1A1A1A",
+    fontFamily: theme.fonts.bold,
+    lineHeight: 36,
+  },
+  subtitleText: {
+    fontSize: 15,
+    color: "#666",
+    textAlign: "center",
+    marginTop: 10,
+    fontFamily: theme.fonts.regular,
+    lineHeight: 22,
+    paddingHorizontal: 20,
+  },
+  stepContainer: {
+    marginTop: 16,
+  },
+  stepBadge: {
+    backgroundColor: "#E8F5E9",
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 20,
+  },
+  stepText: {
+    fontSize: 12,
+    color: "#67C694",
+    fontWeight: "600",
+    fontFamily: theme.fonts.medium,
   },
 });

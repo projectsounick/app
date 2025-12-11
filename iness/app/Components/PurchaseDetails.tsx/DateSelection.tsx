@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
 import Icon from "react-native-vector-icons/Feather";
+import theme from "@/app/Theme/globalTheme";
 
 interface Props {
   selectedDate: Date;
@@ -26,92 +27,29 @@ const ChooseDateSection: React.FC<Props> = ({
   };
 
   return (
-    <View
-      style={{
-        backgroundColor: "#FFFFFF",
-        borderRadius: 20,
-        padding: 16,
-        marginBottom: 16,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.12,
-        shadowRadius: 12,
-        elevation: 5,
-        borderWidth: 1,
-        borderColor: "#F5F5F5",
-      }}
-    >
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          marginBottom: 12,
-        }}
-      >
-        <View
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            backgroundColor: "#9747FF",
-            alignItems: "center",
-            justifyContent: "center",
-            marginRight: 10,
-          }}
-        >
-          <Icon name="calendar" size={18} color="#FFFFFF" />
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.iconContainer}>
+          <Icon name="calendar" size={18} color="#9747FF" />
         </View>
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: "700",
-            color: "#000",
-          }}
-        >
-          Choose a date
-        </Text>
+        <Text style={styles.title}>Choose a date</Text>
       </View>
 
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-          paddingTop: 10,
-          borderTopWidth: 1,
-          borderTopColor: "#F0F0F0",
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: "600",
-            color: "#000",
-            flex: 1,
-          }}
-        >
+      {/* Content */}
+      <View style={styles.content}>
+        <Text style={styles.dateText}>
           {moment(selectedDate).format("MMMM D, YYYY")}
         </Text>
         <TouchableOpacity
           onPress={showDatePicker}
-          style={{
-            backgroundColor: preferences ? "#CCCCCC" : "#9747FF",
-            paddingVertical: 8,
-            paddingHorizontal: 18,
-            borderRadius: 20,
-            opacity: preferences ? 0.6 : 1,
-          }}
+          style={[
+            styles.changeButton,
+            preferences && styles.changeButtonDisabled,
+          ]}
           disabled={preferences}
         >
-          <Text
-            style={{
-              color: "#fff",
-              fontWeight: "600",
-              fontSize: 13,
-            }}
-          >
-            Change
-          </Text>
+          <Text style={styles.changeButtonText}>Change</Text>
         </TouchableOpacity>
       </View>
 
@@ -125,5 +63,70 @@ const ChooseDateSection: React.FC<Props> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: "#F5F5F5",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#F3EDFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  title: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#1A1A1A",
+    fontFamily: theme.fonts.bold,
+  },
+  content: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#F5F5F5",
+  },
+  dateText: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#1A1A1A",
+    fontFamily: theme.fonts.medium,
+  },
+  changeButton: {
+    backgroundColor: "#67C694",
+    paddingVertical: 8,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+  },
+  changeButtonDisabled: {
+    backgroundColor: "#E0E0E0",
+  },
+  changeButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 13,
+    fontFamily: theme.fonts.medium,
+  },
+});
 
 export default ChooseDateSection;

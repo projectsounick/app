@@ -213,9 +213,9 @@ export default function EditOnboardingScreen() {
         case "goal":
           return goalOptionsOnboarding.map((o: any) => o.label);
         case "timeCommitment":
-          return onboardingCommitmentOptions;
+          return onboardingCommitmentOptions.map((o: any) => o.label);
         case "preferredWorkoutTime":
-          return onboardingPreferredWorkoutTimeOptions;
+          return onboardingPreferredWorkoutTimeOptions.map((o: any) => o.label);
         case "workoutPreferences":
           return workoutPreferenceOptions.map((o: any) => o.label);
         case "activityLevel":

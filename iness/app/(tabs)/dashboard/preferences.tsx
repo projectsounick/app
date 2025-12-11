@@ -151,7 +151,7 @@ const BookSessionDetailsScreen = () => {
       resizeMode="cover"
     >
       <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+        style={{ flex: 1, backgroundColor: "transparent" }}
         edges={["top", "left", "right"]}
       >
         <View style={{ paddingLeft: 20, paddingTop: 20 }}>

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
+import theme from "@/app/Theme/globalTheme";
 
 interface Props {
   slots: string[];
@@ -17,125 +18,53 @@ const SlotSelectionSection: React.FC<Props> = ({
   const visibleSlots = isExpanded ? slots : slots.slice(0, 3);
 
   return (
-    <View
-      style={{
-        backgroundColor: "#FFFFFF",
-        borderRadius: 20,
-        padding: 16,
-        marginBottom: 16,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.12,
-        shadowRadius: 12,
-        elevation: 5,
-        borderWidth: 1,
-        borderColor: "#F5F5F5",
-      }}
-    >
+    <View style={styles.container}>
       {/* Header */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          marginBottom: 12,
-        }}
-      >
-        <View
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            backgroundColor: "#9747FF",
-            alignItems: "center",
-            justifyContent: "center",
-            marginRight: 10,
-          }}
-        >
-          <Icon name="clock" size={18} color="#FFFFFF" />
+      <View style={styles.header}>
+        <View style={styles.iconContainer}>
+          <Icon name="clock" size={18} color="#9747FF" />
         </View>
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: "700",
-            color: "#000",
-          }}
-        >
-          Available Slots
-        </Text>
+        <Text style={styles.title}>Available Slots</Text>
       </View>
 
       {/* Slot buttons */}
-      <View
-        style={{
-          flexDirection: "row",
-          gap: 10,
-          flexWrap: "wrap",
-          paddingTop: 10,
-          borderTopWidth: 1,
-          borderTopColor: "#F0F0F0",
-        }}
-      >
-        {visibleSlots.map((slot, index) => (
-          <TouchableOpacity
-            key={index}
-            onPress={() => onSelectSlot(slot)}
-            style={{
-              backgroundColor:
-                selectedSlot === slot ? "#9747FF" : "#F8F8F8",
-              paddingVertical: 10,
-              paddingHorizontal: 18,
-              borderRadius: 16,
-              borderWidth: 2,
-              borderColor:
-                selectedSlot === slot ? "#9747FF" : "transparent",
-              minWidth: 110,
-              alignItems: "center",
-              shadowColor: selectedSlot === slot ? "#9747FF" : "transparent",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: selectedSlot === slot ? 0.3 : 0,
-              shadowRadius: 4,
-              elevation: selectedSlot === slot ? 3 : 0,
-            }}
-          >
-            <Text
-              style={{
-                color: selectedSlot === slot ? "#FFFFFF" : "#333",
-                fontSize: 13,
-                fontWeight: "600",
-              }}
+      <View style={styles.slotsContainer}>
+        {visibleSlots.map((slot, index) => {
+          const isSelected = selectedSlot === slot;
+          return (
+            <TouchableOpacity
+              key={index}
+              onPress={() => onSelectSlot(slot)}
+              style={[
+                styles.slotButton,
+                isSelected && styles.slotButtonSelected,
+              ]}
             >
-              {slot}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.slotText,
+                  isSelected && styles.slotTextSelected,
+                ]}
+              >
+                {slot}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
       {/* Expand/Collapse button */}
       {slots.length > 3 && (
         <TouchableOpacity
           onPress={() => setIsExpanded(!isExpanded)}
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            marginTop: 12,
-            alignSelf: "flex-end",
-            paddingVertical: 6,
-            paddingHorizontal: 10,
-          }}
+          style={styles.expandButton}
         >
-          <Text
-            style={{
-              color: "#9747FF",
-              fontSize: 14,
-              fontWeight: "600",
-              marginRight: 4,
-            }}
-          >
+          <Text style={styles.expandText}>
             {isExpanded ? "Show less" : "Show all"}
           </Text>
           <Icon
             name={isExpanded ? "chevron-up" : "chevron-down"}
-            size={18}
+            size={16}
             color="#9747FF"
           />
         </TouchableOpacity>
@@ -143,5 +72,89 @@ const SlotSelectionSection: React.FC<Props> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: "#F5F5F5",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#F3EDFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  title: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#1A1A1A",
+    fontFamily: theme.fonts.bold,
+  },
+  slotsContainer: {
+    flexDirection: "row",
+    gap: 10,
+    flexWrap: "wrap",
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#F5F5F5",
+  },
+  slotButton: {
+    backgroundColor: "#F8F8F8",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+    minWidth: 100,
+    alignItems: "center",
+  },
+  slotButtonSelected: {
+    backgroundColor: "#F3EDFF",
+    borderColor: "#9747FF",
+    borderWidth: 2,
+  },
+  slotText: {
+    color: "#666",
+    fontSize: 13,
+    fontWeight: "500",
+    fontFamily: theme.fonts.medium,
+  },
+  slotTextSelected: {
+    color: "#9747FF",
+    fontWeight: "600",
+  },
+  expandButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-end",
+    marginTop: 12,
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+  },
+  expandText: {
+    color: "#9747FF",
+    fontSize: 13,
+    fontWeight: "600",
+    marginRight: 4,
+    fontFamily: theme.fonts.medium,
+  },
+});
 
 export default SlotSelectionSection;

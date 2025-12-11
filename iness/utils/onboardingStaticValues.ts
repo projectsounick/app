@@ -1,15 +1,39 @@
 /// Static value for onboarding commitment ---------------/
 export const onboardingCommitmentOptions = [
-  "15-30 minutes",
-  "30-60 minutes",
-  "One hour or more",
+  {
+    label: "15-30 minutes",
+    icon: "clock-fast",
+    description: "Perfect for quick, effective workouts",
+  },
+  {
+    label: "30-60 minutes",
+    icon: "clock-outline",
+    description: "Balanced sessions for steady progress",
+  },
+  {
+    label: "One hour or more",
+    icon: "clock-plus-outline",
+    description: "Comprehensive training for maximum results",
+  },
 ];
 
 //// Static value for onboarding preferred workout time ---------------/
 export const onboardingPreferredWorkoutTimeOptions = [
-  "Morning",
-  "Afternoon",
-  "Evening",
+  {
+    label: "Morning",
+    icon: "weather-sunset-up",
+    description: "Start your day with energy and focus",
+  },
+  {
+    label: "Afternoon",
+    icon: "weather-sunny",
+    description: "Perfect for lunch breaks or mid-day boost",
+  },
+  {
+    label: "Evening",
+    icon: "weather-night",
+    description: "Unwind and de-stress after your day",
+  },
 ];
 
 //// Onboarding steps ------------------------------------------------/
@@ -32,23 +56,28 @@ export const onboardingSteps = [
 export const workoutPreferenceOptions = [
   {
     label: "Strength Training",
-    icon: "weight-lifter", // MaterialCommunityIcons
+    icon: "weight-lifter",
+    description: "Build muscle and increase power",
   },
   {
     label: "Cardio",
-    icon: "run-fast", // MaterialCommunityIcons
+    icon: "run-fast",
+    description: "Boost endurance and heart health",
   },
   {
     label: "Yoga",
-    icon: "yoga", // MaterialCommunityIcons
+    icon: "yoga",
+    description: "Flexibility, balance and mindfulness",
   },
   {
     label: "Pilates",
-    icon: "human-handsup", // MaterialCommunityIcons (closest fit)
+    icon: "human-handsup",
+    description: "Core strength and body control",
   },
   {
     label: "Functional Activities",
-    icon: "walk", // MaterialCommunityIcons (general fitness symbol)
+    icon: "walk",
+    description: "Everyday movement and mobility",
   },
 ];
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import theme from "@/app/Theme/globalTheme";
 import { ChatMessageBubbleProps } from "@/app/interfaces/chatInterface";
@@ -31,37 +31,27 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
 
   return (
     <View
-      style={{
-        marginVertical: 6,
-        alignSelf: isUser ? "flex-end" : "flex-start",
-        alignItems: isUser ? "flex-end" : "flex-start",
-        maxWidth: "80%",
-        paddingHorizontal: 4,
-      }}
+      style={[
+        styles.container,
+        {
+          alignSelf: isUser ? "flex-end" : "flex-start",
+          alignItems: isUser ? "flex-end" : "flex-start",
+        },
+      ]}
     >
       <View
-        style={{
-          backgroundColor: isUser ? "#67C694" : "#FFFFFF",
-          padding: 16,
-          borderRadius: 20,
-          shadowColor: isUser ? "#67C694" : "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: isUser ? 0.2 : 0.1,
-          shadowRadius: 6,
-          elevation: 4,
-          borderWidth: isUser ? 0 : 1,
-          borderColor: "#F5F5F5",
-        }}
+        style={[
+          styles.bubble,
+          isUser ? styles.userBubble : styles.supportBubble,
+        ]}
       >
         {/* Text Content */}
         {item.content ? (
           <Text
-            style={{
-              color: isUser ? "#FFFFFF" : "#000",
-              fontSize: 15,
-              fontWeight: "500",
-              lineHeight: 22,
-            }}
+            style={[
+              styles.messageText,
+              { color: isUser ? "#FFFFFF" : "#1A1A1A" },
+            ]}
           >
             {item.content.replace(/\\n/g, "\n")}
           </Text>
@@ -75,47 +65,34 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
           return (
             <TouchableOpacity
               key={idx}
-              style={{
-                marginTop: item.content ? 10 : 0,
-                borderRadius: 12,
-                overflow: "hidden",
-                backgroundColor: isUser ? "rgba(255,255,255,0.1)" : "#F8F8F8",
-              }}
+              style={[
+                styles.attachmentContainer,
+                {
+                  marginTop: item.content ? 10 : 0,
+                  backgroundColor: isUser
+                    ? "rgba(255,255,255,0.15)"
+                    : "#F8F8F8",
+                },
+              ]}
               onPress={() => {
                 setImageModalVisible(true);
                 setSelectedImage(fileUrl);
               }}
             >
               {isImage ? (
-                <Image
-                  source={{ uri: fileUrl }}
-                  style={{
-                    width: 180,
-                    height: 120,
-                    borderRadius: 12,
-                    resizeMode: "cover",
-                  }}
-                />
+                <Image source={{ uri: fileUrl }} style={styles.attachmentImage} />
               ) : (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    padding: 10,
-                  }}
-                >
+                <View style={styles.fileAttachment}>
                   <Ionicons
                     name="document-attach"
                     size={18}
                     color={isUser ? "#FFFFFF" : "#9747FF"}
                   />
                   <Text
-                    style={{
-                      color: isUser ? "#FFFFFF" : "#000",
-                      marginLeft: 8,
-                      fontSize: 13,
-                      fontWeight: "500",
-                    }}
+                    style={[
+                      styles.fileText,
+                      { color: isUser ? "#FFFFFF" : "#1A1A1A" },
+                    ]}
                     numberOfLines={1}
                   >
                     {fileUrl.split("/").pop() || "Attachment"}
@@ -129,47 +106,22 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
         {/* "Go to Plans" Button inside chat bubble */}
         {index === 0 && !isUser && (
           <TouchableOpacity
-            style={{
-              backgroundColor: "#9747FF",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "center",
-              paddingVertical: 10,
-              paddingHorizontal: 16,
-              borderRadius: 12,
-              marginTop: 12,
-              shadowColor: "#9747FF",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.3,
-              shadowRadius: 4,
-              elevation: 3,
-            }}
+            style={styles.goToPlansBtn}
             onPress={() => {
               router.push("/(tabs)/dashboard/plan");
             }}
           >
-            <Text
-              style={{
-                color: "#FFFFFF",
-                fontWeight: "700",
-                fontSize: 14,
-                marginRight: 6,
-              }}
-            >
-              Go to Plans
-            </Text>
+            <Text style={styles.goToPlansText}>Go to Plans</Text>
             <Ionicons name="arrow-forward" size={16} color="#FFFFFF" />
           </TouchableOpacity>
         )}
 
         {/* Date inside bubble */}
         <Text
-          style={{
-            fontSize: 10,
-            color: isUser ? "rgba(255,255,255,0.8)" : "#999",
-            marginTop: 8,
-            fontWeight: "400",
-          }}
+          style={[
+            styles.dateText,
+            { color: isUser ? "rgba(255,255,255,0.8)" : "#999" },
+          ]}
         >
           {formatDate(item.date)}
         </Text>
@@ -177,5 +129,82 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    marginVertical: 6,
+    maxWidth: "80%",
+    paddingHorizontal: 4,
+  },
+  bubble: {
+    padding: 14,
+    borderRadius: 18,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  userBubble: {
+    backgroundColor: "#9747FF",
+    shadowColor: "#9747FF",
+    shadowOpacity: 0.2,
+  },
+  supportBubble: {
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#000",
+    borderWidth: 1,
+    borderColor: "#F5F5F5",
+  },
+  messageText: {
+    fontSize: 14,
+    fontWeight: "500",
+    lineHeight: 20,
+    fontFamily: theme.fonts.regular,
+  },
+  attachmentContainer: {
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  attachmentImage: {
+    width: 180,
+    height: 120,
+    borderRadius: 10,
+    resizeMode: "cover",
+  },
+  fileAttachment: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+  },
+  fileText: {
+    marginLeft: 8,
+    fontSize: 13,
+    fontWeight: "500",
+    fontFamily: theme.fonts.medium,
+  },
+  goToPlansBtn: {
+    backgroundColor: "#67C694",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 20,
+    marginTop: 12,
+  },
+  goToPlansText: {
+    color: "#FFFFFF",
+    fontWeight: "600",
+    fontSize: 13,
+    marginRight: 6,
+    fontFamily: theme.fonts.medium,
+  },
+  dateText: {
+    fontSize: 10,
+    marginTop: 8,
+    fontWeight: "400",
+    fontFamily: theme.fonts.regular,
+  },
+});
 
 export default ChatMessage;

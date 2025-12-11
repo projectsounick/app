@@ -11,6 +11,7 @@ import {
   Alert,
   Modal,
   TouchableOpacity,
+  StyleSheet,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -20,6 +21,7 @@ import { userService } from "@/app/services/user.service";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import { router } from "expo-router";
 import HealthReportUploader from "@/app/modules/UploadReportPdf";
+import theme from "@/app/Theme/globalTheme";
 
 const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const { height } = Dimensions.get("window");
@@ -32,7 +34,12 @@ interface InfoModalProps {
   content: string;
 }
 
-const InfoModal: React.FC<InfoModalProps> = ({ visible, onClose, title, content }) => {
+const InfoModal: React.FC<InfoModalProps> = ({
+  visible,
+  onClose,
+  title,
+  content,
+}) => {
   return (
     <Modal
       transparent
@@ -40,70 +47,15 @@ const InfoModal: React.FC<InfoModalProps> = ({ visible, onClose, title, content 
       visible={visible}
       onRequestClose={onClose}
     >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "rgba(0,0,0,0.5)",
-          justifyContent: "center",
-          alignItems: "center",
-          padding: 20,
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: "#FFFFFF",
-            borderRadius: 20,
-            padding: 24,
-            width: "100%",
-            maxWidth: 400,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.25,
-            shadowRadius: 12,
-            elevation: 10,
-          }}
-        >
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 16,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 18,
-                fontWeight: "700",
-                color: "#000",
-                flex: 1,
-              }}
-            >
-              {title}
-            </Text>
-            <TouchableOpacity
-              onPress={onClose}
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: 16,
-                backgroundColor: "#F0F0F0",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>{title}</Text>
+            <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
               <Ionicons name="close" size={20} color="#333" />
             </TouchableOpacity>
           </View>
-          <Text
-            style={{
-              fontSize: 14,
-              color: "#666",
-              lineHeight: 22,
-            }}
-          >
-            {content}
-          </Text>
+          <Text style={styles.modalText}>{content}</Text>
         </View>
       </View>
     </Modal>
@@ -117,12 +69,16 @@ export default function AppSettingsScreen() {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [infoModalVisible, setInfoModalVisible] = useState(false);
-  const [healthReportModalVisible, setHealthReportModalVisible] = useState(false);
-  const [currentInfoModal, setCurrentInfoModal] = useState<{ title: string; content: string } | null>(null);
-  const [deleteAccountModalVisible, setDeleteAccountModalVisible] = useState(false);
+  const [healthReportModalVisible, setHealthReportModalVisible] =
+    useState(false);
+  const [currentInfoModal, setCurrentInfoModal] = useState<{
+    title: string;
+    content: string;
+  } | null>(null);
+  const [deleteAccountModalVisible, setDeleteAccountModalVisible] =
+    useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  
-  // Info content - can be passed as props or modified as needed
+
   const notificationInfo = {
     title: "Notification Settings",
     content:
@@ -151,23 +107,16 @@ export default function AppSettingsScreen() {
   };
 
   const handleLogout = async () => {
-    Alert.alert(
-      "Logout",
-      "Are you sure you want to logout?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Logout",
+        style: "destructive",
+        onPress: async () => {
+          await userService.logout();
         },
-        {
-          text: "Logout",
-          style: "destructive",
-          onPress: async () => {
-            await userService.logout();
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
 
   const handleDeleteAccount = async () => {
@@ -206,19 +155,12 @@ export default function AppSettingsScreen() {
   };
 
   const handleNotificationToggle = async (value: boolean) => {
-    // If user is trying to turn OFF notifications
     if (!value && notificationEnabled) {
       Alert.alert(
         "Turn Off Notifications?",
         "If you turn it off then you won't be getting any notification from us.",
         [
-          {
-            text: "Cancel",
-            style: "cancel",
-            onPress: () => {
-              // Keep toggle in current state (ON)
-            },
-          },
+          { text: "Cancel", style: "cancel" },
           {
             text: "Turn Off",
             style: "destructive",
@@ -229,20 +171,14 @@ export default function AppSettingsScreen() {
         ]
       );
     } else if (value && !notificationEnabled) {
-      // If user is trying to turn ON notifications
       Alert.alert(
         "Turn On Notifications?",
         "You will receive notifications from us. Please make sure notifications are enabled in your device settings.",
         [
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
+          { text: "Cancel", style: "cancel" },
           {
             text: "Turn On",
             onPress: async () => {
-              // Note: To turn ON, user needs to register for push token
-              // This would typically require requesting notification permissions
               setSnackbarMessage(
                 "Please enable notifications in your device settings to receive push notifications."
               );
@@ -257,19 +193,14 @@ export default function AppSettingsScreen() {
   const updateNotificationStatus = async (enabled: boolean) => {
     try {
       setLoading(true);
-
       if (!enabled) {
-        // Turn OFF: Set expoPushToken to null
         const response = await userService.updateUser({
           expoPushToken: null,
         });
-
         if (response.success) {
-          // Update local storage
           await asyncStorageUtils.updateUserDataInAsyncStorage({
             expoPushToken: null,
           });
-
           setNotificationEnabled(false);
           setSnackbarMessage("Notifications turned off successfully");
           setSnackbarOpen(true);
@@ -280,7 +211,9 @@ export default function AppSettingsScreen() {
       }
     } catch (error: any) {
       console.error("Error updating notification status:", error);
-      setSnackbarMessage("Failed to update notification settings. Please try again.");
+      setSnackbarMessage(
+        "Failed to update notification settings. Please try again."
+      );
       setSnackbarOpen(true);
     } finally {
       setLoading(false);
@@ -308,79 +241,28 @@ export default function AppSettingsScreen() {
           </View>
 
           {initialLoading ? (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
+            <View style={styles.loaderContainer}>
               <ActivityIndicator color="#9747FF" size="large" />
             </View>
           ) : (
             <ScrollView
-              contentContainerStyle={{
-                padding: 20,
-                paddingBottom: 40,
-              }}
+              contentContainerStyle={styles.scrollContent}
               showsVerticalScrollIndicator={false}
             >
-              {/* Notification Settings Card */}
-              <View
-                style={{
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 20,
-                  padding: 16,
-                  marginBottom: 16,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.12,
-                  shadowRadius: 12,
-                  elevation: 5,
-                  borderWidth: 1,
-                  borderColor: "#F5F5F5",
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 12,
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 18,
-                      backgroundColor: "#9747FF",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginRight: 10,
-                    }}
-                  >
-                    <Ionicons name="notifications" size={18} color="#FFFFFF" />
+              {/* Notification Settings */}
+              <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <View style={styles.iconContainer}>
+                    <Ionicons
+                      name="notifications-outline"
+                      size={18}
+                      color="#9747FF"
+                    />
                   </View>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: "700",
-                      color: "#000",
-                      flex: 1,
-                    }}
-                  >
-                    Notifications
-                  </Text>
+                  <Text style={styles.cardTitle}>Notifications</Text>
                   <TouchableOpacity
                     onPress={() => handleInfoClick(notificationInfo)}
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 14,
-                      backgroundColor: "#F0F0F0",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
+                    style={styles.infoBtn}
                   >
                     <Ionicons
                       name="information-circle-outline"
@@ -390,39 +272,11 @@ export default function AppSettingsScreen() {
                   </TouchableOpacity>
                 </View>
 
-                <View
-                  style={{
-                    paddingTop: 10,
-                    borderTopWidth: 1,
-                    borderTopColor: "#F0F0F0",
-                  }}
-                >
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      marginTop: 8,
-                    }}
-                  >
+                <View style={styles.cardContent}>
+                  <View style={styles.settingRow}>
                     <View style={{ flex: 1, marginRight: 12 }}>
-                      <Text
-                        style={{
-                          fontSize: 15,
-                          fontWeight: "600",
-                          color: "#000",
-                          marginBottom: 4,
-                        }}
-                      >
-                        Push Notifications
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: 13,
-                          color: "#666",
-                          lineHeight: 18,
-                        }}
-                      >
+                      <Text style={styles.settingTitle}>Push Notifications</Text>
+                      <Text style={styles.settingSubtitle}>
                         {notificationEnabled
                           ? "You will receive notifications from us"
                           : "You won't receive any notifications from us"}
@@ -434,13 +288,8 @@ export default function AppSettingsScreen() {
                       <Switch
                         value={notificationEnabled}
                         onValueChange={handleNotificationToggle}
-                        trackColor={{
-                          false: "#E0E0E0",
-                          true: "#67C694",
-                        }}
-                        thumbColor={
-                          notificationEnabled ? "#FFFFFF" : "#F4F3F4"
-                        }
+                        trackColor={{ false: "#E0E0E0", true: "#67C694" }}
+                        thumbColor={notificationEnabled ? "#FFFFFF" : "#F4F3F4"}
                         ios_backgroundColor="#E0E0E0"
                       />
                     )}
@@ -448,62 +297,20 @@ export default function AppSettingsScreen() {
                 </View>
               </View>
 
-              {/* Health Report Upload Card */}
-              <View
-                style={{
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 20,
-                  padding: 16,
-                  marginBottom: 16,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.12,
-                  shadowRadius: 12,
-                  elevation: 5,
-                  borderWidth: 1,
-                  borderColor: "#F5F5F5",
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 12,
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 18,
-                      backgroundColor: "#9747FF",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginRight: 10,
-                    }}
-                  >
-                    <Ionicons name="cloud-upload" size={18} color="#FFFFFF" />
+              {/* Health Report Upload */}
+              <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <View style={styles.iconContainer}>
+                    <Ionicons
+                      name="cloud-upload-outline"
+                      size={18}
+                      color="#9747FF"
+                    />
                   </View>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: "700",
-                      color: "#000",
-                      flex: 1,
-                    }}
-                  >
-                    Health Report Upload
-                  </Text>
+                  <Text style={styles.cardTitle}>Health Report Upload</Text>
                   <TouchableOpacity
                     onPress={() => handleInfoClick(healthReportInfo)}
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 14,
-                      backgroundColor: "#F0F0F0",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
+                    style={styles.infoBtn}
                   >
                     <Ionicons
                       name="information-circle-outline"
@@ -513,109 +320,42 @@ export default function AppSettingsScreen() {
                   </TouchableOpacity>
                 </View>
 
-                <View
-                  style={{
-                    paddingTop: 10,
-                    borderTopWidth: 1,
-                    borderTopColor: "#F0F0F0",
-                  }}
-                >
+                <View style={styles.cardContent}>
                   <TouchableOpacity
                     onPress={() => setHealthReportModalVisible(true)}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      marginTop: 8,
-                      paddingVertical: 8,
-                    }}
+                    style={styles.settingRow}
                   >
                     <View style={{ flex: 1 }}>
-                      <Text
-                        style={{
-                          fontSize: 15,
-                          fontWeight: "600",
-                          color: "#000",
-                          marginBottom: 4,
-                        }}
-                      >
+                      <Text style={styles.settingTitle}>
                         Upload Health Report
                       </Text>
-                      <Text
-                        style={{
-                          fontSize: 13,
-                          color: "#666",
-                          lineHeight: 18,
-                        }}
-                      >
+                      <Text style={styles.settingSubtitle}>
                         Upload your health reports in PDF format
                       </Text>
                     </View>
                     <Ionicons
                       name="chevron-forward"
                       size={20}
-                      color="#9747FF"
+                      color="#1A1A1A"
                     />
                   </TouchableOpacity>
                 </View>
               </View>
 
-              {/* Preferences Card */}
-              <View
-                style={{
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 20,
-                  padding: 16,
-                  marginBottom: 16,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.12,
-                  shadowRadius: 12,
-                  elevation: 5,
-                  borderWidth: 1,
-                  borderColor: "#F5F5F5",
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 12,
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 18,
-                      backgroundColor: "#9747FF",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginRight: 10,
-                    }}
-                  >
-                    <Ionicons name="settings" size={18} color="#FFFFFF" />
+              {/* Preferences */}
+              <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <View style={styles.iconContainer}>
+                    <Ionicons
+                      name="options-outline"
+                      size={18}
+                      color="#9747FF"
+                    />
                   </View>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: "700",
-                      color: "#000",
-                      flex: 1,
-                    }}
-                  >
-                    Preferences
-                  </Text>
+                  <Text style={styles.cardTitle}>Preferences</Text>
                   <TouchableOpacity
                     onPress={() => handleInfoClick(preferencesInfo)}
-                    style={{
-                      width: 28,
-                      height: 28,
-                      borderRadius: 14,
-                      backgroundColor: "#F0F0F0",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
+                    style={styles.infoBtn}
                   >
                     <Ionicons
                       name="information-circle-outline"
@@ -625,231 +365,74 @@ export default function AppSettingsScreen() {
                   </TouchableOpacity>
                 </View>
 
-                <View
-                  style={{
-                    paddingTop: 10,
-                    borderTopWidth: 1,
-                    borderTopColor: "#F0F0F0",
-                  }}
-                >
+                <View style={styles.cardContent}>
                   <TouchableOpacity
                     onPress={handlePreferences}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      marginTop: 8,
-                      paddingVertical: 8,
-                    }}
+                    style={styles.settingRow}
                   >
                     <View style={{ flex: 1 }}>
-                      <Text
-                        style={{
-                          fontSize: 15,
-                          fontWeight: "600",
-                          color: "#000",
-                          marginBottom: 4,
-                        }}
-                      >
-                        Session Preferences
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: 13,
-                          color: "#666",
-                          lineHeight: 18,
-                        }}
-                      >
+                      <Text style={styles.settingTitle}>Session Preferences</Text>
+                      <Text style={styles.settingSubtitle}>
                         Set your date, time slot, and location preferences
                       </Text>
                     </View>
                     <Ionicons
                       name="chevron-forward"
                       size={20}
-                      color="#9747FF"
+                      color="#1A1A1A"
                     />
                   </TouchableOpacity>
                 </View>
               </View>
 
-              {/* Logout Card */}
-              <View
-                style={{
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 20,
-                  padding: 16,
-                  marginBottom: 16,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.12,
-                  shadowRadius: 12,
-                  elevation: 5,
-                  borderWidth: 1,
-                  borderColor: "#F5F5F5",
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 12,
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 18,
-                      backgroundColor: "#9747FF",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginRight: 10,
-                    }}
-                  >
-                    <Ionicons name="log-out" size={18} color="#FFFFFF" />
+              {/* Logout */}
+              <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <View style={styles.iconContainer}>
+                    <Ionicons name="log-out-outline" size={18} color="#9747FF" />
                   </View>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: "700",
-                      color: "#000",
-                      flex: 1,
-                    }}
-                  >
-                    Logout
-                  </Text>
+                  <Text style={styles.cardTitle}>Logout</Text>
                 </View>
 
-                <View
-                  style={{
-                    paddingTop: 10,
-                    borderTopWidth: 1,
-                    borderTopColor: "#F0F0F0",
-                  }}
-                >
+                <View style={styles.cardContent}>
                   <TouchableOpacity
                     onPress={handleLogout}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      marginTop: 8,
-                      paddingVertical: 8,
-                    }}
+                    style={styles.settingRow}
                   >
                     <View style={{ flex: 1 }}>
-                      <Text
-                        style={{
-                          fontSize: 15,
-                          fontWeight: "600",
-                          color: "#000",
-                          marginBottom: 4,
-                        }}
-                      >
-                        Sign Out
-                      </Text>
-                      <Text
-                        style={{
-                          fontSize: 13,
-                          color: "#666",
-                          lineHeight: 18,
-                        }}
-                      >
+                      <Text style={styles.settingTitle}>Sign Out</Text>
+                      <Text style={styles.settingSubtitle}>
                         Logout from your account
                       </Text>
                     </View>
                     <Ionicons
                       name="chevron-forward"
                       size={20}
-                      color="#9747FF"
+                      color="#1A1A1A"
                     />
                   </TouchableOpacity>
                 </View>
               </View>
 
-              {/* Delete Account Card */}
-              <View
-                style={{
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 20,
-                  padding: 16,
-                  marginBottom: 16,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.12,
-                  shadowRadius: 12,
-                  elevation: 5,
-                  borderWidth: 1,
-                  borderColor: "#FF6B6B",
-                }}
-              >
-                <View
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginBottom: 12,
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: 18,
-                      backgroundColor: "#FF6B6B",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginRight: 10,
-                    }}
-                  >
-                    <Ionicons name="trash" size={18} color="#FFFFFF" />
+              {/* Delete Account */}
+              <View style={[styles.card, styles.dangerCard]}>
+                <View style={styles.cardHeader}>
+                  <View style={styles.dangerIconContainer}>
+                    <Ionicons name="trash-outline" size={18} color="#FF6B6B" />
                   </View>
-                  <Text
-                    style={{
-                      fontSize: 16,
-                      fontWeight: "700",
-                      color: "#FF6B6B",
-                      flex: 1,
-                    }}
-                  >
-                    Delete Account
-                  </Text>
+                  <Text style={styles.dangerTitle}>Delete Account</Text>
                 </View>
 
-                <View
-                  style={{
-                    paddingTop: 10,
-                    borderTopWidth: 1,
-                    borderTopColor: "#F0F0F0",
-                  }}
-                >
+                <View style={styles.cardContent}>
                   <TouchableOpacity
                     onPress={() => setDeleteAccountModalVisible(true)}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      marginTop: 8,
-                      paddingVertical: 8,
-                    }}
+                    style={styles.settingRow}
                   >
                     <View style={{ flex: 1 }}>
-                      <Text
-                        style={{
-                          fontSize: 15,
-                          fontWeight: "600",
-                          color: "#FF6B6B",
-                          marginBottom: 4,
-                        }}
-                      >
+                      <Text style={[styles.settingTitle, { color: "#FF6B6B" }]}>
                         Permanently Delete Account
                       </Text>
-                      <Text
-                        style={{
-                          fontSize: 13,
-                          color: "#666",
-                          lineHeight: 18,
-                        }}
-                      >
+                      <Text style={styles.settingSubtitle}>
                         Your account will be permanently deleted
                       </Text>
                     </View>
@@ -890,138 +473,37 @@ export default function AppSettingsScreen() {
             visible={deleteAccountModalVisible}
             onRequestClose={() => setDeleteAccountModalVisible(false)}
           >
-            <View
-              style={{
-                flex: 1,
-                backgroundColor: "rgba(0,0,0,0.5)",
-                justifyContent: "center",
-                alignItems: "center",
-                padding: 20,
-              }}
-            >
-              <View
-                style={{
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 20,
-                  padding: 24,
-                  width: "100%",
-                  maxWidth: 400,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 4 },
-                  shadowOpacity: 0.25,
-                  shadowRadius: 12,
-                  elevation: 10,
-                }}
-              >
-                <View
-                  style={{
-                    alignItems: "center",
-                    marginBottom: 20,
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 60,
-                      height: 60,
-                      borderRadius: 30,
-                      backgroundColor: "#FFEBEE",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginBottom: 16,
-                    }}
-                  >
+            <View style={styles.modalOverlay}>
+              <View style={styles.modalContent}>
+                <View style={styles.deleteModalHeader}>
+                  <View style={styles.deleteIconContainer}>
                     <Ionicons name="warning" size={30} color="#FF6B6B" />
                   </View>
-                  <Text
-                    style={{
-                      fontSize: 20,
-                      fontWeight: "700",
-                      color: "#000",
-                      marginBottom: 8,
-                    }}
-                  >
-                    Are you sure?
-                  </Text>
-                  <Text
-                    style={{
-                      fontSize: 14,
-                      color: "#666",
-                      textAlign: "center",
-                      lineHeight: 20,
-                    }}
-                  >
+                  <Text style={styles.deleteModalTitle}>Are you sure?</Text>
+                  <Text style={styles.deleteModalText}>
                     Your account will be permanently deleted. This action cannot
                     be undone.
                   </Text>
                 </View>
 
                 {isDeleting ? (
-                  <View
-                    style={{
-                      alignItems: "center",
-                      paddingVertical: 20,
-                    }}
-                  >
+                  <View style={styles.deletingContainer}>
                     <ActivityIndicator color="#FF6B6B" size="large" />
-                    <Text
-                      style={{
-                        marginTop: 12,
-                        fontSize: 14,
-                        color: "#666",
-                      }}
-                    >
-                      Deleting account...
-                    </Text>
+                    <Text style={styles.deletingText}>Deleting account...</Text>
                   </View>
                 ) : (
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      gap: 12,
-                    }}
-                  >
+                  <View style={styles.deleteModalButtons}>
                     <TouchableOpacity
                       onPress={() => setDeleteAccountModalVisible(false)}
-                      style={{
-                        flex: 1,
-                        paddingVertical: 14,
-                        paddingHorizontal: 20,
-                        borderRadius: 12,
-                        backgroundColor: "#F0F0F0",
-                        alignItems: "center",
-                      }}
+                      style={styles.cancelButton}
                     >
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          fontWeight: "600",
-                          color: "#666",
-                        }}
-                      >
-                        Cancel
-                      </Text>
+                      <Text style={styles.cancelButtonText}>Cancel</Text>
                     </TouchableOpacity>
-
                     <TouchableOpacity
                       onPress={handleDeleteAccount}
-                      style={{
-                        flex: 1,
-                        paddingVertical: 14,
-                        paddingHorizontal: 20,
-                        borderRadius: 12,
-                        backgroundColor: "#FF6B6B",
-                        alignItems: "center",
-                      }}
+                      style={styles.deleteButton}
                     >
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          fontWeight: "600",
-                          color: "#FFFFFF",
-                        }}
-                      >
-                        Delete
-                      </Text>
+                      <Text style={styles.deleteButtonText}>Delete</Text>
                     </TouchableOpacity>
                   </View>
                 )}
@@ -1041,3 +523,208 @@ export default function AppSettingsScreen() {
   );
 }
 
+const styles = StyleSheet.create({
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: "#F5F5F5",
+  },
+  dangerCard: {
+    borderColor: "#FFEBEE",
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#F3EDFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  dangerIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "#FFEBEE",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  cardTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#1A1A1A",
+    flex: 1,
+    fontFamily: theme.fonts.bold,
+  },
+  dangerTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#FF6B6B",
+    flex: 1,
+    fontFamily: theme.fonts.bold,
+  },
+  infoBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#F3EDFF",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cardContent: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "#F5F5F5",
+  },
+  settingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  settingTitle: {
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#1A1A1A",
+    marginBottom: 2,
+    fontFamily: theme.fonts.medium,
+  },
+  settingSubtitle: {
+    fontSize: 12,
+    color: "#888",
+    lineHeight: 16,
+    fontFamily: theme.fonts.regular,
+  },
+  // Modal styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 24,
+    width: "100%",
+    maxWidth: 400,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    flex: 1,
+    fontFamily: theme.fonts.bold,
+  },
+  modalCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#F5F5F5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalText: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 22,
+    fontFamily: theme.fonts.regular,
+  },
+  // Delete modal styles
+  deleteModalHeader: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  deleteIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: "#FFEBEE",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  deleteModalTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginBottom: 8,
+    fontFamily: theme.fonts.bold,
+  },
+  deleteModalText: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    lineHeight: 20,
+    fontFamily: theme.fonts.regular,
+  },
+  deletingContainer: {
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  deletingText: {
+    marginTop: 12,
+    fontSize: 14,
+    color: "#666",
+    fontFamily: theme.fonts.regular,
+  },
+  deleteModalButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#F5F5F5",
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#666",
+    fontFamily: theme.fonts.medium,
+  },
+  deleteButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#FF6B6B",
+    alignItems: "center",
+  },
+  deleteButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
+    fontFamily: theme.fonts.medium,
+  },
+});
