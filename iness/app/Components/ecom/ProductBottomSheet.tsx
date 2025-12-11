@@ -9,22 +9,24 @@ import {
   TouchableOpacity,
   Pressable,
   TouchableWithoutFeedback,
-  ImageBackground,
+  StyleSheet,
 } from "react-native";
 import { Product } from "@/app/interfaces/ecommerceInterface";
 import { Ionicons } from "@expo/vector-icons";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { cartService } from "@/app/services/cart.service";
 import { addToCart } from "@/Slices/cartSlice";
 import {
   convertToProductCartItem,
   isEcomProductAddableToCart,
-  isProductAddableToCart,
 } from "@/utils/cartUtils";
 import { RootState } from "@/store";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import { useDispatch, useSelector } from "react-redux";
 import { withAuthGuard } from "@/app/Hoc/WithAuthGuardButton";
+import theme from "@/app/Theme/globalTheme";
+
 const ProtectedAnimatedSubmitButton = withAuthGuard(AnimatedSubmitButton);
 const { width, height } = Dimensions.get("window");
 
@@ -52,11 +54,11 @@ const ProductModal: React.FC<ProductModalProps> = ({
   const [showFullDescription, setShowFullDescription] = useState(false);
   const imageScrollRef = useRef<ScrollView>(null);
   const [cartLoading, setCardLoading] = useState(false);
-
-  const [selectedPlanItem, setSelectedPlanItem] = React.useState("");
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+
   if (!selectedProduct) return null;
+
   useEffect(() => {
     if (
       selectedProduct &&
@@ -65,6 +67,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
     )
       setSelectedVariationId(selectedProduct.variations[0]._id);
   }, []);
+
   const handleScroll = (event: any) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / width);
     setActiveIndex(index);
@@ -78,11 +81,11 @@ const ProductModal: React.FC<ProductModalProps> = ({
       : selectedProduct.basePrice;
 
   const toggleDescription = () => setShowFullDescription((prev) => !prev);
+
   const addingIntoToCart = async () => {
     try {
       setCardLoading(true);
 
-      /// checking whether this product is available in cart or not--/
       const alreadyExistsInCart = isEcomProductAddableToCart(
         cartItems,
         selectedProduct._id,
@@ -101,7 +104,6 @@ const ProductModal: React.FC<ProductModalProps> = ({
         },
       };
 
-      /// making the api call to store cart details in the database ---/
       const cartDbResponse = await cartService.addCartItems(apiObject);
       const updatedCartItem = convertToProductCartItem(
         selectedProduct,
@@ -118,73 +120,32 @@ const ProductModal: React.FC<ProductModalProps> = ({
         dispatch(addToCart(finalItem));
         setSnackbarOpen(true);
         setSnackbarMessage("Added to cart successfully");
-        setSelectedPlanItem("");
       }
-      //}
     } catch (error: any) {
-      setSnackbarOpen(error.message);
+      setSnackbarMessage(error.message);
       setSnackbarOpen(true);
     } finally {
       setCardLoading(false);
     }
   };
+
   return (
     <Modal visible={visible} transparent animationType="slide">
       <TouchableWithoutFeedback onPress={onClose}>
-        <View
-          style={{
-            flex: 1,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            justifyContent: "flex-end",
-          }}
-        />
+        <View style={styles.overlay} />
       </TouchableWithoutFeedback>
 
-      <View
-        style={{
-          position: "absolute",
-          bottom: 0,
-          height: height * 0.75,
-          width: "100%",
-          borderTopLeftRadius: 24,
-          borderTopRightRadius: 24,
-          backgroundColor: "#FFFFFF",
-          padding: 20,
-        }}
-      >
-        <View
-          style={{
-            width: 50,
-            height: 5,
-            backgroundColor: "#000000",
-            borderRadius: 3,
-            alignSelf: "center",
-            marginBottom: 16,
-          }}
-        />
+      <View style={styles.modalContent}>
+        {/* Dash Handle */}
+        <View style={styles.dashHandle} />
 
         {/* Close Button */}
-        <TouchableOpacity
-          style={{
-            height: 36,
-            width: 36,
-            alignSelf: "flex-end",
-            backgroundColor: "#F5F5F5",
-            borderRadius: 18,
-            marginBottom: 16,
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1,
-          }}
-          onPress={onClose}
-        >
-          <Ionicons name="close" size={20} color="#000" />
+        <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
+          <Ionicons name="close" size={20} color="#1A1A1A" />
         </TouchableOpacity>
 
         {/* Image Carousel */}
-        <View style={{ height: 240, marginBottom: 20, borderRadius: 16, overflow: "hidden", backgroundColor: "#F8F8F8" }}>
+        <View style={styles.imageCarousel}>
           <ScrollView
             horizontal
             pagingEnabled
@@ -192,41 +153,29 @@ const ProductModal: React.FC<ProductModalProps> = ({
             onScroll={handleScroll}
             scrollEventThrottle={16}
             ref={imageScrollRef}
-            style={{
-              borderRadius: 16,
-            }}
           >
             {selectedProduct.images.map((imgUrl, index) => (
               <Image
                 key={index}
                 source={{ uri: imgUrl }}
                 resizeMode="contain"
-                style={{ width: width - 40, height: 240 }}
+                style={styles.carouselImage}
               />
             ))}
           </ScrollView>
 
           {/* Dots */}
-          <View
-            style={{
-              position: "absolute",
-              bottom: 8,
-              left: 0,
-              right: 0,
-              flexDirection: "row",
-              justifyContent: "center",
-            }}
-          >
+          <View style={styles.dotsContainer}>
             {selectedProduct.images.map((_, index) => (
               <View
                 key={index}
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
-                  backgroundColor: index === activeIndex ? "#9747FF" : "#D0D0D0",
-                  marginHorizontal: 4,
-                }}
+                style={[
+                  styles.dot,
+                  {
+                    backgroundColor:
+                      index === activeIndex ? "#9747FF" : "#E0E0E0",
+                  },
+                ]}
               />
             ))}
           </View>
@@ -238,34 +187,35 @@ const ProductModal: React.FC<ProductModalProps> = ({
           contentContainerStyle={{ paddingBottom: 100 }}
           showsVerticalScrollIndicator={false}
         >
-          <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 8, color: "#000" }}>
-            {selectedProduct.name}
-          </Text>
+          <Text style={styles.productName}>{selectedProduct.name}</Text>
 
           {/* Description */}
           <Pressable onPress={toggleDescription}>
             <Text
               numberOfLines={showFullDescription ? undefined : 3}
-              style={{ fontSize: 14, color: "#666", marginBottom: 8, lineHeight: 20 }}
+              style={styles.description}
             >
               {selectedProduct.description}
             </Text>
             {!showFullDescription && (
-              <Text style={{ color: "#9747FF", marginBottom: 16, fontWeight: "500" }}>
-                Read more
-              </Text>
+              <Text style={styles.readMore}>Read more</Text>
             )}
           </Pressable>
 
           {/* Variations */}
           {variationType && variations && variations.length > 0 && (
-            <View style={{ marginBottom: 20 }}>
-              <Text
-                style={{ fontSize: 16, fontWeight: "600", marginBottom: 12, color: "#000" }}
-              >
-                {variationType}
-              </Text>
-              <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+            <View style={styles.variationSection}>
+              <View style={styles.variationHeader}>
+                <View style={styles.variationIconContainer}>
+                  <MaterialCommunityIcons
+                    name="format-list-bulleted"
+                    size={16}
+                    color="#9747FF"
+                  />
+                </View>
+                <Text style={styles.variationTitle}>{variationType}</Text>
+              </View>
+              <View style={styles.variationList}>
                 {variations.map((v, idx) => (
                   <Pressable
                     key={idx}
@@ -273,22 +223,17 @@ const ProductModal: React.FC<ProductModalProps> = ({
                       setSelectedVariation(idx);
                       setSelectedVariationId(v._id);
                     }}
-                    style={{
-                      paddingHorizontal: 18,
-                      paddingVertical: 10,
-                      borderRadius: 12,
-                      backgroundColor:
-                        selectedVariation === idx ? "#9747FF" : "#F5F5F5",
-                      borderWidth: selectedVariation === idx ? 0 : 1,
-                      borderColor: "#E0E0E0",
-                    }}
+                    style={[
+                      styles.variationChip,
+                      selectedVariation === idx && styles.variationChipSelected,
+                    ]}
                   >
                     <Text
-                      style={{
-                        fontSize: 14,
-                        color: selectedVariation === idx ? "#FFFFFF" : "#000",
-                        fontWeight: selectedVariation === idx ? "600" : "500",
-                      }}
+                      style={[
+                        styles.variationChipText,
+                        selectedVariation === idx &&
+                          styles.variationChipTextSelected,
+                      ]}
                     >
                       {v.label}
                     </Text>
@@ -298,11 +243,17 @@ const ProductModal: React.FC<ProductModalProps> = ({
             </View>
           )}
 
-          {/* Quantity Control */}
-
           {/* Price */}
-          <View style={{ marginBottom: 24, paddingTop: 16, borderTopWidth: 1, borderTopColor: "#F0F0F0" }}>
-            <Text style={{ fontSize: 24, fontWeight: "bold", color: "#9747FF" }}>
+          <View style={styles.priceSection}>
+            <View style={styles.priceIconContainer}>
+              <MaterialCommunityIcons
+                name="tag-outline"
+                size={18}
+                color="#67C694"
+              />
+            </View>
+            <Text style={styles.priceLabel}>Total Price</Text>
+            <Text style={styles.priceValue}>
               ₹{((price ?? 0) * quantity).toFixed(2)}
             </Text>
           </View>
@@ -311,10 +262,11 @@ const ProductModal: React.FC<ProductModalProps> = ({
         {/* Add to Cart Button */}
         <ProtectedAnimatedSubmitButton
           loading={cartLoading}
-          title="Add to cart"
+          title="Add to Cart"
           onPress={addingIntoToCart}
           height={50}
         />
+
         <CustomSnackbar
           visible={snackbarOpen}
           message={snackbarMessage}
@@ -325,5 +277,167 @@ const ProductModal: React.FC<ProductModalProps> = ({
     </Modal>
   );
 };
+
+const styles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    position: "absolute",
+    bottom: 0,
+    height: height * 0.75,
+    width: "100%",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    backgroundColor: "#FFFFFF",
+    padding: 20,
+  },
+  dashHandle: {
+    width: 50,
+    height: 5,
+    backgroundColor: "#E0E0E0",
+    borderRadius: 3,
+    alignSelf: "center",
+    marginBottom: 16,
+  },
+  closeBtn: {
+    position: "absolute",
+    top: 16,
+    right: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: "#F5F5F5",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  imageCarousel: {
+    height: 220,
+    marginBottom: 16,
+    borderRadius: 16,
+    overflow: "hidden",
+    backgroundColor: "#FAFAFA",
+  },
+  carouselImage: {
+    width: width - 40,
+    height: 220,
+  },
+  dotsContainer: {
+    position: "absolute",
+    bottom: 10,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    marginHorizontal: 4,
+  },
+  productName: {
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 10,
+    color: "#1A1A1A",
+    fontFamily: theme.fonts.bold,
+  },
+  description: {
+    fontSize: 13,
+    color: "#666",
+    marginBottom: 6,
+    lineHeight: 20,
+    fontFamily: theme.fonts.regular,
+  },
+  readMore: {
+    color: "#9747FF",
+    marginBottom: 16,
+    fontWeight: "500",
+    fontSize: 13,
+    fontFamily: theme.fonts.medium,
+  },
+  variationSection: {
+    marginBottom: 16,
+  },
+  variationHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  variationIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    backgroundColor: "#F3EDFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  variationTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#1A1A1A",
+    fontFamily: theme.fonts.bold,
+  },
+  variationList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  variationChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 10,
+    backgroundColor: "#FAFAFA",
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+  },
+  variationChipSelected: {
+    backgroundColor: "#F3EDFF",
+    borderColor: "#9747FF",
+  },
+  variationChipText: {
+    fontSize: 13,
+    color: "#666",
+    fontWeight: "500",
+    fontFamily: theme.fonts.medium,
+  },
+  variationChipTextSelected: {
+    color: "#9747FF",
+    fontWeight: "600",
+  },
+  priceSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 16,
+    paddingBottom: 8,
+    borderTopWidth: 1,
+    borderTopColor: "#F5F5F5",
+  },
+  priceIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#E8F5E9",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  priceLabel: {
+    fontSize: 13,
+    color: "#888",
+    flex: 1,
+    fontFamily: theme.fonts.regular,
+  },
+  priceValue: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#67C694",
+    fontFamily: theme.fonts.bold,
+  },
+});
 
 export default ProductModal;

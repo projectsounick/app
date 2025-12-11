@@ -54,7 +54,7 @@ function BlogSliderCard() {
             style={{
               width: 34,
               height: 34,
-              borderRadius: 17,
+              borderRadius: 10,
               backgroundColor: "#F3EDFF",
               alignItems: "center",
               justifyContent: "center",

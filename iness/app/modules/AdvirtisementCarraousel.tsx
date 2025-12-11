@@ -49,7 +49,7 @@ function StylishCarousel() {
             style={{
               width: 42,
               height: 42,
-              borderRadius: 21,
+              borderRadius: 12,
               backgroundColor: "#ffffff20",
               alignItems: "center",
               justifyContent: "center",

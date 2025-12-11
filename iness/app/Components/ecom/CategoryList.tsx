@@ -1,151 +1,68 @@
 import React, { memo } from "react";
-import { View, Text, Image, TouchableOpacity, FlatList, Dimensions } from "react-native";
-import { MaterialIcons } from "@expo/vector-icons"; // for the arrow icon
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  FlatList,
+  Dimensions,
+  StyleSheet,
+} from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-
 import { useRouter } from "expo-router";
+import theme from "@/app/Theme/globalTheme";
 
 interface Category {
   _id: string;
   name: string;
-  image: string; // Assuming there's an image URL or local path
+  image: string;
 }
-
-interface Props {
-  categories: Category[];
-}
-
-// Removed colorful backgrounds - using white cards with theme accents
 
 function CategoryGrid() {
-
   const router = useRouter();
+  const categories: any = useSelector(
+    (state: RootState) => state.ecom.categories
+  );
+
   const renderItem = ({ item, index }: { item: Category; index: number }) => {
     return (
       <TouchableOpacity
         key={item._id}
         activeOpacity={0.8}
-        style={{
-          width: (Dimensions.get("window").width - 48) / 2,
-          height: 160,
-          borderRadius: 20,
-          backgroundColor: "#FFFFFF",
-          padding: 16,
-          marginBottom: 16,
-          justifyContent: "space-between",
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.12,
-          shadowRadius: 12,
-          elevation: 5,
-          borderWidth: 1,
-          borderColor: "#F5F5F5",
-        }}
-        onPress={() =>{
-          console.log('item', item);
+        style={styles.categoryCard}
+        onPress={() => {
           router.push(
             `/dashboard/productList?category=${encodeURIComponent(item.name)}&categoryId=${encodeURIComponent(item._id)}`
-          )
+          );
         }}
       >
-        {/* Image Container with Background */}
-        <View 
-          style={{ 
-            alignItems: "center", 
-            justifyContent: "center",
-            height: 90,
-            marginBottom: 8,
-            backgroundColor: "#F8F8F8",
-            borderRadius: 12,
-            overflow: "hidden",
-          }}
-        >
-          <Image
-            source={{ uri: item.image }}
-            style={{
-              width: 80,
-              height: 80,
-              resizeMode: "contain",
-            }}
-          />
+        {/* Image Container */}
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: item.image }} style={styles.categoryImage} />
         </View>
 
         {/* Bottom row: text + arrow */}
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingTop: 8,
-            borderTopWidth: 1,
-            borderTopColor: "#F0F0F0",
-          }}
-        >
-          <Text
-            numberOfLines={1}
-            style={{
-              fontSize: 14,
-              fontWeight: "600",
-              color: "#000",
-              flex: 1,
-              marginRight: 8,
-            }}
-          >
+        <View style={styles.cardFooter}>
+          <Text numberOfLines={1} style={styles.categoryName}>
             {item.name}
           </Text>
-          <View
-            style={{
-              width: 24,
-              height: 24,
-              borderRadius: 12,
-              backgroundColor: "#9747FF",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <MaterialIcons name="chevron-right" size={16} color="#FFFFFF" />
-          </View>
+          <MaterialIcons name="chevron-right" size={20} color="#1A1A1A" />
         </View>
       </TouchableOpacity>
     );
   };
 
-  const categories: any = useSelector(
-    (state: RootState) => state.ecom.categories
-  );
   return (
-    <View style={{ marginTop: 24, marginBottom: 8 }}>
+    <View style={styles.container}>
       {categories.length > 0 ? (
         <>
           {/* Header Section */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: 20,
-              paddingHorizontal: 4,
-            }}
-          >
-            <Text
-              style={{
-                fontSize: 24,
-                fontWeight: "700",
-                color: "#000",
-                letterSpacing: -0.5,
-              }}
-            >
-              Shop by Category
-            </Text>
-            <View
-              style={{
-                width: 40,
-                height: 3,
-                backgroundColor: "#9747FF",
-                borderRadius: 2,
-              }}
-            />
+          <View style={styles.headerSection}>
+            <Text style={styles.headerTitle}>Shop by Category</Text>
+            <View style={styles.headerDash} />
           </View>
 
           <FlatList
@@ -153,53 +70,130 @@ function CategoryGrid() {
             renderItem={renderItem}
             keyExtractor={(item) => item._id}
             numColumns={2}
-            contentContainerStyle={{ paddingBottom: 40 }}
-            columnWrapperStyle={{
-              justifyContent: "space-between",
-              paddingHorizontal: 4,
-            }}
+            contentContainerStyle={{ paddingBottom: 16 }}
+            columnWrapperStyle={styles.columnWrapper}
             scrollEnabled={false}
           />
         </>
       ) : (
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            padding: 20,
-          }}
-        >
-          <View
-            style={{
-              height: "80%",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-evenly",
-              alignItems: "center",
-            }}
-          >
-            <View
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            ></View>
-            <Image
-              source={require("../../../assets/images/placholderEquip.png")}
-              style={{
-                width: 250,
-                height: 250,
-                resizeMode: "contain",
-              }}
+        <View style={styles.emptyContainer}>
+          <View style={styles.emptyIconContainer}>
+            <MaterialCommunityIcons
+              name="shopping-outline"
+              size={40}
+              color="#9747FF"
             />
           </View>
+          <Text style={styles.emptyTitle}>No categories yet</Text>
+          <Text style={styles.emptySubtitle}>
+            Check back later for new products
+          </Text>
         </View>
       )}
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  headerSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+    paddingHorizontal: 4,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    fontFamily: theme.fonts.bold,
+  },
+  headerDash: {
+    width: 40,
+    height: 3,
+    backgroundColor: "#9747FF",
+    borderRadius: 2,
+  },
+  columnWrapper: {
+    justifyContent: "space-between",
+    paddingHorizontal: 4,
+  },
+  categoryCard: {
+    width: (Dimensions.get("window").width - 48) / 2,
+    borderRadius: 14,
+    backgroundColor: "#FFFFFF",
+    padding: 12,
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
+    borderWidth: 1,
+    borderColor: "#F5F5F5",
+  },
+  imageContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    height: 90,
+    marginBottom: 10,
+    backgroundColor: "#FAFAFA",
+    borderRadius: 10,
+    overflow: "hidden",
+  },
+  categoryImage: {
+    width: 75,
+    height: 75,
+    resizeMode: "contain",
+  },
+  cardFooter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: "#F5F5F5",
+  },
+  categoryName: {
+    fontSize: 13,
+    fontWeight: "600",
+    color: "#1A1A1A",
+    flex: 1,
+    marginRight: 8,
+    fontFamily: theme.fonts.medium,
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 40,
+  },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    backgroundColor: "#F3EDFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 20,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    marginBottom: 8,
+    fontFamily: theme.fonts.bold,
+  },
+  emptySubtitle: {
+    fontSize: 14,
+    color: "#888",
+    textAlign: "center",
+    fontFamily: theme.fonts.regular,
+  },
+});
 
 export default memo(CategoryGrid);

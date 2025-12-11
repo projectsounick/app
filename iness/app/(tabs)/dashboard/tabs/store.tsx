@@ -77,7 +77,7 @@ export default function EquipScreen() {
             </View>
           )}
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}
+          contentContainerStyle={{ paddingBottom: 100 }}
         />
       )}
     </SafeAreaView>

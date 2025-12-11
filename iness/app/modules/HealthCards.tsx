@@ -148,7 +148,7 @@ function HealthDashboard() {
                 style={{
                   width: 32,
                   height: 32,
-                  borderRadius: 16,
+                  borderRadius: 10,
                   backgroundColor: "#F3EDFF",
                   alignItems: "center",
                   justifyContent: "center",
@@ -281,7 +281,7 @@ function HealthDashboard() {
                 style={{
                   width: 32,
                   height: 32,
-                  borderRadius: 16,
+                  borderRadius: 10,
                   backgroundColor: "#F3EDFF",
                   alignItems: "center",
                   justifyContent: "center",
@@ -415,7 +415,7 @@ function HealthDashboard() {
               style={{
                 width: 32,
                 height: 32,
-                borderRadius: 16,
+                borderRadius: 10,
                 backgroundColor: "#F3EDFF",
                 alignItems: "center",
                 justifyContent: "center",

@@ -107,7 +107,7 @@ const UpcomingSessionsCard = () => {
             style={{
               width: 34,
               height: 34,
-              borderRadius: 17,
+              borderRadius: 10,
               backgroundColor: "#F3EDFF",
               alignItems: "center",
               justifyContent: "center",
@@ -169,7 +169,7 @@ const UpcomingSessionsCard = () => {
             style={{
               width: 50,
               height: 50,
-              borderRadius: 25,
+              borderRadius: 14,
               backgroundColor: "#F3EDFF",
               alignItems: "center",
               justifyContent: "center",
