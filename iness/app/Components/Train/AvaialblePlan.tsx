@@ -34,7 +34,7 @@ export default function AvailablePlans() {
               <View style={styles.iconContainer}>
                 <MaterialCommunityIcons
                   name={icons[index % icons.length]}
-                  size={18}
+                  size={22}
                   color="#9747FF"
                 />
               </View>
@@ -78,7 +78,7 @@ export default function AvailablePlans() {
               <View style={styles.iconContainer}>
                 <MaterialCommunityIcons
                   name="food-apple"
-                  size={18}
+                  size={22}
                   color="#9747FF"
                 />
               </View>

@@ -10,7 +10,8 @@ import {
   Platform,
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import theme from "@/app/Theme/globalTheme";
 import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
@@ -243,7 +244,7 @@ export default function TrackingGraphPage() {
         style={{ flex: 1 }}
       >
         <SafeAreaView
-          style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+          style={{ flex: 1, backgroundColor: "transparent" }}
           edges={["left", "right"]}
         >
           {loading ? (
@@ -278,13 +279,13 @@ export default function TrackingGraphPage() {
                     justifyContent: "space-between",
                     marginBottom: 24,
                     backgroundColor: "#FFFFFF",
-                    borderRadius: 20,
+                    borderRadius: 16,
                     padding: 4,
                     shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 12,
-                    elevation: 3,
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 3,
+                    elevation: 2,
                     borderWidth: 1,
                     borderColor: "#F5F5F5",
                   }}
@@ -292,11 +293,16 @@ export default function TrackingGraphPage() {
                   {tabNames.map((tab) => {
                     const isSelected = selectedTab === tab;
                     const tabColors = {
-                      Sleep: { bg: "#E8F5E9", text: "#67C694" },
-                      Steps: { bg: "#F3EDFF", text: "#9747FF" },
-                      Water: { bg: "#E3F2FD", text: "#4FC3F7" },
+                      Sleep: { bg: "#67C694", text: "#FFFFFF", icon: "#FFFFFF" },
+                      Steps: { bg: "#9747FF", text: "#FFFFFF", icon: "#FFFFFF" },
+                      Water: { bg: "#4FC3F7", text: "#FFFFFF", icon: "#FFFFFF" },
                     };
-                    const color = tabColors[tab];
+                    const inactiveColors = {
+                      Sleep: { bg: "transparent", text: "#666", icon: "#999" },
+                      Steps: { bg: "transparent", text: "#666", icon: "#999" },
+                      Water: { bg: "transparent", text: "#666", icon: "#999" },
+                    };
+                    const color = isSelected ? tabColors[tab] : inactiveColors[tab];
                     
                     return (
                       <TouchableOpacity
@@ -304,32 +310,38 @@ export default function TrackingGraphPage() {
                         onPress={() => setSelectedTab(tab)}
                         style={{
                           flex: 1,
-                          paddingVertical: 12,
-                          paddingHorizontal: 12,
-                          borderRadius: 16,
-                          backgroundColor: isSelected ? color.bg : "transparent",
+                          paddingVertical: 10,
+                          paddingHorizontal: 8,
+                          borderRadius: 12,
+                          backgroundColor: color.bg,
                           alignItems: "center",
                           flexDirection: "row",
                           justifyContent: "center",
                           gap: 6,
+                          shadowColor: isSelected ? color.bg : "transparent",
+                          shadowOffset: { width: 0, height: isSelected ? 2 : 0 },
+                          shadowOpacity: isSelected ? 0.3 : 0,
+                          shadowRadius: isSelected ? 4 : 0,
+                          elevation: isSelected ? 3 : 0,
                         }}
                       >
-                        <Ionicons
+                        <MaterialCommunityIcons
                           name={
                             tab === "Sleep"
-                              ? "moon-outline"
+                              ? "moon-waning-crescent"
                               : tab === "Steps"
-                                ? "walk-outline"
-                                : "water-outline"
+                                ? "walk"
+                                : "cup-water"
                           }
                           size={18}
-                          color={isSelected ? color.text : "#999"}
+                          color={color.icon}
                         />
                         <Text
                           style={{
-                            color: isSelected ? color.text : "#666",
-                            fontWeight: isSelected ? "700" : "600",
-                            fontSize: 14,
+                            color: color.text,
+                            fontWeight: "700",
+                            fontSize: 13,
+                            fontFamily: theme.fonts.bold,
                           }}
                         >
                           {tab}
@@ -343,14 +355,14 @@ export default function TrackingGraphPage() {
                 <View
                   style={{
                     backgroundColor: "#FFFFFF",
-                    borderRadius: 20,
+                    borderRadius: 16,
                     padding: 16,
                     marginBottom: 24,
                     shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 12,
-                    elevation: 3,
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 4,
+                    elevation: 2,
                     borderWidth: 1,
                     borderColor: "#F5F5F5",
                     flexDirection: "row",
@@ -364,32 +376,39 @@ export default function TrackingGraphPage() {
                       Steps: "#9747FF",
                       Water: "#4FC3F7",
                     };
+                    const arrowBgColors = {
+                      Sleep: "#E8F5E9",
+                      Steps: "#F3EDFF",
+                      Water: "#E3F2FD",
+                    };
                     const arrowColor = arrowColors[selectedTab];
+                    const arrowBg = arrowBgColors[selectedTab];
                     
                     return (
                       <>
                         <TouchableOpacity
                           onPress={() => setMonthOffset((prev) => prev - 1)}
                           style={{
-                            width: 44,
-                            height: 44,
-                            borderRadius: 22,
-                            backgroundColor: "#F8F8F8",
+                            width: 40,
+                            height: 40,
+                            borderRadius: 12,
+                            backgroundColor: arrowBg,
                             alignItems: "center",
                             justifyContent: "center",
                           }}
                         >
                           <Ionicons
                             name="chevron-back"
-                            size={22}
+                            size={20}
                             color={arrowColor}
                           />
                         </TouchableOpacity>
                         <Text
                           style={{
-                            fontSize: 17,
+                            fontSize: 16,
                             fontWeight: "700",
-                            color: "#000",
+                            color: "#1A1A1A",
+                            fontFamily: theme.fonts.bold,
                           }}
                         >
                           {currentMonth.format("MMMM YYYY")}
@@ -397,17 +416,17 @@ export default function TrackingGraphPage() {
                         <TouchableOpacity
                           onPress={() => setMonthOffset((prev) => prev + 1)}
                           style={{
-                            width: 44,
-                            height: 44,
-                            borderRadius: 22,
-                            backgroundColor: "#F8F8F8",
+                            width: 40,
+                            height: 40,
+                            borderRadius: 12,
+                            backgroundColor: arrowBg,
                             alignItems: "center",
                             justifyContent: "center",
                           }}
                         >
                           <Ionicons
                             name="chevron-forward"
-                            size={22}
+                            size={20}
                             color={arrowColor}
                           />
                         </TouchableOpacity>
@@ -420,14 +439,14 @@ export default function TrackingGraphPage() {
                 <View
                   style={{
                     backgroundColor: "#FFFFFF",
-                    borderRadius: 24,
+                    borderRadius: 20,
                     padding: 20,
                     marginBottom: 24,
                     shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 16,
-                    elevation: 3,
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.05,
+                    shadowRadius: 4,
+                    elevation: 2,
                     borderWidth: 1,
                     borderColor: "#F5F5F5",
                   }}
@@ -445,42 +464,433 @@ export default function TrackingGraphPage() {
                   </Animated.View>
                 </View>
 
-                {/* Records Section */}
+                {/* Detailed Report Section */}
+                {getSelectedData().length > 0 && (() => {
+                  const selectedData = getSelectedData();
+                  const total = selectedData.reduce((sum, item) => sum + item.value, 0);
+                  const count = selectedData.length;
+                  
+                  // Base/Target values per day
+                  const dailyTargets = {
+                    Sleep: 8, // hours
+                    Steps: 10000, // steps
+                    Water: 8, // glasses
+                  };
+                  
+                  // Calculate days in the month
+                  const daysInMonth = currentMonth.daysInMonth();
+                  const targetTotal = dailyTargets[selectedTab] * daysInMonth;
+                  const difference = total - targetTotal;
+                  const percentage = targetTotal > 0 ? (total / targetTotal) * 100 : 0;
+                  const isLagging = difference < 0;
+                  
+                  const colors = {
+                    Sleep: { text: "#67C694", bg: "#E8F5E9" },
+                    Steps: { text: "#9747FF", bg: "#F3EDFF" },
+                    Water: { text: "#4FC3F7", bg: "#E3F2FD" },
+                  };
+                  const color = colors[selectedTab];
+                  
+                  return (
+                    <>
+                      {/* Detailed Report Header */}
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          marginBottom: 16,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 18,
+                            fontWeight: "700",
+                            color: "#1A1A1A",
+                            fontFamily: theme.fonts.bold,
+                          }}
+                        >
+                          Detailed Report
+                        </Text>
+                        <View
+                          style={{
+                            width: 30,
+                            height: 3,
+                            backgroundColor: "#9747FF",
+                            borderRadius: 2,
+                          }}
+                        />
+                      </View>
+                      
+                      {/* Detailed Report Card */}
+                      <View
+                        style={{
+                          backgroundColor: "#FFFFFF",
+                          borderRadius: 16,
+                          padding: 20,
+                          marginBottom: 24,
+                          shadowColor: "#000",
+                          shadowOffset: { width: 0, height: 1 },
+                          shadowOpacity: 0.05,
+                          shadowRadius: 4,
+                          elevation: 2,
+                          borderWidth: 1,
+                          borderColor: "#F5F5F5",
+                        }}
+                      >
+                        {/* Stats Row */}
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            justifyContent: "space-around",
+                            marginBottom: 20,
+                            paddingBottom: 20,
+                            borderBottomWidth: 1,
+                            borderBottomColor: "#F5F5F5",
+                          }}
+                        >
+                          <View style={{ alignItems: "center", flex: 1 }}>
+                            <Text
+                              style={{
+                                fontSize: 24,
+                                fontWeight: "700",
+                                color: color.text,
+                                fontFamily: theme.fonts.bold,
+                                marginBottom: 4,
+                              }}
+                            >
+                              {selectedTab === "Sleep"
+                                ? `${total.toFixed(1)} hrs`
+                                : selectedTab === "Steps"
+                                  ? total.toLocaleString()
+                                  : `${total} glasses`}
+                            </Text>
+                            <Text
+                              style={{
+                                fontSize: 13,
+                                color: "#666",
+                                fontFamily: theme.fonts.medium,
+                              }}
+                            >
+                              Total {selectedTab}
+                            </Text>
+                          </View>
+                          
+                          <View
+                            style={{
+                              width: 1,
+                              height: 50,
+                              backgroundColor: "#E8E8E8",
+                              marginHorizontal: 16,
+                            }}
+                          />
+                          
+                          <View style={{ alignItems: "center", flex: 1 }}>
+                            <Text
+                              style={{
+                                fontSize: 24,
+                                fontWeight: "700",
+                                color: color.text,
+                                fontFamily: theme.fonts.bold,
+                                marginBottom: 4,
+                              }}
+                            >
+                              {count}
+                            </Text>
+                            <Text
+                              style={{
+                                fontSize: 13,
+                                color: "#666",
+                                fontFamily: theme.fonts.medium,
+                              }}
+                            >
+                              {count === 1 ? "Entry" : "Entries"}
+                            </Text>
+                          </View>
+                        </View>
+                        
+                        {/* Analysis Section */}
+                        <View
+                          style={{
+                            backgroundColor: "#F9F9F9",
+                            borderRadius: 12,
+                            padding: 16,
+                            borderWidth: 1,
+                            borderColor: "#F0F0F0",
+                          }}
+                        >
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                              marginBottom: 16,
+                            }}
+                          >
+                            <View
+                              style={{
+                                width: 36,
+                                height: 36,
+                                borderRadius: 10,
+                                backgroundColor: isLagging ? "#FFEBEE" : "#E8F5E9",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                marginRight: 10,
+                              }}
+                            >
+                              <Ionicons
+                                name={isLagging ? "trending-down" : "trending-up"}
+                                size={20}
+                                color={isLagging ? "#D32F2F" : "#2F8C62"}
+                              />
+                            </View>
+                            <Text
+                              style={{
+                                fontSize: 16,
+                                fontWeight: "700",
+                                color: "#1A1A1A",
+                                fontFamily: theme.fonts.bold,
+                              }}
+                            >
+                              Monthly Analysis
+                            </Text>
+                          </View>
+                          
+                          {/* Progress Bar Section */}
+                          <View style={{ marginBottom: 20 }}>
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                marginBottom: 8,
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  fontSize: 12,
+                                  color: "#888",
+                                  fontFamily: theme.fonts.medium,
+                                }}
+                              >
+                                Progress
+                              </Text>
+                              <Text
+                                style={{
+                                  fontSize: 14,
+                                  fontWeight: "700",
+                                  color: isLagging ? "#D32F2F" : "#2F8C62",
+                                  fontFamily: theme.fonts.bold,
+                                }}
+                              >
+                                {percentage.toFixed(1)}%
+                              </Text>
+                            </View>
+                            
+                            <View
+                              style={{
+                                height: 10,
+                                backgroundColor: "#E8E8E8",
+                                borderRadius: 5,
+                                overflow: "hidden",
+                                marginBottom: 16,
+                              }}
+                            >
+                              <View
+                                style={{
+                                  height: "100%",
+                                  width: `${Math.min(percentage, 100)}%`,
+                                  backgroundColor: isLagging ? "#FF6B6B" : "#67C694",
+                                  borderRadius: 5,
+                                }}
+                              />
+                            </View>
+                          </View>
+                          
+                          {/* Target vs Actual Cards */}
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              gap: 12,
+                              marginBottom: 16,
+                            }}
+                          >
+                            {/* Target Card */}
+                            <View
+                              style={{
+                                flex: 1,
+                                backgroundColor: "#FFFFFF",
+                                borderRadius: 12,
+                                padding: 14,
+                                borderWidth: 1,
+                                borderColor: "#E8E8E8",
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  fontSize: 11,
+                                  color: "#888",
+                                  fontFamily: theme.fonts.medium,
+                                  marginBottom: 6,
+                                }}
+                              >
+                                Target
+                              </Text>
+                              <Text
+                                style={{
+                                  fontSize: 18,
+                                  fontWeight: "700",
+                                  color: "#1A1A1A",
+                                  fontFamily: theme.fonts.bold,
+                                  marginBottom: 2,
+                                }}
+                              >
+                                {selectedTab === "Sleep"
+                                  ? `${targetTotal.toFixed(1)} hrs`
+                                  : selectedTab === "Steps"
+                                    ? targetTotal.toLocaleString()
+                                    : `${targetTotal} glasses`}
+                              </Text>
+                              <Text
+                                style={{
+                                  fontSize: 10,
+                                  color: "#999",
+                                  fontFamily: theme.fonts.regular,
+                                }}
+                              >
+                                {dailyTargets[selectedTab].toLocaleString()} {selectedTab === "Sleep" ? "hrs" : selectedTab === "Steps" ? "steps" : "glasses"}/day
+                              </Text>
+                            </View>
+                            
+                            {/* Actual Card */}
+                            <View
+                              style={{
+                                flex: 1,
+                                backgroundColor: color.bg,
+                                borderRadius: 12,
+                                padding: 14,
+                                borderWidth: 1,
+                                borderColor: color.text + "20",
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  fontSize: 11,
+                                  color: "#888",
+                                  fontFamily: theme.fonts.medium,
+                                  marginBottom: 6,
+                                }}
+                              >
+                                Actual
+                              </Text>
+                              <Text
+                                style={{
+                                  fontSize: 18,
+                                  fontWeight: "700",
+                                  color: color.text,
+                                  fontFamily: theme.fonts.bold,
+                                  marginBottom: 2,
+                                }}
+                              >
+                                {selectedTab === "Sleep"
+                                  ? `${total.toFixed(1)} hrs`
+                                  : selectedTab === "Steps"
+                                    ? total.toLocaleString()
+                                    : `${total} glasses`}
+                              </Text>
+                              <Text
+                                style={{
+                                  fontSize: 10,
+                                  color: "#999",
+                                  fontFamily: theme.fonts.regular,
+                                }}
+                              >
+                                {count} {count === 1 ? "entry" : "entries"}
+                              </Text>
+                            </View>
+                          </View>
+                          
+                          {/* Difference Card */}
+                          <View
+                            style={{
+                              backgroundColor: isLagging ? "#FFEBEE" : "#E8F5E9",
+                              borderRadius: 12,
+                              padding: 14,
+                              borderWidth: 1,
+                              borderColor: isLagging ? "#FFCDD2" : "#C8E6C9",
+                              flexDirection: "row",
+                              alignItems: "center",
+                              justifyContent: "space-between",
+                            }}
+                          >
+                            <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                              <Ionicons
+                                name={isLagging ? "alert-circle" : "checkmark-circle"}
+                                size={20}
+                                color={isLagging ? "#D32F2F" : "#2F8C62"}
+                                style={{ marginRight: 10 }}
+                              />
+                              <View style={{ flex: 1 }}>
+                                <Text
+                                  style={{
+                                    fontSize: 11,
+                                    color: "#666",
+                                    fontFamily: theme.fonts.medium,
+                                    marginBottom: 2,
+                                  }}
+                                >
+                                  {isLagging ? "Lagging by" : "Ahead by"}
+                                </Text>
+                                <Text
+                                  style={{
+                                    fontSize: 16,
+                                    fontWeight: "700",
+                                    color: isLagging ? "#D32F2F" : "#2F8C62",
+                                    fontFamily: theme.fonts.bold,
+                                  }}
+                                >
+                                  {selectedTab === "Sleep"
+                                    ? `${Math.abs(difference).toFixed(1)} hrs`
+                                    : selectedTab === "Steps"
+                                      ? Math.abs(difference).toLocaleString()
+                                      : `${Math.abs(difference)} glasses`}
+                                </Text>
+                              </View>
+                            </View>
+                          </View>
+                        </View>
+                      </View>
+                    </>
+                  );
+                })()}
+
+                {/* Records Section Header */}
                 {getSelectedData().length > 0 && (
                   <View
                     style={{
                       flexDirection: "row",
                       alignItems: "center",
+                      justifyContent: "space-between",
                       marginBottom: 16,
                     }}
                   >
-                    {(() => {
-                      const colors = {
-                        Sleep: "#67C694",
-                        Steps: "#9747FF",
-                        Water: "#4FC3F7",
-                      };
-                      return (
-                        <View
-                          style={{
-                            width: 4,
-                            height: 24,
-                            backgroundColor: colors[selectedTab],
-                            borderRadius: 2,
-                            marginRight: 12,
-                          }}
-                        />
-                      );
-                    })()}
                     <Text
                       style={{
                         fontSize: 18,
                         fontWeight: "700",
-                        color: "#000",
+                        color: "#1A1A1A",
+                        fontFamily: theme.fonts.bold,
                       }}
                     >
                       {selectedTab} Records
                     </Text>
+                    <View
+                      style={{
+                        width: 30,
+                        height: 3,
+                        backgroundColor: "#9747FF",
+                        borderRadius: 2,
+                      }}
+                    />
                   </View>
                 )}
 
@@ -500,7 +910,19 @@ export default function TrackingGraphPage() {
                       borderColor: "#F5F5F5",
                     }}
                   >
-                    <Ionicons name="bar-chart-outline" size={48} color="#999" />
+                    <View
+                      style={{
+                        width: 64,
+                        height: 64,
+                        borderRadius: 16,
+                        backgroundColor: "#F3EDFF",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: 16,
+                      }}
+                    >
+                      <Ionicons name="bar-chart-outline" size={32} color="#9747FF" />
+                    </View>
                     <Text
                       style={{
                         textAlign: "center",
@@ -530,12 +952,12 @@ export default function TrackingGraphPage() {
                             backgroundColor: "#FFFFFF",
                             padding: 16,
                             marginBottom: 12,
-                            borderRadius: 20,
+                            borderRadius: 16,
                             shadowColor: "#000",
-                            shadowOffset: { width: 0, height: 2 },
-                            shadowOpacity: 0.08,
-                            shadowRadius: 12,
-                            elevation: 3,
+                            shadowOffset: { width: 0, height: 1 },
+                            shadowOpacity: 0.05,
+                            shadowRadius: 4,
+                            elevation: 2,
                             borderWidth: 1,
                             borderColor: "#F5F5F5",
                             flexDirection: "row",
@@ -550,34 +972,12 @@ export default function TrackingGraphPage() {
                               flex: 1,
                             }}
                           >
-                            <View
-                              style={{
-                                width: 48,
-                                height: 48,
-                                borderRadius: 24,
-                                backgroundColor: color.bg,
-                                alignItems: "center",
-                                justifyContent: "center",
-                                marginRight: 12,
-                              }}
-                            >
-                              <Ionicons
-                                name={
-                                  selectedTab === "Sleep"
-                                    ? "moon-outline"
-                                    : selectedTab === "Steps"
-                                      ? "walk-outline"
-                                      : "water-outline"
-                                }
-                                size={24}
-                                color={color.icon}
-                              />
-                            </View>
                             <Text
                               style={{
                                 color: "#000",
                                 fontWeight: "600",
                                 fontSize: 15,
+                                fontFamily: theme.fonts.medium,
                               }}
                             >
                               {dayjs(item.date).format("MMM D, YYYY")}

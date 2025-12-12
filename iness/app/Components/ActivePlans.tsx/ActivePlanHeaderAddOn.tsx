@@ -163,7 +163,7 @@ export default function DateBar({
               } else if (isSelected) {
                 backgroundColor = "#FFFFFF";
                 borderColor = "#9747FF";
-                borderWidth = 2;
+                borderWidth = 2.5;
                 textColor = "#111";
                 subTextColor = "#666";
               } else if (isCompleted) {
@@ -187,12 +187,12 @@ export default function DateBar({
                     backgroundColor,
                     borderWidth,
                     borderColor,
-                    shadowColor: isSelected ? "#9747FF" : "rgba(0,0,0,0.06)",
-                    shadowOffset: { width: 0, height: isSelected ? 3 : 2 },
-                    shadowOpacity: isSelected ? 0.25 : 0.1,
-                    shadowRadius: isSelected ? 6 : 4,
-                    elevation: isSelected ? 4 : 2,
-                    transform: [{ scale: isSelected ? 1.02 : 1 }],
+                    shadowColor: isSelected ? "#9747FF" : "rgba(0,0,0,0.05)",
+                    shadowOffset: { width: 0, height: isSelected ? 4 : 1 },
+                    shadowOpacity: isSelected ? 0.2 : 0.06,
+                    shadowRadius: isSelected ? 10 : 3,
+                    elevation: isSelected ? 5 : 1,
+                    transform: [{ scale: isSelected ? 1.03 : 1 }],
                     paddingVertical: 8,
                   }}
                   activeOpacity={0.8}

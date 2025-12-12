@@ -5,15 +5,12 @@ import theme from "@/app/Theme/globalTheme";
 import { router } from "expo-router";
 
 const handleCoupons = () => router.push("/dashboard/coupon");
-const handlePolicy = () => router.push("/dashboard/policy");
 const handleCalculator = () => router.push("/dashboard/calculator");
 const handleYourPurchases = () => router.push("/dashboard/purchases");
 const handleMeasurements = () => router.push("/dashboard/measurement");
 const handleWeightTrack = () => router.push("/dashboard/trackWeight");
-const handleCertificates = () => router.push("/dashboard/certificates");
-const handleMedicalCitations = () =>
-  router.push({ pathname: "/dashboard/medicalcitations" } as any);
 const handleAppSettings = () => router.push("/dashboard/appsettings");
+const handleAdditionalInfo = () => router.push("/dashboard/additionalinfo");
 
 export default function SettingsList() {
   const settings = [
@@ -48,19 +45,9 @@ export default function SettingsList() {
       onPress: handleMeasurements,
     },
     {
-      icon: "ribbon-outline",
-      label: "Our Certificates",
-      onPress: handleCertificates,
-    },
-    {
-      icon: "document-text-outline",
-      label: "Policy",
-      onPress: handlePolicy,
-    },
-    {
-      icon: "medical-outline",
-      label: "Medical Citations",
-      onPress: handleMedicalCitations,
+      icon: "information-circle-outline",
+      label: "Additional Information",
+      onPress: handleAdditionalInfo,
     },
   ];
 

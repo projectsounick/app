@@ -116,7 +116,7 @@ const UpcomingSessionsCard = () => {
           >
             <MaterialCommunityIcons
               name="calendar-clock"
-              size={16}
+              size={20}
               color="#9747FF"
             />
           </View>
@@ -178,7 +178,7 @@ const UpcomingSessionsCard = () => {
           >
             <MaterialCommunityIcons
               name="calendar-clock"
-              size={22}
+              size={26}
               color="#9747FF"
             />
           </View>

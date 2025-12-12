@@ -101,7 +101,7 @@ const PlansInfo: React.FC<Props> = ({
                   marginRight: 12,
                 }}
               >
-                <Ionicons name="information-circle" size={18} color="#9747FF" />
+                <Ionicons name="information-circle" size={22} color="#9747FF" />
               </View>
               <Text
                 style={{
@@ -158,7 +158,7 @@ const PlansInfo: React.FC<Props> = ({
                   marginRight: 12,
                 }}
               >
-                <Ionicons name="checkmark-circle" size={18} color="#9747FF" />
+                <Ionicons name="checkmark-circle" size={22} color="#9747FF" />
               </View>
               <Text
                 style={{
@@ -194,7 +194,7 @@ const PlansInfo: React.FC<Props> = ({
                 >
                   <Ionicons
                     name="checkmark"
-                    size={14}
+                    size={18}
                     color="#9747FF"
                   />
                 </View>
@@ -249,7 +249,7 @@ const PlansInfo: React.FC<Props> = ({
                     marginRight: 12,
                   }}
                 >
-                  <Ionicons name="images" size={18} color="#9747FF" />
+                  <Ionicons name="images" size={22} color="#9747FF" />
                 </View>
                 <Text
                   style={{
@@ -490,7 +490,7 @@ const PlansInfo: React.FC<Props> = ({
                   >
                     <Ionicons
                       name={plan.isOnline ? "videocam" : "location"}
-                      size={11}
+                      size={15}
                       color={isSelected ? "#9747FF" : "#666"}
                       style={{ marginRight: 3 }}
                     />
@@ -528,7 +528,7 @@ const PlansInfo: React.FC<Props> = ({
               elevation: 5,
             }}
           >
-            <Ionicons name="cart" size={18} color="#ffffff" />
+            <Ionicons name="cart" size={22} color="#ffffff" />
             <Text
               style={{
                 color: "#ffffff",

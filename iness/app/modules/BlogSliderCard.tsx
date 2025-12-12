@@ -63,7 +63,7 @@ function BlogSliderCard() {
           >
             <MaterialCommunityIcons
               name="book-open-variant"
-              size={16}
+              size={20}
               color="#9747FF"
             />
           </View>

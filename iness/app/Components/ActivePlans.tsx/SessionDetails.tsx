@@ -106,30 +106,7 @@ const TabbedSessionDetails = ({
 
     return (
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
-        {/* Session Information Heading */}
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingHorizontal: 20,
-     
-            marginBottom: 16,
-          }}
-        >
-          <Text
-            style={{
-              fontSize: 18,
-              fontWeight: "700",
-              color: "#111",
-              fontFamily: theme.fonts.bold,
-            }}
-          >
-            Session Information
-          </Text>
-        </View>
-
-        {/* Session Information Card */}
+        {/* Session Details Card - Date/Status shown in parent, so start with time/duration */}
         <View
           style={{
             backgroundColor: "#FFFFFF",
@@ -145,81 +122,6 @@ const TabbedSessionDetails = ({
             borderColor: "#F1F3F1",
           }}
         >
-          {/* Date and Status Row */}
-          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 16 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", flex: 1, marginRight: 12 }}>
-              <View
-                style={{
-                  backgroundColor: "#F3EDFF",
-                  borderRadius: 10,
-                  padding: 8,
-                  marginRight: 12,
-                }}
-              >
-                <MaterialCommunityIcons
-                  name="calendar-month-outline"
-                  size={20}
-                  color="#9747FF"
-                />
-              </View>
-              <View style={{ flex: 1 }}>
-                <Text
-                  style={{
-                    color: "#666",
-                    fontSize: 12,
-                    fontFamily: theme.fonts.medium,
-                    marginBottom: 2,
-                  }}
-                >
-                  Session Date
-                </Text>
-                <Text
-                  style={{
-                    color: "#111",
-                    fontSize: 16,
-                    fontFamily: theme.fonts.bold,
-                  }}
-                  numberOfLines={2}
-                >
-                  {new Date(selectedSession.sessionDate).toLocaleDateString("en-US", {
-                    weekday: "long",
-                    month: "long",
-                    day: "numeric",
-                    year: "numeric",
-                  })}
-                </Text>
-              </View>
-            </View>
-            <View
-              style={{
-                backgroundColor: selectedSession.sessionStatus === "completed" 
-                  ? "#E8F5E9" 
-                  : selectedSession.sessionStatus === "scheduled"
-                  ? "#FFF8E1"
-                  : "#FFEBEE",
-                paddingHorizontal: 10,
-                paddingVertical: 6,
-                borderRadius: 12,
-                flexShrink: 0,
-              }}
-            >
-              <Text
-                style={{
-                  color: selectedSession.sessionStatus === "completed" 
-                    ? "#2F8C62" 
-                    : selectedSession.sessionStatus === "scheduled"
-                    ? "#D99100"
-                    : "#C62828",
-                  fontSize: 11,
-                  fontFamily: theme.fonts.bold,
-                  textTransform: "capitalize",
-                }}
-              >
-                {selectedSession.sessionStatus}
-              </Text>
-            </View>
-          </View>
-
           {/* Time and Duration Row */}
           <View style={{ flexDirection: "row", marginBottom: 16, gap: 12 }}>
             <View

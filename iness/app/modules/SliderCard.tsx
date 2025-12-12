@@ -30,7 +30,7 @@ export default function SliderCard() {
           <View style={styles.iconContainer}>
             <MaterialCommunityIcons
               name="briefcase-check"
-              size={18}
+              size={22}
               color="#9747FF"
             />
           </View>

@@ -78,7 +78,7 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
           >
             <MaterialCommunityIcons
               name="podcast"
-              size={16}
+              size={20}
               color="#9747FF"
             />
           </View>

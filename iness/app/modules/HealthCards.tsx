@@ -157,7 +157,7 @@ function HealthDashboard() {
               >
                 <MaterialCommunityIcons
                   name="walk"
-                  size={14}
+                  size={18}
                   color="#9747FF"
                 />
               </View>
@@ -290,7 +290,7 @@ function HealthDashboard() {
               >
                 <MaterialCommunityIcons
                   name="moon-waning-crescent"
-                  size={14}
+                  size={18}
                   color="#9747FF"
                 />
               </View>
@@ -424,7 +424,7 @@ function HealthDashboard() {
             >
               <MaterialCommunityIcons
                 name="cup-water"
-                size={14}
+                size={18}
                 color="#9747FF"
               />
             </View>

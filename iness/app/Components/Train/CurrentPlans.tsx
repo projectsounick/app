@@ -47,7 +47,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
               <View style={styles.iconContainer}>
                 <MaterialCommunityIcons
                   name="dumbbell"
-                  size={18}
+                  size={22}
                   color="#9747FF"
                 />
               </View>
@@ -109,7 +109,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
               <View style={styles.iconContainer}>
                 <MaterialCommunityIcons
                   name="file-document-edit"
-                  size={18}
+                  size={22}
                   color="#9747FF"
                 />
               </View>
@@ -144,7 +144,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
               <View style={styles.iconContainer}>
                 <MaterialCommunityIcons
                   name="briefcase-check"
-                  size={18}
+                  size={22}
                   color="#9747FF"
                 />
               </View>

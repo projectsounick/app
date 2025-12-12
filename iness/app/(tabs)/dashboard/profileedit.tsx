@@ -276,7 +276,7 @@ export default function EditOnboardingScreen() {
               <Ionicons
                 name={editFields[field] ? "checkmark" : "pencil"}
                 size={18}
-                color={editFields[field] ? "#67C694" : "#9747FF"}
+                color="#1A1A1A"
               />
             </TouchableOpacity>
           </View>
@@ -307,7 +307,7 @@ export default function EditOnboardingScreen() {
                   handleChange("weight", `${numberOnly}${newUnit}`);
                 }}
                 style={{
-                  backgroundColor: "#9747FF",
+                  backgroundColor: "#67C694",
                   paddingHorizontal: 16,
                   paddingVertical: 14,
                   borderRadius: 12,
@@ -389,7 +389,7 @@ export default function EditOnboardingScreen() {
               <Ionicons
                 name={editFields[field] ? "checkmark" : "pencil"}
                 size={18}
-                color={editFields[field] ? "#67C694" : "#9747FF"}
+                color="#1A1A1A"
               />
             </TouchableOpacity>
           </View>
@@ -418,7 +418,7 @@ export default function EditOnboardingScreen() {
                     ? new Date(formValues.dob).toLocaleDateString()
                     : "Select Date of Birth"}
                 </Text>
-                <Ionicons name="calendar-outline" size={20} color="#9747FF" />
+                <Ionicons name="calendar-outline" size={20} color="#1A1A1A" />
               </TouchableOpacity>
 
               <DateTimePickerModal
@@ -504,7 +504,7 @@ export default function EditOnboardingScreen() {
               <Ionicons
                 name={editFields[field] ? "checkmark" : "pencil"}
                 size={18}
-                color={editFields[field] ? "#67C694" : "#9747FF"}
+                color="#1A1A1A"
               />
             </TouchableOpacity>
           </View>
@@ -587,7 +587,7 @@ export default function EditOnboardingScreen() {
             <Ionicons
               name={editFields[field] ? "checkmark" : "pencil"}
               size={18}
-              color={editFields[field] ? "#67C694" : "#9747FF"}
+              color="#1A1A1A"
             />
           </TouchableOpacity>
         </View>
@@ -629,7 +629,7 @@ export default function EditOnboardingScreen() {
                 >
                   {formValues[field] || "Select an option"}
                 </Text>
-                <Ionicons name="chevron-down" size={20} color="#9747FF" />
+                <Ionicons name="chevron-down" size={20} color="#1A1A1A" />
               </TouchableOpacity>
 
               <DropdownModal
@@ -702,7 +702,7 @@ export default function EditOnboardingScreen() {
               disabled={loading}
               style={{
                 backgroundColor: "#67C694",
-                borderRadius: 16,
+                borderRadius: 30,
                 paddingVertical: 16,
                 alignItems: "center",
                 justifyContent: "center",

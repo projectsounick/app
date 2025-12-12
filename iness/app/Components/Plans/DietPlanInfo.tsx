@@ -93,7 +93,7 @@ const DietPlanInfo: React.FC<Props> = ({
                   marginRight: 12,
                 }}
               >
-                <Ionicons name="information-circle" size={18} color="#9747FF" />
+                <Ionicons name="information-circle" size={22} color="#9747FF" />
               </View>
               <Text
                 style={{
@@ -151,7 +151,7 @@ const DietPlanInfo: React.FC<Props> = ({
                     marginRight: 12,
                   }}
                 >
-                  <Ionicons name="checkmark-circle" size={18} color="#9747FF" />
+                  <Ionicons name="checkmark-circle" size={22} color="#9747FF" />
                 </View>
                 <Text
                   style={{
@@ -187,7 +187,7 @@ const DietPlanInfo: React.FC<Props> = ({
                   >
                     <Ionicons
                       name="checkmark"
-                      size={14}
+                      size={18}
                       color="#9747FF"
                     />
                   </View>
@@ -243,7 +243,7 @@ const DietPlanInfo: React.FC<Props> = ({
                 >
                   <MaterialCommunityIcons
                     name="food-apple"
-                    size={20}
+                    size={24}
                     color="#67C694"
                   />
                 </View>
@@ -260,7 +260,7 @@ const DietPlanInfo: React.FC<Props> = ({
               </View>
               <Ionicons
                 name="cloud-download-outline"
-                size={22}
+                size={26}
                 color="#9747FF"
               />
             </TouchableOpacity>
@@ -414,7 +414,7 @@ const DietPlanInfo: React.FC<Props> = ({
                 elevation: 5,
               }}
             >
-              <Ionicons name="cart" size={18} color="#ffffff" />
+              <Ionicons name="cart" size={22} color="#ffffff" />
               <Text
                 style={{
                   color: "#ffffff",

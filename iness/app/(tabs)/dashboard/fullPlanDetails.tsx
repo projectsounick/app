@@ -287,9 +287,9 @@ const FullPlanDetails = () => {
                     activeOpacity={0.8}
                     style={{
                       backgroundColor: "#E8F5E9",
-                      paddingHorizontal: 8,
-                      paddingVertical: 6,
-                      borderRadius: 10,
+                      paddingHorizontal: 6,
+                      paddingVertical: 5,
+                      borderRadius: 8,
                       flexDirection: "row",
                       alignItems: "center",
                       gap: 4,
@@ -298,16 +298,11 @@ const FullPlanDetails = () => {
                       opacity: downloading ? 0.7 : 1,
                     }}
                   >
-                    <MaterialCommunityIcons
-                      name="food-apple"
-                      size={14}
-                      color="#2F8C62"
-                    />
                     <Text
                       style={{
                         color: "#2F8C62",
                         fontWeight: "700",
-                        fontSize: 10,
+                        fontSize: 9,
                       }}
                     >
                       {downloading ? "Downloading..." : "Diet Plan"}
@@ -321,95 +316,6 @@ const FullPlanDetails = () => {
                 )}
               </View>
             </View>
-          </View>
-
-          {/* Info/Trainer/Workout Tabs */}
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              marginHorizontal: 16,
-              marginTop: 20,
-              backgroundColor: "#FFFFFF",
-              borderRadius: 16,
-              padding: 4,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.05,
-              shadowRadius: 3,
-              elevation: 2,
-              borderWidth: 1,
-              borderColor: "#F1F3F1",
-            }}
-          >
-            {["info", "trainer", "workout"].map((tab) => {
-              const isActive: any = activeTab === tab;
-
-              const icons: any = {
-                info: (
-                  <MaterialIcons
-                    name="info"
-                    size={18}
-                    color={isActive ? "#FFFFFF" : "#1A1A1A"}
-                  />
-                ),
-                trainer: (
-                  <FontAwesome5
-                    name="user-tie"
-                    size={16}
-                    color={isActive ? "#FFFFFF" : "#1A1A1A"}
-                  />
-                ),
-                workout: (
-                  <FontAwesome
-                    name="heartbeat"
-                    size={18}
-                    color={isActive ? "#FFFFFF" : "#1A1A1A"}
-                  />
-                ),
-              };
-
-              const labels: any = {
-                info: "Info",
-                trainer: "Trainer",
-                workout: "Workout",
-              };
-
-              return (
-                <TouchableOpacity
-                  key={tab}
-                  onPress={() => setActiveTab(tab)}
-                  style={{
-                    flex: 1,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    paddingVertical: 10,
-                    marginHorizontal: 4,
-                    borderRadius: 12,
-                    backgroundColor: isActive ? "#67C694" : "transparent",
-                    shadowColor: isActive ? "#67C694" : "transparent",
-                    shadowOffset: { width: 0, height: isActive ? 2 : 0 },
-                    shadowOpacity: isActive ? 0.3 : 0,
-                    shadowRadius: isActive ? 4 : 0,
-                    elevation: isActive ? 3 : 0,
-                  }}
-                  activeOpacity={0.9}
-                >
-                  {icons[tab]}
-                  <Text
-                    style={{
-                      color: isActive ? "#FFFFFF" : "#1A1A1A",
-                      fontSize: 12,
-                      fontWeight: "700",
-                      marginLeft: 6,
-                    }}
-                  >
-                    {labels[tab]}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
           </View>
 
           {/* Assigned Sessions Heading and Slider */}
@@ -436,7 +342,7 @@ const FullPlanDetails = () => {
                       marginRight: 10,
                     }}
                   >
-                    <Ionicons name="calendar" size={18} color="#9747FF" />
+                    <Ionicons name="calendar" size={22} color="#9747FF" />
                   </View>
                   <Text
                     style={{
@@ -482,6 +388,157 @@ const FullPlanDetails = () => {
                   selectedSession={selectedSession}
                   setSelectedSession={setSelectedSession}
                 />
+              </View>
+            </View>
+          )}
+
+          {/* Session Details Section - Wraps viewing session + tabs + content */}
+          {selectedSession && (
+            <View style={{ marginTop: 24 }}>
+              {/* Section Header */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingHorizontal: 20,
+                  marginBottom: 16,
+                }}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <View
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 10,
+                      backgroundColor: "#F3EDFF",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 10,
+                    }}
+                  >
+                    <Ionicons name="document-text" size={22} color="#9747FF" />
+                  </View>
+                  <View>
+                    <Text
+                      style={{
+                        fontSize: 18,
+                        fontWeight: "700",
+                        color: "#1A1A1A",
+                      }}
+                    >
+                      Session Details
+                    </Text>
+                    <Text style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
+                      {new Date(selectedSession.sessionDate).toLocaleDateString("en-US", {
+                        weekday: "long",
+                        month: "short",
+                        day: "numeric",
+                      })} • <Text style={{ 
+                        color: selectedSession.sessionStatus === "completed" ? "#2F8C62" 
+                          : selectedSession.sessionStatus === "missed" ? "#D32F2F" 
+                          : "#F9A825",
+                        fontWeight: "600",
+                        textTransform: "capitalize",
+                      }}>{selectedSession.sessionStatus}</Text>
+                    </Text>
+                  </View>
+                </View>
+                <View
+                  style={{
+                    width: 30,
+                    height: 3,
+                    backgroundColor: "#9747FF",
+                    borderRadius: 2,
+                  }}
+                />
+              </View>
+
+              {/* Tabs */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  marginHorizontal: 20,
+                  backgroundColor: "#FFFFFF",
+                  borderRadius: 14,
+                  padding: 4,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 3,
+                  elevation: 2,
+                  borderWidth: 1,
+                  borderColor: "#F1F3F1",
+                }}
+              >
+                {["info", "trainer", "workout"].map((tab) => {
+                  const isActive: any = activeTab === tab;
+
+                  const icons: any = {
+                    info: (
+                      <MaterialIcons
+                        name="info"
+                        size={20}
+                        color={isActive ? "#FFFFFF" : "#666"}
+                      />
+                    ),
+                    trainer: (
+                      <FontAwesome5
+                        name="user-tie"
+                        size={18}
+                        color={isActive ? "#FFFFFF" : "#666"}
+                      />
+                    ),
+                    workout: (
+                      <FontAwesome
+                        name="heartbeat"
+                        size={20}
+                        color={isActive ? "#FFFFFF" : "#666"}
+                      />
+                    ),
+                  };
+
+                  const labels: any = {
+                    info: "Info",
+                    trainer: "Trainer",
+                    workout: "Workout",
+                  };
+
+                  return (
+                    <TouchableOpacity
+                      key={tab}
+                      onPress={() => setActiveTab(tab)}
+                      style={{
+                        flex: 1,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        paddingVertical: 12,
+                        marginHorizontal: 2,
+                        borderRadius: 10,
+                        backgroundColor: isActive ? "#67C694" : "transparent",
+                        shadowColor: isActive ? "#67C694" : "transparent",
+                        shadowOffset: { width: 0, height: isActive ? 2 : 0 },
+                        shadowOpacity: isActive ? 0.3 : 0,
+                        shadowRadius: isActive ? 4 : 0,
+                        elevation: isActive ? 3 : 0,
+                      }}
+                      activeOpacity={0.9}
+                    >
+                      {icons[tab]}
+                      <Text
+                        style={{
+                          color: isActive ? "#FFFFFF" : "#666",
+                          fontSize: 13,
+                          fontWeight: "700",
+                          marginLeft: 6,
+                        }}
+                      >
+                        {labels[tab]}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
             </View>
           )}
