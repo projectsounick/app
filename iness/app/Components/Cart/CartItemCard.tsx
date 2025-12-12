@@ -140,15 +140,38 @@ export default function CartItemList({
           marginBottom: isLargeScreen ? 24 : 20,
         }}
       >
-        <Text
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              backgroundColor: "#F3EDFF",
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 10,
+            }}
+          >
+            <Ionicons name="bag-outline" size={18} color="#9747FF" />
+          </View>
+          <Text
+            style={{
+              fontSize: 18,
+              fontWeight: "700",
+              color: "#1A1A1A",
+            }}
+          >
+            Your Items
+          </Text>
+        </View>
+        <View
           style={{
-            fontSize: 20,
-            fontWeight: "700",
-            color: "#000",
+            width: 30,
+            height: 3,
+            backgroundColor: "#9747FF",
+            borderRadius: 2,
           }}
-        >
-          Your Items
-        </Text>
+        />
       </View>
 
       {simmerLodaing || loading ? (
@@ -255,21 +278,15 @@ export default function CartItemList({
                         <TouchableOpacity
                           onPress={() => deleteItem(item._id)}
                           style={{
-                            width: isLargeScreen ? 28 : 24,
-                            height: isLargeScreen ? 28 : 24,
-                            borderRadius: isLargeScreen ? 14 : 12,
-                            backgroundColor: "#FFEBEE",
-                            alignItems: "center",
-                            justifyContent: "center",
+                            padding: 4,
                             flexShrink: 0,
-                            marginTop: -2,
                           }}
                           hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                         >
                           <Ionicons
                             name="trash-outline"
-                            size={isLargeScreen ? 14 : 12}
-                            color="#FF6B6B"
+                            size={18}
+                            color="#666"
                           />
                         </TouchableOpacity>
                       </View>
@@ -421,53 +438,55 @@ export default function CartItemList({
             alignItems: "center",
             marginTop: 20,
             padding: 16,
-            backgroundColor: "#F8F8F8",
+            backgroundColor: "#E8F5E9",
             borderRadius: 16,
             borderWidth: 1,
-            borderColor: "#E0E0E0",
+            borderColor: "#C8E6C9",
           }}
         >
-          <View style={{ flex: 1 }}>
-            <Text
+          <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+            <View
               style={{
-                color: "#000",
-                fontSize: 14,
-                fontWeight: "600",
-                marginBottom: 4,
+                width: 32,
+                height: 32,
+                borderRadius: 8,
+                backgroundColor: "#67C694",
+                alignItems: "center",
+                justifyContent: "center",
+                marginRight: 10,
               }}
             >
-              Coupon Applied
-            </Text>
-            <Text
-              style={{
-                color: "#67C694",
-                fontSize: 14,
-                fontWeight: "700",
-              }}
-            >
-              - ₹{couponDetails.discountPrice} OFF
-            </Text>
+              <Ionicons name="checkmark" size={18} color="#fff" />
+            </View>
+            <View>
+              <Text
+                style={{
+                  color: "#1A1A1A",
+                  fontSize: 13,
+                  fontWeight: "600",
+                  marginBottom: 2,
+                }}
+              >
+                Coupon Applied
+              </Text>
+              <Text
+                style={{
+                  color: "#2E7D32",
+                  fontSize: 14,
+                  fontWeight: "700",
+                }}
+              >
+                - ₹{couponDetails.discountPrice} OFF
+              </Text>
+            </View>
           </View>
           <TouchableOpacity
             onPress={() => setCouponDetails(null)}
             style={{
-              backgroundColor: "#FFFFFF",
-              paddingHorizontal: 16,
-              paddingVertical: 8,
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: "#E0E0E0",
+              padding: 6,
             }}
           >
-            <Text
-              style={{
-                color: "#FF6B6B",
-                fontWeight: "600",
-                fontSize: 14,
-              }}
-            >
-              Remove
-            </Text>
+            <Ionicons name="close" size={20} color="#666" />
           </TouchableOpacity>
         </View>
       ) : (
@@ -478,40 +497,46 @@ export default function CartItemList({
             alignItems: "center",
             marginTop: 20,
             padding: 16,
-            backgroundColor: "#F8F8F8",
+            backgroundColor: "#fff",
             borderRadius: 16,
             borderWidth: 1,
-            borderColor: "#E0E0E0",
+            borderColor: "#F5F5F5",
           }}
         >
-          <Text
-            style={{
-              color: "#000",
-              fontSize: 14,
-              fontWeight: "500",
-            }}
-          >
-            Have a coupon?
-          </Text>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Ionicons name="pricetag-outline" size={18} color="#9747FF" style={{ marginRight: 8 }} />
+            <Text
+              style={{
+                color: "#1A1A1A",
+                fontSize: 14,
+                fontWeight: "500",
+              }}
+            >
+              Have a coupon?
+            </Text>
+          </View>
           <TouchableOpacity
             onPress={onAddItem}
             style={{
-              backgroundColor: "#FFFFFF",
+              backgroundColor: "#67C694",
               paddingHorizontal: 16,
               paddingVertical: 8,
-              borderRadius: 12,
-              borderWidth: 1,
-              borderColor: "#9747FF",
+              borderRadius: 20,
+              shadowColor: "#67C694",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.3,
+              shadowRadius: 4,
+              elevation: 3,
             }}
           >
             <Text
               style={{
-                color: "#9747FF",
+                color: "#fff",
                 fontWeight: "600",
-                fontSize: 14,
+                fontSize: 13,
               }}
             >
-              Add +
+              Apply
             </Text>
           </TouchableOpacity>
         </View>

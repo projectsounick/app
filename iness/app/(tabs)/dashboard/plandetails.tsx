@@ -6,7 +6,7 @@ import { RootState } from "@/store";
 import { convertToCartItem, isProductAddableToCart } from "@/utils/cartUtils";
 
 import React, { useEffect, useRef, useState } from "react";
-import { View, Dimensions, Animated } from "react-native";
+import { View, Dimensions, Animated, ImageBackground } from "react-native";
 import { addToCart } from "@/Slices/cartSlice";
 import { useDispatch, useSelector } from "react-redux";
 import CustomSnackbar from "@/app/modules/Snackbar";
@@ -100,52 +100,58 @@ const WorkoutPlanScreen = () => {
   };
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["left", "right", "bottom"]}
+    <ImageBackground
+      source={require("../../../assets/images/basicBackground.jpg")}
+      style={{ flex: 1 }}
+      resizeMode="cover"
     >
-      <SmallHeader
-        title="Overview"
-        bottomComponent={
-          <HeaderContent
-            title={currentPlan ? currentPlan?.planType?.title : "Diet Plan"}
-            subtitle={currentPlan?.title ? currentPlan.title : ""}
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "transparent" }}
+        edges={["left", "right", "bottom"]}
+      >
+        <SmallHeader
+          title="Overview"
+          bottomComponent={
+            <HeaderContent
+              title={currentPlan ? currentPlan?.planType?.title : "Diet Plan"}
+              subtitle={currentPlan?.title ? currentPlan.title : ""}
+            />
+          }
+        />
+        {currentPlan?.planType ? (
+          <PlansInfo
+            screenWidth={screenWidth}
+            cartLoading={cartLoading}
+            currentPlan={currentPlan}
+            selectedPlanItem={selectedPlanItem}
+            setSelectedPlanItem={setSelectedPlanItem}
+            setBottomSectionHeight={setBottomSectionHeight}
+            addingIntoToCart={addingIntoToCart}
+            theme={theme}
+            bottomSectionHeight={bottomSectionHeight}
           />
-        }
-      />
-      {currentPlan?.planType ? (
-        <PlansInfo
-          screenWidth={screenWidth}
-          cartLoading={cartLoading}
-          currentPlan={currentPlan}
-          selectedPlanItem={selectedPlanItem}
-          setSelectedPlanItem={setSelectedPlanItem}
-          setBottomSectionHeight={setBottomSectionHeight}
-          addingIntoToCart={addingIntoToCart}
-          theme={theme}
-          bottomSectionHeight={bottomSectionHeight}
+        ) : (
+          <DietPlanInfo
+            screenWidth={screenWidth}
+            showBottomBar={true}
+            cartLoading={cartLoading}
+            currentPlan={currentPlan}
+            selectedPlanItem={selectedPlanItem}
+            setSelectedPlanItem={setSelectedPlanItem}
+            setBottomSectionHeight={setBottomSectionHeight}
+            addingIntoToCart={addingIntoToCart}
+            theme={theme}
+            bottomSectionHeight={bottomSectionHeight}
+          />
+        )}
+        <CustomSnackbar
+          visible={snackbarOpen}
+          message={snackbarMessage}
+          onDismiss={() => setSnackbarOpen(false)}
+          bgColor={theme.colors.primary}
         />
-      ) : (
-        <DietPlanInfo
-          screenWidth={screenWidth}
-          showBottomBar={true}
-          cartLoading={cartLoading}
-          currentPlan={currentPlan}
-          selectedPlanItem={selectedPlanItem}
-          setSelectedPlanItem={setSelectedPlanItem}
-          setBottomSectionHeight={setBottomSectionHeight}
-          addingIntoToCart={addingIntoToCart}
-          theme={theme}
-          bottomSectionHeight={bottomSectionHeight}
-        />
-      )}
-      <CustomSnackbar
-        visible={snackbarOpen}
-        message={snackbarMessage}
-        onDismiss={() => setSnackbarOpen(false)}
-        bgColor={theme.colors.primary}
-      />
-    </SafeAreaView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 };
 

@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   Alert,
+  ImageBackground,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -136,21 +137,22 @@ export default function ServiceDetailsScreen() {
           flexDirection: "row",
           alignItems: "flex-start",
           marginBottom: 14,
+          marginLeft: 6,
         }}
       >
         <View
           style={{
             width: 24,
             height: 24,
-            borderRadius: 12,
-            backgroundColor: "#E8F5E9",
+            borderRadius: 8,
+            backgroundColor: "#F3EDFF",
             alignItems: "center",
             justifyContent: "center",
             marginRight: 12,
             marginTop: 1,
           }}
         >
-          <Ionicons name="checkmark" size={14} color="#67C694" />
+          <Ionicons name="checkmark" size={14} color="#9747FF" />
         </View>
         <Text
           style={{
@@ -168,8 +170,13 @@ export default function ServiceDetailsScreen() {
   };
 
   return (
+    <ImageBackground
+      source={require("../../../assets/images/basicBackground.jpg")}
+      style={{ flex: 1 }}
+      resizeMode="cover"
+    >
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      style={{ flex: 1, backgroundColor: "transparent" }}
       edges={["left", "right", "bottom"]}
     >
       <SmallHeader
@@ -252,9 +259,9 @@ export default function ServiceDetailsScreen() {
                 >
                   <View
                     style={{
-                      width: 32,
-                      height: 32,
-                      borderRadius: 16,
+                      width: 36,
+                      height: 36,
+                      borderRadius: 10,
                       backgroundColor: "#F3EDFF",
                       alignItems: "center",
                       justifyContent: "center",
@@ -319,7 +326,7 @@ export default function ServiceDetailsScreen() {
                 style={{
                   width: 40,
                   height: 40,
-                  borderRadius: 20,
+                  borderRadius: 12,
                   backgroundColor: "#F3EDFF",
                   alignItems: "center",
                   justifyContent: "center",
@@ -363,7 +370,7 @@ export default function ServiceDetailsScreen() {
                 style={{
                   width: 40,
                   height: 40,
-                  borderRadius: 20,
+                  borderRadius: 12,
                   backgroundColor: "#E8F5E9",
                   alignItems: "center",
                   justifyContent: "center",
@@ -413,16 +420,16 @@ export default function ServiceDetailsScreen() {
             >
               <View
                 style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
-                  backgroundColor: "#E8F5E9",
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  backgroundColor: "#F3EDFF",
                   alignItems: "center",
                   justifyContent: "center",
                   marginRight: 12,
                 }}
               >
-                <Ionicons name="checkmark-circle" size={18} color="#67C694" />
+                <Ionicons name="checkmark-circle" size={18} color="#9747FF" />
               </View>
               <Text
                 style={{
@@ -577,6 +584,7 @@ export default function ServiceDetailsScreen() {
         imageUrl={viewerImage}
       />
     </SafeAreaView>
+    </ImageBackground>
   );
 }
 

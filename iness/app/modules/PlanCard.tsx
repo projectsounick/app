@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   ImageBackground,
-  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useDispatch } from "react-redux";
@@ -19,46 +18,86 @@ interface PlanCardProps {
   planGroupLength: number;
 }
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-
 const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
   const dispatch = useDispatch();
   const router = useRouter();
 
+  const handlePress = () => {
+    router.push("/dashboard/plandetails");
+    dispatch(setCurrentPlan(item));
+  };
+
   return (
-    <View
+    <TouchableOpacity
       key={index}
+      activeOpacity={0.9}
+      onPress={handlePress}
       style={{
         marginRight: index === planGroupLength - 1 ? 0 : 12,
-        width: 280,
-        height: 209,
+        width: 340,
+        height: 200,
         borderRadius: 16,
         overflow: "hidden",
-        backgroundColor: "#736AD6",
+        backgroundColor: "#fff",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 3,
+        borderWidth: 1,
+        borderColor: "#F5F5F5",
       }}
     >
-      {/* Background image if available */}
+      {/* Image and Content Layout */}
       {item.imgUrl ? (
-        <ImageBackground
-          source={{ uri: item.imgUrl }}
-          style={{ flex: 1 }}
-          resizeMode="cover"
-        >
-          {/* Dark gradient overlay */}
-          <LinearGradient
-            colors={["rgba(0,0,0,0.6)", "rgba(0,0,0,0.2)"]}
-            style={{ flex: 1, padding: 16, justifyContent: "space-between" }}
+        <View style={{ flexDirection: "row", flex: 1 }}>
+          {/* Image Section */}
+          <View
+            style={{
+              width: 140,
+              height: 200,
+              backgroundColor: "#F9F9F9",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
-            <View style={{ flex: 1, justifyContent: "space-between" }}>
+            <ImageBackground
+              source={{ uri: item.imgUrl }}
+              style={{
+                width: "100%",
+                height: "100%",
+              }}
+              resizeMode="contain"
+              imageStyle={{
+                borderTopLeftRadius: 16,
+                borderBottomLeftRadius: 16,
+              }}
+            >
+              <LinearGradient
+                colors={["rgba(0,0,0,0.05)", "transparent"]}
+                style={{
+                  flex: 1,
+                }}
+              />
+            </ImageBackground>
+          </View>
+
+          {/* Content Section */}
+          <View
+            style={{
+              flex: 1,
+              padding: 14,
+              justifyContent: "space-between",
+            }}
+          >
+            <View style={{ flexShrink: 1 }}>
+              {/* Title */}
               <Text
                 style={{
                   fontWeight: theme.fontWeights.bold,
-                  fontSize: theme.fontSizes.regular,
-                  color: "#fff",
-                  marginBottom: 6,
-                  textShadowColor: "rgba(0,0,0,0.8)",
-                  textShadowOffset: { width: 1, height: 1 },
-                  textShadowRadius: 4,
+                  fontSize: 15,
+                  color: "#1A1A1A",
+                  marginBottom: 8,
                 }}
                 numberOfLines={2}
                 ellipsizeMode="tail"
@@ -66,108 +105,168 @@ const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
                 {item.title}
               </Text>
 
+              {/* Description Items - Max 2 */}
               <View>
-                {item.descItems
-                  ?.slice(0, 3)
-                  .map((desc: string, idx: number) => (
+                {item.descItems?.slice(0, 2).map((desc: string, idx: number) => (
+                  <View
+                    key={idx}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "flex-start",
+                      marginBottom: 5,
+                    }}
+                  >
                     <View
-                      key={idx}
                       style={{
-                        flexDirection: "row",
-                        alignItems: "flex-start",
-                        marginBottom: 8,
+                        width: 5,
+                        height: 5,
+                        borderRadius: 2.5,
+                        backgroundColor: "#9747FF",
+                        marginRight: 6,
+                        marginTop: 5,
                       }}
+                    />
+                    <Text
+                      style={{
+                        color: "#666",
+                        fontSize: 11,
+                        flex: 1,
+                        lineHeight: 15,
+                        fontWeight: "400",
+                      }}
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
                     >
-                      <View
-                        style={{
-                          width: 11,
-                          height: 11,
-                          borderRadius: 5.5,
-                          backgroundColor: "rgba(255,255,255,0.7)",
-                          marginRight: 6,
-                          marginTop: 2,
-                        }}
-                      />
-                      <Text
-                        style={{
-                          color: "#fff",
-                          fontSize: 12,
-                          flex: 1,
-                          textShadowColor: "rgba(0,0,0,0.7)",
-                          textShadowOffset: { width: 0, height: 1 },
-                          textShadowRadius: 3,
-                        }}
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                      >
-                        {desc}
-                      </Text>
-                    </View>
-                  ))}
+                      {desc}
+                    </Text>
+                  </View>
+                ))}
               </View>
+            </View>
 
-              <TouchableOpacity
+            {/* Button */}
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#67C694",
+                paddingVertical: 9,
+                paddingHorizontal: 18,
+                borderRadius: 30,
+                alignSelf: "flex-start",
+                marginTop: 8,
+                shadowColor: "#67C694",
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.4,
+                shadowRadius: 6,
+                elevation: 6,
+              }}
+              onPress={handlePress}
+            >
+              <Text
                 style={{
-                  backgroundColor: "rgba(103,198,148,0.9)",
-                  width: SCREEN_WIDTH * 0.3,
-                  height: SCREEN_WIDTH * 0.08,
-                  borderRadius: (SCREEN_WIDTH * 0.1) / 2,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  marginTop: 4,
-                  shadowColor: "#000", // shadow color
-                  shadowOffset: { width: 0, height: 3 }, // x/y offset
-                  shadowOpacity: 0.3, // how opaque the shadow is
-                  shadowRadius: 4, // blur radius
-                  elevation: 5, // for Android shadow
-                }}
-                onPress={() => {
-                  router.push("/dashboard/plandetails");
-                  dispatch(setCurrentPlan(item));
+                  fontWeight: "700",
+                  fontSize: 12,
+                  color: "#fff",
                 }}
               >
-                <Text
-                  style={{
-                    fontWeight: "700",
-                    fontSize: theme.fontSizes.regularSmall,
-                    textAlign: "center",
-                    color: "#fff",
-                    textShadowColor: "rgba(0,0,0,0.6)",
-                    textShadowOffset: { width: 0, height: 1 },
-                    textShadowRadius: 2,
-                  }}
-                >
-                  Check Details
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </LinearGradient>
-        </ImageBackground>
+                Check Details
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       ) : (
-        // fallback if no image
+        // Fallback if no image
         <View
           style={{
             flex: 1,
-            backgroundColor: "#736AD6",
-            padding: 16,
+            padding: 14,
             justifyContent: "space-between",
+            backgroundColor: "#F9F9F9",
+            height: 200,
           }}
         >
-          <Text
+          <View style={{ flexShrink: 1 }}>
+            <Text
+              style={{
+                fontWeight: theme.fontWeights.bold,
+                fontSize: 15,
+                color: "#1A1A1A",
+                marginBottom: 8,
+              }}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {item.title}
+            </Text>
+
+            {item.descItems?.length > 0 && (
+              <View>
+                {item.descItems.slice(0, 2).map((desc: string, idx: number) => (
+                  <View
+                    key={idx}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "flex-start",
+                      marginBottom: 5,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 5,
+                        height: 5,
+                        borderRadius: 2.5,
+                        backgroundColor: "#9747FF",
+                        marginRight: 6,
+                        marginTop: 5,
+                      }}
+                    />
+                    <Text
+                      style={{
+                        color: "#666",
+                        fontSize: 11,
+                        flex: 1,
+                        lineHeight: 15,
+                        fontWeight: "400",
+                      }}
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
+                    >
+                      {desc}
+                    </Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+
+          <TouchableOpacity
             style={{
-              fontWeight: theme.fontWeights.bold,
-              fontSize: theme.fontSizes.regular,
-              color: "#fff",
-              marginBottom: 6,
+              backgroundColor: "#67C694",
+              paddingVertical: 9,
+              paddingHorizontal: 18,
+              borderRadius: 30,
+              alignSelf: "flex-start",
+              marginTop: 8,
+              shadowColor: "#67C694",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.4,
+              shadowRadius: 6,
+              elevation: 6,
             }}
-            numberOfLines={2}
-            ellipsizeMode="tail"
+            onPress={handlePress}
           >
-            {item.title}
-          </Text>
+            <Text
+              style={{
+                fontWeight: "700",
+                fontSize: 12,
+                color: "#fff",
+              }}
+            >
+              Check Details
+            </Text>
+          </TouchableOpacity>
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 };
 

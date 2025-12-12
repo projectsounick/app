@@ -5,12 +5,9 @@ import {
   TouchableOpacity,
   Image,
   ImageBackground,
-  Dimensions,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 interface PlanCardProps {
   id?: string;
@@ -33,10 +30,6 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
 }) => {
   const router = useRouter();
 
-  const gradientColors: any = isActive
-    ? ["rgba(0,0,0,0.85)", "rgba(0,0,0,0.4)"]
-    : ["rgba(0,0,0,0.9)", "rgba(0,0,0,0.6)"];
-
   const handlePress = () => {
     if (type === "manual") {
       router.push({ pathname: "/dashboard/activeManualPlan" });
@@ -58,128 +51,135 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
   };
 
   return (
-    <View
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={handlePress}
       style={{
-        borderRadius: 20,
-        marginVertical: 12,
-        height: type === "manual" ? 160 : 280,
+        borderRadius: 16,
+        marginVertical: 8,
         overflow: "hidden",
+        backgroundColor: "#fff",
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.2,
-        shadowRadius: 10,
-        elevation: 6,
-        flexDirection: "row",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 8,
+        elevation: 3,
+        borderWidth: 1,
+        borderColor: "#F5F5F5",
       }}
     >
       {/* For manual, show static image on right. For normal, use background */}
       {type !== "manual" ? (
-        <ImageBackground
-          source={
-            imgUrl
-              ? { uri: imgUrl }
-              : require("../../../assets/images/track.png")
-          }
-          style={{ flex: 1, justifyContent: "flex-end" }}
-          resizeMode="cover"
-          imageStyle={{ borderRadius: 20 }}
-        >
-          <LinearGradient
-            colors={gradientColors}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 0, y: 1 }}
+        <View style={{ flexDirection: "row" }}>
+          {/* Image Section */}
+          <ImageBackground
+            source={
+              imgUrl
+                ? { uri: imgUrl }
+                : require("../../../assets/images/track.png")
+            }
+            style={{
+              width: 140,
+              height: 200,
+            }}
+            resizeMode="cover"
+          >
+            <LinearGradient
+              colors={["rgba(0,0,0,0.3)", "rgba(0,0,0,0.1)"]}
+              style={{
+                flex: 1,
+              }}
+            />
+          </ImageBackground>
+
+          {/* Content Section */}
+          <View
             style={{
               flex: 1,
-              borderRadius: 20,
-              padding: 20,
-              justifyContent: "center",
+              padding: 16,
+              justifyContent: "space-between",
             }}
           >
-            {/* Title */}
-            <Text
-              style={{
-                fontSize: 18,
-                marginBottom: 12,
-                color: "#fff",
-                fontWeight: "700",
-                textShadowColor: "rgba(0,0,0,0.95)",
-                textShadowOffset: { width: 1, height: 2 },
-                textShadowRadius: 4,
-              }}
-              numberOfLines={2}
-              ellipsizeMode="tail"
-            >
-              {title || "Untitled Plan"}
-            </Text>
+            <View>
+              {/* Title */}
+              <Text
+                style={{
+                  fontSize: 16,
+                  marginBottom: 10,
+                  color: "#1A1A1A",
+                  fontWeight: "700",
+                }}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                {title || "Untitled Plan"}
+              </Text>
 
-            {/* Description */}
-            <View style={{ marginBottom: 16 }}>
-              {descItems.length > 0 ? (
-                descItems.slice(0, 3).map((item, idx) => (
-                  <View
-                    key={idx}
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      marginBottom: 6,
-                    }}
-                  >
+              {/* Description */}
+              <View>
+                {descItems.length > 0 ? (
+                  descItems.slice(0, 3).map((item, idx) => (
                     <View
+                      key={idx}
                       style={{
-                        width: 8,
-                        height: 8,
-                        borderRadius: 4,
-                        backgroundColor: "rgba(255,255,255,0.95)",
-                        marginRight: 8,
-                      }}
-                    />
-                    <Text
-                      numberOfLines={2}
-                      ellipsizeMode="tail"
-                      style={{
-                        fontSize: 14,
-                        color: "#fff",
-                        flexShrink: 1,
-                        fontWeight: "500",
-                        lineHeight: 18,
-                        textShadowColor: "rgba(0,0,0,0.8)",
-                        textShadowOffset: { width: 0, height: 1 },
-                        textShadowRadius: 3,
+                        flexDirection: "row",
+                        alignItems: "flex-start",
+                        marginBottom: 6,
                       }}
                     >
-                      {item}
-                    </Text>
-                  </View>
-                ))
-              ) : (
-                <Text
-                  style={{
-                    fontSize: 14,
-                    color: "#eee",
-                    lineHeight: 18,
-                    fontWeight: "400",
-                  }}
-                >
-                  No description available.
-                </Text>
-              )}
+                      <View
+                        style={{
+                          width: 6,
+                          height: 6,
+                          borderRadius: 3,
+                          backgroundColor: "#9747FF",
+                          marginRight: 8,
+                          marginTop: 5,
+                        }}
+                      />
+                      <Text
+                        numberOfLines={2}
+                        ellipsizeMode="tail"
+                        style={{
+                          fontSize: 12,
+                          color: "#666",
+                          flex: 1,
+                          fontWeight: "400",
+                          lineHeight: 16,
+                        }}
+                      >
+                        {item}
+                      </Text>
+                    </View>
+                  ))
+                ) : (
+                  <Text
+                    style={{
+                      fontSize: 12,
+                      color: "#999",
+                      lineHeight: 16,
+                      fontWeight: "400",
+                    }}
+                  >
+                    No description available.
+                  </Text>
+                )}
+              </View>
             </View>
 
             {/* Button */}
             <TouchableOpacity
               style={{
-                backgroundColor: "rgba(103,198,148,0.9)",
-                width: SCREEN_WIDTH * 0.3,
-                height: SCREEN_WIDTH * 0.08,
-                borderRadius: (SCREEN_WIDTH * 0.1) / 2,
-                justifyContent: "center",
-                alignItems: "center",
+                backgroundColor: "#67C694",
+                paddingVertical: 10,
+                paddingHorizontal: 20,
+                borderRadius: 30,
                 alignSelf: "flex-start",
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 3 },
+                shadowColor: "#67C694",
+                shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.3,
                 shadowRadius: 4,
-                elevation: 5,
+                elevation: 3,
               }}
               onPress={handlePress}
             >
@@ -187,27 +187,19 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
                 style={{
                   color: "#fff",
                   fontWeight: "700",
-                  fontSize: 14,
-                  textShadowColor: "rgba(0,0,0,0.6)",
-                  textShadowOffset: { width: 0, height: 1 },
-                  textShadowRadius: 2,
+                  fontSize: 13,
                 }}
               >
                 {isActive ? "Continue" : "Check"}
               </Text>
             </TouchableOpacity>
-          </LinearGradient>
-        </ImageBackground>
+          </View>
+        </View>
       ) : (
-        <LinearGradient
-          colors={["#9C56F6", "#3A1B63"]}
-          start={{ x: 0.5, y: 0 }}
-          end={{ x: 0.5, y: 1 }}
+        <View
           style={{
-            flex: 1,
-            borderRadius: 20,
-            padding: 16,
             flexDirection: "row",
+            padding: 16,
             alignItems: "center",
           }}
         >
@@ -217,10 +209,7 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
                 fontSize: 16,
                 fontWeight: "700",
                 marginBottom: 6,
-                color: "white",
-                textShadowColor: "rgba(0,0,0,0.9)",
-                textShadowOffset: { width: 0, height: 1 },
-                textShadowRadius: 3,
+                color: "#1A1A1A",
               }}
               numberOfLines={1}
             >
@@ -230,10 +219,8 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
             <Text
               style={{
                 fontSize: 13,
-                color: "white",
-                textShadowColor: "rgba(0,0,0,0.7)",
-                textShadowOffset: { width: 0, height: 1 },
-                textShadowRadius: 2,
+                color: "#666",
+                lineHeight: 18,
               }}
               numberOfLines={2}
               ellipsizeMode="tail"
@@ -244,20 +231,22 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
             <TouchableOpacity
               style={{
                 backgroundColor: "#67C694",
-                paddingVertical: 6,
+                paddingVertical: 8,
                 paddingHorizontal: 20,
                 borderRadius: 30,
                 alignSelf: "flex-start",
                 marginTop: 10,
-                shadowColor: "#000", // shadow color
-                shadowOffset: { width: 0, height: 3 }, // x/y offset
-                shadowOpacity: 0.3, // how opaque the shadow is
-                shadowRadius: 4, // blur radius
-                elevation: 5, // for Android shadow
+                shadowColor: "#67C694",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.3,
+                shadowRadius: 4,
+                elevation: 3,
               }}
               onPress={handlePress}
             >
-              <Text style={{ color: "#fff", fontWeight: "600" }}>Continue</Text>
+              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 13 }}>
+                Continue
+              </Text>
             </TouchableOpacity>
           </View>
 
@@ -267,13 +256,13 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
               width: 90,
               height: 110,
               resizeMode: "cover",
-              marginLeft: 8,
-              borderRadius: 8,
+              marginLeft: 12,
+              borderRadius: 12,
             }}
           />
-        </LinearGradient>
+        </View>
       )}
-    </View>
+    </TouchableOpacity>
   );
 };
 

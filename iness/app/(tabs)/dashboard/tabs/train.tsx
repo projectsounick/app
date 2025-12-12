@@ -120,30 +120,42 @@ export default function TrainScreen() {
             <View
               style={{
                 flexDirection: "row",
-                backgroundColor: "#E0E0E0",
-                borderRadius: 25,
-                padding: 3,
-                width: 280,
+                backgroundColor: "#fff",
+                borderRadius: 16,
+                padding: 4,
+                width: 300,
                 position: "relative",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 3,
+                borderWidth: 1,
+                borderColor: "#F5F5F5",
               }}
             >
               {/* Sliding Highlight */}
               <Animated.View
                 style={{
                   position: "absolute",
-                  top: 3,
-                  bottom: 3,
+                  top: 4,
+                  bottom: 4,
                   width: "50%",
-                  borderRadius: 20,
+                  borderRadius: 12,
                   backgroundColor: "#67C694",
                   transform: [
                     {
                       translateX: translateX.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [0, 140], // half of width
+                        outputRange: [0, 150], // half of width (300/2 = 150)
                       }),
                     },
                   ],
+                  shadowColor: "#67C694",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4,
+                  elevation: 4,
                 }}
               />
 
@@ -153,15 +165,16 @@ export default function TrainScreen() {
                   flex: 1,
                   justifyContent: "center",
                   alignItems: "center",
-                  paddingVertical: 10,
+                  paddingVertical: 12,
+                  zIndex: 1,
                 }}
                 onPress={() => handlePress("current")}
               >
                 <Text
                   style={{
-                    color: activeTab === "current" ? "#fff" : "#111",
-                    fontWeight: "600",
-                    fontSize: 15,
+                    color: activeTab === "current" ? "#fff" : "#666",
+                    fontWeight: "700",
+                    fontSize: 14,
                   }}
                 >
                   Current Plans
@@ -174,15 +187,16 @@ export default function TrainScreen() {
                   flex: 1,
                   justifyContent: "center",
                   alignItems: "center",
-                  paddingVertical: 10,
+                  paddingVertical: 12,
+                  zIndex: 1,
                 }}
                 onPress={() => handlePress("available")}
               >
                 <Text
                   style={{
-                    color: activeTab === "available" ? "#fff" : "#111",
-                    fontWeight: "600",
-                    fontSize: 15,
+                    color: activeTab === "available" ? "#fff" : "#666",
+                    fontWeight: "700",
+                    fontSize: 14,
                   }}
                 >
                   Available Plans

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { View, Text, Image, TouchableOpacity, Linking } from "react-native";
+import { View, Text, Image, TouchableOpacity, Linking, ImageBackground, Alert, Platform } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 import { ActivityIndicator } from "react-native-paper";
@@ -16,6 +16,8 @@ import { Session } from "@/app/interfaces/sessionInterface";
 import SessionDetailsTabs from "@/app/Components/ActivePlans.tsx/SessionDetails";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ShimmerLoader from "@/app/modules/TrainSimmer";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 
 const FullPlanDetails = () => {
   const { id, type } = useLocalSearchParams(); // type: 'plan' | 'service'
@@ -133,10 +135,51 @@ const FullPlanDetails = () => {
     }
   }, [selectedPlanOrService, type, totalSessions]);
   const [activeTab, setActiveTab] = useState<any>("info");
+  const [downloading, setDownloading] = useState(false);
+
+  const downloadDietPlan = async (url: string) => {
+    try {
+      setDownloading(true);
+      
+      // Extract filename from URL or use default
+      const urlParts = url.split("/");
+      const fileName = urlParts[urlParts.length - 1] || "diet-plan.pdf";
+      const fileUri = FileSystem.documentDirectory + fileName;
+
+      // Download the file
+      const downloadResult = await FileSystem.downloadAsync(url, fileUri);
+
+      if (downloadResult.status === 200) {
+        // Check if sharing is available
+        const isAvailable = await Sharing.isAvailableAsync();
+        
+        if (isAvailable) {
+          await Sharing.shareAsync(downloadResult.uri, {
+            mimeType: "application/pdf",
+            dialogTitle: "Your Diet Plan",
+          });
+        } else {
+          Alert.alert("Success", "Diet plan downloaded successfully!");
+        }
+      } else {
+        throw new Error("Download failed");
+      }
+    } catch (error: any) {
+      console.log("Download error:", error);
+      Alert.alert("Error", "Failed to download diet plan. Please try again.");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   return (
+    <ImageBackground
+      source={require("../../../assets/images/basicBackground.jpg")}
+      style={{ flex: 1 }}
+      resizeMode="cover"
+    >
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#F6F8F7" }}
+      style={{ flex: 1, backgroundColor: "transparent" }}
       edges={["left", "right"]}
     >
       {loading ? (
@@ -238,8 +281,9 @@ const FullPlanDetails = () => {
                 {selectedSession?.activePlanDetails?.dietPlanUrl && (
                   <TouchableOpacity
                     onPress={() =>
-                      Linking.openURL(selectedSession.activePlanDetails.dietPlanUrl)
+                      downloadDietPlan(selectedSession.activePlanDetails.dietPlanUrl)
                     }
+                    disabled={downloading}
                     activeOpacity={0.8}
                     style={{
                       backgroundColor: "#E8F5E9",
@@ -251,6 +295,7 @@ const FullPlanDetails = () => {
                       gap: 4,
                       borderWidth: 1,
                       borderColor: "#67C694",
+                      opacity: downloading ? 0.7 : 1,
                     }}
                   >
                     <MaterialCommunityIcons
@@ -265,10 +310,10 @@ const FullPlanDetails = () => {
                         fontSize: 10,
                       }}
                     >
-                      Diet Plan
+                      {downloading ? "Downloading..." : "Diet Plan"}
                     </Text>
                     <Ionicons
-                      name="cloud-download-outline"
+                      name={downloading ? "hourglass-outline" : "cloud-download-outline"}
                       size={14}
                       color="#2F8C62"
                     />
@@ -305,21 +350,21 @@ const FullPlanDetails = () => {
                   <MaterialIcons
                     name="info"
                     size={18}
-                    color={isActive ? "#FFFFFF" : "#111"}
+                    color={isActive ? "#FFFFFF" : "#1A1A1A"}
                   />
                 ),
                 trainer: (
                   <FontAwesome5
                     name="user-tie"
                     size={16}
-                    color={isActive ? "#FFFFFF" : "#111"}
+                    color={isActive ? "#FFFFFF" : "#1A1A1A"}
                   />
                 ),
                 workout: (
                   <FontAwesome
                     name="heartbeat"
                     size={18}
-                    color={isActive ? "#FFFFFF" : "#111"}
+                    color={isActive ? "#FFFFFF" : "#1A1A1A"}
                   />
                 ),
               };
@@ -343,9 +388,9 @@ const FullPlanDetails = () => {
                     marginHorizontal: 4,
                     borderRadius: 12,
                     backgroundColor: isActive ? "#67C694" : "transparent",
-                    shadowColor: isActive ? "#2F8C62" : "transparent",
+                    shadowColor: isActive ? "#67C694" : "transparent",
                     shadowOffset: { width: 0, height: isActive ? 2 : 0 },
-                    shadowOpacity: isActive ? 0.2 : 0,
+                    shadowOpacity: isActive ? 0.3 : 0,
                     shadowRadius: isActive ? 4 : 0,
                     elevation: isActive ? 3 : 0,
                   }}
@@ -354,7 +399,7 @@ const FullPlanDetails = () => {
                   {icons[tab]}
                   <Text
                     style={{
-                      color: isActive ? "#FFFFFF" : "#111",
+                      color: isActive ? "#FFFFFF" : "#1A1A1A",
                       fontSize: 12,
                       fontWeight: "700",
                       marginLeft: 6,
@@ -379,32 +424,65 @@ const FullPlanDetails = () => {
                   marginBottom: 16,
                 }}
               >
-                <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <View
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 10,
+                      backgroundColor: "#F3EDFF",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 10,
+                    }}
+                  >
+                    <Ionicons name="calendar" size={18} color="#9747FF" />
+                  </View>
                   <Text
                     style={{
                       fontSize: 18,
                       fontWeight: "700",
-                      color: "#111",
+                      color: "#1A1A1A",
                     }}
                   >
                     Assigned Sessions
                   </Text>
-                  <Text
+                  <View
                     style={{
-                      fontSize: 14,
-                      fontWeight: "400",
-                      color: "#111",
+                      backgroundColor: "#F3EDFF",
+                      paddingHorizontal: 8,
+                      paddingVertical: 4,
+                      borderRadius: 8,
+                      marginLeft: 8,
                     }}
                   >
-                    / {totalSessions}
-                  </Text>
+                    <Text
+                      style={{
+                        fontSize: 12,
+                        fontWeight: "700",
+                        color: "#9747FF",
+                      }}
+                    >
+                      {totalSessions}
+                    </Text>
+                  </View>
                 </View>
+                <View
+                  style={{
+                    width: 30,
+                    height: 3,
+                    backgroundColor: "#9747FF",
+                    borderRadius: 2,
+                  }}
+                />
               </View>
-              <WorkoutSummaryCard
-                sessions={sessions}
-                selectedSession={selectedSession}
-                setSelectedSession={setSelectedSession}
-              />
+              <View style={{ paddingHorizontal: 20 }}>
+                <WorkoutSummaryCard
+                  sessions={sessions}
+                  selectedSession={selectedSession}
+                  setSelectedSession={setSelectedSession}
+                />
+              </View>
             </View>
           )}
 
@@ -424,6 +502,7 @@ const FullPlanDetails = () => {
         </>
       )}
     </SafeAreaView>
+    </ImageBackground>
   );
 };
 

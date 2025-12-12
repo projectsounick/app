@@ -59,7 +59,7 @@ const PlansInfo: React.FC<Props> = ({
   return (
     <>
       {/* Main Scrollable Section */}
-      <View style={{ flex: 1, backgroundColor: "#F8F8F8", paddingHorizontal: 16 }}>
+      <View style={{ flex: 1, backgroundColor: "transparent", paddingHorizontal: 16 }}>
         <ScrollView
           contentContainerStyle={{
             paddingTop: 20,
@@ -92,9 +92,9 @@ const PlansInfo: React.FC<Props> = ({
             >
               <View
                 style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
                   backgroundColor: "#F3EDFF",
                   alignItems: "center",
                   justifyContent: "center",
@@ -149,16 +149,16 @@ const PlansInfo: React.FC<Props> = ({
             >
               <View
                 style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 16,
-                  backgroundColor: "#E8F5E9",
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  backgroundColor: "#F3EDFF",
                   alignItems: "center",
                   justifyContent: "center",
                   marginRight: 12,
                 }}
               >
-                <Ionicons name="checkmark-circle" size={18} color="#67C694" />
+                <Ionicons name="checkmark-circle" size={18} color="#9747FF" />
               </View>
               <Text
                 style={{
@@ -177,14 +177,15 @@ const PlansInfo: React.FC<Props> = ({
                   flexDirection: "row",
                   alignItems: "flex-start",
                   marginBottom: 14,
+                  marginLeft: 6,
                 }}
               >
                 <View
                   style={{
                     width: 24,
                     height: 24,
-                    borderRadius: 12,
-                    backgroundColor: "#E8F5E9",
+                    borderRadius: 8,
+                    backgroundColor: "#F3EDFF",
                     alignItems: "center",
                     justifyContent: "center",
                     marginRight: 12,
@@ -194,7 +195,7 @@ const PlansInfo: React.FC<Props> = ({
                   <Ionicons
                     name="checkmark"
                     size={14}
-                    color="#67C694"
+                    color="#9747FF"
                   />
                 </View>
                 <Text
@@ -239,9 +240,9 @@ const PlansInfo: React.FC<Props> = ({
               >
                 <View
                   style={{
-                    width: 32,
-                    height: 32,
-                    borderRadius: 16,
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
                     backgroundColor: "#F3EDFF",
                     alignItems: "center",
                     justifyContent: "center",
@@ -446,10 +447,10 @@ const PlansInfo: React.FC<Props> = ({
                         width: 20,
                         height: 20,
                         borderRadius: 10,
-                        backgroundColor: isSelected ? "#9747FF" : "#E0E0E0",
+                        backgroundColor: isSelected ? "#9747FF" : "#FFFFFF",
                         alignItems: "center",
                         justifyContent: "center",
-                        borderWidth: isSelected ? 0 : 2,
+                        borderWidth: 2,
                         borderColor: "#9747FF",
                       }}
                     >
@@ -508,14 +509,37 @@ const PlansInfo: React.FC<Props> = ({
             })}
           </View>
 
-          <ProtectedAnimatedSubmitButton
-            loading={cartLoading}
-            title="Add to cart"
+          <TouchableOpacity
             onPress={() => {
               addingIntoToCart("plan");
             }}
-            height={50}
-          />
+            disabled={cartLoading}
+            style={{
+              backgroundColor: "#67C694",
+              borderRadius: 30,
+              paddingVertical: 14,
+              alignItems: "center",
+              flexDirection: "row",
+              justifyContent: "center",
+              shadowColor: "#67C694",
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 5,
+            }}
+          >
+            <Ionicons name="cart" size={18} color="#ffffff" />
+            <Text
+              style={{
+                color: "#ffffff",
+                fontSize: 16,
+                fontWeight: "700",
+                marginLeft: 8,
+              }}
+            >
+              {cartLoading ? "Adding..." : "Add to Cart"}
+            </Text>
+          </TouchableOpacity>
         </View>
       </Animated.View>
     </>

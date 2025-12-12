@@ -76,7 +76,7 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
   }, []);
 
   const handleScroll = (event: any) => {
-    const itemWidth = screenWidth - 40;
+    const itemWidth = screenWidth - 40 + 12; // width + gap
     const offsetX = event.nativeEvent.contentOffset.x;
     const index = Math.round(offsetX / itemWidth);
     setCurrentMediaIndex(index);
@@ -226,14 +226,14 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                 {/* Header with Close Button */}
                 <View style={styles.headerContainer}>
                   <View style={styles.iconContainer}>
-                    <Ionicons name="create-outline" size={24} color="#9747FF" />
+                    <Ionicons name="create-outline" size={20} color="#9747FF" />
                   </View>
                   <Text style={styles.modalTitle}>Create a Post</Text>
                   <TouchableOpacity
                     onPress={handleClose}
                     style={styles.closeButton}
                   >
-                    <Ionicons name="close" size={20} color="#000" />
+                    <Ionicons name="close" size={18} color="#1A1A1A" />
                   </TouchableOpacity>
                 </View>
 
@@ -271,7 +271,7 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                         >
                           <Ionicons
                             name={icon as any}
-                            size={20}
+                            size={18}
                             color={postType === type ? "#9747FF" : "#666"}
                           />
                         </View>
@@ -305,61 +305,64 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                   {(postType === "image" || postType === "video") &&
                     media.length > 0 && (
                       <View style={styles.sliderContainer}>
-                        <View style={styles.mediaScrollWrapper}>
-                          <ScrollView
-                            horizontal
-                            pagingEnabled={false}
-                            showsHorizontalScrollIndicator={false}
-                            onScroll={handleScroll}
-                            scrollEventThrottle={16}
-                            nestedScrollEnabled={true}
-                            bounces={true}
-                            decelerationRate={0.9}
-                            snapToInterval={screenWidth - 40}
-                            snapToAlignment="start"
-                            directionalLockEnabled={true}
-                            contentContainerStyle={styles.mediaListContent}
-                            style={styles.mediaFlatList}
-                            scrollEnabled={true}
-                          >
-                            {media.map((item, index) => (
-                              <View key={index} style={styles.mediaItem}>
-                                {postType === "video" ? (
-                                  <Video
-                                    source={{ uri: item }}
-                                    style={styles.media}
-                                    useNativeControls
-                                    resizeMode={ResizeMode.COVER}
-                                  />
-                                ) : (
-                                  <Image
-                                    source={{ uri: item }}
-                                    style={styles.media}
-                                    resizeMode="cover"
-                                  />
-                                )}
-                                <TouchableOpacity
-                                  onPress={() => handleRemoveMedia(index)}
-                                  style={styles.removeMediaButton}
-                                >
-                                  <Ionicons name="close-circle" size={24} color="#fff" />
-                                </TouchableOpacity>
-                              </View>
-                            ))}
-                          </ScrollView>
-                        </View>
-
-                        <View style={styles.dotsContainer}>
-                          {media.map((_, i) => (
-                            <View
-                              key={i}
+                        <FlatList
+                          data={media}
+                          horizontal
+                          showsHorizontalScrollIndicator={false}
+                          onScroll={handleScroll}
+                          scrollEventThrottle={16}
+                          bounces={true}
+                          decelerationRate="fast"
+                          snapToInterval={screenWidth - 40 + 12}
+                          snapToAlignment="start"
+                          contentContainerStyle={styles.mediaListContent}
+                          keyExtractor={(_, index) => index.toString()}
+                          nestedScrollEnabled={true}
+                          directionalLockEnabled={true}
+                          renderItem={({ item, index }) => (
+                            <View 
                               style={[
-                                styles.dot,
-                                i === currentMediaIndex && styles.activeDot,
+                                styles.mediaItem,
+                                { marginRight: index === media.length - 1 ? 0 : 12 }
                               ]}
-                            />
-                          ))}
-                        </View>
+                            >
+                              {postType === "video" ? (
+                                <Video
+                                  source={{ uri: item }}
+                                  style={styles.media}
+                                  useNativeControls
+                                  resizeMode={ResizeMode.CONTAIN}
+                                />
+                              ) : (
+                                <Image
+                                  source={{ uri: item }}
+                                  style={styles.media}
+                                  resizeMode="contain"
+                                />
+                              )}
+                              <TouchableOpacity
+                                onPress={() => handleRemoveMedia(index)}
+                                style={styles.removeMediaButton}
+                              >
+                                <Ionicons name="close-circle" size={32} color="#1A1A1A" />
+                              </TouchableOpacity>
+                            </View>
+                          )}
+                        />
+
+                        {media.length > 1 && (
+                          <View style={styles.dotsContainer}>
+                            {media.map((_, i) => (
+                              <View
+                                key={i}
+                                style={[
+                                  styles.dot,
+                                  i === currentMediaIndex && styles.activeDot,
+                                ]}
+                              />
+                            ))}
+                          </View>
+                        )}
                       </View>
                     )}
 
@@ -443,7 +446,7 @@ const styles = StyleSheet.create({
   },
   handleBar: {
     width: 40,
-    height: 4,
+    height: 3,
     backgroundColor: "#D0D0D0",
     borderRadius: 2,
     alignSelf: "center",
@@ -456,35 +459,31 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#E3F2FD",
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#F3EDFF",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: "700",
-    color: "#000",
+    color: "#1A1A1A",
     flex: 1,
   },
   closeButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: "#F5F5F5",
     alignItems: "center",
     justifyContent: "center",
   },
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 20,
-  },
-  mediaListContent: {
-    paddingLeft: 20,
-    paddingRight: 20,
   },
   optionContainer: {
     flexDirection: "row",
@@ -498,27 +497,37 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: "#F5F5F5",
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   optionButtonSelected: {
     borderWidth: 2,
     borderColor: "#9747FF",
     backgroundColor: "#FFFFFF",
+    shadowColor: "#9747FF",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
   },
   optionIconContainer: {
     width: 36,
     height: 36,
-    borderRadius: 18,
-    backgroundColor: "#F8F8F8",
+    borderRadius: 10,
+    backgroundColor: "#F5F5F5",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
   },
   optionIconContainerSelected: {
-    backgroundColor: "#F3E8FF",
+    backgroundColor: "#F3EDFF",
   },
   optionButtonText: {
     color: "#666",
@@ -533,50 +542,52 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   captionInput: {
-    backgroundColor: "#F8F8F8",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 16,
     textAlignVertical: "top",
     fontSize: 15,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
-    color: "#000",
+    borderColor: "#F5F5F5",
+    color: "#1A1A1A",
     minHeight: 120,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 1,
   },
   sliderContainer: {
     marginBottom: 16,
+    marginHorizontal: -20,
   },
-  mediaScrollWrapper: {
-    width: "100%",
-  },
-  mediaFlatList: {
-    flexGrow: 0,
+  mediaListContent: {
+    paddingHorizontal: 20,
   },
   mediaItem: {
     width: screenWidth - 40,
     height: 280,
     borderRadius: 16,
-    marginRight: 0,
     overflow: "hidden",
-    backgroundColor: "#000",
+    backgroundColor: "#F9F9F9",
     borderWidth: 1,
     borderColor: "#F5F5F5",
     position: "relative",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
   media: {
     width: "100%",
     height: "100%",
+    backgroundColor: "#F9F9F9",
   },
   removeMediaButton: {
     position: "absolute",
-    top: 12,
-    right: 12,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    alignItems: "center",
-    justifyContent: "center",
+    top: 10,
+    right: 10,
   },
   dotsContainer: {
     flexDirection: "row",
@@ -600,16 +611,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#67C694",
-    paddingVertical: 16,
+    paddingVertical: 14,
     borderRadius: 30,
     justifyContent: "center",
     marginTop: 8,
+    shadowColor: "#67C694",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 6,
   },
   uploadButtonText: {
     color: "#FFFFFF",
     fontWeight: "700",
     marginLeft: 8,
-    fontSize: 16,
+    fontSize: 15,
   },
   actionRow: {
     flexDirection: "row",
@@ -621,34 +637,43 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   cancelButton: {
-    paddingVertical: 16,
-    backgroundColor: "#F0F0F0",
+    paddingVertical: 14,
+    backgroundColor: "#F5F5F5",
     borderRadius: 30,
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E0E0E0",
   },
   cancelButtonText: {
     color: "#666",
     fontWeight: "600",
-    fontSize: 16,
+    fontSize: 15,
   },
   postButton: {
-    paddingVertical: 16,
+    paddingVertical: 14,
     backgroundColor: "#67C694",
     borderRadius: 30,
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    shadowColor: "#67C694",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 6,
+    elevation: 6,
   },
   postButtonDisabled: {
     backgroundColor: "#D0D0D0",
     opacity: 0.6,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   postButtonText: {
     color: "#FFFFFF",
     fontWeight: "700",
-    fontSize: 16,
+    fontSize: 15,
   },
 });

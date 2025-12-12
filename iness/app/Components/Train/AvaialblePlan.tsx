@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 8,
+    marginBottom: 4,
   },
   headerLeft: {
     flexDirection: "row",
@@ -162,6 +162,7 @@ const styles = StyleSheet.create({
     color: "#888",
     marginBottom: 16,
     marginLeft: 46,
+    marginTop: 2,
     fontFamily: theme.fonts.regular,
   },
 });

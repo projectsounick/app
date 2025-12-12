@@ -6,6 +6,7 @@ import {
   Image,
   ScrollView,
   ImageBackground,
+  StyleSheet,
 } from "react-native";
 import { useSelector } from "react-redux";
 import { LinearGradient } from "expo-linear-gradient";
@@ -37,85 +38,28 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
     <ScrollView
       contentContainerStyle={{ paddingBottom: 40, paddingVertical: 8 }}
     >
-      {/* Main Header */}
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginBottom: 24,
-          paddingHorizontal: 4,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 24,
-            fontWeight: "700",
-            color: "#000",
-            letterSpacing: -0.5,
-          }}
-        >
-          Current Plans
-        </Text>
-        <View
-          style={{
-            width: 40,
-            height: 3,
-            backgroundColor: "#9747FF",
-            borderRadius: 2,
-          }}
-        />
-      </View>
-
       {/* Plan Cards */}
       {plans.length > 0 && (
-        <View style={{ marginBottom: 24 }}>
-          {/* Header */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 12,
-            }}
-          >
-            <View
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 18,
-                backgroundColor: "#9747FF",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 12,
-              }}
-            >
-              <MaterialCommunityIcons
-                name="dumbbell"
-                size={20}
-                color="#FFFFFF"
-              />
+        <View style={styles.section}>
+          {/* Section Header with Icon */}
+          <View style={styles.sectionHeader}>
+            <View style={styles.headerLeft}>
+              <View style={styles.iconContainer}>
+                <MaterialCommunityIcons
+                  name="dumbbell"
+                  size={18}
+                  color="#9747FF"
+                />
+              </View>
+              <Text style={styles.sectionTitle}>Active Plans</Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "700",
-                  color: "#000",
-                  marginBottom: 2,
-                }}
-              >
-                Active Plans
-              </Text>
-              <Text
-                style={{
-                  fontSize: 13,
-                  color: "#666",
-                }}
-              >
-                Your current workout and diet plans.
-              </Text>
-            </View>
+            <View style={styles.headerDash} />
           </View>
+
+          {/* Description */}
+          <Text style={styles.sectionDescription}>
+            Your current workout and diet plans.
+          </Text>
 
           {/* Plan Cards */}
           {plans.map((plan, index) => {
@@ -143,60 +87,41 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
 
       {/* Empty State */}
       {plans.length === 0 && activeManualPlan === null && activeServices.length === 0 && (
-        <View style={{ marginTop: 24, alignItems: "center" }}>
-          <Text style={{ color: "#666", textAlign: "center", fontSize: 14 }}>
+        <View style={styles.emptyState}>
+          <View style={styles.emptyIconContainer}>
+            <MaterialCommunityIcons
+              name="clipboard-text-outline"
+              size={32}
+              color="#9747FF"
+            />
+          </View>
+          <Text style={styles.emptyText}>
             No {isActive ? "active" : "completed"} plans found.
           </Text>
         </View>
       )}
+
       {isActive && activeManualPlan && (
-        <View style={{ marginBottom: 24 }}>
-          {/* Header */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 12,
-            }}
-          >
-            <View
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 18,
-                backgroundColor: "#9747FF",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 12,
-              }}
-            >
-              <MaterialCommunityIcons
-                name="file-document-edit"
-                size={20}
-                color="#FFFFFF"
-              />
+        <View style={styles.section}>
+          {/* Section Header with Icon */}
+          <View style={styles.sectionHeader}>
+            <View style={styles.headerLeft}>
+              <View style={styles.iconContainer}>
+                <MaterialCommunityIcons
+                  name="file-document-edit"
+                  size={18}
+                  color="#9747FF"
+                />
+              </View>
+              <Text style={styles.sectionTitle}>Manual Plan</Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "700",
-                  color: "#000",
-                  marginBottom: 2,
-                }}
-              >
-                Manual Plan
-              </Text>
-              <Text
-                style={{
-                  fontSize: 13,
-                  color: "#666",
-                }}
-              >
-                Your custom workout plan.
-              </Text>
-            </View>
+            <View style={styles.headerDash} />
           </View>
+
+          {/* Description */}
+          <Text style={styles.sectionDescription}>
+            Your custom workout plan.
+          </Text>
 
           {/* Manual Plan Card */}
           <CurrentPlanCard
@@ -210,54 +135,28 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
           />
         </View>
       )}
+
       {activeServices.length > 0 && (
-        <View style={{ marginBottom: 24 }}>
-          {/* Header */}
-          <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginBottom: 12,
-            }}
-          >
-            <View
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 18,
-                backgroundColor: "#9747FF",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 12,
-              }}
-            >
-              <MaterialCommunityIcons
-                name="briefcase-check"
-                size={20}
-                color="#FFFFFF"
-              />
+        <View style={styles.section}>
+          {/* Section Header with Icon */}
+          <View style={styles.sectionHeader}>
+            <View style={styles.headerLeft}>
+              <View style={styles.iconContainer}>
+                <MaterialCommunityIcons
+                  name="briefcase-check"
+                  size={18}
+                  color="#9747FF"
+                />
+              </View>
+              <Text style={styles.sectionTitle}>Active Services</Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text
-                style={{
-                  fontSize: 18,
-                  fontWeight: "700",
-                  color: "#000",
-                  marginBottom: 2,
-                }}
-              >
-                Active Services
-              </Text>
-              <Text
-                style={{
-                  fontSize: 13,
-                  color: "#666",
-                }}
-              >
-                Your active service subscriptions.
-              </Text>
-            </View>
+            <View style={styles.headerDash} />
           </View>
+
+          {/* Description */}
+          <Text style={styles.sectionDescription}>
+            Your active service subscriptions.
+          </Text>
 
           {/* Service Cards */}
           {activeServices.map((service, index) => {
@@ -283,5 +182,66 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
     </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  section: {
+    marginBottom: 24,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 8,
+  },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "#F3EDFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 10,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#1A1A1A",
+  },
+  headerDash: {
+    width: 30,
+    height: 3,
+    backgroundColor: "#9747FF",
+    borderRadius: 2,
+  },
+  sectionDescription: {
+    fontSize: 13,
+    color: "#888",
+    marginBottom: 16,
+    marginLeft: 46,
+  },
+  emptyState: {
+    marginTop: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyIconContainer: {
+    width: 64,
+    height: 64,
+    borderRadius: 16,
+    backgroundColor: "#F3EDFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  emptyText: {
+    color: "#888",
+    textAlign: "center",
+    fontSize: 14,
+  },
+});
 
 export default CurrentPlans;

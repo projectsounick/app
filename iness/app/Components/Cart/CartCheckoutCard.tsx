@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Modal, TextInput } from "react-native";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { CartItem } from "@/app/interfaces/cartInterface";
 import AnimatedDots from "./LoadingDots";
 import { DiscountCoupon } from "@/app/interfaces/otherInterfaces";
-import theme from "@/app/Theme/globalTheme";
 
 interface CartCheckoutSummaryProps {
   cartItems: CartItem[];
@@ -33,52 +32,77 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
     <View
       style={{
         paddingHorizontal: 20,
-        paddingTop: 20,
+        paddingTop: 16,
         paddingBottom: 30,
-        backgroundColor: "#2D0140",
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
+        backgroundColor: "#fff",
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        borderTopWidth: 1,
+        borderLeftWidth: 1,
+        borderRightWidth: 1,
+        borderColor: "#F5F5F5",
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: -4 },
+        shadowOpacity: 0.1,
+        shadowRadius: 12,
+        elevation: 8,
       }}
     >
-      {/* Billing Address */}
-      {/* <View
-        style={{ flexDirection: "row", alignItems: "center", marginBottom: 14 }}
+      {/* Price Summary */}
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 16,
+          paddingBottom: 16,
+          borderBottomWidth: 1,
+          borderBottomColor: "#F5F5F5",
+        }}
       >
-        <MaterialCommunityIcons name="home-outline" size={18} color="#fff" />
-        <View style={{ flex: 1, marginLeft: 8 }}>
-          <Text style={{ color: "#fff", fontSize: 13, fontWeight: "600" }}>
-            Billing Address
-          </Text>
-          <Text style={{ color: "#CCCCCC", fontSize: 12 }} numberOfLines={1}>
-            {address}
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          <View
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              backgroundColor: "#F3EDFF",
+              alignItems: "center",
+              justifyContent: "center",
+              marginRight: 10,
+            }}
+          >
+            <Ionicons name="receipt-outline" size={18} color="#9747FF" />
+          </View>
+          <Text style={{ fontSize: 15, fontWeight: "600", color: "#1A1A1A" }}>
+            Total Amount
           </Text>
         </View>
-        <TouchableOpacity onPress={() => setModalVisible(true)}>
-          <Text style={{ color: "#A4F77F", fontWeight: "600", fontSize: 12 }}>
-            Change
-          </Text>
-        </TouchableOpacity>
-      </View> */}
+        <Text style={{ fontSize: 20, fontWeight: "700", color: "#1A1A1A" }}>
+          ₹{totalAmount}
+        </Text>
+      </View>
 
       {/* Bottom Row - Payment & Button */}
-      <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
         {/* Pay Using */}
-        <TouchableOpacity
+        <View
           style={{
-            backgroundColor: "#5C0B81",
+            backgroundColor: "#F3EDFF",
             paddingVertical: 10,
-            paddingHorizontal: 12,
-            borderRadius: 10,
-            marginRight: 10,
+            paddingHorizontal: 14,
+            borderRadius: 12,
             justifyContent: "center",
             alignItems: "center",
+            borderWidth: 1,
+            borderColor: "#E8DEFF",
           }}
         >
-          <Text style={{ color: "#fff", fontSize: 10 }}>Pay Using</Text>
-          <Text style={{ color: "#fff", fontWeight: "bold", fontSize: 14 }}>
-            Phone Pe
+          <Text style={{ color: "#9747FF", fontSize: 10, fontWeight: "500" }}>Pay Using</Text>
+          <Text style={{ color: "#9747FF", fontWeight: "700", fontSize: 13 }}>
+            PhonePe
           </Text>
-        </TouchableOpacity>
+        </View>
 
         {/* Place Order */}
         <TouchableOpacity
@@ -86,66 +110,36 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
           disabled={cartItems.length === 0}
           style={{
             flex: 1,
-            backgroundColor: cartItems.length === 0 ? "#cccccc" : "#67c694",
+            backgroundColor: cartItems.length === 0 ? "#D0D0D0" : "#67C694",
             flexDirection: "row",
             alignItems: "center",
-            justifyContent: "space-between",
-            paddingHorizontal: 16,
+            justifyContent: "center",
+            paddingHorizontal: 20,
             borderRadius: 30,
-            height: 48,
-
-            opacity: cartItems.length === 0 ? 0.6 : 1, // visual cue
+            height: 50,
+            opacity: cartItems.length === 0 ? 0.6 : 1,
+            shadowColor: "#67C694",
+            shadowOffset: { width: 0, height: 4 },
+            shadowOpacity: cartItems.length === 0 ? 0 : 0.4,
+            shadowRadius: 6,
+            elevation: cartItems.length === 0 ? 0 : 6,
+            gap: 8,
           }}
         >
           {loading ? (
             <AnimatedDots />
           ) : (
             <>
-              <View>
-                <Text
-                  style={{
-                    color: "#000",
-                    fontSize: 11,
-                    fontFamily: theme.fonts.bold,
-                  }}
-                >
-                  Total
-                </Text>
-                <Text
-                  style={{
-                    color: "#000",
-                    fontWeight: "bold",
-                    fontSize: 16,
-                    fontFamily: theme.fonts.bold,
-                  }}
-                >
-                  ₹{totalAmount}
-                </Text>
-              </View>
-              <View
+              <MaterialCommunityIcons name="cart-check" size={20} color="#fff" />
+              <Text
                 style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  color: "#fff",
+                  fontWeight: "700",
+                  fontSize: 15,
                 }}
               >
-                <Text
-                  style={{
-                    color: "#000",
-                    fontWeight: "bold",
-                    fontFamily: theme.fonts.bold,
-                    fontSize: 16,
-                  }}
-                >
-                  Place Order
-                </Text>
-                <MaterialIcons
-                  name="arrow-forward-ios"
-                  size={18}
-                  color="#000"
-                  style={{ marginLeft: 2 }}
-                />
-              </View>
+                Place Order
+              </Text>
             </>
           )}
         </TouchableOpacity>
