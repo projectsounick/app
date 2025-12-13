@@ -41,11 +41,9 @@ export default function CouponScreen() {
           await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
 
         if (loggedUser.exists) {
-          let couponIds = loggedUser.data.assignedCoupons;
-
-          if (couponIds) {
-            const couponRespone = await couponService.getAllCoupons(couponIds);
-
+        
+            const couponRespone = await couponService.getAllCoupons();
+   
             if (couponRespone.success) {
               setCoupons(couponRespone.data);
               setSnackBarOpen(true);
@@ -58,10 +56,7 @@ export default function CouponScreen() {
             setSnackBarOpen(true);
             setSnackbarMessage("You do not have any coupon");
           }
-        } else {
-          setSnackBarOpen(true);
-          setSnackbarMessage("Some error has happened,try again");
-        }
+       
       } catch (error: any) {
         console.log(`erro ${error.message}`);
 
@@ -98,19 +93,7 @@ export default function CouponScreen() {
         </View>
 
         {/* Heading */}
-        <Text
-          style={{
-            fontSize: 24,
-            fontWeight: "bold",
-            color: theme.colors.dark,
-            paddingHorizontal: 20,
-            textAlign: "center",
-            marginTop: 30,
-            marginBottom: 20,
-          }}
-        >
-          Your Coupons
-        </Text>
+     
         {loading ? (
           <View
             style={{

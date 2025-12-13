@@ -20,7 +20,9 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 
 const FullPlanDetails = () => {
-  const { id, type } = useLocalSearchParams(); // type: 'plan' | 'service'
+  const { id, type } = useLocalSearchParams();
+
+ // type: 'plan' | 'service'
   const [loading, setLoading] = useState(false);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [selectedSession, setSelectedSession] = useState<Session | null>(null);
@@ -34,16 +36,26 @@ const FullPlanDetails = () => {
     (state: RootState) => state.plan.activeServices
   );
 
-  const selectedPlanOrService: any =
-    type === "plan"
-      ? activePlans.find((plan) => plan._id === id)
-      : activeServices.find((service) => service._id === id);
+  const selectedPlanOrService: any = useMemo(
+    () =>
+      type === "plan"
+        ? activePlans.find((plan) => plan._id === id)
+        : activeServices.find((service) => service._id === id),
+    [type, id, activePlans, activeServices]
+  );
 
+  useEffect(() => {
+    if (selectedPlanOrService) {
+      console.log("this is selectedPlanOrService", selectedPlanOrService);
+    }
+  }, [selectedPlanOrService]);
   async function fetchSessions() {
     try {
+
       setLoading(true);
       let response;
       if (type === "plan") {
+    
         let activePlanId: any = id;
         let activeServiceId: any = null;
         response = await sessionService.getSessions(
@@ -51,6 +63,7 @@ const FullPlanDetails = () => {
           activeServiceId
         ); // planId
       } else {
+
         let activePlanId: any = null;
         let activeServiceId: any = id;
         response = await sessionService.getSessions(
@@ -190,7 +203,7 @@ const FullPlanDetails = () => {
         </View>
       ) : (
         <>
-          <SmallHeader title="Plan Overview" showBell showCart />
+          <SmallHeader title="Overview" showBell showCart weightShow={false} />
           <BackHeader />
 
           <View style={{ paddingHorizontal: 16, paddingTop: 12 }}>

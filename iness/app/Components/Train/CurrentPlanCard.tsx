@@ -15,7 +15,7 @@ interface PlanCardProps {
   descItems?: string[];
   imgUrl?: string | null;
   isActive: boolean;
-  type?: "plan" | "diet" | "manual";
+  type?: "plan" | "diet" | "manual" | "service";
   manualDescription?: string;
 }
 
@@ -37,7 +37,7 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
     }
 
     if (isActive) {
-      if (type === "plan") {
+      if (type === "plan" || type === "service") {
         router.push({
           pathname: "/dashboard/fullPlanDetails",
           params: { id, type },

@@ -11,6 +11,7 @@ const handleMeasurements = () => router.push("/dashboard/measurement");
 const handleWeightTrack = () => router.push("/dashboard/trackWeight");
 const handleAppSettings = () => router.push("/dashboard/appsettings");
 const handleAdditionalInfo = () => router.push("/dashboard/additionalinfo");
+const handleMeditation = () => router.push("/dashboard/meditation");
 
 export default function SettingsList() {
   const settings = [
@@ -23,6 +24,11 @@ export default function SettingsList() {
       icon: "fitness",
       label: "Body Weight Track",
       onPress: handleWeightTrack,
+    },
+    {
+      icon: "leaf-outline",
+      label: "Meditation",
+      onPress: handleMeditation,
     },
     {
       icon: "pricetags-outline",

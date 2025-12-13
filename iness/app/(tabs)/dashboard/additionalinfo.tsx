@@ -74,6 +74,48 @@ const policies = [
     content:
       "This policy may be updated from time to time. Users will be notified via in-app alerts. Continued use of the app constitutes acceptance of the updated policy.",
   },
+  {
+    title: "Changes to Policy",
+    icon: "file-document-edit-outline",
+    content:
+      "This policy may be updated from time to time. Users will be notified via in-app alerts. Continued use of the app constitutes acceptance of the updated policy.",
+  },
+  {
+    title: "Payment Terms & Conditions",
+    icon: "credit-card-outline",
+    content:
+      "All payments are processed securely through PhonePe Payment Gateway, an RBI authorized Payment Aggregator. By making a payment, you agree to our payment terms. All transactions are subject to verification and may be declined at our discretion. You are responsible for ensuring sufficient funds are available for transactions.",
+  },
+  {
+    title: "Payment Gateway - PhonePe",
+    icon: "bank-outline",
+    content:
+      "We use PhonePe Payment Gateway (PhonePe Limited, RBI authorized Payment Aggregator) to process all payments. PhonePe supports multiple payment methods including UPI, Credit/Debit Cards, and Net Banking. All payment data is encrypted and processed securely. PhonePe complies with PCI DSS standards for secure payment processing.",
+  },
+  {
+    title: "Transaction Security",
+    icon: "lock-outline",
+    content:
+      "All payment transactions are secured using industry-standard encryption protocols. Your payment information is processed securely through PhonePe's secure payment infrastructure. We do not store your complete payment card details or UPI PIN on our servers. All sensitive payment data is handled by PhonePe in compliance with RBI guidelines.",
+  },
+  {
+    title: "Payment Processing",
+    icon: "cash-multiple",
+    content:
+      "Payments are processed in real-time. Upon successful payment, you will receive a confirmation. Failed transactions will be automatically reversed to your original payment method within 5-7 business days. Transaction limits may apply as per PhonePe and your bank's policies. All amounts are displayed in Indian Rupees (INR).",
+  },
+  {
+    title: "Refund & Cancellation",
+    icon: "cash-refund",
+    content:
+      "Refund requests must be made within 24 hours of purchase. No refunds will be processed once a plan has started or content has been accessed. Refunds will be processed to the original payment method within 7-10 business days. For payment-related disputes, please contact support@iness.fitness with your transaction ID.",
+  },
+  {
+    title: "Payment Disputes & Grievances",
+    icon: "alert-circle-outline",
+    content:
+      "For any payment-related issues, disputes, or unauthorized transactions, please contact our Grievance Officer at support@iness.fitness immediately with transaction details. We will investigate and resolve disputes in accordance with RBI guidelines. You may also contact PhonePe support for payment gateway related issues.",
+  },
 ];
 
 const citations = [
@@ -172,6 +214,14 @@ export default function AdditionalInfoScreen() {
     Linking.openURL(`mailto:${email}`).catch((err) =>
       console.error("Failed to open email:", err)
     );
+  };
+
+  const openCitation = (url: string) => {
+    if (url) {
+      Linking.openURL(url).catch((err) =>
+        console.error("Failed to open URL:", err)
+      );
+    }
   };
 
   const renderCertificatesContent = () => (

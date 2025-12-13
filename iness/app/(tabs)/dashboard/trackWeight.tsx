@@ -92,8 +92,13 @@ const WeightTrackerScreen = () => {
     }
   };
 
+  // Sort data from oldest to newest for the chart
+  const sortedChartData = [...(weightData || [])].sort(
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+
   const chartData = {
-    labels: (weightData || []).map((item) =>
+    labels: sortedChartData.map((item) =>
       new Date(item.date).toLocaleDateString("en-IN", {
         day: "numeric",
         month: "short",
@@ -101,7 +106,7 @@ const WeightTrackerScreen = () => {
     ),
     datasets: [
       {
-        data: (weightData || []).map((item) => item.weight),
+        data: sortedChartData.map((item) => item.weight),
         color: () => "#9747FF", // Purple color
         strokeWidth: 3,
       },
@@ -357,49 +362,30 @@ const WeightTrackerScreen = () => {
                       alignItems: "center",
                     }}
                   >
-                    <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-                      <View
+                    <View style={{ flex: 1 }}>
+                      <Text
                         style={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: 10,
-                          backgroundColor: "#F3EDFF",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          marginRight: 12,
+                          fontSize: 16,
+                          fontWeight: "700",
+                          color: "#1A1A1A",
+                          marginBottom: 4,
                         }}
                       >
-                        <MaterialCommunityIcons
-                          name="weight-kilogram"
-                          size={18}
-                          color="#9747FF"
-                        />
-                      </View>
-                      <View style={{ flex: 1 }}>
-                        <Text
-                          style={{
-                            fontSize: 16,
-                            fontWeight: "700",
-                            color: "#1A1A1A",
-                            marginBottom: 4,
-                          }}
-                        >
-                          {entry.weight} kg
-                        </Text>
-                        <Text
-                          style={{
-                            color: "#666",
-                            fontSize: 12,
-                            fontWeight: "400",
-                          }}
-                        >
-                          {new Date(entry.date).toLocaleString("en-IN", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                          })}
-                        </Text>
-                      </View>
+                        {entry.weight} kg
+                      </Text>
+                      <Text
+                        style={{
+                          color: "#666",
+                          fontSize: 12,
+                          fontWeight: "400",
+                        }}
+                      >
+                        {new Date(entry.date).toLocaleString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </Text>
                     </View>
                     <TouchableOpacity
                       onPress={() => handleDeleteWeight(entry._id || "")}

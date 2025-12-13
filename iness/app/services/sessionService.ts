@@ -25,12 +25,13 @@ async function getSessions(
       url += `?activeServiceId=${encodeURIComponent(activeServiceId)}`;
     }
     if (activePlanId || activeServiceId) {
-      url += `&&isActive=${encodeURIComponent("true")}`;
+      url += `&isActive=${encodeURIComponent("true")}`;
     } else {
       url += `?isActive=${encodeURIComponent("true")}`;
     }
 
     let data = await fetchWrapper.get(url);
+   
     return data;
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);

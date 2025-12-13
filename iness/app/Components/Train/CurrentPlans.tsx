@@ -172,7 +172,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
                   descItems={descItems}
                   imgUrl={imageUrl}
                   isActive={isActive}
-                  type="plan"
+                  type="service"
                 />
               </View>
             );
