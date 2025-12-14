@@ -8,6 +8,8 @@ const baseUrl = `${config.apiUrl}/api`;
 export const chatService = {
   getSupportConversation,
   addSupportMessage,
+  getTrainerChat,
+  addTrainerMessage,
 };
 
 //// Funciton for updating the user in using backend then storing in AsyncStorage----/
@@ -36,5 +38,26 @@ async function addSupportMessage(
     });
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
+  }
+}
+
+async function getTrainerChat(chatId: string): Promise<ApiResponseInterface> {
+  try {
+    return fetchWrapper.get(`${baseUrl}/trainerchat/${chatId}`);
+  } catch (error: any) {
+    throw new Error("Error getting trainer chat: " + error.message);
+  }
+}
+
+async function addTrainerMessage(
+  data: ChatMessage,
+  chatId: string
+): Promise<ApiResponseInterface> {
+  try {
+    return fetchWrapper.post(`${baseUrl}/trainerchat/${chatId}`, {
+      data,
+    });
+  } catch (error: any) {
+    throw new Error("Error adding trainer message: " + error.message);
   }
 }

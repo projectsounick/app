@@ -20,7 +20,7 @@ import theme from "../Theme/globalTheme";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { router } from "expo-router";
-import TrackerModal from "../Components/Tracking/TrackingModal";
+import TrackerModal from "@/app/Modals/TrackingModal";
 import CustomSnackbar from "./Snackbar";
 import { trackService } from "../services/track.service";
 import { updateTrackingField } from "@/Slices/trackSlice";

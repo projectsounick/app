@@ -20,7 +20,7 @@ import ChatMessage from "@/app/Components/SupportChat/ChatMessage";
 import useGetDataHook from "@/hooks/useFetchHook";
 import { chatService } from "@/app/services/chat.service";
 import { ActivityIndicator } from "react-native-paper";
-import { uploadToAzureFromExpo } from "@/utils/azureUtils"; // make sure this util exists and works
+import { uploadToAzureFromExpo } from "@/utils/azureUtils";
 import { userService } from "@/app/services/user.service";
 import ImageViewerModal from "@/app/Modals/ImageViewerModal";
 import {
@@ -29,10 +29,15 @@ import {
 } from "react-native-safe-area-context";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-const { height } = Dimensions.get("window");
-const topPadding = height * 0.05; // 2% of screen height
+import { useLocalSearchParams } from "expo-router";
 
-export default function SupportScreen() {
+const { height } = Dimensions.get("window");
+const topPadding = height * 0.05;
+
+export default function TrainerChatScreen() {
+  const params = useLocalSearchParams();
+  const chatId = params.chatId as string;
+  const trainerName = params.trainerName as string;
   const [inputText, setInputText] = useState("");
   const flatListRef = useRef<FlatList>(null);
   const [selectedAttachments, setSelectedAttachments] = useState<string[]>([]);
@@ -45,11 +50,12 @@ export default function SupportScreen() {
     setSnackbarVisible,
     snackbarVisible,
     snackbarMessage,
-  } = useGetDataHook(chatService.getSupportConversation);
+  } = useGetDataHook(() => chatService.getTrainerChat(chatId));
   const [messageSendingLoader, setMessageSendingLoader] = useState(false);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  //// Function for sending the message to the support ------------------------/
+
+  //// Function for sending the message to the trainer ------------------------/
   const handleSend = async () => {
     try {
       setMessageSendingLoader(true);
@@ -104,17 +110,11 @@ export default function SupportScreen() {
         attachments: uploadedUrls,
         date: new Date().toDateString(),
       };
-      let loggedUser =
-        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-      let userId;
-      if (loggedUser.exists) {
-        userId = loggedUser.data._id;
-      }
 
       //// Uploading the message to the backend ----------------------------/
-      const uploadMessageResponse = await chatService.addSupportMessage(
+      const uploadMessageResponse = await chatService.addTrainerMessage(
         data,
-        userId
+        chatId
       );
 
       if (uploadMessageResponse.success) {
@@ -176,7 +176,7 @@ export default function SupportScreen() {
                 marginTop: Platform.OS === "ios" ? topPadding : "4%",
               }}
             >
-              <NormalHeader screenName="Support" />
+              <NormalHeader screenName={trainerName || "Trainer"} />
             </View>
 
             {loading ? (
@@ -214,52 +214,19 @@ export default function SupportScreen() {
                     style={{
                       alignItems: "center",
                       paddingHorizontal: 20,
-                      backgroundColor: "#FFFFFF",
-                      borderRadius: 20,
-                      padding: 24,
-                      marginHorizontal: 20,
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 4 },
-                      shadowOpacity: 0.12,
-                      shadowRadius: 12,
-                      elevation: 5,
-                      borderWidth: 1,
-                      borderColor: "#F5F5F5",
+                      paddingVertical: 40,
                     }}
                   >
-                    <View
-                      style={{
-                        width: 60,
-                        height: 60,
-                        borderRadius: 30,
-                        backgroundColor: "#F0F0F0",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        marginBottom: 16,
-                      }}
-                    >
-                      <Ionicons name="chatbubble-ellipses" size={30} color="#9747FF" />
-                    </View>
-                    <Text
-                      style={{
-                        color: "#000",
-                        fontSize: 18,
-                        fontWeight: "700",
-                        textAlign: "center",
-                        marginBottom: 8,
-                      }}
-                    >
-                      No conversation yet
-                    </Text>
                     <Text
                       style={{
                         color: "#666",
-                        fontSize: 14,
+                        fontSize: 16,
                         textAlign: "center",
-                        lineHeight: 20,
+                        lineHeight: 24,
+                        fontFamily: theme.fonts.regular,
                       }}
                     >
-                      Start a conversation with our support team. We're here to help!
+                      No conversation yet. Start a conversation with your trainer.
                     </Text>
                   </View>
                 }

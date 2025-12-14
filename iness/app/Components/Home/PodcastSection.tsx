@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import theme from "@/app/Theme/globalTheme";
-import PodcastBottomSheetModal from "./PodcastBottomSheetModal";
+import PodcastBottomSheetModal from "@/app/Modals/PodcastBottomSheetModal";
 import { UserData } from "@/app/interfaces/UserInterface";
 import { PodcastInterface } from "@/app/interfaces/podcastsInterface";
 import { useSelector } from "react-redux";

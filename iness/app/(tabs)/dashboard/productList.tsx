@@ -15,7 +15,7 @@ import { RootState } from "@/store";
 import { AntDesign } from "@expo/vector-icons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { Product } from "@/app/interfaces/ecommerceInterface";
-import ProductModal from "@/app/Components/ecom/ProductBottomSheet";
+import ProductModal from "@/app/Modals/ProductBottomSheetModal";
 import SmallHeader from "@/app/modules/SmallHeader";
 import { useLocalSearchParams } from "expo-router";
 import BackHeader from "@/app/modules/BackHeader";

@@ -19,8 +19,8 @@ import { ActivityIndicator } from "react-native-paper";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import theme from "@/app/Theme/globalTheme";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AddressModal from "@/app/Components/Cart/AddressModal";
-import CouponModal from "@/app/Components/Cart/CouponModal";
+import AddressModal from "@/app/Modals/AddressModal";
+import CouponModal from "@/app/Modals/CouponModal";
 import { DiscountCoupon } from "@/app/interfaces/otherInterfaces";
 import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
 

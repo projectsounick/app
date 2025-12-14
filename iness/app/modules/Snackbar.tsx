@@ -3,6 +3,7 @@ import { Animated, Easing, Dimensions, View } from "react-native";
 import { useEffect, useRef, useState } from "react";
 import theme from "../Theme/globalTheme";
 import { CustomSnackbarProps } from "../interfaces/moduleInterfaces";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const { height } = Dimensions.get("window");
 
@@ -13,100 +14,82 @@ const CustomSnackbar: React.FC<CustomSnackbarProps> = ({
   bgColor,
   duration = 2000,
 }) => {
-  const translateY = useRef(new Animated.Value(height)).current;
-  const [showBackdrop, setShowBackdrop] = useState(false);
+  const translateY = useRef(new Animated.Value(100)).current;
+  const insets = useSafeAreaInsets();
+  const bottomOffset = insets.bottom + 20; // 20px spacing from bottom
 
   useEffect(() => {
     if (visible) {
-      setShowBackdrop(true);
-
       Animated.timing(translateY, {
-        toValue: height / 2.5,
-        duration: 400,
+        toValue: 0,
+        duration: 300,
         easing: Easing.out(Easing.ease),
         useNativeDriver: true,
       }).start();
 
       const timer = setTimeout(() => {
         Animated.timing(translateY, {
-          toValue: height,
-          duration: 300,
+          toValue: 100,
+          duration: 250,
           easing: Easing.in(Easing.ease),
           useNativeDriver: true,
         }).start(() => {
-          setShowBackdrop(false);
           onDismiss();
         });
       }, duration);
 
       return () => clearTimeout(timer);
     } else {
-      setShowBackdrop(false);
+      Animated.timing(translateY, {
+        toValue: 100,
+        duration: 250,
+        easing: Easing.in(Easing.ease),
+        useNativeDriver: true,
+      }).start();
     }
   }, [visible]);
 
   return (
-    <>
-      {showBackdrop && (
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.3)", // 👈 semi-transparent dark background
-            zIndex: 9998,
-          }}
-        />
-      )}
-      <Animated.View
+    <Animated.View
+      style={{
+        position: "absolute",
+        left: 16,
+        right: 16,
+        bottom: bottomOffset,
+        transform: [{ translateY }],
+        zIndex: 9999,
+      }}
+    >
+      <Snackbar
+        visible={visible}
+        onDismiss={onDismiss}
+        duration={duration}
         style={{
-          position: "absolute",
-          left: 16,
-          right: 16,
-          transform: [{ translateY }],
-          zIndex: 9999,
+          backgroundColor: bgColor || "#FFFFFF",
+          borderRadius: 12,
+          paddingHorizontal: 16,
+          paddingVertical: 12,
+          shadowColor: "#000",
+          shadowOpacity: 0.15,
+          shadowOffset: { width: 0, height: 2 },
+          shadowRadius: 8,
+          elevation: 6,
         }}
       >
-        <Snackbar
-          visible={visible}
-          onDismiss={onDismiss}
-          duration={duration}
-          action={{
-            label: "Close",
-            onPress: onDismiss,
-            labelStyle: {
-              color: theme.colors.black,
-              fontWeight: "bold",
-            },
-          }}
-          style={{
-            backgroundColor: bgColor,
-            borderRadius: 12,
-            paddingHorizontal: 16,
-            paddingVertical: 8,
-            shadowColor: "#000",
-            shadowOpacity: 0.25,
-            shadowOffset: { width: 0, height: 4 },
-            shadowRadius: 8,
-            elevation: 6,
-          }}
-        >
-          <View>
-            <Animated.Text
-              style={{
-                color: theme.colors.black,
-                fontSize: theme.fontSizes.medium,
-                fontWeight: "600",
-              }}
-            >
-              {message}
-            </Animated.Text>
-          </View>
-        </Snackbar>
-      </Animated.View>
-    </>
+        <View>
+          <Animated.Text
+            style={{
+              color: "#000000",
+              fontSize: theme.fontSizes.regular,
+              fontWeight: "500",
+              fontFamily: theme.fonts.regular,
+            }}
+          >
+            {message}
+          </Animated.Text>
+        </View>
+      </Snackbar>
+    </Animated.View>
   );
 };
 

@@ -1,246 +1,380 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Animated,
+  ScrollView,
   Dimensions,
   TouchableOpacity,
   Alert,
   ImageBackground,
+  StyleSheet,
+  Platform,
+  ActivityIndicator,
 } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import NormalHeader from "@/app/modules/NormalHeader";
-import { MaterialIcons } from "@expo/vector-icons"; // Importing icons for copy button
+import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import theme from "@/app/Theme/globalTheme";
 import { CouponInterface } from "@/app/interfaces/otherInterfaces";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { couponService } from "@/app/services/coupon.service";
-import { ActivityIndicator } from "react-native-paper";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import { SafeAreaView } from "react-native-safe-area-context";
-const { width } = Dimensions.get("window");
-const CARD_WIDTH = width * 0.7; // Adjusting width to show part of left and right cards
-const SPACING = 20; // Adjust spacing between cards
-const CARD_HEIGHT = 150; // Reducing the card height
 
-///// Main funcitonal component for the Couponscreen ------------------------------------/
+const { height, width } = Dimensions.get("window");
+const topPadding = height * 0.05;
+const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 
 export default function CouponScreen() {
   const [coupons, setCoupons] = useState<CouponInterface[]>([]);
-  const scrollX = useRef(new Animated.Value(0)).current;
   const [loading, setLoading] = useState(false);
   const [snackbarOpen, setSnackBarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  ///// Useeffect funciton for fetching the coupons --------------------/
+
   useEffect(() => {
     async function fetchCoupons() {
       try {
         setLoading(true);
-        //// getting the user from localstorage ---------/
         const loggedUser =
           await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
 
         if (loggedUser.exists) {
-        
-            const couponRespone = await couponService.getAllCoupons();
-   
-            if (couponRespone.success) {
-              setCoupons(couponRespone.data);
-              setSnackBarOpen(true);
-              setSnackbarMessage("Coupons has been fetched");
-            } else {
-              setSnackBarOpen(true);
-              setSnackbarMessage("Some error has happened,try again");
-            }
+          const couponResponse = await couponService.getAllCoupons();
+
+          if (couponResponse.success) {
+            setCoupons(couponResponse.data);
+            setSnackBarOpen(true);
+            setSnackbarMessage("Coupons loaded successfully");
           } else {
             setSnackBarOpen(true);
-            setSnackbarMessage("You do not have any coupon");
+            setSnackbarMessage("Failed to load coupons. Please try again.");
           }
-       
+        } else {
+          setSnackBarOpen(true);
+          setSnackbarMessage("Please login to view coupons");
+        }
       } catch (error: any) {
-        console.log(`erro ${error.message}`);
-
+        console.log(`Error: ${error.message}`);
         setSnackBarOpen(true);
-        setSnackbarMessage("Some error has happened,try again");
+        setSnackbarMessage("An error occurred. Please try again.");
       } finally {
         setLoading(false);
       }
     }
     fetchCoupons();
   }, []);
+
   const copyToClipboard = async (code: string) => {
-    await Clipboard.setStringAsync(code);
-    Alert.alert("Copied!", `Coupon code "${code}" copied to clipboard.`);
+    try {
+      await Clipboard.setStringAsync(code);
+      setSnackbarMessage(`Coupon code "${code}" copied to clipboard!`);
+      setSnackBarOpen(true);
+    } catch (error) {
+      Alert.alert("Error", "Failed to copy coupon code");
+    }
   };
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={["top", "left", "right"]}
-    >
+    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
       <ImageBackground
-        source={require("../../../assets/images/basicBackground.jpg")}
+        source={backgroundImg}
+        style={{ flex: 1 }}
         resizeMode="cover"
-        style={{
-          flex: 1,
-          justifyContent: "flex-start",
-          backgroundColor: "#000",
-        }}
       >
-        {/* Header */}
-        <View style={{ paddingTop: 30, paddingLeft: 20 }}>
-          <NormalHeader screenName="Coupons" />
-        </View>
-
-        {/* Heading */}
-     
-        {loading ? (
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: "transparent" }}
+          edges={["left", "right"]}
+        >
+          {/* Header */}
           <View
             style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
+              paddingLeft: 20,
+              marginTop: Platform.OS === "ios" ? topPadding : "4%",
             }}
           >
-            <ActivityIndicator color={theme.colors.secondPrimary} />
+            <NormalHeader screenName="Coupons" />
           </View>
-        ) : (
-          <Animated.ScrollView
-            horizontal
-            pagingEnabled
-            showsHorizontalScrollIndicator={false}
-            snapToInterval={CARD_WIDTH + SPACING}
-            decelerationRate="fast"
-            scrollEventThrottle={16}
-            onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-              { useNativeDriver: true }
-            )}
-            contentContainerStyle={{
-              paddingHorizontal: (width - CARD_WIDTH) / 2, // Showing part of the cards on both sides
-            }}
-          >
-            {coupons.map((coupon, index) => {
-              const inputRange = [
-                (index - 1) * (CARD_WIDTH + SPACING),
-                index * (CARD_WIDTH + SPACING),
-                (index + 1) * (CARD_WIDTH + SPACING),
-              ];
 
-              const scale = scrollX.interpolate({
-                inputRange,
-                outputRange: [0.9, 1, 0.9],
-                extrapolate: "clamp",
-              });
+          {loading ? (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="large" color="#9747FF" />
+              <Text style={styles.loadingText}>Loading coupons...</Text>
+            </View>
+          ) : coupons.length === 0 ? (
+            <View style={styles.emptyContainer}>
+              <MaterialCommunityIcons
+                name="ticket-outline"
+                size={64}
+                color="#9747FF"
+              />
+              <Text style={styles.emptyTitle}>No Coupons Available</Text>
+              <Text style={styles.emptyText}>
+                You don't have any coupons at the moment. Check back later for
+                new offers!
+              </Text>
+            </View>
+          ) : (
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {/* Description Section */}
+              <View style={styles.descriptionContainer}>
+                <View style={styles.descriptionHeader}>
+                  <MaterialCommunityIcons
+                    name="ticket-percent"
+                    size={24}
+                    color="#9747FF"
+                  />
+                  <Text style={styles.descriptionTitle}>
+                    Available Coupons
+                  </Text>
+                </View>
+                <Text style={styles.descriptionText}>
+                  Tap on any coupon to copy the code and use it during checkout
+                  to avail discounts on your purchases.
+                </Text>
+              </View>
 
-              const opacity = scrollX.interpolate({
-                inputRange,
-                outputRange: [0.6, 1, 0.6],
-                extrapolate: "clamp",
-              });
-
-              return (
-                <Animated.View
-                  key={index}
-                  style={{
-                    width: CARD_WIDTH,
-                    height: CARD_HEIGHT, // Reduced height of card
-                    marginRight: SPACING,
-                    backgroundColor: theme.colors.cardLight,
-                    borderWidth: 1,
-                    borderColor: theme.colors.cardLight,
-                    borderRadius: 15,
-                    padding: 15,
-                    transform: [{ scale }],
-                    opacity,
-                    justifyContent: "center", // Align content in the center vertically
-                  }}
-                >
-                  {/* Coupon Card Background */}
-
-                  {/* Coupon Name and Copy Icon inside a Box */}
-                  <View
-                    style={{
-                      // Semi-transparent background for the text box
-                      padding: 10,
-                      borderRadius: 10,
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                    }}
+              {/* Coupons List */}
+              <View style={styles.couponsContainer}>
+                {coupons.map((coupon, index) => (
+                  <TouchableOpacity
+                    key={coupon._id || index}
+                    activeOpacity={0.9}
+                    onPress={() => copyToClipboard(coupon.code)}
+                    style={styles.couponCardWrapper}
                   >
-                    <View style={{ flex: 1 }}>
-                      <Text
-                        style={{
-                          color: theme.colors.dark,
-                          fontSize: 18,
-                          fontWeight: "700",
-                        }}
-                      >
-                        {coupon.title}
-                      </Text>
-                      <Text
-                        style={{
-                          color: theme.colors.textSecondary || "#666",
-                          fontSize: 14,
-                          marginTop: 2,
-                        }}
-                        numberOfLines={2}
-                        ellipsizeMode="tail"
-                      >
-                        {coupon.description}
-                      </Text>
-                    </View>
-                    {/* Copy Icon inside the Box */}
-                    <TouchableOpacity
-                      onPress={() => copyToClipboard(coupon.code)}
+                    <LinearGradient
+                      colors={["#9747FF", "#7B2CBF"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.couponGradient}
                     >
-                      <MaterialIcons
-                        name="content-copy"
-                        size={20}
-                        color={theme.colors.dark}
-                      />
-                    </TouchableOpacity>
-                  </View>
+                      <View style={styles.couponCard}>
+                        {/* Top Section - Title */}
+                        <View style={styles.couponHeader}>
+                          <View style={styles.titleContainer}>
+                            <MaterialCommunityIcons
+                              name="ticket-confirmation"
+                              size={20}
+                              color="#fff"
+                            />
+                            <Text style={styles.couponTitle} numberOfLines={1}>
+                              {coupon.title}
+                            </Text>
+                          </View>
+                        </View>
 
-                  {/* Coupon Code Box */}
-                  <View
-                    style={{
-                      backgroundColor: "#fff",
-                      borderRadius: 10,
-                      padding: 10,
-                      marginTop: 10,
-                      borderWidth: 1,
-                      borderColor: "#ccc",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        color: "#1E40AF",
-                        fontSize: 18,
-                        fontFamily: "monospace",
-                      }}
-                    >
-                      {coupon.code}
-                    </Text>
-                  </View>
-                </Animated.View>
-              );
-            })}
-          </Animated.ScrollView>
-        )}
+                        {/* Description */}
+                        <Text style={styles.couponDescription} numberOfLines={2}>
+                          {coupon.description}
+                        </Text>
 
-        {/* Coupon Cards */}
-        <CustomSnackbar
-          onDismiss={() => setSnackBarOpen(false)}
-          visible={snackbarOpen}
-          message={snackbarMessage}
-          bgColor={theme.colors.primary}
-        />
+                        {/* Coupon Code Section */}
+                        <View style={styles.codeContainer}>
+                          <View style={styles.codeBox}>
+                            <Text style={styles.codeLabel}>Coupon Code</Text>
+                            <View style={styles.codeValueContainer}>
+                              <Text style={styles.codeValue}>{coupon.code}</Text>
+                            </View>
+                          </View>
+                          <TouchableOpacity
+                            onPress={() => copyToClipboard(coupon.code)}
+                            style={styles.copyCodeButton}
+                            activeOpacity={0.8}
+                          >
+                            <MaterialIcons
+                              name="content-copy"
+                              size={18}
+                              color="#9747FF"
+                            />
+                            <Text style={styles.copyCodeText}>Copy</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </LinearGradient>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </ScrollView>
+          )}
+
+          <CustomSnackbar
+            onDismiss={() => setSnackBarOpen(false)}
+            visible={snackbarOpen}
+            message={snackbarMessage}
+            bgColor="#FFFFFF"
+          />
+        </SafeAreaView>
       </ImageBackground>
-    </SafeAreaView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: "#666",
+    fontFamily: theme.fonts.regular,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 40,
+  },
+  emptyTitle: {
+    fontSize: 22,
+    fontWeight: "700",
+    color: "#000",
+    marginTop: 20,
+    marginBottom: 8,
+    fontFamily: theme.fonts.bold,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#666",
+    textAlign: "center",
+    lineHeight: 24,
+    fontFamily: theme.fonts.regular,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 20,
+  },
+  descriptionContainer: {
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+    marginTop: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  descriptionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  descriptionTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#000",
+    marginLeft: 10,
+    fontFamily: theme.fonts.bold,
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: "#666",
+    lineHeight: 20,
+    fontFamily: theme.fonts.regular,
+  },
+  couponsContainer: {
+    gap: 16,
+  },
+  couponCardWrapper: {
+    marginBottom: 4,
+  },
+  couponGradient: {
+    borderRadius: 20,
+    padding: 2,
+    shadowColor: "#9747FF",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+  couponCard: {
+    backgroundColor: "transparent",
+    borderRadius: 18,
+    padding: 20,
+  },
+  couponHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+    marginRight: 12,
+  },
+  couponTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#fff",
+    marginLeft: 8,
+    flex: 1,
+    fontFamily: theme.fonts.bold,
+  },
+  couponDescription: {
+    fontSize: 14,
+    color: "rgba(255, 255, 255, 0.9)",
+    lineHeight: 20,
+    marginBottom: 16,
+    fontFamily: theme.fonts.regular,
+  },
+  codeContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  codeBox: {
+    flex: 1,
+    backgroundColor: "rgba(255, 255, 255, 0.15)",
+    borderRadius: 12,
+    padding: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+  },
+  codeLabel: {
+    fontSize: 11,
+    color: "rgba(255, 255, 255, 0.7)",
+    marginBottom: 6,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    fontFamily: theme.fonts.medium,
+  },
+  codeValueContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  codeValue: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#fff",
+    letterSpacing: 2,
+    fontFamily: theme.fonts.bold,
+  },
+  copyCodeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 6,
+  },
+  copyCodeText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#9747FF",
+    fontFamily: theme.fonts.medium,
+  },
+});

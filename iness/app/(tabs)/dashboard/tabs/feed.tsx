@@ -3,7 +3,7 @@ import { View, ActivityIndicator, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import SmallHeader from "@/app/modules/SmallHeader";
-import ImageSelectorModal from "@/app/modules/CommunitPostModal";
+import ImageSelectorModal from "@/app/Modals/CommunitPostModal";
 import PostFeed from "@/app/Components/Community/CommunityFeed";
 import { communityService } from "@/app/services/community.service";
 import { LoginWrapper } from "@/app/Hoc/LoginWrapper";

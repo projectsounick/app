@@ -13,7 +13,7 @@ import { RootState } from "@/store";
 import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { Product } from "@/app/interfaces/ecommerceInterface";
-import ProductModal from "./ProductBottomSheet";
+import ProductModal from "@/app/Modals/ProductBottomSheetModal";
 import theme from "@/app/Theme/globalTheme";
 
 const GroupedProductDisplay = () => {

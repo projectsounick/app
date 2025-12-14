@@ -17,6 +17,11 @@ const handleTrainers = () => router.push("/dashboard/trainers");
 export default function SettingsList() {
   const settings = [
     {
+      icon: "people-outline",
+      label: "Trainers",
+      onPress: handleTrainers,
+    },
+    {
       icon: "settings-outline",
       label: "App Settings",
       onPress: handleAppSettings,
@@ -56,11 +61,7 @@ export default function SettingsList() {
       label: "Additional Information",
       onPress: handleAdditionalInfo,
     },
-    {
-      icon: "people-outline",
-      label: "Trainers",
-      onPress: handleTrainers,
-    },
+  
   ];
 
   return (

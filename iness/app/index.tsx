@@ -89,26 +89,26 @@ const HomeScreen = () => {
           justifyContent: "space-between",
         }}
       >
-        {/* ✅ Skip Button (Top Right) */}
+        {/* ✅ Skip Button (Top Right) - Smaller and less prominent */}
         <TouchableOpacity
           onPress={handleSkip}
           style={{
             position: "absolute",
             top: 50,
             right: 20,
-            backgroundColor: "rgba(0,0,0,0.4)",
-            paddingVertical: 6,
-            paddingHorizontal: 14,
-            borderRadius: 20,
+            backgroundColor: "rgba(0,0,0,0.2)",
+            paddingVertical: 4,
+            paddingHorizontal: 10,
+            borderRadius: 16,
             zIndex: 10,
           }}
         >
           <Text
             style={{
-              color: "#fff",
-              fontWeight: "600",
-              fontSize: 14,
-              letterSpacing: 0.3,
+              color: "rgba(255,255,255,0.7)",
+              fontWeight: "500",
+              fontSize: 11,
+              letterSpacing: 0.2,
             }}
           >
             Skip Now

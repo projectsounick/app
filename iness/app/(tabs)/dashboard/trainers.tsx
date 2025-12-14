@@ -17,6 +17,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import NormalHeader from "@/app/modules/NormalHeader";
 import theme from "@/app/Theme/globalTheme";
 import { userService } from "@/app/services/user.service";
+import { router } from "expo-router";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 
 const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const { height } = Dimensions.get("window");
@@ -185,9 +187,20 @@ export default function TrainersScreen() {
                         <TouchableOpacity 
                           style={styles.chatIconContainer}
                           activeOpacity={0.7}
-                          onPress={() => {
-                            // TODO: Navigate to chat with trainer
-                            console.log("Chat with trainer:", trainer.name);
+                          onPress={async () => {
+                            try {
+                              const loggedUser = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+                              if (loggedUser.exists) {
+                                const userId = loggedUser.data._id;
+                                const chatId = `${userId}-${trainer._id}`;
+                                router.push({
+                                  pathname: "/(tabs)/dashboard/trainerchat",
+                                  params: { chatId, trainerName: trainer.name, trainerId: trainer._id },
+                                });
+                              }
+                            } catch (error) {
+                              console.error("Error navigating to trainer chat:", error);
+                            }
                           }}
                         >
                           <Ionicons name="chatbubble-ellipses" size={22} color="#fff" />
@@ -240,9 +253,20 @@ export default function TrainersScreen() {
                         <TouchableOpacity 
                           style={styles.chatIconContainerInactive}
                           activeOpacity={0.7}
-                          onPress={() => {
-                            // TODO: Navigate to chat with trainer
-                            console.log("Chat with trainer:", trainer.name);
+                          onPress={async () => {
+                            try {
+                              const loggedUser = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+                              if (loggedUser.exists) {
+                                const userId = loggedUser.data._id;
+                                const chatId = `${userId}-${trainer._id}`;
+                                router.push({
+                                  pathname: "/(tabs)/dashboard/trainerchat",
+                                  params: { chatId, trainerName: trainer.name, trainerId: trainer._id },
+                                });
+                              }
+                            } catch (error) {
+                              console.error("Error navigating to trainer chat:", error);
+                            }
                           }}
                         >
                           <Ionicons name="chatbubble-ellipses-outline" size={22} color="#666" />

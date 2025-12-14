@@ -16,7 +16,7 @@ import { Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { PlanInterface } from "@/app/interfaces/planInterface";
-import DietPlanInfoModal from "@/app/modules/DietPlanModal";
+import DietPlanInfoModal from "@/app/Modals/DietPlanModal";
 import { withAuthGuard } from "@/app/Hoc/WithAuthGuardButton";
 const ProtectedAnimatedSubmitButton = withAuthGuard(AnimatedSubmitButton);
 interface Props {

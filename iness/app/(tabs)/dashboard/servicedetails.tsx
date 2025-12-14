@@ -26,7 +26,7 @@ import {
 } from "@/utils/cartUtils";
 import { addToCart } from "@/Slices/cartSlice";
 import { setCurrentService } from "@/Slices/planSlice";
-import ImageViewerModal from "@/app/modules/ImageModel";
+import ImageViewerModal from "@/app/Modals/ImageViewerModal";
 
 export default function ServiceDetailsScreen() {
   const { serviceId } = useLocalSearchParams<{ serviceId?: string }>();

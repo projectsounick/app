@@ -14,8 +14,11 @@ export interface NotificationNavigationData {
 }
 
 export interface NotificationData {
-  type?: "video" | "post_like" | "session" | "support_message" | "comment" | "post_deleted" | "blog" | "podcast";
+  type?: "video" | "post_like" | "session" | "support_message" | "comment" | "post_deleted" | "blog" | "podcast" | "trainer_chat";
   navigationData?: NotificationNavigationData;
+  chatId?: string;
+  trainerId?: string;
+  trainerName?: string;
   [key: string]: any; // Allow other data fields
 }
 
@@ -35,6 +38,21 @@ export function handleNotificationNavigation(
   }
 
   try {
+    // Special handling for trainer_chat - check for chatId and trainerId even if navigationData exists
+    if (notificationData.type === "trainer_chat") {
+      if (notificationData.chatId && notificationData.trainerId) {
+        router.push({
+          pathname: "/dashboard/trainerchat" as any,
+          params: {
+            chatId: notificationData.chatId,
+            trainerId: notificationData.trainerId,
+            trainerName: notificationData.trainerName || "Trainer",
+          },
+        } as any);
+        return;
+      }
+    }
+
     // If navigationData is provided, use it directly
     if (notificationData.navigationData) {
       const { screen, params } = notificationData.navigationData;
@@ -107,6 +125,23 @@ export function handleNotificationNavigation(
       case "podcast":
         // Podcast notifications navigate to media/podcast screen
         router.push("/dashboard/media" as any);
+        break;
+
+      case "trainer_chat":
+        // Trainer chat notifications navigate to trainer chat screen
+        if (notificationData.chatId && notificationData.trainerId) {
+          router.push({
+            pathname: "/dashboard/trainerchat" as any,
+            params: {
+              chatId: notificationData.chatId,
+              trainerId: notificationData.trainerId,
+              trainerName: notificationData.trainerName || "Trainer",
+            },
+          } as any);
+        } else {
+          // Fallback: navigate to trainers screen if chatId is missing
+          router.push("/dashboard/trainers" as any);
+        }
         break;
 
       default:
@@ -182,6 +217,13 @@ export function getNotificationIcon(
     case "podcast":
       return {
         icon: "podcast", // MaterialCommunityIcons icon name
+        color: "#9747FF",
+        bgColor: "#F3EDFF",
+      };
+
+    case "trainer_chat":
+      return {
+        icon: "chatbubble-ellipses-outline",
         color: "#9747FF",
         bgColor: "#F3EDFF",
       };

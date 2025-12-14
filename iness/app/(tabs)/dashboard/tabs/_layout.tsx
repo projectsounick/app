@@ -10,7 +10,7 @@ import {
   Modal,
 } from "react-native";
 import Imagepicker from "@/app/modules/Imagepicker";
-import StreaksBottomSheet from "@/app/modules/StreakBottomSheet";
+import StreaksBottomSheet from "@/app/Modals/StreakBottomSheet";
 import { useDispatch, useSelector } from "react-redux";
 import { setStreakModalShow } from "@/Slices/streakSlice";
 import { RootState } from "@/store";

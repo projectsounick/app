@@ -20,7 +20,7 @@ import useServiceWithSnackbar from "@/hooks/usePostDataHook";
 import { userService } from "./services/user.service";
 import AnimatedSubmitButton from "./modules/AnimatedSubmitButton";
 import CustomSnackbar from "./modules/Snackbar";
-import PrivacyPolicyModal from "./modules/PrivacyPolicyModal";
+import PrivacyPolicyModal from "@/app/Modals/PrivacyPolicyModal";
 
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import NormalHeader from "./modules/NormalHeader";

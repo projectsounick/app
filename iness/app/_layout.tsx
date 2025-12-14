@@ -5,8 +5,7 @@ import * as Notifications from "expo-notifications";
 import {
   storeNotification,
   storePendingNavigation,
-  getPendingNavigation,
-  clearPendingNavigation,
+
 } from "@/utils/notificationUtils";
 import { useEffect } from "react";
 
@@ -87,7 +86,7 @@ export default function RootLayout() {
           const notification = lastResponse.notification;
           const data = notification.request.content.data;
           
-          console.log("App opened from notification, data:", data);
+      
           
           // Extract navigation data from notification
           let notificationData: NotificationData | null = null;
@@ -99,20 +98,37 @@ export default function RootLayout() {
                 type: (data.type as any) || undefined,
                 navigationData: data.navigationData as NotificationNavigationData,
               };
-            } else if (data.type) {
-              // Data has type but no navigationData, construct it
-              const screen = data.type === "support_message" ? "/dashboard/supportchat" :
-                            data.type === "post_like" || data.type === "comment" ? "/dashboard/tabs/feed" :
-                            data.type === "session" ? "/dashboard/tabs" : "/dashboard/tabs";
+          } else if (data.type) {
+            // Data has type but no navigationData, construct it
+            let screen = "/dashboard/tabs";
+            let params: Record<string, any> = (data.params as Record<string, any>) || {};
+            
+            if (data.type === "support_message") {
+              screen = "/dashboard/supportchat";
+            } else if (data.type === "post_like" || data.type === "comment") {
+              screen = "/dashboard/tabs/feed";
+            } else if (data.type === "session") {
+              screen = "/dashboard/tabs";
+            } else if (data.type === "trainer_chat") {
+              screen = "/dashboard/trainerchat";
+              // Include trainer chat params if available
+              if (data.chatId && data.trainerId) {
+                params = {
+                  chatId: data.chatId,
+                  trainerId: data.trainerId,
+                  trainerName: data.trainerName || "Trainer",
+                };
+              }
+            }
               
-              notificationData = {
-                type: data.type as any,
-                navigationData: {
-                  screen: screen,
-                  params: (data.params as Record<string, any>) || {},
-                },
-              };
-            } else if (data.screen) {
+            notificationData = {
+              type: data.type as any,
+              navigationData: {
+                screen: screen,
+                params: params,
+              },
+            };
+          } else if (data.screen) {
               // Has screen directly
               notificationData = {
                 type: (data.type as any) || undefined,
@@ -130,11 +146,7 @@ export default function RootLayout() {
           if (notificationData) {
             // Store for later navigation (after app is fully ready)
             await storePendingNavigation(notificationData);
-            console.log("✅ Stored pending navigation from notification tap:", {
-              type: notificationData.type,
-              screen: notificationData.navigationData?.screen,
-              fullData: notificationData,
-            });
+           
           } else {
             console.log("⚠️ No valid notification data found");
           }
@@ -186,15 +198,32 @@ export default function RootLayout() {
             };
           } else if (data.type) {
             // Data has type but no navigationData, construct it
-            const screen = data.type === "support_message" ? "/dashboard/supportchat" :
-                          data.type === "post_like" || data.type === "comment" ? "/dashboard/tabs/feed" :
-                          data.type === "session" ? "/dashboard/tabs" : "/dashboard/tabs";
+            let screen = "/dashboard/tabs";
+            let params: Record<string, any> = data.params || {};
+            
+            if (data.type === "support_message") {
+              screen = "/dashboard/supportchat";
+            } else if (data.type === "post_like" || data.type === "comment") {
+              screen = "/dashboard/tabs/feed";
+            } else if (data.type === "session") {
+              screen = "/dashboard/tabs";
+            } else if (data.type === "trainer_chat") {
+              screen = "/dashboard/trainerchat";
+              // Include trainer chat params if available
+              if (data.chatId && data.trainerId) {
+                params = {
+                  chatId: data.chatId,
+                  trainerId: data.trainerId,
+                  trainerName: data.trainerName || "Trainer",
+                };
+              }
+            }
             
             notificationData = {
               type: data.type as any,
               navigationData: {
                 screen: screen,
-                params: data.params || {},
+                params: params,
               },
             };
           } else if (data.screen) {
@@ -221,7 +250,7 @@ export default function RootLayout() {
           // Navigate immediately when app is running
           setTimeout(() => {
             try {
-              console.log("App running - navigating to:", notificationData);
+      
               handleNotificationNavigation(router, notificationData);
             } catch (error) {
               console.error("Error handling notification navigation:", error);

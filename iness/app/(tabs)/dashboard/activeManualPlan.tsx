@@ -21,8 +21,8 @@ import { ResizeMode, Video } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import BackHeader from "@/app/modules/BackHeader";
 import { LinearGradient } from "expo-linear-gradient";
-import ImageViewerModal from "@/app/modules/ImageModel";
-import VideoViewerModal from "@/app/modules/VideoViewerModal";
+import ImageViewerModal from "@/app/Modals/ImageViewerModal";
+import VideoViewerModal from "@/app/Modals/VideoViewerModal";
 
 const dayKeys: (keyof WorkoutPlanInterface)[] = [
   "sun",

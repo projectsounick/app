@@ -10,10 +10,10 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { videocallService } from "../services/videocall.service";
 import { ActivityIndicator } from "react-native-paper";
-import VideoCallScreen from "./VideoCallModule";
+import VideoCallScreen from "@/app/modules/VideoCallModule";
 import { VideoCallFrontend } from "../interfaces/videocallInterface";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import CustomSnackbar from "./Snackbar";
+import CustomSnackbar from "@/app/modules/Snackbar";
 import theme from "../Theme/globalTheme";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 

@@ -29,7 +29,7 @@ import { captureRef } from "react-native-view-shot";
 import { communityService } from "@/app/services/community.service";
 import { useFocusEffect } from "expo-router";
 import theme from "@/app/Theme/globalTheme";
-import ImageViewerModal from "@/app/modules/ImageModel";
+import ImageViewerModal from "@/app/Modals/ImageViewerModal";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { userService } from "@/app/services/user.service";
 import { Post } from "@/app/interfaces/communityService";

@@ -26,7 +26,7 @@ import {
 } from "@/utils/cartUtils";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
-import CustomModal from "./ServiceDetailsModal";
+import CustomModal from "@/app/Modals/ServiceDetailsModal";
 
 const BannerCard = ({ cardData }: { cardData: any }) => {
   const cartItems = useSelector((state: RootState) => state.cart.cartItems);

@@ -49,20 +49,22 @@ function FloatingOptions() {
       label: "Do Yoga",
       bg: ["#9747FF", "#7B2CBF"],
     },
-    {
-      icon: <MaterialIcons name="fitness-center" size={32} color="#fff" />,
-      label: "Weight Train",
-      bg: ["#67C694", "#4CAF50"],
-    },
+   
     {
       icon: <FontAwesome5 name="chalkboard-teacher" size={30} color="#fff" />,
       label: "Offline Class",
-      bg: ["#4FC3F7", "#29B6F6"],
+      bg: ["#67C694", "#4CAF50"],
+    
     },
     {
       icon: <Ionicons name="videocam" size={32} color="#fff" />,
       label: "Online Class",
       bg: ["#9747FF", "#7B2CBF"],
+    },
+    {
+      icon: <MaterialIcons name="fitness-center" size={32} color="#fff" />,
+      label: "Weight Train",
+      bg: ["#4FC3F7", "#29B6F6"],
     },
     {
       icon: <Entypo name="chat" size={32} color="#fff" />,
@@ -80,49 +82,8 @@ function FloatingOptions() {
     return mapping[label] || null;
   };
 
-  // Check if there's a current plan matching the type (case-insensitive)
-  const findCurrentPlan = (planType: string) => {
-    return activePlans.find(
-      (plan) => plan.plan?.planType?.title?.toLowerCase() === planType.toLowerCase()
-    );
-  };
-
-  // Check if there's a current service matching the type (by title containing the keyword)
-  const findCurrentServiceByType = (type: string) => {
-    const keyword = type.toLowerCase();
-    // Also create alternative keywords for better matching
-    const keywords = [keyword];
-    if (keyword === "yoga") {
-      keywords.push("yoga");
-    } else if (keyword === "weight training") {
-      keywords.push("weight", "training", "workout", "fitness");
-    }
-    
-    const foundService = activeServices.find(
-      (service) => {
-        const title = service.serviceDetails?.title?.toLowerCase() || "";
-        // Check if title contains any of the keywords
-        return keywords.some(kw => title.includes(kw));
-      }
-    );
-    
-    // Debug logging (remove in production if needed)
-    if (!foundService && activeServices.length > 0) {
-      console.log("Service not found. Available services:", 
-        activeServices.map(s => s.serviceDetails?.title).filter(Boolean)
-      );
-      console.log("Looking for keyword:", keyword);
-    }
-    
-    return foundService;
-  };
-
-  // Check if there's a current service matching the online/offline type
-  const findCurrentService = (isOnline: boolean) => {
-    return activeServices.find(
-      (service) => service.serviceDetails?.isOnline === isOnline
-    );
-  };
+  
+  
 
   // 🔒 Auth check before navigating
   const handleOptionPress = async (label: string) => {

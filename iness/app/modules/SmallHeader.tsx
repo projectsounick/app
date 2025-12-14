@@ -224,8 +224,8 @@ export default function SmallHeader({
                 <View
                   style={{
                     position: "absolute",
-                    top: 1,
-                    right: 1,
+                    top: -2,
+                    right: -2,
                     backgroundColor: "#FF3B3B",
                     borderRadius: 6,
                     paddingHorizontal: 3,
@@ -268,8 +268,8 @@ export default function SmallHeader({
                       borderRadius: 4,
                       backgroundColor: "red",
                       position: "absolute",
-                      top: 6,
-                      right: 6,
+                      top: 2,
+                      right: 2,
                     }}
                   />
                 ) : null}

@@ -12,7 +12,7 @@ import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Image, Dimensions } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 import { useDispatch } from "react-redux";
-import CouponModal from "./CouponModal";
+import CouponModal from "@/app/Modals/CouponModal";
 import { DiscountCoupon } from "@/app/interfaces/otherInterfaces";
 
 const { width: screenWidth } = Dimensions.get("window");

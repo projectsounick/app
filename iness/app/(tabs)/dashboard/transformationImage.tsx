@@ -24,9 +24,11 @@ import { userService } from "@/app/services/user.service";
 import { uploadToAzureFromExpo } from "@/utils/azureUtils";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { SafeAreaView } from "react-native-safe-area-context";
-import ImageViewerModal from "@/app/modules/ImageModel";
-import VideoViewerModal from "@/app/modules/VideoViewerModal";
+import ImageViewerModal from "@/app/Modals/ImageViewerModal";
+import VideoViewerModal from "@/app/Modals/VideoViewerModal";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+const { height } = Dimensions.get("window");
+const topPadding = height * 0.05;
 
 // Format date like "06 Jul 2025"
 const formatDateDisplay = (dateStr: string) => {
@@ -184,7 +186,7 @@ export default function TransformationImage() {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "transparent" }}
-      edges={["top", "left", "right"]}
+      edges={[ "left", "right"]}
     >
       <ImageBackground
         source={require("../../../assets/images/basicBackground.jpg")}
@@ -192,7 +194,12 @@ export default function TransformationImage() {
         resizeMode="cover"
       >
         {/* Header */}
-        <View style={styles.headerContainer}>
+        <View
+            style={{
+              paddingLeft: 20,
+              marginTop: Platform.OS === "ios" ? topPadding : "4%",
+            }}
+          >
           <NormalHeader screenName="Photos" />
         </View>
 

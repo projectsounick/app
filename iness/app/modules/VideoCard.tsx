@@ -24,7 +24,7 @@ import {
   PodcastVideoCardPropsInterface,
 } from "../interfaces/podcastsInterface";
 
-import MediaComponentModal from "../Components/MediaComponents/MediaCommentModal";
+import MediaComponentModal from "@/app/Modals/MediaCommentModal";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { userService } from "../services/user.service";

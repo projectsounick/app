@@ -3,7 +3,7 @@ import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import theme from "@/app/Theme/globalTheme";
 import { useState } from "react";
-import TransformationImageModal from "./TransformationModal";
+import TransformationImageModal from "@/app/Modals/TransformationModal";
 import { router } from "expo-router";
 import useGetDataHook from "@/hooks/useFetchHook";
 import { transformatiomImageService } from "@/app/services/transofmationImage.service";

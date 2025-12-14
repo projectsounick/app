@@ -13,7 +13,7 @@ import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import theme from "@/app/Theme/globalTheme";
 import { ActivityIndicator } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import VideoCallChecker from "@/app/modules/VideoCallJoinModal";
+import VideoCallChecker from "@/app/Modals/VideoCallJoinModal";
 import eventBus from "@/event";
 import { notificationService } from "@/app/services/notification.service";
 import CustomSnackbar from "@/app/modules/Snackbar";

@@ -18,7 +18,7 @@ import PlanCard from "@/app/modules/PlanCard";
 import BackHeader from "@/app/modules/BackHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-const { width } = Dimensions.get("window");
+
 
 export default function SliderCard() {
   const plans = useSelector((state: RootState) => state.plan.plans);

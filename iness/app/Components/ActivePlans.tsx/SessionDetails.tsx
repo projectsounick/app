@@ -21,7 +21,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Session } from "@/app/interfaces/sessionInterface";
 import theme from "@/app/Theme/globalTheme";
 import { router } from "expo-router";
-import FeedbackModal from "./SessionFeedbackModal";
+import FeedbackModal from "@/app/Modals/SessionFeedbackModal";
 import useServiceWithSnackbar from "@/hooks/usePostDataHook";
 import { sessionService } from "@/app/services/sessionService";
 import { ActivityIndicator } from "react-native-paper";
