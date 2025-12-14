@@ -1,9 +1,11 @@
 import React from "react";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, usePathname } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
 import theme from "../Theme/globalTheme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 
 interface NormalHeaderProps {
   screenName: string;
@@ -13,10 +15,8 @@ interface NormalHeaderProps {
 
 export default function NormalHeader({ screenName, rightIcon, showSupportChat }: NormalHeaderProps) {
   const router = useRouter();
-
   const navigation = useNavigation();
-
-
+  const insets = useSafeAreaInsets();
 
   const handleSupportChatPress = () => {
     router.push("/dashboard/supportchat");
@@ -34,14 +34,17 @@ export default function NormalHeader({ screenName, rightIcon, showSupportChat }:
   };
 
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        marginBottom: 20,
-      }}
-    >
+    <>
+      <StatusBar style="dark" />
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 20,
+          paddingTop: Platform.OS === "android" ? Math.max(insets.top, 0) : 0,
+        }}
+      >
       {/* Back Button and Title */}
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         <TouchableOpacity
@@ -101,5 +104,6 @@ export default function NormalHeader({ screenName, rightIcon, showSupportChat }:
         ) : null} */}
       </View>
     </View>
+    </>
   );
 }

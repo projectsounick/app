@@ -119,7 +119,7 @@ export default function DateBar({
       <View style={{ flexDirection: "row", alignItems: "center" }}>
         {/* Left Arrow */}
         <TouchableOpacity style={{ paddingRight: 8 }}>
-          <Icon name="chevron-left" size={30} color="#2F8C62" />
+          <Icon name="chevron-left" size={30} color="#000000" />
         </TouchableOpacity>
 
         {/* Scroll Container */}
@@ -249,7 +249,7 @@ export default function DateBar({
 
         {/* Right Arrow */}
         <TouchableOpacity style={{ paddingLeft: 8 }}>
-          <Icon name="chevron-right" size={30} color="#2F8C62" />
+          <Icon name="chevron-right" size={30} color="#000000" />
         </TouchableOpacity>
       </View>
     </View>

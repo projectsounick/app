@@ -5,6 +5,7 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Dimensions,
 } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import OnboardingCard from "@/app/modules/OnboardingCard";
@@ -13,6 +14,8 @@ import { UserData } from "@/app/interfaces/UserInterface";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
 import theme from "@/app/Theme/globalTheme";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 // Enhanced goal options with descriptions
 const goalOptions = [
@@ -96,8 +99,8 @@ const OnboardingPrimaryGoal = ({
               icon={item.icon}
               description={item.description}
               updateState={updateState}
-              height={85}
-              fontSize={17}
+              height={Math.min(screenWidth * 0.2, 75)}
+              fontSize={Math.max(screenWidth * 0.04, 15)}
             />
           ))}
         </View>

@@ -120,6 +120,7 @@ const TabbedSessionDetails = ({
             elevation: 3,
             borderWidth: 1,
             borderColor: "#F1F3F1",
+            position: "relative",
           }}
         >
           {/* Time and Duration Row */}
@@ -203,7 +204,7 @@ const TabbedSessionDetails = ({
           </View>
 
           {/* Type and Address Row */}
-          <View style={{ flexDirection: "row", gap: 12, marginBottom: 0 }}>
+          <View style={{ flexDirection: "row", gap: 12, marginBottom: selectedSession.sessionStatus === "completed" ? 50 : 0 }}>
             <View
               style={{
                 flex: 1,
@@ -288,47 +289,53 @@ const TabbedSessionDetails = ({
               </View>
             ) : null}
           </View>
-        </View>
-        {selectedSession.sessionStatus === "completed" && (
-          <Pressable
-            onPress={() => setShowModal(true)}
-            style={{
-              backgroundColor: "#eee",
-              borderColor: "#7C3AED",
-              borderWidth: 1,
-              marginHorizontal: 16,
-              padding: 12,
-              borderRadius: 12,
-              marginBottom: 16,
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <View style={{ flex: 1, paddingRight: 8 }}>
-              <Text
+
+          {/* Feedback Button - Small, bottom left inside card */}
+          {selectedSession.sessionStatus === "completed" && (
+            <View
+              style={{
+                position: "absolute",
+                bottom: 16,
+                left: 16,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() => setShowModal(true)}
+                activeOpacity={0.8}
                 style={{
-                  fontWeight: "bold",
-                  marginBottom: 6,
-                  color: "#000",
-                  fontFamily: theme.fonts.medium,
+                  backgroundColor: "#67C694",
+                  borderRadius: 20,
+                  paddingVertical: 8,
+                  paddingHorizontal: 12,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  shadowColor: "#67C694",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.2,
+                  shadowRadius: 4,
+                  elevation: 3,
                 }}
               >
-                Session Feedback
-              </Text>
-              {loading ? (
-                <ActivityIndicator />
-              ) : (
-                <Text style={{ fontSize: 12, color: "#333" }}>
-                  {selectedSession.sessionFeedback
-                    ? selectedSession.sessionFeedback
-                    : "Tap to give feedback"}
+                <Ionicons
+                  name="chatbubble-ellipses"
+                  size={14}
+                  color="#FFFFFF"
+                  style={{ marginRight: 6 }}
+                />
+                <Text
+                  style={{
+                    color: "#FFFFFF",
+                    fontSize: 12,
+                    fontWeight: "600",
+                    fontFamily: theme.fonts.medium,
+                  }}
+                >
+                  {selectedSession.sessionFeedback ? "Edit" : "Feedback"}
                 </Text>
-              )}
+              </TouchableOpacity>
             </View>
-            <MaterialIcons name="chevron-right" size={24} color="#2e7d32" />
-          </Pressable>
-        )}
+          )}
+        </View>
         <FeedbackModal
           visible={showModal}
           onClose={() => setShowModal(false)}

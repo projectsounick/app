@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   InteractionManager,
   Dimensions,
+  StyleSheet,
 } from "react-native";
 import {
   createAgoraRtcEngine,
@@ -15,8 +16,11 @@ import {
   RtcSurfaceView,
   IRtcEngine,
 } from "react-native-agora";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { SafeAreaView } from "react-native-safe-area-context";
+import theme from "@/app/Theme/globalTheme";
 
 interface VideoCallScreenProps {
   appId: string;
@@ -169,50 +173,52 @@ export default function VideoCallScreen({
 
     if (count === 0) {
       return (
-        <Text
-          style={{
-            color: "#fff",
-            fontSize: 18,
-            textAlign: "center",
-            position: "absolute",
-            top: "50%",
-            left: 0,
-            right: 0,
-          }}
-        >
-          Waiting for remote users...
-        </Text>
+        <View style={styles.emptyStateContainer}>
+          <LinearGradient
+            colors={["#9747FF", "#7B2CBF"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.emptyStateGradient}
+          >
+            <View style={styles.emptyStateContent}>
+              <MaterialCommunityIcons
+                name="video-off"
+                size={64}
+                color="#fff"
+                style={{ marginBottom: 16 }}
+              />
+              <Text style={styles.emptyStateTitle}>Waiting for participants</Text>
+              <Text style={styles.emptyStateSubtitle}>
+                The call will start when others join
+              </Text>
+            </View>
+          </LinearGradient>
+        </View>
       );
     }
 
     if (count === 1) {
       return (
-        <RtcSurfaceView
-          key={remoteUids[0]}
-          canvas={{ uid: remoteUids[0], renderMode: 1 }}
-          style={{
-            flex: 1,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "#111",
-          }}
-        />
+        <View style={styles.singleRemoteContainer}>
+          <RtcSurfaceView
+            key={remoteUids[0]}
+            canvas={{ uid: remoteUids[0], renderMode: 1 }}
+            style={styles.singleRemoteView}
+          />
+        </View>
       );
     }
 
     if (count === 2) {
       return (
-        <View style={{ flex: 1, flexDirection: "column" }}>
+        <View style={styles.twoRemoteContainer}>
           {remoteUids.map((uid) => (
-            <RtcSurfaceView
-              key={uid}
-              canvas={{ uid, renderMode: 1 }}
-              style={{
-                width: "100%",
-                height: height / 2,
-                backgroundColor: "#111",
-              }}
-            />
+            <View key={uid} style={styles.twoRemoteItem}>
+              <RtcSurfaceView
+                canvas={{ uid, renderMode: 1 }}
+                style={styles.twoRemoteView}
+              />
+            </View>
           ))}
         </View>
       );
@@ -220,144 +226,400 @@ export default function VideoCallScreen({
 
     // More than 2 → grid
     return (
-      <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+      <View style={styles.gridContainer}>
         {remoteUids.map((uid) => (
-          <RtcSurfaceView
-            key={uid}
-            canvas={{ uid, renderMode: 1 }}
-            style={{
-              width: width / 2,
-              height: height / 3,
-              backgroundColor: "#111",
-              borderWidth: 1,
-              borderColor: "#000",
-            }}
-          />
+          <View key={uid} style={styles.gridItem}>
+            <RtcSurfaceView
+              canvas={{ uid, renderMode: 1 }}
+              style={styles.gridView}
+            />
+          </View>
         ))}
       </View>
     );
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#000" }}>
-      {/* Timer */}
+    <SafeAreaView style={styles.container} edges={[]}>
+      {/* Top Bar with Timer */}
       {joined && (
-        <View
-          style={{
-            position: "absolute",
-            top: 40,
-            left: 16,
-            backgroundColor: "rgba(0,0,0,0.5)",
-            paddingHorizontal: 12,
-            paddingVertical: 6,
-            borderRadius: 20,
-            zIndex: 10,
-          }}
-        >
-          <Text style={{ color: "#fff", fontSize: 16, fontWeight: "600" }}>
-            {callDuration}
-          </Text>
+        <View style={styles.topBar}>
+          <LinearGradient
+            colors={["rgba(151, 71, 255, 0.9)", "rgba(123, 44, 191, 0.9)"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.timerContainer}
+          >
+            <Ionicons name="time-outline" size={18} color="#fff" />
+            <Text style={styles.timerText}>{callDuration}</Text>
+          </LinearGradient>
         </View>
       )}
 
       {/* Remote Layout */}
-      {renderRemoteLayout()}
+      <View style={styles.remoteContainer}>{renderRemoteLayout()}</View>
 
       {/* Floating Local View */}
       {isHost && (
-        <View
-          style={{
-            position: "absolute",
-            top: 40,
-            right: 20,
-            width: 120,
-            height: 160,
-            borderRadius: 10,
-            overflow: "hidden",
-            borderColor: "#fff",
-            borderWidth: 1,
-            zIndex: 10,
-          }}
-        >
-          <RtcSurfaceView
-            canvas={{ uid: 0, renderMode: 1 }}
-            style={{ width: "100%", height: "100%" }}
-          />
+        <View style={styles.localViewContainer}>
+          <View style={styles.localViewWrapper}>
+            <RtcSurfaceView
+              canvas={{ uid: 0, renderMode: 1 }}
+              style={styles.localView}
+            />
+            {!cameraOn && (
+              <View style={styles.cameraOffOverlay}>
+                <Ionicons name="videocam-off" size={24} color="#fff" />
+              </View>
+            )}
+            {/* Host Badge - Top Right */}
+            <View style={styles.hostBadge}>
+              <LinearGradient
+                colors={["#9747FF", "#7B2CBF"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.hostBadgeGradient}
+              >
+                <MaterialCommunityIcons name="account-star" size={12} color="#fff" />
+                <Text style={styles.hostBadgeText}>Host</Text>
+              </LinearGradient>
+            </View>
+          </View>
         </View>
       )}
 
-      {/* Controls */}
-      <View
-        style={{
-          position: "absolute",
-          alignSelf: "center",
-          bottom: 40,
-          flexDirection: "row",
-          gap: 16,
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#333",
-            width: 56,
-            height: 56,
-            borderRadius: 28,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          onPress={toggleMute}
+      {/* Controls Bar */}
+      <View style={styles.controlsContainer}>
+        <LinearGradient
+          colors={["rgba(0, 0, 0, 0.7)", "rgba(0, 0, 0, 0.5)"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          style={styles.controlsGradient}
         >
-          <Ionicons name={isMuted ? "mic-off" : "mic"} size={24} color="#fff" />
-        </TouchableOpacity>
+          <View style={styles.controlsRow}>
+            {/* Mute Button */}
+            <TouchableOpacity
+              style={[
+                styles.controlButton,
+                isMuted && styles.controlButtonActive,
+              ]}
+              onPress={toggleMute}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={
+                  isMuted
+                    ? ["#E53935", "#C62828"]
+                    : ["rgba(255, 255, 255, 0.2)", "rgba(255, 255, 255, 0.1)"]
+                }
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.controlButtonGradient}
+              >
+                <Ionicons
+                  name={isMuted ? "mic-off" : "mic"}
+                  size={22}
+                  color="#fff"
+                />
+              </LinearGradient>
+            </TouchableOpacity>
 
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#333",
-            width: 56,
-            height: 56,
-            borderRadius: 28,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          onPress={toggleCamera}
-        >
-          <Ionicons
-            name={cameraOn ? "videocam" : "videocam-off"}
-            size={24}
-            color="#fff"
-          />
-        </TouchableOpacity>
+            {/* Camera Toggle */}
+            <TouchableOpacity
+              style={[
+                styles.controlButton,
+                !cameraOn && styles.controlButtonActive,
+              ]}
+              onPress={toggleCamera}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={
+                  !cameraOn
+                    ? ["#E53935", "#C62828"]
+                    : ["rgba(255, 255, 255, 0.2)", "rgba(255, 255, 255, 0.1)"]
+                }
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.controlButtonGradient}
+              >
+                <Ionicons
+                  name={cameraOn ? "videocam" : "videocam-off"}
+                  size={22}
+                  color="#fff"
+                />
+              </LinearGradient>
+            </TouchableOpacity>
 
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#333",
-            width: 56,
-            height: 56,
-            borderRadius: 28,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          onPress={switchCamera}
-        >
-          <Ionicons name="camera-reverse-outline" size={24} color="#fff" />
-        </TouchableOpacity>
+            {/* Switch Camera (only if camera is on) */}
+            {cameraOn && (
+              <TouchableOpacity
+                style={styles.controlButton}
+                onPress={switchCamera}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={["rgba(255, 255, 255, 0.2)", "rgba(255, 255, 255, 0.1)"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.controlButtonGradient}
+                >
+                  <Ionicons
+                    name="camera-reverse"
+                    size={22}
+                    color="#fff"
+                  />
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
 
-        <TouchableOpacity
-          style={{
-            backgroundColor: "#E53935",
-            width: 56,
-            height: 56,
-            borderRadius: 32,
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-          onPress={endCall}
-        >
-          <Ionicons name="call" size={28} color="#fff" />
-        </TouchableOpacity>
+            {/* End Call Button */}
+            <TouchableOpacity
+              style={styles.endCallButton}
+              onPress={endCall}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={["#E53935", "#C62828"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.endCallGradient}
+              >
+                <Ionicons name="call" size={26} color="#fff" />
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  topBar: {
+    position: "absolute",
+    top: Platform.OS === "ios" ? 50 : 20,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    zIndex: 100,
+  },
+  timerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    gap: 8,
+    shadowColor: "#9747FF",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  timerText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "700",
+    fontFamily: theme.fonts.bold,
+  },
+  hostBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    zIndex: 10,
+  },
+  hostBadgeGradient: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+    shadowColor: "#9747FF",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.4,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  hostBadgeText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "700",
+    fontFamily: theme.fonts.bold,
+  },
+  remoteContainer: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyStateGradient: {
+    width: width * 0.8,
+    borderRadius: 24,
+    padding: 40,
+    alignItems: "center",
+    shadowColor: "#9747FF",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  emptyStateContent: {
+    alignItems: "center",
+  },
+  emptyStateTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 8,
+    fontFamily: theme.fonts.bold,
+    textAlign: "center",
+  },
+  emptyStateSubtitle: {
+    color: "rgba(255, 255, 255, 0.8)",
+    fontSize: 14,
+    fontFamily: theme.fonts.regular,
+    textAlign: "center",
+  },
+  singleRemoteContainer: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  singleRemoteView: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#111",
+  },
+  twoRemoteContainer: {
+    flex: 1,
+    flexDirection: "column",
+    gap: 2,
+  },
+  twoRemoteItem: {
+    flex: 1,
+    overflow: "hidden",
+  },
+  twoRemoteView: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#111",
+  },
+  gridContainer: {
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 2,
+  },
+  gridItem: {
+    width: width / 2 - 1,
+    height: height / 3 - 1,
+    overflow: "hidden",
+  },
+  gridView: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "#111",
+  },
+  localViewContainer: {
+    position: "absolute",
+    top: Platform.OS === "ios" ? 100 : 70,
+    right: 20,
+    zIndex: 50,
+  },
+  localViewWrapper: {
+    width: 140,
+    height: 180,
+    borderRadius: 16,
+    overflow: "hidden",
+    borderWidth: 3,
+    borderColor: "#67C694",
+    shadowColor: "#67C694",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 8,
+    backgroundColor: "#000",
+  },
+  localView: {
+    width: "100%",
+    height: "100%",
+  },
+  cameraOffOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  controlsContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingBottom: Platform.OS === "ios" ? 30 : 20,
+    zIndex: 100,
+  },
+  controlsGradient: {
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+  },
+  controlsRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
+  },
+  controlButton: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    overflow: "hidden",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  controlButtonActive: {
+    shadowColor: "#E53935",
+    shadowOpacity: 0.5,
+  },
+  controlButtonGradient: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  endCallButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    overflow: "hidden",
+    shadowColor: "#E53935",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  endCallGradient: {
+    width: "100%",
+    height: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});

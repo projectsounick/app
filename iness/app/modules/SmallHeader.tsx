@@ -17,6 +17,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import eventBus from "@/event";
 import { getStoredNotifications } from "@/utils/notificationUtils";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 
 import { setStreakModalShow } from "@/Slices/streakSlice";
 
@@ -56,6 +58,8 @@ export default function SmallHeader({
   const [weight, setWeight] = useState<number | null>(null);
   const [notificationResponseLength, setNotificationResponseLength] =
     useState(0);
+  
+  const insets = useSafeAreaInsets();
 
   useEffect(() => {
     const isMounted = { current: true };
@@ -97,11 +101,12 @@ export default function SmallHeader({
 
   return (
     <>
+      <StatusBar style="light" />
       <LinearGradient
         colors={["#140A21", "#522987"]}
         start={{ x: 0, y: 0 }}
         style={{
-          paddingTop: 20,
+          paddingTop: Platform.OS === "android" ? Math.max(insets.top, 20) : 20,
           paddingHorizontal: 20,
           paddingBottom: 20,
           borderBottomLeftRadius: 20,

@@ -15,6 +15,9 @@ import { RootState } from "@/store";
 import { router } from "expo-router";
 import { Blog } from "../interfaces/blogInterface";
 
+const { width } = Dimensions.get("window");
+const CARD_WIDTH = width * 0.85; // Responsive card width - 85% of screen width
+
 function BlogSliderCard() {
   const blogs = useSelector((state: RootState) => state.blog.blogs);
 
@@ -84,7 +87,7 @@ function BlogSliderCard() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingRight: 16 }}
+        contentContainerStyle={{ paddingLeft: 4, paddingRight: 16, paddingTop: 8, paddingBottom: 8 }}
       >
         {blogs.map((item: Blog, index) => (
           <TouchableOpacity
@@ -99,7 +102,9 @@ function BlogSliderCard() {
               backgroundColor: "#FFFFFF",
               borderRadius: 20,
               marginRight: 16,
-              width: 320,
+              marginTop: 4,
+              marginBottom: 4,
+              width: CARD_WIDTH,
               shadowColor: "#000",
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.08,
@@ -145,11 +150,12 @@ function BlogSliderCard() {
                 <Text
                   numberOfLines={2}
                   style={{
-                    fontSize: 16,
+                    fontSize: Math.max(width * 0.042, 15), // Responsive font size, minimum 15px
                     fontWeight: "700",
                     color: "#000",
-                    marginBottom: 12,
-                    lineHeight: 22,
+                    marginBottom: 8,
+                    lineHeight: Math.max(width * 0.055, 22), // Responsive line height
+                    fontFamily: theme.fonts.bold,
                   }}
                 >
                   {item.title}
@@ -160,9 +166,9 @@ function BlogSliderCard() {
               <TouchableOpacity
                 style={{
                   backgroundColor: "#67C694",
-                  paddingVertical: 10,
-                  paddingHorizontal: 20,
-                  borderRadius: 16,
+                  paddingVertical: 6,
+                  paddingHorizontal: 14,
+                  borderRadius: 12,
                   alignSelf: "flex-start",
                   shadowColor: "#67C694",
                   shadowOffset: { width: 0, height: 2 },
@@ -179,9 +185,10 @@ function BlogSliderCard() {
               >
                 <Text
                   style={{
-                    fontSize: 14,
+                    fontSize: 12,
                     fontWeight: "700",
                     color: "#FFFFFF",
+                    fontFamily: theme.fonts.bold,
                   }}
                 >
                   Read

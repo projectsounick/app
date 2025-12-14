@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Pressable, TextInput, ScrollView } from "react-native";
+import { View, Text, Pressable, TextInput, ScrollView, Alert } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Modal from "react-native-modal";
 import { Session } from "@/app/interfaces/sessionInterface";
@@ -33,6 +33,10 @@ const FeedbackModal = ({
   };
   const submitFeedback = async (feedback: string) => {
     if (!currentSession) return;
+    if (!feedback || feedback.trim() === "") {
+      Alert.alert("Error", "Please provide your feedback before submitting.");
+      return;
+    }
     try {
       setFeedbackLoading(true);
       const params = {
@@ -42,9 +46,14 @@ const FeedbackModal = ({
       const response = await sessionService.updateSession(params);
       if (response.success) {
         setCurrentSession({ ...currentSession, sessionFeedback: feedback });
+        onClose(); // Close the modal
+        Alert.alert("Success", "Thank you for your feedback! Your response has been submitted successfully.");
+      } else {
+        Alert.alert("Error", "Failed to submit feedback. Please try again.");
       }
     } catch (err) {
       console.log(err);
+      Alert.alert("Error", "Something went wrong. Please try again.");
     } finally {
       setFeedbackLoading(false);
     }
@@ -155,7 +164,7 @@ const FeedbackModal = ({
                 backgroundColor: "#f8d7da",
                 paddingVertical: 10,
                 paddingHorizontal: 16,
-                borderRadius: 6,
+                borderRadius: 20,
               }}
             >
               <Text style={{ color: "#721c24", fontWeight: "600" }}>
@@ -170,15 +179,17 @@ const FeedbackModal = ({
                     : selectedOption || ""
                 )
               }
+              disabled={feedbackLoading}
               style={{
                 backgroundColor: "#d4edda",
                 paddingVertical: 10,
                 paddingHorizontal: 16,
-                borderRadius: 6,
+                borderRadius: 20,
+                opacity: feedbackLoading ? 0.6 : 1,
               }}
             >
               <Text style={{ color: "#155724", fontWeight: "600" }}>
-                Submit
+                {feedbackLoading ? "Submitting..." : "Submit"}
               </Text>
             </Pressable>
           </View>

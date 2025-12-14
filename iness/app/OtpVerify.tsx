@@ -183,24 +183,25 @@ const OTPInputScreen = () => {
           style={{
             flex: 1,
             justifyContent: "space-between",
-            paddingTop: "15%",
+            paddingTop: Platform.OS === "android" ? "5%" : "12%",
             paddingBottom: "10%",
+            paddingHorizontal: theme.spacing.lg,
           }}
         >
           {/* Top Content */}
-          <View style={{ alignItems: "center", gap: theme.spacing.lg }}>
+          <View style={{ alignItems: "center", gap: theme.spacing.lg, width: "100%" }}>
             <View
               style={{
                 alignItems: "flex-start",
-
-                width: "90%",
+                width: "100%",
               }}
             >
               <NormalHeader screenName="Enter OTP" />
               <Text
                 style={{
                   fontSize: theme.fontSizes.small,
-                  color: theme.colors.gray, // or a lighter color
+                  color: theme.colors.gray,
+                  marginTop: 12,
                 }}
               >
                 An OTP has been sent to your email

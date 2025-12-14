@@ -40,8 +40,7 @@ export default function PaymentScreen() {
     try {
       setLoading(true);
       const response = await paymentService.getTotalPurchaseHistory();
-      console.log("this is response");
-      console.log(response);
+     
 
       if (response.success) {
         setPayment(response.data);

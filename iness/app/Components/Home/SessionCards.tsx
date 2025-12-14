@@ -15,9 +15,10 @@ import { setCalendarSheetOpen } from "@/Slices/componentOpenSlice";
 import { RootState } from "@/store";
 import { useRouter } from "expo-router";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.75;
 const SPACING = 12;
+const CARD_HEIGHT = height * 0.22; // Responsive card height
 
 interface Trainer {
   _id: string;
@@ -222,7 +223,7 @@ const UpcomingSessionsCard = () => {
           </TouchableOpacity>
         </View>
       ) : (
-        <View style={{ height: 160 }}>
+        <View style={{ height: CARD_HEIGHT }}>
           <Animated.ScrollView
             ref={scrollRef}
             horizontal
@@ -272,7 +273,7 @@ const UpcomingSessionsCard = () => {
                     style={{
                       backgroundColor: "#FFFFFF",
                       borderRadius: 20,
-                      padding: 16,
+                      padding: width * 0.04, // Responsive padding (4% of screen width)
                       shadowColor: "#000",
                       shadowOffset: { width: 0, height: 1 },
                       shadowOpacity: 0.05,
@@ -281,6 +282,7 @@ const UpcomingSessionsCard = () => {
                       borderWidth: 1,
                       borderColor: "#F5F5F5",
                       position: "relative",
+                      height: CARD_HEIGHT - 20, // Ensure card fits in container
                     }}
                   >
                     {/* Session Status Badge */}
@@ -295,9 +297,9 @@ const UpcomingSessionsCard = () => {
                             : session.sessionStatus === "missed"
                               ? "#FFEBEE"
                               : "#FFF3E0",
-                        paddingHorizontal: 10,
-                        paddingVertical: 4,
-                        borderRadius: 12,
+                        paddingHorizontal: 8,
+                        paddingVertical: 3,
+                        borderRadius: 10,
                       }}
                     >
                       <Text
@@ -308,7 +310,7 @@ const UpcomingSessionsCard = () => {
                               : session.sessionStatus === "missed"
                                 ? "#F44336"
                                 : "#FF9800",
-                          fontSize: 11,
+                          fontSize: 9,
                           fontFamily: theme.fonts.bold,
                           textTransform: "uppercase",
                           fontWeight: "700",
@@ -329,10 +331,10 @@ const UpcomingSessionsCard = () => {
                       {/* Trainer Image */}
                       <View
                         style={{
-                          width: 70,
-                          height: 70,
-                          borderRadius: 35,
-                          marginRight: 12,
+                          width: width * 0.18, // Responsive image size (18% of screen width)
+                          height: width * 0.18,
+                          borderRadius: (width * 0.18) / 2,
+                          marginRight: width * 0.03, // Responsive margin
                           overflow: "hidden",
                           backgroundColor: "#F8F8F8",
                         }}
@@ -352,16 +354,18 @@ const UpcomingSessionsCard = () => {
                       </View>
 
                       {/* Info Section */}
-                      <View style={{ flex: 1 }}>
+                      <View style={{ flex: 1, paddingRight: width * 0.18 }}>
                         <Text
                           style={{
-                            fontSize: 16,
+                            fontSize: width * 0.04, // Responsive font size (4% of screen width)
                             fontFamily: theme.fonts.bold,
                             color: "#000",
-                            marginBottom: 6,
+                            marginBottom: 4,
                             fontWeight: "700",
                           }}
-                          numberOfLines={1}
+                          numberOfLines={2}
+                          adjustsFontSizeToFit={true}
+                          minimumFontScale={0.8}
                         >
                           {session.trainer.name}
                         </Text>
@@ -369,7 +373,7 @@ const UpcomingSessionsCard = () => {
                           style={{
                             flexDirection: "row",
                             alignItems: "center",
-                            marginBottom: 4,
+                            marginBottom: 3,
                           }}
                         >
                           <Ionicons
@@ -378,13 +382,13 @@ const UpcomingSessionsCard = () => {
                                 ? "videocam-outline"
                                 : "location-outline"
                             }
-                            size={12}
+                            size={width * 0.03}
                             color="#666"
                             style={{ marginRight: 4 }}
                           />
                           <Text
                             style={{
-                              fontSize: 12,
+                              fontSize: width * 0.03,
                               color: "#666",
                               fontWeight: "500",
                               textTransform: "uppercase",
@@ -397,21 +401,22 @@ const UpcomingSessionsCard = () => {
                           style={{
                             flexDirection: "row",
                             alignItems: "center",
-                            marginBottom: 12,
+                            marginBottom: 6,
                           }}
                         >
                           <Ionicons
                             name="time-outline"
-                            size={12}
+                            size={width * 0.03}
                             color="#666"
                             style={{ marginRight: 4 }}
                           />
                           <Text
                             style={{
-                              fontSize: 12,
+                              fontSize: width * 0.03,
                               color: "#666",
                               fontWeight: "500",
                             }}
+                            numberOfLines={1}
                           >
                             {formatDateTime(session.sessionDate)}
                           </Text>
@@ -420,9 +425,9 @@ const UpcomingSessionsCard = () => {
                         <TouchableOpacity
                           style={{
                             backgroundColor: "#67C694",
-                            paddingVertical: 8,
-                            paddingHorizontal: 16,
-                            borderRadius: 12,
+                            paddingVertical: 5,
+                            paddingHorizontal: width * 0.04,
+                            borderRadius: 10,
                             alignSelf: "flex-start",
                             shadowColor: "#67C694",
                             shadowOffset: { width: 0, height: 2 },
@@ -436,11 +441,11 @@ const UpcomingSessionsCard = () => {
                             style={{
                               color: "#fff",
                               fontFamily: theme.fonts.bold,
-                              fontSize: 13,
+                              fontSize: width * 0.033,
                               fontWeight: "700",
                             }}
                           >
-                            View Details
+                            View
                           </Text>
                         </TouchableOpacity>
                       </View>

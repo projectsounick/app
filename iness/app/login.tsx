@@ -98,12 +98,12 @@ const Login = () => {
                 flex: 1, // Ensures the View takes up the full available space
                 justifyContent: "space-between", // Adds space between top content and the button
                 alignItems: "center",
-                paddingTop: "15%",
+                paddingTop: Platform.OS === "android" ? "5%" : "12%",
                 paddingBottom: "10%",
               }}
             >
               {/* Top Content */}
-              <View>
+              <View style={{ width: "100%" }}>
                 <NormalHeader screenName="Your Email" />
 
                 <Text
@@ -111,6 +111,7 @@ const Login = () => {
                     fontSize: theme.fontSizes.regular,
                     color: theme.colors.normal,
                     textAlign: "center",
+                    marginTop: 12,
                     marginBottom: theme.spacing.lg,
                   }}
                 >

@@ -20,6 +20,7 @@ import { PAGINATION_LIMITS } from "@/app/shared/paginationLimits";
 import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
+const CARD_WIDTH = width * 0.85; // Responsive card width - 85% of screen width to ensure at least one card is fully visible
 
 interface PodcastMediaCardInterface {
   loggedUser: UserData | null;
@@ -117,7 +118,7 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingRight: 16 }}
+        contentContainerStyle={{ paddingLeft: 4, paddingRight: 16, paddingTop: 8, paddingBottom: 8 }}
       >
         {podCasts.slice(0, PAGINATION_LIMITS.PODCAST_INITIAL).map((podcast, index) => (
           <TouchableOpacity
@@ -127,8 +128,11 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
               setSelectedMedia(podcast);
             }}
             style={{
-              width: 320,
+              width: CARD_WIDTH,
               marginRight: 16,
+              marginLeft: index === 0 ? 0 : 0,
+              marginTop: 4,
+              marginBottom: 4,
               backgroundColor: "#FFFFFF",
               borderRadius: 20,
               overflow: "hidden",
@@ -210,9 +214,9 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
                 <TouchableOpacity
                   style={{
                     backgroundColor: "#67C694",
-                    paddingVertical: 10,
-                    paddingHorizontal: 20,
-                    borderRadius: 16,
+                    paddingVertical: 6,
+                    paddingHorizontal: 14,
+                    borderRadius: 12,
                     flexDirection: "row",
                     alignItems: "center",
                     justifyContent: "center",
@@ -229,15 +233,15 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
                 >
                   <Ionicons
                     name="play-circle"
-                    size={14}
+                    size={12}
                     color="#fff"
-                    style={{ marginRight: 6 }}
+                    style={{ marginRight: 4 }}
                   />
                   <Text
                     style={{
                       color: "#fff",
                       fontFamily: theme.fonts.bold,
-                      fontSize: 14,
+                      fontSize: 12,
                       fontWeight: "700",
                     }}
                   >

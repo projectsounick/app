@@ -11,12 +11,15 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
+  Dimensions,
 } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
 import theme from "@/app/Theme/globalTheme";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
   const [heightFeet, setHeightFeet] = useState<string | null>(null);
@@ -140,7 +143,7 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
                   >
                     <MaterialCommunityIcons
                       name="ruler-square"
-                      size={20}
+                      size={Math.min(screenWidth * 0.05, 18)}
                       color={heightFeet ? "#9747FF" : "#888"}
                     />
                     <Text
@@ -153,7 +156,7 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
                     </Text>
                     <MaterialCommunityIcons
                       name="chevron-down"
-                      size={20}
+                      size={Math.min(screenWidth * 0.05, 18)}
                       color={heightFeet ? "#9747FF" : "#888"}
                     />
                   </TouchableOpacity>
@@ -176,7 +179,7 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
                   >
                     <MaterialCommunityIcons
                       name="tape-measure"
-                      size={20}
+                      size={Math.min(screenWidth * 0.05, 18)}
                       color={heightInches ? "#9747FF" : "#888"}
                     />
                     <Text
@@ -189,7 +192,7 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
                     </Text>
                     <MaterialCommunityIcons
                       name="chevron-down"
-                      size={20}
+                      size={Math.min(screenWidth * 0.05, 18)}
                       color={heightInches ? "#9747FF" : "#888"}
                     />
                   </TouchableOpacity>
@@ -357,21 +360,21 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   displayHeight: {
-    fontSize: 28,
+    fontSize: Math.max(screenWidth * 0.07, 24),
     fontWeight: "700",
     color: "#1A1A1A",
     fontFamily: theme.fonts.bold,
   },
   displayLabel: {
-    fontSize: 14,
+    fontSize: Math.max(screenWidth * 0.033, 13),
     color: "#666",
     marginLeft: 6,
     fontFamily: theme.fonts.regular,
   },
   pickerCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 20,
+    borderRadius: 16,
+    padding: Math.min(screenWidth * 0.05, 16),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -388,18 +391,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   pickerLabel: {
-    fontSize: 13,
+    fontSize: Math.max(screenWidth * 0.03, 12),
     color: "#666",
-    marginBottom: 10,
+    marginBottom: Math.min(screenWidth * 0.025, 8),
     fontFamily: theme.fonts.medium,
     marginLeft: 4,
   },
   pickerButton: {
     borderWidth: 2,
     borderColor: "#E8E8E8",
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
+    borderRadius: 12,
+    paddingVertical: Math.min(screenWidth * 0.035, 12),
+    paddingHorizontal: Math.min(screenWidth * 0.035, 12),
     backgroundColor: "#F8F9FA",
     flexDirection: "row",
     alignItems: "center",
@@ -410,7 +413,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FAFAFF",
   },
   pickerText: {
-    fontSize: 18,
+    fontSize: Math.max(screenWidth * 0.042, 16),
     color: "#999",
     fontWeight: "600",
     flex: 1,
@@ -421,11 +424,11 @@ const styles = StyleSheet.create({
     color: "#1A1A1A",
   },
   separatorContainer: {
-    paddingHorizontal: 8,
-    paddingBottom: 14,
+    paddingHorizontal: Math.min(screenWidth * 0.02, 6),
+    paddingBottom: Math.min(screenWidth * 0.035, 12),
   },
   separatorText: {
-    fontSize: 32,
+    fontSize: Math.max(screenWidth * 0.08, 24),
     fontWeight: "700",
     color: "#9747FF",
   },

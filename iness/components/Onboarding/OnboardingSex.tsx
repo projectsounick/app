@@ -16,7 +16,7 @@ import { UserData } from "@/app/interfaces/UserInterface";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
 import theme from "@/app/Theme/globalTheme";
 
-const { width: screenWidth } = Dimensions.get("window");
+const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
 
 const genderOptions = [
   {
@@ -222,7 +222,7 @@ const GenderCard = ({
         >
           <MaterialCommunityIcons
             name={option.icon}
-            size={40}
+            size={Math.min(screenWidth * 0.08, 30)} // Responsive icon size, max 30px
             color={isSelected ? option.color : "#888"}
           />
         </View>
@@ -249,7 +249,11 @@ const GenderCard = ({
           ]}
         >
           {isSelected && (
-            <MaterialCommunityIcons name="check" size={16} color="#FFFFFF" />
+            <MaterialCommunityIcons 
+              name="check" 
+              size={Math.min(screenWidth * 0.035, 12)} 
+              color="#FFFFFF" 
+            />
           )}
         </View>
       </TouchableOpacity>
@@ -271,8 +275,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   genderCard: {
-    borderRadius: 20,
-    padding: 24,
+    borderRadius: 16,
+    padding: Math.min(screenWidth * 0.045, 16), // Responsive padding, max 16px
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -281,31 +285,31 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   genderIconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: Math.min(screenWidth * 0.15, 60), // Responsive icon container, max 60px
+    height: Math.min(screenWidth * 0.15, 60),
+    borderRadius: Math.min(screenWidth * 0.075, 30),
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 16,
+    marginBottom: Math.min(screenWidth * 0.03, 12),
   },
   genderLabel: {
-    fontSize: 22,
+    fontSize: Math.max(screenWidth * 0.042, 16), // Responsive font size, min 16px
     fontWeight: "700",
     fontFamily: theme.fonts.bold,
-    marginBottom: 4,
+    marginBottom: 3,
   },
   genderDescription: {
-    fontSize: 14,
+    fontSize: Math.max(screenWidth * 0.03, 12), // Responsive font size, min 12px
     color: "#888",
     fontFamily: theme.fonts.regular,
   },
   selectionCircle: {
     position: "absolute",
-    top: 16,
-    right: 16,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    top: Math.min(screenWidth * 0.03, 12),
+    right: Math.min(screenWidth * 0.03, 12),
+    width: Math.min(screenWidth * 0.06, 24),
+    height: Math.min(screenWidth * 0.06, 24),
+    borderRadius: Math.min(screenWidth * 0.03, 12),
     borderWidth: 2,
     alignItems: "center",
     justifyContent: "center",

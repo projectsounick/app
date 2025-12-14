@@ -5,10 +5,13 @@ import {
   Text,
   View,
   StyleSheet,
+  Dimensions,
 } from "react-native";
 import { OnboardingCardInterface } from "../interfaces/onboardingInterface";
 import theme from "../Theme/globalTheme";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 export default function OnboardingCard({
   index,
@@ -94,7 +97,7 @@ export default function OnboardingCard({
           >
             <MaterialCommunityIcons
               name={icon}
-              size={24}
+              size={Math.min(screenWidth * 0.06, 20)}
               color={isSelected ? "#9747FF" : "#666"}
             />
           </View>
@@ -130,7 +133,11 @@ export default function OnboardingCard({
           ]}
         >
           {isSelected && (
-            <MaterialCommunityIcons name="check" size={16} color="#FFFFFF" />
+            <MaterialCommunityIcons 
+              name="check" 
+              size={Math.min(screenWidth * 0.04, 14)} 
+              color="#FFFFFF" 
+            />
           )}
         </View>
       </TouchableOpacity>
@@ -140,12 +147,12 @@ export default function OnboardingCard({
 
 const styles = StyleSheet.create({
   card: {
-    marginBottom: 14,
-    borderRadius: 18,
+    marginBottom: Math.min(screenWidth * 0.035, 12),
+    borderRadius: 16,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: Math.min(screenWidth * 0.04, 14),
+    paddingVertical: Math.min(screenWidth * 0.03, 10),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
@@ -153,12 +160,12 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
+    width: Math.min(screenWidth * 0.12, 42),
+    height: Math.min(screenWidth * 0.12, 42),
+    borderRadius: Math.min(screenWidth * 0.035, 12),
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 14,
+    marginRight: Math.min(screenWidth * 0.035, 12),
   },
   contentContainer: {
     flex: 1,
@@ -169,19 +176,19 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.medium,
   },
   description: {
-    marginTop: 4,
-    fontSize: 13,
+    marginTop: 3,
+    fontSize: Math.max(screenWidth * 0.03, 12),
     color: "#888",
     fontFamily: theme.fonts.regular,
-    lineHeight: 18,
+    lineHeight: Math.max(screenWidth * 0.045, 16),
   },
   checkContainer: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
+    width: Math.min(screenWidth * 0.065, 24),
+    height: Math.min(screenWidth * 0.065, 24),
+    borderRadius: Math.min(screenWidth * 0.0325, 12),
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    marginLeft: 10,
+    marginLeft: Math.min(screenWidth * 0.025, 8),
   },
 });

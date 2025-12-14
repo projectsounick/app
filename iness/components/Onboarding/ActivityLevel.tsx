@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import OnboardingCard from "@/app/modules/OnboardingCard";
 import { activityLevelOptions } from "@/utils/onboardingStaticValues";
@@ -8,6 +8,8 @@ import { UserData } from "@/app/interfaces/UserInterface";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
 import theme from "@/app/Theme/globalTheme";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 //// Main functional component for the activityLevel Level screen--------------------/
 const ActivityLevel = ({
@@ -68,8 +70,8 @@ const ActivityLevel = ({
                 icon={icon}
                 description={description}
                 updateState={updateState}
-                fontSize={16}
-                height={85}
+                fontSize={Math.max(screenWidth * 0.038, 14)}
+                height={Math.min(screenWidth * 0.2, 75)}
               />
             )
           )}

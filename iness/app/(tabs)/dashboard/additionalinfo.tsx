@@ -428,7 +428,24 @@ export default function AdditionalInfoScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.contentCard}>
-        <Text style={styles.title}>Welcome to Iness</Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 16,
+          }}
+        >
+          <Text style={styles.title}>Welcome to Iness</Text>
+          <Image
+            source={require("../../../assets/images/logowithoutbackground.png")}
+            style={{
+              width: 50,
+              height: 50,
+              resizeMode: "contain",
+            }}
+          />
+        </View>
         <Text style={styles.paragraph}>
           Iness is a comprehensive wellness platform dedicated to helping you
           achieve your health and fitness goals. We provide personalized workout

@@ -15,7 +15,8 @@ import {
 import Modal from "react-native-modal";
 import Animated, { FadeInUp } from "react-native-reanimated";
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 import OnboardingName from "@/components/Onboarding/OnboardingName";
 import OnboardingSex from "@/components/Onboarding/OnboardingSex";
 import OnboardingPrimaryGoal from "@/components/Onboarding/OnboardingPrimaryGoal";
@@ -37,6 +38,7 @@ import InfoModal from "@/components/Onboarding/Information";
 
 //// Main functional component for the Onboarding screen ///// -----------------------------------/
 const OnboardingScreen = () => {
+  const insets = useSafeAreaInsets();
   const [currentStep, setCurrentStep] = useState(0);
   const [showIntroModal, setShowIntroModal] = useState(true); // Show intro first
   const navigation = useNavigation<any>();
@@ -146,12 +148,17 @@ const OnboardingScreen = () => {
           style={{ flex: 1, backgroundColor: "#f2f2f2" }}
           edges={["left", "right"]}
         >
+          <StatusBar style="dark" />
           <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === "ios" ? "padding" : undefined}
           >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View style={{ flex: 1, paddingTop: "8%", paddingHorizontal: 20 }}>
+              <View style={{ 
+                flex: 1, 
+                paddingTop: Platform.OS === "android" ? Math.max(insets.top, 20) : "8%", 
+                paddingHorizontal: 20 
+              }}>
                 {/* Row with Back Button + Progress Bar */}
                 <View
                   style={{

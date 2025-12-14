@@ -21,6 +21,7 @@ import { RootState } from "@/store";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getStoredNotifications } from "@/utils/notificationUtils";
 import eventBus from "@/event";
+import { StatusBar } from "expo-status-bar";
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.04;
 interface AnimatedHeaderProps {
@@ -33,6 +34,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
 
   const ComponentWithHeader = (props: AnimatedHeaderProps): ReactElement => {
     const cartItems = useSelector((state: RootState) => state.cart.cartItems);
+    const insets = useSafeAreaInsets();
     // Use scrollY from props if provided; otherwise, create a new one
     const scrollY = props.scrollY || useRef(new Animated.Value(0)).current;
     const title = props.title;
@@ -88,38 +90,41 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
     }, []);
 
     return (
-      <View
-        style={{
-          // opacity: headerOpacity,
-          // transform: [{ translateY: headerTranslateY }],
-
-          top: 0,
-
-          left: 0,
-          right: 0,
-          zIndex: 10,
-        }}
-      >
-        <LinearGradient
-          colors={["#844ACF", "#432569"]}
-          start={{ x: 0, y: 0 }} // top
-          end={{ x: 0, y: 1 }} // bottom
+      <>
+        <StatusBar style="light" />
+        <View
           style={{
-            borderBottomLeftRadius: 30,
-            borderBottomRightRadius: 30,
-            paddingHorizontal: 20,
-            paddingBottom: 18,
+            // opacity: headerOpacity,
+            // transform: [{ translateY: headerTranslateY }],
+
+            top: 0,
+
+            left: 0,
+            right: 0,
+            zIndex: 10,
           }}
         >
-          <View
+          <LinearGradient
+            colors={["#844ACF", "#432569"]}
+            start={{ x: 0, y: 0 }} // top
+            end={{ x: 0, y: 1 }} // bottom
             style={{
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "space-between",
-              position: "relative", // important
-              marginTop: Platform.OS === "ios" ? topPadding : "4%",
+              borderBottomLeftRadius: 30,
+              borderBottomRightRadius: 30,
+              paddingHorizontal: 20,
+              paddingTop: Platform.OS === "android" ? Math.max(insets.top, 0) : 0,
+              paddingBottom: 18,
             }}
           >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+                position: "relative", // important
+                marginTop: Platform.OS === "ios" ? topPadding : 0,
+              }}
+            >
             {/* Left Side */}
             <View
               style={{
@@ -242,6 +247,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
           <WrappedComponent userData={userData} />
         </LinearGradient>
       </View>
+      </>
     );
   };
 

@@ -286,7 +286,7 @@ const styles = StyleSheet.create({
   modalContent: {
     position: "absolute",
     bottom: 0,
-    height: height * 0.75,
+    height: height * 0.9,
     width: "100%",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   imageCarousel: {
-    height: 220,
+    height: 180,
     marginBottom: 16,
     borderRadius: 16,
     overflow: "hidden",
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   },
   carouselImage: {
     width: width - 40,
-    height: 220,
+    height: 180,
   },
   dotsContainer: {
     position: "absolute",

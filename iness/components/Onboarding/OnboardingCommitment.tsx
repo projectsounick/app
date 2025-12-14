@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import OnboardingCard from "@/app/modules/OnboardingCard";
 import { onboardingCommitmentOptions } from "@/utils/onboardingStaticValues";
@@ -8,6 +8,8 @@ import { UserData } from "@/app/interfaces/UserInterface";
 import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
 import theme from "@/app/Theme/globalTheme";
+
+const { width: screenWidth } = Dimensions.get("window");
 
 //// Main functional component for the Onboarding timeCommitment screen--------------------/
 const OnboardingtimeCommitment = ({
@@ -67,8 +69,8 @@ const OnboardingtimeCommitment = ({
               icon={item.icon}
               description={item.description}
               updateState={updateState}
-              height={85}
-              fontSize={17}
+              height={Math.min(screenWidth * 0.2, 75)}
+              fontSize={Math.max(screenWidth * 0.04, 15)}
             />
           ))}
         </View>

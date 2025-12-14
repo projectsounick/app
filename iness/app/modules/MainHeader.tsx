@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Image,
   LayoutChangeEvent,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -14,6 +15,8 @@ import Animated, {
   interpolate,
 } from "react-native-reanimated";
 import theme from "../Theme/globalTheme";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { StatusBar } from "expo-status-bar";
 
 interface UserData {
   name?: string;
@@ -33,6 +36,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({
   router,
   onHeightMeasured,
 }) => {
+  const insets = useSafeAreaInsets();
   const headerOpacity = useDerivedValue(() =>
     interpolate(scrollY.value, [0, 100], [1, 0])
   );
@@ -42,23 +46,25 @@ const MainHeader: React.FC<MainHeaderProps> = ({
   );
 
   return (
-    <LinearGradient
-      colors={["#844ACF", "#432569"]}
-      start={{ x: 0.5, y: 0 }}
-      end={{ x: 0.5, y: 1 }}
-      style={{
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        borderBottomLeftRadius: 30,
-        borderBottomRightRadius: 30,
-        zIndex: 10,
-        paddingHorizontal: 20,
-        paddingTop: 20,
-        paddingBottom: 16, // ensure bottom spacing
-      }}
-    >
+    <>
+      <StatusBar style="light" />
+      <LinearGradient
+        colors={["#844ACF", "#432569"]}
+        start={{ x: 0.5, y: 0 }}
+        end={{ x: 0.5, y: 1 }}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          borderBottomLeftRadius: 30,
+          borderBottomRightRadius: 30,
+          zIndex: 10,
+          paddingHorizontal: 20,
+          paddingTop: Platform.OS === "android" ? Math.max(insets.top, 20) : 20,
+          paddingBottom: 16, // ensure bottom spacing
+        }}
+      >
       <Animated.View
         style={{
           opacity: headerOpacity,
@@ -150,6 +156,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({
         </View>
       </Animated.View>
     </LinearGradient>
+    </>
   );
 };
 
