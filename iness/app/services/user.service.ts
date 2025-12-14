@@ -22,6 +22,7 @@ export const userService = {
   blockUser,
   googleSignIn,
   appleSignIn,
+  getUserTrainers,
 };
 
 //// Function for sending the otp to the user ---------------/
@@ -169,6 +170,15 @@ async function getActiveDietPlans() {
     return fetchWrapper.get(`${baseUrl}/get-active-diets`);
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
+  }
+}
+
+//// Function for getting user trainers ---------------/
+async function getUserTrainers(): Promise<ApiResponseInterface> {
+  try {
+    return fetchWrapper.get(`${baseUrl}/get-user-trainers`);
+  } catch (error: any) {
+    throw new Error("Error fetching trainers: " + error.message);
   }
 }
 

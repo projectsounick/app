@@ -28,10 +28,8 @@ const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
   };
 
   return (
-    <TouchableOpacity
+    <View
       key={index}
-      activeOpacity={0.9}
-      onPress={handlePress}
       style={{
         marginRight: index === planGroupLength - 1 ? 0 : 12,
         width: 340,
@@ -168,7 +166,7 @@ const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
                   color: "#fff",
                 }}
               >
-                Check Details
+                Continue
               </Text>
             </TouchableOpacity>
           </View>
@@ -261,12 +259,12 @@ const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
                 color: "#fff",
               }}
             >
-              Check Details
+              Continue
             </Text>
           </TouchableOpacity>
         </View>
       )}
-    </TouchableOpacity>
+    </View>
   );
 };
 

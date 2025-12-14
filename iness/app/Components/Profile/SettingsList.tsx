@@ -12,6 +12,7 @@ const handleWeightTrack = () => router.push("/dashboard/trackWeight");
 const handleAppSettings = () => router.push("/dashboard/appsettings");
 const handleAdditionalInfo = () => router.push("/dashboard/additionalinfo");
 const handleMeditation = () => router.push("/dashboard/meditation");
+const handleTrainers = () => router.push("/dashboard/trainers");
 
 export default function SettingsList() {
   const settings = [
@@ -54,6 +55,11 @@ export default function SettingsList() {
       icon: "information-circle-outline",
       label: "Additional Information",
       onPress: handleAdditionalInfo,
+    },
+    {
+      icon: "people-outline",
+      label: "Trainers",
+      onPress: handleTrainers,
     },
   ];
 

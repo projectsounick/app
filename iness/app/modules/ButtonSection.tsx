@@ -18,11 +18,18 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation, router } from "expo-router";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { userService } from "../services/user.service";
+import { useSelector } from "react-redux";
+import { RootState } from "@/store";
+import eventBus from "@/event";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 function FloatingOptions() {
   const navigation = useNavigation();
+  
+  // Get current plans and services from Redux
+  const activePlans = useSelector((state: RootState) => state.plan.activePlans);
+  const activeServices = useSelector((state: RootState) => state.plan.activeServices);
   
   // Calculate to show partial view of last item
   // Each item: 80px width + 16px margin = 96px
@@ -64,6 +71,59 @@ function FloatingOptions() {
     },
   ];
 
+  // Map button labels to plan types and service filters
+  const getPlanTypeForLabel = (label: string): string | null => {
+    const mapping: Record<string, string> = {
+      "Do Yoga": "Yoga",
+      "Weight Train": "Weight Training",
+    };
+    return mapping[label] || null;
+  };
+
+  // Check if there's a current plan matching the type (case-insensitive)
+  const findCurrentPlan = (planType: string) => {
+    return activePlans.find(
+      (plan) => plan.plan?.planType?.title?.toLowerCase() === planType.toLowerCase()
+    );
+  };
+
+  // Check if there's a current service matching the type (by title containing the keyword)
+  const findCurrentServiceByType = (type: string) => {
+    const keyword = type.toLowerCase();
+    // Also create alternative keywords for better matching
+    const keywords = [keyword];
+    if (keyword === "yoga") {
+      keywords.push("yoga");
+    } else if (keyword === "weight training") {
+      keywords.push("weight", "training", "workout", "fitness");
+    }
+    
+    const foundService = activeServices.find(
+      (service) => {
+        const title = service.serviceDetails?.title?.toLowerCase() || "";
+        // Check if title contains any of the keywords
+        return keywords.some(kw => title.includes(kw));
+      }
+    );
+    
+    // Debug logging (remove in production if needed)
+    if (!foundService && activeServices.length > 0) {
+      console.log("Service not found. Available services:", 
+        activeServices.map(s => s.serviceDetails?.title).filter(Boolean)
+      );
+      console.log("Looking for keyword:", keyword);
+    }
+    
+    return foundService;
+  };
+
+  // Check if there's a current service matching the online/offline type
+  const findCurrentService = (isOnline: boolean) => {
+    return activeServices.find(
+      (service) => service.serviceDetails?.isOnline === isOnline
+    );
+  };
+
   // 🔒 Auth check before navigating
   const handleOptionPress = async (label: string) => {
     try {
@@ -93,12 +153,42 @@ function FloatingOptions() {
             ]
           );
         }
-      } else {
-        // Others go directly to train
-        navigation.navigate("train" as never);
+        return;
+      }
+
+      // Handle Yoga and Weight Train - navigate to train and let it check after data loads
+      const planType = getPlanTypeForLabel(label);
+      if (planType) {
+        // Navigate to train screen first
+        router.push("/(tabs)/dashboard/tabs/train");
+        // Wait longer to ensure train screen is mounted and data fetch has started
+        setTimeout(() => {
+          eventBus.emit("check-and-navigate", {
+            type: "plan-or-service",
+            planType: planType,
+            action: "yoga-or-weight-train",
+          });
+        }, 300);
+        return;
+      }
+
+      // Handle Online Class and Offline Class - navigate to train and let it check after data loads
+      if (label === "Online Class" || label === "Offline Class") {
+        const isOnline = label === "Online Class";
+        // Navigate to train screen first
+        router.push("/(tabs)/dashboard/tabs/train");
+        // Wait longer to ensure train screen is mounted and data fetch has started
+        setTimeout(() => {
+          eventBus.emit("check-and-navigate", {
+            type: "service",
+            serviceType: isOnline ? "online" : "offline",
+            action: "online-or-offline-class",
+          });
+        }, 300);
+        return;
       }
     } catch (error) {
-      console.error("Auth check failed:", error);
+      console.error("Navigation error:", error);
     }
   };
 

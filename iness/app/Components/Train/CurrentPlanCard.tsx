@@ -51,9 +51,7 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
   };
 
   return (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      onPress={handlePress}
+    <View
       style={{
         borderRadius: 16,
         marginVertical: 8,
@@ -262,7 +260,7 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
           />
         </View>
       )}
-    </TouchableOpacity>
+    </View>
   );
 };
 

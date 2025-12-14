@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import useFetchMultipleStoreDataHook from "@/hooks/useMultipleDataStoreHook";
 import { SliceKey } from "@/sliceRegistery";
-import { planService } from "@/app/services/plan.service";
+
 import { cartService } from "@/app/services/cart.service";
 
 
@@ -32,7 +32,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import SmallHeader from "@/app/modules/SmallHeader";
 import FloatingOptions from "@/app/modules/ButtonSection";
 import HealthDashboard from "@/app/modules/HealthCards";
-import BlogCarousel from "@/app/modules/BlogsCards";
+
 import SessionCarousel from "@/app/Components/Home/SessionCards";
 
 import PodcastMediaCard from "@/app/Components/Home/PodcastSection";
@@ -373,13 +373,6 @@ const YourComponent = () => {
 
             <BlogSliderCard />
 
-            {/* <SliderCard /> */}
-            {/* <BannerCard cardData={trackingCardData} />
-            <BannerCard cardData={bookSessionCardData} /> */}
-            {/* <DualBannerCardRow
-              firstCard={bookSessionCardData}
-              secondCard={trackingCardData}
-            /> */}
 
             <InfoCarousel />
             {modalVisible && (
