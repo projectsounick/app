@@ -125,7 +125,6 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
                 />
               </View>
               <Text style={styles.displayHeight}>{displayHeight}</Text>
-              <Text style={styles.displayLabel}>Current Height</Text>
             </View>
 
             {/* Picker Card */}
@@ -364,12 +363,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#1A1A1A",
     fontFamily: theme.fonts.bold,
-  },
-  displayLabel: {
-    fontSize: Math.max(screenWidth * 0.033, 13),
-    color: "#666",
-    marginLeft: 6,
-    fontFamily: theme.fonts.regular,
   },
   pickerCard: {
     backgroundColor: "#FFFFFF",

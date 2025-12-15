@@ -9,10 +9,11 @@ import {
   Keyboard,
   ScrollView,
   TouchableOpacity,
+  StyleSheet,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import CustomSnackbar from "@/app/modules/Snackbar";
+import OnboardingHeading from "@/app/modules/OnboardingHeading";
+import theme from "@/app/Theme/globalTheme";
 
 // Main functional component
 const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
@@ -67,150 +68,62 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={{ flex: 1 }}>
           <ScrollView
-            contentContainerStyle={{
-              flexGrow: 1,
-              paddingHorizontal: 20,
-              paddingTop: 20,
-            }}
+            contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
-            {/* Centered Content */}
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-                paddingHorizontal: 20,
-              }}
-            >
-              {/* Heading */}
-              <View
-                style={{
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 20,
-                  padding: 30,
-                  width: "100%",
-                  marginBottom: 30,
-                  alignItems: "center",
-                  borderWidth: 1,
-                  borderColor: "#F5F5F5",
-                }}
+            <View style={styles.inner}>
+              <OnboardingHeading
+                icon="phone"
+                subtitle="We'll use this for login and updates"
               >
-                <Text
-                  style={{
-                    fontSize: 28,
-                    fontWeight: "700",
-                    color: "#000",
-                    textAlign: "center",
-                  }}
-                >
-                  Your Contact{"\n"}Number?
-                </Text>
-                <Text
-                  style={{
-                    textAlign: "center",
-                    fontSize: 14,
-                    color: "#666",
-                    marginTop: 8,
-                  }}
-                >
-                  (optional)
-                </Text>
-              </View>
+                Your contact number
+              </OnboardingHeading>
 
-              {/* Input with Icon */}
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  backgroundColor: "#F8F8F8",
-                  borderRadius: 16,
-                  paddingHorizontal: 16,
-                  height: 56,
-                  width: "100%",
-                  borderWidth: 1,
-                  borderColor: phoneNumberError ? "#FF6B6B" : "#E0E0E0",
-                  marginBottom: phoneNumberError ? 8 : 0,
-                }}
-              >
+              <View style={styles.card}>
                 <View
-                  style={{
-                    width: 36,
-                    height: 36,
-                    borderRadius: 18,
-                    backgroundColor: "#F0F0F0",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginRight: 12,
-                  }}
+                  style={[
+                    styles.inputWrapper,
+                    phoneNumberError && styles.inputWrapperError,
+                  ]}
                 >
-                  <Ionicons name="call-outline" size={20} color="#9747FF" />
+                  <View style={styles.countryBadge}>
+                    <Text style={styles.countryText}>+91</Text>
+                  </View>
+                  <TextInput
+                    value={phoneNumber}
+                    onChangeText={(text) => {
+                      setphoneNumber(text);
+                      if (phoneNumberError) validatePhoneNumber();
+                    }}
+                    placeholder="Enter 10-digit number"
+                    placeholderTextColor="#9A8CB8"
+                    style={styles.input}
+                    returnKeyType="done"
+                    keyboardType="number-pad"
+                    maxLength={10}
+                  />
                 </View>
-                <TextInput
-                  value={phoneNumber}
-                  onChangeText={(text) => {
-                    setphoneNumber(text);
-                    if (phoneNumberError) validatePhoneNumber();
-                  }}
-                  placeholder="Enter your number"
-                  placeholderTextColor="#999"
-                  style={{
-                    flex: 1,
-                    fontSize: 16,
-                    color: "#000",
-                    backgroundColor: "transparent",
-                    paddingVertical: 0,
-                  }}
-                  returnKeyType="done"
-                  keyboardType="number-pad"
-                  maxLength={10}
-                />
-              </View>
 
-              {/* Error message */}
-              {phoneNumberError ? (
-                <Text
-                  style={{
-                    color: "#FF6B6B",
-                    fontSize: 14,
-                    marginTop: 8,
-                    alignSelf: "flex-start",
-                    marginLeft: 20,
-                  }}
-                >
-                  {phoneNumberError}
-                </Text>
-              ) : null}
+                {phoneNumberError ? (
+                  <Text style={styles.errorText}>{phoneNumberError}</Text>
+                ) : (
+                  <Text style={styles.helperText}>
+                    You can skip for now and add it later.
+                  </Text>
+                )}
+              </View>
             </View>
           </ScrollView>
 
-          {/* Bottom Button - Always at bottom */}
-          <View
-            style={{
-              paddingHorizontal: 20,
-              paddingBottom: 30,
-              paddingTop: 20,
-              backgroundColor: "transparent",
-            }}
-          >
+          <View style={styles.bottomContainer}>
             <TouchableOpacity
               onPress={handleNext}
-              style={{
-                backgroundColor: "#67C694",
-                borderRadius: 30,
-                paddingVertical: 16,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
+              style={styles.nextButton}
+              activeOpacity={0.9}
             >
-              <Text
-                style={{
-                  color: "#FFFFFF",
-                  fontSize: 16,
-                  fontWeight: "700",
-                }}
-              >
-                {phoneNumber === "" ? "Skip" : "Next"}
+              <Text style={styles.nextText}>
+                {phoneNumber === "" ? "Skip for now" : "Next"}
               </Text>
             </TouchableOpacity>
           </View>
@@ -221,3 +134,91 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
 };
 
 export default OnboardingphoneNumber;
+
+const styles = StyleSheet.create({
+  scrollContent: {
+    flexGrow: 1,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+  inner: {
+    flex: 1,
+    paddingBottom: 10,
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "#EFEFEF",
+  },
+  inputWrapper: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    height: 60,
+    borderWidth: 1.5,
+    borderColor: "#E6E6E6",
+  },
+  inputWrapperError: {
+    borderColor: "#FF8A8A",
+  },
+  countryBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    backgroundColor: "#F7F2FF",
+    borderRadius: 12,
+    marginRight: 10,
+    borderWidth: 1,
+    borderColor: "#D6C6FF",
+  },
+  countryText: {
+    color: "#5B2EC2",
+    fontFamily: theme.fonts.medium,
+    fontSize: 14,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    color: "#1A1A1A",
+    fontFamily: theme.fonts.medium,
+    paddingVertical: 0,
+  },
+  helperText: {
+    marginTop: 12,
+    color: "#7A6B99",
+    fontSize: 13,
+    fontFamily: theme.fonts.regular,
+  },
+  errorText: {
+    marginTop: 12,
+    color: "#FF6B6B",
+    fontSize: 13,
+    fontFamily: theme.fonts.medium,
+  },
+  bottomContainer: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    paddingTop: 16,
+    backgroundColor: "transparent",
+  },
+  nextButton: {
+    backgroundColor: "#67C694",
+    borderRadius: 30,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#67C694",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.2,
+    shadowRadius: 10,
+    elevation: 5,
+  },
+  nextText: {
+    color: "#FFFFFF",
+    fontSize: 16,
+    fontFamily: theme.fonts.bold,
+  },
+});

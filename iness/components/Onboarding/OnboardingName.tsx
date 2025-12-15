@@ -60,7 +60,6 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
 
             {/* Input Card */}
             <View style={styles.inputCard}>
-              <Text style={styles.inputLabel}>Your Name</Text>
               <View
                 style={[
                   styles.inputContainer,
@@ -169,7 +168,7 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
 const FeatureItem = ({ icon, text }: { icon: string; text: string }) => (
   <View style={styles.featureItem}>
     <View style={styles.featureIconContainer}>
-      <MaterialCommunityIcons name={icon} size={18} color="#67C694" />
+      <MaterialCommunityIcons name={icon} size={18} color="#9747FF" />
     </View>
     <Text style={styles.featureText}>{text}</Text>
   </View>
@@ -250,26 +249,45 @@ const styles = StyleSheet.create({
   },
   featureRow: {
     flexDirection: "row",
-    marginBottom: 10,
+    marginBottom: 14,
   },
   featureItem: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    backgroundColor: "#F9F6FF",
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E2D6FF",
+    marginRight: 12,
+    shadowColor: "#9747FF",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
   },
   featureIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
-    backgroundColor: "#E8F5E9",
+    width: 36,
+    height: 36,
+    borderRadius: 12,
+    backgroundColor: "#F3EDFF",
+    borderWidth: 1,
+    borderColor: "#E2D6FF",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 10,
+    marginRight: 12,
+    shadowColor: "#9747FF",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 3,
   },
   featureText: {
     fontSize: 13,
-    color: "#555",
-    fontFamily: theme.fonts.regular,
+    color: "#4A3B70",
+    fontFamily: theme.fonts.medium,
     flex: 1,
   },
   bottomContainer: {

@@ -138,14 +138,14 @@ const OnboardingScreen = () => {
   const backgroundImg = require("../assets/images/basicBackground.jpg");
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+    <View style={{ flex: 1, backgroundColor: "transparent" }}>
       <ImageBackground
         source={backgroundImg}
         style={{ flex: 1 }}
         resizeMode="cover"
       >
         <SafeAreaView
-          style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+          style={{ flex: 1, backgroundColor: "transparent" }}
           edges={["left", "right"]}
         >
           <StatusBar style="dark" />

@@ -139,7 +139,7 @@ const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
             <MaterialCommunityIcons
               name="lightbulb-outline"
               size={20}
-              color="#9747FF"
+              color="#67C694"
             />
             <Text style={styles.tipTitle}>Did you know?</Text>
           </View>
@@ -298,12 +298,12 @@ const styles = StyleSheet.create({
     fontFamily: theme.fonts.regular,
   },
   tipCard: {
-    backgroundColor: "#F3EDFF",
+    backgroundColor: "#E8F5E9",
     borderRadius: 16,
     padding: 16,
     marginTop: 20,
     borderWidth: 1,
-    borderColor: "#E8E0F5",
+    borderColor: "#D4EDE0",
   },
   tipHeader: {
     flexDirection: "row",

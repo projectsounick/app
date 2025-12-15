@@ -272,44 +272,44 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   cardsContainer: {
-    marginTop: 10,
+    marginTop: 6,
   },
   genderCard: {
-    borderRadius: 16,
-    padding: Math.min(screenWidth * 0.045, 16), // Responsive padding, max 16px
+    borderRadius: 14,
+    padding: Math.min(screenWidth * 0.04, 14), // Responsive padding, max 14px
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 3,
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
+    elevation: 2,
   },
   genderIconContainer: {
-    width: Math.min(screenWidth * 0.15, 60), // Responsive icon container, max 60px
-    height: Math.min(screenWidth * 0.15, 60),
-    borderRadius: Math.min(screenWidth * 0.075, 30),
+    width: Math.min(screenWidth * 0.14, 52), // Slightly smaller, max 52px
+    height: Math.min(screenWidth * 0.14, 52),
+    borderRadius: Math.min(screenWidth * 0.07, 26),
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: Math.min(screenWidth * 0.03, 12),
+    marginBottom: Math.min(screenWidth * 0.025, 10),
   },
   genderLabel: {
-    fontSize: Math.max(screenWidth * 0.042, 16), // Responsive font size, min 16px
+    fontSize: Math.max(screenWidth * 0.04, 15), // Slightly smaller, min 15px
     fontWeight: "700",
     fontFamily: theme.fonts.bold,
     marginBottom: 3,
   },
   genderDescription: {
-    fontSize: Math.max(screenWidth * 0.03, 12), // Responsive font size, min 12px
+    fontSize: Math.max(screenWidth * 0.028, 12), // Slightly smaller
     color: "#888",
     fontFamily: theme.fonts.regular,
   },
   selectionCircle: {
     position: "absolute",
-    top: Math.min(screenWidth * 0.03, 12),
-    right: Math.min(screenWidth * 0.03, 12),
-    width: Math.min(screenWidth * 0.06, 24),
-    height: Math.min(screenWidth * 0.06, 24),
-    borderRadius: Math.min(screenWidth * 0.03, 12),
+    top: Math.min(screenWidth * 0.028, 10),
+    right: Math.min(screenWidth * 0.028, 10),
+    width: Math.min(screenWidth * 0.055, 20),
+    height: Math.min(screenWidth * 0.055, 20),
+    borderRadius: Math.min(screenWidth * 0.0275, 10),
     borderWidth: 2,
     alignItems: "center",
     justifyContent: "center",

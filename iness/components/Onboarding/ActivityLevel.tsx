@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions, Animated } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import OnboardingCard from "@/app/modules/OnboardingCard";
 import { activityLevelOptions } from "@/utils/onboardingStaticValues";
@@ -113,7 +113,7 @@ const ActivityLevel = ({
               },
             ]}
           >
-            {loading ? "Loading..." : "Continue"}
+            {loading ? <DotLoader /> : "Continue"}
           </Text>
           {!loading && isValid && (
             <MaterialCommunityIcons
@@ -193,3 +193,49 @@ const styles = StyleSheet.create({
 });
 
 export default ActivityLevel;
+
+const DotLoader = () => {
+  const dot1 = useRef(new Animated.Value(0)).current;
+  const dot2 = useRef(new Animated.Value(0)).current;
+  const dot3 = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const createAnimation = (anim: Animated.Value, delay: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(anim, {
+            toValue: 1,
+            duration: 300,
+            delay,
+            useNativeDriver: true,
+          }),
+          Animated.timing(anim, {
+            toValue: 0.2,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+
+    createAnimation(dot1, 0);
+    createAnimation(dot2, 150);
+    createAnimation(dot3, 300);
+  }, [dot1, dot2, dot3]);
+
+  const dotStyle = (anim: Animated.Value) => ({
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginHorizontal: 3,
+    backgroundColor: "#FFFFFF",
+    opacity: anim,
+  });
+
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <Animated.View style={dotStyle(dot1)} />
+      <Animated.View style={dotStyle(dot2)} />
+      <Animated.View style={dotStyle(dot3)} />
+    </View>
+  );
+};
