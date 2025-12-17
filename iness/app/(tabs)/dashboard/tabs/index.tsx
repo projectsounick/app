@@ -34,6 +34,7 @@ import FloatingOptions from "@/app/modules/ButtonSection";
 import HealthDashboard from "@/app/modules/HealthCards";
 
 import SessionCarousel from "@/app/Components/Home/SessionCards";
+import TestimonialsCarousel from "@/app/Components/Home/TestimonialsCarousel";
 
 import PodcastMediaCard from "@/app/Components/Home/PodcastSection";
 import { podCastService } from "@/app/services/podcast.service";
@@ -219,6 +220,7 @@ const YourComponent = () => {
             ) : null}
 
             <BlogSliderCard />
+            <TestimonialsCarousel />
 
 
             <InfoCarousel />

@@ -203,181 +203,183 @@ export default function TransformationImage() {
           <NormalHeader screenName="Photos" />
         </View>
 
-        {loading ? (
-          <View style={styles.loaderContainer}>
-            <ActivityIndicator color="#9747FF" size="large" />
-          </View>
-        ) : (
-          <SectionList
-            sections={normalizeData(data || [])}
-            keyExtractor={(_, index) => index.toString()}
-            contentContainerStyle={styles.listContainer}
-            ListHeaderComponent={
-              <>
-                {/* Info Card */}
-                <View style={styles.infoCard}>
-                  <View style={styles.infoIconContainer}>
-                    <MaterialCommunityIcons
-                      name="image-multiple"
-                      size={22}
-                      color="#9747FF"
-                    />
+        <View style={styles.contentContainer}>
+          {loading ? (
+            <View style={styles.loaderContainer}>
+              <ActivityIndicator color="#9747FF" size="large" />
+            </View>
+          ) : (
+            <SectionList
+              sections={normalizeData(data || [])}
+              keyExtractor={(_, index) => index.toString()}
+              contentContainerStyle={styles.listContainer}
+              ListHeaderComponent={
+                <>
+                  {/* Info Card */}
+                  <View style={styles.infoCard}>
+                    <View style={styles.infoIconContainer}>
+                      <MaterialCommunityIcons
+                        name="image-multiple"
+                        size={22}
+                        color="#9747FF"
+                      />
+                    </View>
+                    <View style={styles.infoTextContainer}>
+                      <Text style={styles.infoTitle}>
+                        Your Transformation Journey
+                      </Text>
+                      <Text style={styles.infoSubtitle}>
+                        Track your progress by uploading photos & videos regularly
+                      </Text>
+                    </View>
                   </View>
-                  <View style={styles.infoTextContainer}>
-                    <Text style={styles.infoTitle}>
-                      Your Transformation Journey
-                    </Text>
-                    <Text style={styles.infoSubtitle}>
-                      Track your progress by uploading photos & videos regularly
-                    </Text>
-                  </View>
-                </View>
 
-                {/* Stats Row */}
-                {totalMedia > 0 && (
-                  <View style={styles.statsCard}>
-                    <View style={styles.statItem}>
-                      <View style={styles.statIconContainer}>
-                        <MaterialCommunityIcons
-                          name="folder-image"
-                          size={18}
-                          color="#9747FF"
-                        />
+                  {/* Stats Row */}
+                  {totalMedia > 0 && (
+                    <View style={styles.statsCard}>
+                      <View style={styles.statItem}>
+                        <View style={styles.statIconContainer}>
+                          <MaterialCommunityIcons
+                            name="folder-image"
+                            size={18}
+                            color="#9747FF"
+                          />
+                        </View>
+                        <Text style={styles.statValue}>{totalMedia}</Text>
+                        <Text style={styles.statLabel}>Total Media</Text>
                       </View>
-                      <Text style={styles.statValue}>{totalMedia}</Text>
-                      <Text style={styles.statLabel}>Total Media</Text>
-                    </View>
-                    <View style={styles.statDivider} />
-                    <View style={styles.statItem}>
-                      <View style={styles.statIconContainer}>
-                        <MaterialCommunityIcons
-                          name="calendar-check"
-                          size={18}
-                          color="#9747FF"
-                        />
+                      <View style={styles.statDivider} />
+                      <View style={styles.statItem}>
+                        <View style={styles.statIconContainer}>
+                          <MaterialCommunityIcons
+                            name="calendar-check"
+                            size={18}
+                            color="#9747FF"
+                          />
+                        </View>
+                        <Text style={styles.statValue}>{data?.length || 0}</Text>
+                        <Text style={styles.statLabel}>Days Tracked</Text>
                       </View>
-                      <Text style={styles.statValue}>{data?.length || 0}</Text>
-                      <Text style={styles.statLabel}>Days Tracked</Text>
                     </View>
-                  </View>
-                )}
-              </>
-            }
-            ListEmptyComponent={
-              <View style={styles.emptyStateCard}>
-                <View style={styles.emptyIconContainer}>
-                  <MaterialCommunityIcons
-                    name="camera-plus-outline"
-                    size={40}
-                    color="#9747FF"
-                  />
-                </View>
-                <Text style={styles.emptyTitle}>No Photos Yet</Text>
-                <Text style={styles.emptySubtitle}>
-                  Start capturing your transformation journey by uploading your
-                  first photo or video
-                </Text>
-                <TouchableOpacity
-                  style={styles.emptyButton}
-                  onPress={() => pickImage("gallery")}
-                >
-                  <MaterialCommunityIcons
-                    name="upload"
-                    size={18}
-                    color="#fff"
-                  />
-                  <Text style={styles.emptyButtonText}>Upload Now</Text>
-                </TouchableOpacity>
-              </View>
-            }
-            renderItem={() => null}
-            renderSectionHeader={({ section }) => (
-              <View style={styles.sectionHeader}>
-                <View style={styles.dateContainer}>
-                  <View style={styles.dateIconContainer}>
+                  )}
+                </>
+              }
+              ListEmptyComponent={
+                <View style={styles.emptyStateCard}>
+                  <View style={styles.emptyIconContainer}>
                     <MaterialCommunityIcons
-                      name="calendar"
-                      size={14}
+                      name="camera-plus-outline"
+                      size={40}
                       color="#9747FF"
                     />
                   </View>
-                  <Text style={styles.dateText}>
-                    {formatDateDisplay(section.title)}
+                  <Text style={styles.emptyTitle}>No Photos Yet</Text>
+                  <Text style={styles.emptySubtitle}>
+                    Start capturing your transformation journey by uploading your
+                    first photo or video
                   </Text>
+                  <TouchableOpacity
+                    style={styles.emptyButton}
+                    onPress={() => pickImage("gallery")}
+                  >
+                    <MaterialCommunityIcons
+                      name="upload"
+                      size={18}
+                      color="#fff"
+                    />
+                    <Text style={styles.emptyButtonText}>Upload Now</Text>
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.dateLine} />
-                <View style={styles.countBadge}>
-                  <Text style={styles.countText}>{section.data.length}</Text>
+              }
+              renderItem={() => null}
+              renderSectionHeader={({ section }) => (
+                <View style={styles.sectionHeader}>
+                  <View style={styles.dateContainer}>
+                    <View style={styles.dateIconContainer}>
+                      <MaterialCommunityIcons
+                        name="calendar"
+                        size={14}
+                        color="#9747FF"
+                      />
+                    </View>
+                    <Text style={styles.dateText}>
+                      {formatDateDisplay(section.title)}
+                    </Text>
+                  </View>
+                  <View style={styles.dateLine} />
+                  <View style={styles.countBadge}>
+                    <Text style={styles.countText}>{section.data.length}</Text>
+                  </View>
                 </View>
-              </View>
-            )}
-            renderSectionFooter={({ section }) => (
-              <View style={styles.mediaContainer}>
-                <ScrollView
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.mediaScrollContainer}
-                >
-                  {section.data.map((item: any, index: number) => {
-                    const isVideo = item.url.endsWith(".mp4");
-                    return (
-                      <TouchableOpacity
-                        key={`img-${index}`}
-                        onPress={() =>
-                          openModal(item.url, isVideo ? "video" : "image")
-                        }
-                        style={[styles.mediaCard, { width: imageSize }]}
-                        activeOpacity={0.8}
-                      >
-                        {isVideo ? (
-                          <View
-                            style={[
-                              styles.videoPlaceholder,
-                              { height: imageSize },
-                            ]}
-                          >
-                            <View style={styles.playButtonContainer}>
-                              <Ionicons
-                                name="play"
-                                size={24}
-                                color="#fff"
-                              />
+              )}
+              renderSectionFooter={({ section }) => (
+                <View style={styles.mediaContainer}>
+                  <ScrollView
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={styles.mediaScrollContainer}
+                  >
+                    {section.data.map((item: any, index: number) => {
+                      const isVideo = item.url.endsWith(".mp4");
+                      return (
+                        <TouchableOpacity
+                          key={`img-${index}`}
+                          onPress={() =>
+                            openModal(item.url, isVideo ? "video" : "image")
+                          }
+                          style={[styles.mediaCard, { width: imageSize }]}
+                          activeOpacity={0.8}
+                        >
+                          {isVideo ? (
+                            <View
+                              style={[
+                                styles.videoPlaceholder,
+                                { height: imageSize },
+                              ]}
+                            >
+                              <View style={styles.playButtonContainer}>
+                                <Ionicons
+                                  name="play"
+                                  size={24}
+                                  color="#fff"
+                                />
+                              </View>
+                              <View style={styles.videoBadge}>
+                                <MaterialCommunityIcons
+                                  name="video"
+                                  size={10}
+                                  color="#fff"
+                                />
+                                <Text style={styles.videoBadgeText}>Video</Text>
+                              </View>
                             </View>
-                            <View style={styles.videoBadge}>
-                              <MaterialCommunityIcons
-                                name="video"
-                                size={10}
-                                color="#fff"
+                          ) : (
+                            <View style={{ position: "relative" }}>
+                              <Image
+                                source={{ uri: item.url }}
+                                style={[styles.mediaImage, { height: imageSize }]}
                               />
-                              <Text style={styles.videoBadgeText}>Video</Text>
+                              <View style={styles.imageBadge}>
+                                <MaterialCommunityIcons
+                                  name="image"
+                                  size={10}
+                                  color="#fff"
+                                />
+                              </View>
                             </View>
-                          </View>
-                        ) : (
-                          <View style={{ position: "relative" }}>
-                            <Image
-                              source={{ uri: item.url }}
-                              style={[styles.mediaImage, { height: imageSize }]}
-                            />
-                            <View style={styles.imageBadge}>
-                              <MaterialCommunityIcons
-                                name="image"
-                                size={10}
-                                color="#fff"
-                              />
-                            </View>
-                          </View>
-                        )}
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              </View>
-            )}
-          />
-        )}
+                          )}
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
+              )}
+            />
+          )}
+        </View>
 
-        {/* Upload Button */}
-        <View style={styles.buttonContainer}>
+        {/* White Bottom Sheet with Upload Button */}
+        <View style={styles.bottomSheet}>
           <TouchableOpacity
             style={styles.uploadButton}
             onPress={() => pickImage("gallery")}
@@ -432,6 +434,9 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingLeft: 20,
   },
+  contentContainer: {
+    flex: 1,
+  },
   loaderContainer: {
     flex: 1,
     justifyContent: "center",
@@ -439,7 +444,7 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     padding: 16,
-    paddingBottom: 100,
+    paddingBottom: 20,
   },
   // Info Card
   infoCard: {
@@ -703,12 +708,19 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginLeft: 4,
   },
-  // Upload Button
-  buttonContainer: {
-    position: "absolute",
-    bottom: 30,
-    left: 16,
-    right: 16,
+  // White Bottom Sheet
+  bottomSheet: {
+    backgroundColor: "#FFFFFF",
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: Platform.OS === "ios" ? 34 : 20,
+    borderTopWidth: 1,
+    borderTopColor: "#F5F5F5",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 8,
   },
   uploadButton: {
     backgroundColor: "#67C694",
@@ -718,10 +730,10 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 30,
     shadowColor: "#67C694",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   uploadButtonText: {
     color: "#fff",

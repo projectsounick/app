@@ -11,7 +11,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { ActivityIndicator } from "react-native-paper";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 
 import SmallHeader from "@/app/modules/SmallHeader";
 import BackHeader from "@/app/modules/BackHeader";
@@ -143,7 +143,7 @@ const PaymentSuccessScreen = () => {
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: "#f2f2f2" }}
-      edges={[ "left", "right"]}
+      edges={["left", "right"]}
     >
       <ImageBackground
         style={{ flex: 1 }}
@@ -163,7 +163,7 @@ const PaymentSuccessScreen = () => {
             <ActivityIndicator />
           </View>
         ) : (
-          <View style={{ marginTop: 20, alignItems: "center", gap: 20, paddingHorizontal: 20 }}>
+          <View style={{ marginTop: 20, alignItems: "center", gap: 20, paddingHorizontal: 20, paddingBottom: messageType === "error" ? 200 : 180 }}>
             {/* Message Box with Icon */}
             {message && (
               <View
@@ -329,7 +329,7 @@ const PaymentSuccessScreen = () => {
           </View>
         )}
 
-        {/* Bottom CTA with Gradient */}
+        {/* Bottom CTA - White Sheet for Failed/Error, Gradient for Success */}
         <Animated.View
           style={{
             position: "absolute",
@@ -339,59 +339,182 @@ const PaymentSuccessScreen = () => {
             opacity: opacityAnim,
           }}
         >
-          <LinearGradient
-            colors={["#140A21", "#522987"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
+          {/* White Bottom Sheet for All Cases */}
+          <View
             style={{
-              paddingVertical: 20,
-              alignItems: "center",
-              borderTopLeftRadius: 25,
-              borderTopRightRadius: 25,
+              backgroundColor: "#FFFFFF",
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              paddingTop: 12,
+              paddingHorizontal: 20,
+              paddingBottom: 0,
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: -4 },
+              shadowOpacity: 0.1,
+              shadowRadius: 12,
+              elevation: 10,
+              borderTopWidth: 1,
+              borderLeftWidth: 1,
+              borderRightWidth: 1,
+              borderColor: "#F5F5F5",
             }}
           >
-            <TouchableOpacity
-              onPress={() => router.replace("/(tabs)/dashboard/tabs/train")}
+            {/* Dash Handle */}
+            <View
               style={{
-                backgroundColor: "#67C694", // Green button
-                paddingVertical: 14,
-                paddingHorizontal: 30,
-                borderRadius: 30,
-                alignItems: "center",
-                width: "80%",
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.2,
-                shadowRadius: 4,
-                elevation: 5,
+                width: 50,
+                height: 5,
+                backgroundColor: "#E0E0E0",
+                borderRadius: 3,
+                alignSelf: "center",
+                marginBottom: 20,
               }}
-            >
-              <Text
-                style={{
-                  color: "#FFFFFF",
-                  fontSize: 16,
-                  fontWeight: "600",
-                }}
-              >
-                See my plans
-              </Text>
-            </TouchableOpacity>
+            />
 
-            <TouchableOpacity
-              onPress={() => router.replace("/(tabs)/dashboard/tabs")}
-              style={{ marginTop: 12 }}
-            >
-              <Text
-                style={{
-                  color: "#67C694",
-                  fontSize: 14,
-                  fontWeight: "500",
-                }}
-              >
-                Continue exploring
-              </Text>
-            </TouchableOpacity>
-          </LinearGradient>
+            {messageType === "error" ? (
+              <>
+                {/* Go to Cart Button */}
+                <TouchableOpacity
+                  onPress={() => router.replace("/(tabs)/dashboard/cart")}
+                  style={{
+                    backgroundColor: "#67C694",
+                    paddingVertical: 14,
+                    borderRadius: 25,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexDirection: "row",
+                    marginBottom: 12,
+                    shadowColor: "#67C694",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}
+                >
+                  <Ionicons name="cart" size={20} color="#FFFFFF" />
+                  <Text
+                    style={{
+                      color: "#FFFFFF",
+                      fontSize: 16,
+                      fontWeight: "600",
+                      marginLeft: 8,
+                    }}
+                  >
+                    Go to Cart
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Plans Button */}
+                <TouchableOpacity
+                  onPress={() => router.replace("/(tabs)/dashboard/tabs/train")}
+                  style={{
+                    backgroundColor: "#F3EDFF",
+                    paddingVertical: 14,
+                    borderRadius: 25,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexDirection: "row",
+                    marginBottom: 12,
+                    borderWidth: 1,
+                    borderColor: "#E0D5FF",
+                  }}
+                >
+                  <MaterialCommunityIcons name="format-list-bulleted" size={20} color="#9747FF" />
+                  <Text
+                    style={{
+                      color: "#9747FF",
+                      fontSize: 16,
+                      fontWeight: "600",
+                      marginLeft: 8,
+                    }}
+                  >
+                    View Plans
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Continue Exploring Button */}
+                <TouchableOpacity
+                  onPress={() => router.replace("/(tabs)/dashboard/tabs")}
+                  style={{
+                    paddingTop: 14,
+                    paddingBottom: 20,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexDirection: "row",
+                  }}
+                >
+                  <Ionicons name="compass-outline" size={18} color="#666" />
+                  <Text
+                    style={{
+                      color: "#666",
+                      fontSize: 14,
+                      fontWeight: "500",
+                      marginLeft: 8,
+                    }}
+                  >
+                    Continue Exploring
+                  </Text>
+                </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                {/* See my plans Button for Success */}
+                <TouchableOpacity
+                  onPress={() => router.replace("/(tabs)/dashboard/tabs/train")}
+                  style={{
+                    backgroundColor: "#67C694",
+                    paddingVertical: 14,
+                    borderRadius: 25,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexDirection: "row",
+                    marginBottom: 12,
+                    shadowColor: "#67C694",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 4,
+                    elevation: 5,
+                  }}
+                >
+                  <MaterialCommunityIcons name="clipboard-check" size={20} color="#FFFFFF" />
+                  <Text
+                    style={{
+                      color: "#FFFFFF",
+                      fontSize: 16,
+                      fontWeight: "600",
+                      marginLeft: 8,
+                    }}
+                  >
+                    See my plans
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Continue Exploring Button */}
+                <TouchableOpacity
+                  onPress={() => router.replace("/(tabs)/dashboard/tabs")}
+                  style={{
+                    paddingTop: 14,
+                    paddingBottom: 20,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexDirection: "row",
+                  }}
+                >
+                  <Ionicons name="compass-outline" size={18} color="#666" />
+                  <Text
+                    style={{
+                      color: "#666",
+                      fontSize: 14,
+                      fontWeight: "500",
+                      marginLeft: 8,
+                    }}
+                  >
+                    Continue exploring
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
         </Animated.View>
       </ImageBackground>
     </SafeAreaView>

@@ -15,11 +15,12 @@ import { RootState } from "@/store";
 import { router } from "expo-router";
 import { Blog } from "../interfaces/blogInterface";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.85; // Responsive card width - 85% of screen width
 
 function BlogSliderCard() {
   const blogs = useSelector((state: RootState) => state.blog.blogs);
+  const screenHeight = height;
 
   return (
     <View
@@ -150,11 +151,11 @@ function BlogSliderCard() {
                 <Text
                   numberOfLines={2}
                   style={{
-                    fontSize: Math.max(width * 0.042, 15), // Responsive font size, minimum 15px
+                    fontSize: screenHeight < 700 ? 14 : screenHeight < 900 ? 15 : 15, // Reduced from responsive calculation
                     fontWeight: "700",
                     color: "#000",
                     marginBottom: 8,
-                    lineHeight: Math.max(width * 0.055, 22), // Responsive line height
+                    lineHeight: screenHeight < 700 ? 20 : screenHeight < 900 ? 21 : 22,
                     fontFamily: theme.fonts.bold,
                   }}
                 >
@@ -166,8 +167,8 @@ function BlogSliderCard() {
               <TouchableOpacity
                 style={{
                   backgroundColor: "#67C694",
-                  paddingVertical: 6,
-                  paddingHorizontal: 14,
+                  paddingVertical: screenHeight < 700 ? 8 : screenHeight < 900 ? 9 : 10,
+                  paddingHorizontal: screenHeight < 700 ? 16 : screenHeight < 900 ? 18 : 20,
                   borderRadius: 12,
                   alignSelf: "flex-start",
                   shadowColor: "#67C694",
@@ -185,7 +186,7 @@ function BlogSliderCard() {
               >
                 <Text
                   style={{
-                    fontSize: 12,
+                    fontSize: screenHeight < 700 ? 13 : screenHeight < 900 ? 14 : 14,
                     fontWeight: "700",
                     color: "#FFFFFF",
                     fontFamily: theme.fonts.bold,

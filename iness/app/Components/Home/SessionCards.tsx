@@ -279,7 +279,7 @@ const UpcomingSessionsCard = () => {
                   <TouchableOpacity
                     onPress={() => dispatch(setCalendarSheetOpen(true))}
                     style={{
-                      backgroundColor: "#FFFFFF",
+                      backgroundColor: session.sessionStatus === "completed" ? "#F5F5F5" : "#FFFFFF",
                       borderRadius: 20,
                       paddingVertical: height < 700 ? 12 : height < 900 ? 14 : 16,
                       paddingHorizontal: 16,
@@ -289,7 +289,7 @@ const UpcomingSessionsCard = () => {
                       shadowRadius: 4,
                       elevation: 2,
                       borderWidth: 1,
-                      borderColor: "#F5F5F5",
+                      borderColor: session.sessionStatus === "completed" ? "#E0E0E0" : "#F5F5F5",
                       position: "relative",
                       height: CARD_HEIGHT - (height < 700 ? 16 : height < 900 ? 18 : 20),
                       justifyContent: "space-between",
@@ -303,7 +303,7 @@ const UpcomingSessionsCard = () => {
                         right: height < 700 ? 10 : 14,
                         backgroundColor:
                           session.sessionStatus === "completed"
-                            ? "#E8F5E9"
+                            ? "#E0E0E0"
                             : session.sessionStatus === "missed"
                               ? "#FFEBEE"
                               : "#FFF3E0",
@@ -317,7 +317,7 @@ const UpcomingSessionsCard = () => {
                         style={{
                           color:
                             session.sessionStatus === "completed"
-                              ? "#4CAF50"
+                              ? "#000000"
                               : session.sessionStatus === "missed"
                                 ? "#F44336"
                                 : "#FF9800",
@@ -378,7 +378,7 @@ const UpcomingSessionsCard = () => {
                             style={{
                               fontSize: height < 700 ? 14 : height < 900 ? 15 : 16,
                               fontFamily: theme.fonts.bold,
-                              color: "#000",
+                              color: session.sessionStatus === "completed" ? "#000000" : "#000",
                               marginBottom: height < 700 ? 6 : height < 900 ? 8 : 10,
                               fontWeight: "700",
                               lineHeight: height < 700 ? 18 : 20,
@@ -402,13 +402,13 @@ const UpcomingSessionsCard = () => {
                                   : "location-outline"
                               }
                               size={14}
-                              color="#666"
+                              color={session.sessionStatus === "completed" ? "#333" : "#666"}
                               style={{ marginRight: 6 }}
                             />
                             <Text
                               style={{
                                 fontSize: 12,
-                                color: "#666",
+                                color: session.sessionStatus === "completed" ? "#000000" : "#666",
                                 fontWeight: "500",
                                 textTransform: "uppercase",
                                 letterSpacing: 0.5,
@@ -427,13 +427,13 @@ const UpcomingSessionsCard = () => {
                             <Ionicons
                               name="time-outline"
                               size={14}
-                              color="#666"
+                              color={session.sessionStatus === "completed" ? "#333" : "#666"}
                               style={{ marginRight: 6 }}
                             />
                             <Text
                               style={{
                                 fontSize: 12,
-                                color: "#666",
+                                color: session.sessionStatus === "completed" ? "#000000" : "#666",
                                 fontWeight: "500",
                               }}
                               numberOfLines={1}
