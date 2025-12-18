@@ -53,8 +53,9 @@ const PaymentSuccessScreen = () => {
       setOrderId(null);
       // AsyncStorage remove using promise
       AsyncStorage.removeItem("currentOrderId")
-        .then(() => console.log("Order ID removed on unmount"))
-        .catch((e) => console.error("Failed to remove:", e));
+        .catch((e) => {
+          // Failed to remove
+        });
     };
   }, []);
   const dispatch = useDispatch();

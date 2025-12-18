@@ -44,7 +44,6 @@ function useFetchMultipleStoreDataHook(
             const duration = Date.now() - startTime;
             const seconds = (duration / 1000).toFixed(2);
             const status = duration > 3000 ? "⚠️ SLOW" : duration > 1000 ? "⚠️" : "✅";
-            console.log(`${status} [${sliceKey}] completed in ${seconds}s (${duration}ms)`);
             return { res, duration, sliceKey };
           })
           .catch((err) => {
@@ -86,14 +85,14 @@ function useFetchMultipleStoreDataHook(
       });
 
       // Performance summary
-      const sortedByDuration = [...performanceReport].sort((a, b) => b.duration - a.duration);
-      console.log("\n📊 API Performance Summary (slowest first):");
-      sortedByDuration.forEach(({ sliceKey, duration, status }) => {
-        const seconds = (duration / 1000).toFixed(2);
-        const icon = duration > 3000 ? "🐌" : duration > 1000 ? "⚠️" : "✅";
-        console.log(`  ${icon} ${sliceKey}: ${seconds}s (${duration}ms) - ${status}`);
-      });
-      console.log("");
+      // const sortedByDuration = [...performanceReport].sort((a, b) => b.duration - a.duration);
+      // console.log("\n📊 API Performance Summary (slowest first):");
+      // sortedByDuration.forEach(({ sliceKey, duration, status }) => {
+      //   const seconds = (duration / 1000).toFixed(2);
+      //   const icon = duration > 3000 ? "🐌" : duration > 1000 ? "⚠️" : "✅";
+      //   console.log(`  ${icon} ${sliceKey}: ${seconds}s (${duration}ms) - ${status}`);
+      // });
+      // console.log("");
 
       if (hasError) {
         setSnackbarMessage("Some data failed to load");

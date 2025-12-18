@@ -93,7 +93,6 @@ const HealthReportUploader = ({
         }
       }
     } catch (err) {
-      console.log("Upload error:", err);
       Alert.alert("Error", "Failed to upload the health report.");
       setLoading(false);
     }
@@ -114,7 +113,6 @@ const HealthReportUploader = ({
         Alert.alert("Error", "Failed to clear health report on server.");
       }
     } catch (err) {
-      console.log("Error clearing health report:", err);
       Alert.alert("Error", "Failed to clear health report.");
     } finally {
       setLoading(false);

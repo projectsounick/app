@@ -103,16 +103,13 @@ export default function VideoCallScreen({
 
     engine.registerEventHandler({
       onJoinChannelSuccess: (_, localUid) => {
-        console.log("✅ Joined channel, UID:", localUid);
         setJoined(true);
         setCallStartTime(new Date());
       },
       onUserJoined: (_, uid) => {
-        console.log("👤 Remote user joined:", uid);
         setRemoteUids((prev) => [...new Set([...prev, uid])]);
       },
       onUserOffline: (_, uid) => {
-        console.log("❌ Remote user offline:", uid);
         setRemoteUids((prev) => prev.filter((id) => id !== uid));
       },
     });
@@ -137,9 +134,8 @@ export default function VideoCallScreen({
           agoraEngineRef.current = null;
         }
         await AsyncStorage.removeItem("videocallActivity");
-        console.log("✅ Agora cleanup done");
       } catch (err) {
-        console.warn("⚠️ Agora cleanup failed:", err);
+        // Agora cleanup failed
       }
     });
   };

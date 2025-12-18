@@ -44,10 +44,6 @@ const AppUpdateBottomSheet = () => {
   useEffect(() => {
     const checkVersion = async () => {
       try {
-        console.log("🔍 [VersionCheck] Starting version check...");
-        console.log("🔍 [VersionCheck] Current app version:", CURRENT_VERSION);
-        console.log("🔍 [VersionCheck] Platform:", Platform.OS);
-
         const baseUrlAndroid =
           "https://inessstorage.blob.core.windows.net/iness-public/androidVersion.json";
         const baseUrlIos =
@@ -59,34 +55,24 @@ const AppUpdateBottomSheet = () => {
         // Cache buster to avoid stale JSON from CDN/browser cache
         const cacheBuster = Date.now();
         const fullUrl = `${baseUrl}?cb=${cacheBuster}`;
-        console.log("🔍 [VersionCheck] Fetching from URL:", fullUrl);
 
         const response = await fetch(fullUrl);
-        console.log("🔍 [VersionCheck] Response status:", response.status);
-        console.log("🔍 [VersionCheck] Response ok:", response.ok);
 
         if (!response.ok) {
-          console.error("❌ [VersionCheck] Failed to fetch version JSON. Status:", response.status);
           return;
         }
 
         const raw = await response.json();
-        console.log("🔍 [VersionCheck] Raw response data:", JSON.stringify(raw, null, 2));
 
         let latest: string | null = null;
         let latestReleaseNote: string | null = null;
         let isMandatory: boolean = false;
 
         if (Array.isArray(raw) && raw.length > 0) {
-          console.log("🔍 [VersionCheck] Array length:", raw.length);
-          console.log("🔍 [VersionCheck] First element type:", typeof raw[0]);
-          console.log("🔍 [VersionCheck] First element:", raw[0]);
-
           if (typeof raw[0] === "string") {
             // Legacy: ["1.0.0", "1.1.0"]
             latest = raw[0] as string;
             isMandatory = false; // Legacy format doesn't support mandatory
-            console.log("🔍 [VersionCheck] Using legacy format. Latest version:", latest);
           } else if (typeof raw[0] === "object" && raw[0]?.version) {
             // New format: [{ version, releaseNote?, mandatoryUpdate? }, ...]
             latest = String(raw[0].version);
@@ -94,22 +80,12 @@ const AppUpdateBottomSheet = () => {
               latestReleaseNote = String(raw[0].releaseNote);
             }
             isMandatory = Boolean(raw[0].mandatoryUpdate) || false;
-            console.log("🔍 [VersionCheck] Using new format. Latest version:", latest);
-            console.log("🔍 [VersionCheck] Release note:", latestReleaseNote || "none");
-            console.log("🔍 [VersionCheck] Mandatory update:", isMandatory);
-          } else {
-            console.warn("⚠️ [VersionCheck] Unknown format for first element:", raw[0]);
           }
-        } else {
-          console.warn("⚠️ [VersionCheck] Response is not a non-empty array:", raw);
         }
 
         if (!latest) {
-          console.warn("⚠️ [VersionCheck] No latest version found. Exiting.");
           return;
         }
-
-        console.log("🔍 [VersionCheck] Latest version from JSON:", latest);
 
         // Fetch user from AsyncStorage to get versionModalClicked if present
         const userStr = await AsyncStorage.getItem("user");
@@ -119,56 +95,31 @@ const AppUpdateBottomSheet = () => {
             const user = JSON.parse(userStr);
             if (user.versionModalClicked) {
               versionModalClicked = String(user.versionModalClicked);
-              console.log("🔍 [VersionCheck] User's versionModalClicked:", versionModalClicked);
-            } else {
-              console.log("🔍 [VersionCheck] User has no versionModalClicked set");
             }
           } catch (err) {
-            console.error("❌ [VersionCheck] Error parsing user from AsyncStorage:", err);
             versionModalClicked = null;
           }
-        } else {
-          console.log("🔍 [VersionCheck] No user found in AsyncStorage");
         }
 
         // Show modal only if:
         // 1) latest > current app version AND
         // 2) user has not already interacted with this or a newer version
         const hasNewerThanCurrent = isNewerVersion(latest, CURRENT_VERSION);
-        console.log("🔍 [VersionCheck] Is latest newer than current?", hasNewerThanCurrent);
-        console.log("🔍 [VersionCheck] Comparison: latest=", latest, "vs current=", CURRENT_VERSION);
 
         const hasAlreadySeenThisOrNewer =
           versionModalClicked &&
           !isNewerVersion(latest, versionModalClicked);
-        console.log("🔍 [VersionCheck] Has user already seen this or newer?", hasAlreadySeenThisOrNewer);
-        if (versionModalClicked) {
-          console.log("🔍 [VersionCheck] Comparison: latest=", latest, "vs versionModalClicked=", versionModalClicked);
-        }
 
         const shouldShowModal = hasNewerThanCurrent && !hasAlreadySeenThisOrNewer;
-        console.log("🔍 [VersionCheck] Should show modal?", shouldShowModal);
-        console.log("🔍 [VersionCheck] Conditions: hasNewerThanCurrent=", hasNewerThanCurrent, ", !hasAlreadySeenThisOrNewer=", !hasAlreadySeenThisOrNewer);
 
         if (shouldShowModal) {
-          console.log("✅ [VersionCheck] Showing modal with version:", latest);
-          console.log("✅ [VersionCheck] Mandatory update:", isMandatory);
           setLatestVersion(latest);
           setReleaseNote(latestReleaseNote);
           setMandatoryUpdate(isMandatory);
           setIsVisible(true);
-        } else {
-          console.log("❌ [VersionCheck] NOT showing modal. Reasons:");
-          if (!hasNewerThanCurrent) {
-            console.log("   - Latest version is NOT newer than current");
-          }
-          if (hasAlreadySeenThisOrNewer) {
-            console.log("   - User has already interacted with this or a newer version");
-          }
         }
       } catch (error) {
-        console.error("❌ [VersionCheck] Failed to check version:", error);
-        console.error("❌ [VersionCheck] Error details:", JSON.stringify(error, null, 2));
+        // Error checking version
       }
     };
 
@@ -210,7 +161,7 @@ const AppUpdateBottomSheet = () => {
           setIsVisible(false);
         });
       } catch (err) {
-        console.error("Failed to update versionModalClicked", err);
+        // Failed to update versionModalClicked
       }
     }
     // If mandatory, don't close modal - let it stay open so they see it again if they return

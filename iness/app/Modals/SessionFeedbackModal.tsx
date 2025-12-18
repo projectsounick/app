@@ -52,7 +52,6 @@ const FeedbackModal = ({
         Alert.alert("Error", "Failed to submit feedback. Please try again.");
       }
     } catch (err) {
-      console.log(err);
       Alert.alert("Error", "Something went wrong. Please try again.");
     } finally {
       setFeedbackLoading(false);

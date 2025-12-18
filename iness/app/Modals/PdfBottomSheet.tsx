@@ -76,7 +76,6 @@ export default function DietPlanBottomSheet({
         throw new Error("Download failed");
       }
     } catch (error: any) {
-      console.log("Download error:", error);
       Alert.alert("Error", "Failed to download diet plan. Please try again.");
     } finally {
       setLoading(false);

@@ -84,9 +84,7 @@ const planSlice = createSlice({
       }
     },
     setServices: (state, action: PayloadAction<any[]>) => {
-      console.log("service payload");
 
-      console.log(action.payload);
 
       state.activeServices = action.payload.filter(
         (service) => service.isActive === true

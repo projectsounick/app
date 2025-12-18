@@ -147,11 +147,7 @@ export default function RootLayout() {
             // Store for later navigation (after app is fully ready)
             await storePendingNavigation(notificationData);
            
-          } else {
-            console.log("⚠️ No valid notification data found");
           }
-        } else {
-          console.log("No last notification response found");
         }
       } catch (error) {
         console.error("Error checking initial notification:", error);

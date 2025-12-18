@@ -12,7 +12,6 @@ const SessionCardRow: React.FC<SessionCardRowProps> = ({
   selectedSession,
   totalSessions,
 }) => {
-  console.log(selectedSession);
 
   const activePlan =
     selectedSession?.activePlanDetails || selectedSession?.activeServiceDetails;

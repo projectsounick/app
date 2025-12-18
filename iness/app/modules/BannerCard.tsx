@@ -69,7 +69,6 @@ const BannerCard = ({ cardData }: { cardData: any }) => {
           ...updatedCartItem,
           _id: cartDbResponse.data._id,
         };
-        console.log("before close");
 
         setModalVisible(false);
         dispatch(addToCart(finalItem));

@@ -21,6 +21,19 @@ const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const { height } = Dimensions.get("window");
 
+// Responsive scaling factors
+const scale = SCREEN_WIDTH / 375; // Base width (iPhone X/11)
+const fontScale = SCREEN_WIDTH < 375 ? SCREEN_WIDTH / 375 : 1; // Scale down for smaller screens
+const verticalScale = SCREEN_HEIGHT / 812; // Base height
+
+// Responsive font sizes
+const responsiveFontSize = (size: number) => size * Math.min(fontScale, 1.1);
+// Responsive dimensions
+const responsiveWidth = (size: number) => size * scale;
+const responsiveHeight = (size: number) => size * verticalScale;
+// Responsive spacing
+const responsiveSpacing = (size: number) => size * Math.min(scale, 1.1);
+
 type MeditationType = "timer" | "breathing" | "guided";
 
 interface MeditationSession {
@@ -266,7 +279,7 @@ export default function MeditationScreen() {
               style={[styles.controlButton, styles.resetButton]}
               onPress={resetTimer}
             >
-              <Ionicons name="refresh" size={24} color="#666" />
+              <Ionicons name="refresh" size={responsiveFontSize(24)} color="#666" />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -275,7 +288,7 @@ export default function MeditationScreen() {
             >
               <Ionicons
                 name={isActive ? "pause" : "play"}
-                size={32}
+                size={responsiveFontSize(32)}
                 color="#fff"
               />
             </TouchableOpacity>
@@ -288,7 +301,7 @@ export default function MeditationScreen() {
                 setTimeRemaining(300);
               }}
             >
-              <Ionicons name="stop" size={24} color="#666" />
+              <Ionicons name="stop" size={responsiveFontSize(24)} color="#666" />
             </TouchableOpacity>
           </View>
 
@@ -299,7 +312,7 @@ export default function MeditationScreen() {
                 <View style={styles.sessionInfoIconContainer}>
                   <MaterialCommunityIcons
                     name="information-outline"
-                    size={20}
+                    size={responsiveFontSize(20)}
                     color="#9747FF"
                   />
                 </View>
@@ -329,7 +342,7 @@ export default function MeditationScreen() {
               >
                 <MaterialCommunityIcons
                   name={session.icon as any}
-                  size={28}
+                  size={responsiveFontSize(28)}
                   color="#fff"
                 />
               </LinearGradient>
@@ -342,7 +355,7 @@ export default function MeditationScreen() {
                   {session.duration} minutes
                 </Text>
               </View>
-              <Ionicons name="chevron-forward" size={20} color="#9747FF" />
+              <Ionicons name="chevron-forward" size={responsiveFontSize(20)} color="#9747FF" />
             </TouchableOpacity>
           ))}
         </View>
@@ -398,7 +411,7 @@ export default function MeditationScreen() {
         >
           <Ionicons
             name={isActive ? "pause" : "play"}
-            size={28}
+            size={responsiveFontSize(28)}
             color="#fff"
           />
           <Text style={styles.breathingButtonText}>
@@ -442,7 +455,7 @@ export default function MeditationScreen() {
             <View style={styles.sessionInfoIconContainer}>
               <MaterialCommunityIcons
                 name="information-outline"
-                size={20}
+                size={responsiveFontSize(20)}
                 color="#9747FF"
               />
             </View>
@@ -454,7 +467,7 @@ export default function MeditationScreen() {
               style={styles.infoLinkButton}
               onPress={() => Linking.openURL(selectedBreathing.link!)}
             >
-              <Ionicons name="open-outline" size={16} color="#9747FF" />
+              <Ionicons name="open-outline" size={responsiveFontSize(16)} color="#9747FF" />
               <Text style={styles.infoLinkText}>Learn More</Text>
             </TouchableOpacity>
           )}
@@ -469,7 +482,7 @@ export default function MeditationScreen() {
       <View style={styles.comingSoonCard}>
         <MaterialCommunityIcons
           name="meditation"
-          size={48}
+          size={responsiveFontSize(48)}
           color="#9747FF"
         />
         <Text style={styles.comingSoonTitle}>Coming Soon</Text>
@@ -527,9 +540,9 @@ export default function MeditationScreen() {
                 >
                   <Ionicons
                     name={item.icon as any}
-                    size={18}
+                    size={responsiveFontSize(18)}
                     color={isSelected ? "#FFFFFF" : "#999"}
-                    style={{ marginRight: 6 }}
+                    style={{ marginRight: responsiveSpacing(6) }}
                   />
                   <Text
                     style={[
@@ -552,7 +565,7 @@ export default function MeditationScreen() {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 100 }}>
+            <View style={{ paddingHorizontal: responsiveSpacing(16), paddingTop: responsiveSpacing(16), paddingBottom: responsiveSpacing(100) }}>
               {/* Content */}
               {selectedType === "timer" && renderTimerView()}
               {selectedType === "breathing" && renderBreathingView()}
@@ -567,7 +580,7 @@ export default function MeditationScreen() {
 
 const styles = StyleSheet.create({
   headerContainer: {
-    paddingHorizontal: 20,
+    paddingHorizontal: responsiveSpacing(20),
     marginTop: Platform.OS === "ios" ? height * 0.05 : "4%",
   },
   scrollView: {
@@ -579,12 +592,12 @@ const styles = StyleSheet.create({
   fixedTabsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginHorizontal: 16,
-    marginTop: 16,
-    marginBottom: 24,
+    marginHorizontal: responsiveSpacing(16),
+    marginTop: responsiveSpacing(16),
+    marginBottom: responsiveSpacing(24),
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 4,
+    borderRadius: responsiveSpacing(16),
+    padding: responsiveSpacing(4),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -595,17 +608,17 @@ const styles = StyleSheet.create({
   },
   tabButton: {
     flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    borderRadius: 12,
+    paddingVertical: responsiveSpacing(10),
+    paddingHorizontal: responsiveSpacing(8),
+    borderRadius: responsiveSpacing(12),
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
-    gap: 6,
+    gap: responsiveSpacing(6),
   },
   tabButtonText: {
     fontWeight: "700",
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     fontFamily: theme.fonts.bold,
   },
   contentContainer: {
@@ -616,12 +629,12 @@ const styles = StyleSheet.create({
   },
   timerCircle: {
     alignItems: "center",
-    marginVertical: 40,
+    marginVertical: responsiveSpacing(40),
   },
   timerInnerCircle: {
-    width: 280,
-    height: 280,
-    borderRadius: 140,
+    width: responsiveWidth(280),
+    height: responsiveWidth(280),
+    borderRadius: responsiveWidth(140),
     overflow: "hidden",
   },
   timerGradient: {
@@ -631,28 +644,28 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   timerText: {
-    fontSize: 48,
+    fontSize: responsiveFontSize(48),
     fontWeight: "700",
     color: "#fff",
     fontFamily: theme.fonts.bold,
   },
   timerLabel: {
-    fontSize: 18,
+    fontSize: responsiveFontSize(18),
     color: "#fff",
-    marginTop: 8,
+    marginTop: responsiveSpacing(8),
     fontFamily: theme.fonts.medium,
   },
   timerControls: {
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: 20,
-    marginTop: 30,
+    gap: responsiveSpacing(20),
+    marginTop: responsiveSpacing(30),
   },
   controlButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: responsiveWidth(56),
+    height: responsiveWidth(56),
+    borderRadius: responsiveWidth(28),
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#FFFFFF",
@@ -665,9 +678,9 @@ const styles = StyleSheet.create({
     borderColor: "#F5F5F5",
   },
   playButton: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: responsiveWidth(72),
+    height: responsiveWidth(72),
+    borderRadius: responsiveWidth(36),
     backgroundColor: "#67C694",
     borderWidth: 0,
     shadowColor: "#67C694",
@@ -685,10 +698,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: responsiveSpacing(16),
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: responsiveFontSize(20),
     fontWeight: "700",
     color: "#1A1A1A",
     fontFamily: theme.fonts.bold,
@@ -703,9 +716,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: responsiveSpacing(16),
+    padding: responsiveSpacing(16),
+    marginBottom: responsiveSpacing(12),
     marginHorizontal: 0,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -716,31 +729,31 @@ const styles = StyleSheet.create({
     borderColor: "#F5F5F5",
   },
   sessionGradient: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: responsiveWidth(56),
+    height: responsiveWidth(56),
+    borderRadius: responsiveWidth(28),
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 16,
+    marginRight: responsiveSpacing(16),
   },
   sessionInfo: {
     flex: 1,
   },
   sessionTitle: {
-    fontSize: 16,
+    fontSize: responsiveFontSize(16),
     fontWeight: "700",
     color: "#1A1A1A",
-    marginBottom: 4,
+    marginBottom: responsiveSpacing(4),
     fontFamily: theme.fonts.bold,
   },
   sessionDescription: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     color: "#666",
-    marginBottom: 4,
+    marginBottom: responsiveSpacing(4),
     fontFamily: theme.fonts.regular,
   },
   sessionDuration: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     color: "#9747FF",
     fontWeight: "600",
     fontFamily: theme.fonts.medium,
@@ -750,13 +763,13 @@ const styles = StyleSheet.create({
   },
   breathingCircleContainer: {
     alignItems: "center",
-    marginTop: 28,
-    marginBottom: 28,
+    marginTop: responsiveSpacing(28),
+    marginBottom: responsiveSpacing(28),
   },
   breathingCircle: {
-    width: 250,
-    height: 250,
-    borderRadius: 125,
+    width: responsiveWidth(250),
+    height: responsiveWidth(250),
+    borderRadius: responsiveWidth(125),
     overflow: "hidden",
   },
   breathingGradient: {
@@ -767,10 +780,10 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   breathingPhaseText: {
-    fontSize: 32,
+    fontSize: responsiveFontSize(32),
     fontWeight: "700",
     color: "#fff",
-    marginBottom: 20,
+    marginBottom: responsiveSpacing(20),
     fontFamily: theme.fonts.bold,
   },
   breathingProgressBar: {
@@ -787,15 +800,15 @@ const styles = StyleSheet.create({
   },
   breathingControls: {
     alignItems: "center",
-    marginTop: 28,
+    marginTop: responsiveSpacing(28),
   },
   breathingButton: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 40,
-    paddingVertical: 18,
-    borderRadius: 24,
-    gap: 12,
+    paddingHorizontal: responsiveSpacing(40),
+    paddingVertical: responsiveSpacing(18),
+    borderRadius: responsiveSpacing(24),
+    gap: responsiveSpacing(12),
     shadowColor: "#67C694",
     shadowOffset: { width: 0, height: 6 },
     shadowOpacity: 0.4,
@@ -806,27 +819,27 @@ const styles = StyleSheet.create({
     backgroundColor: "#67C694",
   },
   breathingButtonText: {
-    fontSize: 18,
+    fontSize: responsiveFontSize(18),
     fontWeight: "700",
     color: "#fff",
     fontFamily: theme.fonts.bold,
   },
   breathingPatterns: {
-    marginTop: 40,
-    marginBottom: 16,
+    marginTop: responsiveSpacing(40),
+    marginBottom: responsiveSpacing(16),
     paddingHorizontal: 0,
   },
   breathingPatternsGrid: {
     flexDirection: "row",
     justifyContent: "space-between",
-    gap: 12,
+    gap: responsiveSpacing(12),
   },
   breathingPatternCard: {
     flex: 1,
     alignItems: "center",
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: responsiveSpacing(16),
+    padding: responsiveSpacing(16),
     borderWidth: 1,
     borderColor: "#F5F5F5",
     shadowColor: "#000",
@@ -834,7 +847,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
-    minHeight: 140,
+    minHeight: responsiveHeight(140),
     justifyContent: "center",
   },
   breathingPatternCardActive: {
@@ -843,15 +856,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#F3EDFF",
   },
   breathingPatternName: {
-    fontSize: 15,
+    fontSize: responsiveFontSize(15),
     fontWeight: "700",
     color: "#1A1A1A",
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: responsiveSpacing(8),
     fontFamily: theme.fonts.bold,
   },
   breathingPatternDesc: {
-    fontSize: 12,
+    fontSize: responsiveFontSize(12),
     color: "#666",
     textAlign: "center",
     fontFamily: theme.fonts.regular,
@@ -861,8 +874,8 @@ const styles = StyleSheet.create({
   },
   comingSoonCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 40,
+    borderRadius: responsiveSpacing(16),
+    padding: responsiveSpacing(40),
     marginHorizontal: 0,
     alignItems: "center",
     shadowColor: "#000",
@@ -874,25 +887,25 @@ const styles = StyleSheet.create({
     borderColor: "#F5F5F5",
   },
   comingSoonTitle: {
-    fontSize: 22,
+    fontSize: responsiveFontSize(22),
     fontWeight: "700",
     color: "#1A1A1A",
-    marginTop: 16,
-    marginBottom: 8,
+    marginTop: responsiveSpacing(16),
+    marginBottom: responsiveSpacing(8),
     fontFamily: theme.fonts.bold,
   },
   comingSoonText: {
-    fontSize: 14,
+    fontSize: responsiveFontSize(14),
     color: "#666",
     textAlign: "center",
-    lineHeight: 20,
+    lineHeight: responsiveFontSize(20),
     fontFamily: theme.fonts.regular,
   },
   sessionInfoCard: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 20,
-    marginTop: 24,
+    borderRadius: responsiveSpacing(16),
+    padding: responsiveSpacing(20),
+    marginTop: responsiveSpacing(24),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
@@ -904,46 +917,46 @@ const styles = StyleSheet.create({
   sessionInfoHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: responsiveSpacing(16),
   },
   sessionInfoIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: responsiveWidth(36),
+    height: responsiveWidth(36),
+    borderRadius: responsiveSpacing(10),
     backgroundColor: "#F3EDFF",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
+    marginRight: responsiveSpacing(12),
   },
   sessionInfoTitle: {
-    fontSize: 18,
+    fontSize: responsiveFontSize(18),
     fontWeight: "700",
     color: "#1A1A1A",
     fontFamily: theme.fonts.bold,
   },
   sessionInfoText: {
-    fontSize: 14,
+    fontSize: responsiveFontSize(14),
     color: "#666",
-    lineHeight: 22,
+    lineHeight: responsiveFontSize(22),
     fontFamily: theme.fonts.regular,
     textAlign: "left",
-    marginBottom: 12,
+    marginBottom: responsiveSpacing(12),
   },
   infoLinkButton: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 8,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    marginTop: responsiveSpacing(8),
+    paddingVertical: responsiveSpacing(8),
+    paddingHorizontal: responsiveSpacing(12),
     backgroundColor: "#F3EDFF",
-    borderRadius: 8,
+    borderRadius: responsiveSpacing(8),
     alignSelf: "flex-start",
   },
   infoLinkText: {
-    fontSize: 13,
+    fontSize: responsiveFontSize(13),
     color: "#9747FF",
     fontWeight: "600",
-    marginLeft: 6,
+    marginLeft: responsiveSpacing(6),
     fontFamily: theme.fonts.medium,
   },
 });

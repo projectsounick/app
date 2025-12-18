@@ -55,7 +55,6 @@ export default function CouponScreen() {
           setSnackbarMessage("Please login to view coupons");
         }
       } catch (error: any) {
-        console.log(`Error: ${error.message}`);
         setSnackBarOpen(true);
         setSnackbarMessage("An error occurred. Please try again.");
       } finally {

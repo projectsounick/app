@@ -70,7 +70,6 @@ async function updateUser(userData: any): Promise<any> {
 ///// Function for loging out the user ------------------------------------------------/
 async function logout() {
   try {
-    console.log("Logout called");
 
     await AsyncStorage.clear();
     store.dispatch({ type: "RESET_STORE" });

@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, Image, TouchableOpacity, Linking, ImageBackground, Alert, Platform } from "react-native";
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, router } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 import { ActivityIndicator } from "react-native-paper";
 import SmallHeader from "@/app/modules/SmallHeader";
@@ -43,12 +43,6 @@ const FullPlanDetails = () => {
         : activeServices.find((service) => service._id === id),
     [type, id, activePlans, activeServices]
   );
-
-  useEffect(() => {
-    if (selectedPlanOrService) {
-      console.log("this is selectedPlanOrService", selectedPlanOrService);
-    }
-  }, [selectedPlanOrService]);
   async function fetchSessions() {
     try {
 
@@ -101,7 +95,6 @@ const FullPlanDetails = () => {
       }
       setSelectedSession(closestSession);
     } catch (error: any) {
-      console.log("Error fetching sessions:", error);
       setSnackbarMessage("Failed to fetch sessions");
       setSnackbarOpen(true);
     } finally {
@@ -113,40 +106,29 @@ const FullPlanDetails = () => {
     fetchSessions();
   }, [id, type]);
 
-  const title = useMemo(
-    () =>
-      selectedPlanOrService?.plan?.title ||
-      selectedPlanOrService?.serviceDetails?.title ||
-      "Plan",
-    [selectedPlanOrService]
-  );
+  // Simple property access - no need for useMemo
+  const title =
+    selectedPlanOrService?.plan?.title ||
+    selectedPlanOrService?.serviceDetails?.title ||
+    "Plan";
 
-  const imageUrl = useMemo(
-    () =>
-      selectedPlanOrService?.plan?.imgUrl ||
-      selectedPlanOrService?.serviceDetails?.imgUrl ||
-      "",
-    [selectedPlanOrService]
-  );
+  const imageUrl =
+    selectedPlanOrService?.plan?.imgUrl ||
+    selectedPlanOrService?.serviceDetails?.imgUrl ||
+    "";
 
-  const totalSessions = sessions.length;
-  const completedSessions = useMemo(
-    () =>
-      sessions.filter(
-        (s) => (s.sessionStatus || "").toLowerCase() === "completed"
-      ).length,
-    [sessions]
-  );
-  const remainingSessions = Math.max(totalSessions - completedSessions, 0);
+  // Simple property access with fallbacks - no need for useMemo
+  const sessionCount =
+    selectedPlanOrService?.totalSessions ||
+    (type === "plan"
+      ? selectedPlanOrService?.plan?.planItem?.sessionCount
+      : selectedPlanOrService?.serviceDetails?.sessionCount) ||
+    sessions.length;
+
+  // Calculate remaining sessions as sessionCount - sessions.length
+  const remainingSessions = Math.max((sessionCount || 0) - sessions.length, 0);
   
-  // Get sessionCount from plan or service
-  const sessionCount = useMemo(() => {
-    if (type === "plan") {
-      return selectedPlanOrService?.plan?.planItem?.sessionCount || totalSessions;
-    } else {
-      return selectedPlanOrService?.serviceDetails?.sessionCount || totalSessions;
-    }
-  }, [selectedPlanOrService, type, totalSessions]);
+  const totalSessions = sessions.length;
   const [activeTab, setActiveTab] = useState<any>("info");
   const [downloading, setDownloading] = useState(false);
 
@@ -178,7 +160,6 @@ const FullPlanDetails = () => {
         throw new Error("Download failed");
       }
     } catch (error: any) {
-      console.log("Download error:", error);
       Alert.alert("Error", "Failed to download diet plan. Please try again.");
     } finally {
       setDownloading(false);
@@ -257,9 +238,27 @@ const FullPlanDetails = () => {
                   >
                     {title}
                   </Text>
-                  <Text style={{ color: "#666", marginBottom: 12, fontSize: 13 }}>
+                  <Text style={{ color: "#666", marginBottom: 4, fontSize: 13 }}>
                     {type === "plan" ? "Active Plan" : "Active Service"}
                   </Text>
+                  {/* Start and End Dates */}
+                  {selectedPlanOrService?.planStartDate && selectedPlanOrService?.planEndDate && (
+                    <View style={{ marginBottom: 12 }}>
+                      <Text style={{ color: "#666", fontSize: 12, fontFamily: theme.fonts.regular }}>
+                        {new Date(selectedPlanOrService.planStartDate).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}{" "}
+                        -{" "}
+                        {new Date(selectedPlanOrService.planEndDate).toLocaleDateString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                        })}
+                      </Text>
+                    </View>
+                  )}
                   <View style={{ flexDirection: "row", gap: 8, }}>
                     <View
                       style={{
@@ -556,18 +555,217 @@ const FullPlanDetails = () => {
             </View>
           )}
 
-          <SessionDetailsTabs
-            selectedSession={selectedSession}
-         
-            setSelectedSession={setSelectedSession}
-         
-            activeTab={activeTab}
-          />
+          {sessions.length > 0 && selectedSession ? (
+            <SessionDetailsTabs
+              selectedSession={selectedSession}
+              setSelectedSession={setSelectedSession}
+              activeTab={activeTab}
+            />
+          ) : sessions.length === 0 && selectedPlanOrService ? (
+            <View style={{ marginTop: 24, paddingHorizontal: 20, paddingBottom: 100 }}>
+              {/* Plan/Service Details Section */}
+              <View
+                style={{
+                  backgroundColor: "#FFFFFF",
+                  borderRadius: 20,
+                  padding: 20,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.08,
+                  shadowRadius: 6,
+                  elevation: 3,
+                  borderWidth: 1,
+                  borderColor: "#F1F3F1",
+                }}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+                  <View
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: 10,
+                      backgroundColor: "#F3EDFF",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginRight: 10,
+                    }}
+                  >
+                    <Ionicons name="information-circle" size={22} color="#9747FF" />
+                  </View>
+                  <Text
+                    style={{
+                      fontSize: 18,
+                      fontWeight: "700",
+                      color: "#1A1A1A",
+                    }}
+                  >
+                    {type === "plan" ? "Plan Description" : "Service Description"}
+                  </Text>
+                </View>
+
+                {/* Description Items List */}
+                {((selectedPlanOrService?.plan?.descItems && selectedPlanOrService.plan.descItems.length > 0) ||
+                  (selectedPlanOrService?.serviceDetails?.descItems && selectedPlanOrService.serviceDetails.descItems.length > 0)) && (
+                  <View style={{ marginBottom: 16 }}>
+                    {(selectedPlanOrService?.plan?.descItems || selectedPlanOrService?.serviceDetails?.descItems || [])
+                      .slice(0, 2)
+                      .map(
+                        (item: string, index: number) => (
+                          <View
+                            key={index}
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "flex-start",
+                              marginBottom: 12,
+                            }}
+                          >
+                            <View
+                              style={{
+                                width: 6,
+                                height: 6,
+                                borderRadius: 3,
+                                backgroundColor: "#9747FF",
+                                marginTop: 6,
+                                marginRight: 12,
+                              }}
+                            />
+                            <Text
+                              style={{
+                                flex: 1,
+                                fontSize: 13,
+                                color: "#666",
+                                lineHeight: 20,
+                                fontFamily: theme.fonts.regular,
+                              }}
+                            >
+                              {item}
+                            </Text>
+                          </View>
+                        )
+                      )}
+                  </View>
+                )}
+
+                {/* Additional Details */}
+                <View style={{ gap: 12 }}>
+                  {selectedPlanOrService?.plan?.planItem?.sessionCount && (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        backgroundColor: "#F8F9FA",
+                        borderRadius: 12,
+                        padding: 12,
+                      }}
+                    >
+                      <MaterialCommunityIcons
+                        name="calendar-check"
+                        size={18}
+                        color="#9747FF"
+                        style={{ marginRight: 10 }}
+                      />
+                      <Text style={{ fontSize: 13, color: "#666", fontFamily: theme.fonts.medium, marginRight: 8 }}>
+                        Total Sessions:
+                      </Text>
+                      <Text style={{ fontSize: 14, color: "#111", fontFamily: theme.fonts.bold }}>
+                        {selectedPlanOrService.plan.planItem.sessionCount}
+                      </Text>
+                    </View>
+                  )}
+
+                  {selectedPlanOrService?.serviceDetails?.sessionCount && (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        backgroundColor: "#F8F9FA",
+                        borderRadius: 12,
+                        padding: 12,
+                      }}
+                    >
+                      <MaterialCommunityIcons
+                        name="calendar-check"
+                        size={18}
+                        color="#9747FF"
+                        style={{ marginRight: 10 }}
+                      />
+                      <Text style={{ fontSize: 13, color: "#666", fontFamily: theme.fonts.medium, marginRight: 8 }}>
+                        Total Sessions:
+                      </Text>
+                      <Text style={{ fontSize: 14, color: "#111", fontFamily: theme.fonts.bold }}>
+                        {selectedPlanOrService.serviceDetails.sessionCount}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            </View>
+          ) : null}
+
+          {/* Request Session Button - Fixed at Bottom */}
+          {sessions.length === 0 && (
+            <View
+              style={{
+                position: "absolute",
+                bottom: 0,
+                left: 0,
+                right: 0,
+                backgroundColor: "#FFFFFF",
+                paddingHorizontal: 20,
+                paddingTop: 16,
+                paddingBottom: 32,
+                borderTopWidth: 1,
+                borderTopColor: "#F1F3F1",
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: -2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 8,
+                elevation: 8,
+              }}
+            >
+              <TouchableOpacity
+                onPress={() =>
+                  router.push({
+                    pathname: "/dashboard/supportchat",
+                    params: { planTitle: title, requestType: type === "plan" ? "session" : "service" },
+                  })
+                }
+                style={{
+                  backgroundColor: "#67C694",
+                  borderRadius: 30,
+                  paddingVertical: 16,
+                  paddingHorizontal: 20,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  shadowColor: "#67C694",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.3,
+                  shadowRadius: 4,
+                  elevation: 4,
+                }}
+                activeOpacity={0.8}
+              >
+                <Text
+                  style={{
+                    color: "#FFFFFF",
+                    fontSize: 16,
+                    fontWeight: "700",
+                    fontFamily: theme.fonts.bold,
+                  }}
+                >
+                  Request a Session
+                </Text>
+                <Ionicons name="arrow-forward" size={20} color="#FFFFFF" />
+              </TouchableOpacity>
+            </View>
+          )}
+
           <CustomSnackbar
             visible={snackbarOpen}
             message={snackbarMessage}
             onDismiss={() => setSnackbarOpen(false)}
-            bgColor={theme.colors.primary}
+            bgColor="#FFFFFF"
           />
         </>
       )}

@@ -88,7 +88,6 @@ function CartScreen() {
     
       
       const response: any = await cartService.getPhonePeUrl(data);
-      console.log(response);
       const orderId = response?.data?.orderId;
 
       if (orderId) {
@@ -104,8 +103,6 @@ function CartScreen() {
         throw new Error("Missing orderId or redirect URL");
       }
     } catch (error: any) {
-      console.log(error);
-      
       // Store error message in AsyncStorage
       const errorMessage = error?.message || "Something went wrong. Please try again.";
       await AsyncStorage.setItem("paymentError", errorMessage);

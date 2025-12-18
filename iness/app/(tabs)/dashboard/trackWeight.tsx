@@ -38,7 +38,6 @@ const WeightTrackerScreen = () => {
     try {
       setLoading(true);
       const response = await weightService.getWeights();
-      console.log(response.data);
       if (response.success && response.data) {
         setWeightData(response.data);
       } else {
@@ -82,7 +81,6 @@ const WeightTrackerScreen = () => {
 
   const handleDeleteWeight = async (weightId: string) => {
     try {
-      console.log(weightId);
       const response = await weightService.deleteWeight(weightId);
       if (response.success) {
         setWeightData((prev) => (prev || []).filter((w) => w._id !== weightId));

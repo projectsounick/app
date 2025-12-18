@@ -60,7 +60,6 @@ const YourComponent = () => {
   );
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
-  console.log(calendarSheetOpen);
   const podCasts = useSelector((state: RootState) => state.podcast.podcasts);
   // Fetch user data and modal flag from AsyncStorage
   useEffect(() => {
@@ -73,14 +72,12 @@ const YourComponent = () => {
           setLoggedUser(user);
 
           if (user.healthReport == null) {
-            console.log("went inside this");
-
             // null or undefined
             setModalVisible(true); // show the modal
           }
         }
       } catch (err) {
-        console.log("Error fetching AsyncStorage data:", err);
+        // Error fetching AsyncStorage data
       }
     };
     setTimeout(() => {

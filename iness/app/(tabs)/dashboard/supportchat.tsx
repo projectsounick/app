@@ -29,11 +29,29 @@ import {
 } from "react-native-safe-area-context";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import { useLocalSearchParams } from "expo-router";
+import {
+  getTemplateByType,
+  getTemplateMessage,
+  SupportChatTemplate,
+} from "@/app/utils/supportChatTemplates";
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.05; // 2% of screen height
 
 export default function SupportScreen() {
+  const { planTitle, requestType } = useLocalSearchParams<{
+    planTitle?: string;
+    requestType?: string;
+  }>();
   const [inputText, setInputText] = useState("");
+  const [showTemplateCard, setShowTemplateCard] = useState(!!planTitle);
+  
+  // Get template based on request type
+  const template: SupportChatTemplate | undefined = requestType === "session" 
+    ? getTemplateByType("session")
+    : requestType === "service"
+    ? getTemplateByType("service")
+    : undefined;
   const flatListRef = useRef<FlatList>(null);
   const [selectedAttachments, setSelectedAttachments] = useState<string[]>([]);
   const {
@@ -267,6 +285,112 @@ export default function SupportScreen() {
                   flatListRef.current?.scrollToEnd({ animated: true })
                 }
               />
+            )}
+
+            {/* Template Message Card - Above Input */}
+            {showTemplateCard && planTitle && template && (
+              <View
+                style={{
+                  marginHorizontal: 16,
+                  marginBottom: 12,
+                  backgroundColor: "#FFFFFF",
+                  borderRadius: 16,
+                  padding: 16,
+                  shadowColor: "#000",
+                  shadowOffset: { width: 0, height: 2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 8,
+                  elevation: 4,
+                  borderWidth: 1,
+                  borderColor: "#E8F5E9",
+                  borderLeftWidth: 4,
+                  borderLeftColor: "#67C694",
+                }}
+              >
+                <View
+                  style={{
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "flex-start",
+                    marginBottom: 12,
+                  }}
+                >
+                  <View style={{ flex: 1, marginRight: 8 }}>
+                    <Text
+                      style={{
+                        fontSize: 14,
+                        fontWeight: "700",
+                        color: "#1A1A1A",
+                        marginBottom: 6,
+                        fontFamily: theme.fonts.bold,
+                      }}
+                    >
+                      {template.title}
+                    </Text>
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        color: "#666",
+                        fontFamily: theme.fonts.regular,
+                      }}
+                    >
+                      {requestType === "service" ? "Service" : "Plan"}: {planTitle}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => setShowTemplateCard(false)}
+                    style={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: 12,
+                      backgroundColor: "#F0F0F0",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                  >
+                    <Ionicons name="close" size={16} color="#666" />
+                  </TouchableOpacity>
+                </View>
+                <Text
+                  style={{
+                    fontSize: 13,
+                    color: "#666",
+                    lineHeight: 18,
+                    marginBottom: 12,
+                    fontFamily: theme.fonts.regular,
+                  }}
+                >
+                  {getTemplateMessage(template, { planTitle })}
+                </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    const templateMessage = getTemplateMessage(template, { planTitle });
+                    setInputText(templateMessage);
+                    setShowTemplateCard(false);
+                  }}
+                  style={{
+                    backgroundColor: "#67C694",
+                    borderRadius: 12,
+                    paddingVertical: 10,
+                    paddingHorizontal: 16,
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                  activeOpacity={0.8}
+                >
+                  <Text
+                    style={{
+                      color: "#FFFFFF",
+                      fontSize: 13,
+                      fontWeight: "700",
+                      fontFamily: theme.fonts.bold,
+                    }}
+                  >
+                    Use This Message
+                  </Text>
+                </TouchableOpacity>
+              </View>
             )}
 
             {/* Input & Attachments */}

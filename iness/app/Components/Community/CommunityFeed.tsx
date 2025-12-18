@@ -399,8 +399,6 @@ const CommunityPosts = ({
     communityService
       .togglePostLike(postId, notificationData)
       .then((response) => {
-        console.log("this is like response", response);
-
         setPosts((prevPosts: any) =>
           prevPosts.map((p: any) =>
             p._id === postId

@@ -16,7 +16,6 @@ async function getPodcasts(): Promise<ApiResponseInterface> {
     // Fetch initial podcasts using limit from config
     let response = await fetchWrapper.get(`${baseUrl}/get-podcasts?limit=${PAGINATION_LIMITS.PODCAST_INITIAL}`);
 
-    console.log("Initial podcasts fetched:", response.data?.length || 0);
     return response;
   } catch (error: any) {
     throw new Error("Error fetching podcasts: " + error.message);
@@ -35,7 +34,6 @@ async function getPodcastsPaginated(
     
     let response = await fetchWrapper.get(`${baseUrl}/get-podcasts${params}`);
 
-    console.log("Paginated podcasts fetched:", response.data?.length || 0);
     return response;
   } catch (error: any) {
     throw new Error("Error fetching podcasts: " + error.message);

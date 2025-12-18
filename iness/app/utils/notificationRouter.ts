@@ -33,7 +33,6 @@ export function handleNotificationNavigation(
 ): void {
   // If no data provided, do nothing
   if (!notificationData) {
-    console.log("No notification data provided");
     return;
   }
 
@@ -147,7 +146,6 @@ export function handleNotificationNavigation(
       default:
         // Default: navigate to dashboard
         router.push("/dashboard/tabs" as any);
-        console.log("Unknown notification type, defaulting to dashboard");
         break;
     }
   } catch (error) {

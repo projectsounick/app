@@ -209,6 +209,7 @@ function HealthDashboard() {
             </Text>
             <TouchableOpacity
               onPress={() => router.push("/(tabs)/dashboard/track")}
+              style={{ padding: 8, marginRight: -8, marginVertical: -8 }}
             >
               <Ionicons name="chevron-forward" size={16} color="#999" />
             </TouchableOpacity>
@@ -343,6 +344,7 @@ function HealthDashboard() {
             </Text>
             <TouchableOpacity
               onPress={() => router.push("/(tabs)/dashboard/track")}
+              style={{ padding: 8, marginRight: -8, marginVertical: -8 }}
             >
               <Ionicons name="chevron-forward" size={16} color="#999" />
             </TouchableOpacity>
@@ -477,6 +479,7 @@ function HealthDashboard() {
           </Text>
           <TouchableOpacity
             onPress={() => router.push("/(tabs)/dashboard/track")}
+            style={{ padding: 8, marginRight: -8, marginVertical: -8 }}
           >
             <Ionicons name="chevron-forward" size={18} color="#999" />
           </TouchableOpacity>

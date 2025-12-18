@@ -11,13 +11,15 @@ import {
   Pressable,
 } from "react-native";
 import { Video, ResizeMode } from "expo-av";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
-
-const VIDEO_FLAG = "promoVideoShown";
+import {
+  promotionalVideoService,
+  PromotionalVideoItem,
+} from "../services/promotionalVideo.service";
 
 const PromoVideoModal = () => {
   const [showModal, setShowModal] = useState(false);
+  const [currentVideo, setCurrentVideo] = useState<PromotionalVideoItem | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [isPlaying, setIsPlaying] = useState(true);
@@ -29,48 +31,41 @@ const PromoVideoModal = () => {
   const screenHeight = Dimensions.get("window").height;
 
   useEffect(() => {
-    const fetchData = async () => {
+    const checkForNewVideo = async () => {
       try {
-        // Check if video has been shown before
-        const flag = await AsyncStorage.getItem(VIDEO_FLAG);
-        if (flag === "true") {
-          // Video already shown, don't show again
-          return;
+        setLoading(true);
+        // Check for new promotional video with higher number
+        const newVideo = await promotionalVideoService.checkForNewPromotionalVideo();
+        
+        if (newVideo) {
+          setCurrentVideo(newVideo);
+          setVideoUrl(newVideo.url);
+          setShowModal(true);
+          setTimeout(() => setLoading(false), 2000);
+        } else {
+          setLoading(false);
         }
-
-        // Fetch video data after a delay
-        setTimeout(async () => {
-          try {
-            const res = await fetch(
-              "https://inessstorage.blob.core.windows.net/iness-public/promotionVideos.json"
-            );
-            const data = await res.json();
-            const activeVideo = data.find((item: any) => item.active);
-            if (activeVideo) {
-              setVideoUrl(activeVideo.url);
-              setShowModal(true);
-              setTimeout(() => setLoading(false), 2000);
-            }
-          } catch (err) {
-            console.error("Error fetching promo video:", err);
-            setLoading(false);
-          }
-        }, 5000);
       } catch (err) {
-        console.error("Error checking AsyncStorage:", err);
+        console.error("Error checking for promotional video:", err);
+        setLoading(false);
       }
     };
 
-    fetchData();
+    // Check for new video after a delay
+    setTimeout(() => {
+      checkForNewVideo();
+    }, 5000);
   }, []);
 
   const handleClose = async () => {
     try {
-      // Store flag in AsyncStorage - show only once
-      await AsyncStorage.setItem(VIDEO_FLAG, "true");
+      // Store the entire video object in AsyncStorage when closed
+      if (currentVideo) {
+        await promotionalVideoService.storePromotionalVideo(currentVideo);
+      }
       setShowModal(false);
     } catch (err) {
-      console.error("Error saving flag:", err);
+      console.error("Error saving promotional video:", err);
       setShowModal(false);
     }
   };
@@ -106,7 +101,7 @@ const PromoVideoModal = () => {
               {/* Header */}
               <View style={styles.headerContainer}>
                 <View style={styles.iconContainer}>
-                  <Ionicons name="play-circle" size={28} color="#67C694" />
+                  <Ionicons name="school-outline" size={28} color="#9747FF" />
                 </View>
                 <View style={styles.titleContainer}>
                   <Text style={styles.modalTitle}>Watch & Learn</Text>
@@ -123,7 +118,7 @@ const PromoVideoModal = () => {
           {isFullscreen && (
             <View style={styles.fullscreenHeader}>
               <View style={styles.fullscreenTitleContainer}>
-                <Ionicons name="play-circle" size={24} color="#67C694" style={{ marginRight: 8 }} />
+                <Ionicons name="school-outline" size={24} color="#9747FF" style={{ marginRight: 8 }} />
                 <Text style={styles.fullscreenTitle}>Watch & Learn</Text>
               </View>
               <TouchableOpacity onPress={handleClose} style={styles.fullscreenCloseButton}>
@@ -137,9 +132,9 @@ const PromoVideoModal = () => {
             {loading ? (
               <View style={styles.loaderContainer}>
                 <View style={styles.loaderIconContainer}>
-                  <Ionicons name="play-circle" size={48} color="#67C694" />
+                  <Ionicons name="school-outline" size={48} color="#9747FF" />
                 </View>
-                <ActivityIndicator size="large" color="#67C694" style={{ marginTop: 16 }} />
+                <ActivityIndicator size="large" color="#9747FF" style={{ marginTop: 16 }} />
                 <Text style={styles.loadingText}>Preparing your video...</Text>
               </View>
             ) : videoUrl ? (
@@ -252,7 +247,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#E8F5E9",
+    backgroundColor: "#F3EDFF",
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -360,7 +355,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#E8F5E9",
+    backgroundColor: "#F3EDFF",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,

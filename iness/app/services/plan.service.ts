@@ -43,7 +43,8 @@ async function getActivePlans(): Promise<{
   success: boolean;
 }> {
   let respone = await fetchWrapper.get(`${config.apiUrl}/api/get-active-plans`);
-
+console.log('this is active plans');
+console.log(respone);
   return respone;
 }
 ///// Function for getting all the prodcuts based on category--------/
