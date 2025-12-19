@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -86,16 +86,60 @@ export default function TrackingGraphPage() {
   const totalTrackData = useSelector(
     (state: RootState) => state.track.totalTrackData as TrackingData[]
   );
-  // ✅ Fetch tracking data
-  const fetchData = async () => {
+  
+  // Store data per month: { "2024-12": TrackingData[], "2024-11": TrackingData[], ... }
+  const [monthDataMap, setMonthDataMap] = useState<{ [monthKey: string]: TrackingData[] }>({});
+  const [loadedMonths, setLoadedMonths] = useState<Set<string>>(new Set());
+  const [loadingMonths, setLoadingMonths] = useState<Set<string>>(new Set());
+  const [chartKey, setChartKey] = useState(0); // Force chart remount when data changes
+  
+  // Use refs to avoid dependency issues in useEffect
+  const loadedMonthsRef = useRef<Set<string>>(new Set());
+  const loadingMonthsRef = useRef<Set<string>>(new Set());
+  
+  // Keep refs in sync with state
+  useEffect(() => {
+    loadedMonthsRef.current = loadedMonths;
+  }, [loadedMonths]);
+  
+  useEffect(() => {
+    loadingMonthsRef.current = loadingMonths;
+  }, [loadingMonths]);
+
+  // ✅ Fetch tracking data for a specific month
+  const fetchDataForMonth = useCallback(async (month: dayjs.Dayjs) => {
+    const monthKey = month.format("YYYY-MM");
+    console.log(`[Track] Fetching data for month: ${monthKey}`);
+    
+    // Check if already loaded or currently loading (use refs to avoid dependency issues)
+    if (loadedMonthsRef.current.has(monthKey)) {
+      console.log(`[Track] Month ${monthKey} already loaded, skipping fetch`);
+      return;
+    }
+    
+    if (loadingMonthsRef.current.has(monthKey)) {
+      console.log(`[Track] Month ${monthKey} already loading, skipping duplicate fetch`);
+      return;
+    }
+
+    // Mark as loading
+    setLoadingMonths((prev) => {
+      const next = new Set(prev);
+      next.add(monthKey);
+      loadingMonthsRef.current = next;
+      return next;
+    });
     setLoading(true);
     try {
-      const today = new Date();
       const formatDate = (d: Date) => d.toLocaleDateString("en-CA");
 
-      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      // Calculate start and end of the month
+      const startOfMonth = month.startOf("month").toDate();
+      const endOfMonth = month.endOf("month").toDate();
       const startDate = formatDate(startOfMonth);
-      const endDate = formatDate(today);
+      const endDate = formatDate(endOfMonth);
+
+      console.log(`[Track] Fetching ${monthKey}: ${startDate} to ${endDate}`);
 
       const [stepsRes, sleepRes, waterRes] = await Promise.all([
         trackService.getTrackingData("walk", startDate, endDate),
@@ -131,7 +175,7 @@ export default function TrackingGraphPage() {
           dateMap[date].water = item;
         });
 
-        const totalTrackArray: TrackingData[] = Object.values(dateMap).sort(
+        const monthTrackArray: TrackingData[] = Object.values(dateMap).sort(
           (a, b) => {
             const dateA = a.steps?.date || a.sleep?.date || a.water?.date || "";
             const dateB = b.steps?.date || b.sleep?.date || b.water?.date || "";
@@ -139,32 +183,107 @@ export default function TrackingGraphPage() {
           }
         );
 
-        const todayStr = formatDate(today);
-        const todayData = dateMap[todayStr] || {
-          steps: null,
-          sleep: null,
-          water: null,
-        };
+        // Store this month's data (Redux will update via useEffect)
+        setMonthDataMap((prev) => {
+          const updated = {
+            ...prev,
+            [monthKey]: monthTrackArray,
+          };
+          
+          // Force chart remount by updating key
+          setChartKey((prev) => prev + 1);
+          console.log(`[Track] Updated chartKey to force remount`);
+          
+          return updated;
+        });
+        
+        setLoadedMonths((prev) => {
+          const next = new Set(prev);
+          next.add(monthKey);
+          loadedMonthsRef.current = next;
+          return next;
+        });
+        
+        setLoadingMonths((prev) => {
+          const next = new Set(prev);
+          next.delete(monthKey);
+          loadingMonthsRef.current = next;
+          return next;
+        });
+        
+        console.log(`[Track] Stored ${monthTrackArray.length} entries for ${monthKey}`);
 
-        // ✅ update redux
-        dispatch(setTotalTrackData(totalTrackArray));
-        dispatch(setCurrentDateTrackData(todayData));
+        // Update today's data if this is the current month
+        const today = new Date();
+        if (month.isSame(today, "month")) {
+          const todayStr = formatDate(today);
+          const todayData = dateMap[todayStr] || {
+            steps: null,
+            sleep: null,
+            water: null,
+          };
+          dispatch(setCurrentDateTrackData(todayData));
+        }
       }
     } catch (err) {
-      console.error("Failed to load tracking data", err);
+      console.error(`[Track] Failed to load tracking data for ${monthKey}:`, err);
+      setLoadingMonths((prev) => {
+        const next = new Set(prev);
+        next.delete(monthKey);
+        return next;
+      });
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch]);
 
-  // ✅ Run on mount (or when user opens graph page)
+  // Update Redux whenever monthDataMap changes
   useEffect(() => {
-    if (totalTrackData.length === 0) {
-      fetchData();
+    const monthKeys = Object.keys(monthDataMap);
+    if (monthKeys.length === 0) {
+      console.log(`[Track] monthDataMap is empty, skipping Redux update`);
+      return;
     }
-  }, []);
+    
+    console.log(`[Track] monthDataMap changed, updating Redux. Months: ${monthKeys.join(", ")}`);
+    
+    // Merge all months into one array
+    const allData: TrackingData[] = [];
+    Object.values(monthDataMap).forEach((monthData) => {
+      allData.push(...monthData);
+    });
+    
+    // Sort by date (oldest to newest)
+    allData.sort((a, b) => {
+      const dateA = a.steps?.date || a.sleep?.date || a.water?.date || "";
+      const dateB = b.steps?.date || b.sleep?.date || b.water?.date || "";
+      return new Date(dateA).getTime() - new Date(dateB).getTime();
+    });
+    
+    // Update Redux
+    console.log(`[Track] Dispatching ${allData.length} entries to Redux`);
+    dispatch(setTotalTrackData(allData));
+    console.log(`[Track] Redux updated with ${allData.length} total entries across ${monthKeys.length} months`);
+  }, [monthDataMap, dispatch]);
+
+  // ✅ Fetch data when month changes OR on initial mount
+  useEffect(() => {
+    const monthKey = currentMonth.format("YYYY-MM");
+    console.log(`[Track] useEffect triggered - Month: ${monthKey}, monthOffset: ${monthOffset}`);
+    console.log(`[Track] Loaded months:`, Array.from(loadedMonthsRef.current));
+    console.log(`[Track] Loading months:`, Array.from(loadingMonthsRef.current));
+    
+    // Use refs to check without causing dependency issues
+    if (!loadedMonthsRef.current.has(monthKey) && !loadingMonthsRef.current.has(monthKey)) {
+      console.log(`[Track] Month ${monthKey} needs data, fetching...`);
+      fetchDataForMonth(currentMonth);
+    } else {
+      console.log(`[Track] Month ${monthKey} already ${loadedMonthsRef.current.has(monthKey) ? 'loaded' : 'loading'}, skipping`);
+    }
+  }, [monthOffset, fetchDataForMonth]);
 
   const { sleepData, stepsData, waterData } = useMemo(() => {
+    console.log(`[Track] Recalculating sleep/steps/water data from ${totalTrackData.length} entries`);
     const sleepData: ChartPoint[] = [];
     const stepsData: ChartPoint[] = [];
     const waterData: ChartPoint[] = [];
@@ -187,22 +306,68 @@ export default function TrackingGraphPage() {
       }
     });
 
+    console.log(`[Track] Processed - Sleep: ${sleepData.length}, Steps: ${stepsData.length}, Water: ${waterData.length}`);
     return { sleepData, stepsData, waterData };
   }, [totalTrackData]);
 
-  const filterMonthData = (dataArray: ChartPoint[]): ChartPoint[] =>
-    dataArray
-      .filter((d) => dayjs(d.date).isSame(currentMonth, "month"))
-      .sort((a, b) => dayjs(a.date).unix() - dayjs(b.date).unix());
+  const filterMonthData = (dataArray: ChartPoint[]): ChartPoint[] => {
+    const monthKey = currentMonth.format("YYYY-MM");
+    console.log(`[Track] Filtering data for month: ${monthKey}, total data points: ${dataArray.length}`);
+    
+    const filtered = dataArray.filter((d) => {
+      const dateMonthKey = dayjs(d.date).format("YYYY-MM");
+      const matches = dateMonthKey === monthKey;
+      if (matches) {
+        console.log(`[Track] Match found: ${d.date} (${dateMonthKey}) matches ${monthKey}`);
+      }
+      return matches;
+    });
+    
+    console.log(`[Track] Filtered to ${filtered.length} entries for ${monthKey}`);
+    
+    return filtered.sort((a, b) => dayjs(a.date).unix() - dayjs(b.date).unix());
+  };
 
-  const getGraphData = () => {
+  // Get graph data directly from monthDataMap for current month (more reliable than Redux)
+  const getGraphData = useMemo(() => {
+    const monthKey = currentMonth.format("YYYY-MM");
+    console.log(`[Track] getGraphData - Tab: ${selectedTab}, Month: ${monthKey}`);
+    console.log(`[Track] monthDataMap keys:`, Object.keys(monthDataMap));
+    
+    // Get data directly from monthDataMap for current month
+    const currentMonthData = monthDataMap[monthKey] || [];
+    console.log(`[Track] Current month data entries: ${currentMonthData.length}`);
+    
+    // Convert to chart points based on selected tab
     let dataset: ChartPoint[] = [];
-
-    if (selectedTab === "Sleep") dataset = filterMonthData(sleepData);
-    else if (selectedTab === "Steps") dataset = filterMonthData(stepsData);
-    else if (selectedTab === "Water") dataset = filterMonthData(waterData);
+    
+    currentMonthData.forEach((entry) => {
+      if (selectedTab === "Sleep" && entry.sleep?.date && entry.sleep.sleepDuration != null) {
+        dataset.push({
+          date: entry.sleep.date,
+          value: entry.sleep.sleepDuration,
+        });
+      } else if (selectedTab === "Steps" && entry.steps?.date && entry.steps.steps != null) {
+        dataset.push({
+          date: entry.steps.date,
+          value: entry.steps.steps,
+        });
+      } else if (selectedTab === "Water" && entry.water?.date && entry.water.waterIntake != null) {
+        dataset.push({
+          date: entry.water.date,
+          value: entry.water.waterIntake,
+        });
+      }
+    });
+    
+    // Sort by date
+    dataset.sort((a, b) => dayjs(a.date).unix() - dayjs(b.date).unix());
+    
+    console.log(`[Track] Graph dataset length: ${dataset.length}`);
+    console.log(`[Track] Also checking Redux - Sleep: ${sleepData.length}, Steps: ${stepsData.length}, Water: ${waterData.length}`);
 
     if (dataset.length === 0) {
+      console.log(`[Track] No data for graph, returning empty state`);
       return {
         labels: ["No data"],
         datasets: [{ data: [0] }],
@@ -212,17 +377,51 @@ export default function TrackingGraphPage() {
     const labels = dataset.map((d) => dayjs(d.date).format("D"));
     const values = dataset.map((d) => d.value);
 
+    console.log(`[Track] Graph data - Labels: ${labels.length}, Values: ${values.length}, Sample:`, values.slice(0, 5));
+    console.log(`[Track] Full graph data structure:`, JSON.stringify({
+      labels: labels.slice(0, 5),
+      datasets: [{ data: values.slice(0, 5) }]
+    }));
+
+    // Ensure all values are numbers
+    const validValues = values.map(v => typeof v === 'number' ? v : 0);
+    
     return {
       labels,
-      datasets: [{ data: values }],
+      datasets: [{ data: validValues }],
     };
-  };
+  }, [selectedTab, currentMonth, monthDataMap, sleepData, stepsData, waterData]);
 
-  const getSelectedData = () => {
-    if (selectedTab === "Sleep") return filterMonthData(sleepData);
-    if (selectedTab === "Steps") return filterMonthData(stepsData);
-    return filterMonthData(waterData);
-  };
+  const getSelectedData = useMemo(() => {
+    const monthKey = currentMonth.format("YYYY-MM");
+    const currentMonthData = monthDataMap[monthKey] || [];
+    
+    // Convert to chart points based on selected tab
+    let data: ChartPoint[] = [];
+    
+    currentMonthData.forEach((entry) => {
+      if (selectedTab === "Sleep" && entry.sleep?.date && entry.sleep.sleepDuration != null) {
+        data.push({
+          date: entry.sleep.date,
+          value: entry.sleep.sleepDuration,
+        });
+      } else if (selectedTab === "Steps" && entry.steps?.date && entry.steps.steps != null) {
+        data.push({
+          date: entry.steps.date,
+          value: entry.steps.steps,
+        });
+      } else if (selectedTab === "Water" && entry.water?.date && entry.water.waterIntake != null) {
+        data.push({
+          date: entry.water.date,
+          value: entry.water.waterIntake,
+        });
+      }
+    });
+    
+    // Sort by date (oldest to newest), then reverse to show newest first
+    data.sort((a, b) => dayjs(a.date).unix() - dayjs(b.date).unix());
+    return data.reverse();
+  }, [selectedTab, currentMonth, monthDataMap]);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -451,22 +650,29 @@ export default function TrackingGraphPage() {
                     borderColor: "#F5F5F5",
                   }}
                 >
-                  <Animated.View style={{ opacity: fadeAnim }}>
-                    <LineChart
-                      data={getGraphData()}
-                      width={screenWidth - 72}
-                      height={220}
-                      chartConfig={getChartConfig(selectedTab)}
-                      bezier
-                      withShadow={false}
-                      style={{ borderRadius: 16 }}
-                    />
-                  </Animated.View>
+                  <View>
+                    {getGraphData.labels.length > 0 && getGraphData.labels[0] !== "No data" ? (
+                      <LineChart
+                        key={`chart-${selectedTab}-${currentMonth.format("YYYY-MM")}-${chartKey}`}
+                        data={getGraphData}
+                        width={screenWidth - 72}
+                        height={220}
+                        chartConfig={getChartConfig(selectedTab)}
+                        bezier
+                        withShadow={false}
+                        style={{ borderRadius: 16 }}
+                      />
+                    ) : (
+                      <View style={{ height: 220, justifyContent: 'center', alignItems: 'center' }}>
+                        <Text style={{ color: '#999', fontSize: 14 }}>No data available</Text>
+                      </View>
+                    )}
+                  </View>
                 </View>
 
                 {/* Detailed Report Section */}
-                {getSelectedData().length > 0 && (() => {
-                  const selectedData = getSelectedData();
+                {getSelectedData.length > 0 && (() => {
+                  const selectedData = getSelectedData;
                   const total = selectedData.reduce((sum, item) => sum + item.value, 0);
                   const count = selectedData.length;
                   
@@ -864,7 +1070,7 @@ export default function TrackingGraphPage() {
                 })()}
 
                 {/* Records Section Header */}
-                {getSelectedData().length > 0 && (
+                {getSelectedData.length > 0 && (
                   <View
                     style={{
                       flexDirection: "row",
@@ -894,7 +1100,7 @@ export default function TrackingGraphPage() {
                   </View>
                 )}
 
-                {getSelectedData().length === 0 ? (
+                {getSelectedData.length === 0 ? (
                   <View
                     style={{
                       backgroundColor: "#FFFFFF",
@@ -937,7 +1143,7 @@ export default function TrackingGraphPage() {
                   </View>
                 ) : (
                   <View style={{ marginBottom: 20 }}>
-                    {getSelectedData().map((item, index) => {
+                    {getSelectedData.map((item, index) => {
                       const colors = {
                         Sleep: { bg: "#E8F5E9", icon: "#67C694", text: "#67C694" },
                         Steps: { bg: "#F3EDFF", icon: "#9747FF", text: "#9747FF" },

@@ -9,6 +9,7 @@ import {
   Dimensions,
   KeyboardAvoidingView,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import * as Progress from "react-native-progress";
 import {
@@ -26,6 +27,8 @@ import { trackService } from "../services/track.service";
 import { updateTrackingField } from "@/Slices/trackSlice";
 import { createStreak } from "../services/streaks.service";
 import { setStreakData } from "@/Slices/streakSlice";
+import { useAppleHealthSync } from "@/hooks/useAppleHealthSync";
+import { HealthKit } from "@/services/healthSync";
 
 function HealthDashboard() {
   //// Store data -------------------------------------------------------/
@@ -49,6 +52,11 @@ function HealthDashboard() {
   const [updateDataLoading, setUpdateDataLoading] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState("");
+  const [syncingSteps, setSyncingSteps] = useState(false);
+  const [syncingSleep, setSyncingSleep] = useState(false);
+
+  // Apple Health sync hook
+  const { isAvailable, syncData, canSync, syncStatus } = useAppleHealthSync();
 
   const onClose = () => {
     setModalVisible(false);
@@ -108,6 +116,224 @@ function HealthDashboard() {
     }
   }
 
+  /**
+   * Sync steps from Apple Health
+   */
+  const handleSyncSteps = async () => {
+    console.log("========== [HealthCards] handleSyncSteps START ==========");
+    console.log("[HealthCards] Timestamp:", new Date().toISOString());
+    console.log("[HealthCards] Current syncingSteps state:", syncingSteps);
+    
+    if (!isAvailable) {
+      console.log("[HealthCards] HealthKit not available, returning");
+      setSnackbarMsg("Apple Health is only available on iOS");
+      setSnackbarVisible(true);
+      return;
+    }
+
+    // Check if sync is allowed
+    if (!canSync("steps")) {
+      console.log("[HealthCards] Sync not allowed (already enabled), returning");
+      setSnackbarMsg("Steps sync is already enabled. Data syncs automatically.");
+      setSnackbarVisible(true);
+      return;
+    }
+
+    console.log("[HealthCards] Setting syncingSteps = true");
+    setSyncingSteps(true);
+    console.log("[HealthCards] syncingSteps after setState:", true);
+    console.log("[HealthCards] isAvailable:", isAvailable);
+    console.log("[HealthCards] syncStatus:", JSON.stringify(syncStatus));
+    console.log("[HealthCards] Current stepsCount:", stepsCount);
+    
+    try {
+      console.log("[HealthCards] About to call syncData('steps')...");
+      const startTime = Date.now();
+      const result = await syncData("steps");
+      const duration = Date.now() - startTime;
+      console.log(`[HealthCards] syncData returned after ${duration}ms`);
+      console.log("[HealthCards] syncData result:", JSON.stringify(result));
+      
+      // Clear syncing state IMMEDIATELY to unblock UI
+      console.log("[HealthCards] Setting syncingSteps = false (IMMEDIATELY)");
+      setSyncingSteps(false);
+      console.log("[HealthCards] syncingSteps cleared, UI should be unblocked now");
+      
+      if (result.success) {
+        const syncedCount = result.syncedCount || 0;
+        const todayValue = result.value || 0;
+        console.log(`[HealthCards] Sync successful: ${syncedCount} entries, today: ${todayValue}`);
+        
+        // IMMEDIATELY update the Redux store with today's steps value
+        // This gives instant UI feedback - backend sync happens in background
+        if (todayValue > 0) {
+          console.log("[HealthCards] About to update Redux store...");
+          try {
+            const newStepsValue = stepsCount + todayValue; // Add health data to existing
+            const existingStepsData = currentDayTrackData.steps;
+            console.log("[HealthCards] Redux update - current:", stepsCount, "adding:", todayValue, "new:", newStepsValue);
+            
+            const dispatchStartTime = Date.now();
+            dispatch(updateTrackingField({
+              type: "steps",
+              data: {
+                ...(existingStepsData || {}),
+                steps: newStepsValue,
+                date: existingStepsData?.date || new Date().toISOString().split('T')[0],
+                userId: existingStepsData?.userId || '',
+              } as any,
+            }));
+            const dispatchDuration = Date.now() - dispatchStartTime;
+            console.log(`[HealthCards] Redux dispatch completed in ${dispatchDuration}ms`);
+            console.log(`[HealthCards] Store updated: ${stepsCount} + ${todayValue} = ${newStepsValue}`);
+          } catch (error) {
+            console.error(`[HealthCards] ERROR updating store:`, error);
+            console.error(`[HealthCards] Error stack:`, (error as any)?.stack);
+          }
+        }
+        
+        console.log(`[HealthCards] Steps sync completed: ${syncedCount} entries synced, today: ${todayValue}`);
+        
+        setSnackbarMsg(
+          syncedCount > 1 
+            ? `Synced ${syncedCount} days of steps data from Apple Health. Today: ${todayValue.toLocaleString()} steps`
+            : `Synced ${todayValue.toLocaleString()} steps from Apple Health`
+        );
+        setSnackbarVisible(true);
+        console.log("[HealthCards] Snackbar message set");
+      } else {
+        console.error("[HealthCards] Steps sync failed:", result.error);
+        
+        // Check if it's a permission issue
+        if (result.error?.includes("permission") || HealthKit.wasPermissionDenied()) {
+          console.log("[HealthCards] Permission denied, showing alert");
+          HealthKit.showPermissionDeniedAlert();
+        } else {
+          setSnackbarMsg(result.error || "No steps data found in Apple Health");
+          setSnackbarVisible(true);
+        }
+      }
+    } catch (error: any) {
+      console.error("[HealthCards] EXCEPTION in handleSyncSteps:", error);
+      console.error("[HealthCards] Error message:", error?.message);
+      console.error("[HealthCards] Error stack:", error?.stack);
+      setSnackbarMsg(error.message || "Failed to sync steps");
+      setSnackbarVisible(true);
+      console.log("[HealthCards] Setting syncingSteps = false (in catch)");
+      setSyncingSteps(false);
+    }
+    
+    console.log("========== [HealthCards] handleSyncSteps END ==========");
+  };
+
+  /**
+   * Sync sleep from Apple Health
+   */
+  const handleSyncSleep = async () => {
+    console.log("========== [HealthCards] handleSyncSleep START ==========");
+    console.log("[HealthCards] Timestamp:", new Date().toISOString());
+    console.log("[HealthCards] Current syncingSleep state:", syncingSleep);
+    
+    if (!isAvailable) {
+      console.log("[HealthCards] HealthKit not available, returning");
+      setSnackbarMsg("Apple Health is only available on iOS");
+      setSnackbarVisible(true);
+      return;
+    }
+
+    // Check if sync is allowed
+    if (!canSync("sleep")) {
+      console.log("[HealthCards] Sync not allowed (already enabled), returning");
+      setSnackbarMsg("Sleep sync is already enabled. Data syncs automatically.");
+      setSnackbarVisible(true);
+      return;
+    }
+
+    console.log("[HealthCards] Setting syncingSleep = true");
+    setSyncingSleep(true);
+    console.log("[HealthCards] syncingSleep after setState:", true);
+    console.log("[HealthCards] Current sleepDuration:", sleepDuration);
+    
+    try {
+      console.log("[HealthCards] About to call syncData('sleep')...");
+      const startTime = Date.now();
+      const result = await syncData("sleep");
+      const duration = Date.now() - startTime;
+      console.log(`[HealthCards] syncData returned after ${duration}ms`);
+      console.log("[HealthCards] syncData result:", JSON.stringify(result));
+      
+      // Clear syncing state IMMEDIATELY to unblock UI
+      console.log("[HealthCards] Setting syncingSleep = false (IMMEDIATELY)");
+      setSyncingSleep(false);
+      console.log("[HealthCards] syncingSleep cleared, UI should be unblocked now");
+      
+      if (result.success) {
+        const syncedCount = result.syncedCount || 0;
+        const todayValue = result.value || 0;
+        console.log(`[HealthCards] Sync successful: ${syncedCount} entries, today: ${todayValue}`);
+        
+        // IMMEDIATELY update the Redux store with today's sleep value
+        // This gives instant UI feedback - backend sync happens in background
+        if (todayValue > 0) {
+          console.log("[HealthCards] About to update Redux store...");
+          try {
+            const newSleepValue = sleepDuration + todayValue; // Add health data to existing
+            const existingSleepData = currentDayTrackData.sleep;
+            console.log("[HealthCards] Redux update - current:", sleepDuration, "adding:", todayValue, "new:", newSleepValue);
+            
+            const dispatchStartTime = Date.now();
+            dispatch(updateTrackingField({
+              type: "sleep",
+              data: {
+                ...(existingSleepData || {}),
+                sleepDuration: newSleepValue,
+                date: existingSleepData?.date || new Date().toISOString().split('T')[0],
+                userId: existingSleepData?.userId || '',
+              } as any,
+            }));
+            const dispatchDuration = Date.now() - dispatchStartTime;
+            console.log(`[HealthCards] Redux dispatch completed in ${dispatchDuration}ms`);
+            console.log(`[HealthCards] Store updated: ${sleepDuration} + ${todayValue} = ${newSleepValue}`);
+          } catch (error) {
+            console.error(`[HealthCards] ERROR updating store:`, error);
+            console.error(`[HealthCards] Error stack:`, (error as any)?.stack);
+          }
+        }
+        
+        console.log(`[HealthCards] Sleep sync completed: ${syncedCount} entries synced, today: ${todayValue}`);
+        
+        setSnackbarMsg(
+          syncedCount > 1 
+            ? `Synced ${syncedCount} days of sleep data from Apple Health. Today: ${todayValue} hrs`
+            : `Synced ${todayValue} hours of sleep from Apple Health`
+        );
+        setSnackbarVisible(true);
+        console.log("[HealthCards] Snackbar message set");
+      } else {
+        console.error("[HealthCards] Sleep sync failed:", result.error);
+        
+        // Check if it's a permission issue
+        if (result.error?.includes("permission") || HealthKit.wasPermissionDenied()) {
+          console.log("[HealthCards] Permission denied, showing alert");
+          HealthKit.showPermissionDeniedAlert();
+        } else {
+          setSnackbarMsg(result.error || "No sleep data found in Apple Health");
+          setSnackbarVisible(true);
+        }
+      }
+    } catch (error: any) {
+      console.error("[HealthCards] EXCEPTION in handleSyncSleep:", error);
+      console.error("[HealthCards] Error message:", error?.message);
+      console.error("[HealthCards] Error stack:", error?.stack);
+      setSnackbarMsg(error.message || "Failed to sync sleep");
+      setSnackbarVisible(true);
+      console.log("[HealthCards] Setting syncingSleep = false (in catch)");
+      setSyncingSleep(false);
+    }
+    
+    console.log("========== [HealthCards] handleSyncSleep END ==========");
+  };
+
   return (
     <View style={{ marginBottom: 16 }}>
       {/* Row with Steps & Sleep */}
@@ -119,7 +345,9 @@ function HealthDashboard() {
         }}
       >
         {/* Steps Card */}
-        <View
+        <TouchableOpacity
+          onPress={() => router.push("/(tabs)/dashboard/track")}
+          activeOpacity={0.7}
           style={{
             flex: 1,
             backgroundColor: "#FFFFFF",
@@ -172,12 +400,14 @@ function HealthDashboard() {
                 Steps
               </Text>
             </View>
-            <TouchableOpacity
-              onPress={() => openModal("steps")}
-              style={{ padding: 6 }}
-            >
-              <AntDesign name="pluscircle" size={22} color="#67c694" />
-            </TouchableOpacity>
+            <View>
+              <TouchableOpacity
+                onPress={() => openModal("steps")}
+                style={{ padding: 6 }}
+              >
+                <AntDesign name="pluscircle" size={22} color="#67c694" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <Progress.Bar
@@ -207,53 +437,52 @@ function HealthDashboard() {
             >
               {stepsCount.toLocaleString()}/{stepsGoal.toLocaleString()}
             </Text>
-            <TouchableOpacity
-              onPress={() => router.push("/(tabs)/dashboard/track")}
-              style={{ padding: 8, marginRight: -8, marginVertical: -8 }}
-            >
-              <Ionicons name="chevron-forward" size={16} color="#999" />
-            </TouchableOpacity>
           </View>
           {/* Sync row */}
-          {/* <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 8,
-              justifyContent: "space-between",
-            }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              {Platform.OS === "ios" ? (
-                <Ionicons name="logo-apple" size={18} color="#7771de" />
-              ) : (
-                <MaterialCommunityIcons
-                  name="google-fit"
-                  size={16}
-                  color="#7771de"
-                />
-              )}
-              <Text
+          {Platform.OS === "ios" && canSync("steps") && (
+            <View onStartShouldSetResponder={() => true}>
+              <TouchableOpacity
+                onPress={handleSyncSteps}
+                disabled={syncingSteps}
                 style={{
-                  marginLeft: 6,
-                  color: "#7771de",
-                  fontFamily: theme.fonts.medium,
-                  fontWeight: "500",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 8,
+                  justifyContent: "space-between",
+                  opacity: syncingSteps ? 0.6 : 1,
                 }}
               >
-                Sync your steps
-              </Text>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                {syncingSteps && (
+                  <ActivityIndicator size="small" color="#9747FF" style={{ marginRight: 8 }} />
+                )}
+                <Text
+                  style={{
+                    color: "#9747FF",
+                    fontFamily: theme.fonts.medium,
+                    fontWeight: "500",
+                    fontSize: 12,
+                  }}
+                >
+                  {syncingSteps ? "Syncing..." : "Sync with Apple Health"}
+                </Text>
+              </View>
+              {!syncingSteps && (
+                <Ionicons
+                  name="chevron-forward"
+                  size={16}
+                  color="#9747FF"
+                />
+              )}
+              </TouchableOpacity>
             </View>
-            <Ionicons
-              name="arrow-forward-circle-outline"
-              size={18}
-              color="#7771de"
-            />
-          </TouchableOpacity> */}
-        </View>
+          )}
+        </TouchableOpacity>
 
         {/* Sleep Card */}
-        <View
+        <TouchableOpacity
+          onPress={() => router.push("/(tabs)/dashboard/track")}
+          activeOpacity={0.7}
           style={{
             flex: 1,
             backgroundColor: "#FFFFFF",
@@ -306,12 +535,14 @@ function HealthDashboard() {
                 Sleep
               </Text>
             </View>
-            <TouchableOpacity
-              onPress={() => openModal("sleep")}
-              style={{ padding: 6 }}
-            >
-              <AntDesign name="pluscircle" size={22} color="#67c694" />
-            </TouchableOpacity>
+            <View>
+              <TouchableOpacity
+                onPress={() => openModal("sleep")}
+                style={{ padding: 6 }}
+              >
+                <AntDesign name="pluscircle" size={22} color="#67c694" />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <Progress.Bar
@@ -342,50 +573,47 @@ function HealthDashboard() {
             >
               {sleepDuration}/{sleepGoal} hrs
             </Text>
-            <TouchableOpacity
-              onPress={() => router.push("/(tabs)/dashboard/track")}
-              style={{ padding: 8, marginRight: -8, marginVertical: -8 }}
-            >
-              <Ionicons name="chevron-forward" size={16} color="#999" />
-            </TouchableOpacity>
           </View>
           {/* Sync row */}
-          {/* <TouchableOpacity
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 8,
-              justifyContent: "space-between",
-            }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              {Platform.OS === "ios" ? (
-                <Ionicons name="logo-apple" size={18} color="#7771de" />
-              ) : (
-                <MaterialCommunityIcons
-                  name="google-fit"
-                  size={16}
-                  color="#7771de"
-                />
-              )}
-              <Text
+          {Platform.OS === "ios" && canSync("sleep") && (
+            <View onStartShouldSetResponder={() => true}>
+              <TouchableOpacity
+                onPress={handleSyncSleep}
+                disabled={syncingSleep}
                 style={{
-                  marginLeft: 6,
-                  color: "#7771de",
-                  fontWeight: "500",
-                  fontFamily: theme.fonts.medium,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 8,
+                  justifyContent: "space-between",
+                  opacity: syncingSleep ? 0.6 : 1,
                 }}
               >
-                Sync your sleep
-              </Text>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                {syncingSleep && (
+                  <ActivityIndicator size="small" color="#9747FF" style={{ marginRight: 8 }} />
+                )}
+                <Text
+                  style={{
+                    color: "#9747FF",
+                    fontWeight: "500",
+                    fontFamily: theme.fonts.medium,
+                    fontSize: 12,
+                  }}
+                >
+                  {syncingSleep ? "Syncing..." : "Sync with Apple Health"}
+                </Text>
+              </View>
+              {!syncingSleep && (
+                <Ionicons
+                  name="chevron-forward"
+                  size={16}
+                  color="#9747FF"
+                />
+              )}
+              </TouchableOpacity>
             </View>
-            <Ionicons
-              name="arrow-forward-circle-outline"
-              size={18}
-              color="#7771de"
-            />
-          </TouchableOpacity> */}
-        </View>
+          )}
+        </TouchableOpacity>
       </View>
 
       {/* Water Card */}
@@ -501,7 +729,7 @@ function HealthDashboard() {
         <CustomSnackbar
           visible={snackbarVisible}
           onDismiss={() => setSnackbarVisible(false)}
-          bgColor={theme.colors.primary}
+          bgColor="#FFFFFF"
           message={snackbarMsg}
         />
       ) : null}

@@ -12,7 +12,7 @@
     "icon": "./assets/images/androidlogo.png",
     "scheme": "myapp",
     "platforms": ["ios", "android"],
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "newArchEnabled": false,
     "ios": {
       "icon": "./assets/images/logonew.png",
@@ -79,6 +79,14 @@
             "minSdkVersion": 26,
             "ndk": "26.1.10909125"
           }
+        }
+      ],
+      [
+        "react-native-health",
+        {
+          "isClinicalDataEnabled": true,
+          "healthSharePermission": "We need access to your health data to sync your steps and sleep information.",
+          "healthUpdatePermission": "We need access to update your health data with tracking information."
         }
       ]
     ],

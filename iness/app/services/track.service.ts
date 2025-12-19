@@ -7,6 +7,8 @@ export const trackService = {
   getTrackingData,
   updateTrackingData,
   getCurrentDayTrackData,
+  syncHealthData,
+  getHealthSyncStatus,
 };
 
 //// Funciton for updating the user in using backend then storing in AsyncStorage----/
@@ -34,4 +36,25 @@ async function updateTrackingData(
 ): Promise<ApiResponseInterface> {
   const url = `${baseUrl}/create-tracking/${type}`;
   return await fetchWrapper.post(url, { value, date });
+}
+
+/**
+ * Sync health data from device (iOS/Android)
+ * @param data - Steps and/or sleep data to sync
+ * @param platform - "ios" or "android"
+ */
+async function syncHealthData(
+  data: { steps?: Array<{ date: string; value: number }>; sleep?: Array<{ date: string; value: number }> },
+  platform: "ios" | "android" = "ios"
+): Promise<ApiResponseInterface> {
+  const url = `${baseUrl}/sync-health-data`;
+  return await fetchWrapper.post(url, { action: "sync", data, platform });
+}
+
+/**
+ * Get user's health sync status
+ */
+async function getHealthSyncStatus(): Promise<ApiResponseInterface> {
+  const url = `${baseUrl}/sync-health-data`;
+  return await fetchWrapper.post(url, { action: "status" });
 }

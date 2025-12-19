@@ -14,7 +14,14 @@ interface UserData {
   appleHealth: {
     stepSync: boolean;
     sleepSync: boolean;
-    lastSync: Date;
+    lastSyncApple: Date | null;
+    lastSyncAndroid: Date | null;
+  };
+  healthSync: {
+    stepSync: boolean;
+    sleepSync: boolean;
+    lastSyncIOS: Date | null;
+    lastSyncAndroid: Date | null;
   };
   phoneNumber: string;
   assignedCoupons: string[];

@@ -50,6 +50,7 @@ import { fetchStreak } from "@/app/services/streaks.service";
 import WeightTrackerBottomSheet from "@/app/Modals/WeightTrackModal";
 import eventBus from "@/event";
 import { usePendingNavigation } from "@/app/hooks/usePendingNavigation";
+import { useAppleHealthBackgroundSync } from "@/hooks/useAppleHealthBackgroundSync";
 
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
@@ -118,6 +119,9 @@ const YourComponent = () => {
   const { loading, setSnackbarMessage, setSnackbarVisible } =
     useFetchMultipleStoreDataHook(configs);
   const [currentSession, setCurrentSession] = useState<any>(null);
+
+  // Background Apple Health sync
+  useAppleHealthBackgroundSync();
 
   const [showFeedbackModal, setShowFeedbackModal] = useState(false);
   const [weightTrackModalShow, setWeightTrackModalShow] = useState(false);
