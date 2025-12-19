@@ -21,6 +21,17 @@ const SPACING = 12;
 // Responsive card height based on screen size - slightly increased for better spacing
 const CARD_HEIGHT = height < 700 ? height * 0.17 : height < 900 ? height * 0.19 : height * 0.21;
 
+// Responsive scaling factors
+const scale = width / 375; // Base width (iPhone X/11)
+const fontScale = width < 375 ? width / 375 : Math.min(width / 375, 1.1); // Scale down for smaller screens, cap for larger
+const verticalScale = height / 812; // Base height
+
+// Responsive functions
+const responsiveFontSize = (size: number) => size * Math.min(fontScale, 1.15);
+const responsiveWidth = (size: number) => size * Math.min(scale, 1.1);
+const responsiveHeight = (size: number) => size * Math.min(verticalScale, 1.1);
+const responsiveSpacing = (size: number) => size * Math.min(scale, 1.1);
+
 interface Trainer {
   _id: string;
   name: string;
@@ -280,9 +291,9 @@ const UpcomingSessionsCard = () => {
                     onPress={() => dispatch(setCalendarSheetOpen(true))}
                     style={{
                       backgroundColor: session.sessionStatus === "completed" ? "#F5F5F5" : "#FFFFFF",
-                      borderRadius: 20,
-                      paddingVertical: height < 700 ? 12 : height < 900 ? 14 : 16,
-                      paddingHorizontal: 16,
+                      borderRadius: responsiveSpacing(20),
+                      paddingVertical: responsiveSpacing(12),
+                      paddingHorizontal: responsiveSpacing(16),
                       shadowColor: "#000",
                       shadowOffset: { width: 0, height: 1 },
                       shadowOpacity: 0.05,
@@ -291,7 +302,7 @@ const UpcomingSessionsCard = () => {
                       borderWidth: 1,
                       borderColor: session.sessionStatus === "completed" ? "#E0E0E0" : "#F5F5F5",
                       position: "relative",
-                      height: CARD_HEIGHT - (height < 700 ? 16 : height < 900 ? 18 : 20),
+                      height: CARD_HEIGHT - responsiveSpacing(16),
                       justifyContent: "space-between",
                     }}
                   >
@@ -299,17 +310,17 @@ const UpcomingSessionsCard = () => {
                     <View
                       style={{
                         position: "absolute",
-                        top: height < 700 ? 10 : 14,
-                        right: height < 700 ? 10 : 14,
+                        top: responsiveSpacing(10),
+                        right: responsiveSpacing(10),
                         backgroundColor:
                           session.sessionStatus === "completed"
                             ? "#E0E0E0"
                             : session.sessionStatus === "missed"
                               ? "#FFEBEE"
                               : "#FFF3E0",
-                        paddingHorizontal: 10,
-                        paddingVertical: 4,
-                        borderRadius: 12,
+                        paddingHorizontal: responsiveSpacing(8),
+                        paddingVertical: responsiveSpacing(3),
+                        borderRadius: responsiveSpacing(10),
                         zIndex: 1,
                       }}
                     >
@@ -321,7 +332,7 @@ const UpcomingSessionsCard = () => {
                               : session.sessionStatus === "missed"
                                 ? "#F44336"
                                 : "#FF9800",
-                          fontSize: 10,
+                          fontSize: responsiveFontSize(9),
                           fontFamily: theme.fonts.bold,
                           textTransform: "uppercase",
                           fontWeight: "700",
@@ -343,10 +354,10 @@ const UpcomingSessionsCard = () => {
                       {/* Trainer Image */}
                       <View
                         style={{
-                          width: height < 700 ? 50 : height < 900 ? 55 : 60,
-                          height: height < 700 ? 50 : height < 900 ? 55 : 60,
-                          borderRadius: height < 700 ? 25 : height < 900 ? 27.5 : 30,
-                          marginRight: 12,
+                          width: responsiveWidth(50),
+                          height: responsiveWidth(50),
+                          borderRadius: responsiveWidth(25),
+                          marginRight: responsiveSpacing(12),
                           overflow: "hidden",
                           backgroundColor: "#F8F8F8",
                         }}
@@ -370,18 +381,18 @@ const UpcomingSessionsCard = () => {
                         style={{ 
                           flex: 1, 
                           justifyContent: "space-between",
-                          minHeight: height < 700 ? 50 : height < 900 ? 55 : 60,
+                          minHeight: responsiveWidth(50),
                         }}
                       >
                         <View>
                           <Text
                             style={{
-                              fontSize: height < 700 ? 14 : height < 900 ? 15 : 16,
+                              fontSize: responsiveFontSize(14),
                               fontFamily: theme.fonts.bold,
                               color: session.sessionStatus === "completed" ? "#000000" : "#000",
-                              marginBottom: height < 700 ? 6 : height < 900 ? 8 : 10,
+                              marginBottom: responsiveSpacing(6),
                               fontWeight: "700",
-                              lineHeight: height < 700 ? 18 : 20,
+                              lineHeight: responsiveFontSize(18),
                             }}
                             numberOfLines={2}
                           >
@@ -392,7 +403,7 @@ const UpcomingSessionsCard = () => {
                             style={{
                               flexDirection: "row",
                               alignItems: "center",
-                              marginBottom: height < 700 ? 4 : 6,
+                              marginBottom: responsiveSpacing(4),
                             }}
                           >
                             <Ionicons
@@ -401,13 +412,13 @@ const UpcomingSessionsCard = () => {
                                   ? "videocam-outline"
                                   : "location-outline"
                               }
-                              size={14}
+                              size={responsiveFontSize(13)}
                               color={session.sessionStatus === "completed" ? "#333" : "#666"}
-                              style={{ marginRight: 6 }}
+                              style={{ marginRight: responsiveSpacing(6) }}
                             />
                             <Text
                               style={{
-                                fontSize: 12,
+                                fontSize: responsiveFontSize(11),
                                 color: session.sessionStatus === "completed" ? "#000000" : "#666",
                                 fontWeight: "500",
                                 textTransform: "uppercase",
@@ -426,13 +437,13 @@ const UpcomingSessionsCard = () => {
                           >
                             <Ionicons
                               name="time-outline"
-                              size={14}
+                              size={responsiveFontSize(13)}
                               color={session.sessionStatus === "completed" ? "#333" : "#666"}
-                              style={{ marginRight: 6 }}
+                              style={{ marginRight: responsiveSpacing(6) }}
                             />
                             <Text
                               style={{
-                                fontSize: 12,
+                                fontSize: responsiveFontSize(11),
                                 color: session.sessionStatus === "completed" ? "#000000" : "#666",
                                 fontWeight: "500",
                               }}
@@ -449,16 +460,17 @@ const UpcomingSessionsCard = () => {
                     <TouchableOpacity
                       style={{
                         backgroundColor: "#67C694",
-                        paddingVertical: height < 700 ? 8 : height < 900 ? 9 : 10,
-                        paddingHorizontal: 20,
-                        borderRadius: 12,
+                        paddingVertical: responsiveSpacing(7),
+                        paddingHorizontal: responsiveSpacing(16),
+                        borderRadius: responsiveSpacing(10),
                         alignSelf: "flex-start",
-                        marginTop: height < 700 ? 6 : height < 900 ? 8 : 10,
+                        marginTop: responsiveSpacing(6),
                         shadowColor: "#67C694",
                         shadowOffset: { width: 0, height: 2 },
                         shadowOpacity: 0.3,
                         shadowRadius: 4,
                         elevation: 3,
+                        minWidth: responsiveWidth(60),
                       }}
                       onPress={() => dispatch(setCalendarSheetOpen(true))}
                     >
@@ -466,7 +478,7 @@ const UpcomingSessionsCard = () => {
                         style={{
                           color: "#fff",
                           fontFamily: theme.fonts.bold,
-                          fontSize: height < 700 ? 13 : 14,
+                          fontSize: responsiveFontSize(12),
                           fontWeight: "700",
                         }}
                       >

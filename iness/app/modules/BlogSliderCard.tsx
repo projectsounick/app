@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+  Platform,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
@@ -28,11 +29,16 @@ function BlogSliderCard() {
         paddingVertical: 16,
         paddingHorizontal: 16,
         borderRadius: 20,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-        elevation: 3,
+        ...(Platform.OS === "ios"
+          ? {
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.08,
+              shadowRadius: 12,
+            }
+          : {
+              elevation: 1,
+            }),
         backgroundColor: "#FFFFFF",
         marginBottom: 16,
         borderWidth: 1,
@@ -106,11 +112,16 @@ function BlogSliderCard() {
               marginTop: 4,
               marginBottom: 4,
               width: CARD_WIDTH,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.08,
-              shadowRadius: 12,
-              elevation: 3,
+              ...(Platform.OS === "ios"
+                ? {
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 12,
+                  }
+                : {
+                    elevation: 1,
+                  }),
               borderWidth: 1,
               borderColor: "#F5F5F5",
               overflow: "hidden",
@@ -171,11 +182,16 @@ function BlogSliderCard() {
                   paddingHorizontal: screenHeight < 700 ? 16 : screenHeight < 900 ? 18 : 20,
                   borderRadius: 12,
                   alignSelf: "flex-start",
-                  shadowColor: "#67C694",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 4,
-                  elevation: 3,
+                  ...(Platform.OS === "ios"
+                    ? {
+                        shadowColor: "#67C694",
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.3,
+                        shadowRadius: 4,
+                      }
+                    : {
+                        elevation: 2,
+                      }),
                 }}
                 onPress={() =>
                   router.push({

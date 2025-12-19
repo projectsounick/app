@@ -13,8 +13,17 @@ import {
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import theme from "@/app/Theme/globalTheme";
-const { height } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 const topPadding = height * 0.05;
+
+// Responsive scaling factors
+const scale = width / 375; // Base width (iPhone X/11)
+const fontScale = width < 375 ? width / 375 : Math.min(width / 375, 0.95); // Scale down for smaller screens, cap lower for larger
+const verticalScale = height / 812; // Base height
+
+// Responsive functions - more aggressive scaling
+const responsiveFontSize = (size: number) => size * Math.min(fontScale, 0.95);
+const responsiveSpacing = (size: number) => size * Math.min(scale, 1.0);
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Blog } from "@/app/interfaces/blogInterface";
 import { blogService } from "@/app/services/blog.Service";
@@ -94,84 +103,47 @@ export default function BlogDetailsScreen() {
           blogData && (
             <ScrollView
               contentContainerStyle={{
-                paddingHorizontal: 16,
-                paddingTop: 16,
-                paddingBottom: 100,
+                paddingHorizontal: responsiveSpacing(16),
+                paddingTop: responsiveSpacing(16),
+                paddingBottom: responsiveSpacing(100),
               }}
               showsVerticalScrollIndicator={false}
             >
-              {/* Blog Cover Image Card */}
+              {/* Blog Cover Image */}
               {blogData.coverImage && (
                 <View
                   style={{
-                    backgroundColor: "#FFFFFF",
-                    borderRadius: 24,
+                    marginBottom: responsiveSpacing(24),
+                    borderRadius: responsiveSpacing(12),
                     overflow: "hidden",
-                    marginBottom: 24,
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.08,
-                    shadowRadius: 16,
-                    elevation: 3,
-                    borderWidth: 1,
-                    borderColor: "#F5F5F5",
                   }}
                 >
                   <Image
                     source={{ uri: blogData.coverImage }}
                     style={{
                       width: "100%",
-                      height: 240,
+                      height: responsiveSpacing(240),
                     }}
                     resizeMode="contain"
                   />
                 </View>
               )}
 
-              {/* Blog Title Card */}
-              <View
+              {/* Blog Title */}
+              <Text
                 style={{
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 20,
-                  padding: 20,
-                  marginBottom: 24,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.08,
-                  shadowRadius: 12,
-                  elevation: 3,
-                  borderWidth: 1,
-                  borderColor: "#F5F5F5",
+                  fontSize: responsiveFontSize(20),
+                  fontWeight: "700",
+                  color: "#000",
+                  lineHeight: responsiveFontSize(28),
+                  marginBottom: responsiveSpacing(20),
                 }}
               >
-                <Text
-                  style={{
-                    fontSize: 22,
-                    fontWeight: "700",
-                    color: "#000",
-                    lineHeight: 30,
-                  }}
-                >
-                  {blogData.title}
-                </Text>
-              </View>
+                {blogData.title}
+              </Text>
 
-              {/* Blog Content Card */}
-              <View
-                style={{
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 20,
-                  padding: 20,
-                  marginBottom: 24,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.08,
-                  shadowRadius: 12,
-                  elevation: 3,
-                  borderWidth: 1,
-                  borderColor: "#F5F5F5",
-                }}
-              >
+              {/* Blog Content */}
+              <View>
                 {/* Blog Content Loop */}
                 {blogData?.content?.map((item, index) => {
                   if (item.contentType === "heading") {
@@ -179,11 +151,11 @@ export default function BlogDetailsScreen() {
                       <Text
                         key={index}
                         style={{
-                          fontSize: 18,
+                          fontSize: responsiveFontSize(18),
                           fontWeight: "700",
                           color: "#000",
-                          marginTop: index > 0 ? 24 : 0,
-                          marginBottom: 12,
+                          marginTop: index > 0 ? responsiveSpacing(24) : 0,
+                          marginBottom: responsiveSpacing(12),
                         }}
                       >
                         {item.contentData}
@@ -196,10 +168,10 @@ export default function BlogDetailsScreen() {
                       <Text
                         key={index}
                         style={{
-                          fontSize: 15,
-                          lineHeight: 24,
+                          fontSize: responsiveFontSize(15),
+                          lineHeight: responsiveFontSize(24),
                           color: "#666",
-                          marginBottom: 16,
+                          marginBottom: responsiveSpacing(16),
                           fontWeight: "400",
                         }}
                       >
@@ -213,8 +185,8 @@ export default function BlogDetailsScreen() {
                       <View
                         key={index}
                         style={{
-                          marginVertical: 16,
-                          borderRadius: 16,
+                          marginVertical: responsiveSpacing(16),
+                          borderRadius: responsiveSpacing(16),
                           overflow: "hidden",
                           backgroundColor: "#F8F8F8",
                           alignItems: "center",
@@ -225,7 +197,7 @@ export default function BlogDetailsScreen() {
                           source={{ uri: item.contentData }}
                           style={{
                             width: "100%",
-                            height: 220,
+                            height: responsiveSpacing(220),
                           }}
                           resizeMode="contain"
                         />
@@ -241,40 +213,39 @@ export default function BlogDetailsScreen() {
               <View
                 style={{
                   backgroundColor: "#F3EDFF",
-                  borderRadius: 20,
-                  padding: 20,
-                  marginBottom: 16,
-                  borderWidth: 1,
-                  borderColor: "#E8D5FF",
+                  borderRadius: responsiveSpacing(12),
+                  padding: responsiveSpacing(16),
+                  marginTop: responsiveSpacing(24),
+                  marginBottom: responsiveSpacing(16),
                 }}
               >
                 <View
                   style={{
                     flexDirection: "row",
                     alignItems: "center",
-                    marginBottom: 12,
+                    marginBottom: responsiveSpacing(12),
                   }}
                 >
                   <View
                     style={{
-                      width: 40,
-                      height: 40,
-                      borderRadius: 20,
+                      width: responsiveSpacing(40),
+                      height: responsiveSpacing(40),
+                      borderRadius: responsiveSpacing(20),
                       backgroundColor: "#9747FF",
                       alignItems: "center",
                       justifyContent: "center",
-                      marginRight: 12,
+                      marginRight: responsiveSpacing(12),
                     }}
                   >
                     <Ionicons
                       name="information-circle"
-                      size={22}
+                      size={responsiveFontSize(22)}
                       color="#FFFFFF"
                     />
                   </View>
                   <Text
                     style={{
-                      fontSize: 16,
+                      fontSize: responsiveFontSize(16),
                       fontWeight: "700",
                       color: "#000",
                     }}
@@ -284,9 +255,9 @@ export default function BlogDetailsScreen() {
                 </View>
                 <Text
                   style={{
-                    fontSize: 14,
+                    fontSize: responsiveFontSize(14),
                     color: "#666",
-                    lineHeight: 20,
+                    lineHeight: responsiveFontSize(20),
                     fontWeight: "500",
                   }}
                 >

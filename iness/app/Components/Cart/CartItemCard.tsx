@@ -124,6 +124,7 @@ export default function CartItemList({
   return (
     <View
       style={{
+        flex: 1,
         backgroundColor: "#FFFFFF",
         padding: containerPadding,
         borderRadius: 20,
@@ -187,7 +188,11 @@ export default function CartItemList({
           <ActivityIndicator color="#67C694" />
         </View>
       ) : (
-        <>
+        <ScrollView
+          style={{ flex: 1 }}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 8 }}
+        >
           {items.length === 0 ? (
             <View
               style={{
@@ -206,11 +211,7 @@ export default function CartItemList({
               </Text>
             </View>
           ) : (
-            <ScrollView
-              style={{ maxHeight: isLargeScreen ? 600 : 500 }}
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ paddingBottom: 8 }}
-            >
+            <>
               {items.map((item: CartItem) => {
                 return (
                   <View
@@ -423,14 +424,11 @@ export default function CartItemList({
                   </View>
                 );
               })}
-            </ScrollView>
+            </>
           )}
-        </>
-      )}
-      {/* Empty State or Items */}
 
-      {/* Footer */}
-      {couponDetails ? (
+          {/* Footer - Coupon Section */}
+          {couponDetails ? (
         <View
           style={{
             flexDirection: "row",
@@ -540,8 +538,10 @@ export default function CartItemList({
             </Text>
           </TouchableOpacity>
         </View>
-      )}
+          )}
 
+        </ScrollView>
+      )}
       <CustomSnackbar
         visible={snackbarVisible}
         message={snackbarMessage}

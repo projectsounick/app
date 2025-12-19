@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   Dimensions,
+  Platform,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import theme from "@/app/Theme/globalTheme";
@@ -47,11 +48,16 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
         paddingVertical: 16,
         paddingHorizontal: 16,
         marginBottom: 16,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-        elevation: 3,
+        ...(Platform.OS === "ios"
+          ? {
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.08,
+              shadowRadius: 12,
+            }
+          : {
+              elevation: 1,
+            }),
         borderWidth: 1,
         borderColor: "#F5F5F5",
       }}
@@ -136,11 +142,16 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
               backgroundColor: "#FFFFFF",
               borderRadius: 20,
               overflow: "hidden",
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.08,
-              shadowRadius: 12,
-              elevation: 3,
+              ...(Platform.OS === "ios"
+                ? {
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 12,
+                  }
+                : {
+                    elevation: 1,
+                  }),
               borderWidth: 1,
               borderColor: "#F5F5F5",
             }}
@@ -220,11 +231,16 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
                     flexDirection: "row",
                     alignItems: "center",
                     justifyContent: "center",
-                    shadowColor: "#67C694",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 4,
-                    elevation: 3,
+                    ...(Platform.OS === "ios"
+                      ? {
+                          shadowColor: "#67C694",
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 0.3,
+                          shadowRadius: 4,
+                        }
+                      : {
+                          elevation: 2,
+                        }),
                   }}
                   onPress={() => {
                     setVisible(true);
