@@ -461,26 +461,23 @@ function HealthDashboard() {
                 flexDirection: "row",
                 alignItems: "center",
                 marginTop: 8,
-                paddingVertical: 6,
-                paddingHorizontal: 10,
-                backgroundColor: "#F3EDFF",
-                borderRadius: 8,
-                alignSelf: "flex-start",
               }}
             >
               <Ionicons
                 name="checkmark-circle"
-                size={16}
+                size={14}
                 color="#9747FF"
-                style={{ marginRight: 6 }}
+                style={{ marginRight: 6, marginTop: 1 }}
               />
               <Text
                 style={{
                   color: "#000",
-                  fontFamily: theme.fonts.medium,
-                  fontWeight: "500",
-                  fontSize: 12,
-                  lineHeight: 16,
+                  fontFamily: theme.fonts.regular,
+                  fontWeight: "400",
+                  fontSize: 11,
+                  lineHeight: 14,
+                  includeFontPadding: false,
+                  textAlignVertical: "center",
                 }}
               >
                 Synced with Apple Health
@@ -635,26 +632,23 @@ function HealthDashboard() {
                 flexDirection: "row",
                 alignItems: "center",
                 marginTop: 8,
-                paddingVertical: 6,
-                paddingHorizontal: 10,
-                backgroundColor: "#F3EDFF",
-                borderRadius: 8,
-                alignSelf: "flex-start",
               }}
             >
               <Ionicons
                 name="checkmark-circle"
-                size={16}
+                size={14}
                 color="#9747FF"
-                style={{ marginRight: 6 }}
+                style={{ marginRight: 6, marginTop: 1 }}
               />
               <Text
                 style={{
                   color: "#000",
-                  fontFamily: theme.fonts.medium,
-                  fontWeight: "500",
-                  fontSize: 12,
-                  lineHeight: 16,
+                  fontFamily: theme.fonts.regular,
+                  fontWeight: "400",
+                  fontSize: 11,
+                  lineHeight: 14,
+                  includeFontPadding: false,
+                  textAlignVertical: "center",
                 }}
               >
                 Synced with Apple Health

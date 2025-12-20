@@ -24,6 +24,7 @@ import {
 } from "@/Slices/trackSlice";
 import { ActivityIndicator } from "react-native-paper";
 import { useAppleHealthSync } from "@/hooks/useAppleHealthSync";
+import CustomSnackbar from "@/app/modules/Snackbar";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -85,6 +86,8 @@ export default function TrackingGraphPage() {
   const [loading, setLoading] = useState(false);
   const [syncingSteps, setSyncingSteps] = useState(false);
   const [syncingSleep, setSyncingSleep] = useState(false);
+  const [snackbarVisible, setSnackbarVisible] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
   const dispatch = useDispatch();
   const totalTrackData = useSelector(
     (state: RootState) => state.track.totalTrackData as TrackingData[]
@@ -636,9 +639,21 @@ export default function TrackingGraphPage() {
                                   return next;
                                 });
                                 fetchDataForMonth(currentMonth);
+                                // Show success message
+                                const message = result.syncedCount 
+                                  ? `Steps synced successfully! (${result.syncedCount} entries)`
+                                  : "Steps synced successfully!";
+                                setSnackbarMessage(message);
+                                setTimeout(() => setSnackbarVisible(true), 100);
+                              } else {
+                                // Show error message
+                                setSnackbarMessage(result.error || "Failed to sync steps");
+                                setSnackbarVisible(true);
                               }
                             } catch (error) {
                               console.error("[Track] Manual sync error:", error);
+                              setSnackbarMessage("An error occurred while syncing steps");
+                              setSnackbarVisible(true);
                             } finally {
                               setSyncingSteps(false);
                             }
@@ -691,9 +706,21 @@ export default function TrackingGraphPage() {
                                   return next;
                                 });
                                 fetchDataForMonth(currentMonth);
+                                // Show success message
+                                const message = result.syncedCount 
+                                  ? `Sleep synced successfully! (${result.syncedCount} entries)`
+                                  : "Sleep synced successfully!";
+                                setSnackbarMessage(message);
+                                setTimeout(() => setSnackbarVisible(true), 100);
+                              } else {
+                                // Show error message
+                                setSnackbarMessage(result.error || "Failed to sync sleep");
+                                setSnackbarVisible(true);
                               }
                             } catch (error) {
                               console.error("[Track] Manual sync error:", error);
+                              setSnackbarMessage("An error occurred while syncing sleep");
+                              setSnackbarVisible(true);
                             } finally {
                               setSyncingSleep(false);
                             }
@@ -1572,6 +1599,13 @@ export default function TrackingGraphPage() {
               </View>
             </ScrollView>
           )}
+          
+          <CustomSnackbar
+            visible={snackbarVisible}
+            message={snackbarMessage}
+            onDismiss={() => setSnackbarVisible(false)}
+            bgColor="#FFFFFF"
+          />
         </SafeAreaView>
       </ImageBackground>
     </View>

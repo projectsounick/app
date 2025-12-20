@@ -11,17 +11,13 @@ interface UserData {
   weight: string;
   height: string;
   weightUnit: string;
-  appleHealth: {
-    stepSync: boolean;
-    sleepSync: boolean;
-    lastSyncApple: Date | null;
-    lastSyncAndroid: Date | null;
-  };
   healthSync: {
     stepSync: boolean;
     sleepSync: boolean;
-    lastSyncIOS: Date | null;
-    lastSyncAndroid: Date | null;
+    lastSyncedStepsValue?: number | null;
+    lastSyncedStepsDate?: Date | null;
+    lastSyncedSleepValue?: number | null;
+    lastSyncedSleepDate?: Date | null;
   };
   phoneNumber: string;
   assignedCoupons: string[];

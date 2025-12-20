@@ -17,6 +17,7 @@ export type SyncPlatform = "ios" | "android";
 export interface HealthDataEntry {
   date: string;
   value: number;
+  totalHealthKitValue?: number; // Optional: total HealthKit value for this date (for backend to store correctly)
 }
 
 export interface SyncPayload {
@@ -27,8 +28,10 @@ export interface SyncPayload {
 export interface SyncStatus {
   stepSync: boolean;
   sleepSync: boolean;
-  lastSyncIOS: Date | null;
-  lastSyncAndroid: Date | null;
+  lastSyncedStepsValue?: number | null;
+  lastSyncedStepsDate?: Date | null; // Also serves as lastSyncIOS equivalent
+  lastSyncedSleepValue?: number | null;
+  lastSyncedSleepDate?: Date | null; // Also serves as lastSyncAndroid equivalent
 }
 
 export interface SyncResult {
@@ -63,8 +66,10 @@ export interface HealthSyncApiResponse {
     sleepCount?: number;
     stepSync?: boolean;
     sleepSync?: boolean;
-    lastSyncIOS?: string | null;
-    lastSyncAndroid?: string | null;
+    lastSyncedStepsValue?: number | null;
+    lastSyncedStepsDate?: string | null;
+    lastSyncedSleepValue?: number | null;
+    lastSyncedSleepDate?: string | null;
   };
   error?: string;
 }

@@ -68,6 +68,70 @@ export function shouldRetryPendingSync(pendingSync: PendingSyncData): boolean {
 }
 
 // ============================================
+// Last Synced HealthKit Values
+// ============================================
+
+/**
+ * Store the last HealthKit value we synced (for today)
+ * This helps us calculate incremental changes even when manual entries exist
+ */
+export async function storeLastSyncedHealthKitValue(
+  type: "steps" | "sleep",
+  value: number
+): Promise<void> {
+  try {
+    const key = type === "steps" 
+      ? STORAGE_KEYS.LAST_SYNCED_STEPS 
+      : STORAGE_KEYS.LAST_SYNCED_SLEEP;
+    await AsyncStorage.setItem(key, JSON.stringify({ value, timestamp: Date.now() }));
+  } catch (error) {
+    console.error(`${LOG_PREFIX.STORAGE} Error storing last synced value:`, error);
+  }
+}
+
+/**
+ * Get the last HealthKit value we synced (for today)
+ */
+export async function getLastSyncedHealthKitValue(
+  type: "steps" | "sleep"
+): Promise<number | null> {
+  try {
+    const key = type === "steps" 
+      ? STORAGE_KEYS.LAST_SYNCED_STEPS 
+      : STORAGE_KEYS.LAST_SYNCED_SLEEP;
+    const data = await AsyncStorage.getItem(key);
+    if (!data) return null;
+    
+    const parsed = JSON.parse(data);
+    // Check if it's from today (if not, return null)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const storedDate = new Date(parsed.timestamp);
+    storedDate.setHours(0, 0, 0, 0);
+    
+    if (storedDate.getTime() === today.getTime()) {
+      return parsed.value;
+    }
+    return null;
+  } catch (error) {
+    console.error(`${LOG_PREFIX.STORAGE} Error getting last synced value:`, error);
+    return null;
+  }
+}
+
+/**
+ * Clear last synced values (called when a new day starts)
+ */
+export async function clearLastSyncedHealthKitValues(): Promise<void> {
+  try {
+    await AsyncStorage.removeItem(STORAGE_KEYS.LAST_SYNCED_STEPS);
+    await AsyncStorage.removeItem(STORAGE_KEYS.LAST_SYNCED_SLEEP);
+  } catch (error) {
+    console.error(`${LOG_PREFIX.STORAGE} Error clearing last synced values:`, error);
+  }
+}
+
+// ============================================
 // Sync Status Cache
 // ============================================
 
@@ -93,8 +157,8 @@ export async function getCachedSyncStatus(): Promise<SyncStatus | null> {
     const parsed = JSON.parse(data);
     return {
       ...parsed,
-      lastSyncIOS: parsed.lastSyncIOS ? new Date(parsed.lastSyncIOS) : null,
-      lastSyncAndroid: parsed.lastSyncAndroid ? new Date(parsed.lastSyncAndroid) : null,
+      lastSyncedStepsDate: parsed.lastSyncedStepsDate ? new Date(parsed.lastSyncedStepsDate) : null,
+      lastSyncedSleepDate: parsed.lastSyncedSleepDate ? new Date(parsed.lastSyncedSleepDate) : null,
     };
   } catch (error) {
     console.error(`${LOG_PREFIX.STORAGE} Error getting cached sync status:`, error);

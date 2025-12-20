@@ -24,6 +24,8 @@ export const STORAGE_KEYS = {
   PENDING_SYNC: "health_sync_pending",
   LAST_SYNC_ATTEMPT: "health_sync_last_attempt",
   SYNC_STATUS_CACHE: "health_sync_status_cache",
+  LAST_SYNCED_STEPS: "health_sync_last_steps_value",
+  LAST_SYNCED_SLEEP: "health_sync_last_sleep_value",
 } as const;
 
 // ============================================

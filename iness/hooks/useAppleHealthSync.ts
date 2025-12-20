@@ -123,9 +123,8 @@ export function useAppleHealthSync(): UseHealthSyncReturn {
               if (prevStatus) {
                 const updatedStatus: SyncStatus = {
                   ...prevStatus,
-                  ...(type === "steps" ? { stepSync: true } : {}),
-                  ...(type === "sleep" ? { sleepSync: true } : {}),
-                  lastSyncIOS: new Date(), // Update last sync time
+                  ...(type === "steps" ? { stepSync: true, lastSyncedStepsDate: new Date() } : {}),
+                  ...(type === "sleep" ? { sleepSync: true, lastSyncedSleepDate: new Date() } : {}),
                 };
                 syncStatusRef.current = updatedStatus;
                 return updatedStatus;
@@ -134,8 +133,8 @@ export function useAppleHealthSync(): UseHealthSyncReturn {
                 const newStatus: SyncStatus = {
                   stepSync: type === "steps",
                   sleepSync: type === "sleep",
-                  lastSyncIOS: new Date(),
-                  lastSyncAndroid: null,
+                  ...(type === "steps" ? { lastSyncedStepsDate: new Date() } : {}),
+                  ...(type === "sleep" ? { lastSyncedSleepDate: new Date() } : {}),
                 };
                 syncStatusRef.current = newStatus;
                 return newStatus;
