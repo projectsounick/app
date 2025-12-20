@@ -411,34 +411,111 @@ export async function getHistoricalSteps(
   const initialized = await initializeHealthKit();
   if (!initialized) return [];
 
-  console.log(
-    `${LOG_PREFIX.HEALTHKIT} Fetching steps: ${startDate.toISOString()} to ${endDate.toISOString()}`
-  );
-
+  // First, fetch last 5 entries regardless of date range for debugging
+  const debugEndDate = new Date();
+  const debugStartDate = new Date();
+  debugStartDate.setDate(debugStartDate.getDate() - 30); // Last 30 days for debugging
+  
   return new Promise((resolve) => {
+    // First, fetch debug data (last 30 days, regardless of requested range)
+    // Show RAW samples, not aggregated
     healthKit.getDailyStepCountSamples(
       {
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
+        startDate: debugStartDate.toISOString(),
+        endDate: debugEndDate.toISOString(),
       },
-      (error, results) => {
-        if (error) {
-          console.error(`${LOG_PREFIX.HEALTHKIT} Error getting historical steps:`, error);
-          resolve([]);
-          return;
+      (debugError, debugResults) => {
+        if (!debugError && debugResults && debugResults.length > 0) {
+          // Sort by date (newest first) and take last 5 RAW entries
+          const sortedResults = (debugResults || []).sort((a: any, b: any) => {
+            const dateA = new Date(a.startDate || a.date || a.endDate || 0).getTime();
+            const dateB = new Date(b.startDate || b.date || b.endDate || 0).getTime();
+            return dateB - dateA; // Newest first
+          });
+          
+          const last5Raw = sortedResults.slice(0, 5);
+          console.log(`\n========== [DEBUG] Last 5 RAW Step Entries in HealthKit (Last 30 Days) ==========`);
+          console.log(`Total raw samples found: ${debugResults.length}`);
+          last5Raw.forEach((entry: any, index: number) => {
+            const dateStr = entry.startDate || entry.date || entry.endDate;
+            const date = new Date(dateStr);
+            const localDate = date.toLocaleString('en-US', { 
+              timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              weekday: 'short', 
+              month: 'short', 
+              day: 'numeric',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            });
+            const utcDate = date.toISOString();
+            const value = entry.value || entry.quantity || 0;
+            console.log(`  ${index + 1}. ${localDate} (UTC: ${utcDate}): ${value} steps`);
+          });
+          console.log(`================================================\n`);
+        } else {
+          console.log(`[DEBUG] No debug entries found or error:`, debugError);
         }
+        
+        // Now fetch the actual requested date range
+        console.log(`\n[DEBUG] Fetching steps for sync - Date range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
+        console.log(`[DEBUG] Date range (local): ${startDate.toLocaleString()} to ${endDate.toLocaleString()}`);
+        
+        healthKit.getDailyStepCountSamples(
+          {
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString(),
+          },
+          (error, results) => {
+            if (error) {
+              console.error(`${LOG_PREFIX.HEALTHKIT} Error getting historical steps:`, error);
+              resolve([]);
+              return;
+            }
 
-        console.log(`${LOG_PREFIX.HEALTHKIT} Raw step samples received: ${(results || []).length}`);
-        
-        // Aggregate by date to get daily totals
-        const data = aggregateStepsByDate(results || []);
+            console.log(`[DEBUG] HealthKit returned ${(results || []).length} raw samples for sync date range`);
+            if (results && results.length > 0) {
+              const sampleDates = results.slice(0, 3).map((r: any) => {
+                const dateStr = r.startDate || r.date || r.endDate;
+                return dateStr ? new Date(dateStr).toLocaleString() : 'unknown';
+              });
+              console.log(`[DEBUG] Sample dates from HealthKit: ${sampleDates.join(', ')}`);
+            }
 
-        console.log(`${LOG_PREFIX.HEALTHKIT} Aggregated to ${data.length} days`);
-        
-        // Log last 10 entries for debugging
-        logLastEntries('steps', data, 10);
-        
-        resolve(data);
+            // Aggregate by date to get daily totals
+            // Note: getDailyStepCountSamples returns daily aggregates, not time-based samples
+            // So we can't filter by time within a day - we can only filter by date
+            // If synced today, we need to handle it differently to avoid double-counting
+            let data: HealthDataEntry[];
+            
+            // Check if we're syncing today's data (startDate is today)
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const startDateOnly = new Date(startDate);
+            startDateOnly.setHours(0, 0, 0, 0);
+            const isSyncingToday = startDateOnly.getTime() === today.getTime();
+            
+            if (isSyncingToday && startDate > today) {
+              // We're syncing today but from a specific time (not start of day)
+              // Since getDailyStepCountSamples returns daily totals, we can't filter by time
+              // Instead, we'll include today's data but the backend should handle it
+              // OR we need to fetch the current total and subtract what we already have
+              console.log(`[DEBUG] Syncing today from ${startDate.toLocaleString()} - will include full day's data (HealthKit limitation)`);
+              data = aggregateStepsByDate(results || []);
+            } else {
+              // Normal case: include all data in the range
+              data = aggregateStepsByDate(results || []);
+            }
+            
+            console.log(`[DEBUG] After aggregation: ${data.length} entries`);
+            if (data.length > 0) {
+              console.log(`[DEBUG] Aggregated entries:`, data.map(d => `${new Date(d.date).toLocaleString()}: ${d.value} steps`).join(', '));
+            }
+            
+            resolve(data);
+          }
+        );
       }
     );
   });
@@ -457,32 +534,77 @@ export async function getHistoricalSleep(
   const initialized = await initializeHealthKit();
   if (!initialized) return [];
 
-  console.log(
-    `${LOG_PREFIX.HEALTHKIT} Fetching sleep: ${startDate.toISOString()} to ${endDate.toISOString()}`
-  );
-
+  // First, fetch last 5 entries regardless of date range for debugging
+  const debugEndDate = new Date();
+  const debugStartDate = new Date();
+  debugStartDate.setDate(debugStartDate.getDate() - 30); // Last 30 days for debugging
+  
   return new Promise((resolve) => {
+    // First, fetch debug data (last 30 days, regardless of requested range)
     healthKit.getSleepSamples(
       {
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
+        startDate: debugStartDate.toISOString(),
+        endDate: debugEndDate.toISOString(),
       },
-      (error, results) => {
-        if (error) {
-          console.error(`${LOG_PREFIX.HEALTHKIT} Error getting historical sleep:`, error);
-          resolve([]);
-          return;
+      (debugError, debugResults) => {
+        if (!debugError && debugResults && debugResults.length > 0) {
+          // Sort by date (newest first) and take last 5 RAW entries
+          const sortedResults = (debugResults || []).sort((a: any, b: any) => {
+            const dateA = new Date(a.startDate || a.date || a.endDate || 0).getTime();
+            const dateB = new Date(b.startDate || b.date || b.endDate || 0).getTime();
+            return dateB - dateA; // Newest first
+          });
+          
+          const last5Raw = sortedResults.slice(0, 5);
+          console.log(`\n========== [DEBUG] Last 5 RAW Sleep Entries in HealthKit (Last 30 Days) ==========`);
+          console.log(`Total raw samples found: ${debugResults.length}`);
+          last5Raw.forEach((entry: any, index: number) => {
+            const dateStr = entry.startDate || entry.date || entry.endDate;
+            const date = new Date(dateStr);
+            const localDate = date.toLocaleString('en-US', { 
+              timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+              weekday: 'short', 
+              month: 'short', 
+              day: 'numeric',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit'
+            });
+            const utcDate = date.toISOString();
+            // Calculate duration for sleep entries
+            let duration = 0;
+            if (entry.startDate && entry.endDate) {
+              duration = (new Date(entry.endDate).getTime() - new Date(entry.startDate).getTime()) / (1000 * 60 * 60);
+            } else if (entry.value) {
+              duration = entry.value;
+            }
+            console.log(`  ${index + 1}. ${localDate} (UTC: ${utcDate}): ${duration.toFixed(2)} hours`);
+          });
+          console.log(`================================================\n`);
+        } else {
+          console.log(`[DEBUG] No debug entries found or error:`, debugError);
         }
+        
+        // Now fetch the actual requested date range
+        healthKit.getSleepSamples(
+          {
+            startDate: startDate.toISOString(),
+            endDate: endDate.toISOString(),
+          },
+          (error, results) => {
+            if (error) {
+              console.error(`${LOG_PREFIX.HEALTHKIT} Error getting historical sleep:`, error);
+              resolve([]);
+              return;
+            }
 
-        console.log(`${LOG_PREFIX.HEALTHKIT} Raw sleep samples received: ${(results || []).length}`);
-        
-        const data = aggregateSleepByDate(results || []);
-        console.log(`${LOG_PREFIX.HEALTHKIT} Aggregated to ${data.length} days`);
-        
-        // Log last 10 entries for debugging
-        logLastEntries('sleep', data, 10);
-        
-        resolve(data);
+            // If synced today, only include samples after last sync time to prevent double-counting
+            const data = aggregateSleepByDate(results || [], startDate);
+            
+            resolve(data);
+          }
+        );
       }
     );
   });
@@ -543,71 +665,94 @@ function calculateTotalSleepHours(samples: any[]): number {
   return Math.round(totalHours * 10) / 10; // Round to 1 decimal
 }
 
-function aggregateSleepByDate(samples: any[]): HealthDataEntry[] {
+/**
+ * Aggregate sleep samples by date (sum all sleep for each day)
+ * Uses local timezone to determine which day sleep belongs to
+ * @param minDate - Optional minimum date to filter samples (only include samples after this time)
+ */
+function aggregateSleepByDate(samples: any[], minDate?: Date): HealthDataEntry[] {
   const sleepByDate: Record<string, number> = {};
 
   samples.forEach((entry) => {
     if (entry.startDate && entry.endDate) {
       const start = new Date(entry.startDate);
-      const dateKey = start.toISOString().split("T")[0]; // YYYY-MM-DD
+      
+      // If minDate is provided, only include samples that start after that time
+      if (minDate && start < minDate) {
+        return; // Skip this sample
+      }
+      
+      // Use local date (YYYY-MM-DD) to match backend normalization
+      // This ensures sleep is grouped by the user's local day, not UTC day
+      const year = start.getFullYear();
+      const month = String(start.getMonth() + 1).padStart(2, '0');
+      const day = String(start.getDate()).padStart(2, '0');
+      const dateKey = `${year}-${month}-${day}`; // Local date in YYYY-MM-DD format
       const duration = (new Date(entry.endDate).getTime() - start.getTime()) / (1000 * 60 * 60);
       sleepByDate[dateKey] = (sleepByDate[dateKey] || 0) + duration;
     }
   });
 
-  return Object.entries(sleepByDate).map(([date, hours]) => ({
-    date: new Date(date).toISOString(),
-    value: Math.round(hours * 10) / 10,
-  }));
+  return Object.entries(sleepByDate).map(([date, hours]) => {
+    // Create date at midnight local time for this date
+    const [year, month, day] = date.split('-').map(Number);
+    const localDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+    return {
+      date: localDate.toISOString(),
+      value: Math.round(hours * 10) / 10,
+    };
+  });
 }
 
 /**
  * Aggregate step samples by date (sum all steps for each day)
+ * Uses local timezone to determine which day a step belongs to
+ * @param minDate - Optional minimum date to filter samples (only include samples after this time)
  */
-function aggregateStepsByDate(samples: any[]): HealthDataEntry[] {
+function aggregateStepsByDate(samples: any[], minDate?: Date): HealthDataEntry[] {
   const stepsByDate: Record<string, number> = {};
+  let filteredCount = 0;
+  let includedCount = 0;
 
   samples.forEach((entry) => {
     // Get the date from startDate, date, or endDate
     const dateStr = entry.startDate || entry.date || entry.endDate;
     if (dateStr && entry.value) {
       const date = new Date(dateStr);
-      const dateKey = date.toISOString().split("T")[0]; // YYYY-MM-DD
+      
+      // If minDate is provided, only include samples after that time
+      if (minDate && date < minDate) {
+        filteredCount++;
+        return; // Skip this sample
+      }
+      
+      includedCount++;
+      // Use local date (YYYY-MM-DD) to match backend normalization
+      // This ensures steps are grouped by the user's local day, not UTC day
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const dateKey = `${year}-${month}-${day}`; // Local date in YYYY-MM-DD format
       stepsByDate[dateKey] = (stepsByDate[dateKey] || 0) + (entry.value || 0);
     }
   });
 
+  if (minDate) {
+    console.log(`[DEBUG] Aggregation filter: ${filteredCount} samples filtered out (before ${minDate.toLocaleString()}), ${includedCount} samples included`);
+  }
+
   const result = Object.entries(stepsByDate)
-    .map(([date, steps]) => ({
-      date: new Date(date).toISOString(),
-      value: Math.round(steps),
-    }))
+    .map(([date, steps]) => {
+      // Create date at midnight local time for this date
+      const [year, month, day] = date.split('-').map(Number);
+      const localDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+      return {
+        date: localDate.toISOString(),
+        value: Math.round(steps),
+      };
+    })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Sort newest first
 
   return result;
 }
 
-/**
- * Log last N entries for debugging
- */
-function logLastEntries(type: string, data: HealthDataEntry[], count: number = 10): void {
-  console.log(`\n========== ${type.toUpperCase()} - Last ${count} Entries ==========`);
-  console.log(`Total entries: ${data.length}`);
-  
-  const entries = data.slice(0, count);
-  entries.forEach((entry, index) => {
-    const date = new Date(entry.date);
-    const formattedDate = date.toLocaleDateString('en-US', { 
-      weekday: 'short', 
-      month: 'short', 
-      day: 'numeric',
-      year: 'numeric'
-    });
-    console.log(`  ${index + 1}. ${formattedDate}: ${entry.value} ${type === 'steps' ? 'steps' : 'hours'}`);
-  });
-  
-  // Also log total
-  const total = data.reduce((sum, e) => sum + e.value, 0);
-  console.log(`Total ${type}: ${type === 'steps' ? total : total.toFixed(1)}`);
-  console.log(`================================================\n`);
-}

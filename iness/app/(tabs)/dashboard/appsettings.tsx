@@ -22,6 +22,9 @@ import CustomSnackbar from "@/app/modules/Snackbar";
 import { router } from "expo-router";
 import HealthReportUploader from "@/app/modules/UploadReportPdf";
 import theme from "@/app/Theme/globalTheme";
+import { useAppleHealthSync } from "@/hooks/useAppleHealthSync";
+import { HealthKit } from "@/services/healthSync";
+import { trackService } from "@/app/services/track.service";
 
 const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const { height } = Dimensions.get("window");
@@ -78,6 +81,13 @@ export default function AppSettingsScreen() {
   const [deleteAccountModalVisible, setDeleteAccountModalVisible] =
     useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  
+  // Health Sync
+  const { syncStatus, isAvailable, refreshSyncStatus, syncData } = useAppleHealthSync();
+  const [stepsSyncEnabled, setStepsSyncEnabled] = useState(false);
+  const [sleepSyncEnabled, setSleepSyncEnabled] = useState(false);
+  const [syncingSteps, setSyncingSteps] = useState(false);
+  const [syncingSleep, setSyncingSleep] = useState(false);
 
   const notificationInfo = {
     title: "Notification Settings",
@@ -95,6 +105,158 @@ export default function AppSettingsScreen() {
     title: "Preferences",
     content:
       "Set your session preferences including date, time slot, and location. You can update your preferences or request changes to your existing preferences. Preferences help us schedule your sessions according to your convenience.",
+  };
+
+  const healthSyncInfo = {
+    title: "Health Data Sync",
+    content:
+      "Sync your steps and sleep data from Apple Health. When enabled, your health data will automatically sync with the app. You can turn off sync at any time. If you turn off sync, you'll need to grant permissions again when you turn it back on.",
+  };
+
+  const handleStepsSyncToggle = async (value: boolean) => {
+    if (!isAvailable) {
+      setSnackbarMessage("Apple Health is only available on iOS devices");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    if (value && !stepsSyncEnabled) {
+      // Turning ON - trigger sync
+      console.log("[AppSettings] Turning ON steps sync");
+      setSyncingSteps(true);
+      try {
+        const result = await syncData("steps");
+        
+        if (result.success) {
+          setStepsSyncEnabled(true);
+          await refreshSyncStatus();
+          setSnackbarMessage("Steps sync enabled successfully");
+          setSnackbarOpen(true);
+        } else {
+          // Check if it's a permission issue
+          if (result.error?.includes("permission") || HealthKit.wasPermissionDenied()) {
+            HealthKit.showPermissionDeniedAlert();
+          } else {
+            setSnackbarMessage(result.error || "Failed to enable steps sync");
+            setSnackbarOpen(true);
+          }
+        }
+      } catch (error: any) {
+        console.error("[AppSettings] Error enabling steps sync:", error);
+        setSnackbarMessage("Failed to enable steps sync");
+        setSnackbarOpen(true);
+      } finally {
+        setSyncingSteps(false);
+      }
+    } else if (!value && stepsSyncEnabled) {
+      // Turning OFF - show confirmation modal
+      Alert.alert(
+        "Turn Off Steps Sync?",
+        "If you turn off steps sync, you'll need to grant permissions again when you turn it back on. Your existing synced data will remain in the app.",
+        [
+          { text: "Cancel", style: "cancel", onPress: () => {} },
+          {
+            text: "Turn Off",
+            style: "destructive",
+            onPress: async () => {
+              // Update backend to disable sync
+              try {
+                setLoading(true);
+                const response = await trackService.disableHealthSync("steps");
+                if (response.success) {
+                  setStepsSyncEnabled(false);
+                  await refreshSyncStatus();
+                  setSnackbarMessage("Steps sync turned off");
+                  setSnackbarOpen(true);
+                } else {
+                  setSnackbarMessage(response.message || "Failed to turn off steps sync");
+                  setSnackbarOpen(true);
+                }
+              } catch (error) {
+                console.error("[AppSettings] Error disabling steps sync:", error);
+                setSnackbarMessage("Failed to turn off steps sync");
+                setSnackbarOpen(true);
+              } finally {
+                setLoading(false);
+              }
+            },
+          },
+        ]
+      );
+    }
+  };
+
+  const handleSleepSyncToggle = async (value: boolean) => {
+    if (!isAvailable) {
+      setSnackbarMessage("Apple Health is only available on iOS devices");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    if (value && !sleepSyncEnabled) {
+      // Turning ON - trigger sync
+      console.log("[AppSettings] Turning ON sleep sync");
+      setSyncingSleep(true);
+      try {
+        const result = await syncData("sleep");
+        
+        if (result.success) {
+          setSleepSyncEnabled(true);
+          await refreshSyncStatus();
+          setSnackbarMessage("Sleep sync enabled successfully");
+          setSnackbarOpen(true);
+        } else {
+          // Check if it's a permission issue
+          if (result.error?.includes("permission") || HealthKit.wasPermissionDenied()) {
+            HealthKit.showPermissionDeniedAlert();
+          } else {
+            setSnackbarMessage(result.error || "Failed to enable sleep sync");
+            setSnackbarOpen(true);
+          }
+        }
+      } catch (error: any) {
+        console.error("[AppSettings] Error enabling sleep sync:", error);
+        setSnackbarMessage("Failed to enable sleep sync");
+        setSnackbarOpen(true);
+      } finally {
+        setSyncingSleep(false);
+      }
+    } else if (!value && sleepSyncEnabled) {
+      // Turning OFF - show confirmation modal
+      Alert.alert(
+        "Turn Off Sleep Sync?",
+        "If you turn off sleep sync, you'll need to grant permissions again when you turn it back on. Your existing synced data will remain in the app.",
+        [
+          { text: "Cancel", style: "cancel", onPress: () => {} },
+          {
+            text: "Turn Off",
+            style: "destructive",
+            onPress: async () => {
+              // Update backend to disable sync
+              try {
+                setLoading(true);
+                const response = await trackService.disableHealthSync("sleep");
+                if (response.success) {
+                  setSleepSyncEnabled(false);
+                  await refreshSyncStatus();
+                  setSnackbarMessage("Sleep sync turned off");
+                  setSnackbarOpen(true);
+                } else {
+                  setSnackbarMessage(response.message || "Failed to turn off sleep sync");
+                  setSnackbarOpen(true);
+                }
+              } catch (error) {
+                console.error("[AppSettings] Error disabling sleep sync:", error);
+                setSnackbarMessage("Failed to turn off sleep sync");
+                setSnackbarOpen(true);
+              } finally {
+                setLoading(false);
+              }
+            },
+          },
+        ]
+      );
+    }
   };
 
   const handleInfoClick = (info: { title: string; content: string }) => {
@@ -136,7 +298,28 @@ export default function AppSettingsScreen() {
 
   useEffect(() => {
     loadNotificationStatus();
+    loadHealthSyncStatus();
   }, []);
+
+  // Update local state when syncStatus changes
+  useEffect(() => {
+    if (syncStatus) {
+      setStepsSyncEnabled(syncStatus.stepSync);
+      setSleepSyncEnabled(syncStatus.sleepSync);
+    }
+  }, [syncStatus]);
+
+  const loadHealthSyncStatus = async () => {
+    try {
+      const response = await trackService.getHealthSyncStatus();
+      if (response.success && response.data) {
+        setStepsSyncEnabled(response.data.stepSync || false);
+        setSleepSyncEnabled(response.data.sleepSync || false);
+      }
+    } catch (error) {
+      console.error("Error loading health sync status:", error);
+    }
+  };
 
   const loadNotificationStatus = async () => {
     try {
@@ -296,6 +479,80 @@ export default function AppSettingsScreen() {
                   </View>
                 </View>
               </View>
+
+              {/* Health Data Sync - iOS Only */}
+              {Platform.OS === "ios" && isAvailable && (
+                <View style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <View style={styles.iconContainer}>
+                      <Ionicons
+                        name="heart-outline"
+                        size={18}
+                        color="#9747FF"
+                      />
+                    </View>
+                    <Text style={styles.cardTitle}>Health Data Sync</Text>
+                    <TouchableOpacity
+                      onPress={() => handleInfoClick(healthSyncInfo)}
+                      style={styles.infoBtn}
+                    >
+                      <Ionicons
+                        name="information-circle-outline"
+                        size={18}
+                        color="#9747FF"
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={styles.cardContent}>
+                    {/* Steps Sync Toggle */}
+                    <View style={[styles.settingRow, { marginBottom: 16 }]}>
+                      <View style={{ flex: 1, marginRight: 12 }}>
+                        <Text style={styles.settingTitle}>Steps Sync</Text>
+                        <Text style={styles.settingSubtitle}>
+                          {stepsSyncEnabled
+                            ? "Your steps data is syncing from Apple Health"
+                            : "Sync your daily steps from Apple Health"}
+                        </Text>
+                      </View>
+                      {syncingSteps ? (
+                        <ActivityIndicator color="#9747FF" size="small" />
+                      ) : (
+                        <Switch
+                          value={stepsSyncEnabled}
+                          onValueChange={handleStepsSyncToggle}
+                          trackColor={{ false: "#E0E0E0", true: "#9747FF" }}
+                          thumbColor={stepsSyncEnabled ? "#FFFFFF" : "#F4F3F4"}
+                          ios_backgroundColor="#E0E0E0"
+                        />
+                      )}
+                    </View>
+
+                    {/* Sleep Sync Toggle */}
+                    <View style={styles.settingRow}>
+                      <View style={{ flex: 1, marginRight: 12 }}>
+                        <Text style={styles.settingTitle}>Sleep Sync</Text>
+                        <Text style={styles.settingSubtitle}>
+                          {sleepSyncEnabled
+                            ? "Your sleep data is syncing from Apple Health"
+                            : "Sync your sleep duration from Apple Health"}
+                        </Text>
+                      </View>
+                      {syncingSleep ? (
+                        <ActivityIndicator color="#9747FF" size="small" />
+                      ) : (
+                        <Switch
+                          value={sleepSyncEnabled}
+                          onValueChange={handleSleepSyncToggle}
+                          trackColor={{ false: "#E0E0E0", true: "#9747FF" }}
+                          thumbColor={sleepSyncEnabled ? "#FFFFFF" : "#F4F3F4"}
+                          ios_backgroundColor="#E0E0E0"
+                        />
+                      )}
+                    </View>
+                  </View>
+                </View>
+              )}
 
               {/* Health Report Upload */}
               <View style={styles.card}>

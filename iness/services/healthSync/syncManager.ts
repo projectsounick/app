@@ -24,7 +24,6 @@ import * as Storage from "./syncStorage";
  */
 export async function fetchSyncStatus(): Promise<SyncStatus | null> {
   try {
-    console.log(`${LOG_PREFIX.SYNC} Fetching sync status...`);
     const response = await trackService.getHealthSyncStatus();
 
     if (response.success && response.data) {
@@ -41,7 +40,6 @@ export async function fetchSyncStatus(): Promise<SyncStatus | null> {
 
       // Cache for offline access
       await Storage.cacheSyncStatus(status);
-      console.log(`${LOG_PREFIX.SYNC} Status:`, status);
       return status;
     }
 
@@ -82,42 +80,23 @@ export async function syncDataType(
   status: SyncStatus | null,
   platform: SyncPlatform = "ios"
 ): Promise<SyncResult> {
-  console.log("========== [SyncManager] syncDataType START ==========");
-  console.log(`${LOG_PREFIX.SYNC} Type: ${type}, Platform: ${platform}`);
-  console.log(`${LOG_PREFIX.SYNC} Timestamp:`, new Date().toISOString());
-  console.log(`${LOG_PREFIX.SYNC} Status:`, JSON.stringify(status));
-  
   if (!HealthKit.isHealthKitAvailable()) {
-    console.log(`${LOG_PREFIX.SYNC} HealthKit not available, returning`);
     return { success: false, value: 0, error: "HealthKit not available" };
   }
 
-  console.log(`${LOG_PREFIX.SYNC} Starting ${type} sync...`);
-
   try {
     // Initialize HealthKit - this shows the permission modal
-    console.log(`${LOG_PREFIX.SYNC} Step 1: Calling HealthKit.initializeHealthKit...`);
-    const initStartTime = Date.now();
     const initialized = await HealthKit.initializeHealthKit();
-    const initDuration = Date.now() - initStartTime;
-    console.log(`${LOG_PREFIX.SYNC} HealthKit initialized: ${initialized} (took ${initDuration}ms)`);
     
     if (!initialized) {
-      console.log(`${LOG_PREFIX.SYNC} HealthKit initialization failed - permissions may have been denied`);
       return { success: false, value: 0, error: "HealthKit permissions not granted. Please enable in Settings." };
     }
 
     // Get date range (use iOS sync date for iOS platform)
-    console.log(`${LOG_PREFIX.SYNC} Step 2: Getting date range...`);
     const { startDate, endDate } = Storage.getSyncDateRange(status?.lastSyncIOS || null);
-    console.log(`${LOG_PREFIX.SYNC} Date range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
 
     // Fetch historical data
-    console.log(`${LOG_PREFIX.SYNC} Step 3: Fetching historical data from HealthKit...`);
-    const fetchStartTime = Date.now();
     const data = await HealthKit.getHistoricalData(type, startDate, endDate);
-    const fetchDuration = Date.now() - fetchStartTime;
-    console.log(`${LOG_PREFIX.SYNC} Fetched ${data.length} entries (took ${fetchDuration}ms)`);
 
     if (data.length === 0) {
       // If this is the first sync attempt and we got no data, 
@@ -125,12 +104,10 @@ export async function syncDataType(
       const isFirstSync = !status?.lastSyncIOS;
       
       if (isFirstSync) {
-        console.log(`${LOG_PREFIX.SYNC} No data on first sync - might be permission issue`);
         // Show alert with option to check settings
         HealthKit.showNoDataOrPermissionAlert(type);
       }
       
-      console.log(`${LOG_PREFIX.SYNC} No data found, returning failure`);
       return {
         success: false,
         value: 0,
@@ -138,7 +115,6 @@ export async function syncDataType(
       };
     }
 
-    console.log(`${LOG_PREFIX.SYNC} Step 4: Finding today's value...`);
     // Find today's value IMMEDIATELY for UI update
     const todayEntry = data.find((entry) => {
       const entryDate = new Date(entry.date);
@@ -146,28 +122,20 @@ export async function syncDataType(
       return entryDate.toDateString() === today.toDateString();
     });
     const todayValue = todayEntry?.value || 0;
-    console.log(`${LOG_PREFIX.SYNC} Today's ${type} value: ${todayValue}`);
 
     // Prepare payload
-    console.log(`${LOG_PREFIX.SYNC} Step 5: Preparing payload...`);
     const payload: SyncPayload = {};
     if (type === "steps") {
       payload.steps = data;
     } else if (type === "sleep") {
       payload.sleep = data;
     }
-    console.log(`${LOG_PREFIX.SYNC} Payload prepared: ${type} with ${data.length} entries`);
 
     // Return success IMMEDIATELY with today's value
     // Backend sync happens in background (fire-and-forget)
-    console.log(`${LOG_PREFIX.SYNC} Step 6: Returning success immediately with today's value: ${todayValue}`);
-    console.log(`${LOG_PREFIX.SYNC} Starting background sync (fire-and-forget)...`);
-    
     // Sync to backend IN BACKGROUND (fire-and-forget, non-blocking)
     syncToBackendInBackground(payload, platform, data.length);
-    console.log(`${LOG_PREFIX.SYNC} Background sync started (non-blocking)`);
 
-    console.log("========== [SyncManager] syncDataType END (success) ==========");
     return {
       success: true,
       value: todayValue,
@@ -178,7 +146,6 @@ export async function syncDataType(
     console.error(`${LOG_PREFIX.SYNC} EXCEPTION in syncDataType:`, error);
     console.error(`${LOG_PREFIX.SYNC} Error message:`, error?.message);
     console.error(`${LOG_PREFIX.SYNC} Error stack:`, error?.stack);
-    console.log("========== [SyncManager] syncDataType END (error) ==========");
     return { success: false, value: 0, error: error.message };
   }
 }
@@ -191,51 +158,28 @@ function syncToBackendInBackground(
   platform: SyncPlatform,
   entryCount: number
 ): void {
-  console.log("========== [SyncManager] syncToBackendInBackground START ==========");
-  console.log(`${LOG_PREFIX.BACKGROUND} Entry count: ${entryCount}, Platform: ${platform}`);
-  console.log(`${LOG_PREFIX.BACKGROUND} Timestamp:`, new Date().toISOString());
-  console.log(`${LOG_PREFIX.BACKGROUND} Has steps: ${!!payload.steps}, Has sleep: ${!!payload.sleep}`);
-  
   // Fire and forget - don't await anything
   Promise.resolve().then(async () => {
-    console.log(`${LOG_PREFIX.BACKGROUND} Background sync promise started`);
-    console.log(`${LOG_PREFIX.BACKGROUND} About to call trackService.syncHealthData...`);
-    const startTime = Date.now();
-    
     try {
       const response = await trackService.syncHealthData(payload, platform);
-      const duration = Date.now() - startTime;
-      console.log(`${LOG_PREFIX.BACKGROUND} Backend call completed in ${duration}ms`);
-      console.log(`${LOG_PREFIX.BACKGROUND} Response success:`, response.success);
       
       if (response.success) {
-        console.log(`${LOG_PREFIX.BACKGROUND} Backend sync successful`);
         await Storage.clearPendingSync();
-        console.log(`${LOG_PREFIX.BACKGROUND} Cleared pending sync`);
       } else {
         console.error(`${LOG_PREFIX.BACKGROUND} Backend sync failed:`, response.message);
         // Store failure info (not data) for retry later
-        console.log(`${LOG_PREFIX.BACKGROUND} Storing failure info for retry...`);
         await Storage.storePendingSync(payload, platform);
-        console.log(`${LOG_PREFIX.BACKGROUND} Failure info stored`);
       }
     } catch (error: any) {
-      const duration = Date.now() - startTime;
-      console.error(`${LOG_PREFIX.BACKGROUND} Backend sync error after ${duration}ms:`, error?.message);
+      console.error(`${LOG_PREFIX.BACKGROUND} Backend sync error:`, error?.message);
       console.error(`${LOG_PREFIX.BACKGROUND} Error stack:`, error?.stack);
       // Store failure info (not data) for retry later
-      console.log(`${LOG_PREFIX.BACKGROUND} Storing failure info for retry...`);
       await Storage.storePendingSync(payload, platform);
-      console.log(`${LOG_PREFIX.BACKGROUND} Failure info stored`);
     }
-    
-    console.log("========== [SyncManager] syncToBackendInBackground END ==========");
   }).catch((err) => {
     console.error(`${LOG_PREFIX.BACKGROUND} Promise rejection (should not happen):`, err);
     // Silently ignore - this is fire and forget
   });
-  
-  console.log(`${LOG_PREFIX.BACKGROUND} Function returned immediately (non-blocking)`);
 }
 
 // ============================================
@@ -248,42 +192,120 @@ function syncToBackendInBackground(
 export async function syncNewData(status: SyncStatus): Promise<boolean> {
   if (!HealthKit.isHealthKitAvailable()) return false;
 
-  // Check date range
+  // Check date range - will fetch from last sync time to now
   const { startDate, endDate, skipSync } = Storage.getSyncDateRange(status.lastSyncIOS);
 
   if (skipSync) {
-    console.log(`${LOG_PREFIX.BACKGROUND} Already synced today or no new data`);
     return true;
   }
-
-  console.log(
-    `${LOG_PREFIX.BACKGROUND} Syncing from ${startDate.toISOString()} to ${endDate.toISOString()}`
-  );
 
   try {
     const payload: SyncPayload = {};
 
     // Fetch steps if enabled
     if (status.stepSync) {
-      const steps = await HealthKit.getHistoricalSteps(startDate, endDate);
-      if (steps.length > 0) {
-        payload.steps = steps;
-        console.log(`${LOG_PREFIX.BACKGROUND} Found ${steps.length} step entries`);
+      // Check if we're syncing today (already synced today)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const startDateOnly = new Date(startDate);
+      startDateOnly.setHours(0, 0, 0, 0);
+      const isSyncingToday = startDateOnly.getTime() === today.getTime() && status.lastSyncIOS && Storage.isToday(status.lastSyncIOS);
+      
+      if (isSyncingToday) {
+        // We've already synced today - get current total and compare with backend
+        // This prevents double-counting when getDailyStepCountSamples returns full day's total
+        try {
+          const currentDayData = await trackService.getCurrentDayTrackData();
+          const backendSteps = currentDayData.success && currentDayData.data?.steps?.steps ? currentDayData.data.steps.steps : 0;
+          
+          // Get today's current total from HealthKit
+          const healthKitTodayTotal = await HealthKit.getTodaySteps();
+          
+          // Calculate difference (only send new steps)
+          const difference = Math.max(0, healthKitTodayTotal - backendSteps);
+          
+          if (difference > 0) {
+            // Only send the difference to prevent double-counting
+            const todayDate = new Date();
+            todayDate.setHours(0, 0, 0, 0);
+            payload.steps = [{
+              date: todayDate.toISOString(),
+              value: difference
+            }];
+            console.log(`[DEBUG] Today already synced - HealthKit: ${healthKitTodayTotal}, Backend: ${backendSteps}, Difference: ${difference}`);
+          } else {
+            console.log(`[DEBUG] No new steps since last sync (HealthKit: ${healthKitTodayTotal}, Backend: ${backendSteps})`);
+          }
+        } catch (error) {
+          // Fallback to normal sync if comparison fails
+          console.error(`[DEBUG] Error comparing today's data, using normal sync:`, error);
+          const steps = await HealthKit.getHistoricalSteps(startDate, endDate);
+          if (steps.length > 0) {
+            payload.steps = steps;
+          }
+        }
+      } else {
+        // Normal sync (not today or first sync today)
+        const steps = await HealthKit.getHistoricalSteps(startDate, endDate);
+        if (steps.length > 0) {
+          payload.steps = steps;
+        }
       }
     }
 
     // Fetch sleep if enabled
     if (status.sleepSync) {
-      const sleep = await HealthKit.getHistoricalSleep(startDate, endDate);
-      if (sleep.length > 0) {
-        payload.sleep = sleep;
-        console.log(`${LOG_PREFIX.BACKGROUND} Found ${sleep.length} sleep entries`);
+      // Check if we're syncing today (already synced today)
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const startDateOnly = new Date(startDate);
+      startDateOnly.setHours(0, 0, 0, 0);
+      const isSyncingToday = startDateOnly.getTime() === today.getTime() && status.lastSyncIOS && Storage.isToday(status.lastSyncIOS);
+      
+      if (isSyncingToday) {
+        // We've already synced today - get current total and compare with backend
+        // This prevents double-counting when getSleepSamples returns full day's total
+        try {
+          const currentDayData = await trackService.getCurrentDayTrackData();
+          const backendSleep = currentDayData.success && currentDayData.data?.sleep?.sleepDuration ? currentDayData.data.sleep.sleepDuration : 0;
+          
+          // Get today's current total from HealthKit
+          const healthKitTodayTotal = await HealthKit.getTodaySleep();
+          
+          // Calculate difference (only send new sleep)
+          const difference = Math.max(0, healthKitTodayTotal - backendSleep);
+          
+          if (difference > 0) {
+            // Only send the difference to prevent double-counting
+            const todayDate = new Date();
+            todayDate.setHours(0, 0, 0, 0);
+            payload.sleep = [{
+              date: todayDate.toISOString(),
+              value: difference
+            }];
+            console.log(`[DEBUG] Today already synced - HealthKit: ${healthKitTodayTotal.toFixed(2)}h, Backend: ${backendSleep.toFixed(2)}h, Difference: ${difference.toFixed(2)}h`);
+          } else {
+            console.log(`[DEBUG] No new sleep since last sync (HealthKit: ${healthKitTodayTotal.toFixed(2)}h, Backend: ${backendSleep.toFixed(2)}h)`);
+          }
+        } catch (error) {
+          // Fallback to normal sync if comparison fails
+          console.error(`[DEBUG] Error comparing today's sleep data, using normal sync:`, error);
+          const sleep = await HealthKit.getHistoricalSleep(startDate, endDate);
+          if (sleep.length > 0) {
+            payload.sleep = sleep;
+          }
+        }
+      } else {
+        // Normal sync (not today or first sync today)
+        const sleep = await HealthKit.getHistoricalSleep(startDate, endDate);
+        if (sleep.length > 0) {
+          payload.sleep = sleep;
+        }
       }
     }
 
     // Nothing to sync
     if (!payload.steps && !payload.sleep) {
-      console.log(`${LOG_PREFIX.BACKGROUND} No new data to sync`);
       return true;
     }
 
@@ -291,7 +313,6 @@ export async function syncNewData(status: SyncStatus): Promise<boolean> {
     const response = await trackService.syncHealthData(payload, "ios");
 
     if (response.success) {
-      console.log(`${LOG_PREFIX.BACKGROUND} Sync successful`);
       await Storage.clearPendingSync();
       return true;
     } else {
@@ -317,21 +338,16 @@ export async function retryPendingSync(status: SyncStatus | null): Promise<boole
   const timeSinceFailure = Date.now() - pendingSync.timestamp;
   const fiveMinutes = 5 * 60 * 1000;
   if (timeSinceFailure < fiveMinutes) {
-    console.log(`${LOG_PREFIX.BACKGROUND} Pending sync not ready for retry yet`);
     return false;
   }
 
-  console.log(`${LOG_PREFIX.BACKGROUND} Retrying pending sync by re-fetching from HealthKit...`);
-
   if (!HealthKit.isHealthKitAvailable()) {
-    console.log(`${LOG_PREFIX.BACKGROUND} HealthKit not available for retry`);
     return false;
   }
 
   try {
     const initialized = await HealthKit.initializeHealthKit();
     if (!initialized) {
-      console.log(`${LOG_PREFIX.BACKGROUND} HealthKit not initialized for retry`);
       return false;
     }
 
@@ -354,7 +370,6 @@ export async function retryPendingSync(status: SyncStatus | null): Promise<boole
     }
 
     if (!payload.steps && !payload.sleep) {
-      console.log(`${LOG_PREFIX.BACKGROUND} No data to retry`);
       await Storage.clearPendingSync();
       return true;
     }
@@ -363,11 +378,9 @@ export async function retryPendingSync(status: SyncStatus | null): Promise<boole
     const response = await trackService.syncHealthData(payload, pendingSync.platform);
 
     if (response.success) {
-      console.log(`${LOG_PREFIX.BACKGROUND} Pending sync successful`);
       await Storage.clearPendingSync();
       return true;
     } else {
-      console.log(`${LOG_PREFIX.BACKGROUND} Pending sync failed again, will retry later`);
       // Update timestamp for next retry
       await Storage.storePendingSync(payload, pendingSync.platform);
       return false;
@@ -405,11 +418,6 @@ export async function getDisplayValue(
   try {
     const appleValue = await HealthKit.getTodayValue(type);
     const displayValue = backendValue + appleValue;
-    
-    console.log(
-      `${LOG_PREFIX.SYNC} Display ${type}: backend=${backendValue}, apple=${appleValue}, display=${displayValue}`
-    );
-    
     return displayValue;
   } catch (error) {
     console.error(`${LOG_PREFIX.SYNC} Error getting display value:`, error);

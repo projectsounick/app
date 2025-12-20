@@ -9,6 +9,7 @@ export const trackService = {
   getCurrentDayTrackData,
   syncHealthData,
   getHealthSyncStatus,
+  disableHealthSync,
 };
 
 //// Funciton for updating the user in using backend then storing in AsyncStorage----/
@@ -57,4 +58,12 @@ async function syncHealthData(
 async function getHealthSyncStatus(): Promise<ApiResponseInterface> {
   const url = `${baseUrl}/sync-health-data`;
   return await fetchWrapper.post(url, { action: "status" });
+}
+
+/**
+ * Disable health sync for a specific type
+ */
+async function disableHealthSync(type: "steps" | "sleep"): Promise<ApiResponseInterface> {
+  const url = `${baseUrl}/sync-health-data`;
+  return await fetchWrapper.post(url, { action: "disable", type });
 }

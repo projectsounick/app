@@ -29,7 +29,6 @@ export async function storePendingSync(
     };
 
     await AsyncStorage.setItem(STORAGE_KEYS.PENDING_SYNC, JSON.stringify(failureInfo));
-    console.log(`${LOG_PREFIX.STORAGE} Stored sync failure info (not data)`);
   } catch (error) {
     console.error(`${LOG_PREFIX.STORAGE} Error storing pending sync:`, error);
   }
@@ -54,7 +53,6 @@ export async function getPendingSync(): Promise<PendingSyncData | null> {
 export async function clearPendingSync(): Promise<void> {
   try {
     await AsyncStorage.removeItem(STORAGE_KEYS.PENDING_SYNC);
-    console.log(`${LOG_PREFIX.STORAGE} Cleared pending sync`);
   } catch (error) {
     console.error(`${LOG_PREFIX.STORAGE} Error clearing pending sync:`, error);
   }
@@ -145,36 +143,53 @@ export function isToday(date: Date | null): boolean {
 
 /**
  * Get date range for sync (from last sync or history days)
+ * Always fetches from last sync time to now to catch new data
  */
 export function getSyncDateRange(lastSyncDate: Date | null): {
   startDate: Date;
   endDate: Date;
   skipSync: boolean;
 } {
+  // Use local timezone for date calculations
   const now = new Date();
-  const endDate = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59);
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-
-  // If already synced today, skip
-  if (lastSyncDate && isToday(lastSyncDate)) {
-    return { startDate: today, endDate, skipSync: true };
-  }
+  const localYear = now.getFullYear();
+  const localMonth = now.getMonth();
+  const localDate = now.getDate();
+  
+  // End of today in local timezone (23:59:59.999)
+  const endDate = new Date(localYear, localMonth, localDate, 23, 59, 59, 999);
+  
+  // Start of today in local timezone (00:00:00.000)
+  const today = new Date(localYear, localMonth, localDate, 0, 0, 0, 0);
 
   let startDate: Date;
 
   if (lastSyncDate) {
-    // Start from day after last sync
-    startDate = new Date(lastSyncDate);
-    startDate.setDate(startDate.getDate() + 1);
-    startDate.setHours(0, 0, 0, 0);
+    // If synced today, fetch from LAST SYNC TIME to now (not from start of today)
+    // This prevents re-syncing the same data and adding it multiple times
+    if (isToday(lastSyncDate)) {
+      // Use last sync time as start to only get NEW data since last sync
+      startDate = new Date(lastSyncDate);
+      // Ensure we don't go before today (safety check)
+      if (startDate < today) {
+        startDate = new Date(today);
+      }
+    } else {
+      // Last sync was before today - start from day after last sync
+      // Convert lastSyncDate to local date and add 1 day
+      const lastSyncLocal = new Date(lastSyncDate);
+      const lastSyncYear = lastSyncLocal.getFullYear();
+      const lastSyncMonth = lastSyncLocal.getMonth();
+      const lastSyncDay = lastSyncLocal.getDate();
+      
+      startDate = new Date(lastSyncYear, lastSyncMonth, lastSyncDay + 1, 0, 0, 0, 0);
+    }
   } else {
-    // First sync - get history
-    startDate = new Date(now);
-    startDate.setDate(startDate.getDate() - HEALTH_SYNC_CONFIG.historyDays);
-    startDate.setHours(0, 0, 0, 0);
+    // First sync - get history (30 days back from today in local timezone)
+    startDate = new Date(localYear, localMonth, localDate - HEALTH_SYNC_CONFIG.historyDays, 0, 0, 0, 0);
   }
 
-  // Skip if start date is after end date
+  // Skip if start date is after end date (shouldn't happen, but safety check)
   const skipSync = startDate > endDate;
 
   return { startDate, endDate, skipSync };

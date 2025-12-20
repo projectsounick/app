@@ -23,6 +23,7 @@ import {
   setTotalTrackData,
 } from "@/Slices/trackSlice";
 import { ActivityIndicator } from "react-native-paper";
+import { useAppleHealthSync } from "@/hooks/useAppleHealthSync";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -82,10 +83,15 @@ export default function TrackingGraphPage() {
   const normalizeDate = (dateStr: string) =>
     new Date(dateStr).toLocaleDateString("en-CA");
   const [loading, setLoading] = useState(false);
+  const [syncingSteps, setSyncingSteps] = useState(false);
+  const [syncingSleep, setSyncingSleep] = useState(false);
   const dispatch = useDispatch();
   const totalTrackData = useSelector(
     (state: RootState) => state.track.totalTrackData as TrackingData[]
   );
+  
+  // Apple Health sync hook
+  const { isAvailable, syncData, syncStatus } = useAppleHealthSync();
   
   // Store data per month: { "2024-12": TrackingData[], "2024-11": TrackingData[], ... }
   const [monthDataMap, setMonthDataMap] = useState<{ [monthKey: string]: TrackingData[] }>({});
@@ -109,16 +115,13 @@ export default function TrackingGraphPage() {
   // ✅ Fetch tracking data for a specific month
   const fetchDataForMonth = useCallback(async (month: dayjs.Dayjs) => {
     const monthKey = month.format("YYYY-MM");
-    console.log(`[Track] Fetching data for month: ${monthKey}`);
     
     // Check if already loaded or currently loading (use refs to avoid dependency issues)
     if (loadedMonthsRef.current.has(monthKey)) {
-      console.log(`[Track] Month ${monthKey} already loaded, skipping fetch`);
       return;
     }
     
     if (loadingMonthsRef.current.has(monthKey)) {
-      console.log(`[Track] Month ${monthKey} already loading, skipping duplicate fetch`);
       return;
     }
 
@@ -139,7 +142,6 @@ export default function TrackingGraphPage() {
       const startDate = formatDate(startOfMonth);
       const endDate = formatDate(endOfMonth);
 
-      console.log(`[Track] Fetching ${monthKey}: ${startDate} to ${endDate}`);
 
       const [stepsRes, sleepRes, waterRes] = await Promise.all([
         trackService.getTrackingData("walk", startDate, endDate),
@@ -192,7 +194,6 @@ export default function TrackingGraphPage() {
           
           // Force chart remount by updating key
           setChartKey((prev) => prev + 1);
-          console.log(`[Track] Updated chartKey to force remount`);
           
           return updated;
         });
@@ -211,7 +212,6 @@ export default function TrackingGraphPage() {
           return next;
         });
         
-        console.log(`[Track] Stored ${monthTrackArray.length} entries for ${monthKey}`);
 
         // Update today's data if this is the current month
         const today = new Date();
@@ -241,11 +241,8 @@ export default function TrackingGraphPage() {
   useEffect(() => {
     const monthKeys = Object.keys(monthDataMap);
     if (monthKeys.length === 0) {
-      console.log(`[Track] monthDataMap is empty, skipping Redux update`);
       return;
     }
-    
-    console.log(`[Track] monthDataMap changed, updating Redux. Months: ${monthKeys.join(", ")}`);
     
     // Merge all months into one array
     const allData: TrackingData[] = [];
@@ -261,29 +258,20 @@ export default function TrackingGraphPage() {
     });
     
     // Update Redux
-    console.log(`[Track] Dispatching ${allData.length} entries to Redux`);
     dispatch(setTotalTrackData(allData));
-    console.log(`[Track] Redux updated with ${allData.length} total entries across ${monthKeys.length} months`);
   }, [monthDataMap, dispatch]);
 
   // ✅ Fetch data when month changes OR on initial mount
   useEffect(() => {
     const monthKey = currentMonth.format("YYYY-MM");
-    console.log(`[Track] useEffect triggered - Month: ${monthKey}, monthOffset: ${monthOffset}`);
-    console.log(`[Track] Loaded months:`, Array.from(loadedMonthsRef.current));
-    console.log(`[Track] Loading months:`, Array.from(loadingMonthsRef.current));
     
     // Use refs to check without causing dependency issues
     if (!loadedMonthsRef.current.has(monthKey) && !loadingMonthsRef.current.has(monthKey)) {
-      console.log(`[Track] Month ${monthKey} needs data, fetching...`);
       fetchDataForMonth(currentMonth);
-    } else {
-      console.log(`[Track] Month ${monthKey} already ${loadedMonthsRef.current.has(monthKey) ? 'loaded' : 'loading'}, skipping`);
     }
   }, [monthOffset, fetchDataForMonth]);
 
   const { sleepData, stepsData, waterData } = useMemo(() => {
-    console.log(`[Track] Recalculating sleep/steps/water data from ${totalTrackData.length} entries`);
     const sleepData: ChartPoint[] = [];
     const stepsData: ChartPoint[] = [];
     const waterData: ChartPoint[] = [];
@@ -306,24 +294,16 @@ export default function TrackingGraphPage() {
       }
     });
 
-    console.log(`[Track] Processed - Sleep: ${sleepData.length}, Steps: ${stepsData.length}, Water: ${waterData.length}`);
     return { sleepData, stepsData, waterData };
   }, [totalTrackData]);
 
   const filterMonthData = (dataArray: ChartPoint[]): ChartPoint[] => {
     const monthKey = currentMonth.format("YYYY-MM");
-    console.log(`[Track] Filtering data for month: ${monthKey}, total data points: ${dataArray.length}`);
     
     const filtered = dataArray.filter((d) => {
       const dateMonthKey = dayjs(d.date).format("YYYY-MM");
-      const matches = dateMonthKey === monthKey;
-      if (matches) {
-        console.log(`[Track] Match found: ${d.date} (${dateMonthKey}) matches ${monthKey}`);
-      }
-      return matches;
+      return dateMonthKey === monthKey;
     });
-    
-    console.log(`[Track] Filtered to ${filtered.length} entries for ${monthKey}`);
     
     return filtered.sort((a, b) => dayjs(a.date).unix() - dayjs(b.date).unix());
   };
@@ -331,12 +311,9 @@ export default function TrackingGraphPage() {
   // Get graph data directly from monthDataMap for current month (more reliable than Redux)
   const getGraphData = useMemo(() => {
     const monthKey = currentMonth.format("YYYY-MM");
-    console.log(`[Track] getGraphData - Tab: ${selectedTab}, Month: ${monthKey}`);
-    console.log(`[Track] monthDataMap keys:`, Object.keys(monthDataMap));
     
     // Get data directly from monthDataMap for current month
     const currentMonthData = monthDataMap[monthKey] || [];
-    console.log(`[Track] Current month data entries: ${currentMonthData.length}`);
     
     // Convert to chart points based on selected tab
     let dataset: ChartPoint[] = [];
@@ -362,12 +339,8 @@ export default function TrackingGraphPage() {
     
     // Sort by date
     dataset.sort((a, b) => dayjs(a.date).unix() - dayjs(b.date).unix());
-    
-    console.log(`[Track] Graph dataset length: ${dataset.length}`);
-    console.log(`[Track] Also checking Redux - Sleep: ${sleepData.length}, Steps: ${stepsData.length}, Water: ${waterData.length}`);
 
     if (dataset.length === 0) {
-      console.log(`[Track] No data for graph, returning empty state`);
       return {
         labels: ["No data"],
         datasets: [{ data: [0] }],
@@ -376,12 +349,6 @@ export default function TrackingGraphPage() {
 
     const labels = dataset.map((d) => dayjs(d.date).format("D"));
     const values = dataset.map((d) => d.value);
-
-    console.log(`[Track] Graph data - Labels: ${labels.length}, Values: ${values.length}, Sample:`, values.slice(0, 5));
-    console.log(`[Track] Full graph data structure:`, JSON.stringify({
-      labels: labels.slice(0, 5),
-      datasets: [{ data: values.slice(0, 5) }]
-    }));
 
     // Ensure all values are numbers
     const validValues = values.map(v => typeof v === 'number' ? v : 0);
@@ -569,69 +536,200 @@ export default function TrackingGraphPage() {
                     justifyContent: "space-between",
                   }}
                 >
-                  {(() => {
-                    const arrowColors = {
-                      Sleep: "#67C694",
-                      Steps: "#9747FF",
-                      Water: "#4FC3F7",
-                    };
-                    const arrowBgColors = {
-                      Sleep: "#E8F5E9",
-                      Steps: "#F3EDFF",
-                      Water: "#E3F2FD",
-                    };
-                    const arrowColor = arrowColors[selectedTab];
-                    const arrowBg = arrowBgColors[selectedTab];
-                    
-                    return (
-                      <>
+                  {/* Left side: Arrows and Month */}
+                  <View style={{ 
+                    flexDirection: "row", 
+                    alignItems: "center", 
+                    flex: Platform.OS === "ios" && isAvailable && 
+                      ((selectedTab === "Steps" && syncStatus?.stepSync) || 
+                       (selectedTab === "Sleep" && syncStatus?.sleepSync)) ? 1 : undefined,
+                    justifyContent: Platform.OS === "ios" && isAvailable && 
+                      ((selectedTab === "Steps" && syncStatus?.stepSync) || 
+                       (selectedTab === "Sleep" && syncStatus?.sleepSync)) ? "flex-start" : "center",
+                    width: Platform.OS === "ios" && isAvailable && 
+                      ((selectedTab === "Steps" && syncStatus?.stepSync) || 
+                       (selectedTab === "Sleep" && syncStatus?.sleepSync)) ? undefined : "100%",
+                  }}>
+                    {(() => {
+                      const arrowColors = {
+                        Sleep: "#67C694",
+                        Steps: "#9747FF",
+                        Water: "#4FC3F7",
+                      };
+                      const arrowBgColors = {
+                        Sleep: "#E8F5E9",
+                        Steps: "#F3EDFF",
+                        Water: "#E3F2FD",
+                      };
+                      const arrowColor = arrowColors[selectedTab];
+                      const arrowBg = arrowBgColors[selectedTab];
+                      
+                      return (
+                        <>
+                          <TouchableOpacity
+                            onPress={() => setMonthOffset((prev) => prev - 1)}
+                            style={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: 12,
+                              backgroundColor: arrowBg,
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Ionicons
+                              name="chevron-back"
+                              size={20}
+                              color={arrowColor}
+                            />
+                          </TouchableOpacity>
+                          <Text
+                            style={{
+                              fontSize: 16,
+                              fontWeight: "700",
+                              color: "#1A1A1A",
+                              fontFamily: theme.fonts.bold,
+                              marginHorizontal: 12,
+                            }}
+                          >
+                            {currentMonth.format("MMMM YYYY")}
+                          </Text>
+                          <TouchableOpacity
+                            onPress={() => setMonthOffset((prev) => prev + 1)}
+                            style={{
+                              width: 40,
+                              height: 40,
+                              borderRadius: 12,
+                              backgroundColor: arrowBg,
+                              alignItems: "center",
+                              justifyContent: "center",
+                            }}
+                          >
+                            <Ionicons
+                              name="chevron-forward"
+                              size={20}
+                              color={arrowColor}
+                            />
+                          </TouchableOpacity>
+                        </>
+                      );
+                    })()}
+                  </View>
+
+                  {/* Right side: Sync buttons (only when sync is enabled) */}
+                  {Platform.OS === "ios" && isAvailable && (
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                      {/* Steps Sync Button */}
+                      {selectedTab === "Steps" && syncStatus?.stepSync && (
                         <TouchableOpacity
-                          onPress={() => setMonthOffset((prev) => prev - 1)}
+                          onPress={async () => {
+                            if (!isAvailable || syncingSteps) return;
+                            setSyncingSteps(true);
+                            try {
+                              const result = await syncData("steps");
+                              if (result.success) {
+                                // Refresh data for current month
+                                const monthKey = currentMonth.format("YYYY-MM");
+                                setLoadedMonths((prev) => {
+                                  const next = new Set(prev);
+                                  next.delete(monthKey);
+                                  return next;
+                                });
+                                fetchDataForMonth(currentMonth);
+                              }
+                            } catch (error) {
+                              console.error("[Track] Manual sync error:", error);
+                            } finally {
+                              setSyncingSteps(false);
+                            }
+                          }}
+                          disabled={syncingSteps}
                           style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 12,
-                            backgroundColor: arrowBg,
+                            flexDirection: "row",
                             alignItems: "center",
-                            justifyContent: "center",
+                            paddingVertical: 8,
+                            paddingHorizontal: 12,
+                            backgroundColor: "#67C694",
+                            borderRadius: 20,
+                            opacity: syncingSteps ? 0.6 : 1,
                           }}
                         >
-                          <Ionicons
-                            name="chevron-back"
-                            size={20}
-                            color={arrowColor}
-                          />
+                          {syncingSteps ? (
+                            <ActivityIndicator size="small" color="#FFFFFF" />
+                          ) : (
+                            <>
+                              <Ionicons name="refresh" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                              <Text
+                                style={{
+                                  color: "#FFFFFF",
+                                  fontFamily: theme.fonts.medium,
+                                  fontWeight: "600",
+                                  fontSize: 12,
+                                }}
+                              >
+                                Sync Now
+                              </Text>
+                            </>
+                          )}
                         </TouchableOpacity>
-                        <Text
-                          style={{
-                            fontSize: 16,
-                            fontWeight: "700",
-                            color: "#1A1A1A",
-                            fontFamily: theme.fonts.bold,
-                          }}
-                        >
-                          {currentMonth.format("MMMM YYYY")}
-                        </Text>
+                      )}
+
+                      {/* Sleep Sync Button */}
+                      {selectedTab === "Sleep" && syncStatus?.sleepSync && (
                         <TouchableOpacity
-                          onPress={() => setMonthOffset((prev) => prev + 1)}
+                          onPress={async () => {
+                            if (!isAvailable || syncingSleep) return;
+                            setSyncingSleep(true);
+                            try {
+                              const result = await syncData("sleep");
+                              if (result.success) {
+                                // Refresh data for current month
+                                const monthKey = currentMonth.format("YYYY-MM");
+                                setLoadedMonths((prev) => {
+                                  const next = new Set(prev);
+                                  next.delete(monthKey);
+                                  return next;
+                                });
+                                fetchDataForMonth(currentMonth);
+                              }
+                            } catch (error) {
+                              console.error("[Track] Manual sync error:", error);
+                            } finally {
+                              setSyncingSleep(false);
+                            }
+                          }}
+                          disabled={syncingSleep}
                           style={{
-                            width: 40,
-                            height: 40,
-                            borderRadius: 12,
-                            backgroundColor: arrowBg,
+                            flexDirection: "row",
                             alignItems: "center",
-                            justifyContent: "center",
+                            paddingVertical: 8,
+                            paddingHorizontal: 12,
+                            backgroundColor: "#67C694",
+                            borderRadius: 20,
+                            opacity: syncingSleep ? 0.6 : 1,
                           }}
                         >
-                          <Ionicons
-                            name="chevron-forward"
-                            size={20}
-                            color={arrowColor}
-                          />
+                          {syncingSleep ? (
+                            <ActivityIndicator size="small" color="#FFFFFF" />
+                          ) : (
+                            <>
+                              <Ionicons name="refresh" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                              <Text
+                                style={{
+                                  color: "#FFFFFF",
+                                  fontFamily: theme.fonts.medium,
+                                  fontWeight: "600",
+                                  fontSize: 12,
+                                }}
+                              >
+                                Sync Now
+                              </Text>
+                            </>
+                          )}
                         </TouchableOpacity>
-                      </>
-                    );
-                  })()}
+                      )}
+                    </View>
+                  )}
                 </View>
 
                 {/* Chart Card */}
@@ -670,6 +768,7 @@ export default function TrackingGraphPage() {
                   </View>
                 </View>
 
+
                 {/* Detailed Report Section */}
                 {getSelectedData.length > 0 && (() => {
                   const selectedData = getSelectedData;
@@ -689,6 +788,27 @@ export default function TrackingGraphPage() {
                   const difference = total - targetTotal;
                   const percentage = targetTotal > 0 ? (total / targetTotal) * 100 : 0;
                   const isLagging = difference < 0;
+                  
+                  // Additional Analytics
+                  const averagePerDay = count > 0 ? total / count : 0;
+                  
+                  // Find best and worst days
+                  const bestDay = selectedData.length > 0 
+                    ? selectedData.reduce((max, item) => item.value > max.value ? item : max, selectedData[0])
+                    : null;
+                  const worstDay = selectedData.length > 0 
+                    ? selectedData.reduce((min, item) => item.value < min.value ? item : min, selectedData[0])
+                    : null;
+                  
+                  // Days with data vs days without
+                  const daysWithData = count;
+                  const daysWithoutData = daysInMonth - count;
+                  const dataCompleteness = (daysWithData / daysInMonth) * 100;
+                  
+                  // Days above/below target
+                  const daysAboveTarget = selectedData.filter(item => item.value >= dailyTargets[selectedTab]).length;
+                  const daysBelowTarget = selectedData.filter(item => item.value < dailyTargets[selectedTab]).length;
+                  const targetAchievementRate = count > 0 ? (daysAboveTarget / count) * 100 : 0;
                   
                   const colors = {
                     Sleep: { text: "#67C694", bg: "#E8F5E9" },
@@ -744,7 +864,7 @@ export default function TrackingGraphPage() {
                           borderColor: "#F5F5F5",
                         }}
                       >
-                        {/* Stats Row */}
+                        {/* Stats Row - Enhanced */}
                         <View
                           style={{
                             flexDirection: "row",
@@ -801,7 +921,11 @@ export default function TrackingGraphPage() {
                                 marginBottom: 4,
                               }}
                             >
-                              {count}
+                              {selectedTab === "Sleep"
+                                ? `${averagePerDay.toFixed(1)}`
+                                : selectedTab === "Steps"
+                                  ? Math.round(averagePerDay).toLocaleString()
+                                  : `${averagePerDay.toFixed(1)}`}
                             </Text>
                             <Text
                               style={{
@@ -810,8 +934,149 @@ export default function TrackingGraphPage() {
                                 fontFamily: theme.fonts.medium,
                               }}
                             >
-                              {count === 1 ? "Entry" : "Entries"}
+                              Avg/Day
                             </Text>
+                          </View>
+                        </View>
+                        
+                        {/* Best & Worst Day Row */}
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            marginBottom: 20,
+                            paddingBottom: 20,
+                            borderBottomWidth: 1,
+                            borderBottomColor: "#F5F5F5",
+                            gap: 12,
+                          }}
+                        >
+                          {/* Best Day Card */}
+                          <View
+                            style={{
+                              flex: 1,
+                              backgroundColor: "#E8F5E9",
+                              borderRadius: 12,
+                              padding: 16,
+                              borderWidth: 1,
+                              borderColor: "#C8E6C9",
+                            }}
+                          >
+                            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                              <Ionicons name="trophy" size={18} color="#2F8C62" style={{ marginRight: 6 }} />
+                              <Text
+                                style={{
+                                  fontSize: 12,
+                                  color: "#666",
+                                  fontFamily: theme.fonts.medium,
+                                  fontWeight: "600",
+                                }}
+                              >
+                                Best Day
+                              </Text>
+                            </View>
+                            {bestDay ? (
+                              <>
+                                <Text
+                                  style={{
+                                    fontSize: 22,
+                                    fontWeight: "700",
+                                    color: "#2F8C62",
+                                    fontFamily: theme.fonts.bold,
+                                    marginBottom: 4,
+                                  }}
+                                >
+                                  {selectedTab === "Sleep"
+                                    ? `${bestDay.value.toFixed(1)} hrs`
+                                    : selectedTab === "Steps"
+                                      ? `${Math.round(bestDay.value).toLocaleString()} steps`
+                                      : `${bestDay.value} glasses`}
+                                </Text>
+                                <Text
+                                  style={{
+                                    fontSize: 13,
+                                    color: "#666",
+                                    fontFamily: theme.fonts.medium,
+                                  }}
+                                >
+                                  {dayjs(bestDay.date).format("MMMM D, YYYY")}
+                                </Text>
+                              </>
+                            ) : (
+                              <Text
+                                style={{
+                                  fontSize: 14,
+                                  color: "#999",
+                                  fontFamily: theme.fonts.regular,
+                                }}
+                              >
+                                No data
+                              </Text>
+                            )}
+                          </View>
+                          
+                          {/* Worst Day Card */}
+                          <View
+                            style={{
+                              flex: 1,
+                              backgroundColor: "#FFEBEE",
+                              borderRadius: 12,
+                              padding: 16,
+                              borderWidth: 1,
+                              borderColor: "#FFCDD2",
+                            }}
+                          >
+                            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                              <Ionicons name="trending-down" size={18} color="#D32F2F" style={{ marginRight: 6 }} />
+                              <Text
+                                style={{
+                                  fontSize: 12,
+                                  color: "#666",
+                                  fontFamily: theme.fonts.medium,
+                                  fontWeight: "600",
+                                }}
+                              >
+                                Worst Day
+                              </Text>
+                            </View>
+                            {worstDay ? (
+                              <>
+                                <Text
+                                  style={{
+                                    fontSize: 22,
+                                    fontWeight: "700",
+                                    color: "#D32F2F",
+                                    fontFamily: theme.fonts.bold,
+                                    marginBottom: 4,
+                                  }}
+                                >
+                                  {selectedTab === "Sleep"
+                                    ? `${worstDay.value.toFixed(1)} hrs`
+                                    : selectedTab === "Steps"
+                                      ? `${Math.round(worstDay.value).toLocaleString()} steps`
+                                      : `${worstDay.value} glasses`}
+                                </Text>
+                                <Text
+                                  style={{
+                                    fontSize: 13,
+                                    color: "#666",
+                                    fontFamily: theme.fonts.medium,
+                                  }}
+                                >
+                                  {dayjs(worstDay.date).format("MMMM D, YYYY")}
+                                </Text>
+                              </>
+                            ) : (
+                              <Text
+                                style={{
+                                  fontSize: 14,
+                                  color: "#999",
+                                  fontFamily: theme.fonts.regular,
+                                }}
+                              >
+                                No data
+                              </Text>
+                            )}
                           </View>
                         </View>
                         
@@ -1026,6 +1291,7 @@ export default function TrackingGraphPage() {
                               flexDirection: "row",
                               alignItems: "center",
                               justifyContent: "space-between",
+                              marginBottom: 16,
                             }}
                           >
                             <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
@@ -1062,6 +1328,101 @@ export default function TrackingGraphPage() {
                                 </Text>
                               </View>
                             </View>
+                          </View>
+                          
+                          {/* Additional Analytics Grid */}
+                          <View style={{ gap: 12 }}>
+                            {/* Data Completeness & Target Achievement */}
+                            <View style={{ flexDirection: "row", gap: 12 }}>
+                              <View
+                                style={{
+                                  flex: 1,
+                                  backgroundColor: "#FFFFFF",
+                                  borderRadius: 12,
+                                  padding: 14,
+                                  borderWidth: 1,
+                                  borderColor: "#E8E8E8",
+                                }}
+                              >
+                                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                                  <Ionicons name="calendar" size={16} color="#666" style={{ marginRight: 6 }} />
+                                  <Text
+                                    style={{
+                                      fontSize: 11,
+                                      color: "#888",
+                                      fontFamily: theme.fonts.medium,
+                                    }}
+                                  >
+                                    Data Completeness
+                                  </Text>
+                                </View>
+                                <Text
+                                  style={{
+                                    fontSize: 18,
+                                    fontWeight: "700",
+                                    color: "#1A1A1A",
+                                    fontFamily: theme.fonts.bold,
+                                    marginBottom: 4,
+                                  }}
+                                >
+                                  {dataCompleteness.toFixed(0)}%
+                                </Text>
+                                <Text
+                                  style={{
+                                    fontSize: 10,
+                                    color: "#999",
+                                    fontFamily: theme.fonts.regular,
+                                  }}
+                                >
+                                  {daysWithData} of {daysInMonth} days
+                                </Text>
+                              </View>
+                              
+                              <View
+                                style={{
+                                  flex: 1,
+                                  backgroundColor: "#FFFFFF",
+                                  borderRadius: 12,
+                                  padding: 14,
+                                  borderWidth: 1,
+                                  borderColor: "#E8E8E8",
+                                }}
+                              >
+                                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                                  <Ionicons name="flag" size={16} color="#666" style={{ marginRight: 6 }} />
+                                  <Text
+                                    style={{
+                                      fontSize: 11,
+                                      color: "#888",
+                                      fontFamily: theme.fonts.medium,
+                                    }}
+                                  >
+                                    Target Achievement
+                                  </Text>
+                                </View>
+                                <Text
+                                  style={{
+                                    fontSize: 18,
+                                    fontWeight: "700",
+                                    color: targetAchievementRate >= 70 ? "#2F8C62" : targetAchievementRate >= 50 ? "#FF9800" : "#D32F2F",
+                                    fontFamily: theme.fonts.bold,
+                                    marginBottom: 4,
+                                  }}
+                                >
+                                  {targetAchievementRate.toFixed(0)}%
+                                </Text>
+                                <Text
+                                  style={{
+                                    fontSize: 10,
+                                    color: "#999",
+                                    fontFamily: theme.fonts.regular,
+                                  }}
+                                >
+                                  {daysAboveTarget} above, {daysBelowTarget} below
+                                </Text>
+                              </View>
+                            </View>
+                            
                           </View>
                         </View>
                       </View>

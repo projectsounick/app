@@ -39,7 +39,6 @@ export function useAppleHealthBackgroundSync(): void {
     if (!syncStatus.stepSync && !syncStatus.sleepSync) return;
 
     syncInProgressRef.current = true;
-    console.log(`${LOG_PREFIX.BACKGROUND} Starting background sync...`);
 
     try {
       const success = await SyncManager.syncNewData(syncStatus);
@@ -128,7 +127,6 @@ export function useAppleHealthBackgroundSync(): void {
     if (!isAvailable || !syncStatus) return;
     if (!syncStatus.stepSync && !syncStatus.sleepSync) return;
 
-    console.log(`${LOG_PREFIX.BACKGROUND} Running full sync routine...`);
 
     // 1. Update display immediately with Apple Health data
     await refreshDisplayData();
@@ -153,7 +151,6 @@ export function useAppleHealthBackgroundSync(): void {
           appStateRef.current.match(/inactive|background/) &&
           nextAppState === "active"
         ) {
-          console.log(`${LOG_PREFIX.BACKGROUND} App came to foreground`);
           runFullSync();
         }
 
