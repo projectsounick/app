@@ -14,42 +14,54 @@ import {
 import { LOG_PREFIX, HEALTH_SYNC_CONFIG } from "./constants";
 import * as HealthKit from "./healthKitService";
 import * as Storage from "./syncStorage";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ============================================
 // Sync Status
 // ============================================
 
 /**
- * Fetch sync status from backend
+ * Fetch sync status from AsyncStorage user data
  */
 export async function fetchSyncStatus(): Promise<SyncStatus | null> {
   try {
-    const response = await trackService.getHealthSyncStatus();
-
-    if (response.success && response.data) {
-      const status: SyncStatus = {
-        stepSync: response.data.stepSync || false,
-        sleepSync: response.data.sleepSync || false,
-        lastSyncedStepsValue: response.data.lastSyncedStepsValue ?? null,
-        lastSyncedStepsDate: response.data.lastSyncedStepsDate
-          ? new Date(response.data.lastSyncedStepsDate)
-          : null,
-        lastSyncedSleepValue: response.data.lastSyncedSleepValue ?? null,
-        lastSyncedSleepDate: response.data.lastSyncedSleepDate
-          ? new Date(response.data.lastSyncedSleepDate)
-          : null,
-      };
-
-      // Cache for offline access
-      await Storage.cacheSyncStatus(status);
-      return status;
+    // Get user data from AsyncStorage
+    const userDataStr = await AsyncStorage.getItem("user");
+ console.log("it is userDataStr sync", userDataStr);
+    if (!userDataStr) {
+      return null;
     }
+    
+    const userData = JSON.parse(userDataStr);
+    const healthSync = userData.healthSync;
+    console.log("it is healthSync sync", healthSync);
+    if (!healthSync) {
+      // No healthSync data, return default
+      return {
+        stepSync: false,
+        sleepSync: false,
+        syncModalShown: false,
+      };
+    }
+    
+    const status: SyncStatus = {
+      stepSync: healthSync.stepSync || false,
+      sleepSync: healthSync.sleepSync || false,
+      syncModalShown: healthSync.syncModalShown ?? false,
+      lastSyncedStepsValue: healthSync.lastSyncedStepsValue ?? null,
+      lastSyncedStepsDate: healthSync.lastSyncedStepsDate
+        ? new Date(healthSync.lastSyncedStepsDate)
+        : null,
+      lastSyncedSleepValue: healthSync.lastSyncedSleepValue ?? null,
+      lastSyncedSleepDate: healthSync.lastSyncedSleepDate
+        ? new Date(healthSync.lastSyncedSleepDate)
+        : null,
+    };
 
-    return null;
+    return status;
   } catch (error) {
-    console.error(`${LOG_PREFIX.SYNC} Error fetching status:`, error);
-    // Try to return cached status
-    return await Storage.getCachedSyncStatus();
+    console.error(`${LOG_PREFIX.SYNC} Error fetching status from AsyncStorage:`, error);
+    return null;
   }
 }
 
@@ -87,6 +99,38 @@ export async function syncDataType(
   }
 
   try {
+    // Check AsyncStorage first to prevent duplicate syncs on page refresh
+    // Use AsyncStorage as source of truth for lastSyncDate to ensure we don't sync duplicate data
+    const userDataStr = await AsyncStorage.getItem("user");
+    if (userDataStr) {
+      const userData = JSON.parse(userDataStr);
+      const healthSync = userData.healthSync;
+      
+      if (healthSync) {
+        // Always use the stored lastSyncDate from AsyncStorage if available (more reliable than status param)
+        const storedLastSyncDate = type === "steps"
+          ? (healthSync.lastSyncedStepsDate ? new Date(healthSync.lastSyncedStepsDate) : null)
+          : (healthSync.lastSyncedSleepDate ? new Date(healthSync.lastSyncedSleepDate) : null);
+        
+        // Override status with stored date from AsyncStorage to ensure accurate sync range
+        if (storedLastSyncDate) {
+          if (!status) {
+            // Create status object if it doesn't exist
+            status = {
+              stepSync: false,
+              sleepSync: false,
+              syncModalShown: false,
+            };
+          }
+          if (type === "steps") {
+            status.lastSyncedStepsDate = storedLastSyncDate;
+          } else {
+            status.lastSyncedSleepDate = storedLastSyncDate;
+          }
+        }
+      }
+    }
+
     // Initialize HealthKit - this shows the permission modal
     const initialized = await HealthKit.initializeHealthKit();
     
@@ -98,7 +142,18 @@ export async function syncDataType(
     const lastSyncDate = type === "steps" 
       ? (status?.lastSyncedStepsDate || null)
       : (status?.lastSyncedSleepDate || null);
-    const { startDate, endDate } = Storage.getSyncDateRange(lastSyncDate);
+    const { startDate, endDate, skipSync } = Storage.getSyncDateRange(lastSyncDate);
+    
+    // Skip sync if no new data to sync
+    if (skipSync) {
+      console.log(`${LOG_PREFIX.SYNC} Skipping ${type} sync - no new data to sync`);
+      return {
+        success: true,
+        value: 0,
+        syncedCount: 0,
+        allData: [],
+      };
+    }
 
     // Fetch historical data
     const data = await HealthKit.getHistoricalData(type, startDate, endDate);
@@ -142,7 +197,7 @@ export async function syncDataType(
     // Return success IMMEDIATELY with today's value
     // Backend sync happens in background (fire-and-forget)
     // Sync to backend IN BACKGROUND (fire-and-forget, non-blocking)
-    syncToBackendInBackground(payload, platform, data.length);
+    syncToBackendInBackground(payload, platform, data.length, type);
 
     return {
       success: true,
@@ -159,12 +214,13 @@ export async function syncDataType(
 }
 
 /**
- * Sync to backend in background (truly fire-and-forget, non-blocking)
+ * Sync to backend in background and update AsyncStorage after success
  */
 function syncToBackendInBackground(
   payload: SyncPayload,
   platform: SyncPlatform,
-  entryCount: number
+  entryCount: number,
+  type?: HealthDataType
 ): void {
   // Fire and forget - don't await anything
   Promise.resolve().then(async () => {
@@ -173,6 +229,59 @@ function syncToBackendInBackground(
       
       if (response.success) {
         await Storage.clearPendingSync();
+        
+        // Update AsyncStorage user data with sync status
+        // Backend has set syncModalShown and sync flags to true
+        try {
+          const userDataStr = await AsyncStorage.getItem("user");
+          if (userDataStr) {
+            const userData = JSON.parse(userDataStr);
+            
+            // Update healthSync in user data
+            if (!userData.healthSync) {
+              userData.healthSync = {};
+            }
+            
+            const now = new Date();
+            
+            // Set sync flags and lastSyncDate based on what was synced
+            if (payload.steps) {
+              userData.healthSync.stepSync = true;
+              userData.healthSync.syncModalShown = true;
+              userData.healthSync.lastSyncedStepsDate = now.toISOString();
+              // Find today's steps value from payload
+              const todaySteps = payload.steps.find((entry) => {
+                const entryDate = new Date(entry.date);
+                const today = new Date();
+                return entryDate.toDateString() === today.toDateString();
+              });
+              if (todaySteps) {
+                userData.healthSync.lastSyncedStepsValue = todaySteps.value;
+              }
+            }
+            if (payload.sleep) {
+              userData.healthSync.sleepSync = true;
+              userData.healthSync.syncModalShown = true;
+              userData.healthSync.lastSyncedSleepDate = now.toISOString();
+              // Find today's sleep value from payload
+              const todaySleep = payload.sleep.find((entry) => {
+                const entryDate = new Date(entry.date);
+                const today = new Date();
+                return entryDate.toDateString() === today.toDateString();
+              });
+              if (todaySleep) {
+                userData.healthSync.lastSyncedSleepValue = todaySleep.value;
+              }
+            }
+            
+            // Save updated user data back to AsyncStorage
+            await AsyncStorage.setItem("user", JSON.stringify(userData));
+            console.log(`${LOG_PREFIX.BACKGROUND} Updated AsyncStorage user data with sync status and lastSyncDate`);
+          }
+        } catch (updateError) {
+          console.error(`${LOG_PREFIX.BACKGROUND} Error updating AsyncStorage:`, updateError);
+          // Don't fail the sync if AsyncStorage update fails
+        }
       } else {
         console.error(`${LOG_PREFIX.BACKGROUND} Backend sync failed:`, response.message);
         // Store failure info (not data) for retry later

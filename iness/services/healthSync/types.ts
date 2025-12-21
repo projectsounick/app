@@ -27,6 +27,7 @@ export interface SyncPayload {
 
 export interface SyncStatus {
   stepSync: boolean;
+  syncModalShown: boolean;
   sleepSync: boolean;
   lastSyncedStepsValue?: number | null;
   lastSyncedStepsDate?: Date | null; // Also serves as lastSyncIOS equivalent

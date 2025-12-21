@@ -13,6 +13,7 @@ interface UserData {
   weightUnit: string;
   healthSync: {
     stepSync: boolean;
+    syncModalShown: boolean;
     sleepSync: boolean;
     lastSyncedStepsValue?: number | null;
     lastSyncedStepsDate?: Date | null;

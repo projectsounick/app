@@ -27,6 +27,7 @@ import theme from "@/app/Theme/globalTheme";
 import { useAppleHealthSync } from "@/hooks/useAppleHealthSync";
 import { HealthKit } from "@/services/healthSync";
 import { trackService } from "@/app/services/track.service";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const { height } = Dimensions.get("window");
@@ -332,11 +333,35 @@ export default function AppSettingsScreen() {
             const response = await trackService.disableHealthSync(pendingDisableType);
             
             if (response.success) {
-              if (pendingDisableType === "steps") {
-                setStepsSyncEnabled(false);
-              } else {
-                setSleepSyncEnabled(false);
+              // Update AsyncStorage user data
+              try {
+                const userDataStr = await AsyncStorage.getItem("user");
+                if (userDataStr) {
+                  const userData = JSON.parse(userDataStr);
+                  
+                  // Initialize healthSync if it doesn't exist
+                  if (!userData.healthSync) {
+                    userData.healthSync = {};
+                  }
+                  
+                  // Update the sync flag
+                  if (pendingDisableType === "steps") {
+                    userData.healthSync.stepSync = false;
+                    setStepsSyncEnabled(false);
+                  } else {
+                    userData.healthSync.sleepSync = false;
+                    setSleepSyncEnabled(false);
+                  }
+                  
+                  // Save updated user data back to AsyncStorage
+                  await AsyncStorage.setItem("user", JSON.stringify(userData));
+                  console.log("[AppSettings] Updated AsyncStorage user data");
+                }
+              } catch (updateError) {
+                console.error("[AppSettings] Error updating AsyncStorage:", updateError);
+                // Don't fail the flow if AsyncStorage update fails
               }
+              
               await refreshSyncStatus();
               setSnackbarMessage(`${pendingDisableType === "steps" ? "Steps" : "Sleep"} sync turned off`);
               setSnackbarOpen(true);

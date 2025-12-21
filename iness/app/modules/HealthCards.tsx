@@ -10,6 +10,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   ActivityIndicator,
+  InteractionManager,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import * as Progress from "react-native-progress";
@@ -167,6 +168,11 @@ function HealthDashboard() {
     setSyncingSteps(true);
     
     try {
+      // Defer sync work to allow UI to render loading state first
+      // Use both InteractionManager and setTimeout to ensure UI is responsive
+      await InteractionManager.runAfterInteractions();
+      await new Promise(resolve => setTimeout(resolve, 100)); // Small delay to ensure UI renders
+      
       const result = await syncData("steps");
       
       // Clear syncing state IMMEDIATELY to unblock UI
@@ -251,6 +257,11 @@ function HealthDashboard() {
     setSyncingSleep(true);
     
     try {
+      // Defer sync work to allow UI to render loading state first
+      // Use both InteractionManager and setTimeout to ensure UI is responsive
+      await InteractionManager.runAfterInteractions();
+      await new Promise(resolve => setTimeout(resolve, 100)); // Small delay to ensure UI renders
+      
       const result = await syncData("sleep");
       
       // Clear syncing state IMMEDIATELY to unblock UI

@@ -51,6 +51,7 @@ export function useAppleHealthSync(): UseHealthSyncReturn {
   const initializeSync = async () => {
     try {
       const status = await SyncManager.fetchSyncStatus();
+      console.log("it is status sync", status);
       if (mountedRef.current) {
         setSyncStatus(status);
         setIsInitialized(true);
@@ -123,14 +124,15 @@ export function useAppleHealthSync(): UseHealthSyncReturn {
               if (prevStatus) {
                 const updatedStatus: SyncStatus = {
                   ...prevStatus,
-                  ...(type === "steps" ? { stepSync: true, lastSyncedStepsDate: new Date() } : {}),
-                  ...(type === "sleep" ? { sleepSync: true, lastSyncedSleepDate: new Date() } : {}),
+                  ...(type === "steps" ? { stepSync: true, syncModalShown: true, lastSyncedStepsDate: new Date() } : {}),
+                  ...(type === "sleep" ? { sleepSync: true, syncModalShown: true, lastSyncedSleepDate: new Date() } : {}),
                 };
                 syncStatusRef.current = updatedStatus;
                 return updatedStatus;
               } else {
                 // If no status yet, create one
                 const newStatus: SyncStatus = {
+                  syncModalShown: true,
                   stepSync: type === "steps",
                   sleepSync: type === "sleep",
                   ...(type === "steps" ? { lastSyncedStepsDate: new Date() } : {}),
