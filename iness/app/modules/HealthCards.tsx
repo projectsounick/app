@@ -1,4 +1,4 @@
-import React, { memo, useState, useRef, useEffect, useMemo } from "react";
+import React, { memo, useState, useRef, useEffect, useMemo, useCallback } from "react";
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import * as Progress from "react-native-progress";
 import {
   Ionicons,
@@ -56,7 +57,7 @@ function HealthDashboard() {
   const [syncingSleep, setSyncingSleep] = useState(false);
 
   // Apple Health sync hook
-  const { isAvailable, syncData, canSync, syncStatus } = useAppleHealthSync();
+  const { isAvailable, syncData, canSync, syncStatus, refreshSyncStatus } = useAppleHealthSync();
   
   // Use ref to check canSync without causing re-renders
   const canSyncRef = useRef(canSync);
@@ -66,6 +67,14 @@ function HealthDashboard() {
     canSyncRef.current = canSync;
     syncStatusRef.current = syncStatus;
   }, [canSync, syncStatus]);
+
+  // Refresh sync status when screen comes into focus (e.g., after returning from settings)
+  useFocusEffect(
+    useCallback(() => {
+      console.log("[HealthCards] Screen focused, refreshing sync status");
+      refreshSyncStatus();
+    }, [refreshSyncStatus])
+  );
   
   // Memoize canSync check to avoid re-renders - only recalculate when syncStatus actually changes
   const canSyncSteps = useMemo(() => {
