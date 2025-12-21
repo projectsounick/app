@@ -53,6 +53,11 @@ const getChartConfig = (tab: TabType) => {
       strokeWidth: "2",
       stroke: color.primary,
     },
+    propsForLabels: {
+      fontSize: 10,
+      fontFamily: theme.fonts.regular,
+    },
+    decimalPlaces: 0,
   };
 };
 
@@ -350,14 +355,49 @@ export default function TrackingGraphPage() {
       };
     }
 
-    const labels = dataset.map((d) => dayjs(d.date).format("D"));
+    const allLabels = dataset.map((d) => dayjs(d.date).format("D"));
     const values = dataset.map((d) => d.value);
 
     // Ensure all values are numbers
     const validValues = values.map(v => typeof v === 'number' ? v : 0);
     
+    // Reduce label congestion: show fewer labels for better readability
+    // Keep array length the same, but use empty strings for labels we want to hide
+    const getSparseLabels = (labels: string[]): string[] => {
+      const totalLabels = labels.length;
+      
+      // If we have few labels (<= 12), show all
+      if (totalLabels <= 12) {
+        return labels;
+      }
+      
+      // For more labels, show approximately 6-7 labels
+      // Calculate step size to distribute labels evenly
+      const targetCount = 7;
+      const step = Math.ceil((totalLabels - 1) / (targetCount - 1));
+      
+      const sparseLabels = labels.map(() => ""); // Start with all empty
+      
+      // Set labels at calculated intervals
+      for (let i = 0; i < totalLabels; i += step) {
+        if (i < totalLabels) {
+          sparseLabels[i] = labels[i];
+        }
+      }
+      
+      // Always ensure first and last labels are shown
+      sparseLabels[0] = labels[0];
+      if (sparseLabels[totalLabels - 1] === "") {
+        sparseLabels[totalLabels - 1] = labels[totalLabels - 1];
+      }
+      
+      return sparseLabels;
+    };
+    
+    const sparseLabels = getSparseLabels(allLabels);
+    
     return {
-      labels,
+      labels: sparseLabels,
       datasets: [{ data: validValues }],
     };
   }, [selectedTab, currentMonth, monthDataMap, sleepData, stepsData, waterData]);

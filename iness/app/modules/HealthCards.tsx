@@ -5,10 +5,7 @@ import {
   Platform,
   Modal,
   TouchableOpacity,
-  TextInput,
-  Dimensions,
-  KeyboardAvoidingView,
-  ScrollView,
+
   ActivityIndicator,
   InteractionManager,
 } from "react-native";
@@ -63,30 +60,163 @@ function HealthDashboard() {
   // Use ref to check canSync without causing re-renders
   const canSyncRef = useRef(canSync);
   const syncStatusRef = useRef(syncStatus);
+  const previousSyncStatusRef = useRef<{ stepSync: boolean; sleepSync: boolean } | null>(null);
   
   useEffect(() => {
     canSyncRef.current = canSync;
     syncStatusRef.current = syncStatus;
   }, [canSync, syncStatus]);
 
+  // Helper function to trigger auto-sync
+  const triggerAutoSync = useCallback(async (type: "steps" | "sleep") => {
+    console.log(`[HealthCards] Auto-syncing ${type} after reactivation...`);
+    
+    if (type === "steps") {
+      setSyncingSteps(true);
+      try {
+        await InteractionManager.runAfterInteractions();
+        await new Promise(resolve => setTimeout(resolve, 100));
+        const result = await syncData("steps");
+        setSyncingSteps(false);
+        
+        if (result.success) {
+          const todayValue = result.value || 0;
+          if (todayValue > 0) {
+            setTimeout(() => {
+              try {
+                const newStepsValue = stepsCount + todayValue;
+                const existingStepsData = currentDayTrackData.steps;
+                dispatch(updateTrackingField({
+                  type: "steps",
+                  data: {
+                    ...(existingStepsData || {}),
+                    steps: newStepsValue,
+                    date: existingStepsData?.date || new Date().toISOString().split('T')[0],
+                    userId: existingStepsData?.userId || '',
+                  } as any,
+                }));
+              } catch (error) {
+                console.error(`[HealthCards] ERROR updating store:`, error);
+              }
+            }, 0);
+          }
+          setSnackbarMsg(`Auto-synced ${todayValue.toLocaleString()} steps from Apple Health`);
+          setSnackbarVisible(true);
+        }
+      } catch (error: any) {
+        console.error("[HealthCards] Auto-sync steps error:", error);
+        setSyncingSteps(false);
+      }
+    } else {
+      setSyncingSleep(true);
+      try {
+        await InteractionManager.runAfterInteractions();
+        await new Promise(resolve => setTimeout(resolve, 100));
+        const result = await syncData("sleep");
+        setSyncingSleep(false);
+        
+        if (result.success) {
+          const todayValue = result.value || 0;
+          if (todayValue > 0) {
+            setTimeout(() => {
+              try {
+                const newSleepValue = sleepDuration + todayValue;
+                const existingSleepData = currentDayTrackData.sleep;
+                dispatch(updateTrackingField({
+                  type: "sleep",
+                  data: {
+                    ...(existingSleepData || {}),
+                    sleepDuration: newSleepValue,
+                    date: existingSleepData?.date || new Date().toISOString().split('T')[0],
+                    userId: existingSleepData?.userId || '',
+                  } as any,
+                }));
+              } catch (error) {
+                console.error(`[HealthCards] ERROR updating store:`, error);
+              }
+            }, 0);
+          }
+          setSnackbarMsg(`Auto-synced ${todayValue} hours of sleep from Apple Health`);
+          setSnackbarVisible(true);
+        }
+      } catch (error: any) {
+        console.error("[HealthCards] Auto-sync sleep error:", error);
+        setSyncingSleep(false);
+      }
+    }
+  }, [syncData, stepsCount, sleepDuration, currentDayTrackData, dispatch]);
+
   // Refresh sync status when screen comes into focus (e.g., after returning from settings)
+  // Also check for reactivation and auto-sync
   useFocusEffect(
     useCallback(() => {
-      console.log("[HealthCards] Screen focused, refreshing sync status");
-      refreshSyncStatus();
-    }, [refreshSyncStatus])
+      console.log("[HealthCards] Screen focused, checking sync status...");
+      
+      // Store current status BEFORE refresh (to compare after)
+      const statusBeforeRefresh = syncStatusRef.current 
+        ? { stepSync: syncStatusRef.current.stepSync, sleepSync: syncStatusRef.current.sleepSync }
+        : null;
+      
+      // Refresh status
+      refreshSyncStatus().then(() => {
+        // After refresh completes, check if sync was reactivated
+        setTimeout(() => {
+          const currentStatus = syncStatusRef.current;
+          
+          if (statusBeforeRefresh && currentStatus) {
+            // Check if steps sync was reactivated (false -> true)
+            if (!statusBeforeRefresh.stepSync && currentStatus.stepSync) {
+              console.log("[HealthCards] Steps sync reactivated, triggering auto-sync...");
+              setTimeout(() => {
+                triggerAutoSync("steps");
+              }, 300);
+            }
+            
+            // Check if sleep sync was reactivated (false -> true)
+            if (!statusBeforeRefresh.sleepSync && currentStatus.sleepSync) {
+              console.log("[HealthCards] Sleep sync reactivated, triggering auto-sync...");
+              setTimeout(() => {
+                triggerAutoSync("sleep");
+              }, 300);
+            }
+          }
+          
+          // Update previous status for next time
+          if (currentStatus) {
+            previousSyncStatusRef.current = {
+              stepSync: currentStatus.stepSync,
+              sleepSync: currentStatus.sleepSync,
+            };
+          }
+        }, 200); // Small delay to ensure state is updated
+      });
+    }, [refreshSyncStatus, triggerAutoSync])
   );
   
-  // Memoize canSync check to avoid re-renders - only recalculate when syncStatus actually changes
+  // Initialize previous status on mount
+  useEffect(() => {
+    if (syncStatus && !previousSyncStatusRef.current) {
+      previousSyncStatusRef.current = {
+        stepSync: syncStatus.stepSync,
+        sleepSync: syncStatus.sleepSync,
+      };
+    }
+  }, [syncStatus]);
+  
+  // Only show "Sync with Apple Health" when syncModalShown is false (first time state)
+  // Once syncModalShown becomes true (iOS modal was shown), we don't show sync UI on cards anymore
+  // User can manage sync from App Settings instead
   const canSyncSteps = useMemo(() => {
-    if (!syncStatus) return true; // Allow if status not loaded
-    return !syncStatus.stepSync;
-  }, [syncStatus?.stepSync]);
+    if (!syncStatus) return false; // Don't show if status not loaded yet
+    // Only show if syncModalShown is false (first time)
+    return syncStatus.syncModalShown === false;
+  }, [syncStatus?.syncModalShown]);
   
   const canSyncSleep = useMemo(() => {
-    if (!syncStatus) return true; // Allow if status not loaded
-    return !syncStatus.sleepSync;
-  }, [syncStatus?.sleepSync]);
+    if (!syncStatus) return false; // Don't show if status not loaded yet
+    // Only show if syncModalShown is false (first time)
+    return syncStatus.syncModalShown === false;
+  }, [syncStatus?.syncModalShown]);
 
   const onClose = () => {
     setModalVisible(false);
@@ -241,6 +371,7 @@ function HealthDashboard() {
    * Sync sleep from Apple Health
    */
   const handleSyncSleep = async () => {
+    // Store in ref for auto-sync functionality
     if (!isAvailable) {
       setSnackbarMsg("Apple Health is only available on iOS");
       setSnackbarVisible(true);
@@ -434,6 +565,31 @@ function HealthDashboard() {
             >
               {stepsCount.toLocaleString()}/{stepsGoal.toLocaleString()}
             </Text>
+            {/* Apple Health sync indicator - bottom right of number */}
+            {syncStatus?.stepSync && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#F3EDFF",
+                  paddingHorizontal: 6,
+                  paddingVertical: 2,
+                  borderRadius: 8,
+                }}
+              >
+                <Ionicons name="heart" size={10} color="#9747FF" />
+                <Text
+                  style={{
+                    fontSize: 9,
+                    color: "#9747FF",
+                    fontFamily: theme.fonts.medium,
+                    marginLeft: 3,
+                  }}
+                >
+                  Health
+                </Text>
+              </View>
+            )}
           </View>
           {/* Sync row - Show "Sync with Apple Health" when sync is NOT enabled */}
           {Platform.OS === "ios" && canSyncSteps && (
@@ -474,36 +630,7 @@ function HealthDashboard() {
               )}
             </TouchableOpacity>
           )}
-          {/* Show sync status when sync IS enabled */}
-          {Platform.OS === "ios" && syncStatus?.stepSync && (
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginTop: 8,
-              }}
-            >
-              <Ionicons
-                name="checkmark-circle"
-                size={14}
-                color="#9747FF"
-                style={{ marginRight: 6, marginTop: 1 }}
-              />
-              <Text
-                style={{
-                  color: "#000",
-                  fontFamily: theme.fonts.regular,
-                  fontWeight: "400",
-                  fontSize: 11,
-                  lineHeight: 14,
-                  includeFontPadding: false,
-                  textAlignVertical: "center",
-                }}
-              >
-                Synced with Apple Health
-              </Text>
-            </View>
-          )}
+          {/* No "Synced with Apple Health" status shown - user manages sync from App Settings */}
         </TouchableOpacity>
 
         {/* Sleep Card */}
@@ -605,6 +732,31 @@ function HealthDashboard() {
             >
               {sleepDuration}/{sleepGoal} hrs
             </Text>
+            {/* Apple Health sync indicator - bottom right of number */}
+            {syncStatus?.sleepSync && (
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#F3EDFF",
+                  paddingHorizontal: 6,
+                  paddingVertical: 2,
+                  borderRadius: 8,
+                }}
+              >
+                <Ionicons name="heart" size={10} color="#9747FF" />
+                <Text
+                  style={{
+                    fontSize: 9,
+                    color: "#9747FF",
+                    fontFamily: theme.fonts.medium,
+                    marginLeft: 3,
+                  }}
+                >
+                  Health
+                </Text>
+              </View>
+            )}
           </View>
           {/* Sync row - Show "Sync with Apple Health" when sync is NOT enabled */}
           {Platform.OS === "ios" && canSyncSleep && (
@@ -645,36 +797,7 @@ function HealthDashboard() {
               )}
             </TouchableOpacity>
           )}
-          {/* Show sync status when sync IS enabled */}
-          {Platform.OS === "ios" && syncStatus?.sleepSync && (
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginTop: 8,
-              }}
-            >
-              <Ionicons
-                name="checkmark-circle"
-                size={14}
-                color="#9747FF"
-                style={{ marginRight: 6, marginTop: 1 }}
-              />
-              <Text
-                style={{
-                  color: "#000",
-                  fontFamily: theme.fonts.regular,
-                  fontWeight: "400",
-                  fontSize: 11,
-                  lineHeight: 14,
-                  includeFontPadding: false,
-                  textAlignVertical: "center",
-                }}
-              >
-                Synced with Apple Health
-              </Text>
-            </View>
-          )}
+          {/* No "Synced with Apple Health" status shown - user manages sync from App Settings */}
         </TouchableOpacity>
       </View>
 

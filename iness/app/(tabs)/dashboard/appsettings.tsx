@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -12,8 +12,6 @@ import {
   Modal,
   TouchableOpacity,
   StyleSheet,
-  AppState,
-  AppStateStatus,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -68,6 +66,298 @@ const InfoModal: React.FC<InfoModalProps> = ({
   );
 };
 
+// Health Sync Guide Modal - Bottom Sheet Style
+interface HealthSyncGuideModalProps {
+  visible: boolean;
+  onClose: () => void;
+  type: "steps" | "sleep";
+  action: "enable" | "disable";
+  onContinue: () => void;
+  loading?: boolean;
+}
+
+const HealthSyncGuideModal: React.FC<HealthSyncGuideModalProps> = ({
+  visible,
+  onClose,
+  type,
+  action,
+  onContinue,
+  loading = false,
+}) => {
+  const isSteps = type === "steps";
+  const isEnable = action === "enable";
+  const permissionName = isSteps ? "Steps" : "Sleep Analysis";
+  
+  const steps = isEnable
+    ? [
+        "Tap 'Open Settings' below to go to Apple Health",
+        `Find 'iness' under Data Access & Devices`,
+        `Turn ON the "${permissionName}" toggle`,
+        "Return here and tap 'Continue'",
+      ]
+    : [
+        "Tap 'Open Settings' below to go to Apple Health",
+        `Find 'iness' under Data Access & Devices`,
+        `Turn OFF the "${permissionName}" toggle`,
+        "Return here and tap 'Continue'",
+      ];
+
+  return (
+    <Modal
+      transparent
+      animationType="slide"
+      visible={visible}
+      onRequestClose={onClose}
+    >
+      <View style={healthSyncModalStyles.overlay}>
+        <TouchableOpacity 
+          style={healthSyncModalStyles.overlayTouch} 
+          activeOpacity={1} 
+          onPress={onClose}
+        />
+        <View style={healthSyncModalStyles.sheet}>
+          {/* Handle Bar */}
+          <View style={healthSyncModalStyles.handleBar} />
+          
+          {/* Close Button */}
+          <TouchableOpacity onPress={onClose} style={healthSyncModalStyles.closeBtn}>
+            <Ionicons name="close" size={20} color="#333" />
+          </TouchableOpacity>
+          
+          {/* Icon */}
+          <View style={healthSyncModalStyles.iconContainer}>
+            <View style={[
+              healthSyncModalStyles.iconCircle,
+              { backgroundColor: isSteps ? "#F3EDFF" : "#E8F5E9" }
+            ]}>
+              <Ionicons 
+                name={isSteps ? "walk-outline" : "moon-outline"} 
+                size={32} 
+                color={isSteps ? "#9747FF" : "#67C694"} 
+              />
+            </View>
+          </View>
+          
+          {/* Title */}
+          <Text style={healthSyncModalStyles.title}>
+            {isEnable ? `Enable ${isSteps ? "Steps" : "Sleep"} Sync` : `Turn Off ${isSteps ? "Steps" : "Sleep"} Sync`}
+          </Text>
+          
+          {/* Steps List */}
+          <View style={healthSyncModalStyles.stepsContainer}>
+            {steps.map((step, index) => (
+              <View key={index} style={healthSyncModalStyles.stepRow}>
+                <View style={healthSyncModalStyles.stepNumber}>
+                  <Text style={healthSyncModalStyles.stepNumberText}>{index + 1}</Text>
+                </View>
+                <Text style={healthSyncModalStyles.stepText}>{step}</Text>
+              </View>
+            ))}
+          </View>
+          
+          {/* Note */}
+          <View style={healthSyncModalStyles.noteContainer}>
+            <Ionicons name="information-circle-outline" size={18} color="#888" />
+            <Text style={healthSyncModalStyles.noteText}>
+              {isEnable 
+                ? "If you don't enable the permission in Health, tapping Continue won't change anything."
+                : "If you don't disable the permission in Health, tapping Continue won't change anything."
+              }
+            </Text>
+          </View>
+          
+          {/* Buttons */}
+          <View style={healthSyncModalStyles.buttonsContainer}>
+            <TouchableOpacity 
+              style={healthSyncModalStyles.cancelButton}
+              onPress={onClose}
+              disabled={loading}
+            >
+              <Text style={healthSyncModalStyles.cancelButtonText}>Cancel</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={healthSyncModalStyles.settingsButton}
+              onPress={() => HealthKit.openHealthSettings()}
+              disabled={loading}
+            >
+              <Ionicons name="settings-outline" size={18} color="#9747FF" />
+              <Text style={healthSyncModalStyles.settingsButtonText}>Open Settings</Text>
+            </TouchableOpacity>
+          </View>
+          
+          <TouchableOpacity 
+            style={[
+              healthSyncModalStyles.continueButton,
+              loading && { opacity: 0.7 }
+            ]}
+            onPress={onContinue}
+            disabled={loading}
+          >
+            {loading ? (
+              <ActivityIndicator size="small" color="#FFFFFF" />
+            ) : (
+              <Text style={healthSyncModalStyles.continueButtonText}>Continue</Text>
+            )}
+          </TouchableOpacity>
+        </View>
+      </View>
+    </Modal>
+  );
+};
+
+const healthSyncModalStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  overlayTouch: {
+    flex: 1,
+  },
+  sheet: {
+    backgroundColor: "#FFFFFF",
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: Platform.OS === "ios" ? 40 : 24,
+  },
+  handleBar: {
+    width: 50,
+    height: 5,
+    backgroundColor: "#E0E0E0",
+    borderRadius: 3,
+    alignSelf: "center",
+    marginBottom: 20,
+  },
+  closeBtn: {
+    position: "absolute",
+    top: 16,
+    right: 20,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#F5F5F5",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  iconContainer: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  iconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#1A1A1A",
+    textAlign: "center",
+    marginBottom: 24,
+    fontFamily: theme.fonts.bold,
+  },
+  stepsContainer: {
+    marginBottom: 20,
+  },
+  stepRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 16,
+  },
+  stepNumber: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "#F3EDFF",
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  stepNumberText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#9747FF",
+    fontFamily: theme.fonts.medium,
+  },
+  stepText: {
+    flex: 1,
+    fontSize: 15,
+    color: "#333",
+    lineHeight: 22,
+    fontFamily: theme.fonts.regular,
+  },
+  noteContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: "#F8F8F8",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 24,
+    gap: 8,
+  },
+  noteText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#666",
+    lineHeight: 18,
+    fontFamily: theme.fonts.regular,
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#F5F5F5",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cancelButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#666",
+    fontFamily: theme.fonts.medium,
+  },
+  settingsButton: {
+    flex: 1,
+    flexDirection: "row",
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: "#F3EDFF",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+  },
+  settingsButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#9747FF",
+    fontFamily: theme.fonts.medium,
+  },
+  continueButton: {
+    paddingVertical: 16,
+    borderRadius: 20,
+    backgroundColor: "#67C694",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  continueButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#FFFFFF",
+    fontFamily: theme.fonts.medium,
+  },
+});
+
 export default function AppSettingsScreen() {
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -92,10 +382,11 @@ export default function AppSettingsScreen() {
   const [syncingSteps, setSyncingSteps] = useState(false);
   const [syncingSleep, setSyncingSleep] = useState(false);
   
-  // Track pending disable operation - when user goes to settings to turn off permissions
-  const [pendingDisableType, setPendingDisableType] = useState<"steps" | "sleep" | null>(null);
-  const appStateRef = useRef(AppState.currentState);
-  const wentToSettingsRef = useRef(false);
+  // Health Sync Guide Modal state
+  const [syncGuideModalVisible, setSyncGuideModalVisible] = useState(false);
+  const [syncGuideModalType, setSyncGuideModalType] = useState<"steps" | "sleep">("steps");
+  const [syncGuideModalAction, setSyncGuideModalAction] = useState<"enable" | "disable">("enable");
+  const [syncGuideLoading, setSyncGuideLoading] = useState(false);
 
   const notificationInfo = {
     title: "Notification Settings",
@@ -129,59 +420,17 @@ export default function AppSettingsScreen() {
     }
 
     if (value && !stepsSyncEnabled) {
-      // Turning ON - trigger sync
-      console.log("[AppSettings] Turning ON steps sync");
-      setSyncingSteps(true);
-      try {
-        const result = await syncData("steps");
-        
-        if (result.success) {
-          setStepsSyncEnabled(true);
-          await refreshSyncStatus();
-          setSnackbarMessage("Steps sync enabled successfully");
-          setSnackbarOpen(true);
-        } else {
-          // Check if it's a permission issue
-          if (result.error?.includes("permission") || HealthKit.wasPermissionDenied()) {
-            HealthKit.showPermissionDeniedAlert();
-          } else {
-            setSnackbarMessage(result.error || "Failed to enable steps sync");
-            setSnackbarOpen(true);
-          }
-        }
-      } catch (error: any) {
-        console.error("[AppSettings] Error enabling steps sync:", error);
-        setSnackbarMessage("Failed to enable steps sync");
-        setSnackbarOpen(true);
-      } finally {
-        setSyncingSteps(false);
-      }
+      // Turning ON - show guidance modal
+      console.log("[AppSettings] Turning ON steps sync - showing guide");
+      setSyncGuideModalType("steps");
+      setSyncGuideModalAction("enable");
+      setSyncGuideModalVisible(true);
     } else if (!value && stepsSyncEnabled) {
-      // Turning OFF - show guide to go to Health settings
+      // Turning OFF - show guidance modal
       console.log("[AppSettings] Turning OFF steps sync - showing guide");
-      setPendingDisableType("steps");
-      
-      Alert.alert(
-        "Turn Off Steps Sync",
-        "To turn off steps sync, please disable permissions in Apple Health:\n\n1. Tap 'Open Settings' below\n2. Go to Health → Data Access & Devices\n3. Find 'iness' and turn OFF Steps\n4. Return to this app",
-        [
-          { 
-            text: "Cancel", 
-            style: "cancel", 
-            onPress: () => {
-              setPendingDisableType(null);
-              wentToSettingsRef.current = false;
-            }
-          },
-          {
-            text: "Open Settings",
-            onPress: () => {
-              wentToSettingsRef.current = true;
-              HealthKit.openHealthSettings();
-            },
-          },
-        ]
-      );
+      setSyncGuideModalType("steps");
+      setSyncGuideModalAction("disable");
+      setSyncGuideModalVisible(true);
     }
   };
 
@@ -193,65 +442,121 @@ export default function AppSettingsScreen() {
     }
 
     if (value && !sleepSyncEnabled) {
-      // Turning ON - trigger sync
-      console.log("[AppSettings] Turning ON sleep sync");
-      setSyncingSleep(true);
-      try {
-        const result = await syncData("sleep");
-        
-        if (result.success) {
-          setSleepSyncEnabled(true);
-          await refreshSyncStatus();
-          setSnackbarMessage("Sleep sync enabled successfully");
-          setSnackbarOpen(true);
-        } else {
-          // Check if it's a permission issue
-          if (result.error?.includes("permission") || HealthKit.wasPermissionDenied()) {
-            HealthKit.showPermissionDeniedAlert();
-          } else {
-            setSnackbarMessage(result.error || "Failed to enable sleep sync");
-            setSnackbarOpen(true);
-          }
-        }
-      } catch (error: any) {
-        console.error("[AppSettings] Error enabling sleep sync:", error);
-        setSnackbarMessage("Failed to enable sleep sync");
-        setSnackbarOpen(true);
-      } finally {
-        setSyncingSleep(false);
-      }
+      // Turning ON - show guidance modal
+      console.log("[AppSettings] Turning ON sleep sync - showing guide");
+      setSyncGuideModalType("sleep");
+      setSyncGuideModalAction("enable");
+      setSyncGuideModalVisible(true);
     } else if (!value && sleepSyncEnabled) {
-      // Turning OFF - show guide to go to Health settings
+      // Turning OFF - show guidance modal
       console.log("[AppSettings] Turning OFF sleep sync - showing guide");
-      setPendingDisableType("sleep");
-      
-      Alert.alert(
-        "Turn Off Sleep Sync",
-        "To turn off sleep sync, please disable permissions in Apple Health:\n\n1. Tap 'Open Settings' below\n2. Go to Health → Data Access & Devices\n3. Find 'iness' and turn OFF Sleep\n4. Return to this app",
-        [
-          { 
-            text: "Cancel", 
-            style: "cancel", 
-            onPress: () => {
-              setPendingDisableType(null);
-              wentToSettingsRef.current = false;
-            }
-          },
-          {
-            text: "Open Settings",
-            onPress: () => {
-              wentToSettingsRef.current = true;
-              HealthKit.openHealthSettings();
-            },
-          },
-        ]
-      );
+      setSyncGuideModalType("sleep");
+      setSyncGuideModalAction("disable");
+      setSyncGuideModalVisible(true);
     }
   };
 
   const handleInfoClick = (info: { title: string; content: string }) => {
     setCurrentInfoModal(info);
     setInfoModalVisible(true);
+  };
+
+  // Handle Continue button in Health Sync Guide Modal
+  const handleSyncGuideContinue = async () => {
+    const type = syncGuideModalType;
+    const action = syncGuideModalAction;
+    
+    setSyncGuideLoading(true);
+    
+    try {
+      if (action === "enable") {
+        // Enabling sync
+        console.log(`[AppSettings] User pressed Continue for ${type} sync ON`);
+        
+        if (type === "steps") {
+          setSyncingSteps(true);
+        } else {
+          setSyncingSleep(true);
+        }
+        
+        const result = await syncData(type);
+        
+        if (result.success) {
+          if (type === "steps") {
+            setStepsSyncEnabled(true);
+          } else {
+            setSleepSyncEnabled(true);
+          }
+          await refreshSyncStatus();
+          setSnackbarMessage(`${type === "steps" ? "Steps" : "Sleep"} sync enabled successfully`);
+          setSnackbarOpen(true);
+          setSyncGuideModalVisible(false);
+        } else {
+          setSnackbarMessage(result.error || `Could not enable ${type} sync. Please ensure permission is granted in Health settings.`);
+          setSnackbarOpen(true);
+        }
+        
+        if (type === "steps") {
+          setSyncingSteps(false);
+        } else {
+          setSyncingSleep(false);
+        }
+      } else {
+        // Disabling sync
+        console.log(`[AppSettings] User pressed Continue for ${type} sync OFF`);
+        
+        // Check if permissions are actually OFF
+        HealthKit.resetInitialization();
+        const hasPermissions = await HealthKit.checkPermissionsStatus(type);
+        
+        if (!hasPermissions) {
+          // Permissions are OFF - update backend
+          const response = await trackService.disableHealthSync(type);
+          
+          if (response.success) {
+            // Update AsyncStorage
+            try {
+              const userDataStr = await AsyncStorage.getItem("user");
+              if (userDataStr) {
+                const userData = JSON.parse(userDataStr);
+                if (!userData.healthSync) userData.healthSync = {};
+                if (type === "steps") {
+                  userData.healthSync.stepSync = false;
+                } else {
+                  userData.healthSync.sleepSync = false;
+                }
+                await AsyncStorage.setItem("user", JSON.stringify(userData));
+              }
+            } catch (e) {
+              console.error("[AppSettings] AsyncStorage error:", e);
+            }
+            
+            if (type === "steps") {
+              setStepsSyncEnabled(false);
+            } else {
+              setSleepSyncEnabled(false);
+            }
+            await refreshSyncStatus();
+            setSnackbarMessage(`${type === "steps" ? "Steps" : "Sleep"} sync turned off`);
+            setSnackbarOpen(true);
+            setSyncGuideModalVisible(false);
+          } else {
+            setSnackbarMessage(response.message || "Failed to turn off sync");
+            setSnackbarOpen(true);
+          }
+        } else {
+          // Permissions still ON
+          setSnackbarMessage(`${type === "steps" ? "Steps" : "Sleep"} permission is still enabled in Health. Please disable it first.`);
+          setSnackbarOpen(true);
+        }
+      }
+    } catch (error: any) {
+      console.error(`[AppSettings] Error in sync guide continue:`, error);
+      setSnackbarMessage(`Failed to ${action} ${type} sync`);
+      setSnackbarOpen(true);
+    } finally {
+      setSyncGuideLoading(false);
+    }
   };
 
   const handlePreferences = () => {
@@ -299,107 +604,7 @@ export default function AppSettingsScreen() {
     }
   }, [syncStatus]);
 
-  // AppState listener - detect when user returns from Health settings
-  useEffect(() => {
-    const subscription = AppState.addEventListener("change", async (nextAppState: AppStateStatus) => {
-      // Only check if we went to settings and are now returning
-      if (
-        appStateRef.current.match(/inactive|background/) &&
-        nextAppState === "active" &&
-        pendingDisableType &&
-        wentToSettingsRef.current
-      ) {
-        console.log("[AppSettings] User returned from settings, checking permissions for:", pendingDisableType);
-        
-        // Reset the went to settings flag
-        wentToSettingsRef.current = false;
-        
-        // Small delay to allow system to update permissions
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Reset HealthKit to get fresh permission state
-        HealthKit.resetInitialization();
-        
-        // Check if permissions are now OFF
-        console.log("[AppSettings] Calling checkPermissionsStatus for:", pendingDisableType);
-        const hasPermissions = await HealthKit.checkPermissionsStatus(pendingDisableType);
-        console.log("[AppSettings] Permissions check result:", hasPermissions, "(false means OFF)");
-        
-        if (!hasPermissions) {
-          // Permissions are OFF - update backend
-          console.log("[AppSettings] Permissions are OFF, updating backend");
-          try {
-            setLoading(true);
-            const response = await trackService.disableHealthSync(pendingDisableType);
-            
-            if (response.success) {
-              // Update AsyncStorage user data
-              try {
-                const userDataStr = await AsyncStorage.getItem("user");
-                if (userDataStr) {
-                  const userData = JSON.parse(userDataStr);
-                  
-                  // Initialize healthSync if it doesn't exist
-                  if (!userData.healthSync) {
-                    userData.healthSync = {};
-                  }
-                  
-                  // Update the sync flag
-                  if (pendingDisableType === "steps") {
-                    userData.healthSync.stepSync = false;
-                    setStepsSyncEnabled(false);
-                  } else {
-                    userData.healthSync.sleepSync = false;
-                    setSleepSyncEnabled(false);
-                  }
-                  
-                  // Save updated user data back to AsyncStorage
-                  await AsyncStorage.setItem("user", JSON.stringify(userData));
-                  console.log("[AppSettings] Updated AsyncStorage user data");
-                }
-              } catch (updateError) {
-                console.error("[AppSettings] Error updating AsyncStorage:", updateError);
-                // Don't fail the flow if AsyncStorage update fails
-              }
-              
-              await refreshSyncStatus();
-              setSnackbarMessage(`${pendingDisableType === "steps" ? "Steps" : "Sleep"} sync turned off`);
-              setSnackbarOpen(true);
-            } else {
-              setSnackbarMessage(response.message || "Failed to update sync status");
-              setSnackbarOpen(true);
-            }
-          } catch (error) {
-            console.error("[AppSettings] Error disabling sync:", error);
-            setSnackbarMessage("Failed to turn off sync");
-            setSnackbarOpen(true);
-          } finally {
-            setLoading(false);
-          }
-        } else {
-          // Permissions still ON - user didn't turn them off
-          console.log("[AppSettings] Permissions still ON, sync not disabled");
-          setSnackbarMessage("Please turn off permissions in Health settings to disable sync");
-          setSnackbarOpen(true);
-        }
-        
-        // Clear pending state
-        setPendingDisableType(null);
-      }
-      
-      appStateRef.current = nextAppState;
-    });
-
-    return () => {
-      subscription.remove();
-    };
-  }, [pendingDisableType, refreshSyncStatus]);
-
-  // Clear pending state on mount (in case of stale state)
-  useEffect(() => {
-    setPendingDisableType(null);
-    wentToSettingsRef.current = false;
-  }, []);
+  // No AppState listener needed - we handle everything with Continue button
 
   const loadHealthSyncStatus = async () => {
     try {
@@ -503,7 +708,7 @@ export default function AppSettingsScreen() {
         resizeMode="cover"
       >
         <SafeAreaView
-          style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+          style={{ flex: 1, backgroundColor: "transparent" }}
           edges={["left", "right"]}
         >
           <View
@@ -608,12 +813,12 @@ export default function AppSettingsScreen() {
                         </Text>
                       </View>
                       {syncingSteps ? (
-                        <ActivityIndicator color="#9747FF" size="small" />
+                        <ActivityIndicator color="#67C694" size="small" />
                       ) : (
                         <Switch
                           value={stepsSyncEnabled}
                           onValueChange={handleStepsSyncToggle}
-                          trackColor={{ false: "#E0E0E0", true: "#9747FF" }}
+                          trackColor={{ false: "#E0E0E0", true: "#67C694" }}
                           thumbColor={stepsSyncEnabled ? "#FFFFFF" : "#F4F3F4"}
                           ios_backgroundColor="#E0E0E0"
                         />
@@ -631,12 +836,12 @@ export default function AppSettingsScreen() {
                         </Text>
                       </View>
                       {syncingSleep ? (
-                        <ActivityIndicator color="#9747FF" size="small" />
+                        <ActivityIndicator color="#67C694" size="small" />
                       ) : (
                         <Switch
                           value={sleepSyncEnabled}
                           onValueChange={handleSleepSyncToggle}
-                          trackColor={{ false: "#E0E0E0", true: "#9747FF" }}
+                          trackColor={{ false: "#E0E0E0", true: "#67C694" }}
                           thumbColor={sleepSyncEnabled ? "#FFFFFF" : "#F4F3F4"}
                           ios_backgroundColor="#E0E0E0"
                         />
@@ -809,6 +1014,19 @@ export default function AppSettingsScreen() {
             />
           )}
 
+          {/* Health Sync Guide Modal */}
+          <HealthSyncGuideModal
+            visible={syncGuideModalVisible}
+            onClose={() => {
+              setSyncGuideModalVisible(false);
+              setSyncGuideLoading(false);
+            }}
+            type={syncGuideModalType}
+            action={syncGuideModalAction}
+            onContinue={handleSyncGuideContinue}
+            loading={syncGuideLoading}
+          />
+
           {/* Health Report Uploader Modal */}
           <HealthReportUploader
             modalVisible={healthReportModalVisible}
@@ -864,7 +1082,7 @@ export default function AppSettingsScreen() {
             visible={snackbarOpen}
             message={snackbarMessage}
             onDismiss={() => setSnackbarOpen(false)}
-            bgColor="#67C694"
+            bgColor="#FFFFFF"
           />
         </SafeAreaView>
       </ImageBackground>

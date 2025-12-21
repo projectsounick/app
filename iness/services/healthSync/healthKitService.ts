@@ -773,9 +773,12 @@ function aggregateSleepByDate(samples: any[], minDate?: Date): HealthDataEntry[]
     // Create date at midnight local time for this date
     const [year, month, day] = date.split('-').map(Number);
     const localDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+    const totalValue = Math.round(hours * 10) / 10;
     return {
       date: localDate.toISOString(),
-      value: Math.round(hours * 10) / 10,
+      value: totalValue,
+      // Include totalHealthKitValue to help backend deduplicate on re-sync
+      totalHealthKitValue: totalValue,
     };
   });
 }
@@ -822,9 +825,12 @@ function aggregateStepsByDate(samples: any[], minDate?: Date): HealthDataEntry[]
       // Create date at midnight local time for this date
       const [year, month, day] = date.split('-').map(Number);
       const localDate = new Date(year, month - 1, day, 0, 0, 0, 0);
+      const totalValue = Math.round(steps);
       return {
         date: localDate.toISOString(),
-        value: Math.round(steps),
+        value: totalValue,
+        // Include totalHealthKitValue to help backend deduplicate on re-sync
+        totalHealthKitValue: totalValue,
       };
     })
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()); // Sort newest first

@@ -34,7 +34,10 @@ const CustomSnackbar: React.FC<CustomSnackbarProps> = ({
           easing: Easing.in(Easing.ease),
           useNativeDriver: true,
         }).start(() => {
-          onDismiss();
+          // Defer onDismiss to next tick to avoid useInsertionEffect warning
+          setTimeout(() => {
+            onDismiss();
+          }, 0);
         });
       }, duration);
 
