@@ -846,7 +846,7 @@ export default function TrackingGraphPage() {
                   
                   return (
                     <>
-                      {/* Detailed Report Header */}
+                      {/* Summary Report Header */}
                       <View
                         style={{
                           flexDirection: "row",
@@ -863,7 +863,7 @@ export default function TrackingGraphPage() {
                             fontFamily: theme.fonts.bold,
                           }}
                         >
-                          Detailed Report
+                          Summary Report
                         </Text>
                         <View
                           style={{
@@ -875,7 +875,7 @@ export default function TrackingGraphPage() {
                         />
                       </View>
                       
-                      {/* Detailed Report Card */}
+                      {/* Summary Report Card */}
                       <View
                         style={{
                           backgroundColor: "#FFFFFF",
@@ -1106,7 +1106,53 @@ export default function TrackingGraphPage() {
                             )}
                           </View>
                         </View>
-                        
+                      </View>
+
+                      {/* Monthly Analysis Section Header */}
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          marginBottom: 16,
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 18,
+                            fontWeight: "700",
+                            color: "#1A1A1A",
+                            fontFamily: theme.fonts.bold,
+                          }}
+                        >
+                          Monthly Analysis
+                        </Text>
+                        <View
+                          style={{
+                            width: 30,
+                            height: 3,
+                            backgroundColor: "#9747FF",
+                            borderRadius: 2,
+                          }}
+                        />
+                      </View>
+
+                      {/* Monthly Analysis Card */}
+                      <View
+                        style={{
+                          backgroundColor: "#FFFFFF",
+                          borderRadius: 16,
+                          padding: 20,
+                          marginBottom: 24,
+                          shadowColor: "#000",
+                          shadowOffset: { width: 0, height: 1 },
+                          shadowOpacity: 0.05,
+                          shadowRadius: 4,
+                          elevation: 2,
+                          borderWidth: 1,
+                          borderColor: "#F5F5F5",
+                        }}
+                      >
                         {/* Analysis Section */}
                         <View
                           style={{
@@ -1115,6 +1161,7 @@ export default function TrackingGraphPage() {
                             padding: 16,
                             borderWidth: 1,
                             borderColor: "#F0F0F0",
+                            marginBottom: 16,
                           }}
                         >
                           <View
@@ -1318,7 +1365,6 @@ export default function TrackingGraphPage() {
                               flexDirection: "row",
                               alignItems: "center",
                               justifyContent: "space-between",
-                              marginBottom: 16,
                             }}
                           >
                             <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
@@ -1356,100 +1402,96 @@ export default function TrackingGraphPage() {
                               </View>
                             </View>
                           </View>
-                          
-                          {/* Additional Analytics Grid */}
-                          <View style={{ gap: 12 }}>
-                            {/* Data Completeness & Target Achievement */}
-                            <View style={{ flexDirection: "row", gap: 12 }}>
-                              <View
+                        </View>
+
+                        {/* Data Completeness & Target Achievement */}
+                        <View style={{ flexDirection: "row", gap: 12 }}>
+                          <View
+                            style={{
+                              flex: 1,
+                              backgroundColor: "#FFFFFF",
+                              borderRadius: 12,
+                              padding: 14,
+                              borderWidth: 1,
+                              borderColor: "#E8E8E8",
+                            }}
+                          >
+                            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                              <Ionicons name="calendar" size={16} color="#666" style={{ marginRight: 6 }} />
+                              <Text
                                 style={{
-                                  flex: 1,
-                                  backgroundColor: "#FFFFFF",
-                                  borderRadius: 12,
-                                  padding: 14,
-                                  borderWidth: 1,
-                                  borderColor: "#E8E8E8",
+                                  fontSize: 11,
+                                  color: "#888",
+                                  fontFamily: theme.fonts.medium,
                                 }}
                               >
-                                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-                                  <Ionicons name="calendar" size={16} color="#666" style={{ marginRight: 6 }} />
-                                  <Text
-                                    style={{
-                                      fontSize: 11,
-                                      color: "#888",
-                                      fontFamily: theme.fonts.medium,
-                                    }}
-                                  >
-                                    Data Completeness
-                                  </Text>
-                                </View>
-                                <Text
-                                  style={{
-                                    fontSize: 18,
-                                    fontWeight: "700",
-                                    color: "#1A1A1A",
-                                    fontFamily: theme.fonts.bold,
-                                    marginBottom: 4,
-                                  }}
-                                >
-                                  {dataCompleteness.toFixed(0)}%
-                                </Text>
-                                <Text
-                                  style={{
-                                    fontSize: 10,
-                                    color: "#999",
-                                    fontFamily: theme.fonts.regular,
-                                  }}
-                                >
-                                  {daysWithData} of {daysInMonth} days
-                                </Text>
-                              </View>
-                              
-                              <View
-                                style={{
-                                  flex: 1,
-                                  backgroundColor: "#FFFFFF",
-                                  borderRadius: 12,
-                                  padding: 14,
-                                  borderWidth: 1,
-                                  borderColor: "#E8E8E8",
-                                }}
-                              >
-                                <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-                                  <Ionicons name="flag" size={16} color="#666" style={{ marginRight: 6 }} />
-                                  <Text
-                                    style={{
-                                      fontSize: 11,
-                                      color: "#888",
-                                      fontFamily: theme.fonts.medium,
-                                    }}
-                                  >
-                                    Target Achievement
-                                  </Text>
-                                </View>
-                                <Text
-                                  style={{
-                                    fontSize: 18,
-                                    fontWeight: "700",
-                                    color: targetAchievementRate >= 70 ? "#2F8C62" : targetAchievementRate >= 50 ? "#FF9800" : "#D32F2F",
-                                    fontFamily: theme.fonts.bold,
-                                    marginBottom: 4,
-                                  }}
-                                >
-                                  {targetAchievementRate.toFixed(0)}%
-                                </Text>
-                                <Text
-                                  style={{
-                                    fontSize: 10,
-                                    color: "#999",
-                                    fontFamily: theme.fonts.regular,
-                                  }}
-                                >
-                                  {daysAboveTarget} above, {daysBelowTarget} below
-                                </Text>
-                              </View>
+                                Data Completeness
+                              </Text>
                             </View>
-                            
+                            <Text
+                              style={{
+                                fontSize: 18,
+                                fontWeight: "700",
+                                color: "#1A1A1A",
+                                fontFamily: theme.fonts.bold,
+                                marginBottom: 4,
+                              }}
+                            >
+                              {dataCompleteness.toFixed(0)}%
+                            </Text>
+                            <Text
+                              style={{
+                                fontSize: 10,
+                                color: "#999",
+                                fontFamily: theme.fonts.regular,
+                              }}
+                            >
+                              {daysWithData} of {daysInMonth} days
+                            </Text>
+                          </View>
+                          
+                          <View
+                            style={{
+                              flex: 1,
+                              backgroundColor: "#FFFFFF",
+                              borderRadius: 12,
+                              padding: 14,
+                              borderWidth: 1,
+                              borderColor: "#E8E8E8",
+                            }}
+                          >
+                            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                              <Ionicons name="flag" size={16} color="#666" style={{ marginRight: 6 }} />
+                              <Text
+                                style={{
+                                  fontSize: 11,
+                                  color: "#888",
+                                  fontFamily: theme.fonts.medium,
+                                }}
+                              >
+                                Target Achievement
+                              </Text>
+                            </View>
+                            <Text
+                              style={{
+                                fontSize: 18,
+                                fontWeight: "700",
+                                color: targetAchievementRate >= 70 ? "#2F8C62" : targetAchievementRate >= 50 ? "#FF9800" : "#D32F2F",
+                                fontFamily: theme.fonts.bold,
+                                marginBottom: 4,
+                              }}
+                            >
+                              {targetAchievementRate.toFixed(0)}%
+                            </Text>
+                            <Text
+                              style={{
+                                fontSize: 10,
+                                color: "#999",
+                                fontFamily: theme.fonts.regular,
+                              }}
+                            >
+                              {daysAboveTarget} above, {daysBelowTarget} below
+                            </Text>
                           </View>
                         </View>
                       </View>

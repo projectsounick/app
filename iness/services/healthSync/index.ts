@@ -24,6 +24,7 @@ export {
   openHealthSettings,
   wasPermissionDenied,
   resetInitialization,
+  checkPermissionsStatus,
 } from "./healthKitService";
 
 export {

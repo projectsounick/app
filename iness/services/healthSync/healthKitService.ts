@@ -271,6 +271,82 @@ export function wasPermissionDenied(): boolean {
 }
 
 /**
+ * Check if permissions are currently granted for a specific type
+ * Uses getAuthStatus which can detect when permissions are explicitly denied
+ * @param type - "steps" or "sleep"
+ * @returns true if permissions are granted, false if denied or not determined
+ */
+export async function checkPermissionsStatus(type: "steps" | "sleep"): Promise<boolean> {
+  const healthKit = getHealthKitModule();
+  if (!healthKit) return false;
+
+  console.log(`${LOG_PREFIX.HEALTHKIT} Checking permissions status for ${type}...`);
+
+  const permissionType = type === "steps" 
+    ? healthKit.Constants.Permissions.StepCount 
+    : healthKit.Constants.Permissions.SleepAnalysis;
+
+  try {
+    return new Promise((resolve) => {
+      healthKit.getAuthStatus(
+        { 
+          permissions: { 
+            read: [permissionType],
+            write: []
+          } 
+        },
+        (error: any, result: any) => {
+          if (error) {
+            console.log(`${LOG_PREFIX.HEALTHKIT} getAuthStatus error for ${type}:`, error);
+            // If getAuthStatus fails, try data access test for steps
+            if (type === "steps") {
+              testDataAccess().then(resolve);
+            } else {
+              resolve(false);
+            }
+            return;
+          }
+
+          console.log(`${LOG_PREFIX.HEALTHKIT} ${type} auth status result:`, JSON.stringify(result));
+          
+          if (result?.permissions?.read && Array.isArray(result.permissions.read)) {
+            const statusArray = result.permissions.read;
+            console.log(`${LOG_PREFIX.HEALTHKIT} ${type} status array:`, statusArray);
+            
+            // Status codes: 0 = not determined, 1 = denied, 2 = authorized
+            // We only consider 2 as having access
+            const hasAccess = statusArray.some((status: number) => status === 2);
+            console.log(`${LOG_PREFIX.HEALTHKIT} ${type} has access:`, hasAccess);
+            
+            // If status shows denied (1) or not determined (0), permissions are OFF
+            if (!hasAccess) {
+              console.log(`${LOG_PREFIX.HEALTHKIT} ${type} permissions are OFF (status not 2)`);
+              resolve(false);
+            } else {
+              // Status is 2 (authorized), verify with data access for steps
+              if (type === "steps") {
+                testDataAccess().then(canAccess => {
+                  console.log(`${LOG_PREFIX.HEALTHKIT} Steps data access verification:`, canAccess);
+                  resolve(canAccess);
+                });
+              } else {
+                resolve(true);
+              }
+            }
+          } else {
+            console.log(`${LOG_PREFIX.HEALTHKIT} No valid status array, assuming no access`);
+            resolve(false);
+          }
+        }
+      );
+    });
+  } catch (error) {
+    console.error(`${LOG_PREFIX.HEALTHKIT} Error checking ${type} permissions:`, error);
+    return false;
+  }
+}
+
+/**
  * Show alert directing user to Settings
  */
 export function showPermissionDeniedAlert(): void {

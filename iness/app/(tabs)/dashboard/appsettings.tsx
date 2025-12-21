@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,8 @@ import {
   Modal,
   TouchableOpacity,
   StyleSheet,
+  AppState,
+  AppStateStatus,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
@@ -88,6 +90,11 @@ export default function AppSettingsScreen() {
   const [sleepSyncEnabled, setSleepSyncEnabled] = useState(false);
   const [syncingSteps, setSyncingSteps] = useState(false);
   const [syncingSleep, setSyncingSleep] = useState(false);
+  
+  // Track pending disable operation - when user goes to settings to turn off permissions
+  const [pendingDisableType, setPendingDisableType] = useState<"steps" | "sleep" | null>(null);
+  const appStateRef = useRef(AppState.currentState);
+  const wentToSettingsRef = useRef(false);
 
   const notificationInfo = {
     title: "Notification Settings",
@@ -149,36 +156,27 @@ export default function AppSettingsScreen() {
         setSyncingSteps(false);
       }
     } else if (!value && stepsSyncEnabled) {
-      // Turning OFF - show confirmation modal
+      // Turning OFF - show guide to go to Health settings
+      console.log("[AppSettings] Turning OFF steps sync - showing guide");
+      setPendingDisableType("steps");
+      
       Alert.alert(
-        "Turn Off Steps Sync?",
-        "If you turn off steps sync, you'll need to grant permissions again when you turn it back on. Your existing synced data will remain in the app.",
+        "Turn Off Steps Sync",
+        "To turn off steps sync, please disable permissions in Apple Health:\n\n1. Tap 'Open Settings' below\n2. Go to Health → Data Access & Devices\n3. Find 'iness' and turn OFF Steps\n4. Return to this app",
         [
-          { text: "Cancel", style: "cancel", onPress: () => {} },
+          { 
+            text: "Cancel", 
+            style: "cancel", 
+            onPress: () => {
+              setPendingDisableType(null);
+              wentToSettingsRef.current = false;
+            }
+          },
           {
-            text: "Turn Off",
-            style: "destructive",
-            onPress: async () => {
-              // Update backend to disable sync
-              try {
-                setLoading(true);
-                const response = await trackService.disableHealthSync("steps");
-                if (response.success) {
-                  setStepsSyncEnabled(false);
-                  await refreshSyncStatus();
-                  setSnackbarMessage("Steps sync turned off");
-                  setSnackbarOpen(true);
-                } else {
-                  setSnackbarMessage(response.message || "Failed to turn off steps sync");
-                  setSnackbarOpen(true);
-                }
-              } catch (error) {
-                console.error("[AppSettings] Error disabling steps sync:", error);
-                setSnackbarMessage("Failed to turn off steps sync");
-                setSnackbarOpen(true);
-              } finally {
-                setLoading(false);
-              }
+            text: "Open Settings",
+            onPress: () => {
+              wentToSettingsRef.current = true;
+              HealthKit.openHealthSettings();
             },
           },
         ]
@@ -222,36 +220,27 @@ export default function AppSettingsScreen() {
         setSyncingSleep(false);
       }
     } else if (!value && sleepSyncEnabled) {
-      // Turning OFF - show confirmation modal
+      // Turning OFF - show guide to go to Health settings
+      console.log("[AppSettings] Turning OFF sleep sync - showing guide");
+      setPendingDisableType("sleep");
+      
       Alert.alert(
-        "Turn Off Sleep Sync?",
-        "If you turn off sleep sync, you'll need to grant permissions again when you turn it back on. Your existing synced data will remain in the app.",
+        "Turn Off Sleep Sync",
+        "To turn off sleep sync, please disable permissions in Apple Health:\n\n1. Tap 'Open Settings' below\n2. Go to Health → Data Access & Devices\n3. Find 'iness' and turn OFF Sleep\n4. Return to this app",
         [
-          { text: "Cancel", style: "cancel", onPress: () => {} },
+          { 
+            text: "Cancel", 
+            style: "cancel", 
+            onPress: () => {
+              setPendingDisableType(null);
+              wentToSettingsRef.current = false;
+            }
+          },
           {
-            text: "Turn Off",
-            style: "destructive",
-            onPress: async () => {
-              // Update backend to disable sync
-              try {
-                setLoading(true);
-                const response = await trackService.disableHealthSync("sleep");
-                if (response.success) {
-                  setSleepSyncEnabled(false);
-                  await refreshSyncStatus();
-                  setSnackbarMessage("Sleep sync turned off");
-                  setSnackbarOpen(true);
-                } else {
-                  setSnackbarMessage(response.message || "Failed to turn off sleep sync");
-                  setSnackbarOpen(true);
-                }
-              } catch (error) {
-                console.error("[AppSettings] Error disabling sleep sync:", error);
-                setSnackbarMessage("Failed to turn off sleep sync");
-                setSnackbarOpen(true);
-              } finally {
-                setLoading(false);
-              }
+            text: "Open Settings",
+            onPress: () => {
+              wentToSettingsRef.current = true;
+              HealthKit.openHealthSettings();
             },
           },
         ]
@@ -308,6 +297,84 @@ export default function AppSettingsScreen() {
       setSleepSyncEnabled(syncStatus.sleepSync);
     }
   }, [syncStatus]);
+
+  // AppState listener - detect when user returns from Health settings
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", async (nextAppState: AppStateStatus) => {
+      // Only check if we went to settings and are now returning
+      if (
+        appStateRef.current.match(/inactive|background/) &&
+        nextAppState === "active" &&
+        pendingDisableType &&
+        wentToSettingsRef.current
+      ) {
+        console.log("[AppSettings] User returned from settings, checking permissions for:", pendingDisableType);
+        
+        // Reset the went to settings flag
+        wentToSettingsRef.current = false;
+        
+        // Small delay to allow system to update permissions
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Reset HealthKit to get fresh permission state
+        HealthKit.resetInitialization();
+        
+        // Check if permissions are now OFF
+        console.log("[AppSettings] Calling checkPermissionsStatus for:", pendingDisableType);
+        const hasPermissions = await HealthKit.checkPermissionsStatus(pendingDisableType);
+        console.log("[AppSettings] Permissions check result:", hasPermissions, "(false means OFF)");
+        
+        if (!hasPermissions) {
+          // Permissions are OFF - update backend
+          console.log("[AppSettings] Permissions are OFF, updating backend");
+          try {
+            setLoading(true);
+            const response = await trackService.disableHealthSync(pendingDisableType);
+            
+            if (response.success) {
+              if (pendingDisableType === "steps") {
+                setStepsSyncEnabled(false);
+              } else {
+                setSleepSyncEnabled(false);
+              }
+              await refreshSyncStatus();
+              setSnackbarMessage(`${pendingDisableType === "steps" ? "Steps" : "Sleep"} sync turned off`);
+              setSnackbarOpen(true);
+            } else {
+              setSnackbarMessage(response.message || "Failed to update sync status");
+              setSnackbarOpen(true);
+            }
+          } catch (error) {
+            console.error("[AppSettings] Error disabling sync:", error);
+            setSnackbarMessage("Failed to turn off sync");
+            setSnackbarOpen(true);
+          } finally {
+            setLoading(false);
+          }
+        } else {
+          // Permissions still ON - user didn't turn them off
+          console.log("[AppSettings] Permissions still ON, sync not disabled");
+          setSnackbarMessage("Please turn off permissions in Health settings to disable sync");
+          setSnackbarOpen(true);
+        }
+        
+        // Clear pending state
+        setPendingDisableType(null);
+      }
+      
+      appStateRef.current = nextAppState;
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [pendingDisableType, refreshSyncStatus]);
+
+  // Clear pending state on mount (in case of stale state)
+  useEffect(() => {
+    setPendingDisableType(null);
+    wentToSettingsRef.current = false;
+  }, []);
 
   const loadHealthSyncStatus = async () => {
     try {
