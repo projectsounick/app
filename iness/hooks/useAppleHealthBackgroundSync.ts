@@ -68,75 +68,50 @@ export function useAppleHealthBackgroundSync(): void {
   }, [isAvailable, syncStatus]);
 
   /**
-   * Refresh display with current data (backend + today's Apple Health)
+   * Refresh display with current data from backend ONLY
+   * NEVER calls HealthKit - prevents UI freeze
    */
   const refreshDisplayData = useCallback(async (): Promise<void> => {
     if (!isAvailable || !syncStatus) return;
 
-    try {
-      // Get current day data from backend
-      const response = await trackService.getCurrentDayTrackData();
-      if (!response.success || !response.data) return;
+    // Defer to next event loop to prevent blocking
+    setTimeout(async () => {
+      try {
+        // Get current day data from backend
+        const response = await trackService.getCurrentDayTrackData();
+        if (!response.success || !response.data) return;
 
-      // Update steps display
-      if (syncStatus.stepSync && response.data.steps) {
-        const backendSteps = response.data.steps.steps || 0;
-        const displaySteps = await SyncManager.getDisplayValue(
-          "steps",
-          backendSteps,
-          syncStatus
-        );
-
-        if (mountedRef.current) {
-          dispatch(
-            updateTrackingField({
-              type: "steps",
-              data: { ...response.data.steps, steps: displaySteps },
-            })
-          );
+        // CRITICAL: Just use backend value - NEVER call HealthKit here
+        // Backend already has the correct synced data
+        if (syncStatus.stepSync && response.data.steps) {
+          if (mountedRef.current) {
+            dispatch(
+              updateTrackingField({
+                type: "steps",
+                data: response.data.steps,
+              })
+            );
+          }
         }
-      }
 
-      // Update sleep display
-      if (syncStatus.sleepSync && response.data.sleep) {
-        const backendSleep = response.data.sleep.sleepDuration || 0;
-        const displaySleep = await SyncManager.getDisplayValue(
-          "sleep",
-          backendSleep,
-          syncStatus
-        );
-
-        if (mountedRef.current) {
-          dispatch(
-            updateTrackingField({
-              type: "sleep",
-              data: { ...response.data.sleep, sleepDuration: displaySleep },
-            })
-          );
+        if (syncStatus.sleepSync && response.data.sleep) {
+          if (mountedRef.current) {
+            dispatch(
+              updateTrackingField({
+                type: "sleep",
+                data: response.data.sleep,
+              })
+            );
+          }
         }
+      } catch (error) {
+        console.error(`${LOG_PREFIX.BACKGROUND} Display refresh error:`, error);
       }
-    } catch (error) {
-      console.error(`${LOG_PREFIX.BACKGROUND} Display refresh error:`, error);
-    }
+    }, 0);
   }, [isAvailable, syncStatus, dispatch]);
 
-  /**
-   * Full sync routine (display + backend + retry)
-   */
-  const runFullSync = useCallback(async (): Promise<void> => {
-    if (!isAvailable || !syncStatus) return;
-    if (!syncStatus.stepSync && !syncStatus.sleepSync) return;
-
-
-    // 1. Update display immediately with Apple Health data
-    await refreshDisplayData();
-
-    // 2. Sync new data to backend (in background)
-    await syncToBackend();
-
-    // 3. Retry any pending syncs
-    await retryPending();
-  }, [isAvailable, syncStatus, refreshDisplayData, syncToBackend, retryPending]);
+  // REMOVED runFullSync - it was causing UI freeze
+  // Now we only sync to backend, never refresh display (which was calling HealthKit)
 
   // ============================================
   // App State Listener
@@ -151,7 +126,10 @@ export function useAppleHealthBackgroundSync(): void {
           appStateRef.current.match(/inactive|background/) &&
           nextAppState === "active"
         ) {
-          runFullSync();
+          // Only sync to backend - don't refresh display (prevents UI freeze)
+          setTimeout(() => {
+            syncToBackend();
+          }, 1000); // Delay to prevent blocking
         }
 
         appStateRef.current = nextAppState;
@@ -159,7 +137,7 @@ export function useAppleHealthBackgroundSync(): void {
     );
 
     return () => subscription.remove();
-  }, [runFullSync]);
+  }, [syncToBackend]);
 
   // ============================================
   // Initial Sync on Mount
@@ -169,12 +147,16 @@ export function useAppleHealthBackgroundSync(): void {
     mountedRef.current = true;
 
     if (isAvailable && isInitialized && syncStatus) {
-      // Delay initial sync to let app initialize
+      // Delay initial sync significantly to prevent UI freeze on app open
+      // Only sync to backend - don't refresh display (prevents UI freeze)
       const timer = setTimeout(() => {
         if (mountedRef.current) {
-          runFullSync();
+          // Only sync to backend - don't refresh display (prevents UI freeze)
+          setTimeout(() => {
+            syncToBackend();
+          }, 500);
         }
-      }, HEALTH_SYNC_CONFIG.initialSyncDelayMs);
+      }, HEALTH_SYNC_CONFIG.initialSyncDelayMs + 2000); // Extra 2 second delay
 
       return () => clearTimeout(timer);
     }
@@ -182,7 +164,7 @@ export function useAppleHealthBackgroundSync(): void {
     return () => {
       mountedRef.current = false;
     };
-  }, [isAvailable, isInitialized, syncStatus, runFullSync]);
+  }, [isAvailable, isInitialized, syncStatus, syncToBackend]);
 
   // ============================================
   // Periodic Retry

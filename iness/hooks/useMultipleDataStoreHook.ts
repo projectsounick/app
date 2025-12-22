@@ -44,12 +44,13 @@ function useFetchMultipleStoreDataHook(
             const duration = Date.now() - startTime;
             const seconds = (duration / 1000).toFixed(2);
             const status = duration > 3000 ? "⚠️ SLOW" : duration > 1000 ? "⚠️" : "✅";
+            console.log(`⏱️ [API Call] ${sliceKey}: ${seconds}s (${duration}ms) ${status}`);
             return { res, duration, sliceKey };
           })
           .catch((err) => {
             const duration = Date.now() - startTime;
             const seconds = (duration / 1000).toFixed(2);
-            console.error(`❌ [${sliceKey}] failed in ${seconds}s (${duration}ms):`, err.message);
+            console.error(`❌ [API Call] ${sliceKey} failed in ${seconds}s (${duration}ms):`, err.message);
             throw { err, duration, sliceKey };
           });
       });
@@ -85,14 +86,14 @@ function useFetchMultipleStoreDataHook(
       });
 
       // Performance summary
-      // const sortedByDuration = [...performanceReport].sort((a, b) => b.duration - a.duration);
-      // console.log("\n📊 API Performance Summary (slowest first):");
-      // sortedByDuration.forEach(({ sliceKey, duration, status }) => {
-      //   const seconds = (duration / 1000).toFixed(2);
-      //   const icon = duration > 3000 ? "🐌" : duration > 1000 ? "⚠️" : "✅";
-      //   console.log(`  ${icon} ${sliceKey}: ${seconds}s (${duration}ms) - ${status}`);
-      // });
-      // console.log("");
+      const sortedByDuration = [...performanceReport].sort((a, b) => b.duration - a.duration);
+      console.log("\n📊 [Dashboard Home] API Performance Summary (slowest first):");
+      sortedByDuration.forEach(({ sliceKey, duration, status }) => {
+        const seconds = (duration / 1000).toFixed(2);
+        const icon = duration > 3000 ? "🐌" : duration > 1000 ? "⚠️" : "✅";
+        console.log(`  ${icon} ${sliceKey}: ${seconds}s (${duration}ms) - ${status}`);
+      });
+      console.log("");
 
       if (hasError) {
         setSnackbarMessage("Some data failed to load");

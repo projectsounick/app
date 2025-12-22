@@ -23,9 +23,13 @@ interface CurrentPlansProps {
 
 const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
   // Single selector for active or completed plans based on isActive prop
-  const plans: ActivePlans[] = useSelector((state: RootState) =>
+  const allPlans: ActivePlans[] = useSelector((state: RootState) =>
     isActive ? state.plan.activePlans : state.plan.completedPlans
   );
+
+  // Separate regular plans from diet plans
+  const plans = allPlans.filter((plan) => !plan.dietPlanDetails);
+  const dietPlans = allPlans.filter((plan) => plan.dietPlanDetails);
 
   const activeManualPlan: ActiveManualWorkoutPlanInterface | null = useSelector(
     (state: RootState) => (isActive ? state.plan.activeManualPlan : null)
@@ -58,7 +62,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
 
           {/* Description */}
           <Text style={styles.sectionDescription}>
-            Your current workout and diet plans.
+            Your current workout plans.
           </Text>
 
           {/* Plan Cards */}
@@ -85,8 +89,56 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
         </View>
       )}
 
+      {/* Diet Plan Section */}
+      {dietPlans.length > 0 && (
+        <View style={styles.section}>
+          {/* Section Header with Icon */}
+          <View style={styles.sectionHeader}>
+            <View style={styles.headerLeft}>
+              <View style={styles.iconContainer}>
+                <MaterialCommunityIcons
+                  name="food-apple"
+                  size={22}
+                  color="#9747FF"
+                />
+              </View>
+              <Text style={styles.sectionTitle}>Diet Plan</Text>
+            </View>
+            <View style={styles.headerDash} />
+          </View>
+
+          {/* Description */}
+          <Text style={styles.sectionDescription}>
+            Your active diet plan subscription.
+          </Text>
+
+          {/* Diet Plan Cards */}
+          {dietPlans.map((plan, index) => {
+            const title = plan.dietPlanDetails?.title || "Untitled Diet Plan";
+            const imageUrl = plan.dietPlanDetails?.imgUrl;
+            const descItems = plan.dietPlanDetails?.descItems || [];
+
+            return (
+              <View key={plan._id} style={{ marginBottom: 12 }}>
+                <CurrentPlanCard
+                  id={plan._id}
+                  title={title}
+                  descItems={descItems}
+                  imgUrl={imageUrl}
+                  isActive={isActive}
+                  type="diet"
+                  dietPlanDetails={plan.dietPlanDetails}
+                  dietPlanUrl={plan.dietPlanUrl}
+                  dietPlanAssignDate={plan.dietPlanAssignDate}
+                />
+              </View>
+            );
+          })}
+        </View>
+      )}
+
       {/* Empty State */}
-      {plans.length === 0 && activeManualPlan === null && activeServices.length === 0 && (
+      {plans.length === 0 && dietPlans.length === 0 && activeManualPlan === null && activeServices.length === 0 && (
         <View style={styles.emptyState}>
           <View style={styles.emptyIconContainer}>
             <MaterialCommunityIcons

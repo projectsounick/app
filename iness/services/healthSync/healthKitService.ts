@@ -57,26 +57,17 @@ function getHealthKitModule(): HealthKitModule | null {
 
   if (!AppleHealthKit) {
     try {
-      console.log(`${LOG_PREFIX.HEALTHKIT} Loading react-native-health module...`);
+   
       
       // Try to load the module
       const healthModule = require("react-native-health");
-      console.log(`${LOG_PREFIX.HEALTHKIT} Raw module:`, typeof healthModule);
-      console.log(`${LOG_PREFIX.HEALTHKIT} Module keys:`, Object.keys(healthModule || {}));
-      console.log(`${LOG_PREFIX.HEALTHKIT} Module.default:`, typeof healthModule?.default);
+  
       
       // The module might export differently
       AppleHealthKit = healthModule?.default || healthModule;
       
-      if (AppleHealthKit) {
-        console.log(`${LOG_PREFIX.HEALTHKIT} Module loaded successfully`);
-        console.log(`${LOG_PREFIX.HEALTHKIT} Has initHealthKit:`, typeof AppleHealthKit.initHealthKit);
-        console.log(`${LOG_PREFIX.HEALTHKIT} Has Constants:`, typeof AppleHealthKit.Constants);
-      } else {
-        console.error(`${LOG_PREFIX.HEALTHKIT} Module is null/undefined after require`);
-        console.error(`${LOG_PREFIX.HEALTHKIT} This usually means the native module is not linked.`);
-        console.error(`${LOG_PREFIX.HEALTHKIT} You need to rebuild your dev client with: npx expo prebuild && npx expo run:ios`);
-      }
+  
+   
     } catch (error) {
       console.error(`${LOG_PREFIX.HEALTHKIT} Failed to load module:`, error);
       return null;
@@ -94,7 +85,7 @@ export async function initializeHealthKit(showSettingsAlert: boolean = true): Pr
   console.log(`${LOG_PREFIX.HEALTHKIT} initializeHealthKit called, isInitialized: ${isInitialized}`);
   
   if (!isHealthKitAvailable()) {
-    console.log(`${LOG_PREFIX.HEALTHKIT} Not available on this platform`);
+
     return false;
   }
 
@@ -106,11 +97,11 @@ export async function initializeHealthKit(showSettingsAlert: boolean = true): Pr
 
   // If already initialized, check if permissions are actually granted
   if (isInitialized) {
-    console.log(`${LOG_PREFIX.HEALTHKIT} Already initialized, checking permissions...`);
+
     const hasPermissions = await checkPermissionsGranted();
     
     if (!hasPermissions) {
-      console.log(`${LOG_PREFIX.HEALTHKIT} Permissions not granted despite init`);
+   
       permissionDenied = true;
       if (showSettingsAlert) {
         showPermissionDeniedAlert();
@@ -134,11 +125,11 @@ export async function initializeHealthKit(showSettingsAlert: boolean = true): Pr
       },
     };
 
-    console.log(`${LOG_PREFIX.HEALTHKIT} Calling initHealthKit - modal should appear now...`);
+
 
     const initSuccess = await new Promise<boolean>((resolve) => {
       healthKit.initHealthKit(permissions, (error: string) => {
-        console.log(`${LOG_PREFIX.HEALTHKIT} initHealthKit callback received`);
+     
         
         if (error) {
           console.error(`${LOG_PREFIX.HEALTHKIT} Init error:`, error);
@@ -160,11 +151,11 @@ export async function initializeHealthKit(showSettingsAlert: boolean = true): Pr
     }
 
     // Check if permissions were actually granted (user might have pressed "Don't Allow")
-    console.log(`${LOG_PREFIX.HEALTHKIT} Checking if permissions were granted...`);
+
     const hasPermissions = await checkPermissionsGranted();
     
     if (!hasPermissions) {
-      console.log(`${LOG_PREFIX.HEALTHKIT} User denied permissions`);
+
       permissionDenied = true;
       if (showSettingsAlert) {
         showPermissionDeniedAlert();
@@ -172,7 +163,7 @@ export async function initializeHealthKit(showSettingsAlert: boolean = true): Pr
       return false;
     }
 
-    console.log(`${LOG_PREFIX.HEALTHKIT} Permissions granted successfully!`);
+
     permissionDenied = false;
     return true;
     
@@ -203,7 +194,7 @@ async function checkPermissionsGranted(): Promise<boolean> {
             return;
           }
 
-          console.log(`${LOG_PREFIX.HEALTHKIT} Auth status result:`, JSON.stringify(result));
+
           
           // Result should indicate if we have read access
           // The exact format depends on react-native-health version

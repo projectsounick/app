@@ -203,7 +203,7 @@ export default function TrainersScreen() {
                             }
                           }}
                         >
-                          <Ionicons name="chatbubble-ellipses" size={22} color="#fff" />
+                          <Ionicons name="chatbubble-ellipses" size={26} color="#67C694" />
                         </TouchableOpacity>
                       </View>
                     </LinearGradient>
@@ -535,7 +535,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(255, 255, 255, 0.3)",
+    backgroundColor: "#FFFFFF",
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",

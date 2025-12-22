@@ -446,16 +446,15 @@ export default function TrackingGraphPage() {
   const topPadding = height * 0.05;
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
-      <ImageBackground
-        source={require("../../../assets/images/basicBackground.jpg")}
-        resizeMode="cover"
-        style={{ flex: 1 }}
+    <ImageBackground
+      source={require("../../../assets/images/basicBackground.jpg")}
+      resizeMode="cover"
+      style={{ flex: 1 }}
+    >
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: "transparent" }}
+        edges={["left", "right"]}
       >
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: "transparent" }}
-          edges={["left", "right"]}
-        >
           {loading ? (
             <View
               style={{
@@ -1689,7 +1688,6 @@ export default function TrackingGraphPage() {
             bgColor="#FFFFFF"
           />
         </SafeAreaView>
-      </ImageBackground>
-    </View>
+    </ImageBackground>
   );
 }

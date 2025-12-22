@@ -67,84 +67,44 @@ function HealthDashboard() {
     syncStatusRef.current = syncStatus;
   }, [canSync, syncStatus]);
 
-  // Helper function to trigger auto-sync
-  const triggerAutoSync = useCallback(async (type: "steps" | "sleep") => {
+  // Helper function to trigger auto-sync - FIRE AND FORGET, NO BLOCKING
+  const triggerAutoSync = useCallback((type: "steps" | "sleep") => {
     console.log(`[HealthCards] Auto-syncing ${type} after reactivation...`);
     
-    if (type === "steps") {
-      setSyncingSteps(true);
-      try {
-        await InteractionManager.runAfterInteractions();
-        await new Promise(resolve => setTimeout(resolve, 100));
-        const result = await syncData("steps");
-        setSyncingSteps(false);
-        
-        if (result.success) {
-          const todayValue = result.value || 0;
-          if (todayValue > 0) {
-            setTimeout(() => {
-              try {
-                const newStepsValue = stepsCount + todayValue;
-                const existingStepsData = currentDayTrackData.steps;
+    // Fire sync - don't await, don't block UI
+    syncData(type).then((result) => {
+      if (result.success) {
+        // Refresh from backend after sync completes
+        setTimeout(async () => {
+          try {
+            const response = await trackService.getCurrentDayTrackData();
+            if (response.success) {
+              if (type === "steps" && response.data?.steps) {
                 dispatch(updateTrackingField({
                   type: "steps",
-                  data: {
-                    ...(existingStepsData || {}),
-                    steps: newStepsValue,
-                    date: existingStepsData?.date || new Date().toISOString().split('T')[0],
-                    userId: existingStepsData?.userId || '',
-                  } as any,
+                  data: response.data.steps,
                 }));
-              } catch (error) {
-                console.error(`[HealthCards] ERROR updating store:`, error);
-              }
-            }, 0);
-          }
-          setSnackbarMsg(`Auto-synced ${todayValue.toLocaleString()} steps from Apple Health`);
-          setSnackbarVisible(true);
-        }
-      } catch (error: any) {
-        console.error("[HealthCards] Auto-sync steps error:", error);
-        setSyncingSteps(false);
-      }
-    } else {
-      setSyncingSleep(true);
-      try {
-        await InteractionManager.runAfterInteractions();
-        await new Promise(resolve => setTimeout(resolve, 100));
-        const result = await syncData("sleep");
-        setSyncingSleep(false);
-        
-        if (result.success) {
-          const todayValue = result.value || 0;
-          if (todayValue > 0) {
-            setTimeout(() => {
-              try {
-                const newSleepValue = sleepDuration + todayValue;
-                const existingSleepData = currentDayTrackData.sleep;
+              } else if (type === "sleep" && response.data?.sleep) {
                 dispatch(updateTrackingField({
                   type: "sleep",
-                  data: {
-                    ...(existingSleepData || {}),
-                    sleepDuration: newSleepValue,
-                    date: existingSleepData?.date || new Date().toISOString().split('T')[0],
-                    userId: existingSleepData?.userId || '',
-                  } as any,
+                  data: response.data.sleep,
                 }));
-              } catch (error) {
-                console.error(`[HealthCards] ERROR updating store:`, error);
               }
-            }, 0);
+            }
+          } catch (error) {
+            console.error(`[HealthCards] Error refreshing data:`, error);
           }
-          setSnackbarMsg(`Auto-synced ${todayValue} hours of sleep from Apple Health`);
+        }, 1500);
+        
+        setTimeout(() => {
+          setSnackbarMsg(`Auto sync enabled`);
           setSnackbarVisible(true);
-        }
-      } catch (error: any) {
-        console.error("[HealthCards] Auto-sync sleep error:", error);
-        setSyncingSleep(false);
+        }, 300);
       }
-    }
-  }, [syncData, stepsCount, sleepDuration, currentDayTrackData, dispatch]);
+    }).catch((error: any) => {
+      console.error(`[HealthCards] Auto-sync ${type} error:`, error);
+    });
+  }, [syncData, dispatch]);
 
   // Refresh sync status when screen comes into focus (e.g., after returning from settings)
   // Also check for reactivation and auto-sync
@@ -230,50 +190,59 @@ function HealthDashboard() {
     type: "sleep" | "steps" | "water",
     value: number
   ) {
-    try {
-      setUpdateDataLoading(true);
-      // Map "steps" to "walk", others remain the same
-      const apiType = type === "steps" ? "walk" : type;
-      // Get current day's existing value
-      const existingData: any = currentDayTrackData[type];
+    // CRITICAL: Don't set loading state - it blocks UI
+    // Run in background, UI stays responsive
+    
+    // Defer to next tick to unblock UI immediately
+    setTimeout(async () => {
+      try {
+        // Map "steps" to "walk", others remain the same
+        const apiType = type === "steps" ? "walk" : type;
+        // Get current day's existing value
+        const existingData: any = currentDayTrackData[type];
 
-      // Calculate new value: add new value to existing if present
-      let newValue = value;
-      if (existingData) {
-        if (type === "steps") newValue += existingData.steps || 0;
-        else if (type === "sleep") newValue += existingData.sleepDuration || 0;
-        else if (type === "water") newValue += existingData.waterIntake || 0;
-      }
-
-      // Call API: send _id if exists, so backend knows to update
-      const response = await trackService.updateTrackingData(
-        newValue,
-        Date.now(),
-        apiType
-      );
-
-      if (response.success && response.data) {
-        /// Update the streak -------------------------/
-        let responseStreak = await createStreak();
-        if (responseStreak.success) {
-          dispatch(setStreakData(responseStreak.data));
+        // Calculate new value: add new value to existing if present
+        let newValue = value;
+        if (existingData) {
+          if (type === "steps") newValue += existingData.steps || 0;
+          else if (type === "sleep") newValue += existingData.sleepDuration || 0;
+          else if (type === "water") newValue += existingData.waterIntake || 0;
         }
-        dispatch(
-          updateTrackingField({
-            type: type, // e.g., "steps", "sleep", "water"
-            data: response.data, // must include `_id`
-          })
+
+        // Call API: send _id if exists, so backend knows to update
+        const response = await trackService.updateTrackingData(
+          newValue,
+          Date.now(),
+          apiType
         );
-      } else {
-        setSnackbarMsg("Some error has happened, try again");
-        setSnackbarVisible(true);
+
+        if (response.success && response.data) {
+          /// Update the streak -------------------------/
+          createStreak().then((responseStreak) => {
+            if (responseStreak.success) {
+              dispatch(setStreakData(responseStreak.data));
+            }
+          }).catch(() => {}); // Ignore errors
+          
+          dispatch(
+            updateTrackingField({
+              type: type, // e.g., "steps", "sleep", "water"
+              data: response.data, // must include `_id`
+            })
+          );
+        } else {
+          setTimeout(() => {
+            setSnackbarMsg("Some error has happened, try again");
+            setSnackbarVisible(true);
+          }, 0);
+        }
+      } catch (error) {
+        setTimeout(() => {
+          setSnackbarVisible(true);
+          setSnackbarMsg("Some error has happened, try again");
+        }, 0);
       }
-    } catch (error) {
-      setSnackbarVisible(true);
-      setSnackbarMsg("Some error has happened, try again");
-    } finally {
-      setUpdateDataLoading(false);
-    }
+    }, 0);
   }
 
   /**
@@ -295,76 +264,56 @@ function HealthDashboard() {
       return;
     }
 
-    setSyncingSteps(true);
+    // CRITICAL: Don't set syncing state - it blocks UI
+    // Just fire sync and forget - UI stays responsive
     
-    try {
-      // Defer sync work to allow UI to render loading state first
-      // Use both InteractionManager and setTimeout to ensure UI is responsive
-      await InteractionManager.runAfterInteractions();
-      await new Promise(resolve => setTimeout(resolve, 100)); // Small delay to ensure UI renders
-      
-      const result = await syncData("steps");
-      
-      // Clear syncing state IMMEDIATELY to unblock UI
-      setSyncingSteps(false);
-      
+    // Fire sync in background - NO AWAIT, NO BLOCKING
+    syncData("steps").then((result) => {
+      // Handle result in background - never blocks UI
       if (result.success) {
         const syncedCount = result.syncedCount || 0;
         const todayValue = result.value || 0;
         
-        // IMMEDIATELY update the Redux store with today's steps value
-        // This gives instant UI feedback - backend sync happens in background
-        // Use setTimeout to make it non-blocking
-        if (todayValue > 0) {
-          setTimeout(() => {
-            try {
-              const newStepsValue = stepsCount + todayValue; // Add health data to existing
-              const existingStepsData = currentDayTrackData.steps;
-              
+        // Refresh from backend after sync completes (in background)
+        setTimeout(async () => {
+          try {
+            const response = await trackService.getCurrentDayTrackData();
+            if (response.success && response.data?.steps) {
               dispatch(updateTrackingField({
                 type: "steps",
-                data: {
-                  ...(existingStepsData || {}),
-                  steps: newStepsValue,
-                  date: existingStepsData?.date || new Date().toISOString().split('T')[0],
-                  userId: existingStepsData?.userId || '',
-                } as any,
+                data: response.data.steps,
               }));
-            } catch (error) {
-              console.error(`[HealthCards] ERROR updating store:`, error);
-              console.error(`[HealthCards] Error stack:`, (error as any)?.stack);
             }
-          }, 0);
-        }
+          } catch (error) {
+            console.error(`[HealthCards] Error refreshing data:`, error);
+          }
+        }, 1500);
         
-        // Set snackbar in next tick to avoid blocking
+        // Show snackbar
         setTimeout(() => {
           setSnackbarMsg(
-            syncedCount > 1 
-              ? `Synced ${syncedCount} days of steps data from Apple Health. Today: ${todayValue.toLocaleString()} steps`
-              : `Synced ${todayValue.toLocaleString()} steps from Apple Health`
+            `Synced ${todayValue.toLocaleString()} steps from Apple Health${syncedCount > 1 ? ' (syncing historical data in background)' : ''}`
           );
           setSnackbarVisible(true);
-        }, 0);
+        }, 300);
       } else {
-        console.error("[HealthCards] Steps sync failed:", result.error);
-        
-        // Check if it's a permission issue
-        if (result.error?.includes("permission") || HealthKit.wasPermissionDenied()) {
-          HealthKit.showPermissionDeniedAlert();
-        } else {
-          setSnackbarMsg(result.error || "No steps data found in Apple Health");
-          setSnackbarVisible(true);
-        }
+        // Show error
+        setTimeout(() => {
+          if (result.error?.includes("permission") || HealthKit.wasPermissionDenied()) {
+            HealthKit.showPermissionDeniedAlert();
+          } else {
+            setSnackbarMsg(result.error || "No steps data found in Apple Health");
+            setSnackbarVisible(true);
+          }
+        }, 300);
       }
-    } catch (error: any) {
+    }).catch((error: any) => {
       console.error("[HealthCards] EXCEPTION in handleSyncSteps:", error);
-      console.error("[HealthCards] Error message:", error?.message);
-      console.error("[HealthCards] Error stack:", error?.stack);
-      setSnackbarMsg(error.message || "Failed to sync steps");
-      setSnackbarVisible(true);
-      setSyncingSteps(false);
-    }
+      setTimeout(() => {
+        setSnackbarMsg(error.message || "Failed to sync steps");
+        setSnackbarVisible(true);
+      }, 300);
+    });
   };
 
   /**
@@ -391,11 +340,13 @@ function HealthDashboard() {
       // Defer sync work to allow UI to render loading state first
       // Use both InteractionManager and setTimeout to ensure UI is responsive
       await InteractionManager.runAfterInteractions();
-      await new Promise(resolve => setTimeout(resolve, 100)); // Small delay to ensure UI renders
+      await new Promise(resolve => requestAnimationFrame(resolve)); // Use requestAnimationFrame for smoother UI
+      await new Promise(resolve => setTimeout(resolve, 50)); // Small delay to ensure UI renders
       
+      // This call now returns immediately with today's value - historical data syncs in background
       const result = await syncData("sleep");
       
-      // Clear syncing state IMMEDIATELY to unblock UI
+      // Clear syncing state IMMEDIATELY to unblock UI (before processing result)
       setSyncingSleep(false);
       
       if (result.success) {
@@ -430,9 +381,7 @@ function HealthDashboard() {
         // Set snackbar in next tick to avoid blocking
         setTimeout(() => {
           setSnackbarMsg(
-            syncedCount > 1 
-              ? `Synced ${syncedCount} days of sleep data from Apple Health. Today: ${todayValue} hrs`
-              : `Synced ${todayValue} hours of sleep from Apple Health`
+            `Synced ${todayValue} hours of sleep from Apple Health${syncedCount > 1 ? ' (syncing historical data in background)' : ''}`
           );
           setSnackbarVisible(true);
         }, 0);
@@ -470,12 +419,9 @@ function HealthDashboard() {
         {/* Steps Card */}
         <TouchableOpacity
           onPress={() => {
-            if (!syncingSteps) {
-              router.push("/(tabs)/dashboard/track");
-            }
+            router.push("/(tabs)/dashboard/track");
           }}
           activeOpacity={0.7}
-          disabled={false}
           style={{
             flex: 1,
             backgroundColor: "#FFFFFF",
@@ -528,10 +474,13 @@ function HealthDashboard() {
                 Steps
               </Text>
             </View>
-            <View>
+            <View pointerEvents="box-none">
               <TouchableOpacity
-                onPress={() => openModal("steps")}
+                onPress={() => {
+                  openModal("steps");
+                }}
                 style={{ padding: 6 }}
+                activeOpacity={0.7}
               >
                 <AntDesign name="pluscircle" size={22} color="#67c694" />
               </TouchableOpacity>
@@ -593,19 +542,20 @@ function HealthDashboard() {
           </View>
           {/* Sync row - Show "Sync with Apple Health" when sync is NOT enabled */}
           {Platform.OS === "ios" && canSyncSteps && (
-            <TouchableOpacity
-              onPress={() => {
-                handleSyncSteps();
-              }}
-              disabled={syncingSteps}
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                marginTop: 8,
-                justifyContent: "space-between",
-                opacity: syncingSteps ? 0.6 : 1,
-              }}
-            >
+            <View pointerEvents="box-none" style={{ marginTop: 8 }}>
+              <TouchableOpacity
+                onPress={() => {
+                  handleSyncSteps();
+                }}
+                disabled={syncingSteps}
+                activeOpacity={0.7}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  opacity: syncingSteps ? 0.6 : 1,
+                }}
+              >
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 {syncingSteps && (
                   <ActivityIndicator size="small" color="#9747FF" style={{ marginRight: 8 }} />
@@ -628,7 +578,8 @@ function HealthDashboard() {
                   color="#9747FF"
                 />
               )}
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </View>
           )}
           {/* No "Synced with Apple Health" status shown - user manages sync from App Settings */}
         </TouchableOpacity>

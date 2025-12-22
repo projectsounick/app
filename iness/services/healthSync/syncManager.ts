@@ -27,14 +27,14 @@ export async function fetchSyncStatus(): Promise<SyncStatus | null> {
   try {
     // Get user data from AsyncStorage
     const userDataStr = await AsyncStorage.getItem("user");
- console.log("it is userDataStr sync", userDataStr);
+
     if (!userDataStr) {
       return null;
     }
     
     const userData = JSON.parse(userDataStr);
     const healthSync = userData.healthSync;
-    console.log("it is healthSync sync", healthSync);
+ 
     if (!healthSync) {
       // No healthSync data, return default
       return {
@@ -155,55 +155,75 @@ export async function syncDataType(
       };
     }
 
-    // Fetch historical data
-    const data = await HealthKit.getHistoricalData(type, startDate, endDate);
+    // STEP 1: Get today's value IMMEDIATELY (fast call, doesn't block UI)
+    // This gives instant feedback to the user
+    let todayValue = 0;
+    try {
+      todayValue = await HealthKit.getTodayValue(type);
+      console.log(`${LOG_PREFIX.SYNC} Today's ${type} value: ${todayValue}`);
+    } catch (error) {
+      console.error(`${LOG_PREFIX.SYNC} Error getting today's ${type}:`, error);
+      // Continue even if today's value fetch fails
+    }
 
-    if (data.length === 0) {
-      // If this is the first sync attempt and we got no data, 
-      // user might have denied permissions
-      const lastSyncDate = type === "steps" 
-        ? (status?.lastSyncedStepsDate || null)
-        : (status?.lastSyncedSleepDate || null);
-      const isFirstSync = !lastSyncDate;
-      
-      if (isFirstSync) {
-        // Show alert with option to check settings
-        HealthKit.showNoDataOrPermissionAlert(type);
+    // STEP 2: Return success IMMEDIATELY with today's value for UI update
+    // This unblocks the UI immediately
+    
+    // STEP 3: Fetch historical data in BACKGROUND (deferred, non-blocking)
+    // Use setTimeout to defer the heavy work to the next event loop tick
+    setTimeout(async () => {
+      try {
+        // Defer heavy HealthKit calls to prevent UI blocking
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        console.log(`${LOG_PREFIX.SYNC} Starting background historical data fetch for ${type}...`);
+        const data = await HealthKit.getHistoricalData(type, startDate, endDate);
+
+        if (data.length === 0) {
+          // If this is the first sync attempt and we got no data, 
+          // user might have denied permissions
+          const isFirstSync = !lastSyncDate;
+          
+          if (isFirstSync) {
+            // Show alert with option to check settings
+            HealthKit.showNoDataOrPermissionAlert(type);
+          }
+          
+          console.log(`${LOG_PREFIX.SYNC} No historical ${type} data found`);
+          return;
+        }
+
+        console.log(`${LOG_PREFIX.SYNC} Fetched ${data.length} historical ${type} entries in background`);
+
+        // Prepare payload
+        const payload: SyncPayload = {};
+        if (type === "steps") {
+          payload.steps = data;
+        } else if (type === "sleep") {
+          payload.sleep = data;
+        }
+
+        // Get timezone offset and sync to backend IN BACKGROUND
+        const timezoneOffset = new Date().getTimezoneOffset();
+        syncToBackendInBackground(payload, platform, data.length, type, timezoneOffset);
+      } catch (error: any) {
+        console.error(`${LOG_PREFIX.SYNC} Error in background historical sync for ${type}:`, error);
       }
-      
-      return {
-        success: false,
-        value: 0,
-        error: `No ${type} data found in Apple Health`,
-      };
-    }
+    }, 0);
 
-    // Find today's value IMMEDIATELY for UI update
-    const todayEntry = data.find((entry) => {
-      const entryDate = new Date(entry.date);
-      const today = new Date();
-      return entryDate.toDateString() === today.toDateString();
-    });
-    const todayValue = todayEntry?.value || 0;
-
-    // Prepare payload
-    const payload: SyncPayload = {};
-    if (type === "steps") {
-      payload.steps = data;
-    } else if (type === "sleep") {
-      payload.sleep = data;
-    }
-
-    // Return success IMMEDIATELY with today's value
-    // Backend sync happens in background (fire-and-forget)
-    // Sync to backend IN BACKGROUND (fire-and-forget, non-blocking)
-    syncToBackendInBackground(payload, platform, data.length, type);
-
+    // Create today's date at midnight local time, convert to ISO
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    // Return immediately with today's value - UI is now unblocked
     return {
       success: true,
       value: todayValue,
-      syncedCount: data.length,
-      allData: data, // Return all data for store update
+      syncedCount: 1, // Today's entry (historical data synced in background)
+      allData: todayValue > 0 ? [{
+        date: today.toISOString(),
+        value: todayValue,
+      }] : [], // Return today's entry for immediate store update (only if > 0)
     };
   } catch (error: any) {
     console.error(`${LOG_PREFIX.SYNC} EXCEPTION in syncDataType:`, error);
@@ -220,12 +240,13 @@ function syncToBackendInBackground(
   payload: SyncPayload,
   platform: SyncPlatform,
   entryCount: number,
-  type?: HealthDataType
+  type?: HealthDataType,
+  timezoneOffset?: number
 ): void {
   // Fire and forget - don't await anything
   Promise.resolve().then(async () => {
     try {
-      const response = await trackService.syncHealthData(payload, platform);
+      const response = await trackService.syncHealthData(payload, platform, timezoneOffset);
       
       if (response.success) {
         await Storage.clearPendingSync();
@@ -470,8 +491,11 @@ export async function syncNewData(status: SyncStatus): Promise<boolean> {
       return true;
     }
 
+    // Get timezone offset in minutes (e.g., -300 for EST, +330 for IST)
+    const timezoneOffset = new Date().getTimezoneOffset();
+    
     // Sync to backend
-    const response = await trackService.syncHealthData(payload, "ios");
+    const response = await trackService.syncHealthData(payload, "ios", timezoneOffset);
 
     if (response.success) {
       await Storage.clearPendingSync();

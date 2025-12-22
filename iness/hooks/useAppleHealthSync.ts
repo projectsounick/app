@@ -51,7 +51,7 @@ export function useAppleHealthSync(): UseHealthSyncReturn {
   const initializeSync = async () => {
     try {
       const status = await SyncManager.fetchSyncStatus();
-      console.log("it is status sync", status);
+
       if (mountedRef.current) {
         setSyncStatus(status);
         setIsInitialized(true);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,8 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
+import { DietPlanDetails, DietPlan } from "@/app/interfaces/planInterface";
+import DietPlanDetailsModal from "@/app/Modals/DietPlanDetailsModal";
 
 interface PlanCardProps {
   id?: string;
@@ -17,6 +19,9 @@ interface PlanCardProps {
   isActive: boolean;
   type?: "plan" | "diet" | "manual" | "service";
   manualDescription?: string;
+  dietPlanDetails?: DietPlanDetails | DietPlan;
+  dietPlanUrl?: string;
+  dietPlanAssignDate?: string;
 }
 
 const CurrentPlanCard: React.FC<PlanCardProps> = ({
@@ -27,12 +32,22 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
   isActive,
   type = "plan",
   manualDescription,
+  dietPlanDetails,
+  dietPlanUrl,
+  dietPlanAssignDate,
 }) => {
   const router = useRouter();
+  const [modalVisible, setModalVisible] = useState(false);
 
   const handlePress = () => {
     if (type === "manual") {
       router.push({ pathname: "/dashboard/activeManualPlan" });
+      return;
+    }
+
+    // For diet plans, show modal instead of navigating
+    if (type === "diet" && dietPlanDetails) {
+      setModalVisible(true);
       return;
     }
 
@@ -113,10 +128,10 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
                 {title || "Untitled Plan"}
               </Text>
 
-              {/* Description */}
+              {/* Description - Show only 2 items */}
               <View>
                 {descItems.length > 0 ? (
-                  descItems.slice(0, 3).map((item, idx) => (
+                  descItems.slice(0, 2).map((item, idx) => (
                     <View
                       key={idx}
                       style={{
@@ -259,6 +274,17 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
             }}
           />
         </View>
+      )}
+
+      {/* Diet Plan Modal */}
+      {type === "diet" && (
+        <DietPlanDetailsModal
+          visible={modalVisible}
+          onClose={() => setModalVisible(false)}
+          dietPlan={dietPlanDetails || null}
+          dietPlanUrl={dietPlanUrl}
+          dietPlanAssignDate={dietPlanAssignDate}
+        />
       )}
     </View>
   );

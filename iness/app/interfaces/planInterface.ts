@@ -96,6 +96,7 @@ interface ActivePlans {
   dietPlanDetails?: DietPlan;
   createdAt?: string;
   dietPlanUrl?: string;
+  dietPlanAssignDate?: string;
   updatedAt?: string;
 }
 export type {

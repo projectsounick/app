@@ -43,13 +43,15 @@ async function updateTrackingData(
  * Sync health data from device (iOS/Android)
  * @param data - Steps and/or sleep data to sync
  * @param platform - "ios" or "android"
+ * @param timezoneOffset - User's timezone offset in minutes (e.g., -300 for EST, +330 for IST)
  */
 async function syncHealthData(
   data: { steps?: Array<{ date: string; value: number }>; sleep?: Array<{ date: string; value: number }> },
-  platform: "ios" | "android" = "ios"
+  platform: "ios" | "android" = "ios",
+  timezoneOffset?: number
 ): Promise<ApiResponseInterface> {
   const url = `${baseUrl}/sync-health-data`;
-  return await fetchWrapper.post(url, { action: "sync", data, platform });
+  return await fetchWrapper.post(url, { action: "sync", data, platform, timezoneOffset });
 }
 
 /**
