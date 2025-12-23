@@ -25,6 +25,7 @@ import {
 import { ActivityIndicator } from "react-native-paper";
 import { useAppleHealthSync } from "@/hooks/useAppleHealthSync";
 import CustomSnackbar from "@/app/modules/Snackbar";
+import TrackShimmer from "@/app/modules/TrackShimmer";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -33,7 +34,7 @@ type TabType = (typeof tabNames)[number];
 
 const getChartConfig = (tab: TabType) => {
   const colors = {
-    Sleep: { primary: "#67C694", gradient: "#E8F5E9" },
+    Sleep: { primary: "#B39DDB", gradient: "#EDE7F6" },
     Steps: { primary: "#9747FF", gradient: "#F3EDFF" },
     Water: { primary: "#4FC3F7", gradient: "#E3F2FD" },
   };
@@ -43,21 +44,46 @@ const getChartConfig = (tab: TabType) => {
     backgroundGradientFrom: "#FFFFFF",
     backgroundGradientTo: "#FFFFFF",
     color: (opacity = 1) => {
-      const rgb = tab === "Sleep" ? "103, 198, 148" : tab === "Steps" ? "151, 71, 255" : "79, 195, 247";
+      const rgb = tab === "Sleep" ? "179, 157, 219" : tab === "Steps" ? "151, 71, 255" : "79, 195, 247";
       return `rgba(${rgb}, ${opacity})`;
     },
-    labelColor: () => "#666",
+    labelColor: (opacity = 1) => {
+      // Y-axis labels should be darker
+      return `rgba(51, 51, 51, ${opacity})`;
+    },
     strokeWidth: 3,
     propsForDots: {
       r: "6",
       strokeWidth: "2",
       stroke: color.primary,
+      fill: "#FFFFFF",
     },
     propsForLabels: {
       fontSize: 10,
       fontFamily: theme.fonts.regular,
+      fontWeight: "500",
+      fill: "#000000",
+    },
+    propsForVerticalLabels: {
+      fontSize: 10,
+      fontFamily: theme.fonts.regular,
+      fontWeight: "500",
+      fill: "#000000",
+      color: "#000000",
+    },
+    propsForBackgroundLines: {
+      strokeWidth: 1.5,
+      stroke: "#E8E8E8",
+      strokeDasharray: "0", // Solid lines
     },
     decimalPlaces: 0,
+    formatYLabel: (value) => {
+      const num = parseFloat(value);
+      if (num >= 1000) {
+        return `${(num / 1000).toFixed(1)}k`;
+      }
+      return num.toFixed(0);
+    },
   };
 };
 
@@ -273,9 +299,17 @@ export default function TrackingGraphPage() {
   useEffect(() => {
     const monthKey = currentMonth.format("YYYY-MM");
     
+    // Show shimmer when month changes
+    setLoading(true);
+    
     // Use refs to check without causing dependency issues
     if (!loadedMonthsRef.current.has(monthKey) && !loadingMonthsRef.current.has(monthKey)) {
       fetchDataForMonth(currentMonth);
+    } else {
+      // Data already loaded, hide shimmer after brief delay for smooth transition
+      setTimeout(() => {
+        setLoading(false);
+      }, 200);
     }
   }, [monthOffset, fetchDataForMonth]);
 
@@ -456,15 +490,20 @@ export default function TrackingGraphPage() {
         edges={["left", "right"]}
       >
           {loading ? (
-            <View
-              style={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
+            <ScrollView
+              style={{ flex: 1 }}
+              showsVerticalScrollIndicator={false}
             >
-              <ActivityIndicator color="#9747FF" size="large" />
-            </View>
+              <View
+                style={{
+                  paddingHorizontal: 20,
+                  marginTop: Platform.OS === "ios" ? topPadding : "4%",
+                }}
+              >
+                <NormalHeader screenName="Track" />
+              </View>
+              <TrackShimmer />
+            </ScrollView>
           ) : (
             <ScrollView
               style={{ flex: 1 }}
@@ -501,7 +540,7 @@ export default function TrackingGraphPage() {
                   {tabNames.map((tab) => {
                     const isSelected = selectedTab === tab;
                     const tabColors = {
-                      Sleep: { bg: "#67C694", text: "#FFFFFF", icon: "#FFFFFF" },
+                      Sleep: { bg: "#B39DDB", text: "#FFFFFF", icon: "#FFFFFF" },
                       Steps: { bg: "#9747FF", text: "#FFFFFF", icon: "#FFFFFF" },
                       Water: { bg: "#4FC3F7", text: "#FFFFFF", icon: "#FFFFFF" },
                     };
@@ -594,12 +633,12 @@ export default function TrackingGraphPage() {
                   }}>
                     {(() => {
                       const arrowColors = {
-                        Sleep: "#67C694",
+                        Sleep: "#B39DDB",
                         Steps: "#9747FF",
                         Water: "#4FC3F7",
                       };
                       const arrowBgColors = {
-                        Sleep: "#E8F5E9",
+                        Sleep: "#EDE7F6",
                         Steps: "#F3EDFF",
                         Water: "#E3F2FD",
                       };
@@ -805,30 +844,44 @@ export default function TrackingGraphPage() {
                     borderRadius: 20,
                     padding: 20,
                     marginBottom: 24,
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.05,
-                    shadowRadius: 4,
-                    elevation: 2,
                     borderWidth: 1,
                     borderColor: "#F5F5F5",
                   }}
                 >
                   <View>
                     {getGraphData.labels.length > 0 && getGraphData.labels[0] !== "No data" ? (
-                      <LineChart
-                        key={`chart-${selectedTab}-${currentMonth.format("YYYY-MM")}-${chartKey}`}
-                        data={getGraphData}
-                        width={screenWidth - 72}
-                        height={220}
-                        chartConfig={getChartConfig(selectedTab)}
-                        bezier
-                        withShadow={false}
-                        style={{ borderRadius: 16 }}
-                      />
+                      <View style={{ 
+                        backgroundColor: "#FAFAFA", 
+                        borderRadius: 16, 
+                        paddingTop: 8,
+                        paddingBottom: 8,
+                        paddingRight: 8,
+                        paddingLeft: 0,
+                      }}>
+                        <LineChart
+                          key={`chart-${selectedTab}-${currentMonth.format("YYYY-MM")}-${chartKey}`}
+                          data={getGraphData}
+                          width={screenWidth - 64}
+                          height={240}
+                          chartConfig={getChartConfig(selectedTab)}
+                          bezier
+                          withShadow={false}
+                          withInnerLines={true}
+                          withVerticalLines={false}
+                          withHorizontalLines={true}
+                          withVerticalLabels={true}
+                          withHorizontalLabels={true}
+                          segments={5}
+                          fromZero={true}
+                          style={{ 
+                            borderRadius: 12,
+                            marginLeft: -8,
+                          }}
+                        />
+                      </View>
                     ) : (
-                      <View style={{ height: 220, justifyContent: 'center', alignItems: 'center' }}>
-                        <Text style={{ color: '#999', fontSize: 14 }}>No data available</Text>
+                      <View style={{ height: 240, justifyContent: 'center', alignItems: 'center', backgroundColor: "#FAFAFA", borderRadius: 16 }}>
+                        <Text style={{ color: '#999', fontSize: 14, fontFamily: theme.fonts.regular }}>No data available</Text>
                       </View>
                     )}
                   </View>
@@ -877,7 +930,7 @@ export default function TrackingGraphPage() {
                   const targetAchievementRate = count > 0 ? (daysAboveTarget / count) * 100 : 0;
                   
                   const colors = {
-                    Sleep: { text: "#67C694", bg: "#E8F5E9" },
+                    Sleep: { text: "#B39DDB", bg: "#EDE7F6" },
                     Steps: { text: "#9747FF", bg: "#F3EDFF" },
                     Water: { text: "#4FC3F7", bg: "#E3F2FD" },
                   };
@@ -1215,7 +1268,7 @@ export default function TrackingGraphPage() {
                                 width: 36,
                                 height: 36,
                                 borderRadius: 10,
-                                backgroundColor: isLagging ? "#FFEBEE" : "#E8F5E9",
+                                backgroundColor: isLagging ? "#FFEBEE" : "#EDE7F6",
                                 alignItems: "center",
                                 justifyContent: "center",
                                 marginRight: 10,
@@ -1262,7 +1315,7 @@ export default function TrackingGraphPage() {
                                 style={{
                                   fontSize: 14,
                                   fontWeight: "700",
-                                  color: isLagging ? "#D32F2F" : "#2F8C62",
+                                  color: isLagging ? "#D32F2F" : selectedTab === "Sleep" ? "#B39DDB" : "#2F8C62",
                                   fontFamily: theme.fonts.bold,
                                 }}
                               >
@@ -1283,7 +1336,7 @@ export default function TrackingGraphPage() {
                                 style={{
                                   height: "100%",
                                   width: `${Math.min(percentage, 100)}%`,
-                                  backgroundColor: isLagging ? "#FF6B6B" : "#67C694",
+                                  backgroundColor: isLagging ? "#FF6B6B" : "#B39DDB",
                                   borderRadius: 5,
                                 }}
                               />
@@ -1515,7 +1568,9 @@ export default function TrackingGraphPage() {
                               style={{
                                 fontSize: 18,
                                 fontWeight: "700",
-                                color: targetAchievementRate >= 70 ? "#2F8C62" : targetAchievementRate >= 50 ? "#FF9800" : "#D32F2F",
+                                color: selectedTab === "Sleep" 
+                                  ? (targetAchievementRate >= 70 ? "#B39DDB" : targetAchievementRate >= 50 ? "#CE93D8" : "#D32F2F")
+                                  : (targetAchievementRate >= 70 ? "#2F8C62" : targetAchievementRate >= 50 ? "#FF9800" : "#D32F2F"),
                                 fontFamily: theme.fonts.bold,
                                 marginBottom: 4,
                               }}
@@ -1562,7 +1617,7 @@ export default function TrackingGraphPage() {
                       style={{
                         width: 30,
                         height: 3,
-                        backgroundColor: "#9747FF",
+                        backgroundColor: selectedTab === "Sleep" ? "#B39DDB" : selectedTab === "Steps" ? "#9747FF" : "#4FC3F7",
                         borderRadius: 2,
                       }}
                     />
@@ -1590,13 +1645,17 @@ export default function TrackingGraphPage() {
                         width: 64,
                         height: 64,
                         borderRadius: 16,
-                        backgroundColor: "#F3EDFF",
+                        backgroundColor: selectedTab === "Sleep" ? "#EDE7F6" : selectedTab === "Steps" ? "#F3EDFF" : "#E3F2FD",
                         alignItems: "center",
                         justifyContent: "center",
                         marginBottom: 16,
                       }}
                     >
-                      <Ionicons name="bar-chart-outline" size={32} color="#9747FF" />
+                      <Ionicons 
+                        name="bar-chart-outline" 
+                        size={32} 
+                        color={selectedTab === "Sleep" ? "#B39DDB" : selectedTab === "Steps" ? "#9747FF" : "#4FC3F7"} 
+                      />
                     </View>
                     <Text
                       style={{
@@ -1614,7 +1673,7 @@ export default function TrackingGraphPage() {
                   <View style={{ marginBottom: 20 }}>
                     {getSelectedData.map((item, index) => {
                       const colors = {
-                        Sleep: { bg: "#E8F5E9", icon: "#67C694", text: "#67C694" },
+                        Sleep: { bg: "#EDE7F6", icon: "#B39DDB", text: "#B39DDB" },
                         Steps: { bg: "#F3EDFF", icon: "#9747FF", text: "#9747FF" },
                         Water: { bg: "#E3F2FD", icon: "#4FC3F7", text: "#4FC3F7" },
                       };

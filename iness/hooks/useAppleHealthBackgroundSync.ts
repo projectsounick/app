@@ -32,83 +32,92 @@ export function useAppleHealthBackgroundSync(): void {
   // ============================================
 
   /**
-   * Sync new data to backend (runs in background)
+   * Refresh display with current data from backend ONLY
+   * NEVER calls HealthKit - prevents UI freeze
+   * COMPLETELY NON-BLOCKING - uses requestAnimationFrame for smooth updates
    */
-  const syncToBackend = useCallback(async (): Promise<void> => {
+  const refreshDisplayData = useCallback((): void => {
+    if (!isAvailable || !syncStatus) return;
+
+    // Use requestAnimationFrame to ensure UI is responsive
+    requestAnimationFrame(() => {
+      // Defer API call to next tick to prevent blocking
+      setTimeout(async () => {
+        try {
+          // Get current day data from backend
+          const response = await trackService.getCurrentDayTrackData();
+          if (!response.success || !response.data) return;
+
+          // CRITICAL: Just use backend value - NEVER call HealthKit here
+          // Backend already has the correct synced data
+          // Use requestAnimationFrame for Redux dispatch to prevent blocking
+          if (syncStatus.stepSync && response.data.steps) {
+            requestAnimationFrame(() => {
+              if (mountedRef.current) {
+                dispatch(
+                  updateTrackingField({
+                    type: "steps",
+                    data: response.data.steps,
+                  })
+                );
+              }
+            });
+          }
+
+          if (syncStatus.sleepSync && response.data.sleep) {
+            requestAnimationFrame(() => {
+              if (mountedRef.current) {
+                dispatch(
+                  updateTrackingField({
+                    type: "sleep",
+                    data: response.data.sleep,
+                  })
+                );
+              }
+            });
+          }
+        } catch (error) {
+          console.error(`${LOG_PREFIX.BACKGROUND} Display refresh error:`, error);
+        }
+      }, 0);
+    });
+  }, [isAvailable, syncStatus, dispatch]);
+
+  /**
+   * Sync new data to backend (runs in background)
+   * COMPLETELY NON-BLOCKING - fires and forgets
+   */
+  const syncToBackend = useCallback((): void => {
     if (!isAvailable || !syncStatus || syncInProgressRef.current) return;
     if (!syncStatus.stepSync && !syncStatus.sleepSync) return;
 
     syncInProgressRef.current = true;
 
-    try {
-      const success = await SyncManager.syncNewData(syncStatus);
-
+    // Fire sync in background - NO AWAIT, NO BLOCKING
+    SyncManager.syncNewData(syncStatus).then((success) => {
       if (success && mountedRef.current) {
-        // Refresh data from backend
-        await refreshDisplayData();
+        // Refresh data from backend in background
+        refreshDisplayData();
       }
-    } catch (error) {
-      console.error(`${LOG_PREFIX.BACKGROUND} Error:`, error);
-    } finally {
       syncInProgressRef.current = false;
-    }
-  }, [isAvailable, syncStatus]);
+    }).catch((error) => {
+      console.error(`${LOG_PREFIX.BACKGROUND} Error:`, error);
+      syncInProgressRef.current = false;
+    });
+  }, [isAvailable, syncStatus, refreshDisplayData]);
 
   /**
    * Retry any pending syncs
+   * COMPLETELY NON-BLOCKING - fires and forgets
    */
-  const retryPending = useCallback(async (): Promise<void> => {
+  const retryPending = useCallback((): void => {
     if (!isAvailable) return;
 
-    try {
-      await SyncManager.retryPendingSync(syncStatus);
-    } catch (error) {
+    // Fire retry in background - NO AWAIT, NO BLOCKING
+    SyncManager.retryPendingSync(syncStatus).catch((error) => {
       console.error(`${LOG_PREFIX.BACKGROUND} Retry error:`, error);
-    }
+    });
   }, [isAvailable, syncStatus]);
-
-  /**
-   * Refresh display with current data from backend ONLY
-   * NEVER calls HealthKit - prevents UI freeze
-   */
-  const refreshDisplayData = useCallback(async (): Promise<void> => {
-    if (!isAvailable || !syncStatus) return;
-
-    // Defer to next event loop to prevent blocking
-    setTimeout(async () => {
-      try {
-        // Get current day data from backend
-        const response = await trackService.getCurrentDayTrackData();
-        if (!response.success || !response.data) return;
-
-        // CRITICAL: Just use backend value - NEVER call HealthKit here
-        // Backend already has the correct synced data
-        if (syncStatus.stepSync && response.data.steps) {
-          if (mountedRef.current) {
-            dispatch(
-              updateTrackingField({
-                type: "steps",
-                data: response.data.steps,
-              })
-            );
-          }
-        }
-
-        if (syncStatus.sleepSync && response.data.sleep) {
-          if (mountedRef.current) {
-            dispatch(
-              updateTrackingField({
-                type: "sleep",
-                data: response.data.sleep,
-              })
-            );
-          }
-        }
-      } catch (error) {
-        console.error(`${LOG_PREFIX.BACKGROUND} Display refresh error:`, error);
-      }
-    }, 0);
-  }, [isAvailable, syncStatus, dispatch]);
 
   // REMOVED runFullSync - it was causing UI freeze
   // Now we only sync to backend, never refresh display (which was calling HealthKit)

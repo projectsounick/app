@@ -137,13 +137,26 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
             {/* Title */}
             <Text style={styles.title}>{dietPlan.title}</Text>
 
-            {/* Duration */}
-            <View style={styles.durationContainer}>
-              <Ionicons name="time-outline" size={18} color="#9747FF" />
-              <Text style={styles.durationText}>
-                Duration: {dietPlan.duration} {dietPlan.durationType}
-                {dietPlan.duration > 1 ? "s" : ""}
-              </Text>
+            {/* Duration and Assigned Date - Side by Side Cards */}
+            <View style={styles.durationRowContainer}>
+              {/* Duration Card */}
+              <View style={styles.durationCard}>
+                <Ionicons name="time-outline" size={16} color="#9747FF" />
+                <Text style={styles.durationText}>
+                  Duration: {dietPlan.duration} {dietPlan.durationType}
+                  {dietPlan.duration > 1 ? "s" : ""}
+                </Text>
+              </View>
+              
+              {/* Assigned Date Card */}
+              {dietPlanAssignDate && (
+                <View style={styles.assignedCard}>
+                  <Ionicons name="calendar-outline" size={16} color="#9747FF" />
+                  <Text style={styles.assignedText}>
+                    Assigned: {formatDate(dietPlanAssignDate)}
+                  </Text>
+                </View>
+              )}
             </View>
 
             {/* Description */}
@@ -202,18 +215,6 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
               </View>
             )}
 
-            {/* Assignment Date */}
-            {dietPlanAssignDate && (
-              <View style={styles.infoContainer}>
-                <View style={styles.infoRow}>
-                  <Ionicons name="calendar-outline" size={18} color="#9747FF" />
-                  <Text style={styles.infoLabel}>Assigned on: </Text>
-                  <Text style={styles.infoValue}>
-                    {formatDate(dietPlanAssignDate)}
-                  </Text>
-                </View>
-              </View>
-            )}
 
             {/* View Diet Plan Button (Main Green Button) */}
             {dietPlanUrl && (
@@ -344,23 +345,49 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: theme.fonts.bold,
   },
-  durationContainer: {
+  durationRowContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 24,
-    paddingVertical: 8,
+    gap: 12,
+    flexWrap: "wrap",
+  },
+  durationCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
     paddingHorizontal: 16,
     backgroundColor: theme.colors.cardLight,
     borderRadius: 20,
-    alignSelf: "center",
+    flex: 1,
+    minWidth: "45%",
   },
   durationText: {
-    fontSize: theme.fontSizes.regularSmall,
+    fontSize: 12,
     color: theme.colors.secondPrimary,
     fontWeight: theme.fontWeights.medium,
     marginLeft: 8,
     fontFamily: theme.fonts.medium,
+    flex: 1,
+  },
+  assignedCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: theme.colors.cardLight,
+    borderRadius: 20,
+    flex: 1,
+    minWidth: "45%",
+  },
+  assignedText: {
+    fontSize: 12,
+    color: theme.colors.secondPrimary,
+    fontWeight: theme.fontWeights.medium,
+    marginLeft: 8,
+    fontFamily: theme.fonts.medium,
+    flex: 1,
   },
   section: {
     marginBottom: 24,

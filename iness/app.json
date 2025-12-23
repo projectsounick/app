@@ -3,7 +3,7 @@
     "name": "iness",
     "slug": "iness",
     "jsEngine": "hermes",
-    "version": "1.0.42",
+    "version": "1.0.43",
     "orientation": "default",
     "notification": {
       "icon": "./assets/images/logonew.png",
@@ -18,7 +18,7 @@
       "icon": "./assets/images/logonew.png",
       "supportsTablet": false,
       "bundleIdentifier": "com.iness.fitness",
-      "buildNumber": "54",
+      "buildNumber": "55",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSMicrophoneUsageDescription": "We use the microphone for video recording.",
@@ -96,9 +96,9 @@
     "extra": {
       "router": { "origin": false },
       "eas": {
-        "projectId": "d80cbfa4-17b7-44ae-9955-a47743e5be15"
+        "projectId": "87dfba75-ecf1-4c1c-9b9a-74df81667288"
       }
     },
-    "owner": "surjayan"
+    "owner": "sounick_project"
   }
 }
