@@ -15,7 +15,7 @@ import { ActivePlans } from "@/app/interfaces/planInterface";
 import { Session } from "@/app/interfaces/sessionInterface";
 import SessionDetailsTabs from "@/app/Components/ActivePlans.tsx/SessionDetails";
 import { SafeAreaView } from "react-native-safe-area-context";
-import ShimmerLoader from "@/app/modules/TrainSimmer";
+import TrainerShimmer from "@/app/modules/Shimmer/TrainerShimmer";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 
@@ -180,7 +180,7 @@ const FullPlanDetails = () => {
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          <ShimmerLoader screenName="session" />
+          <TrainerShimmer screenName="session" />
         </View>
       ) : (
         <>

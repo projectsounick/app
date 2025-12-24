@@ -1,18 +1,18 @@
 import React from "react";
 import { View, StyleSheet } from "react-native";
 import ShimmerPlaceHolder from "react-native-shimmer-placeholder";
-import { LinearGradient } from "expo-linear-gradient"; // ✅ shimmer requires this
+import { LinearGradient } from "expo-linear-gradient";
 
-// Main functional component for the Simmer skeleton card
-const SimmerSkeletonCard = () => {
+// Main functional component for the Shimmer skeleton card
+const ShimmerCard = () => {
   return (
     <View style={styles.card}>
       {/* Thumbnail */}
       <ShimmerPlaceHolder
-        LinearGradient={LinearGradient} // ✅ add gradient
+        LinearGradient={LinearGradient}
         style={styles.thumbnail}
-        shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]} // ✅ light shimmer
-        visible={false} // ✅ keeps shimmer animating
+        shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+        visible={false}
       />
 
       {/* Content */}
@@ -100,4 +100,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SimmerSkeletonCard;
+export default ShimmerCard;
+

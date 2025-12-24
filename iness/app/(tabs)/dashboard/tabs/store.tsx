@@ -21,6 +21,7 @@ import { ecommerceService } from "@/app/services/ecom.service";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { ActivityIndicator } from "react-native-paper";
+import StoreShimmer from "@/app/modules/Shimmer/StoreShimmer";
 import CategoryList from "@/app/Components/ecom/CategoryList";
 import GroupedProductDisplay from "@/app/Components/ecom/ProductList";
 import SmallHeader from "@/app/modules/SmallHeader";
@@ -56,17 +57,7 @@ export default function EquipScreen() {
       {/* Header */}
       <SmallHeader title="Store" weightShow={false} />
       {loading ? (
-        <View
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            marginTop: "40%",
-          }}
-        >
-          <ActivityIndicator color="#9747FF" />
-        </View>
+        <StoreShimmer />
       ) : (
         <FlatList
           data={components}

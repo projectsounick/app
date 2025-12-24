@@ -27,6 +27,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import ImageViewerModal from "@/app/Modals/ImageViewerModal";
 import VideoViewerModal from "@/app/Modals/VideoViewerModal";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import ProgressShimmer from "@/app/modules/Shimmer/ProgressShimmer";
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.05;
 
@@ -205,9 +206,7 @@ export default function TransformationImage() {
 
         <View style={styles.contentContainer}>
           {loading ? (
-            <View style={styles.loaderContainer}>
-              <ActivityIndicator color="#9747FF" size="large" />
-            </View>
+            <ProgressShimmer />
           ) : (
             <SectionList
               sections={normalizeData(data || [])}
@@ -436,11 +435,6 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     flex: 1,
-  },
-  loaderContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
   },
   listContainer: {
     padding: 16,

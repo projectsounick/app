@@ -510,8 +510,8 @@ export default function AppSettingsScreen() {
         const hasPermissions = await HealthKit.checkPermissionsStatus(type);
         
         if (!hasPermissions) {
-          // Permissions are OFF - update backend
-          const response = await trackService.disableHealthSync(type);
+          // Permissions are OFF - update backend (iOS platform)
+          const response = await trackService.disableHealthSync(type, "ios");
           
           if (response.success) {
             // Update AsyncStorage
@@ -608,7 +608,8 @@ export default function AppSettingsScreen() {
 
   const loadHealthSyncStatus = async () => {
     try {
-      const response = await trackService.getHealthSyncStatus();
+      // Load iOS health sync status (this screen uses iOS-specific hooks)
+      const response = await trackService.getHealthSyncStatus("ios");
       if (response.success && response.data) {
         setStepsSyncEnabled(response.data.stepSync || false);
         setSleepSyncEnabled(response.data.sleepSync || false);

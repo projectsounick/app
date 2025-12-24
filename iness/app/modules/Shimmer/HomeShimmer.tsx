@@ -5,7 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 const { width } = Dimensions.get("window");
 
-export default function HomeSkeleton() {
+export default function HomeShimmer() {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: "#f5f5f5", padding: 12 }}
@@ -207,3 +207,4 @@ export default function HomeSkeleton() {
     </ScrollView>
   );
 }
+

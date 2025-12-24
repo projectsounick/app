@@ -25,7 +25,7 @@ import AppUpdateBottomSheet from "@/app/Modals/AndroidVersionUpdateModal";
 
 import InfoCarousel from "@/app/modules/AdvirtisementCarraousel";
 
-import HomeSimmerSkeleton from "@/app/modules/HomeSimmerSkeleton";
+import HomeShimmer from "@/app/modules/Shimmer/HomeShimmer";
 import HealthReportUploader from "@/app/modules/UploadReportPdf";
 import OffersCards from "@/app/modules/OfferCard";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -204,7 +204,7 @@ const YourComponent = () => {
         // scrollEventThrottle={16}
       >
         {loading ? (
-          <HomeSimmerSkeleton />
+          <HomeShimmer />
         ) : (
           <>
             <OffersCards />

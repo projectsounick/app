@@ -14,8 +14,10 @@ import {
   UIManager,
   LayoutAnimation,
   ActivityIndicator,
+  StyleSheet,
 } from "react-native";
 import { Feather, AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
 import { Linking, Alert } from "react-native";
 import theme from "../Theme/globalTheme";
@@ -113,21 +115,7 @@ const VideoCard = ({
   }, [podcast?.thumbnailImageLink]);
 
   return (
-    <View
-      style={{
-        backgroundColor: "#FFFFFF",
-        marginBottom: 20,
-        borderRadius: 20,
-        overflow: "hidden",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.08,
-        shadowRadius: 12,
-        elevation: 3,
-        borderWidth: 1,
-        borderColor: "#F5F5F5",
-      }}
-    >
+    <View style={styles.cardContainer}>
       {/* Thumbnail or Video */}
       <View
         style={{
@@ -158,50 +146,30 @@ const VideoCard = ({
           >
             <TouchableOpacity
               onPress={handlePlay}
-              style={{
-                backgroundColor: "rgba(0,0,0,0.5)",
-                borderRadius: 50,
-                width: 50,
-                height: 50,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
+              activeOpacity={0.8}
             >
-              <Ionicons name="play" size={30} color="#fff" />
+              <LinearGradient
+                colors={["#9747FF", "#844ACF"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.playButton}
+              >
+                <Ionicons name="play" size={32} color="#FFFFFF" />
+              </LinearGradient>
             </TouchableOpacity>
           </ImageBackground>
         )}
       </View>
 
       {/* Podcast Details */}
-      <View
-        style={{
-          backgroundColor: "#FFFFFF",
-          padding: 16,
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 18,
-            fontWeight: "700",
-            marginTop: 4,
-            color: "#000",
-            fontFamily: theme.fonts.bold,
-            marginBottom: 8,
-          }}
-        >
+      <View style={styles.contentContainer}>
+        <Text style={styles.title}>
           {podcast.podcastName}
         </Text>
 
         {/* Collapsible Description */}
         <Text
-          style={{
-            marginTop: 4,
-            fontSize: 14,
-            color: "#666",
-            fontFamily: theme.fonts.regular,
-            lineHeight: 20,
-          }}
+          style={styles.description}
           numberOfLines={expandedIndex === podcast._id ? undefined : 2}
         >
           {podcast.description?.replace(/\\n/g, "\n")}
@@ -211,32 +179,18 @@ const VideoCard = ({
           onPress={() =>
             setExpandedIndex(expandedIndex === podcast._id ? null : podcast._id)
           }
+          activeOpacity={0.7}
         >
-          <Text
-            style={{
-              color: "#67C694",
-              fontWeight: "600",
-              marginTop: 6,
-              fontFamily: theme.fonts.medium,
-              fontSize: 13,
-            }}
-          >
+          <Text style={styles.showMoreText}>
             {expandedIndex === podcast._id ? "Show Less" : "Show More"}
           </Text>
         </TouchableOpacity>
 
         {/* Actions */}
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            marginTop: 16,
-            alignItems: "center",
-          }}
-        >
+        <View style={styles.actionsContainer}>
           <TouchableOpacity
             onPress={() => handleLike(podcast)}
-            style={{ flexDirection: "row", alignItems: "center" }}
+            style={styles.likeButton}
             activeOpacity={0.7}
           >
             {loggedUser?._id && podcast.likes.includes(loggedUser._id) ? (
@@ -244,19 +198,12 @@ const VideoCard = ({
             ) : (
               <AntDesign name={"hearto"} size={20} color={"#666"} />
             )}
-            <Text
-              style={{
-                marginLeft: 8,
-                color: "#666",
-                fontSize: 14,
-                fontFamily: theme.fonts.medium,
-              }}
-            >
+            <Text style={styles.likeText}>
               {podcast.likes ? podcast.likes.length : 0}
             </Text>
           </TouchableOpacity>
           {showTooltipForPost === podcast._id ? (
-            <ActivityIndicator size="small" color="#67C694" />
+            <ActivityIndicator size="small" color={theme.colors.secondPrimary} />
           ) : (
             <TouchableOpacity
               onPress={() => {
@@ -290,5 +237,75 @@ const VideoCard = ({
     </View>
   );
 };
+
+const styles = StyleSheet.create({
+  cardContainer: {
+    backgroundColor: "#FFFFFF",
+    marginBottom: 20,
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: theme.colors.secondPrimary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 16,
+    elevation: 6,
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+  },
+  playButton: {
+    borderRadius: 35,
+    width: 70,
+    height: 70,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: theme.colors.secondPrimary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  contentContainer: {
+    backgroundColor: "#FFFFFF",
+    padding: 16,
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginTop: 4,
+    color: theme.colors.dark,
+    fontFamily: theme.fonts.bold,
+    marginBottom: 8,
+  },
+  description: {
+    marginTop: 4,
+    fontSize: 14,
+    color: "#666",
+    fontFamily: theme.fonts.regular,
+    lineHeight: 20,
+  },
+  showMoreText: {
+    color: theme.colors.secondPrimary,
+    fontWeight: "600",
+    marginTop: 6,
+    fontFamily: theme.fonts.medium,
+    fontSize: 13,
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 16,
+    alignItems: "center",
+  },
+  likeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  likeText: {
+    marginLeft: 8,
+    color: "#666",
+    fontSize: 14,
+    fontFamily: theme.fonts.medium,
+  },
+});
 
 export default VideoCard;

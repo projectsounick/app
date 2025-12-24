@@ -225,6 +225,8 @@ export default function TestimonialsScreen() {
                               style={styles.image}
                               resizeMode="contain"
                             />
+                            {/* Gradient Overlay */}
+                            <View style={styles.imageOverlay} />
                             {/* Expand Icon */}
                             <View style={styles.expandIcon}>
                               <Ionicons name="expand" size={14} color="#9747FF" />
@@ -246,17 +248,23 @@ export default function TestimonialsScreen() {
                                 <AntDesign
                                   key={i}
                                   name={i < testimonial.rating ? "star" : "staro"}
-                                  size={11}
-                                  color="#FFD700"
-                                  style={{ marginRight: 1 }}
+                                  size={12}
+                                  color="#FFB800"
+                                  style={{ marginRight: 2 }}
                                 />
                               ))}
+                              {testimonial.rating > 0 && (
+                                <Text style={styles.ratingText}>
+                                  {testimonial.rating.toFixed(1)}
+                                </Text>
+                              )}
                             </View>
 
-                            {/* Review Text - Only 2 lines */}
+                            {/* Review Text - Properly constrained */}
                             <Text
                               style={styles.reviewText}
-                              numberOfLines={2}
+                              numberOfLines={3}
+                              ellipsizeMode="tail"
                             >
                               {testimonial.review}
                             </Text>
@@ -381,23 +389,7 @@ export default function TestimonialsScreen() {
                 </ScrollView>
               )}
 
-              {/* Dots Indicator */}
-              {validTestimonials.length > 1 && (
-                <View style={styles.dotsContainer}>
-                  {validTestimonials.map((_, index) => (
-                      <View
-                        key={index}
-                        style={[
-                          styles.dot,
-                          {
-                            backgroundColor:
-                              index === activeIndex ? "#9747FF" : "#E0E0E0",
-                          },
-                        ]}
-                      />
-                    ))}
-                </View>
-              )}
+              {/* Dots Indicator - Removed */}
             </View>
           </KeyboardAvoidingView>
         </Modal>
@@ -481,75 +473,97 @@ const styles = StyleSheet.create({
   testimonialRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 12,
+    marginBottom: 16,
     gap: 12,
   },
   testimonialCard: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
+    borderRadius: 20,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    shadowColor: "#9747FF",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 6,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: "#F0F0F0",
     maxWidth: (width - 48) / 2, // 2 cards with padding and gaps
-    minHeight: 200, // Reduced height
   },
   imageContainer: {
     width: "100%",
-    aspectRatio: 305 / 130, // Maintain testimonial image aspect ratio (305x130)
+    height: 120, // Reduced height for better proportion
     overflow: "hidden",
     position: "relative",
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#F8F8F8",
     justifyContent: "center",
     alignItems: "center",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
   },
   image: {
     width: "100%",
     height: "100%",
     resizeMode: "contain", // Show full image without cropping
   },
+  imageOverlay: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 30,
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+  },
   expandIcon: {
     position: "absolute",
-    top: 6,
-    right: 6,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.9)",
+    top: 8,
+    right: 8,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.95)",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 2,
-    elevation: 2,
+    shadowColor: "#9747FF",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "rgba(151, 71, 255, 0.1)",
   },
   cardContent: {
-    padding: 10,
+    padding: 12,
     flex: 1,
+    justifyContent: "flex-start",
   },
   reviewerName: {
-    fontSize: 13,
+    fontSize: 14,
     fontFamily: theme.fonts.bold,
-    color: "#000",
+    color: "#1A1A1A",
     fontWeight: "700",
-    marginBottom: 3,
+    marginBottom: 6,
   },
   ratingContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 4,
+    marginBottom: 8,
+  },
+  ratingText: {
+    fontSize: 11,
+    fontFamily: theme.fonts.medium,
+    color: "#666",
+    marginLeft: 4,
+    fontWeight: "600",
   },
   reviewText: {
-    fontSize: 10,
+    fontSize: 11,
     fontFamily: theme.fonts.regular,
-    color: "#666",
-    lineHeight: 14,
+    color: "#555",
+    lineHeight: 16,
+    marginTop: 2,
   },
   // Empty State
   emptyContainer: {

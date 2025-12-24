@@ -7,6 +7,7 @@ import ImageSelectorModal from "@/app/Modals/CommunitPostModal";
 import PostFeed from "@/app/Components/Community/CommunityFeed";
 import { communityService } from "@/app/services/community.service";
 import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
+import FeedShimmer from "@/app/modules/Shimmer/FeedShimmer";
 
 function YourComponent() {
   const [posts, setPosts] = useState<any[]>([]);
@@ -42,21 +43,17 @@ function YourComponent() {
       style={{ flex: 1, backgroundColor: "#FFFFFF" }}
       edges={["left", "right"]}
     >
+      <SmallHeader
+        weightShow={false}
+        title={communitName || "Fitness Hub"}
+        onCreatePost={() => createPostModalRef.current?.openModal()}
+        showCart={false}
+        showBell={false}
+      />
       {loading ? (
-        <View
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <ActivityIndicator size="large" color="#007BFF" />
-        </View>
+        <FeedShimmer />
       ) : (
         <>
-          <SmallHeader
-            weightShow={false}
-            title={communitName || "Fitness Hub"}
-            onCreatePost={() => createPostModalRef.current?.openModal()}
-            showCart={false}
-            showBell={false}
-          />
           <PostFeed
             communityId={communityId}
             posts={posts}

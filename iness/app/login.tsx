@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
+  ScrollView,
 } from "react-native";
 import { Formik } from "formik";
 import { useRouter } from "expo-router";
@@ -84,24 +85,227 @@ const Login = () => {
           style={{ flex: 1 }}
         >
           <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
             style={{
               flex: 1,
-              justifyContent: "center",
-              paddingHorizontal: theme.spacing.lg,
-              display: "flex",
-              flexDirection: "column",
             }}
+            enabled={true}
           >
-            <View
-              style={{
-                flex: 1, // Ensures the View takes up the full available space
-                justifyContent: "space-between", // Adds space between top content and the button
-                alignItems: "center",
-                paddingTop: Platform.OS === "android" ? "5%" : "12%",
-                paddingBottom: "10%",
-              }}
-            >
+            {Platform.OS === "android" ? (
+              <View
+                style={{
+                  flex: 1,
+                  paddingHorizontal: theme.spacing.lg,
+                }}
+              >
+                <ScrollView
+                  contentContainerStyle={{
+                    paddingTop: "5%",
+                    paddingHorizontal: 0,
+                    flexGrow: 1,
+                  }}
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={false}
+                >
+                  {/* Top Content */}
+                  <View style={{ width: "100%", alignItems: "flex-start", paddingHorizontal: 0 }}>
+                    <NormalHeader screenName="Your Email" />
+
+                    <Text
+                      style={{
+                        fontSize: theme.fontSizes.regular,
+                        color: theme.colors.normal,
+                        textAlign: "center",
+                        marginTop: 12,
+                        marginBottom: theme.spacing.lg,
+                      }}
+                    >
+                      please provide your Email. Your privacy is our priority.
+                    </Text>
+
+                    <Formik
+                      innerRef={formikRef}
+                      initialValues={{ email: "" }}
+                      onSubmit={(values, { resetForm }) => {
+                        submitLoginData(values.email, resetForm);
+                        // ✅ Reset the form after submission
+                      }}
+                    >
+                      {({
+                        handleChange,
+                        handleBlur,
+                        handleSubmit,
+                        values,
+                        errors,
+                        touched,
+                      }) => (
+                        <>
+                          {/* Phone Input + Country Picker */}
+                          <View
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                              backgroundColor: "#fff",
+                              borderRadius: 8,
+                              paddingHorizontal: theme.spacing.md,
+                              paddingVertical: 6,
+                              width: "100%",
+                              elevation: 2,
+                              marginBottom: theme.spacing.sm,
+                              alignSelf: "stretch",
+                            }}
+                          >
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                height: 48,
+                                borderColor: "#ccc",
+                                borderWidth: 0,
+                                borderRadius: 8,
+                                paddingHorizontal: 12,
+                                backgroundColor: "#fff",
+                                flex: 1,
+                                minWidth: 0,
+                              }}
+                            >
+                              <MaterialCommunityIcons
+                                name="email-outline"
+                                size={20}
+                                color="#888"
+                                style={{ marginRight: 8 }}
+                              />
+                              <TextInput
+                                placeholder="Enter email"
+                                placeholderTextColor="#888"
+                                value={values.email}
+                                underlineColorAndroid="transparent"
+                                onChangeText={(text) => {
+                                  const lowerText = text.toLowerCase();
+                                  handleChange("email")(lowerText);
+                                  setEmailValue(lowerText);
+                                }}
+                                onBlur={handleBlur("email")}
+                                keyboardType="email-address"
+                                textContentType="emailAddress"
+                                autoComplete="email"
+                                importantForAutofill="yes"
+                                autoCapitalize="none"
+                                style={{
+                                  flex: 1,
+                                  fontSize: 16,
+                                  color: "#000",
+                                  backgroundColor: "transparent",
+                                  borderWidth: 0,
+                                  borderBottomWidth: 0,
+                                  paddingVertical: 0,
+                                  includeFontPadding: false,
+                                  textAlignVertical: "center",
+                                }}
+                              />
+                            </View>
+                          </View>
+
+                          {/* Error */}
+                          {errorMessage && (
+                            <Text
+                              style={{
+                                color: "red",
+                                fontSize: theme.fontSizes.small,
+                                alignSelf: "center",
+                                textAlign: "center",
+                                marginBottom: theme.spacing.md,
+                                marginLeft: 4,
+                              }}
+                            >
+                              {errorMessage}
+                            </Text>
+                          )}
+                        </>
+                      )}
+                    </Formik>
+                  </View>
+                </ScrollView>
+
+                {/* Fixed Bottom Section */}
+                <View
+                  style={{
+                    paddingBottom: "10%",
+                    width: "100%",
+                    paddingHorizontal: 0,
+                  }}
+                >
+                  {/* Privacy Policy Checkbox */}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "center",
+                      marginBottom: 16,
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Checkbox
+                      value={isChecked}
+                      onValueChange={setIsChecked}
+                      color={isChecked ? "#67C694" : undefined}
+                      style={{
+                        borderRadius: 4,
+                        width: 18,
+                        height: 18,
+                      }}
+                    />
+                    <Text
+                      style={{
+                        fontSize: 13,
+                        color: "#000",
+                        marginLeft: 10,
+                        fontFamily: theme.fonts.regular,
+                      }}
+                    >
+                      I accept the{" "}
+                      <Text
+                        style={{
+                          color: "#9747FF",
+                          fontFamily: theme.fonts.medium,
+                          textDecorationLine: "underline",
+                        }}
+                        onPress={() => setPolicyVisible(true)}
+                      >
+                        Privacy Policy & Terms
+                      </Text>
+                    </Text>
+                  </View>
+
+                  <View
+                    style={{
+                      opacity: !isChecked || !emailValue.trim() ? 0.5 : 1,
+                    }}
+                  >
+                    <AnimatedSubmitButton
+                      loading={loading}
+                      onPress={() => {
+                        if (isChecked && emailValue.trim()) {
+                          formikRef.current?.handleSubmit();
+                        }
+                      }}
+                      height={56}
+                      title="Send OTP"
+                    />
+                  </View>
+                </View>
+              </View>
+            ) : (
+              <View
+                style={{
+                  flex: 1,
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  paddingTop: "12%",
+                  paddingBottom: "10%",
+                  paddingHorizontal: theme.spacing.lg,
+                }}
+              >
               {/* Top Content */}
               <View style={{ width: "100%" }}>
                 <NormalHeader screenName="Your Email" />
@@ -290,6 +494,7 @@ const Login = () => {
                 </View>
               </View>
             </View>
+            )}
           </KeyboardAvoidingView>
 
           {/* // Snackbar for displaying messages */}

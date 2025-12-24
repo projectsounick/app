@@ -6,7 +6,7 @@ import SmallHeader from "@/app/modules/SmallHeader";
 import { PodcastInterface } from "@/app/interfaces/podcastsInterface";
 import { podCastService } from "@/app/services/podcast.service";
 import useGetDataHook from "@/hooks/useFetchHook";
-import SimmerSkeletonCard from "@/app/modules/SimmerCard";
+import ShimmerCard from "@/app/modules/Shimmer/ShimmerCard";
 
 import theme from "@/app/Theme/globalTheme";
 import CustomSnackbar from "@/app/modules/Snackbar";
@@ -78,8 +78,8 @@ export default function MediaScreen() {
       >
         {loading ? (
           <>
-            <SimmerSkeletonCard />
-            <SimmerSkeletonCard />
+            <ShimmerCard />
+            <ShimmerCard />
           </>
         ) : mediaItems.length === 0 && loggedUser ? (
           <View

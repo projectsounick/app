@@ -8,6 +8,8 @@ import {
   Platform,
   Dimensions,
   ImageBackground,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import theme from "./Theme/globalTheme";
 import AnimatedSubmitButton from "./modules/AnimatedSubmitButton";
@@ -64,21 +66,29 @@ const OTPInputScreen = () => {
   //// Function to handle the submission of the OTP data---------------------/
   const handleSubmit = async () => {
     setLoading(true);
-    let userAsyncStorageResponse =
-      await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+    try {
+      let userAsyncStorageResponse =
+        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
 
-    //// Check if the phone number exists in AsyncStorage
-    if (
-      !userAsyncStorageResponse ||
-      userAsyncStorageResponse.exists === false
-    ) {
-      setSnackbarVisible(true);
-      setSnackbarMessage("Phone number not found. Please try again.");
-      return;
-    }
+      //// Check if the phone number exists in AsyncStorage
+      if (
+        !userAsyncStorageResponse ||
+        userAsyncStorageResponse.exists === false
+      ) {
+        setLoading(false);
+        setSnackbarVisible(true);
+        setSnackbarMessage("Phone number not found. Please try again.");
+        return;
+      }
 
-    const fullOtp = otp.join("");
-    if (fullOtp.length === 6) {
+      const fullOtp = otp.join("");
+      if (fullOtp.length !== 6) {
+        setLoading(false);
+        setSnackbarVisible(true);
+        setSnackbarMessage("Please enter a valid OTP.");
+        return;
+      }
+
       try {
         //// Calling the fcmToken getting tuils funciton to get the fcmToken ------------------/
         const pushToken = await registerForPushNotificationsAsync();
@@ -89,10 +99,14 @@ const OTPInputScreen = () => {
           expoPushToken: pushToken,
         };
 
+        // Keep loading true throughout the entire process
         const [response, dietPlanResponse] = await Promise.all([
           callService(requestBody),
           userService.getActiveDietPlans(),
         ]);
+
+        // Ensure loading stays true after callService (which sets it to false in its finally block)
+        setLoading(true);
 
         try {
           if (dietPlanResponse.success && dietPlanResponse.data) {
@@ -120,27 +134,40 @@ const OTPInputScreen = () => {
 
             await AsyncStorage.removeItem("wasRedirectedFromCart");
 
+            // Navigate and keep loading visible until navigation transition starts
             navigation.navigate("secondsplashscreen");
+            
+            // Set loading to false after a brief delay to ensure navigation transition has started
+            setTimeout(() => {
+              setLoading(false);
+            }, 500);
 
             //// When onboarding is true we will directly redirect him to secondsplashscreen
             // Uncomment to navigate on success
           } else {
             setOtp(["", "", "", "", "", ""]);
             //// when onboarding is false we will redirect him to onboarding screen
-            navigation.navigate("Onboarding"); // Uncomment to navigate on success
+            navigation.navigate("Onboarding");
+            
+            // Set loading to false after a brief delay to ensure navigation transition has started
+            setTimeout(() => {
+              setLoading(false);
+            }, 500);
           }
         } else {
+          setLoading(false);
           setSnackbarVisible(true);
           setSnackbarMessage("Invalid OTP. Please try again.");
         }
       } catch (error) {
+        setLoading(false);
         console.error("Error verifying OTP:", error);
         setSnackbarVisible(true);
         setSnackbarMessage("Error verifying OTP. Please try again.");
       }
-    } else {
-      setSnackbarVisible(true);
-      setSnackbarMessage("Please enter a valid OTP.");
+    } catch (error) {
+      setLoading(false);
+      console.error("Error in handleSubmit:", error);
     }
   };
 
@@ -170,24 +197,25 @@ const OTPInputScreen = () => {
     }
   };
   return (
-    <ImageBackground
-      source={require("../assets/images/onboardingBackground.jpg")}
-      style={{ flex: 1 }}
-    >
-      <KeyboardAvoidingView
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+      <ImageBackground
+        source={require("../assets/images/onboardingBackground.jpg")}
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
       >
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "space-between",
-            paddingTop: Platform.OS === "android" ? "5%" : "12%",
-            paddingBottom: "10%",
-            paddingHorizontal: theme.spacing.lg,
-          }}
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
         >
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "space-between",
+              paddingTop: Platform.OS === "android" ? "5%" : "12%",
+              paddingBottom: "10%",
+              paddingHorizontal: theme.spacing.lg,
+            }}
+          >
           {/* Top Content */}
           <View style={{ alignItems: "center", gap: theme.spacing.lg, width: "100%" }}>
             <View
@@ -267,15 +295,16 @@ const OTPInputScreen = () => {
             height={50}
             loading={loading}
           />
-        </View>
-      </KeyboardAvoidingView>
-      <CustomSnackbar
-        visible={snackbarVisible}
-        message={snackbarMessage}
-        bgColor={theme.colors.primary}
-        onDismiss={() => setSnackbarVisible(false)}
-      />
-    </ImageBackground>
+          </View>
+        </KeyboardAvoidingView>
+        <CustomSnackbar
+          visible={snackbarVisible}
+          message={snackbarMessage}
+          bgColor={theme.colors.primary}
+          onDismiss={() => setSnackbarVisible(false)}
+        />
+      </ImageBackground>
+    </TouchableWithoutFeedback>
   );
 };
 

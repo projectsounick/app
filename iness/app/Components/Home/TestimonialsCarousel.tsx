@@ -16,7 +16,7 @@ import { useRouter } from "expo-router";
 
 const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.6;
-const CARD_HEIGHT = height < 700 ? height * 0.19 : height < 900 ? height * 0.21 : height * 0.23;
+const CARD_HEIGHT = height < 700 ? 200 : height < 900 ? 220 : 240; // Fixed heights for better proportion
 
 interface Testimonial {
   imageUrl: string;
@@ -115,7 +115,7 @@ const TestimonialsCarousel = () => {
   ).current;
 
   const { height: screenHeight } = Dimensions.get("window");
-  const mainCardPadding = screenHeight < 700 ? 12 : screenHeight < 900 ? 14 : 16;
+  const mainCardPadding = 10; // Fixed reduced padding
 
   if (loading) {
     return (
@@ -209,13 +209,13 @@ const TestimonialsCarousel = () => {
           { zIndex },
         ]}
       >
-        <View style={[styles.card, { height: CARD_HEIGHT }]}>
-          {/* Image */}
-          <View style={[styles.imageContainer, { height: CARD_HEIGHT * 0.45 }]}>
+        <View style={styles.card}>
+          {/* Image - Starts from top */}
+          <View style={styles.imageContainer}>
             <Image
               source={{ uri: testimonial.imageUrl }}
               style={styles.image}
-              resizeMode="cover"
+              resizeMode="contain"
             />
           </View>
 
@@ -231,15 +231,22 @@ const TestimonialsCarousel = () => {
                   key={i}
                   name={i < testimonial.rating ? "star" : "staro"}
                   size={12}
-                  color="#FFD700"
+                  color="#FFB800"
                   style={{ marginRight: 2 }}
                 />
               ))}
+              {testimonial.rating > 0 && (
+                <Text style={styles.ratingText}>
+                  {testimonial.rating.toFixed(1)}
+                </Text>
+              )}
             </View>
 
-            <Text style={styles.reviewText} numberOfLines={2}>
-              {testimonial.review}
-            </Text>
+            <View style={styles.reviewContainer}>
+              <Text style={styles.reviewText} numberOfLines={2} ellipsizeMode="tail">
+                {testimonial.review}
+              </Text>
+            </View>
           </View>
         </View>
       </Animated.View>
@@ -278,18 +285,7 @@ const TestimonialsCarousel = () => {
         {renderCard(0, 10)}
       </View>
 
-      {/* Dots */}
-      <View style={styles.dotsContainer}>
-        {testimonials.map((_, index) => (
-          <View
-            key={index}
-            style={[
-              styles.dot,
-              { backgroundColor: index === currentIndex ? "#9747FF" : "#E0E0E0" },
-            ]}
-          />
-        ))}
-      </View>
+      {/* Dots - Removed */}
     </View>
   );
 };
@@ -299,14 +295,16 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderRadius: 20,
     paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 10,
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowColor: "#9747FF",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 3,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: "#F0F0F0",
   },
   container: {
     backgroundColor: "#FFFFFF",
@@ -328,7 +326,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 10,
   },
   iconContainer: {
     width: 34,
@@ -357,10 +355,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   carouselContainer: {
-    height: CARD_HEIGHT + 20,
+    height: 260, // Adjusted for larger image
     justifyContent: "center",
     alignItems: "center",
     overflow: "visible",
+    marginBottom: 4,
   },
   cardWrapper: {
     position: "absolute",
@@ -368,22 +367,27 @@ const styles = StyleSheet.create({
   },
   card: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 18,
-    padding: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 10,
-    elevation: 8,
+    borderRadius: 16,
+    padding: 0, // Remove padding so image can start from top
+    overflow: "hidden", // Ensure image respects border radius
+    shadowColor: "#9747FF",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
     borderWidth: 1,
     borderColor: "#F0F0F0",
   },
   imageContainer: {
     width: "100%",
-    borderRadius: 12,
+    height: 150, // Increased height for better image display
+    borderRadius: 16,
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
     overflow: "hidden",
-    marginBottom: 10,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: "#F8F8F8",
+    justifyContent: "center",
+    alignItems: "center",
   },
   image: {
     width: "100%",
@@ -391,36 +395,38 @@ const styles = StyleSheet.create({
   },
   cardContent: {
     flex: 1,
+    justifyContent: "flex-start",
+    padding: 12,
+    paddingTop: 10,
   },
   reviewerName: {
-    fontSize: 15,
+    fontSize: 14,
     fontFamily: theme.fonts.bold,
-    color: "#000",
+    color: "#1A1A1A",
     fontWeight: "700",
-    marginBottom: 4,
+    marginBottom: 5,
   },
   ratingContainer: {
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 6,
   },
-  reviewText: {
-    fontSize: 12,
-    fontFamily: theme.fonts.regular,
+  ratingText: {
+    fontSize: 10,
+    fontFamily: theme.fonts.medium,
     color: "#666",
+    marginLeft: 4,
+    fontWeight: "600",
+  },
+  reviewContainer: {
+    maxHeight: 32, // Constrain review text height to prevent overflow
+    overflow: "hidden",
+  },
+  reviewText: {
+    fontSize: 11,
+    fontFamily: theme.fonts.regular,
+    color: "#555",
     lineHeight: 16,
-  },
-  dotsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    marginTop: 16,
-    gap: 8,
-  },
-  dot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
   },
 });
 

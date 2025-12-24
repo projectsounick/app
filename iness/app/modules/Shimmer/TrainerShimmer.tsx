@@ -3,11 +3,11 @@ import { View, StyleSheet, ScrollView } from "react-native";
 import ShimmerPlaceHolder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
 
-interface ShimmerLoaderProps {
+interface TrainerShimmerProps {
   screenName: "train" | "session";
 }
 
-const ShimmerLoader: React.FC<ShimmerLoaderProps> = ({ screenName }) => {
+const TrainerShimmer: React.FC<TrainerShimmerProps> = ({ screenName }) => {
   return (
     <View style={styles.wrapper}>
       <ScrollView
@@ -231,4 +231,5 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ShimmerLoader;
+export default TrainerShimmer;
+

@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { View, Text, FlatList, Image, ImageBackground, Dimensions, Platform, ActivityIndicator, TouchableOpacity } from "react-native";
+import { View, Text, FlatList, Image, ImageBackground, Dimensions, Platform, ActivityIndicator, TouchableOpacity, StyleSheet } from "react-native";
 import VideoCard from "@/app/modules/VideoCard";
 import NormalHeader from "@/app/modules/NormalHeader";
 import { PodcastInterface } from "@/app/interfaces/podcastsInterface";
 import { podCastService } from "@/app/services/podcast.service";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 import theme from "@/app/Theme/globalTheme";
 import { UserData } from "@/app/interfaces/UserInterface";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
@@ -152,80 +153,32 @@ export default function MediaScreen() {
           </View>
 
           {displayPodcasts.length === 0 && loggedUser ? (
-            <View
-              style={{
-                flex: 1,
-                alignItems: "center",
-                justifyContent: "center",
-                padding: 40,
-                minHeight: height * 0.6,
-              }}
-            >
-              <View
-                style={{
-                  backgroundColor: "#FFFFFF",
-                  borderRadius: 24,
-                  padding: 32,
-                  alignItems: "center",
-                  width: "100%",
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.08,
-                  shadowRadius: 12,
-                  elevation: 3,
-                  borderWidth: 1,
-                  borderColor: "#F5F5F5",
-                }}
-              >
-                <View
-                  style={{
-                    width: 80,
-                    height: 80,
-                    borderRadius: 40,
-                    backgroundColor: "#F3EDFF",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    marginBottom: 20,
-                  }}
+            <View style={styles.emptyContainer}>
+              <View style={styles.emptyCard}>
+                <LinearGradient
+                  colors={["#9747FF", "#844ACF"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.emptyIconContainer}
                 >
                   <MaterialCommunityIcons
                     name="podcast"
-                    size={40}
-                    color="#9747FF"
+                    size={44}
+                    color="#FFFFFF"
                   />
-                </View>
+                </LinearGradient>
 
-                <Text
-                  style={{
-                    fontSize: 20,
-                    fontFamily: theme.fonts.bold,
-                    color: "#000",
-                    textAlign: "center",
-                    marginBottom: 8,
-                  }}
-                >
+                <Text style={styles.emptyTitle}>
                   No Media Available
                 </Text>
 
-                <Text
-                  style={{
-                    fontSize: 14,
-                    fontFamily: theme.fonts.regular,
-                    color: "#666",
-                    textAlign: "center",
-                    marginBottom: 24,
-                  }}
-                >
+                <Text style={styles.emptySubtitle}>
                   We will update soon
                 </Text>
 
                 <Image
                   source={require("../../../assets/images/placeholderMedia.png")}
-                  style={{
-                    width: 200,
-                    height: 200,
-                    resizeMode: "contain",
-                  }}
+                  style={styles.emptyImage}
                 />
               </View>
             </View>
@@ -248,28 +201,25 @@ export default function MediaScreen() {
               showsVerticalScrollIndicator={false}
               ListFooterComponent={
                 loadingMore ? (
-                  <View style={{ padding: 20, alignItems: "center" }}>
-                    <ActivityIndicator size="small" color="#67C694" />
+                  <View style={styles.footerContainer}>
+                    <ActivityIndicator size="small" color={theme.colors.secondPrimary} />
                   </View>
                 ) : hasMore && displayPodcasts.length > 0 ? (
-                  <View style={{ padding: 20, alignItems: "center" }}>
+                  <View style={styles.footerContainer}>
                     <TouchableOpacity
                       onPress={fetchMorePodcasts}
-                      style={{
-                        backgroundColor: "#67C694",
-                        paddingVertical: 12,
-                        paddingHorizontal: 24,
-                        borderRadius: 20,
-                        shadowColor: "#67C694",
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.3,
-                        shadowRadius: 4,
-                        elevation: 3,
-                      }}
+                      activeOpacity={0.8}
                     >
-                      <Text style={{ color: "#fff", fontFamily: theme.fonts.bold, fontSize: 14 }}>
-                        Load More
-                      </Text>
+                      <LinearGradient
+                        colors={["#9747FF", "#844ACF"]}
+                        start={{ x: 0, y: 0 }}
+                        end={{ x: 1, y: 1 }}
+                        style={styles.loadMoreButton}
+                      >
+                        <Text style={styles.loadMoreText}>
+                          Load More
+                        </Text>
+                      </LinearGradient>
                     </TouchableOpacity>
                   </View>
                 ) : null
@@ -283,3 +233,79 @@ export default function MediaScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  emptyContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 40,
+    minHeight: height * 0.6,
+  },
+  emptyCard: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    padding: 32,
+    alignItems: "center",
+    width: "100%",
+    shadowColor: theme.colors.secondPrimary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 8,
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+  },
+  emptyIconContainer: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 20,
+    shadowColor: theme.colors.secondPrimary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  emptyTitle: {
+    fontSize: 22,
+    fontFamily: theme.fonts.bold,
+    color: theme.colors.dark,
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  emptySubtitle: {
+    fontSize: 15,
+    fontFamily: theme.fonts.regular,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  emptyImage: {
+    width: 200,
+    height: 200,
+    resizeMode: "contain",
+  },
+  footerContainer: {
+    padding: 20,
+    alignItems: "center",
+  },
+  loadMoreButton: {
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    borderRadius: 24,
+    shadowColor: theme.colors.secondPrimary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  loadMoreText: {
+    color: "#FFFFFF",
+    fontFamily: theme.fonts.bold,
+    fontSize: 15,
+    fontWeight: "700",
+  },
+});

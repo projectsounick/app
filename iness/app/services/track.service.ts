@@ -56,16 +56,19 @@ async function syncHealthData(
 
 /**
  * Get user's health sync status
+ * @param platform - "ios" or "android" to get platform-specific sync status
  */
-async function getHealthSyncStatus(): Promise<ApiResponseInterface> {
+async function getHealthSyncStatus(platform: "ios" | "android" = "ios"): Promise<ApiResponseInterface> {
   const url = `${baseUrl}/sync-health-data`;
-  return await fetchWrapper.post(url, { action: "status" });
+  return await fetchWrapper.post(url, { action: "status", platform });
 }
 
 /**
  * Disable health sync for a specific type
+ * @param type - "steps" or "sleep"
+ * @param platform - "ios" or "android" to disable platform-specific sync
  */
-async function disableHealthSync(type: "steps" | "sleep"): Promise<ApiResponseInterface> {
+async function disableHealthSync(type: "steps" | "sleep", platform: "ios" | "android" = "ios"): Promise<ApiResponseInterface> {
   const url = `${baseUrl}/sync-health-data`;
-  return await fetchWrapper.post(url, { action: "disable", type });
+  return await fetchWrapper.post(url, { action: "disable", type, platform });
 }

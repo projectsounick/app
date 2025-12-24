@@ -24,8 +24,9 @@ import {
 } from "@/Slices/trackSlice";
 import { ActivityIndicator } from "react-native-paper";
 import { useAppleHealthSync } from "@/hooks/useAppleHealthSync";
+import { useAndroidHealthSync } from "@/hooks/useAndroidHealthSync";
 import CustomSnackbar from "@/app/modules/Snackbar";
-import TrackShimmer from "@/app/modules/TrackShimmer";
+import TrackShimmer from "@/app/modules/Shimmer/TrackShimmer";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -124,8 +125,14 @@ export default function TrackingGraphPage() {
     (state: RootState) => state.track.totalTrackData as TrackingData[]
   );
   
-  // Apple Health sync hook
-  const { isAvailable, syncData, syncStatus } = useAppleHealthSync();
+  // Platform-specific health sync hooks
+  const iosHealthSync = useAppleHealthSync();
+  const androidHealthSync = useAndroidHealthSync();
+  
+  // Use platform-specific hook based on OS
+  const { isAvailable, syncData, syncStatus } = Platform.OS === "ios" 
+    ? iosHealthSync 
+    : androidHealthSync;
   
   // Store data per month: { "2024-12": TrackingData[], "2024-11": TrackingData[], ... }
   const [monthDataMap, setMonthDataMap] = useState<{ [monthKey: string]: TrackingData[] }>({});
@@ -621,13 +628,13 @@ export default function TrackingGraphPage() {
                   <View style={{ 
                     flexDirection: "row", 
                     alignItems: "center", 
-                    flex: Platform.OS === "ios" && isAvailable && 
+                    flex: isAvailable && 
                       ((selectedTab === "Steps" && syncStatus?.stepSync) || 
                        (selectedTab === "Sleep" && syncStatus?.sleepSync)) ? 1 : undefined,
-                    justifyContent: Platform.OS === "ios" && isAvailable && 
+                    justifyContent: isAvailable && 
                       ((selectedTab === "Steps" && syncStatus?.stepSync) || 
                        (selectedTab === "Sleep" && syncStatus?.sleepSync)) ? "flex-start" : "center",
-                    width: Platform.OS === "ios" && isAvailable && 
+                    width: isAvailable && 
                       ((selectedTab === "Steps" && syncStatus?.stepSync) || 
                        (selectedTab === "Sleep" && syncStatus?.sleepSync)) ? undefined : "100%",
                   }}>
@@ -698,7 +705,7 @@ export default function TrackingGraphPage() {
                   </View>
 
                   {/* Right side: Sync buttons (only when sync is enabled) */}
-                  {Platform.OS === "ios" && isAvailable && (
+                  {isAvailable && (
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
                       {/* Steps Sync Button */}
                       {selectedTab === "Steps" && syncStatus?.stepSync && (

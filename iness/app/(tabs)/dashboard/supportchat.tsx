@@ -20,6 +20,7 @@ import ChatMessage from "@/app/Components/SupportChat/ChatMessage";
 import useGetDataHook from "@/hooks/useFetchHook";
 import { chatService } from "@/app/services/chat.service";
 import { ActivityIndicator } from "react-native-paper";
+import SupportChatShimmer from "@/app/modules/Shimmer/SupportChatShimmer";
 import { uploadToAzureFromExpo } from "@/utils/azureUtils"; // make sure this util exists and works
 import { userService } from "@/app/services/user.service";
 import ImageViewerModal from "@/app/Modals/ImageViewerModal";
@@ -198,15 +199,7 @@ export default function SupportScreen() {
             </View>
 
             {loading ? (
-              <View
-                style={{
-                  flex: 1,
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-              >
-                <ActivityIndicator color="#9747FF" size="large" />
-              </View>
+              <SupportChatShimmer />
             ) : (
               <FlatList
                 data={data}

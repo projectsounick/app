@@ -12,6 +12,7 @@ import { useRouter } from "expo-router";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import theme from "@/app/Theme/globalTheme";
 import { ActivityIndicator } from "react-native-paper";
+import NotificationShimmer from "@/app/modules/Shimmer/NotificationShimmer";
 import { SafeAreaView } from "react-native-safe-area-context";
 import VideoCallChecker from "@/app/Modals/VideoCallJoinModal";
 import eventBus from "@/event";
@@ -134,15 +135,7 @@ function NotificationScreen() {
 
         {/* Loader */}
         {loading ? (
-          <View
-            style={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <ActivityIndicator color="#9747FF" size="large" />
-          </View>
+          <NotificationShimmer />
         ) : (
           <ScrollView
             contentContainerStyle={{

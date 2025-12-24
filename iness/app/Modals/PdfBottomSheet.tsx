@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
+import { LinearGradient } from "expo-linear-gradient";
 import theme from "../Theme/globalTheme";
 
 const { height } = Dimensions.get("window");
@@ -86,149 +87,140 @@ export default function DietPlanBottomSheet({
     <Modal animationType="slide" visible={visible} onRequestClose={onClose}>
       <View style={styles.backdrop}>
         <View style={styles.sheet}>
-          {/* Handle Bar */}
-          <View
-            style={{
-              width: 40,
-              height: 3,
-              backgroundColor: "#D0D0D0",
-              borderRadius: 2,
-              alignSelf: "center",
-              marginBottom: 20,
-            }}
-          />
+          {/* Gradient Header */}
+          <LinearGradient
+            colors={["#844ACF", "#432569"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.headerGradient}
+          >
+            {/* Handle Bar */}
+            <View style={styles.handle} />
 
-          {/* Header */}
-          <View style={styles.header}>
-            <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
-              <View
-                style={{
-                  width: 36,
-                  height: 36,
-                  borderRadius: 10,
-                  backgroundColor: "#F3EDFF",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginRight: 12,
-                }}
-              >
-                <Ionicons name="restaurant-outline" size={18} color="#9747FF" />
+            {/* Header Content */}
+            <View style={styles.header}>
+              <View style={styles.headerLeft}>
+                <View style={styles.iconContainer}>
+                  <LinearGradient
+                    colors={["#9747FF", "#844ACF"]}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                    style={styles.iconGradient}
+                  >
+                    <Ionicons name="restaurant" size={22} color="#FFFFFF" />
+                  </LinearGradient>
+                </View>
+                <Text style={styles.headerText}>Diet Plan</Text>
               </View>
-              <Text style={styles.headerText}>Diet Plan</Text>
-            </View>
-            <View style={styles.headerRight}>
-              {selectedPlan && (
+              <View style={styles.headerRight}>
+                {selectedPlan && (
+                  <TouchableOpacity
+                    style={styles.downloadButton}
+                    onPress={handleDownload}
+                    disabled={loading}
+                    activeOpacity={0.7}
+                  >
+                    <Ionicons name="download-outline" size={20} color="#FFFFFF" />
+                  </TouchableOpacity>
+                )}
                 <TouchableOpacity
-                  style={styles.downloadButton}
-                  onPress={handleDownload}
-                  disabled={loading}
+                  style={styles.menuButton}
+                  onPress={() => setMenuOpen(!menuOpen)}
+                  activeOpacity={0.7}
                 >
-                  <Ionicons name="download-outline" size={18} color="#67C694" />
+                  <Ionicons name="ellipsis-vertical" size={20} color="#FFFFFF" />
                 </TouchableOpacity>
-              )}
-              <TouchableOpacity
-                style={styles.menuButton}
-                onPress={() => setMenuOpen(!menuOpen)}
-              >
-                <Ionicons name="ellipsis-vertical" size={20} color="#1A1A1A" />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <Ionicons name="close" size={18} color="#1A1A1A" />
-              </TouchableOpacity>
+                <TouchableOpacity onPress={onClose} style={styles.closeButton} activeOpacity={0.7}>
+                  <Ionicons name="close" size={20} color="#FFFFFF" />
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
+          </LinearGradient>
 
           {/* Menu Dropdown */}
           {menuOpen && (
             <View style={styles.menuList}>
-              <ScrollView>
+              <ScrollView showsVerticalScrollIndicator={false}>
                 {dietPlans.length > 0 ? (
                   dietPlans.map((plan, index) => (
                     <TouchableOpacity
                       key={index}
-                      style={styles.menuItem}
+                      style={[
+                        styles.menuItem,
+                        plan === selectedPlan && styles.menuItemActive,
+                      ]}
                       onPress={() => {
                         setSelectedPlan(plan);
                         setMenuOpen(false);
                       }}
+                      activeOpacity={0.7}
                     >
-                      <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                      <View style={styles.menuItemContent}>
+                        <Ionicons
+                          name="document-text"
+                          size={18}
+                          color={plan === selectedPlan ? theme.colors.secondPrimary : "#666"}
+                          style={styles.menuItemIcon}
+                        />
                         <Text
-                          style={{
-                            color: plan === selectedPlan ? "#67C694" : "#666",
-                            fontWeight: plan === selectedPlan ? "700" : "500",
-                            fontSize: 14,
-                            flex: 1,
-                          }}
+                          style={[
+                            styles.menuItemText,
+                            plan === selectedPlan && styles.menuItemTextActive,
+                          ]}
                         >
                           Diet Plan {index + 1}
                         </Text>
                         {plan === selectedPlan && (
-                          <Ionicons name="checkmark-circle" size={20} color="#67C694" />
+                          <Ionicons
+                            name="checkmark-circle"
+                            size={20}
+                            color={theme.colors.secondPrimary}
+                          />
                         )}
                       </View>
                     </TouchableOpacity>
                   ))
                 ) : (
-                  <Text style={styles.noPlansText}>No Plans</Text>
+                  <View style={styles.noPlansContainer}>
+                    <Ionicons name="document-outline" size={32} color="#999" />
+                    <Text style={styles.noPlansText}>No Diet Plans Available</Text>
+                  </View>
                 )}
               </ScrollView>
             </View>
           )}
 
-          {/* WebView */}
-          <View
-            style={{
-              flex: 1,
-              marginTop: 10,
-              borderRadius: 12,
-              overflow: "hidden",
-              backgroundColor: "#F9F9F9",
-              position: "relative",
-            }}
-          >
+          {/* WebView Container */}
+          <View style={styles.webViewWrapper}>
             {selectedPlan ? (
               <>
                 <WebView
                   source={{ uri: selectedPlan }}
-                  style={{ flex: 1 }}
+                  style={styles.webView}
                   onLoadStart={() => setLoading(true)}
                   onLoadEnd={() => setLoading(false)}
                 />
                 {loading && (
-                  <View
-                    style={{
-                      position: "absolute",
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: "rgba(255, 255, 255, 0.9)",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      borderRadius: 12,
-                    }}
-                  >
-                    <ActivityIndicator size="large" color="#67C694" />
+                  <View style={styles.loadingOverlay}>
+                    <ActivityIndicator size="large" color={theme.colors.secondPrimary} />
+                    <Text style={styles.loadingText}>Loading diet plan...</Text>
                   </View>
                 )}
               </>
             ) : (
               <View style={styles.emptyContainer}>
-                <View
-                  style={{
-                    width: 64,
-                    height: 64,
-                    borderRadius: 16,
-                    backgroundColor: "#F3EDFF",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginBottom: 12,
-                  }}
+                <LinearGradient
+                  colors={["#F3EDFF", "#E8D5FF"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.emptyIconContainer}
                 >
-                  <Ionicons name="document-text-outline" size={32} color="#9747FF" />
-                </View>
-                <Text style={styles.emptyText}>Select a diet plan to view</Text>
+                  <Ionicons name="document-text-outline" size={40} color={theme.colors.secondPrimary} />
+                </LinearGradient>
+                <Text style={styles.emptyTitle}>No Diet Plan Selected</Text>
+                <Text style={styles.emptyText}>
+                  Select a diet plan from the menu above to view it here
+                </Text>
               </View>
             )}
           </View>
@@ -241,101 +233,236 @@ export default function DietPlanBottomSheet({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
     justifyContent: "flex-end",
   },
   sheet: {
     height: height * 0.9,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    padding: 20,
-    borderTopWidth: 1,
-    borderLeftWidth: 1,
-    borderRightWidth: 1,
-    borderColor: "#F5F5F5",
+    overflow: "hidden",
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
     shadowOffset: { width: 0, height: -4 },
-    elevation: 10,
+    elevation: 12,
+  },
+  headerGradient: {
+    paddingTop: 12,
+    paddingBottom: 16,
+    paddingHorizontal: 20,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+  },
+  handle: {
+    width: 50,
+    height: 5,
+    backgroundColor: "rgba(255, 255, 255, 0.4)",
+    borderRadius: 3,
+    alignSelf: "center",
+    marginBottom: 16,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
+  },
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    marginRight: 12,
+    shadowColor: theme.colors.secondPrimary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
+  },
+  iconGradient: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
   },
   headerText: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "700",
-    color: "#1A1A1A",
+    color: "#FFFFFF",
+    fontFamily: theme.fonts.bold,
+    textShadowColor: "rgba(0, 0, 0, 0.2)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   headerRight: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: 10,
   },
   menuButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F5F5F5",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   closeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F5F5F5",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   downloadButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#E8F5E9",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
   },
   menuList: {
     position: "absolute",
-    top: 70,
+    top: 80,
     right: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     paddingVertical: 8,
-    width: 180,
-    maxHeight: 220,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
+    width: 200,
+    maxHeight: 240,
+    shadowColor: theme.colors.secondPrimary,
+    shadowOpacity: 0.15,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 4 },
-    elevation: 8,
+    elevation: 10,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: "#F0F0F0",
     zIndex: 100,
   },
   menuItem: {
-    paddingVertical: 12,
+    paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 12,
+    marginHorizontal: 8,
+    marginVertical: 2,
+  },
+  menuItemActive: {
+    backgroundColor: `${theme.colors.secondPrimary}10`,
+  },
+  menuItemContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
+  menuItemIcon: {
+    marginRight: 12,
+  },
+  menuItemText: {
+    flex: 1,
+    fontSize: 15,
+    color: "#666",
+    fontWeight: "500",
+    fontFamily: theme.fonts.medium,
+  },
+  menuItemTextActive: {
+    color: theme.colors.secondPrimary,
+    fontWeight: "700",
+    fontFamily: theme.fonts.bold,
+  },
+  noPlansContainer: {
+    padding: 24,
+    alignItems: "center",
+    justifyContent: "center",
   },
   noPlansText: {
-    color: "#000",
-    textAlign: "center",
-    padding: 10,
+    marginTop: 12,
+    fontSize: 14,
+    color: "#999",
+    fontWeight: "500",
+    fontFamily: theme.fonts.medium,
+  },
+  webViewWrapper: {
+    flex: 1,
+    marginTop: 8,
+    marginHorizontal: 20,
+    marginBottom: 20,
+    borderRadius: 16,
+    overflow: "hidden",
+    backgroundColor: "#F9F9F9",
+    shadowColor: theme.colors.secondPrimary,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: "#F0F0F0",
+  },
+  webView: {
+    flex: 1,
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 16,
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 15,
+    color: "#666",
+    fontWeight: "500",
+    fontFamily: theme.fonts.medium,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 40,
+  },
+  emptyIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+    shadowColor: theme.colors.secondPrimary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  emptyTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: theme.colors.dark,
+    marginBottom: 8,
+    fontFamily: theme.fonts.bold,
   },
   emptyText: {
-    fontSize: 15,
+    fontSize: 14,
     color: "#666",
-    fontWeight: "500",
+    textAlign: "center",
+    lineHeight: 20,
+    fontFamily: theme.fonts.regular,
   },
 });

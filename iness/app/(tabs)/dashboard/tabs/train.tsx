@@ -11,7 +11,7 @@ import React, { useMemo, useRef, useState, useEffect } from "react";
 import { View, Text, Animated, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
-import ShimmerLoader from "@/app/modules/TrainSimmer";
+import TrainerShimmer from "@/app/modules/Shimmer/TrainerShimmer";
 import SmallHeader from "@/app/modules/SmallHeader";
 import { sessionService } from "@/app/services/sessionService";
 import AvailablePlans from "@/app/Components/Train/AvaialblePlan";
@@ -333,7 +333,7 @@ export default function TrainScreen() {
             marginTop: 30,
           }}
         >
-          <ShimmerLoader screenName="train" />
+          <TrainerShimmer screenName="train" />
         </View>
       ) : (
         <>
