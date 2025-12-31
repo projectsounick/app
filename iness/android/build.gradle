@@ -5,7 +5,7 @@ buildscript {
         compileSdkVersion = 35       // ← must match gradle.properties
         targetSdkVersion = 35        // ← update this
         minSdkVersion = 26
-        ndkVersion = "26.1.10909125"  // <- make sure it matches the installed NDK
+        ndkVersion = "27.1.12297006"  // <- NDK r27.1+ supports 16 KB page size by default
     }
   repositories {
     google()
