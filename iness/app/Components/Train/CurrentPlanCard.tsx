@@ -10,6 +10,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { DietPlanDetails, DietPlan } from "@/app/interfaces/planInterface";
 import DietPlanDetailsModal from "@/app/Modals/DietPlanDetailsModal";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
 interface PlanCardProps {
   id?: string;
@@ -36,6 +37,7 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
   dietPlanUrl,
   dietPlanAssignDate,
 }) => {
+  const theme = useGlobalTheme();
   const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -71,14 +73,14 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
         borderRadius: 16,
         marginVertical: 8,
         overflow: "hidden",
-        backgroundColor: "#fff",
-        shadowColor: "#000",
+        backgroundColor: theme.colors.background,
+        shadowColor: theme.colors.black,
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.1,
         shadowRadius: 8,
         elevation: 3,
         borderWidth: 1,
-        borderColor: "#F5F5F5",
+        borderColor: theme.colors.border,
       }}
     >
       {/* For manual, show static image on right. For normal, use background */}
@@ -117,10 +119,10 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
               {/* Title */}
               <Text
                 style={{
-                  fontSize: 16,
+                  fontSize: theme.fontSizes.regular,
                   marginBottom: 10,
-                  color: "#1A1A1A",
-                  fontWeight: "700",
+                  color: theme.colors.text,
+                  fontWeight: theme.fontWeights.bold as "700",
                 }}
                 numberOfLines={2}
                 ellipsizeMode="tail"
@@ -145,7 +147,7 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
                           width: 6,
                           height: 6,
                           borderRadius: 3,
-                          backgroundColor: "#9747FF",
+                          backgroundColor: theme.colors.secondPrimary,
                           marginRight: 8,
                           marginTop: 5,
                         }}
@@ -154,8 +156,8 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
                         numberOfLines={2}
                         ellipsizeMode="tail"
                         style={{
-                          fontSize: 12,
-                          color: "#666",
+                          fontSize: theme.fontSizes.small,
+                          color: theme.colors.textSecondary,
                           flex: 1,
                           fontWeight: "400",
                           lineHeight: 16,
@@ -168,8 +170,8 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
                 ) : (
                   <Text
                     style={{
-                      fontSize: 12,
-                      color: "#999",
+                      fontSize: theme.fontSizes.small,
+                      color: theme.colors.textMuted,
                       lineHeight: 16,
                       fontWeight: "400",
                     }}
@@ -183,12 +185,12 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
             {/* Button */}
             <TouchableOpacity
               style={{
-                backgroundColor: "#67C694",
+                backgroundColor: theme.colors.success,
                 paddingVertical: 10,
                 paddingHorizontal: 20,
                 borderRadius: 30,
                 alignSelf: "flex-start",
-                shadowColor: "#67C694",
+                shadowColor: theme.colors.success,
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.3,
                 shadowRadius: 4,
@@ -198,9 +200,9 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
             >
               <Text
                 style={{
-                  color: "#fff",
-                  fontWeight: "700",
-                  fontSize: 13,
+                  color: theme.colors.textWhite,
+                  fontWeight: theme.fontWeights.bold as "700",
+                  fontSize: theme.fontSizes.regularSmall,
                 }}
               >
                 {isActive ? "Continue" : "Check"}
@@ -219,10 +221,10 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
           <View style={{ flex: 1 }}>
             <Text
               style={{
-                fontSize: 16,
-                fontWeight: "700",
+                fontSize: theme.fontSizes.regular,
+                fontWeight: theme.fontWeights.bold as "700",
                 marginBottom: 6,
-                color: "#1A1A1A",
+                color: theme.colors.text,
               }}
               numberOfLines={1}
             >
@@ -231,8 +233,8 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
 
             <Text
               style={{
-                fontSize: 13,
-                color: "#666",
+                fontSize: theme.fontSizes.regularSmall,
+                color: theme.colors.textSecondary,
                 lineHeight: 18,
               }}
               numberOfLines={2}
@@ -243,13 +245,13 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
 
             <TouchableOpacity
               style={{
-                backgroundColor: "#67C694",
+                backgroundColor: theme.colors.success,
                 paddingVertical: 8,
                 paddingHorizontal: 20,
                 borderRadius: 30,
                 alignSelf: "flex-start",
                 marginTop: 10,
-                shadowColor: "#67C694",
+                shadowColor: theme.colors.success,
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: 0.3,
                 shadowRadius: 4,
@@ -257,7 +259,7 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
               }}
               onPress={handlePress}
             >
-              <Text style={{ color: "#fff", fontWeight: "700", fontSize: 13 }}>
+              <Text style={{ color: theme.colors.textWhite, fontWeight: theme.fontWeights.bold as "700", fontSize: theme.fontSizes.regularSmall }}>
                 Continue
               </Text>
             </TouchableOpacity>

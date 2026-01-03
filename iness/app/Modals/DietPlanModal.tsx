@@ -2,13 +2,15 @@ import React, { useState } from "react";
 import { View, Text, Modal, Pressable, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { DietPlanDetails } from "../interfaces/planInterface";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 interface DietPlanInfoModalProps {
   dietPlan: DietPlanDetails;
 }
 
 const DietPlanInfoModal: React.FC<DietPlanInfoModalProps> = ({ dietPlan }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const [visible, setVisible] = useState(false);
 
   return (
@@ -26,14 +28,14 @@ const DietPlanInfoModal: React.FC<DietPlanInfoModalProps> = ({ dietPlan }) => {
         <Ionicons
           name="fast-food-outline"
           size={18}
-          color={theme.colors.dark}
+          color={theme.colors.text}
         />
         <Text
           style={{
             marginLeft: 8,
-            fontSize: 16,
+            fontSize: theme.fontSizes.regular,
             color: theme.colors.dark,
-            fontWeight: "600",
+            fontWeight: theme.fontWeights.medium as "500",
           }}
         >
           Diet Plan Included
@@ -45,7 +47,7 @@ const DietPlanInfoModal: React.FC<DietPlanInfoModalProps> = ({ dietPlan }) => {
         <Ionicons
           name="chevron-forward-outline"
           size={18}
-          color={theme.colors.dark}
+          color={theme.colors.text}
         />
       </Pressable>
 
@@ -59,14 +61,14 @@ const DietPlanInfoModal: React.FC<DietPlanInfoModalProps> = ({ dietPlan }) => {
         <View
           style={{
             flex: 1,
-            backgroundColor: "rgba(0,0,0,0.5)",
+            backgroundColor: theme.colors.overlay,
             justifyContent: "center",
             alignItems: "center",
           }}
         >
           <View
             style={{
-              backgroundColor: "#fff",
+              backgroundColor: theme.colors.background,
               borderRadius: 12,
               width: "85%",
               maxHeight: "80%",
@@ -85,13 +87,13 @@ const DietPlanInfoModal: React.FC<DietPlanInfoModalProps> = ({ dietPlan }) => {
                 width: 30,
                 height: 30,
                 borderRadius: 15,
-                backgroundColor: "#eee",
+                backgroundColor: theme.colors.backgroundSecondary,
                 justifyContent: "center",
                 alignItems: "center",
                 zIndex: 1,
               }}
             >
-              <Ionicons name="close" size={18} color="#333" />
+              <Ionicons name="close" size={18} color={theme.colors.text} />
             </Pressable>
 
             {/* Scrollable Content */}
@@ -101,10 +103,10 @@ const DietPlanInfoModal: React.FC<DietPlanInfoModalProps> = ({ dietPlan }) => {
             >
               <Text
                 style={{
-                  fontSize: 20,
-                  fontWeight: "700",
+                  fontSize: theme.fontSizes.large,
+                  fontWeight: theme.fontWeights.bold as "700",
                   marginBottom: 12,
-                  color: "#000",
+                  color: theme.colors.text,
                   textAlign: "center",
                 }}
               >
@@ -113,8 +115,8 @@ const DietPlanInfoModal: React.FC<DietPlanInfoModalProps> = ({ dietPlan }) => {
 
               <Text
                 style={{
-                  fontSize: 14,
-                  color: "#666",
+                  fontSize: theme.fontSizes.regularSmall,
+                  color: theme.colors.textSecondary,
                   marginBottom: 16,
                   textAlign: "center",
                 }}
@@ -126,10 +128,10 @@ const DietPlanInfoModal: React.FC<DietPlanInfoModalProps> = ({ dietPlan }) => {
               <View style={{ marginBottom: 12 }}>
                 <Text
                   style={{
-                    fontSize: 16,
-                    fontWeight: "600",
+                    fontSize: theme.fontSizes.regular,
+                    fontWeight: theme.fontWeights.medium as "500",
                     marginBottom: 10,
-                    color: "#000",
+                    color: theme.colors.text,
                   }}
                 >
                   Highlights
@@ -145,7 +147,7 @@ const DietPlanInfoModal: React.FC<DietPlanInfoModalProps> = ({ dietPlan }) => {
                     }}
                   >
                     <Ionicons name="leaf-outline" size={18} color="#10B981" />
-                    <Text style={{ marginLeft: 8, fontSize: 14 }}>{item}</Text>
+                    <Text style={{ marginLeft: 8, fontSize: theme.fontSizes.regularSmall }}>{item}</Text>
                   </View>
                 ))}
               </View>

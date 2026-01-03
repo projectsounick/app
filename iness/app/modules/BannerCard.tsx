@@ -105,7 +105,7 @@ const BannerCard = ({ cardData }: { cardData: any }) => {
             style={{
               fontSize: theme.fontSizes.medium,
               fontFamily: theme.fonts.bold,
-              color: "#fff",
+              color: theme.colors.textWhite,
               marginBottom: 8,
             }}
           >
@@ -127,7 +127,7 @@ const BannerCard = ({ cardData }: { cardData: any }) => {
                   width: 6,
                   height: 6,
                   borderRadius: 3,
-                  backgroundColor: "#fff",
+                  backgroundColor: theme.colors.background,
                   marginTop: 6,
                   marginRight: 6,
                 }}
@@ -135,7 +135,7 @@ const BannerCard = ({ cardData }: { cardData: any }) => {
               <Text
                 style={{
                   fontSize: theme.fontSizes.small,
-                  color: "#fff",
+                  color: theme.colors.textWhite,
                   flexShrink: 1,
                   fontFamily: theme.fonts.regular,
                 }}
@@ -164,7 +164,7 @@ const BannerCard = ({ cardData }: { cardData: any }) => {
           >
             <Text
               style={{
-                color: "#000",
+                color: theme.colors.text,
                 fontWeight: "600",
                 fontFamily: theme.fonts.bold,
               }}
@@ -246,12 +246,12 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   bulletText: {
-    color: "#d1d1d1",
+    color: theme.colors.textLight,
     flexShrink: 1,
     lineHeight: 18,
   },
   button: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: theme.colors.success,
     paddingHorizontal: 22,
     paddingVertical: 8,
     borderRadius: 22,
@@ -264,9 +264,9 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   buttonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 13,
+    color: theme.colors.textWhite,
+    fontWeight: theme.fontWeights.medium as "500",
+    fontSize: theme.fontSizes.regularSmall,
   },
   rightSection: {
     flex: 1,

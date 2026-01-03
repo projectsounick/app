@@ -16,8 +16,12 @@ import {
   promotionalVideoService,
   PromotionalVideoItem,
 } from "../services/promotionalVideo.service";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const PromoVideoModal = () => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme);
   const [showModal, setShowModal] = useState(false);
   const [currentVideo, setCurrentVideo] = useState<PromotionalVideoItem | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -101,14 +105,14 @@ const PromoVideoModal = () => {
               {/* Header */}
               <View style={styles.headerContainer}>
                 <View style={styles.iconContainer}>
-                  <Ionicons name="school-outline" size={28} color="#9747FF" />
+                  <Ionicons name="school-outline" size={28} color={theme.colors.secondPrimary} />
                 </View>
                 <View style={styles.titleContainer}>
                   <Text style={styles.modalTitle}>Watch & Learn</Text>
                   <Text style={styles.modalSubtitle}>Discover what's new</Text>
                 </View>
                 <TouchableOpacity onPress={handleClose} style={styles.closeButton}>
-                  <Ionicons name="close" size={20} color="#000" />
+                  <Ionicons name="close" size={20} color={theme.colors.text} />
                 </TouchableOpacity>
               </View>
             </>
@@ -118,11 +122,11 @@ const PromoVideoModal = () => {
           {isFullscreen && (
             <View style={styles.fullscreenHeader}>
               <View style={styles.fullscreenTitleContainer}>
-                <Ionicons name="school-outline" size={24} color="#9747FF" style={{ marginRight: 8 }} />
+                <Ionicons name="school-outline" size={24} color={theme.colors.secondPrimary} style={{ marginRight: 8 }} />
                 <Text style={styles.fullscreenTitle}>Watch & Learn</Text>
               </View>
               <TouchableOpacity onPress={handleClose} style={styles.fullscreenCloseButton}>
-                <Ionicons name="close" size={24} color="#FFFFFF" />
+                <Ionicons name="close" size={24} color={theme.colors.textWhite} />
               </TouchableOpacity>
             </View>
           )}
@@ -132,9 +136,9 @@ const PromoVideoModal = () => {
             {loading ? (
               <View style={styles.loaderContainer}>
                 <View style={styles.loaderIconContainer}>
-                  <Ionicons name="school-outline" size={48} color="#9747FF" />
+                  <Ionicons name="school-outline" size={48} color={theme.colors.secondPrimary} />
                 </View>
-                <ActivityIndicator size="large" color="#9747FF" style={{ marginTop: 16 }} />
+                <ActivityIndicator size="large" color={theme.colors.secondPrimary} style={{ marginTop: 16 }} />
                 <Text style={styles.loadingText}>Preparing your video...</Text>
               </View>
             ) : videoUrl ? (
@@ -158,7 +162,7 @@ const PromoVideoModal = () => {
                     <Ionicons
                       name={isPlaying ? "pause" : "play"}
                       size={32}
-                      color="#FFFFFF"
+                      color={theme.colors.textWhite}
                     />
                   </View>
                 </TouchableOpacity>
@@ -175,7 +179,7 @@ const PromoVideoModal = () => {
                       <Ionicons
                         name={isFullscreen ? "contract" : "expand"}
                         size={18}
-                        color="#FFFFFF"
+                        color={theme.colors.textWhite}
                       />
                     </View>
                   </TouchableOpacity>
@@ -184,7 +188,7 @@ const PromoVideoModal = () => {
               </View>
             ) : (
               <View style={styles.errorContainer}>
-                <Ionicons name="alert-circle-outline" size={48} color="#999" />
+                <Ionicons name="alert-circle-outline" size={48} color={theme.colors.textMuted} />
                 <Text style={styles.errorText}>Video not available</Text>
               </View>
             )}
@@ -197,10 +201,10 @@ const PromoVideoModal = () => {
 
 export default PromoVideoModal;
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: theme.colors.overlay,
     justifyContent: "center",
     alignItems: "center",
     padding: 10,
@@ -209,14 +213,14 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   modalContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 20,
     width: "100%",
     maxWidth: Dimensions.get("window").width - 20,
     maxHeight: Dimensions.get("window").height * 0.6,
     height: Dimensions.get("window").height * 0.55,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.mediumGrey,
     overflow: "hidden",
   },
   modalContainerFullscreen: {
@@ -230,7 +234,7 @@ const styles = StyleSheet.create({
   handleBar: {
     width: 50,
     height: 5,
-    backgroundColor: "#ccc",
+    backgroundColor: theme.colors.textLight,
     borderRadius: 3,
     alignSelf: "center",
     marginTop: 8,
@@ -247,7 +251,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -256,21 +260,21 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   modalTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#000",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.black,
     marginBottom: 4,
   },
   modalSubtitle: {
-    fontSize: 14,
-    fontWeight: "400",
-    color: "#666",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.regular as "400",
+    color: theme.colors.textSecondary,
   },
   closeButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: theme.colors.lightGrey,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -294,7 +298,7 @@ const styles = StyleSheet.create({
     height: "100%",
     borderRadius: 12,
     overflow: "hidden",
-    backgroundColor: "#000",
+    backgroundColor: theme.colors.black,
     position: "relative",
   },
   videoWrapperFullscreen: {
@@ -340,7 +344,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "rgba(103, 198, 148, 0.9)",
+    backgroundColor: theme.colors.success + "E6",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
@@ -355,15 +359,15 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
   },
   loadingText: {
     marginTop: 20,
-    fontSize: 16,
-    color: "#666",
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.textSecondary,
     fontWeight: "500",
   },
   errorContainer: {
@@ -373,8 +377,8 @@ const styles = StyleSheet.create({
   },
   errorText: {
     marginTop: 16,
-    fontSize: 15,
-    color: "#999",
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.textMuted,
     fontWeight: "500",
   },
   fullscreenHeader: {
@@ -388,7 +392,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: Platform.OS === "ios" ? 50 : 20,
     paddingBottom: 16,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: theme.colors.overlay,
     zIndex: 20,
   },
   fullscreenTitleContainer: {
@@ -396,15 +400,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   fullscreenTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#FFFFFF",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.textWhite,
   },
   fullscreenCloseButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255,255,255,0.25)",
+    backgroundColor: theme.colors.textWhite + "40",
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,

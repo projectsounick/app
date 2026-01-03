@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useEvent } from "expo";
 import { MediaVideoModalProps } from "@/app/interfaces/podcastsInterface";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const { width, height } = Dimensions.get("window");
 
@@ -36,7 +37,7 @@ export default function MediaVideoModal({
       <View
         style={{
           flex: 1,
-          backgroundColor: "#000",
+          backgroundColor: theme.colors.black,
         }}
       >
         <TouchableOpacity
@@ -46,12 +47,12 @@ export default function MediaVideoModal({
             top: 40,
             right: 20,
             zIndex: 10,
-            backgroundColor: "#fff",
+            backgroundColor: theme.colors.background,
             padding: 6,
             borderRadius: 20,
           }}
         >
-          <Ionicons name="close" size={24} color="#000" />
+          <Ionicons name="close" size={24} color={theme.colors.text} />
         </TouchableOpacity>
 
         <VideoView

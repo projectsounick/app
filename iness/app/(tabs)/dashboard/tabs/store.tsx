@@ -1,16 +1,11 @@
 import React, { useMemo, useRef } from "react";
 import {
   View,
-  Text,
-  Image,
-  Animated,
-  Dimensions,
-  ScrollView,
+ 
   FlatList,
 } from "react-native";
 
-import withAnimatedHeader from "@/app/Hoc/MainHeader";
-import NameHeader from "@/app/Components/HeaderSubComponents/NameHeader";
+
 import {
   SafeAreaFrameContext,
   SafeAreaView,
@@ -18,17 +13,17 @@ import {
 import useFetchMultipleStoreDataHook from "@/hooks/useMultipleDataStoreHook";
 import { SliceKey } from "@/sliceRegistery";
 import { ecommerceService } from "@/app/services/ecom.service";
-import { useSelector } from "react-redux";
-import { RootState } from "@/store";
-import { ActivityIndicator } from "react-native-paper";
+
 import StoreShimmer from "@/app/modules/Shimmer/StoreShimmer";
 import CategoryList from "@/app/Components/ecom/CategoryList";
 import GroupedProductDisplay from "@/app/Components/ecom/ProductList";
 import SmallHeader from "@/app/modules/SmallHeader";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
 //// Main functional component for the equipscreen ------------------------/
 
 export default function EquipScreen() {
+  const theme = useGlobalTheme();
   const configs = useMemo(
     () => [
       {
@@ -51,7 +46,7 @@ export default function EquipScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
       edges={["left", "right"]}
     >
       {/* Header */}

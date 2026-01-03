@@ -22,7 +22,7 @@ const SlotSelectionSection: React.FC<Props> = ({
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.iconContainer}>
-          <Icon name="clock" size={18} color="#9747FF" />
+          <Icon name="clock" size={18} color={theme.colors.secondPrimary} />
         </View>
         <Text style={styles.title}>Available Slots</Text>
       </View>
@@ -65,7 +65,7 @@ const SlotSelectionSection: React.FC<Props> = ({
           <Icon
             name={isExpanded ? "chevron-up" : "chevron-down"}
             size={16}
-            color="#9747FF"
+            color={theme.colors.secondPrimary}
           />
         </TouchableOpacity>
       )}
@@ -75,17 +75,17 @@ const SlotSelectionSection: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: "#000",
+    shadowColor: theme.colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   header: {
     flexDirection: "row",
@@ -95,15 +95,15 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
   title: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   slotsContainer: {
@@ -116,29 +116,29 @@ const styles = StyleSheet.create({
     borderTopColor: "#F5F5F5",
   },
   slotButton: {
-    backgroundColor: "#F8F8F8",
+    backgroundColor: theme.colors.darkGrey,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.lightGrey,
     minWidth: 100,
     alignItems: "center",
   },
   slotButtonSelected: {
-    backgroundColor: "#F3EDFF",
-    borderColor: "#9747FF",
+    backgroundColor: theme.colors.backgroundCardLight,
+    borderColor: theme.colors.secondPrimary,
     borderWidth: 2,
   },
   slotText: {
-    color: "#666",
-    fontSize: 13,
-    fontWeight: "500",
+    color: theme.colors.textSecondary,
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
     fontFamily: theme.fonts.medium,
   },
   slotTextSelected: {
-    color: "#9747FF",
-    fontWeight: "600",
+    color: theme.colors.secondPrimary,
+    fontWeight: theme.fontWeights.medium as "500",
   },
   expandButton: {
     flexDirection: "row",
@@ -149,9 +149,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
   },
   expandText: {
-    color: "#9747FF",
-    fontSize: 13,
-    fontWeight: "600",
+    color: theme.colors.secondPrimary,
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
     marginRight: 4,
     fontFamily: theme.fonts.medium,
   },

@@ -5,7 +5,6 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
-  ImageBackground,
   Alert,
   Platform,
   StyleSheet,
@@ -18,12 +17,15 @@ import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { paymentService } from "@/app/services/payment.service";
 import { ActivityIndicator, Dialog, Modal, Portal } from "react-native-paper";
 import CustomSnackbar from "@/app/modules/Snackbar";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import useServiceWithSnackbar from "@/hooks/usePostDataHook";
 import { useFocusEffect } from "expo-router";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 export default function PaymentScreen() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const [payment, setPayment] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [snackbarOpen, setSnackBarOpen] = useState(false);
@@ -188,7 +190,7 @@ export default function PaymentScreen() {
               activeOpacity={0.7}
             >
               <LinearGradient
-                colors={["#9747FF", "#844ACF"]}
+                colors={isDark ? [theme.colors.backgroundCard, theme.colors.backgroundSecondary] : ["#9747FF", "#844ACF"]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.downloadButtonGradient}
@@ -214,7 +216,7 @@ export default function PaymentScreen() {
         {/* Footer: Order info and price */}
         <View style={styles.footer}>
           <View style={styles.dateContainer}>
-            <Ionicons name="calendar-outline" size={14} color="#666" />
+            <Ionicons name="calendar-outline" size={14} color={theme.colors.textMuted} />
             <Text style={styles.dateText}>
               {formatDate(item.createdAt)}
             </Text>
@@ -229,16 +231,12 @@ export default function PaymentScreen() {
   };
 
   return (
-    <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpg")}
-      resizeMode="cover"
-      style={{ flex: 1 }}
-    >
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Portal>
         <Modal visible={paymentLoading} dismissable={false}>
           <View style={styles.modalContainer}>
             <LinearGradient
-              colors={["#9747FF", "#844ACF"]}
+              colors={isDark ? [theme.colors.backgroundCard, theme.colors.backgroundSecondary] : ["#9747FF", "#844ACF"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.modalGradient}
@@ -269,7 +267,7 @@ export default function PaymentScreen() {
         <View style={styles.emptyContainer}>
           <View style={styles.emptyCard}>
             <LinearGradient
-              colors={["#9747FF", "#844ACF"]}
+              colors={isDark ? [theme.colors.backgroundCard, theme.colors.backgroundSecondary] : ["#9747FF", "#844ACF"]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
               style={styles.emptyIconContainer}
@@ -296,26 +294,28 @@ export default function PaymentScreen() {
         onDismiss={() => setSnackBarOpen(false)}
         visible={snackbarOpen}
         message={snackbarMessage}
-        bgColor={theme.colors.primary}
+        bgColor={theme.colors.background}
       />
-    </ImageBackground>
+    </View>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   cardContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 20,
     marginHorizontal: 16,
     marginBottom: 16,
     padding: 18,
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 6,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.12,
+      shadowRadius: 12,
+      elevation: 6,
+    }),
   },
   topRow: {
     flexDirection: "row",
@@ -324,17 +324,19 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     marginRight: 14,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    }),
   },
   thumbnail: {
     width: 60,
     height: 60,
     borderRadius: 14,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.border,
   },
   statusContainer: {
     flex: 1,
@@ -346,29 +348,33 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 20,
     alignSelf: "flex-start",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 3,
+    }),
   },
   statusIcon: {
     marginRight: 6,
   },
   statusText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#FFFFFF",
+    fontSize: theme.fontSizes.small,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.textWhite,
     fontFamily: theme.fonts.bold,
   },
   downloadButton: {
     borderRadius: 20,
     overflow: "hidden",
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 4,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 4,
+    }),
   },
   downloadButtonGradient: {
     width: 36,
@@ -394,8 +400,8 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   itemText: {
-    fontSize: 14,
-    color: "#333",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.text,
     fontFamily: theme.fonts.medium,
     flex: 1,
     lineHeight: 20,
@@ -405,7 +411,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     borderTopWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
     marginTop: 12,
     paddingTop: 14,
   },
@@ -414,8 +420,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   dateText: {
-    color: "#666",
-    fontSize: 13,
+    color: theme.colors.textSecondary,
+    fontSize: theme.fontSizes.regularSmall,
     fontFamily: theme.fonts.regular,
     marginLeft: 6,
   },
@@ -423,14 +429,14 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   priceLabel: {
-    fontSize: 11,
-    color: "#999",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textMuted,
     fontFamily: theme.fonts.regular,
     marginBottom: 2,
   },
   priceValue: {
     fontWeight: "700",
-    fontSize: 18,
+    fontSize: theme.fontSizes.medium,
     color: theme.colors.secondPrimary,
     fontFamily: theme.fonts.bold,
   },
@@ -446,7 +452,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   emptyCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 24,
     padding: 40,
     alignItems: "center",
@@ -457,7 +463,7 @@ const styles = StyleSheet.create({
     shadowRadius: 16,
     elevation: 8,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
   },
   emptyIconContainer: {
     width: 90,
@@ -466,23 +472,25 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 6,
+    }),
   },
   emptyTitle: {
-    fontSize: 22,
+    fontSize: theme.fontSizes.large,
     fontFamily: theme.fonts.bold,
-    color: theme.colors.dark,
+    color: theme.colors.text,
     textAlign: "center",
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 15,
+    fontSize: theme.fontSizes.regular,
     fontFamily: theme.fonts.regular,
-    color: "#666",
+    color: theme.colors.textSecondary,
     textAlign: "center",
     lineHeight: 22,
   },
@@ -501,16 +509,18 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 32,
     alignItems: "center",
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 10,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 12,
+      elevation: 10,
+    }),
   },
   modalText: {
     marginTop: 16,
-    color: "#FFFFFF",
-    fontSize: 16,
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.regular,
     fontFamily: theme.fonts.bold,
     fontWeight: "700",
   },

@@ -20,7 +20,7 @@ import { Feather, AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { Linking, Alert } from "react-native";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 import {
   PodcastInterface,
   PodcastVideoCardPropsInterface,
@@ -44,6 +44,8 @@ const VideoCard = ({
   loggedUser,
   updatePodcastData,
 }: PodcastVideoCardPropsInterface) => {
+  const theme = useGlobalTheme();
+  const styles = getStyles(theme);
   const [commentModalVisible, setCommentModalVisible] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState<any>(null);
   const [showMenuForPost, setShowMenuForPost] = useState<any>();
@@ -238,7 +240,7 @@ const VideoCard = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   cardContainer: {
     backgroundColor: "#FFFFFF",
     marginBottom: 20,
@@ -269,26 +271,26 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   title: {
-    fontSize: 18,
-    fontWeight: "700",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
     marginTop: 4,
-    color: theme.colors.dark,
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
     marginBottom: 8,
   },
   description: {
     marginTop: 4,
-    fontSize: 14,
-    color: "#666",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
     fontFamily: theme.fonts.regular,
     lineHeight: 20,
   },
   showMoreText: {
     color: theme.colors.secondPrimary,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.medium as "500",
     marginTop: 6,
     fontFamily: theme.fonts.medium,
-    fontSize: 13,
+    fontSize: theme.fontSizes.regularSmall,
   },
   actionsContainer: {
     flexDirection: "row",
@@ -302,8 +304,8 @@ const styles = StyleSheet.create({
   },
   likeText: {
     marginLeft: 8,
-    color: "#666",
-    fontSize: 14,
+    color: theme.colors.textSecondary,
+    fontSize: theme.fontSizes.regularSmall,
     fontFamily: theme.fonts.medium,
   },
 });

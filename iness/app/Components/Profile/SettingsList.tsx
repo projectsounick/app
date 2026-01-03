@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { router } from "expo-router";
 
 const handleCoupons = () => router.push("/dashboard/coupon");
@@ -15,6 +15,9 @@ const handleMeditation = () => router.push("/dashboard/meditation");
 const handleTrainers = () => router.push("/dashboard/trainers");
 
 export default function SettingsList() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const settings = [
     {
       icon: "people-outline",
@@ -76,35 +79,37 @@ export default function SettingsList() {
           <View style={styles.leftContent}>
             {/* Icon with purple background */}
             <View style={styles.iconContainer}>
-              <Ionicons name={item.icon} size={18} color="#9747FF" />
+              <Ionicons name={item.icon} size={18} color={theme.colors.secondPrimary} />
             </View>
             <Text style={styles.labelText}>{item.label}</Text>
           </View>
 
           {/* Right arrow */}
-          <Ionicons name="chevron-forward" size={20} color="#1A1A1A" />
+          <Ionicons name="chevron-forward" size={20} color={theme.colors.text} />
         </TouchableOpacity>
       ))}
     </View>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   settingItem: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 14,
     marginBottom: 10,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    }),
   },
   leftContent: {
     flexDirection: "row",
@@ -114,15 +119,15 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 14,
   },
   labelText: {
-    fontSize: 15,
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.text,
     fontFamily: theme.fonts.medium,
-    fontWeight: "500",
+    fontWeight: theme.fontWeights.medium as "500",
   },
 });

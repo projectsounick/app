@@ -12,6 +12,7 @@ import {
 import { AntDesign, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
+import theme from "../Theme/globalTheme";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = 276;
@@ -68,7 +69,7 @@ export default function App() {
         width: CARD_WIDTH,
         marginRight: SPACING,
         borderRadius: 20,
-        backgroundColor: "#fff",
+        backgroundColor: theme.colors.background,
         overflow: "hidden",
         height: CARD_HEIGHT,
         shadowColor: "#000",
@@ -97,7 +98,7 @@ export default function App() {
           width: CARD_WIDTH,
           marginRight: SPACING,
           borderRadius: 25,
-          backgroundColor: "#fff",
+          backgroundColor: theme.colors.background,
           shadowColor: "#000",
           shadowOpacity: isCenter ? 0.25 : 0.12,
           shadowRadius: isCenter ? 14 : 6,
@@ -139,7 +140,7 @@ export default function App() {
 
         {/* Info */}
         <View style={{ padding: 14 }}>
-          <Text style={{ fontSize: 18, fontWeight: "700", color: "#222" }}>
+          <Text style={{ fontSize: theme.fontSizes.medium, fontWeight: theme.fontWeights.bold as "700", color: theme.colors.text }}>
             {item.reviewerName}
           </Text>
           <View
@@ -166,7 +167,7 @@ export default function App() {
               style={{
                 padding: 6,
                 borderRadius: 12,
-                backgroundColor: "#e0f7fa",
+                backgroundColor: theme.colors.info,
               }}
             >
               <Ionicons name="chevron-forward" size={20} color="#00796B" />
@@ -178,7 +179,7 @@ export default function App() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f5f5f5", paddingTop: 20 }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary, paddingTop: 20 }}>
       {loading ? (
         <FlatList
           data={Array.from({ length: 5 })}
@@ -233,7 +234,7 @@ export default function App() {
         >
           <View
             style={{
-              backgroundColor: "#fff",
+              backgroundColor: theme.colors.background,
               borderTopLeftRadius: 25,
               borderTopRightRadius: 25,
               padding: 20,
@@ -244,7 +245,7 @@ export default function App() {
               style={{
                 width: 50,
                 height: 5,
-                backgroundColor: "#ccc",
+                backgroundColor: theme.colors.divider,
                 borderRadius: 3,
                 alignSelf: "center",
                 marginBottom: 15,
@@ -271,7 +272,7 @@ export default function App() {
                   resizeMode="cover"
                 />
                 <Text
-                  style={{ fontSize: 22, fontWeight: "700", color: "#333" }}
+                  style={{ fontSize: theme.fontSizes.large, fontWeight: theme.fontWeights.bold as "700", color: theme.colors.text }}
                 >
                   {selectedCard.reviewerName}
                 </Text>
@@ -286,7 +287,7 @@ export default function App() {
                     />
                   ))}
                 </View>
-                <Text style={{ fontSize: 16, color: "#555", lineHeight: 22 }}>
+                <Text style={{ fontSize: theme.fontSizes.regular, color: theme.colors.text, lineHeight: 22 }}>
                   {selectedCard.review ?? ""}
                 </Text>
               </ScrollView>

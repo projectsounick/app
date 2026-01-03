@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity } from "react-native";
 import { useRouter, usePathname } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { bottomTabs } from "@/utils/staticDataUtils";
+import theme from "../Theme/globalTheme";
 
 ////// Main functional component for the bottom navbar -----------------------/
 export default function BottomNavBar({ pathname, router }: any) {
@@ -12,7 +13,7 @@ export default function BottomNavBar({ pathname, router }: any) {
         flexDirection: "row",
         justifyContent: "space-around",
         alignItems: "center",
-        backgroundColor: "#19002E",
+        backgroundColor: theme.colors.secondPrimary,
         height: 70,
         paddingTop: 6,
         paddingBottom: 6,
@@ -32,12 +33,12 @@ export default function BottomNavBar({ pathname, router }: any) {
             <MaterialCommunityIcons
               name={tab.icon as any}
               size={28}
-              color={isActive ? "#fff" : "#888"}
+              color={isActive ? theme.colors.textWhite : theme.colors.textMuted}
             />
             <Text
               style={{
-                color: isActive ? "#fff" : "#888",
-                fontSize: 12,
+                color: isActive ? theme.colors.textWhite : theme.colors.textMuted,
+                fontSize: theme.fontSizes.small,
                 textAlign: "center",
               }}
             >

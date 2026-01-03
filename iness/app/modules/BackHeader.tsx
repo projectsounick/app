@@ -3,10 +3,12 @@ import { useNavigation } from "@react-navigation/native";
 import { TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
 import { Text } from "react-native-paper";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 ///// Main funcitonal component for the back header --------------/
 export default function BackHeader() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const navigation = useNavigation();
   return (
     <>
@@ -20,14 +22,14 @@ export default function BackHeader() {
         }}
       >
         <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Icon name="chevron-left" size={24} color="#000" />
+          <Icon name="chevron-left" size={24} color={isDark ? theme.colors.textWhite : theme.colors.text} />
         </TouchableOpacity>
         <Text
           style={{
-            fontSize: 16,
-            fontWeight: "600",
+            fontSize: theme.fontSizes.regular,
+            fontWeight: theme.fontWeights.medium as "500",
             marginLeft: 10,
-            color: "#000",
+            color: isDark ? theme.colors.textWhite : theme.colors.text,
             fontFamily: theme.fonts.medium,
           }}
         >

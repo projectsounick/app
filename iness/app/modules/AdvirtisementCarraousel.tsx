@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 import { View, Text, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "../Theme/ThemeContext";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -14,24 +14,32 @@ const DATA = [
 ];
 
 function StylishCarousel() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  
+  // Use black-based gradient in dark mode, purple gradient in light mode
+  const gradientColors: [string, string] = isDark 
+    ? ["#1A1A1A", "#000000"] // Black gradient for dark mode
+    : ["#736AD6", "#5A54C4"]; // Purple gradient for light mode
+  
   return (
     <View
       style={{
         borderRadius: 18,
         overflow: "hidden",
-        shadowColor: "#000",
+        shadowColor: theme.colors.black,
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.12,
         shadowRadius: 8,
         elevation: 4,
         marginBottom: 16,
-        backgroundColor: "#fff",
+        backgroundColor: theme.colors.background,
         borderWidth: 0.5,
-        borderColor: "#EFEFEF",
+        borderColor: theme.colors.border,
       }}
     >
       <LinearGradient
-        colors={["#736AD6", "#5A54C4"]}
+        colors={gradientColors}
         start={{ x: 0.5, y: 0 }}
         end={{ x: 0.5, y: 1 }}
         style={{
@@ -50,7 +58,7 @@ function StylishCarousel() {
               width: 42,
               height: 42,
               borderRadius: 12,
-              backgroundColor: "#ffffff20",
+              backgroundColor: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.2)",
               alignItems: "center",
               justifyContent: "center",
               marginRight: 10,
@@ -67,7 +75,7 @@ function StylishCarousel() {
             style={{
               fontSize: theme.fontSizes.regular,
               fontFamily: theme.fonts.bold,
-              color: "#fff",
+              color: theme.colors.textWhite,
             }}
           >
             Why Choose Us
@@ -77,7 +85,7 @@ function StylishCarousel() {
         <Text
           style={{
             fontSize: theme.fontSizes.small,
-            color: "#E6E6E6",
+            color: theme.colors.textLight,
             marginBottom: 14,
             lineHeight: 18,
           }}
@@ -87,12 +95,12 @@ function StylishCarousel() {
 
         <View
           style={{
-            backgroundColor: "#fff",
+            backgroundColor: theme.colors.background,
             borderRadius: 14,
             paddingVertical: 10,
             paddingHorizontal: 10,
             borderWidth: 1,
-            borderColor: "#F2F2F2",
+            borderColor: theme.colors.border,
           }}
         >
           <View
@@ -113,8 +121,8 @@ function StylishCarousel() {
               >
                 <Text
                   style={{
-                    fontSize: 20,
-                    color: "#736AD6",
+                    fontSize: theme.fontSizes.large,
+                    color: theme.colors.secondPrimary,
                     marginBottom: 4,
                   }}
                 >
@@ -122,8 +130,8 @@ function StylishCarousel() {
                 </Text>
                 <Text
                   style={{
-                    color: theme.colors.dark,
-                    fontSize: 12,
+                    color: theme.colors.text,
+                    fontSize: theme.fontSizes.small,
                     fontFamily: theme.fonts.bold,
                     textAlign: "center",
                     lineHeight: 14,
@@ -133,8 +141,8 @@ function StylishCarousel() {
                 </Text>
                 <Text
                   style={{
-                    color: theme.colors.dark,
-                    fontSize: 12,
+                    color: theme.colors.text,
+                    fontSize: theme.fontSizes.small,
                     fontFamily: theme.fonts.medium,
                     textAlign: "center",
                     lineHeight: 14,

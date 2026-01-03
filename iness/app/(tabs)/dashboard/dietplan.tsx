@@ -39,7 +39,7 @@ const WorkoutPlanScreen = () => {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}
       edges={["top", "left", "right", "bottom"]}
     >
       <SmallHeader

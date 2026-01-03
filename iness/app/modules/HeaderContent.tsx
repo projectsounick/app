@@ -47,9 +47,9 @@ export default function HeaderContent({
               numberOfLines={3}
               ellipsizeMode="tail"
               style={{
-                color: "#fff",
+                color: theme.colors.textWhite,
 
-                fontSize: 22,
+                fontSize: theme.fontSizes.large,
                 fontFamily: theme.fonts.bold,
                 textAlign: "left",
                 flexShrink: 1, // ✅ allows wrapping instead of overflowing

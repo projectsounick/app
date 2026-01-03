@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import ShimmerPlaceHolder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
+import theme from "../../Theme/globalTheme";
 
 // Main functional component for the Shimmer skeleton card
 const ShimmerCard = () => {
@@ -58,7 +59,7 @@ const ShimmerCard = () => {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.background,
     marginBottom: 20,
     borderRadius: 16,
     elevation: 3,

@@ -25,7 +25,7 @@ const PlaceSelectionSection: React.FC<Props> = ({
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.iconContainer}>
-          <Icon name="map-pin" size={18} color="#9747FF" />
+          <Icon name="map-pin" size={18} color={theme.colors.secondPrimary} />
         </View>
         <Text style={styles.title}>Location</Text>
       </View>
@@ -33,7 +33,7 @@ const PlaceSelectionSection: React.FC<Props> = ({
       {/* Place Label */}
       <View style={styles.content}>
         <View style={styles.placeLabel}>
-          <Icon name="home" size={16} color="#9747FF" />
+          <Icon name="home" size={16} color={theme.colors.secondPrimary} />
           <Text style={styles.placeLabelText}>Home</Text>
         </View>
 
@@ -48,14 +48,14 @@ const PlaceSelectionSection: React.FC<Props> = ({
             value={addressMap[place] || ""}
             onChangeText={(text) => onAddressChange(place, text)}
             placeholder="Enter your address"
-            placeholderTextColor="#999"
+            placeholderTextColor={theme.colors.textMuted}
             editable={!preferences}
             style={[styles.input, preferences && styles.inputDisabled]}
           />
           <Icon
             name="edit-2"
             size={16}
-            color={preferences ? "#CCC" : "#9747FF"}
+            color={preferences ? theme.colors.textLight : theme.colors.secondPrimary}
           />
         </View>
       </View>
@@ -65,17 +65,17 @@ const PlaceSelectionSection: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: "#000",
+    shadowColor: theme.colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   header: {
     flexDirection: "row",
@@ -85,15 +85,15 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
   title: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   content: {
@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
   placeLabel: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     paddingVertical: 8,
     paddingHorizontal: 14,
     borderRadius: 10,
@@ -113,34 +113,34 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   placeLabelText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#9747FF",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.secondPrimary,
     marginLeft: 8,
     fontFamily: theme.fonts.medium,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FAFAFA",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.lightGrey,
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
   inputContainerDisabled: {
-    backgroundColor: "#F5F5F5",
-    borderColor: "#E8E8E8",
+    backgroundColor: theme.colors.mediumGrey,
+    borderColor: theme.colors.border,
   },
   input: {
     flex: 1,
-    fontSize: 14,
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.text,
     fontFamily: theme.fonts.regular,
   },
   inputDisabled: {
-    color: "#999",
+    color: theme.colors.textMuted,
   },
 });
 

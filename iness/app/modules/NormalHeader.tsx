@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Platform } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter, usePathname } from "expo-router";
 import { useNavigation } from "@react-navigation/native";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 
@@ -11,9 +11,12 @@ interface NormalHeaderProps {
   screenName: string;
   rightIcon?: boolean;
   showSupportChat?: boolean;
+  textColor?: string;
 }
 
-export default function NormalHeader({ screenName, rightIcon, showSupportChat }: NormalHeaderProps) {
+export default function NormalHeader({ screenName, rightIcon, showSupportChat, textColor }: NormalHeaderProps) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const router = useRouter();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
@@ -35,7 +38,7 @@ export default function NormalHeader({ screenName, rightIcon, showSupportChat }:
 
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style={isDark ? "light" : "dark"} />
       <View
         style={{
           flexDirection: "row",
@@ -47,23 +50,22 @@ export default function NormalHeader({ screenName, rightIcon, showSupportChat }:
       >
       {/* Back Button and Title */}
       <View style={{ flexDirection: "row", alignItems: "center" }}>
-        <TouchableOpacity
+          <TouchableOpacity
           style={{
-            backgroundColor: theme.colors.dark,
+            backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.black,
             borderRadius: 24,
             padding: 4,
             marginRight: 10,
           }}
           onPress={handleBackPress}
         >
-          <Ionicons name="arrow-back" size={20} color={theme.colors.text} />
+          <Ionicons name="arrow-back" size={20} color={isDark ? theme.colors.textWhite : theme.colors.textWhite} />
         </TouchableOpacity>
 
         <Text
           style={{
-            fontSize: 22,
-
-            color: theme.colors.dark,
+            fontSize: theme.fontSizes.large,
+            color: textColor || (isDark ? theme.colors.textWhite : theme.colors.text),
             fontFamily: theme.fonts.bold,
           }}
         >
@@ -81,7 +83,7 @@ export default function NormalHeader({ screenName, rightIcon, showSupportChat }:
               justifyContent: "center",
             }}
           >
-            <Ionicons name="chatbubble-ellipses-outline" size={24} color={theme.colors.dark} />
+            <Ionicons name="chatbubble-ellipses-outline" size={24} color={theme.colors.textWhite} />
           </TouchableOpacity>
         ) : null}
         {/* {rightIcon ? (
@@ -90,14 +92,14 @@ export default function NormalHeader({ screenName, rightIcon, showSupportChat }:
             style={{
               flexDirection: "row",
               alignItems: "center",
-              backgroundColor: "#67c694",
+              backgroundColor: theme.colors.success,
               paddingVertical: 4,
               paddingHorizontal: 8,
               borderRadius: 16,
             }}
           >
             <Ionicons name="stats-chart-outline" size={16} color="#fff" />
-            <Text style={{ marginLeft: 4, color: "#fff", fontWeight: "600", fontSize: 12 }}>
+            <Text style={{ marginLeft: 4, color: theme.colors.textWhite, fontWeight: theme.fontWeights.medium as "500", fontSize: theme.fontSizes.small }}>
               History
             </Text>
           </TouchableOpacity>

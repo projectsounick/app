@@ -11,6 +11,7 @@ import {
 import { useSelector } from "react-redux";
 import { Blog } from "../interfaces/blogInterface";
 import { RootState } from "@/store";
+import theme from "../Theme/globalTheme";
 
 const { width } = Dimensions.get("window");
 
@@ -24,7 +25,7 @@ const BlogCarousel = () => {
         style={{
           width: width * 0.8,
           marginHorizontal: width * 0.1,
-          backgroundColor: "#fff",
+          backgroundColor: theme.colors.background,
           borderRadius: 16,
           shadowColor: "#000",
           shadowOpacity: 0.1,
@@ -45,9 +46,9 @@ const BlogCarousel = () => {
         <View style={{ padding: 16 }}>
           <Text
             style={{
-              fontSize: 16,
-              fontWeight: "600",
-              color: "#19002E",
+              fontSize: theme.fontSizes.regular,
+              fontWeight: theme.fontWeights.medium as "500",
+              color: theme.colors.text,
               marginBottom: 8,
             }}
             numberOfLines={2}
@@ -56,13 +57,13 @@ const BlogCarousel = () => {
           </Text>
           <TouchableOpacity
             style={{
-              backgroundColor: "#522987",
+              backgroundColor: theme.colors.secondPrimary,
               paddingVertical: 10,
               borderRadius: 8,
               alignItems: "center",
             }}
           >
-            <Text style={{ color: "#fff", fontWeight: "600" }}>Read</Text>
+            <Text style={{ color: theme.colors.textWhite, fontWeight: theme.fontWeights.medium as "500" }}>Read</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -73,9 +74,9 @@ const BlogCarousel = () => {
     <View style={{ marginTop: 20 }}>
       <Text
         style={{
-          fontSize: 20,
-          fontWeight: "700",
-          color: "#19002E",
+          fontSize: theme.fontSizes.large,
+          fontWeight: theme.fontWeights.bold as "700",
+          color: theme.colors.text,
           marginLeft: 20,
           marginBottom: 10,
         }}

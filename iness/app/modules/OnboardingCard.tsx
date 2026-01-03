@@ -8,7 +8,7 @@ import {
   Dimensions,
 } from "react-native";
 import { OnboardingCardInterface } from "../interfaces/onboardingInterface";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
 const { width: screenWidth } = Dimensions.get("window");
@@ -23,6 +23,8 @@ export default function OnboardingCard({
   description,
   fontSize = 18,
 }: OnboardingCardInterface) {
+  const theme = useGlobalTheme();
+  const styles = getStyles(theme);
   const isSelected = Array.isArray(state)
     ? state.includes(option)
     : state === option;
@@ -145,7 +147,7 @@ export default function OnboardingCard({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   card: {
     marginBottom: Math.min(screenWidth * 0.035, 12),
     borderRadius: 16,
@@ -178,7 +180,7 @@ const styles = StyleSheet.create({
   description: {
     marginTop: 3,
     fontSize: Math.max(screenWidth * 0.03, 12),
-    color: "#888",
+    color: theme.colors.textMuted,
     fontFamily: theme.fonts.regular,
     lineHeight: Math.max(screenWidth * 0.045, 16),
   },

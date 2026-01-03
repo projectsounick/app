@@ -125,7 +125,7 @@ const HealthReportUploader = ({
       <View
         style={{
           flex: 1,
-          backgroundColor: "rgba(0,0,0,0.5)",
+          backgroundColor: theme.colors.overlay,
           justifyContent: "center",
           alignItems: "center",
         }}
@@ -134,17 +134,17 @@ const HealthReportUploader = ({
           style={{
             width: width * 0.85,
             borderRadius: 20,
-            backgroundColor: "#fff",
+            backgroundColor: theme.colors.background,
             overflow: "hidden",
             elevation: 10,
-            shadowColor: "#000",
+            shadowColor: theme.colors.black,
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.3,
             shadowRadius: 8,
           }}
         >
           <LinearGradient
-            colors={[theme.primary, theme.secondary]}
+            colors={[theme.colors.primary, theme.colors.secondPrimary]}
             style={{
               padding: 20,
               alignItems: "center",
@@ -154,9 +154,9 @@ const HealthReportUploader = ({
           />
           <Text
             style={{
-              color: "#000",
-              fontSize: 20,
-              fontWeight: "700",
+              color: theme.colors.text,
+              fontSize: theme.fontSizes.large,
+              fontWeight: theme.fontWeights.bold as "700",
               textAlign: "center",
               fontFamily: theme.fonts.bold,
             }}
@@ -170,23 +170,23 @@ const HealthReportUploader = ({
               position: "absolute",
               top: 10,
               right: 10,
-              backgroundColor: "#fff",
+              backgroundColor: theme.colors.background,
               width: 32,
               height: 32,
               borderRadius: 16,
               justifyContent: "center",
               alignItems: "center",
               elevation: 5,
-              shadowColor: "#000",
+              shadowColor: theme.colors.black,
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.25,
               shadowRadius: 3,
             }}
           >
             {loading ? (
-              <ActivityIndicator size="small" color={theme.primary} />
+              <ActivityIndicator size="small" color={theme.colors.primary} />
             ) : (
-              <Ionicons name="close" size={20} color={theme.primary} />
+              <Ionicons name="close" size={20} color={theme.colors.primary} />
             )}
           </TouchableOpacity>
 
@@ -194,9 +194,9 @@ const HealthReportUploader = ({
             <Text
               style={{
                 textAlign: "center",
-                fontSize: 14,
+                fontSize: theme.fontSizes.regularSmall,
                 fontFamily: theme.fonts.medium,
-                color: "#666",
+                color: theme.colors.textSecondary,
                 marginBottom: 12,
                 lineHeight: 20,
               }}
@@ -208,9 +208,9 @@ const HealthReportUploader = ({
             <Text
               style={{
                 textAlign: "center",
-                fontSize: 11,
+                fontSize: theme.fontSizes.small,
                 fontFamily: theme.fonts.regular,
-                color: "#999",
+                color: theme.colors.textMuted,
                 marginBottom: 20,
                 lineHeight: 16,
                 fontStyle: "italic",
@@ -229,8 +229,8 @@ const HealthReportUploader = ({
                   marginVertical: 15,
                 }}
               >
-                <ActivityIndicator size="large" color={theme.primary} />
-                <Text style={{ marginTop: 10, color: "#333" }}>
+                <ActivityIndicator size="large" color={theme.colors.primary} />
+                <Text style={{ marginTop: 10, color: theme.colors.text }}>
                   Uploading {fileName}...
                 </Text>
               </View>
@@ -241,26 +241,26 @@ const HealthReportUploader = ({
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: theme.primary,
+                  backgroundColor: theme.colors.primary,
                   paddingVertical: 14,
                   paddingHorizontal: 25,
                   borderRadius: 35,
                   marginBottom: 10,
                   borderWidth: 1,
-                  borderColor: "#000",
-                  shadowColor: "#000",
+                  borderColor: theme.colors.black,
+                  shadowColor: theme.colors.black,
                   shadowOffset: { width: 0, height: 2 },
                   shadowOpacity: 0.3,
                   shadowRadius: 5,
                 }}
               >
-                <Ionicons name="cloud-upload" size={24} color="#000" />
+                <Ionicons name="cloud-upload" size={24} color={theme.colors.black} />
                 <Text
                   style={{
-                    color: "#000",
-                    fontWeight: "700",
+                    color: theme.colors.black,
+                    fontWeight: theme.fontWeights.bold as "700",
                     marginLeft: 12,
-                    fontSize: 16,
+                    fontSize: theme.fontSizes.regular,
                     fontFamily: theme.fonts.bold,
                   }}
                 >
@@ -273,8 +273,8 @@ const HealthReportUploader = ({
               <Text
                 style={{
                   marginTop: 15,
-                  color: "green",
-                  fontSize: 14,
+                  color: theme.colors.success,
+                  fontSize: theme.fontSizes.regularSmall,
                   textAlign: "center",
                 }}
               >

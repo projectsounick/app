@@ -3,6 +3,7 @@ import { View, Text, Modal, TouchableOpacity, StyleSheet } from "react-native";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import theme from "../Theme/globalTheme";
 
 export function withAuthGuard<P extends { onPress?: () => void }>(
   WrappedComponent: React.ComponentType<P>
@@ -109,14 +110,14 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#111827",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     marginBottom: 6,
   },
   message: {
-    fontSize: 15,
-    color: "#4B5563",
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.textSecondary,
     textAlign: "center",
     marginBottom: 20,
   },

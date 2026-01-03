@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { View, Animated, ScrollView } from "react-native";
 import { usePathname, useRouter } from "expo-router";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
 
 import { useDispatch, useSelector } from "react-redux";
@@ -54,6 +55,7 @@ import { useAppleHealthBackgroundSync } from "@/hooks/useAppleHealthBackgroundSy
 
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
+  const theme = useGlobalTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [loggedUser, setLoggedUser] = useState(null);
   const calendarSheetOpen = useSelector(
@@ -177,7 +179,7 @@ const YourComponent = () => {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
       edges={["left", "right"]}
     >
       {/* Animated Header */}

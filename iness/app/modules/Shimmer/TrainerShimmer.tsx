@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
 import ShimmerPlaceHolder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
+import theme from "../../Theme/globalTheme";
 
 interface TrainerShimmerProps {
   screenName: "train" | "session";
@@ -157,7 +158,7 @@ const TrainerShimmer: React.FC<TrainerShimmerProps> = ({ screenName }) => {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: "#f2f2f2",
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   container: {
     padding: 16,
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
     padding: 16,
     marginBottom: 20,
@@ -219,7 +220,7 @@ const styles = StyleSheet.create({
   },
   infoCard: {
     marginTop: 20,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.background,
     borderRadius: 12,
     padding: 16,
   },

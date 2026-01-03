@@ -4,7 +4,6 @@ import {
   Text,
   ScrollView,
   Switch,
-  ImageBackground,
   Platform,
   Dimensions,
   ActivityIndicator,
@@ -21,15 +20,372 @@ import { userService } from "@/app/services/user.service";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import { router } from "expo-router";
 import HealthReportUploader from "@/app/modules/UploadReportPdf";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { useAppleHealthSync } from "@/hooks/useAppleHealthSync";
 import { HealthKit } from "@/services/healthSync";
 import { trackService } from "@/app/services/track.service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.05;
+
+// Style functions - defined early so they can be used in components
+const getHealthSyncModalStyles = (theme: any) => StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "flex-end",
+  },
+  overlayTouch: {
+    flex: 1,
+  },
+  sheet: {
+    backgroundColor: theme.colors.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 24,
+    paddingTop: 12,
+    paddingBottom: Platform.OS === "ios" ? 40 : 24,
+  },
+  handleBar: {
+    width: 50,
+    height: 5,
+    backgroundColor: theme.colors.divider,
+    borderRadius: 3,
+    alignSelf: "center",
+    marginBottom: 20,
+  },
+  closeBtn: {
+    position: "absolute",
+    top: 16,
+    right: 20,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 10,
+  },
+  iconContainer: {
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  iconCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  title: {
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
+    textAlign: "center",
+    marginBottom: 24,
+    fontFamily: theme.fonts.bold,
+  },
+  stepsContainer: {
+    marginBottom: 20,
+  },
+  stepRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 16,
+  },
+  stepNumber: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: theme.colors.backgroundCardLight,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  stepNumberText: {
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.secondPrimary,
+    fontFamily: theme.fonts.medium,
+  },
+  stepText: {
+    flex: 1,
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.text,
+    lineHeight: 22,
+    fontFamily: theme.fonts.regular,
+  },
+  noteContainer: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 24,
+    gap: 8,
+  },
+  noteText: {
+    flex: 1,
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
+    lineHeight: 18,
+    fontFamily: theme.fonts.regular,
+  },
+  buttonsContainer: {
+    flexDirection: "row",
+    gap: 12,
+    marginBottom: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: theme.colors.border,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.textSecondary,
+    fontFamily: theme.fonts.medium,
+  },
+  settingsButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: theme.colors.backgroundCardLight,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 8,
+  },
+  settingsButtonText: {
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.secondPrimary,
+    fontFamily: theme.fonts.medium,
+  },
+  continueButton: {
+    paddingVertical: 16,
+    borderRadius: 20,
+    backgroundColor: theme.colors.success,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  continueButtonText: {
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.textWhite,
+    fontFamily: theme.fonts.medium,
+  },
+});
+
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  scrollContent: {
+    padding: 20,
+    paddingBottom: 40,
+  },
+  card: {
+    backgroundColor: theme.colors.background,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    }),
+  },
+  dangerCard: {
+    borderColor: theme.colors.errorLight,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  iconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: theme.colors.backgroundCardLight,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  dangerIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: theme.colors.errorLight || theme.colors.backgroundSecondary,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  cardTitle: {
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.text,
+    flex: 1,
+    fontFamily: theme.fonts.bold,
+  },
+  dangerTitle: {
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.error,
+    flex: 1,
+    fontFamily: theme.fonts.bold,
+  },
+  infoBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: theme.colors.backgroundCardLight,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  cardContent: {
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+  },
+  settingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  settingTitle: {
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.text,
+    marginBottom: 2,
+    fontFamily: theme.fonts.medium,
+  },
+  settingSubtitle: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textMuted,
+    lineHeight: 16,
+    fontFamily: theme.fonts.regular,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: theme.colors.overlay,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: theme.colors.background,
+    borderRadius: 20,
+    padding: 24,
+    width: "100%",
+    maxWidth: 400,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  modalTitle: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
+    flex: 1,
+    fontFamily: theme.fonts.bold,
+  },
+  modalCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: theme.colors.border,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalText: {
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
+    lineHeight: 22,
+    fontFamily: theme.fonts.regular,
+  },
+  deleteModalHeader: {
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  deleteIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: theme.colors.errorLight || theme.colors.backgroundSecondary,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 16,
+  },
+  deleteModalTitle: {
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
+    marginBottom: 8,
+    fontFamily: theme.fonts.bold,
+  },
+  deleteModalText: {
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
+    textAlign: "center",
+    lineHeight: 20,
+    fontFamily: theme.fonts.regular,
+  },
+  deletingContainer: {
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  deletingText: {
+    marginTop: 12,
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
+    fontFamily: theme.fonts.regular,
+  },
+  deleteModalButtons: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  cancelButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: theme.colors.border,
+    alignItems: "center",
+  },
+  cancelButtonText: {
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.textSecondary,
+    fontFamily: theme.fonts.medium,
+  },
+  deleteButton: {
+    flex: 1,
+    paddingVertical: 14,
+    borderRadius: 12,
+    backgroundColor: theme.colors.errorRed,
+    alignItems: "center",
+  },
+  deleteButtonText: {
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.textWhite,
+    fontFamily: theme.fonts.medium,
+  },
+});
 
 interface InfoModalProps {
   visible: boolean;
@@ -44,6 +400,8 @@ const InfoModal: React.FC<InfoModalProps> = ({
   title,
   content,
 }) => {
+  const theme = useGlobalTheme();
+  const styles = getStyles(theme);
   return (
     <Modal
       transparent
@@ -56,7 +414,7 @@ const InfoModal: React.FC<InfoModalProps> = ({
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>{title}</Text>
             <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
-              <Ionicons name="close" size={20} color="#333" />
+              <Ionicons name="close" size={20} color={theme.colors.textSecondary} />
             </TouchableOpacity>
           </View>
           <Text style={styles.modalText}>{content}</Text>
@@ -84,6 +442,8 @@ const HealthSyncGuideModal: React.FC<HealthSyncGuideModalProps> = ({
   onContinue,
   loading = false,
 }) => {
+  const theme = useGlobalTheme();
+  const healthSyncModalStyles = getHealthSyncModalStyles(theme);
   const isSteps = type === "steps";
   const isEnable = action === "enable";
   const permissionName = isSteps ? "Steps" : "Sleep Analysis";
@@ -121,19 +481,19 @@ const HealthSyncGuideModal: React.FC<HealthSyncGuideModalProps> = ({
           
           {/* Close Button */}
           <TouchableOpacity onPress={onClose} style={healthSyncModalStyles.closeBtn}>
-            <Ionicons name="close" size={20} color="#333" />
+            <Ionicons name="close" size={20} color={theme.colors.text} />
           </TouchableOpacity>
           
           {/* Icon */}
           <View style={healthSyncModalStyles.iconContainer}>
             <View style={[
               healthSyncModalStyles.iconCircle,
-              { backgroundColor: isSteps ? "#F3EDFF" : "#E8F5E9" }
+              { backgroundColor: isSteps ? theme.colors.backgroundCardLight : theme.colors.greenLight }
             ]}>
               <Ionicons 
                 name={isSteps ? "walk-outline" : "moon-outline"} 
                 size={32} 
-                color={isSteps ? "#9747FF" : "#67C694"} 
+                color={isSteps ? theme.colors.secondPrimary : theme.colors.success} 
               />
             </View>
           </View>
@@ -157,7 +517,7 @@ const HealthSyncGuideModal: React.FC<HealthSyncGuideModalProps> = ({
           
           {/* Note */}
           <View style={healthSyncModalStyles.noteContainer}>
-            <Ionicons name="information-circle-outline" size={18} color="#888" />
+            <Ionicons name="information-circle-outline" size={18} color={theme.colors.textMuted} />
             <Text style={healthSyncModalStyles.noteText}>
               {isEnable 
                 ? "If you don't enable the permission in Health, tapping Continue won't change anything."
@@ -181,7 +541,7 @@ const HealthSyncGuideModal: React.FC<HealthSyncGuideModalProps> = ({
               onPress={() => HealthKit.openHealthSettings()}
               disabled={loading}
             >
-              <Ionicons name="settings-outline" size={18} color="#9747FF" />
+              <Ionicons name="settings-outline" size={18} color={theme.colors.secondPrimary} />
               <Text style={healthSyncModalStyles.settingsButtonText}>Open Settings</Text>
             </TouchableOpacity>
           </View>
@@ -195,7 +555,7 @@ const HealthSyncGuideModal: React.FC<HealthSyncGuideModalProps> = ({
             disabled={loading}
           >
             {loading ? (
-              <ActivityIndicator size="small" color="#FFFFFF" />
+              <ActivityIndicator size="small" color={theme.colors.textWhite} />
             ) : (
               <Text style={healthSyncModalStyles.continueButtonText}>Continue</Text>
             )}
@@ -206,159 +566,10 @@ const HealthSyncGuideModal: React.FC<HealthSyncGuideModalProps> = ({
   );
 };
 
-const healthSyncModalStyles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "flex-end",
-  },
-  overlayTouch: {
-    flex: 1,
-  },
-  sheet: {
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    paddingHorizontal: 24,
-    paddingTop: 12,
-    paddingBottom: Platform.OS === "ios" ? 40 : 24,
-  },
-  handleBar: {
-    width: 50,
-    height: 5,
-    backgroundColor: "#E0E0E0",
-    borderRadius: 3,
-    alignSelf: "center",
-    marginBottom: 20,
-  },
-  closeBtn: {
-    position: "absolute",
-    top: 16,
-    right: 20,
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F5F5F5",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 10,
-  },
-  iconContainer: {
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  iconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1A1A1A",
-    textAlign: "center",
-    marginBottom: 24,
-    fontFamily: theme.fonts.bold,
-  },
-  stepsContainer: {
-    marginBottom: 20,
-  },
-  stepRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 16,
-  },
-  stepNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#F3EDFF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  stepNumberText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#9747FF",
-    fontFamily: theme.fonts.medium,
-  },
-  stepText: {
-    flex: 1,
-    fontSize: 15,
-    color: "#333",
-    lineHeight: 22,
-    fontFamily: theme.fonts.regular,
-  },
-  noteContainer: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    backgroundColor: "#F8F8F8",
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 24,
-    gap: 8,
-  },
-  noteText: {
-    flex: 1,
-    fontSize: 13,
-    color: "#666",
-    lineHeight: 18,
-    fontFamily: theme.fonts.regular,
-  },
-  buttonsContainer: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 12,
-  },
-  cancelButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: "#F5F5F5",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  cancelButtonText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#666",
-    fontFamily: theme.fonts.medium,
-  },
-  settingsButton: {
-    flex: 1,
-    flexDirection: "row",
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: "#F3EDFF",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-  },
-  settingsButtonText: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#9747FF",
-    fontFamily: theme.fonts.medium,
-  },
-  continueButton: {
-    paddingVertical: 16,
-    borderRadius: 20,
-    backgroundColor: "#67C694",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  continueButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#FFFFFF",
-    fontFamily: theme.fonts.medium,
-  },
-});
-
 export default function AppSettingsScreen() {
+  const theme = useGlobalTheme();
+  const { setThemeMode, isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const [notificationEnabled, setNotificationEnabled] = useState(false);
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
@@ -410,6 +621,16 @@ export default function AppSettingsScreen() {
     title: "Health Data Sync",
     content:
       "Sync your steps and sleep data from Apple Health. When enabled, your health data will automatically sync with the app. You can turn off sync at any time. If you turn off sync, you'll need to grant permissions again when you turn it back on.",
+  };
+
+  const darkModeInfo = {
+    title: "Dark Mode",
+    content:
+      "Enable dark mode to use a darker color scheme throughout the app. This can help reduce eye strain in low-light conditions and may help conserve battery on devices with OLED displays.",
+  };
+
+  const handleDarkModeToggle = (value: boolean) => {
+    setThemeMode(value ? 'dark' : 'light');
   };
 
   const handleStepsSyncToggle = async (value: boolean) => {
@@ -702,16 +923,11 @@ export default function AppSettingsScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
-      <ImageBackground
-        source={backgroundImg}
-        style={{ flex: 1 }}
-        resizeMode="cover"
-      >
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: "transparent" }}
-          edges={["left", "right"]}
-        >
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      edges={["left", "right"]}
+    >
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
           <View
             style={{
               paddingLeft: 20,
@@ -723,7 +939,7 @@ export default function AppSettingsScreen() {
 
           {initialLoading ? (
             <View style={styles.loaderContainer}>
-              <ActivityIndicator color="#9747FF" size="large" />
+              <ActivityIndicator color={theme.colors.secondPrimary} size="large" />
             </View>
           ) : (
             <ScrollView
@@ -737,7 +953,7 @@ export default function AppSettingsScreen() {
                     <Ionicons
                       name="notifications-outline"
                       size={18}
-                      color="#9747FF"
+                      color={theme.colors.secondPrimary}
                     />
                   </View>
                   <Text style={styles.cardTitle}>Notifications</Text>
@@ -748,7 +964,7 @@ export default function AppSettingsScreen() {
                     <Ionicons
                       name="information-circle-outline"
                       size={18}
-                      color="#9747FF"
+                      color={theme.colors.secondPrimary}
                     />
                   </TouchableOpacity>
                 </View>
@@ -764,16 +980,60 @@ export default function AppSettingsScreen() {
                       </Text>
                     </View>
                     {loading ? (
-                      <ActivityIndicator color="#67C694" size="small" />
+                      <ActivityIndicator color={theme.colors.success} size="small" />
                     ) : (
                       <Switch
                         value={notificationEnabled}
                         onValueChange={handleNotificationToggle}
-                        trackColor={{ false: "#E0E0E0", true: "#67C694" }}
-                        thumbColor={notificationEnabled ? "#FFFFFF" : "#F4F3F4"}
-                        ios_backgroundColor="#E0E0E0"
+                        trackColor={{ false: theme.colors.border, true: theme.colors.success }}
+                        thumbColor={notificationEnabled ? theme.colors.textWhite : "#F4F3F4"}
+                        ios_backgroundColor={theme.colors.border}
                       />
                     )}
+                  </View>
+                </View>
+              </View>
+
+              {/* Dark Mode Settings */}
+              <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <View style={styles.iconContainer}>
+                    <Ionicons
+                      name="moon-outline"
+                      size={18}
+                      color={theme.colors.secondPrimary}
+                    />
+                  </View>
+                  <Text style={styles.cardTitle}>Appearance</Text>
+                  <TouchableOpacity
+                    onPress={() => handleInfoClick(darkModeInfo)}
+                    style={styles.infoBtn}
+                  >
+                    <Ionicons
+                      name="information-circle-outline"
+                      size={18}
+                      color={theme.colors.secondPrimary}
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                <View style={styles.cardContent}>
+                  <View style={styles.settingRow}>
+                    <View style={{ flex: 1, marginRight: 12 }}>
+                      <Text style={styles.settingTitle}>Dark Mode</Text>
+                      <Text style={styles.settingSubtitle}>
+                        {isDark
+                          ? "Dark mode is enabled"
+                          : "Light mode is enabled"}
+                      </Text>
+                    </View>
+                    <Switch
+                      value={isDark}
+                      onValueChange={handleDarkModeToggle}
+                      trackColor={{ false: theme.colors.border, true: theme.colors.secondPrimary }}
+                      thumbColor={isDark ? theme.colors.textWhite : "#F4F3F4"}
+                      ios_backgroundColor={theme.colors.border}
+                    />
                   </View>
                 </View>
               </View>
@@ -786,7 +1046,7 @@ export default function AppSettingsScreen() {
                       <Ionicons
                         name="heart-outline"
                         size={18}
-                        color="#9747FF"
+                        color={theme.colors.secondPrimary}
                       />
                     </View>
                     <Text style={styles.cardTitle}>Health Data Sync</Text>
@@ -797,7 +1057,7 @@ export default function AppSettingsScreen() {
                       <Ionicons
                         name="information-circle-outline"
                         size={18}
-                        color="#9747FF"
+                        color={theme.colors.secondPrimary}
                       />
                     </TouchableOpacity>
                   </View>
@@ -814,14 +1074,14 @@ export default function AppSettingsScreen() {
                         </Text>
                       </View>
                       {syncingSteps ? (
-                        <ActivityIndicator color="#67C694" size="small" />
+                        <ActivityIndicator color={theme.colors.success} size="small" />
                       ) : (
                         <Switch
                           value={stepsSyncEnabled}
                           onValueChange={handleStepsSyncToggle}
-                          trackColor={{ false: "#E0E0E0", true: "#67C694" }}
-                          thumbColor={stepsSyncEnabled ? "#FFFFFF" : "#F4F3F4"}
-                          ios_backgroundColor="#E0E0E0"
+                          trackColor={{ false: theme.colors.border, true: theme.colors.success }}
+                          thumbColor={stepsSyncEnabled ? theme.colors.textWhite : "#F4F3F4"}
+                          ios_backgroundColor={theme.colors.border}
                         />
                       )}
                     </View>
@@ -837,14 +1097,14 @@ export default function AppSettingsScreen() {
                         </Text>
                       </View>
                       {syncingSleep ? (
-                        <ActivityIndicator color="#67C694" size="small" />
+                        <ActivityIndicator color={theme.colors.success} size="small" />
                       ) : (
                         <Switch
                           value={sleepSyncEnabled}
                           onValueChange={handleSleepSyncToggle}
-                          trackColor={{ false: "#E0E0E0", true: "#67C694" }}
-                          thumbColor={sleepSyncEnabled ? "#FFFFFF" : "#F4F3F4"}
-                          ios_backgroundColor="#E0E0E0"
+                          trackColor={{ false: theme.colors.border, true: theme.colors.success }}
+                          thumbColor={sleepSyncEnabled ? theme.colors.textWhite : "#F4F3F4"}
+                          ios_backgroundColor={theme.colors.border}
                         />
                       )}
                     </View>
@@ -859,7 +1119,7 @@ export default function AppSettingsScreen() {
                     <Ionicons
                       name="cloud-upload-outline"
                       size={18}
-                      color="#9747FF"
+                      color={theme.colors.secondPrimary}
                     />
                   </View>
                   <Text style={styles.cardTitle}>Health Report Upload</Text>
@@ -870,7 +1130,7 @@ export default function AppSettingsScreen() {
                     <Ionicons
                       name="information-circle-outline"
                       size={18}
-                      color="#9747FF"
+                      color={theme.colors.secondPrimary}
                     />
                   </TouchableOpacity>
                 </View>
@@ -891,7 +1151,7 @@ export default function AppSettingsScreen() {
                     <Ionicons
                       name="chevron-forward"
                       size={20}
-                      color="#1A1A1A"
+                      color={theme.colors.text}
                     />
                   </TouchableOpacity>
                 </View>
@@ -904,7 +1164,7 @@ export default function AppSettingsScreen() {
                     <Ionicons
                       name="options-outline"
                       size={18}
-                      color="#9747FF"
+                      color={theme.colors.secondPrimary}
                     />
                   </View>
                   <Text style={styles.cardTitle}>Preferences</Text>
@@ -915,7 +1175,7 @@ export default function AppSettingsScreen() {
                     <Ionicons
                       name="information-circle-outline"
                       size={18}
-                      color="#9747FF"
+                      color={theme.colors.secondPrimary}
                     />
                   </TouchableOpacity>
                 </View>
@@ -934,7 +1194,7 @@ export default function AppSettingsScreen() {
                     <Ionicons
                       name="chevron-forward"
                       size={20}
-                      color="#1A1A1A"
+                      color={theme.colors.text}
                     />
                   </TouchableOpacity>
                 </View>
@@ -944,7 +1204,7 @@ export default function AppSettingsScreen() {
               <View style={styles.card}>
                 <View style={styles.cardHeader}>
                   <View style={styles.iconContainer}>
-                    <Ionicons name="log-out-outline" size={18} color="#9747FF" />
+                    <Ionicons name="log-out-outline" size={18} color={theme.colors.secondPrimary} />
                   </View>
                   <Text style={styles.cardTitle}>Logout</Text>
                 </View>
@@ -963,7 +1223,7 @@ export default function AppSettingsScreen() {
                     <Ionicons
                       name="chevron-forward"
                       size={20}
-                      color="#1A1A1A"
+                      color={theme.colors.text}
                     />
                   </TouchableOpacity>
                 </View>
@@ -973,7 +1233,7 @@ export default function AppSettingsScreen() {
               <View style={[styles.card, styles.dangerCard]}>
                 <View style={styles.cardHeader}>
                   <View style={styles.dangerIconContainer}>
-                    <Ionicons name="trash-outline" size={18} color="#FF6B6B" />
+                    <Ionicons name="trash-outline" size={18} color={theme.colors.errorRed} />
                   </View>
                   <Text style={styles.dangerTitle}>Delete Account</Text>
                 </View>
@@ -984,7 +1244,7 @@ export default function AppSettingsScreen() {
                     style={styles.settingRow}
                   >
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.settingTitle, { color: "#FF6B6B" }]}>
+                      <Text style={[styles.settingTitle, { color: theme.colors.error }]}>
                         Permanently Delete Account
                       </Text>
                       <Text style={styles.settingSubtitle}>
@@ -994,7 +1254,7 @@ export default function AppSettingsScreen() {
                     <Ionicons
                       name="chevron-forward"
                       size={20}
-                      color="#FF6B6B"
+                      color={theme.colors.errorRed}
                     />
                   </TouchableOpacity>
                 </View>
@@ -1045,7 +1305,7 @@ export default function AppSettingsScreen() {
               <View style={styles.modalContent}>
                 <View style={styles.deleteModalHeader}>
                   <View style={styles.deleteIconContainer}>
-                    <Ionicons name="warning" size={30} color="#FF6B6B" />
+                    <Ionicons name="warning" size={30} color={theme.colors.errorRed} />
                   </View>
                   <Text style={styles.deleteModalTitle}>Are you sure?</Text>
                   <Text style={styles.deleteModalText}>
@@ -1056,7 +1316,7 @@ export default function AppSettingsScreen() {
 
                 {isDeleting ? (
                   <View style={styles.deletingContainer}>
-                    <ActivityIndicator color="#FF6B6B" size="large" />
+                    <ActivityIndicator color={theme.colors.errorRed} size="large" />
                     <Text style={styles.deletingText}>Deleting account...</Text>
                   </View>
                 ) : (
@@ -1083,216 +1343,9 @@ export default function AppSettingsScreen() {
             visible={snackbarOpen}
             message={snackbarMessage}
             onDismiss={() => setSnackbarOpen(false)}
-            bgColor="#FFFFFF"
+            bgColor={theme.colors.background}
           />
-        </SafeAreaView>
-      </ImageBackground>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  loaderContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  scrollContent: {
-    padding: 20,
-    paddingBottom: 40,
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
-    borderWidth: 1,
-    borderColor: "#F5F5F5",
-  },
-  dangerCard: {
-    borderColor: "#FFEBEE",
-  },
-  cardHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "#F3EDFF",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  dangerIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "#FFEBEE",
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 12,
-  },
-  cardTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1A1A1A",
-    flex: 1,
-    fontFamily: theme.fonts.bold,
-  },
-  dangerTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#FF6B6B",
-    flex: 1,
-    fontFamily: theme.fonts.bold,
-  },
-  infoBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: "#F3EDFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  cardContent: {
-    marginTop: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
-  },
-  settingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-  },
-  settingTitle: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#1A1A1A",
-    marginBottom: 2,
-    fontFamily: theme.fonts.medium,
-  },
-  settingSubtitle: {
-    fontSize: 12,
-    color: "#888",
-    lineHeight: 16,
-    fontFamily: theme.fonts.regular,
-  },
-  // Modal styles
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  modalContent: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 20,
-    padding: 24,
-    width: "100%",
-    maxWidth: 400,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
-    flex: 1,
-    fontFamily: theme.fonts.bold,
-  },
-  modalCloseBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#F5F5F5",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  modalText: {
-    fontSize: 14,
-    color: "#666",
-    lineHeight: 22,
-    fontFamily: theme.fonts.regular,
-  },
-  // Delete modal styles
-  deleteModalHeader: {
-    alignItems: "center",
-    marginBottom: 20,
-  },
-  deleteIconContainer: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: "#FFEBEE",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 16,
-  },
-  deleteModalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1A1A1A",
-    marginBottom: 8,
-    fontFamily: theme.fonts.bold,
-  },
-  deleteModalText: {
-    fontSize: 14,
-    color: "#666",
-    textAlign: "center",
-    lineHeight: 20,
-    fontFamily: theme.fonts.regular,
-  },
-  deletingContainer: {
-    alignItems: "center",
-    paddingVertical: 20,
-  },
-  deletingText: {
-    marginTop: 12,
-    fontSize: 14,
-    color: "#666",
-    fontFamily: theme.fonts.regular,
-  },
-  deleteModalButtons: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  cancelButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: "#F5F5F5",
-    alignItems: "center",
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#666",
-    fontFamily: theme.fonts.medium,
-  },
-  deleteButton: {
-    flex: 1,
-    paddingVertical: 14,
-    borderRadius: 12,
-    backgroundColor: "#FF6B6B",
-    alignItems: "center",
-  },
-  deleteButtonText: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#FFFFFF",
-    fontFamily: theme.fonts.medium,
-  },
-});

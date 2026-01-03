@@ -28,7 +28,7 @@ import { captureRef } from "react-native-view-shot";
 
 import { communityService } from "@/app/services/community.service";
 import { useFocusEffect } from "expo-router";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import ImageViewerModal from "@/app/Modals/ImageViewerModal";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { userService } from "@/app/services/user.service";
@@ -90,6 +90,9 @@ const CommunityPosts = ({
   const [shareImageUrl, setShareImageUrl] = useState<string | null>(null);
   const [sharePostText, setSharePostText] = useState<string>("");
   const sharePreviewRef = useRef<View>(null);
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
 
   const options = ["All Posts", "My Posts"];
 
@@ -498,7 +501,7 @@ const CommunityPosts = ({
             />
           ) : (
             <View style={styles.avatarPlaceholder}>
-              <Ionicons name="person" size={24} color="#999" />
+              <Ionicons name="person" size={24} color={theme.colors.textMuted} />
             </View>
           )}
           <View>
@@ -520,7 +523,7 @@ const CommunityPosts = ({
           }}
           style={styles.menuButton}
         >
-          <Ionicons name="ellipsis-horizontal" size={24} color="#000" />
+          <Ionicons name="ellipsis-horizontal" size={24} color={isDark ? theme.colors.textWhite : theme.colors.text} />
         </TouchableOpacity>
       </View>
 
@@ -537,7 +540,7 @@ const CommunityPosts = ({
             <Ionicons
               name={item.likedByUser ? "heart" : "heart-outline"}
               size={28}
-              color={item.likedByUser ? "#FF3040" : "#000"}
+              color={item.likedByUser ? "#FF3040" : (isDark ? theme.colors.textWhite : theme.colors.text)}
             />
           </TouchableOpacity>
           {/* Comment icon commented out */}
@@ -551,7 +554,7 @@ const CommunityPosts = ({
             onPress={() => handleSharePost(item)}
             style={styles.actionButton}
           >
-            <Ionicons name="paper-plane-outline" size={26} color="#000" />
+            <Ionicons name="paper-plane-outline" size={26} color={isDark ? theme.colors.textWhite : theme.colors.text} />
           </TouchableOpacity>
         </View>
         {/* Bookmark icon commented out */}
@@ -643,7 +646,7 @@ const CommunityPosts = ({
             position: "absolute",
             right: "10%",
             top: "5%",
-            backgroundColor: "#fff",
+            backgroundColor: theme.colors.background,
             borderRadius: 12,
             shadowColor: "#000",
             shadowOpacity: 0.15,
@@ -671,8 +674,8 @@ const CommunityPosts = ({
               <Text
                 style={{
                   marginLeft: 10,
-                  fontSize: 15,
-                  color: "#333",
+                  fontSize: theme.fontSizes.regular,
+                  color: theme.colors.text,
                   fontWeight: "500",
                 }}
               >
@@ -685,7 +688,7 @@ const CommunityPosts = ({
           <View
             style={{
               height: 1,
-              backgroundColor: "#eee",
+              backgroundColor: theme.colors.backgroundSecondary,
               marginHorizontal: 10,
             }}
           />
@@ -736,7 +739,7 @@ const CommunityPosts = ({
                 <Text
                   style={{
                     marginLeft: 10,
-                    fontSize: 15,
+                    fontSize: theme.fontSizes.regular,
                     color: "red",
                     fontWeight: "600",
                   }}
@@ -753,7 +756,7 @@ const CommunityPosts = ({
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {isLoading && posts.length === 0 ? (
         <View style={styles.centerContent}>
           <ActivityIndicator size="large" color="#007BFF" />
@@ -858,7 +861,7 @@ const CommunityPosts = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   listContent: {
     paddingBottom: 100,
   },
@@ -869,16 +872,16 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 8,
-    fontSize: 14,
-    color: theme.colors.mutedText,
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textMuted,
     fontFamily: theme.fonts.regular,
   },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     marginBottom: 0,
     marginHorizontal: 0,
     borderBottomWidth: 1,
-    borderBottomColor: "#E0E0E0",
+    borderBottomColor: theme.colors.border,
     paddingBottom: 12,
   },
   centerContent: {
@@ -889,8 +892,8 @@ const styles = StyleSheet.create({
   },
 
   noPostText: {
-    fontSize: 16,
-    color: "#888",
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.textMuted,
     fontWeight: "500",
   },
 
@@ -912,28 +915,28 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     marginRight: 10,
     borderWidth: 1.5,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.border,
   },
   avatarPlaceholder: {
     width: 36,
     height: 36,
     borderRadius: 18,
     marginRight: 10,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: theme.colors.backgroundSecondary,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1.5,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.border,
   },
   username: {
     fontWeight: "600",
-    fontSize: 14,
-    color: "#000",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   timeText: {
-    fontSize: 12,
-    color: "#999",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textMuted,
     fontFamily: theme.fonts.regular,
     marginTop: 2,
   },
@@ -942,7 +945,7 @@ const styles = StyleSheet.create({
   },
   mediaContainer: {
     width: "100%",
-    backgroundColor: "#000",
+    backgroundColor: theme.colors.black,
     position: "relative",
   },
   mediaItemWrapper: {
@@ -976,7 +979,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 3,
   },
   activeDot: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     width: 8,
     height: 8,
     borderRadius: 4,
@@ -998,8 +1001,8 @@ const styles = StyleSheet.create({
   },
   likesText: {
     fontWeight: "600",
-    fontSize: 14,
-    color: "#000",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.text,
     paddingHorizontal: 12,
     marginTop: 4,
     fontFamily: theme.fonts.bold,
@@ -1009,23 +1012,23 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   caption: {
-    fontSize: 14,
+    fontSize: theme.fontSizes.regularSmall,
     lineHeight: 18,
-    color: "#000",
+    color: theme.colors.text,
     fontFamily: theme.fonts.regular,
   },
   captionUsername: {
     fontWeight: "600",
     fontFamily: theme.fonts.bold,
-    color: "#000",
+    color: theme.colors.text,
   },
   viewCommentsButton: {
     paddingHorizontal: 12,
     marginTop: 4,
   },
   viewCommentsText: {
-    fontSize: 14,
-    color: "#999",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textMuted,
     fontFamily: theme.fonts.regular,
   },
   commentSection: {
@@ -1037,23 +1040,23 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   commentText: {
-    fontSize: 14,
+    fontSize: theme.fontSizes.regularSmall,
     lineHeight: 18,
-    color: "#000",
+    color: theme.colors.text,
     fontFamily: theme.fonts.regular,
   },
   commentUser: {
     fontWeight: "600",
     fontFamily: theme.fonts.bold,
-    color: "#000",
+    color: theme.colors.text,
   },
   viewAllComments: {
     marginTop: 4,
     marginBottom: 8,
   },
   viewAllCommentsText: {
-    fontSize: 14,
-    color: "#999",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textMuted,
     fontFamily: theme.fonts.regular,
   },
   commentInputWrapper: {
@@ -1066,8 +1069,8 @@ const styles = StyleSheet.create({
   },
   commentInput: {
     flex: 1,
-    fontSize: 14,
-    color: "#000",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.text,
     fontFamily: theme.fonts.regular,
     paddingVertical: 4,
     marginRight: 8,
@@ -1081,18 +1084,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   activeToggleButton: {
-    backgroundColor: "#007AFF",
-    borderColor: "#007AFF",
+    backgroundColor: theme.colors.link,
+    borderColor: theme.colors.link,
   },
   toggleButtonText: {
-    color: "#fff",
+    color: theme.colors.textWhite,
     fontWeight: "bold",
   },
   menuDropdown: {
     position: "absolute",
     right: 12,
     top: 50,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.background,
     padding: 8,
     borderRadius: 6,
     elevation: 4,
@@ -1106,12 +1109,12 @@ const styles = StyleSheet.create({
   menuItem: {
     paddingVertical: 6,
     paddingHorizontal: 12,
-    fontSize: 14,
-    color: "#000",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.text,
   },
 
   tooltipBox: {
-    backgroundColor: "#333",
+    backgroundColor: theme.colors.textSecondary,
     padding: 8,
     marginTop: 4,
     borderRadius: 6,
@@ -1119,8 +1122,8 @@ const styles = StyleSheet.create({
     maxWidth: "50%",
   },
   tooltipText: {
-    color: "#fff",
-    fontSize: 12,
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.small,
   },
   shareModalOverlay: {
     flex: 1,
@@ -1129,7 +1132,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   shareModalContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 20,
     padding: 20,
     width: "90%",
@@ -1137,15 +1140,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   shareModalTitle: {
-    fontSize: 20,
+    fontSize: theme.fontSizes.large,
     fontWeight: "700",
     marginBottom: 8,
-    color: "#000",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   shareModalSubtitle: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
     marginBottom: 20,
     textAlign: "center",
     fontFamily: theme.fonts.regular,
@@ -1155,7 +1158,7 @@ const styles = StyleSheet.create({
     height: screenWidth * 0.8,
     borderRadius: 12,
     overflow: "hidden",
-    backgroundColor: "#000",
+    backgroundColor: theme.colors.dark,
   },
   shareImageBackground: {
     width: "100%",
@@ -1195,14 +1198,14 @@ const styles = StyleSheet.create({
   },
   instagramHandleText: {
     color: "#FFFFFF",
-    fontSize: 11,
+    fontSize: theme.fontSizes.small,
     fontWeight: "700",
     fontFamily: theme.fonts.bold,
     marginBottom: 2,
   },
   instagramHandleLink: {
-    color: "#67C694",
-    fontSize: 9,
+    color: theme.colors.success,
+    fontSize: theme.fontSizes.small,
     fontFamily: theme.fonts.regular,
   },
   shareModalActions: {
@@ -1215,13 +1218,13 @@ const styles = StyleSheet.create({
   shareCancelButton: {
     flex: 1,
     padding: 14,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 12,
     alignItems: "center",
   },
   shareCancelButtonText: {
-    color: "#000",
-    fontSize: 16,
+    color: theme.colors.text,
+    fontSize: theme.fontSizes.regular,
     fontWeight: "600",
     fontFamily: theme.fonts.medium,
   },
@@ -1234,7 +1237,7 @@ const styles = StyleSheet.create({
   },
   shareConfirmButtonText: {
     color: "#FFFFFF",
-    fontSize: 16,
+    fontSize: theme.fontSizes.regular,
     fontWeight: "700",
     fontFamily: theme.fonts.bold,
   },

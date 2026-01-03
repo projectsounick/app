@@ -15,8 +15,7 @@ import {
   Ionicons,
 
 } from "@expo/vector-icons";
-
-
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const TrackerModal = ({
   visible,
@@ -31,6 +30,8 @@ const TrackerModal = ({
   onSubmit: any;
   dataLoading: boolean;
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const [values, setValues] = useState({ water: "0", sleep: "", steps: "" });
 
   const increment = () => {
@@ -209,9 +210,9 @@ const TrackerModal = ({
             {getIcon()}
             <Text
               style={{
-                fontSize: 24,
-                fontWeight: "700",
-                color: "#000",
+                fontSize: theme.fontSizes.large,
+                fontWeight: theme.fontWeights.bold as "700",
+                color: theme.colors.text,
                 marginTop: 16,
               }}
             >
@@ -240,9 +241,9 @@ const TrackerModal = ({
                 >
                   <Text
                     style={{
-                      color: "#FFFFFF",
-                      fontSize: 24,
-                      fontWeight: "700",
+                      color: theme.colors.textWhite,
+                      fontSize: theme.fontSizes.large,
+                      fontWeight: theme.fontWeights.bold as "700",
                     }}
                   >
                     -
@@ -263,18 +264,18 @@ const TrackerModal = ({
                 >
                   <Text
                     style={{
-                      fontSize: 20,
-                      fontWeight: "700",
-                      color: "#000",
+                      fontSize: theme.fontSizes.large,
+                      fontWeight: theme.fontWeights.bold as "700",
+                      color: theme.colors.text,
                     }}
                   >
                     {values.water || "0"}
                   </Text>
                   <Text
                     style={{
-                      fontSize: 14,
-                      fontWeight: "500",
-                      color: "#666",
+                      fontSize: theme.fontSizes.regularSmall,
+                      fontWeight: theme.fontWeights.medium as "500",
+                      color: theme.colors.textSecondary,
                       marginTop: 4,
                     }}
                   >
@@ -296,9 +297,9 @@ const TrackerModal = ({
                 >
                   <Text
                     style={{
-                      color: "#FFFFFF",
-                      fontSize: 24,
-                      fontWeight: "700",
+                      color: theme.colors.textWhite,
+                      fontSize: theme.fontSizes.large,
+                      fontWeight: theme.fontWeights.bold as "700",
                     }}
                   >
                     +
@@ -313,13 +314,13 @@ const TrackerModal = ({
                 style={{
                   width: "100%",
                   borderWidth: 1,
-                  borderColor: "#E0E0E0",
+                  borderColor: theme.colors.border,
                   borderRadius: 16,
                   padding: 16,
                   marginVertical: 30,
-                  fontSize: 16,
-                  color: "#000",
-                  backgroundColor: "#F8F8F8",
+                  fontSize: theme.fontSizes.regular,
+                  color: theme.colors.text,
+                  backgroundColor: theme.colors.backgroundSecondary,
                 }}
                 value={values[type] || ""}
                 onChangeText={handleChange}
@@ -344,10 +345,10 @@ const TrackerModal = ({
               >
                 <Text
                   style={{
-                    color: "#FFFFFF",
-                    fontWeight: "700",
+                    color: theme.colors.textWhite,
+                    fontWeight: theme.fontWeights.bold as "700",
                     textAlign: "center",
-                    fontSize: 16,
+                    fontSize: theme.fontSizes.regular,
                   }}
                 >
                   Save

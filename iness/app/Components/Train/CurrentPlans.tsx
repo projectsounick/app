@@ -16,12 +16,15 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { ActiveManualWorkoutPlanInterface } from "@/app/interfaces/activeManualPlan";
 import CurrentPlanCard from "./CurrentPlanCard";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
 interface CurrentPlansProps {
   isActive: boolean;
 }
 
 const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
+  const theme = useGlobalTheme();
+  const styles = getStyles(theme);
   // Single selector for active or completed plans based on isActive prop
   const allPlans: ActivePlans[] = useSelector((state: RootState) =>
     isActive ? state.plan.activePlans : state.plan.completedPlans
@@ -235,7 +238,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   section: {
     marginBottom: 24,
   },
@@ -253,25 +256,25 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
   },
   headerDash: {
     width: 30,
     height: 3,
-    backgroundColor: "#9747FF",
+    backgroundColor: theme.colors.secondPrimary,
     borderRadius: 2,
   },
   sectionDescription: {
-    fontSize: 13,
-    color: "#888",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textMuted,
     marginBottom: 16,
     marginLeft: 46,
   },
@@ -284,15 +287,15 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 16,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 16,
   },
   emptyText: {
-    color: "#888",
+    color: theme.colors.textMuted,
     textAlign: "center",
-    fontSize: 14,
+    fontSize: theme.fontSizes.regularSmall,
   },
 });
 

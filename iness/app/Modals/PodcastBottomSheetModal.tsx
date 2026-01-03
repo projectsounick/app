@@ -18,6 +18,7 @@ import { captureRef } from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
 import { PodcastInterface } from "@/app/interfaces/podcastsInterface";
 import { UserData } from "@/app/interfaces/UserInterface";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const { height } = Dimensions.get("window");
 
@@ -33,6 +34,8 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
   onClose,
   visible,
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const videoRef = useRef<Video>(null);
   const [likes, setLikes] = useState<string[]>([]);
   const [showVideo, setShowVideo] = useState(false);
@@ -169,9 +172,9 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
               </View>
               <Text
                 style={{
-                  color: "#000",
-                  fontSize: 18,
-                  fontWeight: "700",
+                  color: theme.colors.text,
+                  fontSize: theme.fontSizes.medium,
+                  fontWeight: theme.fontWeights.bold as "700",
                   marginBottom: 8,
                 }}
               >
@@ -194,9 +197,9 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
               >
                 <Text
                   style={{
-                    color: "#fff",
-                    fontWeight: "700",
-                    fontSize: 16,
+                    color: theme.colors.textWhite,
+                    fontWeight: theme.fontWeights.bold as "700",
+                    fontSize: theme.fontSizes.regular,
                   }}
                 >
                   Close
@@ -246,9 +249,9 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                   </View>
                   <Text
                     style={{
-                      fontSize: 20,
-                      fontWeight: "700",
-                      color: "#000",
+                      fontSize: theme.fontSizes.large,
+                      fontWeight: theme.fontWeights.bold as "700",
+                      color: theme.colors.text,
                     }}
                   >
                     Podcast
@@ -361,9 +364,9 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                 >
                   <Text
                     style={{
-                      fontSize: 22,
-                      fontWeight: "700",
-                      color: "#000",
+                      fontSize: theme.fontSizes.large,
+                      fontWeight: theme.fontWeights.bold as "700",
+                      color: theme.colors.text,
                       lineHeight: 30,
                     }}
                   >
@@ -390,10 +393,10 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                   <Text
                     numberOfLines={expandedDesc ? undefined : 3}
                     style={{
-                      fontSize: 15,
-                      color: "#666",
+                      fontSize: theme.fontSizes.regular,
+                      color: theme.colors.textSecondary,
                       lineHeight: 24,
-                      fontWeight: "400",
+                      fontWeight: theme.fontWeights.regular as "400",
                     }}
                   >
                     {podcast.description}
@@ -408,9 +411,9 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                     >
                       <Text
                         style={{
-                          fontSize: 14,
-                          color: "#9747FF",
-                          fontWeight: "700",
+                          fontSize: theme.fontSizes.regularSmall,
+                          color: theme.colors.secondPrimary,
+                          fontWeight: theme.fontWeights.bold as "700",
                         }}
                       >
                         {expandedDesc ? "Show less" : "Show more"}
@@ -481,9 +484,9 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
               </View>
               <Text
                 style={{
-                  fontSize: 20,
-                  fontWeight: "700",
-                  color: "#000",
+                  fontSize: theme.fontSizes.large,
+                  fontWeight: theme.fontWeights.bold as "700",
+                  color: theme.colors.text,
                 }}
               >
                 Preview Share
@@ -491,11 +494,11 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
             </View>
             <Text
               style={{
-                fontSize: 14,
-                color: "#666",
+                fontSize: theme.fontSizes.regularSmall,
+                color: theme.colors.textSecondary,
                 marginBottom: 20,
                 textAlign: "center",
-                fontWeight: "500",
+                fontWeight: theme.fontWeights.medium as "500",
               }}
             >
               Logo and Instagram handle will be visible when shared
@@ -566,9 +569,9 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                 >
                   <Text
                     style={{
-                      color: "#FFFFFF",
-                      fontSize: 11,
-                      fontWeight: "700",
+                      color: theme.colors.textWhite,
+                      fontSize: theme.fontSizes.small,
+                      fontWeight: theme.fontWeights.bold as "700",
                       marginBottom: 2,
                     }}
                   >
@@ -576,8 +579,8 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                   </Text>
                   <Text
                     style={{
-                      color: "#67C694",
-                      fontSize: 9,
+                      color: theme.colors.success,
+                      fontSize: theme.fontSizes.small,
                     }}
                   >
                     instagram.com/iness_wellness360_app
@@ -606,9 +609,9 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
               >
                 <Text
                   style={{
-                    color: "#666",
-                    fontSize: 16,
-                    fontWeight: "600",
+                    color: theme.colors.textSecondary,
+                    fontSize: theme.fontSizes.regular,
+                    fontWeight: theme.fontWeights.medium as "500",
                   }}
                 >
                   Cancel
@@ -631,9 +634,9 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
               >
                 <Text
                   style={{
-                    color: "#FFFFFF",
-                    fontSize: 16,
-                    fontWeight: "700",
+                    color: theme.colors.textWhite,
+                    fontSize: theme.fontSizes.regular,
+                    fontWeight: theme.fontWeights.bold as "700",
                   }}
                 >
                   Share

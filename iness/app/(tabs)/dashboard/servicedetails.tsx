@@ -27,6 +27,7 @@ import {
 import { addToCart } from "@/Slices/cartSlice";
 import { setCurrentService } from "@/Slices/planSlice";
 import ImageViewerModal from "@/app/Modals/ImageViewerModal";
+import theme from "@/app/Theme/globalTheme";
 
 export default function ServiceDetailsScreen() {
   const { serviceId } = useLocalSearchParams<{ serviceId?: string }>();
@@ -145,7 +146,7 @@ export default function ServiceDetailsScreen() {
             width: 24,
             height: 24,
             borderRadius: 8,
-            backgroundColor: "#F3EDFF",
+            backgroundColor: theme.colors.backgroundCardLight,
             alignItems: "center",
             justifyContent: "center",
             marginRight: 12,
@@ -156,9 +157,9 @@ export default function ServiceDetailsScreen() {
         </View>
         <Text
           style={{
-            color: "#333",
+            color: theme.colors.textSecondary,
             flex: 1,
-            fontSize: 14,
+            fontSize: theme.fontSizes.regularSmall,
             lineHeight: 22,
             fontWeight: "500",
           }}
@@ -199,7 +200,7 @@ export default function ServiceDetailsScreen() {
           {/* Hero Card */}
           <View
             style={{
-              backgroundColor: "#FFFFFF",
+              backgroundColor: theme.colors.background,
               borderRadius: 20,
               padding: 20,
               marginBottom: 16,
@@ -236,7 +237,7 @@ export default function ServiceDetailsScreen() {
                     width: 110,
                     height: 110,
                     borderRadius: 12,
-                    backgroundColor: "#F3EDFF",
+                    backgroundColor: theme.colors.backgroundCardLight,
                     alignItems: "center",
                     justifyContent: "center",
                     marginRight: 16,
@@ -262,7 +263,7 @@ export default function ServiceDetailsScreen() {
                       width: 36,
                       height: 36,
                       borderRadius: 10,
-                      backgroundColor: "#F3EDFF",
+                      backgroundColor: theme.colors.backgroundCardLight,
                       alignItems: "center",
                       justifyContent: "center",
                       marginRight: 12,
@@ -272,9 +273,9 @@ export default function ServiceDetailsScreen() {
                   </View>
                   <Text
                     style={{
-                      fontSize: 20,
-                      fontWeight: "700",
-                      color: "#000",
+                      fontSize: theme.fontSizes.large,
+                      fontWeight: theme.fontWeights.bold as "700",
+                      color: theme.colors.black,
                       flex: 1,
                     }}
                   >
@@ -284,8 +285,8 @@ export default function ServiceDetailsScreen() {
                 {service.descItems?.length ? (
                   <Text
                     style={{
-                      color: "#666",
-                      fontSize: 13,
+                      color: theme.colors.textSecondary,
+                      fontSize: theme.fontSizes.regularSmall,
                       lineHeight: 18,
                     }}
                     numberOfLines={2}
@@ -308,7 +309,7 @@ export default function ServiceDetailsScreen() {
           >
             <View
               style={{
-                backgroundColor: "#FFFFFF",
+                backgroundColor: theme.colors.background,
                 padding: 16,
                 borderRadius: 16,
                 flex: 1,
@@ -327,7 +328,7 @@ export default function ServiceDetailsScreen() {
                   width: 40,
                   height: 40,
                   borderRadius: 12,
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: theme.colors.backgroundCardLight,
                   alignItems: "center",
                   justifyContent: "center",
                   marginBottom: 8,
@@ -338,21 +339,21 @@ export default function ServiceDetailsScreen() {
               <Text
                 style={{
                   fontWeight: "700",
-                  fontSize: 20,
+                  fontSize: theme.fontSizes.large,
                   marginTop: 4,
-                  color: "#9747FF",
+                  color: theme.colors.secondPrimary,
                 }}
               >
                 {service.sessionCount}
               </Text>
-              <Text style={{ color: "#666", fontSize: 12, marginTop: 2 }}>
+              <Text style={{ color: theme.colors.textSecondary, fontSize: theme.fontSizes.small, marginTop: 2 }}>
                 Sessions
               </Text>
             </View>
 
             <View
               style={{
-                backgroundColor: "#FFFFFF",
+                backgroundColor: theme.colors.background,
                 padding: 16,
                 borderRadius: 16,
                 flex: 1,
@@ -371,7 +372,7 @@ export default function ServiceDetailsScreen() {
                   width: 40,
                   height: 40,
                   borderRadius: 12,
-                  backgroundColor: "#E8F5E9",
+                  backgroundColor: theme.colors.greenLight,
                   alignItems: "center",
                   justifyContent: "center",
                   marginBottom: 8,
@@ -382,14 +383,14 @@ export default function ServiceDetailsScreen() {
               <Text
                 style={{
                   fontWeight: "700",
-                  fontSize: 20,
+                  fontSize: theme.fontSizes.large,
                   marginTop: 4,
-                  color: "#67C694",
+                  color: theme.colors.success,
                 }}
               >
                 ₹{service.price}
               </Text>
-              <Text style={{ color: "#666", fontSize: 12, marginTop: 2 }}>
+              <Text style={{ color: theme.colors.textSecondary, fontSize: theme.fontSizes.small, marginTop: 2 }}>
                 Price
               </Text>
             </View>
@@ -398,7 +399,7 @@ export default function ServiceDetailsScreen() {
           {/* What's included */}
           <View
             style={{
-              backgroundColor: "#FFFFFF",
+              backgroundColor: theme.colors.background,
               borderRadius: 20,
               padding: 20,
               marginBottom: 16,
@@ -423,7 +424,7 @@ export default function ServiceDetailsScreen() {
                   width: 36,
                   height: 36,
                   borderRadius: 10,
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: theme.colors.backgroundCardLight,
                   alignItems: "center",
                   justifyContent: "center",
                   marginRight: 12,
@@ -433,9 +434,9 @@ export default function ServiceDetailsScreen() {
               </View>
               <Text
                 style={{
-                  fontWeight: "700",
-                  fontSize: 18,
-                  color: "#000",
+                  fontWeight: theme.fontWeights.bold as "700",
+                  fontSize: theme.fontSizes.medium,
+                  color: theme.colors.text,
                 }}
               >
                 What's Included
@@ -448,7 +449,7 @@ export default function ServiceDetailsScreen() {
           {service.otherImages && service.otherImages.length > 0 ? (
             <View
               style={{
-                backgroundColor: "#FFFFFF",
+                backgroundColor: theme.colors.background,
                 borderRadius: 20,
                 paddingVertical: 16,
                 paddingHorizontal: 14,
@@ -464,9 +465,9 @@ export default function ServiceDetailsScreen() {
             >
               <Text
                 style={{
-                  fontWeight: "700",
-                  fontSize: 16,
-                  color: "#000",
+                  fontWeight: theme.fontWeights.bold as "700",
+                  fontSize: theme.fontSizes.regular,
+                  color: theme.colors.text,
                   marginBottom: 12,
                 }}
               >
@@ -485,7 +486,7 @@ export default function ServiceDetailsScreen() {
                       height: 140,
                       borderRadius: 14,
                       overflow: "hidden",
-                      backgroundColor: "#FFFFFF",
+                      backgroundColor: theme.colors.background,
                       borderWidth: 1,
                       borderColor: "#EFEFEF",
                       shadowColor: "#000",
@@ -519,7 +520,7 @@ export default function ServiceDetailsScreen() {
             paddingHorizontal: 24,
           }}
         >
-          <Text style={{ fontSize: 16, color: "#666", textAlign: "center" }}>
+          <Text style={{ fontSize: theme.fontSizes.regular, color: theme.colors.textSecondary, textAlign: "center" }}>
             Service details are not available right now.
           </Text>
         </View>
@@ -566,9 +567,9 @@ export default function ServiceDetailsScreen() {
             <Ionicons name="cart" size={18} color="#ffffff" />
             <Text
               style={{
-                color: "#ffffff",
-                fontSize: 16,
-                fontWeight: "700",
+                color: theme.colors.textWhite,
+                fontSize: theme.fontSizes.regular,
+                fontWeight: theme.fontWeights.bold as "700",
                 marginLeft: 8,
               }}
             >

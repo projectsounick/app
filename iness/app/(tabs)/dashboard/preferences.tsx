@@ -176,7 +176,7 @@ const BookSessionDetailsScreen = () => {
                 paddingVertical: 40,
               }}
             >
-              <ActivityIndicator color="#9747FF" size="large" />
+              <ActivityIndicator color={theme.colors.secondPrimary} size="large" />
             </View>
           ) : (
             <SlotSelectionSection
@@ -218,7 +218,7 @@ const BookSessionDetailsScreen = () => {
         visible={snackbarOpen}
         message={snackbarMessage}
         onDismiss={() => setSnackbarOpen(false)}
-        bgColor="#67C694"
+        bgColor={theme.colors.success}
       />
     </ImageBackground>
   );

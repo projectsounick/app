@@ -79,7 +79,7 @@ const Login = () => {
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+      <View style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}>
         <ImageBackground
           source={require("../assets/images/onboardingBackground.jpg")}
           style={{ flex: 1 }}
@@ -110,12 +110,12 @@ const Login = () => {
                 >
                   {/* Top Content */}
                   <View style={{ width: "100%", alignItems: "flex-start", paddingHorizontal: 0 }}>
-                    <NormalHeader screenName="Your Email" />
+                    <NormalHeader screenName="Your Email" textColor={theme.colors.dark} />
 
                     <Text
                       style={{
                         fontSize: theme.fontSizes.regular,
-                        color: theme.colors.normal,
+                        color: theme.colors.text,
                         textAlign: "center",
                         marginTop: 12,
                         marginBottom: theme.spacing.lg,
@@ -146,7 +146,7 @@ const Login = () => {
                             style={{
                               flexDirection: "row",
                               alignItems: "center",
-                              backgroundColor: "#fff",
+                              backgroundColor: theme.colors.background,
                               borderRadius: 8,
                               paddingHorizontal: theme.spacing.md,
                               paddingVertical: 6,
@@ -161,11 +161,11 @@ const Login = () => {
                                 flexDirection: "row",
                                 alignItems: "center",
                                 height: 48,
-                                borderColor: "#ccc",
+                                borderColor: theme.colors.border,
                                 borderWidth: 0,
                                 borderRadius: 8,
                                 paddingHorizontal: 12,
-                                backgroundColor: "#fff",
+                                backgroundColor: theme.colors.background,
                                 flex: 1,
                                 minWidth: 0,
                               }}
@@ -173,12 +173,12 @@ const Login = () => {
                               <MaterialCommunityIcons
                                 name="email-outline"
                                 size={20}
-                                color="#888"
+                                color={theme.colors.textMuted}
                                 style={{ marginRight: 8 }}
                               />
                               <TextInput
                                 placeholder="Enter email"
-                                placeholderTextColor="#888"
+                                placeholderTextColor={theme.colors.textMuted}
                                 value={values.email}
                                 underlineColorAndroid="transparent"
                                 onChangeText={(text) => {
@@ -194,8 +194,8 @@ const Login = () => {
                                 autoCapitalize="none"
                                 style={{
                                   flex: 1,
-                                  fontSize: 16,
-                                  color: "#000",
+                                  fontSize: theme.fontSizes.regular,
+                                  color: theme.colors.dark,
                                   backgroundColor: "transparent",
                                   borderWidth: 0,
                                   borderBottomWidth: 0,
@@ -211,7 +211,7 @@ const Login = () => {
                           {errorMessage && (
                             <Text
                               style={{
-                                color: "red",
+                                color: theme.colors.error,
                                 fontSize: theme.fontSizes.small,
                                 alignSelf: "center",
                                 textAlign: "center",
@@ -248,7 +248,7 @@ const Login = () => {
                     <Checkbox
                       value={isChecked}
                       onValueChange={setIsChecked}
-                      color={isChecked ? "#67C694" : undefined}
+                      color={isChecked ? theme.colors.success : undefined}
                       style={{
                         borderRadius: 4,
                         width: 18,
@@ -257,8 +257,8 @@ const Login = () => {
                     />
                     <Text
                       style={{
-                        fontSize: 13,
-                        color: "#000",
+                        fontSize: theme.fontSizes.regularSmall,
+                        color: theme.colors.text,
                         marginLeft: 10,
                         fontFamily: theme.fonts.regular,
                       }}
@@ -266,7 +266,7 @@ const Login = () => {
                       I accept the{" "}
                       <Text
                         style={{
-                          color: "#9747FF",
+                          color: theme.colors.secondPrimary,
                           fontFamily: theme.fonts.medium,
                           textDecorationLine: "underline",
                         }}
@@ -308,12 +308,12 @@ const Login = () => {
               >
               {/* Top Content */}
               <View style={{ width: "100%" }}>
-                <NormalHeader screenName="Your Email" />
+                <NormalHeader screenName="Your Email" textColor={theme.colors.dark} />
 
                 <Text
                   style={{
                     fontSize: theme.fontSizes.regular,
-                    color: theme.colors.normal,
+                    color: theme.colors.text,
                     textAlign: "center",
                     marginTop: 12,
                     marginBottom: theme.spacing.lg,
@@ -344,7 +344,7 @@ const Login = () => {
                         style={{
                           flexDirection: "row",
                           alignItems: "center",
-                          backgroundColor: "#fff",
+                          backgroundColor: theme.colors.background,
                           borderRadius: 8,
                           paddingHorizontal: theme.spacing.md,
                           paddingVertical: 6,
@@ -361,7 +361,7 @@ const Login = () => {
                       onSelect={onSelect}
                       containerButtonStyle={{ marginRight: theme.spacing.sm }}
                     />
-                    <Text style={{ marginRight: 8, fontSize: 16 }}>
+                    <Text style={{ marginRight: 8, fontSize: theme.fontSizes.regular }}>
                       +{country?.callingCode?.[0] || "91"}
                     </Text> */}
                         <View
@@ -369,23 +369,23 @@ const Login = () => {
                             flexDirection: "row",
                             alignItems: "center",
                             height: 48,
-                            borderColor: "#ccc",
+                            borderColor: theme.colors.border,
                             borderWidth: Platform.OS === "android" ? 0 : 1, // remove border on Android
                             borderRadius: 8,
                             paddingHorizontal: 12,
-                            backgroundColor: "#fff",
+                            backgroundColor: theme.colors.background,
                             width: "100%",
                           }}
                         >
                           <MaterialCommunityIcons
                             name="email-outline"
                             size={20}
-                            color="#888"
+                            color={theme.colors.textMuted}
                             style={{ marginRight: 8 }}
                           />
                           <TextInput
                             placeholder="Enter email"
-                            placeholderTextColor="#888"
+                            placeholderTextColor={theme.colors.textMuted}
                             value={values.email}
                             underlineColorAndroid="transparent"
                             onChangeText={(text) => {
@@ -401,8 +401,8 @@ const Login = () => {
                             autoCapitalize="none"
                             style={{
                               flex: 1,
-                              fontSize: 16,
-                              color: "#000", // replace with theme.colors.dark if needed
+                              fontSize: theme.fontSizes.regular,
+                              color: theme.colors.dark,
                               backgroundColor: "transparent",
                               borderWidth: 0,
                               borderBottomWidth: 0,
@@ -418,7 +418,7 @@ const Login = () => {
                       {errorMessage && (
                         <Text
                           style={{
-                            color: "red",
+                            color: theme.colors.error,
                             fontSize: theme.fontSizes.small,
                             alignSelf: "center",
                             textAlign: "center",
@@ -447,7 +447,7 @@ const Login = () => {
                   <Checkbox
                     value={isChecked}
                     onValueChange={setIsChecked}
-                    color={isChecked ? "#67C694" : undefined}
+                    color={isChecked ? theme.colors.success : undefined}
                     style={{
                       borderRadius: 4,
                       width: 18,
@@ -456,8 +456,8 @@ const Login = () => {
                   />
                   <Text
                     style={{
-                      fontSize: 13,
-                      color: "#000",
+                      fontSize: theme.fontSizes.regularSmall,
+                      color: theme.colors.text,
                       marginLeft: 10,
                       fontFamily: theme.fonts.regular,
                     }}
@@ -465,7 +465,7 @@ const Login = () => {
                     I accept the{" "}
                     <Text
                       style={{
-                        color: "#9747FF",
+                        color: theme.colors.secondPrimary,
                         fontFamily: theme.fonts.medium,
                         textDecorationLine: "underline",
                       }}

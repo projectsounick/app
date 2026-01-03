@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
+import theme from "../../Theme/globalTheme";
 
 const NotificationShimmer: React.FC = () => {
   // Simulate 4-5 notification cards
@@ -86,7 +87,7 @@ const styles = StyleSheet.create({
   },
   notificationCard: {
     marginBottom: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 20,
     padding: 16,
     shadowColor: "#000",

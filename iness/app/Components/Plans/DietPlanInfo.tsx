@@ -11,6 +11,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { withAuthGuard } from "@/app/Hoc/WithAuthGuardButton";
+import theme from "@/app/Theme/globalTheme";
 const ProtectedAnimatedSubmitButton = withAuthGuard(AnimatedSubmitButton);
 interface Props {
   screenWidth: number;
@@ -62,17 +63,17 @@ const DietPlanInfo: React.FC<Props> = ({
           {/* Overview Card */}
           <View
             style={{
-              backgroundColor: "#FFFFFF",
+              backgroundColor: theme.colors.background,
               borderRadius: 20,
               padding: 20,
               marginBottom: 16,
-              shadowColor: "#000",
+              shadowColor: theme.colors.dark,
               shadowOffset: { width: 0, height: 1 },
               shadowOpacity: 0.05,
               shadowRadius: 4,
               elevation: 2,
               borderWidth: 1,
-              borderColor: "#F5F5F5",
+              borderColor: theme.colors.border,
             }}
           >
             <View
@@ -87,19 +88,19 @@ const DietPlanInfo: React.FC<Props> = ({
                   width: 36,
                   height: 36,
                   borderRadius: 10,
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: theme.colors.backgroundCardLight,
                   alignItems: "center",
                   justifyContent: "center",
                   marginRight: 12,
                 }}
               >
-                <Ionicons name="information-circle" size={22} color="#9747FF" />
+                <Ionicons name="information-circle" size={22} color={theme.colors.secondPrimary} />
               </View>
               <Text
                 style={{
-                  fontSize: 20,
-                  fontWeight: "700",
-                  color: "#000",
+                  fontSize: theme.fontSizes.large,
+                  fontWeight: theme.fontWeights.bold as "700",
+                  color: theme.colors.text,
                 }}
               >
                 Overview
@@ -107,8 +108,8 @@ const DietPlanInfo: React.FC<Props> = ({
             </View>
             <Text
               style={{
-                fontSize: 15,
-                color: "#666",
+                fontSize: theme.fontSizes.regular,
+                color: theme.colors.textSecondary,
                 lineHeight: 22,
               }}
             >
@@ -120,17 +121,17 @@ const DietPlanInfo: React.FC<Props> = ({
           {planDetails?.descItems && (
             <View
               style={{
-                backgroundColor: "#FFFFFF",
+                backgroundColor: theme.colors.background,
                 borderRadius: 20,
                 padding: 20,
                 marginBottom: 16,
-                shadowColor: "#000",
+                shadowColor: theme.colors.dark,
                 shadowOffset: { width: 0, height: 1 },
                 shadowOpacity: 0.05,
                 shadowRadius: 4,
                 elevation: 2,
                 borderWidth: 1,
-                borderColor: "#F5F5F5",
+                borderColor: theme.colors.border,
               }}
             >
               <View
@@ -145,19 +146,19 @@ const DietPlanInfo: React.FC<Props> = ({
                     width: 36,
                     height: 36,
                     borderRadius: 10,
-                    backgroundColor: "#F3EDFF",
+                    backgroundColor: theme.colors.backgroundCardLight,
                     alignItems: "center",
                     justifyContent: "center",
                     marginRight: 12,
                   }}
                 >
-                  <Ionicons name="checkmark-circle" size={22} color="#9747FF" />
+                  <Ionicons name="checkmark-circle" size={22} color={theme.colors.secondPrimary} />
                 </View>
                 <Text
                   style={{
-                    fontSize: 18,
-                    fontWeight: "700",
-                    color: "#000",
+                    fontSize: theme.fontSizes.medium,
+                    fontWeight: theme.fontWeights.bold as "700",
+                    color: theme.colors.text,
                   }}
                 >
                   What it provides
@@ -178,7 +179,7 @@ const DietPlanInfo: React.FC<Props> = ({
                       width: 24,
                       height: 24,
                       borderRadius: 8,
-                      backgroundColor: "#F3EDFF",
+                      backgroundColor: theme.colors.backgroundCardLight,
                       alignItems: "center",
                       justifyContent: "center",
                       marginRight: 12,
@@ -188,16 +189,16 @@ const DietPlanInfo: React.FC<Props> = ({
                     <Ionicons
                       name="checkmark"
                       size={18}
-                      color="#9747FF"
+                      color={theme.colors.secondPrimary}
                     />
                   </View>
                   <Text
                     style={{
-                      fontSize: 14,
-                      color: "#333",
+                      fontSize: theme.fontSizes.regularSmall,
+                      color: theme.colors.text,
                       flex: 1,
                       lineHeight: 22,
-                      fontWeight: "500",
+                      fontWeight: theme.fontWeights.medium as "500",
                     }}
                   >
                     {item}
@@ -213,20 +214,20 @@ const DietPlanInfo: React.FC<Props> = ({
               onPress={() => Linking.openURL(currentPlan.dietPlanUrl)}
               activeOpacity={0.9}
               style={{
-                backgroundColor: "#FFFFFF",
+                backgroundColor: theme.colors.background,
                 padding: 20,
                 borderRadius: 20,
                 marginTop: 8,
                 flexDirection: "row",
                 alignItems: "center",
                 justifyContent: "space-between",
-                shadowColor: "#000",
+                shadowColor: theme.colors.dark,
                 shadowOffset: { width: 0, height: 1 },
                 shadowOpacity: 0.05,
                 shadowRadius: 4,
                 elevation: 2,
                 borderWidth: 1,
-                borderColor: "#F5F5F5",
+                borderColor: theme.colors.border,
               }}
             >
               <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
@@ -235,7 +236,7 @@ const DietPlanInfo: React.FC<Props> = ({
                     width: 40,
                     height: 40,
                     borderRadius: 12,
-                    backgroundColor: "#E8F5E9",
+                    backgroundColor: theme.colors.greenLight,
                     alignItems: "center",
                     justifyContent: "center",
                     marginRight: 12,
@@ -244,14 +245,14 @@ const DietPlanInfo: React.FC<Props> = ({
                   <MaterialCommunityIcons
                     name="food-apple"
                     size={24}
-                    color="#67C694"
+                    color={theme.colors.success}
                   />
                 </View>
                 <Text
                   style={{
-                    fontSize: 16,
-                    fontWeight: "600",
-                    color: "#000",
+                    fontSize: theme.fontSizes.regular,
+                    fontWeight: theme.fontWeights.medium as "500",
+                    color: theme.colors.text,
                     flex: 1,
                   }}
                 >
@@ -261,7 +262,7 @@ const DietPlanInfo: React.FC<Props> = ({
               <Ionicons
                 name="cloud-download-outline"
                 size={26}
-                color="#9747FF"
+                color={theme.colors.secondPrimary}
               />
             </TouchableOpacity>
           )}
@@ -284,14 +285,14 @@ const DietPlanInfo: React.FC<Props> = ({
         >
           <View
             style={{
-              backgroundColor: "#FFFFFF",
+              backgroundColor: theme.colors.background,
               paddingTop: 12,
               paddingLeft: Math.min(20, screenWidth * 0.05),
               paddingRight: Math.min(20, screenWidth * 0.05),
               paddingBottom: 12,
               borderTopLeftRadius: 24,
               borderTopRightRadius: 24,
-              shadowColor: "#000",
+              shadowColor: theme.colors.dark,
               shadowOffset: { width: 0, height: -2 },
               shadowOpacity: 0.1,
               shadowRadius: 8,
@@ -299,7 +300,7 @@ const DietPlanInfo: React.FC<Props> = ({
               borderTopWidth: 1,
               borderLeftWidth: 1,
               borderRightWidth: 1,
-              borderColor: "#F5F5F5",
+              borderColor: theme.colors.border,
             }}
           >
             <View
@@ -319,17 +320,17 @@ const DietPlanInfo: React.FC<Props> = ({
                   maxWidth: Math.min(400, screenWidth * 0.9),
                   backgroundColor:
                     selectedPlanItem === currentPlan._id
-                      ? "#F3EDFF"
-                      : "#FFFFFF",
+                      ? theme.colors.backgroundCardLight
+                      : theme.colors.background,
                   borderWidth: selectedPlanItem === currentPlan._id ? 2 : 1.5,
                   borderColor:
                     selectedPlanItem === currentPlan._id
-                      ? "#9747FF"
-                      : "#E0E0E0",
+                      ? theme.colors.secondPrimary
+                      : theme.colors.border,
                   borderRadius: 14,
                   padding: 10,
                   paddingVertical: 12,
-                  shadowColor: selectedPlanItem === currentPlan._id ? "#9747FF" : "#000",
+                  shadowColor: selectedPlanItem === currentPlan._id ? theme.colors.secondPrimary : theme.colors.black,
                   shadowOffset: { width: 0, height: 2 },
                   shadowOpacity: selectedPlanItem === currentPlan._id ? 0.15 : 0.08,
                   shadowRadius: selectedPlanItem === currentPlan._id ? 6 : 4,
@@ -348,9 +349,9 @@ const DietPlanInfo: React.FC<Props> = ({
                   <View style={{ flex: 1 }}>
                     <Text
                       style={{
-                        fontSize: 12,
-                        fontWeight: "700",
-                        color: "#000",
+                        fontSize: theme.fontSizes.small,
+                        fontWeight: theme.fontWeights.bold as "700",
+                        color: theme.colors.text,
                         marginBottom: 1,
                       }}
                     >
@@ -362,15 +363,15 @@ const DietPlanInfo: React.FC<Props> = ({
                       width: 20,
                       height: 20,
                       borderRadius: 10,
-                      backgroundColor: selectedPlanItem === currentPlan._id ? "#9747FF" : "#FFFFFF",
+                      backgroundColor: selectedPlanItem === currentPlan._id ? theme.colors.secondPrimary : theme.colors.background,
                       alignItems: "center",
                       justifyContent: "center",
                       borderWidth: 2,
-                      borderColor: "#9747FF",
+                      borderColor: theme.colors.secondPrimary,
                     }}
                   >
                     {selectedPlanItem === currentPlan._id && (
-                      <Ionicons name="checkmark" size={12} color="#FFFFFF" />
+                      <Ionicons name="checkmark" size={12} color={theme.colors.textWhite} />
                     )}
                   </View>
                 </View>
@@ -383,9 +384,9 @@ const DietPlanInfo: React.FC<Props> = ({
                 >
                   <Text
                     style={{
-                      fontSize: 20,
-                      fontWeight: "700",
-                      color: "#9747FF",
+                      fontSize: theme.fontSizes.large,
+                      fontWeight: theme.fontWeights.bold as "700",
+                      color: theme.colors.secondPrimary,
                       marginRight: 4,
                     }}
                   >
@@ -401,25 +402,25 @@ const DietPlanInfo: React.FC<Props> = ({
               }}
               disabled={cartLoading}
               style={{
-                backgroundColor: "#67C694",
+                backgroundColor: theme.colors.success,
                 borderRadius: 30,
                 paddingVertical: 14,
                 alignItems: "center",
                 flexDirection: "row",
                 justifyContent: "center",
-                shadowColor: "#67C694",
+                shadowColor: theme.colors.success,
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.3,
                 shadowRadius: 8,
                 elevation: 5,
               }}
             >
-              <Ionicons name="cart" size={22} color="#ffffff" />
+              <Ionicons name="cart" size={22} color={theme.colors.textWhite} />
               <Text
                 style={{
-                  color: "#ffffff",
-                  fontSize: 16,
-                  fontWeight: "700",
+                  color: theme.colors.textWhite,
+                  fontSize: theme.fontSizes.regular,
+                  fontWeight: theme.fontWeights.bold as "700",
                   marginLeft: 8,
                 }}
               >

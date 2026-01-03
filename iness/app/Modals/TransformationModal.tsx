@@ -1,7 +1,7 @@
 import React from "react";
 import { Modal, View, Text, TouchableOpacity, Dimensions } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { TransformationImageUploadModalInterface } from "@/app/interfaces/moduleInterfaces";
 import { stepsForTransformationImageReward } from "@/utils/staticDataUtils";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
@@ -12,12 +12,14 @@ export default function TransformationImageModal({
   visible,
   onClose,
 }: TransformationImageUploadModalInterface) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View
         style={{
           flex: 1,
-          backgroundColor: "rgba(0,0,0,0.6)",
+          backgroundColor: theme.colors.overlay,
           justifyContent: "center",
           alignItems: "center",
         }}
@@ -25,7 +27,7 @@ export default function TransformationImageModal({
         <View
           style={{
             width: width * 0.9,
-            backgroundColor: "#fff",
+            backgroundColor: theme.colors.background,
             borderRadius: 16,
             paddingVertical: 24,
             paddingHorizontal: 16,
@@ -46,15 +48,15 @@ export default function TransformationImageModal({
             <MaterialCommunityIcons
               name="close-circle"
               size={28}
-              color={theme.colors.dark}
+              color={theme.colors.text}
             />
           </TouchableOpacity>
 
           {/* Title */}
           <Text
             style={{
-              fontSize: 20,
-              fontWeight: "700",
+              fontSize: theme.fontSizes.large,
+              fontWeight: theme.fontWeights.bold as "700",
               color: theme.colors.dark,
               marginBottom: 4,
             }}
@@ -63,7 +65,7 @@ export default function TransformationImageModal({
           </Text>
           <Text
             style={{
-              fontSize: 14,
+              fontSize: theme.fontSizes.regularSmall,
               color: theme.colors.dark,
               marginBottom: 16,
             }}
@@ -97,8 +99,8 @@ export default function TransformationImageModal({
                     />
                     <Text
                       style={{
-                        fontWeight: "700",
-                        fontSize: 16,
+                        fontWeight: theme.fontWeights.bold as "700",
+                        fontSize: theme.fontSizes.regular,
                         color: theme.colors.dark,
                       }}
                     >
@@ -108,7 +110,7 @@ export default function TransformationImageModal({
                   <Text
                     style={{
                       fontSize: theme.fontSizes.regular,
-                      color: "#555",
+                      color: theme.colors.textSecondary,
                       textAlign: "center",
                       marginTop: 6,
                     }}
@@ -122,7 +124,7 @@ export default function TransformationImageModal({
                   <MaterialCommunityIcons
                     name="arrow-down-bold"
                     size={24}
-                    color={theme.colors.dark}
+                    color={theme.colors.text}
                     style={{ marginVertical: 8 }}
                   />
                 )}

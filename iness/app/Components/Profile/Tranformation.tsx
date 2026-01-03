@@ -1,7 +1,7 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { useState } from "react";
 import TransformationImageModal from "@/app/Modals/TransformationModal";
 import { router } from "expo-router";
@@ -11,6 +11,9 @@ import { ActivityIndicator } from "react-native-paper";
 import CustomSnackbar from "@/app/modules/Snackbar";
 
 export default function TransformationCard() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const [tranformationImageModalVisible, setTransformationImageModalVisible] =
     useState(false);
   const closeTransformationImageModal = () => {
@@ -43,12 +46,12 @@ export default function TransformationCard() {
             <MaterialCommunityIcons
               name="image-multiple"
               size={20}
-              color="#9747FF"
+              color={theme.colors.secondPrimary}
             />
           </View>
           <Text style={styles.title}>Daily Progress Photos</Text>
         </View>
-        <Ionicons name="chevron-forward" size={20} color="#1A1A1A" />
+        <Ionicons name="chevron-forward" size={20} color={theme.colors.text} />
       </View>
 
       {/* Images Row */}
@@ -56,7 +59,7 @@ export default function TransformationCard() {
         <View style={styles.imagesSection}>
           {loading ? (
             <View style={styles.loaderContainer}>
-              <ActivityIndicator color="#9747FF" size="small" />
+              <ActivityIndicator color={theme.colors.secondPrimary} size="small" />
             </View>
           ) : (
             <View style={styles.imagesRow}>
@@ -73,7 +76,7 @@ export default function TransformationCard() {
                           <Ionicons
                             name="play-circle"
                             size={20}
-                            color="#FFFFFF"
+                            color={theme.colors.textWhite}
                           />
                         </View>
                       ) : (
@@ -115,19 +118,21 @@ export default function TransformationCard() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
     borderRadius: 20,
     padding: 16,
     marginBottom: 16,
-    shadowColor: "#9747FF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 12,
-    elevation: 3,
     borderWidth: 1,
-    borderColor: "#F3EDFF",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 12,
+      elevation: 3,
+    }),
   },
   headerRow: {
     flexDirection: "row",
@@ -143,22 +148,22 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
   title: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   imagesSection: {
     marginTop: 14,
     paddingTop: 14,
     borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
+    borderTopColor: theme.colors.border,
   },
   loaderContainer: {
     height: 50,
@@ -175,7 +180,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginRight: 8,
     overflow: "hidden",
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.border,
   },
   thumbnailImage: {
     width: "100%",
@@ -184,7 +189,7 @@ const styles = StyleSheet.create({
   videoPlaceholder: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#1A1A1A",
+    backgroundColor: theme.colors.black,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -192,14 +197,14 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 10,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
   },
   moreCountText: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#9747FF",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.secondPrimary,
     fontFamily: theme.fonts.bold,
   },
 });

@@ -9,7 +9,7 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 import PodcastBottomSheetModal from "@/app/Modals/PodcastBottomSheetModal";
 import { UserData } from "@/app/interfaces/UserInterface";
 import { PodcastInterface } from "@/app/interfaces/podcastsInterface";
@@ -17,7 +17,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { setPodcasts } from "@/Slices/podcastSlice";
 import { PAGINATION_LIMITS } from "@/app/shared/paginationLimits";
-
 import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
@@ -27,6 +26,7 @@ interface PodcastMediaCardInterface {
   loggedUser: UserData | null;
 }
 function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
+  const theme = useGlobalTheme();
   // Always fallback to [] if no data
   const podCasts = useSelector((state: RootState) => state.podcast.podcasts);
   const router = useRouter();
@@ -43,14 +43,14 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
   return (
     <View
       style={{
-        backgroundColor: "#FFFFFF",
+        backgroundColor: theme.colors.background,
         borderRadius: 20,
         paddingVertical: 16,
         paddingHorizontal: 16,
         marginBottom: 16,
         ...(Platform.OS === "ios"
           ? {
-              shadowColor: "#000",
+              shadowColor: theme.colors.dark,
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.08,
               shadowRadius: 12,
@@ -59,7 +59,7 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
               elevation: 1,
             }),
         borderWidth: 1,
-        borderColor: "#F5F5F5",
+        borderColor: theme.colors.border,
       }}
     >
       {/* Header */}
@@ -77,7 +77,7 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
               width: 34,
               height: 34,
               borderRadius: 10,
-              backgroundColor: "#F3EDFF",
+              backgroundColor: theme.colors.backgroundCardLight,
               alignItems: "center",
               justifyContent: "center",
               marginRight: 12,
@@ -86,14 +86,14 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
             <MaterialCommunityIcons
               name="podcast"
               size={20}
-              color="#9747FF"
+                    color={theme.colors.secondPrimary}
             />
           </View>
           <Text
             style={{
-              fontSize: 18,
+              fontSize: theme.fontSizes.medium,
               fontFamily: theme.fonts.bold,
-              color: "#000",
+              color: theme.colors.text,
               fontWeight: "700",
             }}
           >
@@ -107,16 +107,16 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
         >
           <Text
             style={{
-              fontSize: 14,
+              fontSize: theme.fontSizes.regularSmall,
               fontFamily: theme.fonts.medium,
-              color: "#666",
+              color: theme.colors.textSecondary,
               marginRight: 4,
-              fontWeight: "600",
+              fontWeight: theme.fontWeights.medium as "500",
             }}
           >
             See All
           </Text>
-          <Ionicons name="chevron-forward" size={16} color="#666" />
+          <Ionicons name="chevron-forward" size={16} color={theme.colors.textSecondary} />
         </TouchableOpacity>
       </View>
 
@@ -139,12 +139,12 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
               marginLeft: index === 0 ? 0 : 0,
               marginTop: 4,
               marginBottom: 4,
-              backgroundColor: "#FFFFFF",
+              backgroundColor: theme.colors.background,
               borderRadius: 20,
               overflow: "hidden",
               ...(Platform.OS === "ios"
                 ? {
-                    shadowColor: "#000",
+                    shadowColor: theme.colors.dark,
                     shadowOffset: { width: 0, height: 2 },
                     shadowOpacity: 0.08,
                     shadowRadius: 12,
@@ -153,7 +153,7 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
                     elevation: 1,
                   }),
               borderWidth: 1,
-              borderColor: "#F5F5F5",
+              borderColor: theme.colors.border,
             }}
           >
             {/* Thumbnail */}
@@ -161,7 +161,7 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
               style={{
                 width: "100%",
                 height: 180,
-                backgroundColor: "#F8F8F8",
+                backgroundColor: theme.colors.backgroundSecondary,
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -177,11 +177,11 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
             <View style={{ padding: 16 }}>
               <Text
                 style={{
-                  fontSize: 16,
+                  fontSize: theme.fontSizes.regular,
                   fontFamily: theme.fonts.bold,
-                  color: "#000",
+                  color: theme.colors.text,
                   marginBottom: 8,
-                  fontWeight: "700",
+                  fontWeight: theme.fontWeights.bold as "700",
                 }}
                 numberOfLines={1}
               >
@@ -189,10 +189,10 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
               </Text>
               <Text
                 style={{
-                  fontSize: 14,
-                  color: "#666",
+                  fontSize: theme.fontSizes.regularSmall,
+                  color: theme.colors.textSecondary,
                   marginBottom: 8,
-                  fontWeight: "500",
+                  fontWeight: theme.fontWeights.medium as "500",
                   lineHeight: 20,
                 }}
                 numberOfLines={2}
@@ -209,11 +209,11 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
               >
                 <Text
                   style={{
-                    fontSize: 12,
-                    color: "#67C694",
+                    fontSize: theme.fontSizes.small,
+                    color: theme.colors.success,
                     fontFamily: theme.fonts.medium,
                     fontWeight: "600",
-                    backgroundColor: "#E8F5E9",
+                    backgroundColor: theme.colors.greenLight,
                     paddingVertical: 4,
                     paddingHorizontal: 10,
                     borderRadius: 12,
@@ -224,7 +224,7 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
 
                 <TouchableOpacity
                   style={{
-                    backgroundColor: "#67C694",
+                    backgroundColor: theme.colors.success,
                     paddingVertical: 6,
                     paddingHorizontal: 14,
                     borderRadius: 12,
@@ -233,7 +233,7 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
                     justifyContent: "center",
                     ...(Platform.OS === "ios"
                       ? {
-                          shadowColor: "#67C694",
+                          shadowColor: theme.colors.success,
                           shadowOffset: { width: 0, height: 2 },
                           shadowOpacity: 0.3,
                           shadowRadius: 4,
@@ -250,15 +250,15 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
                   <Ionicons
                     name="play-circle"
                     size={12}
-                    color="#fff"
+                    color={theme.colors.textWhite}
                     style={{ marginRight: 4 }}
                   />
                   <Text
                     style={{
-                      color: "#fff",
+                      color: theme.colors.textWhite,
                       fontFamily: theme.fonts.bold,
-                      fontSize: 12,
-                      fontWeight: "700",
+                      fontSize: theme.fontSizes.small,
+                      fontWeight: theme.fontWeights.bold as "700",
                     }}
                   >
                     Watch

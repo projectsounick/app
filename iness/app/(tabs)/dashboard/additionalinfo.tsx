@@ -4,7 +4,6 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  ImageBackground,
   StyleSheet,
   Dimensions,
   Image,
@@ -16,9 +15,7 @@ import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import NormalHeader from "@/app/modules/NormalHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
-import theme from "@/app/Theme/globalTheme";
-
-const backgroundImg = require("../../../assets/images/basicBackground.jpg");
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const { height } = Dimensions.get("window");
 
@@ -194,6 +191,9 @@ const additionalResources = [
 ];
 
 export default function AdditionalInfoScreen() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const [selectedTab, setSelectedTab] = useState<TabType>("Certificates");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [imageError, setImageError] = useState<Record<number, boolean>>({});
@@ -323,7 +323,7 @@ export default function AdditionalInfoScreen() {
               <MaterialCommunityIcons
                 name={policy.icon as any}
                 size={20}
-                color="#9747FF"
+                color={theme.colors.secondPrimary}
               />
             </View>
             <Text style={styles.cardTitle}>{policy.title}</Text>
@@ -519,16 +519,11 @@ export default function AdditionalInfoScreen() {
   const topPadding = height * 0.05;
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
-      <ImageBackground
-        source={backgroundImg}
-        resizeMode="cover"
-        style={{ flex: 1 }}
-      >
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: "transparent" }}
-          edges={["left", "right"]}
-        >
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      edges={["left", "right"]}
+    >
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
           <View
             style={{
               paddingHorizontal: 20,
@@ -544,8 +539,8 @@ export default function AdditionalInfoScreen() {
               {tabNames.map((tab) => {
                 const isSelected = selectedTab === tab;
                 const color = isSelected
-                  ? { bg: "#67C694", text: "#FFFFFF" }
-                  : { bg: "transparent", text: "#666" };
+                  ? { bg: theme.colors.success, text: theme.colors.textWhite }
+                  : { bg: "transparent", text: theme.colors.textSecondary };
 
                 return (
                   <TouchableOpacity
@@ -600,7 +595,7 @@ export default function AdditionalInfoScreen() {
                 activeOpacity={0.8}
                 style={styles.modalCloseBtn}
               >
-                <Ionicons name="close" size={20} color="#1A1A1A" />
+                <Ionicons name="close" size={20} color={theme.colors.text} />
               </TouchableOpacity>
               {selectedImage && (
                 <ScrollView
@@ -617,27 +612,28 @@ export default function AdditionalInfoScreen() {
               )}
             </View>
           </Modal>
-        </SafeAreaView>
-      </ImageBackground>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   tabsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 24,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 3,
+      elevation: 2,
+    }),
   },
   tabButton: {
     flex: 1,
@@ -649,29 +645,31 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontWeight: "700",
-    fontSize: 13,
+    fontSize: theme.fontSizes.regularSmall,
     fontFamily: theme.fonts.bold,
   },
   infoCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 14,
     padding: 14,
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    }),
   },
   infoIconContainer: {
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -680,15 +678,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   infoTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.text,
     marginBottom: 2,
     fontFamily: theme.fonts.bold,
   },
   infoSubtitle: {
-    fontSize: 12,
-    color: "#888",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textMuted,
     fontFamily: theme.fonts.regular,
   },
   emptyContainer: {
@@ -700,21 +698,21 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 16,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 16,
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
     fontFamily: theme.fonts.regular,
     textAlign: "center",
   },
@@ -728,20 +726,22 @@ const styles = StyleSheet.create({
     height: 200,
     marginBottom: 12,
     borderRadius: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     overflow: "hidden",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    }),
   },
   imageContainer: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#FAFAFA",
+    backgroundColor: theme.colors.backgroundSecondary,
     position: "relative",
   },
   certificateImage: {
@@ -760,11 +760,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     gap: 6,
     borderTopWidth: 1,
-    borderTopColor: "#F0F0F0",
+    borderTopColor: theme.colors.border,
   },
   labelText: {
-    color: "#1A1A1A",
-    fontSize: 12,
+    color: theme.colors.text,
+    fontSize: theme.fontSizes.small,
     fontWeight: "600",
     fontFamily: theme.fonts.medium,
   },
@@ -775,7 +775,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 10,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -787,7 +787,7 @@ const styles = StyleSheet.create({
   errorContainer: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#FAFAFA",
+    backgroundColor: theme.colors.backgroundSecondary,
     alignItems: "center",
     justifyContent: "center",
     padding: 16,
@@ -796,30 +796,32 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 14,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 10,
   },
   errorText: {
-    fontSize: 12,
-    color: "#666",
-    fontWeight: "600",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textSecondary,
+    fontWeight: theme.fontWeights.medium as "500",
     textAlign: "center",
     fontFamily: theme.fonts.medium,
   },
   policyCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 14,
     padding: 16,
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    }),
   },
   cardHeader: {
     flexDirection: "row",
@@ -827,37 +829,37 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     paddingBottom: 10,
     borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
+    borderBottomColor: theme.colors.border,
   },
   iconContainer: {
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
   cardTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.text,
     flex: 1,
     fontFamily: theme.fonts.bold,
   },
   cardContent: {
-    fontSize: 13,
-    color: "#666",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
     lineHeight: 20,
     fontFamily: theme.fonts.regular,
   },
   emailLink: {
-    color: "#9747FF",
+    color: theme.colors.secondPrimary,
     textDecorationLine: "underline",
     fontFamily: theme.fonts.medium,
   },
   disclaimerCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 14,
     padding: 14,
     marginBottom: 16,
@@ -867,7 +869,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 1,
     borderWidth: 1,
-    borderColor: "#FFCDD2",
+    borderColor: theme.colors.errorLight,
   },
   disclaimerHeader: {
     flexDirection: "row",
@@ -878,61 +880,63 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "#FFEBEE",
+    backgroundColor: theme.colors.errorLight || theme.colors.backgroundSecondary,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
   },
   disclaimerTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#F44336",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.error,
     fontFamily: theme.fonts.bold,
   },
   disclaimerText: {
-    fontSize: 12,
-    color: "#666",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textSecondary,
     lineHeight: 18,
     fontFamily: theme.fonts.regular,
   },
   citationCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 14,
     padding: 14,
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    }),
   },
   formulaContainer: {
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     borderRadius: 10,
     padding: 10,
     marginVertical: 10,
   },
   formulaText: {
-    fontSize: 11,
+    fontSize: theme.fontSizes.small,
     fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
-    color: "#9747FF",
+    color: theme.colors.secondPrimary,
     lineHeight: 16,
   },
   sourceText: {
-    fontSize: 12,
-    color: "#666",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textSecondary,
     marginBottom: 6,
     fontFamily: theme.fonts.regular,
   },
   sourceLabel: {
     fontWeight: "600",
-    color: "#1A1A1A",
+    color: theme.colors.text,
   },
   additionalInfo: {
-    fontSize: 11,
-    color: "#999",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textMuted,
     lineHeight: 16,
     fontStyle: "italic",
     marginBottom: 10,
@@ -944,8 +948,8 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   sourceTextLink: {
-    fontSize: 12,
-    color: "#9747FF",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.secondPrimary,
     fontFamily: theme.fonts.medium,
     marginLeft: 6,
     textDecorationLine: "underline",
@@ -954,7 +958,7 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 10,
-    backgroundColor: "#E8F5E9",
+    backgroundColor: theme.colors.greenLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
@@ -964,7 +968,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 10,
     paddingHorizontal: 10,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 10,
     marginBottom: 8,
   },
@@ -972,19 +976,19 @@ const styles = StyleSheet.create({
     width: 26,
     height: 26,
     borderRadius: 8,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
   },
   resourceItemText: {
-    fontSize: 12,
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.text,
     flex: 1,
     fontFamily: theme.fonts.regular,
   },
   contentCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 20,
     padding: 24,
     shadowColor: "#000",
@@ -996,23 +1000,23 @@ const styles = StyleSheet.create({
     borderColor: "#F5F5F5",
   },
   title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
     marginTop: 24,
     marginBottom: 12,
   },
   paragraph: {
-    fontSize: 15,
-    color: "#666",
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.textSecondary,
     fontFamily: theme.fonts.regular,
     lineHeight: 24,
     marginBottom: 8,
@@ -1029,14 +1033,14 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: "#9747FF",
+    backgroundColor: theme.colors.secondPrimary,
     marginTop: 8,
     marginRight: 12,
   },
   featureText: {
     flex: 1,
-    fontSize: 15,
-    color: "#666",
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.textSecondary,
     fontFamily: theme.fonts.regular,
     lineHeight: 24,
   },
@@ -1054,7 +1058,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     alignItems: "center",
     justifyContent: "center",
   },

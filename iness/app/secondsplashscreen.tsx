@@ -187,7 +187,7 @@ const SecondSplashScreen = () => {
         {showLetters && (
           <Text
             style={{
-              fontSize: 32,
+              fontSize: theme.fontSizes.xl,
               fontWeight: "bold",
               color: theme.colors.secondPrimary,
               marginLeft: 12,

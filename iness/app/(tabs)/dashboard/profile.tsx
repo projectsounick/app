@@ -12,17 +12,19 @@ import TransformationCard from "@/app/Components/Profile/Tranformation";
 import SettingsList from "@/app/Components/Profile/SettingsList";
 import ProfileCard from "@/app/Components/Profile/DescriptionCard";
 
-import { ImageBackground } from "react-native";
 import NormalHeader from "@/app/modules/NormalHeader";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome } from "@expo/vector-icons"; // You can also use Entypo, Ionicons etc.
 import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.05; // 2% of screen height
 
 //// Main funcitonal component for the Profile screen -------------------------/
 function ProfileScreen() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const openURL = (url: string) => {
     Linking.openURL(url).catch((err) =>
       console.error("Failed to open URL:", err)
@@ -30,14 +32,10 @@ function ProfileScreen() {
   };
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "transparent" }}
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
       edges={["left", "right"]}
     >
-      <ImageBackground
-        source={require("../../../assets/images/basicBackground.jpg")}
-        style={{ flex: 1 }}
-        resizeMode="cover"
-      >
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
         <View
           style={{
             paddingLeft: 20,
@@ -79,7 +77,7 @@ function ProfileScreen() {
                   height: 1,
                   borderStyle: "dashed",
                   borderWidth: 1,
-                  borderColor: "#ccc",
+                  borderColor: theme.colors.textLight,
                 }}
               />
 
@@ -125,13 +123,13 @@ function ProfileScreen() {
                   height: 1,
                   borderStyle: "dashed",
                   borderWidth: 1,
-                  borderColor: "#ccc",
+                  borderColor: theme.colors.textLight,
                 }}
               />
             </View>
           </View>
         </ScrollView>
-      </ImageBackground>
+      </View>
     </SafeAreaView>
   );
 }

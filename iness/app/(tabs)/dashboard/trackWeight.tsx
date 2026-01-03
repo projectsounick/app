@@ -21,10 +21,13 @@ import { weightService } from "@/app/services/weight.service";
 import { createStreak } from "@/app/services/streaks.service";
 import { setStreakData } from "@/Slices/streakSlice";
 import { useDispatch } from "react-redux";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const { height, width } = Dimensions.get("window");
 
 const WeightTrackerScreen = () => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const [weightData, setWeightData] = useState<
     { weight: number; date: string; _id?: string }[]
   >([]);
@@ -105,33 +108,65 @@ const WeightTrackerScreen = () => {
     datasets: [
       {
         data: sortedChartData.map((item) => item.weight),
-        color: () => "#9747FF", // Purple color
+        color: () => theme.colors.secondPrimary, // Purple color
         strokeWidth: 3,
       },
     ],
   };
 
   const chartConfig = {
-    backgroundGradientFrom: "#FFFFFF",
-    backgroundGradientTo: "#FFFFFF",
+    backgroundGradientFrom: isDark ? theme.colors.backgroundCard : "#FFFFFF",
+    backgroundGradientTo: isDark ? theme.colors.backgroundCard : "#FFFFFF",
     decimalPlaces: 1,
     color: (opacity = 1) => `rgba(151, 71, 255, ${opacity})`, // Purple color
-    labelColor: (opacity = 1) => `rgba(90, 90, 90, ${opacity})`,
+    labelColor: (opacity = 1) => {
+      if (isDark) {
+        const hex = theme.colors.textSecondary.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      }
+      return `rgba(90, 90, 90, ${opacity})`;
+    },
     propsForDots: { 
       r: "6", 
       strokeWidth: "2", 
-      stroke: "#9747FF"
+      stroke: theme.colors.secondPrimary
+    },
+    propsForLabels: {
+      fill: isDark ? theme.colors.text : "#000000",
+    },
+    propsForVerticalLabels: {
+      fill: isDark ? theme.colors.text : "#000000",
+    },
+    propsForBackgroundLines: {
+      stroke: isDark ? theme.colors.border : "#E8E8E8",
     },
     strokeWidth: 3,
   };
 
   return (
-    <View style={{ flex: 1,  }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ImageBackground
         source={require("../../../assets/images/basicBackground.jpg")}
         style={{ flex: 1 }}
         resizeMode="cover"
+        imageStyle={{ opacity: isDark ? 0.3 : 1 }}
       >
+        {isDark && (
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: theme.colors.background,
+              opacity: 0.9,
+            }}
+          />
+        )}
         <SafeAreaView
           style={{ flex: 1, }}
           edges={["left", "right"]}
@@ -154,7 +189,7 @@ const WeightTrackerScreen = () => {
                 padding: 20,
               }}
             >
-              <ActivityIndicator color="#67C694" size="large" />
+              <ActivityIndicator color={theme.colors.success} size="large" />
             </View>
           ) : (
             <ScrollView
@@ -164,17 +199,17 @@ const WeightTrackerScreen = () => {
               {/* Chart Card */}
               <View
                 style={{
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: theme.colors.background,
                   borderRadius: 24,
                   padding: 20,
                   marginBottom: 24,
-                  shadowColor: "#000",
+                  shadowColor: theme.colors.black,
                   shadowOffset: { width: 0, height: 2 },
                   shadowOpacity: 0.08,
                   shadowRadius: 16,
                   elevation: 3,
                   borderWidth: 1,
-                  borderColor: "#F5F5F5",
+                  borderColor: theme.colors.border,
                 }}
               >
                 <View
@@ -191,7 +226,7 @@ const WeightTrackerScreen = () => {
                         width: 36,
                         height: 36,
                         borderRadius: 10,
-                        backgroundColor: "#F3EDFF",
+                        backgroundColor: theme.colors.backgroundCardLight,
                         alignItems: "center",
                         justifyContent: "center",
                         marginRight: 12,
@@ -200,15 +235,15 @@ const WeightTrackerScreen = () => {
                       <MaterialCommunityIcons
                         name="weight-kilogram"
                         size={18}
-                        color="#9747FF"
+                        color={theme.colors.secondPrimary}
                       />
                     </View>
                     <View style={{ flex: 1 }}>
                       <Text
                         style={{
-                          fontSize: 18,
-                          fontWeight: "700",
-                          color: "#1A1A1A",
+                          fontSize: theme.fontSizes.medium,
+                          fontWeight: theme.fontWeights.bold as "700",
+                          color: theme.colors.text,
                           marginBottom: 4,
                         }}
                       >
@@ -216,8 +251,8 @@ const WeightTrackerScreen = () => {
                       </Text>
                       <Text
                         style={{
-                          fontSize: 13,
-                          color: "#888",
+                          fontSize: theme.fontSizes.regularSmall,
+                          color: theme.colors.textMuted,
                           fontWeight: "400",
                         }}
                       >
@@ -229,7 +264,7 @@ const WeightTrackerScreen = () => {
                     style={{
                       width: 30,
                       height: 3,
-                      backgroundColor: "#9747FF",
+                      backgroundColor: theme.colors.secondPrimary,
                       borderRadius: 2,
                     }}
                   />
@@ -239,7 +274,7 @@ const WeightTrackerScreen = () => {
                   style={{
                     paddingTop: 16,
                     borderTopWidth: 1,
-                    borderTopColor: "#F0F0F0",
+                    borderTopColor: theme.colors.border,
                   }}
                 >
                   {weightData && weightData.length > 0 ? (
@@ -258,7 +293,7 @@ const WeightTrackerScreen = () => {
                         width: width - 72,
                         height: 220,
                         borderRadius: 16,
-                        backgroundColor: "#F9F9F9",
+                        backgroundColor: theme.colors.backgroundFaded,
                         justifyContent: "center",
                         alignItems: "center",
                       }}
@@ -268,18 +303,18 @@ const WeightTrackerScreen = () => {
                           width: 64,
                           height: 64,
                           borderRadius: 16,
-                          backgroundColor: "#F3EDFF",
+                          backgroundColor: theme.colors.backgroundCardLight,
                           alignItems: "center",
                           justifyContent: "center",
                           marginBottom: 12,
                         }}
                       >
-                        <Ionicons name="bar-chart-outline" size={32} color="#9747FF" />
+                        <Ionicons name="bar-chart-outline" size={32} color={theme.colors.secondPrimary} />
                       </View>
                       <Text
                         style={{
-                          color: "#666",
-                          fontSize: 14,
+                          color: theme.colors.textSecondary,
+                          fontSize: theme.fontSizes.regularSmall,
                           fontWeight: "500",
                         }}
                       >
@@ -306,19 +341,19 @@ const WeightTrackerScreen = () => {
                         width: 36,
                         height: 36,
                         borderRadius: 10,
-                        backgroundColor: "#F3EDFF",
+                        backgroundColor: theme.colors.backgroundCardLight,
                         alignItems: "center",
                         justifyContent: "center",
                         marginRight: 10,
                       }}
                     >
-                      <Ionicons name="list-outline" size={18} color="#9747FF" />
+                      <Ionicons name="list-outline" size={18} color={theme.colors.secondPrimary} />
                     </View>
                     <Text
                       style={{
-                        fontSize: 18,
-                        fontWeight: "700",
-                        color: "#1A1A1A",
+                        fontSize: theme.fontSizes.medium,
+                        fontWeight: theme.fontWeights.bold as "700",
+                        color: theme.colors.text,
                       }}
                     >
                       Recent Logs
@@ -328,7 +363,7 @@ const WeightTrackerScreen = () => {
                     style={{
                       width: 30,
                       height: 3,
-                      backgroundColor: "#9747FF",
+                      backgroundColor: theme.colors.secondPrimary,
                       borderRadius: 2,
                     }}
                   />
@@ -344,17 +379,17 @@ const WeightTrackerScreen = () => {
                   <View
                     key={index}
                     style={{
-                      backgroundColor: "#FFFFFF",
+                      backgroundColor: theme.colors.background,
                       padding: 16,
                       borderRadius: 20,
                       marginBottom: 12,
-                      shadowColor: "#000",
+                      shadowColor: theme.colors.black,
                       shadowOffset: { width: 0, height: 2 },
                       shadowOpacity: 0.08,
                       shadowRadius: 12,
                       elevation: 3,
                       borderWidth: 1,
-                      borderColor: "#F5F5F5",
+                      borderColor: theme.colors.border,
                       flexDirection: "row",
                       justifyContent: "space-between",
                       alignItems: "center",
@@ -363,9 +398,9 @@ const WeightTrackerScreen = () => {
                     <View style={{ flex: 1 }}>
                       <Text
                         style={{
-                          fontSize: 16,
-                          fontWeight: "700",
-                          color: "#1A1A1A",
+                          fontSize: theme.fontSizes.regular,
+                          fontWeight: theme.fontWeights.bold as "700",
+                          color: theme.colors.text,
                           marginBottom: 4,
                         }}
                       >
@@ -373,8 +408,8 @@ const WeightTrackerScreen = () => {
                       </Text>
                       <Text
                         style={{
-                          color: "#666",
-                          fontSize: 12,
+                          color: theme.colors.textSecondary,
+                          fontSize: theme.fontSizes.small,
                           fontWeight: "400",
                         }}
                       >
@@ -391,7 +426,7 @@ const WeightTrackerScreen = () => {
                         padding: 4,
                       }}
                     >
-                      <Ionicons name="trash-outline" size={18} color="#666" />
+                      <Ionicons name="trash-outline" size={18} color={theme.colors.textSecondary} />
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -404,7 +439,7 @@ const WeightTrackerScreen = () => {
               position: "absolute",
               bottom: 24,
               alignSelf: "center",
-              backgroundColor: "#67C694",
+              backgroundColor: theme.colors.success,
               borderRadius: 30,
               width: 60,
               height: 60,
@@ -417,7 +452,7 @@ const WeightTrackerScreen = () => {
               elevation: 8,
             }}
           >
-            <Ionicons name="add" size={28} color="#FFFFFF" />
+            <Ionicons name="add" size={28} color={theme.colors.textWhite} />
           </TouchableOpacity>
 
           <Modal
@@ -436,11 +471,11 @@ const WeightTrackerScreen = () => {
             >
               <View
                 style={{
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: theme.colors.background,
                   borderTopLeftRadius: 24,
                   borderTopRightRadius: 24,
                   padding: 24,
-                  shadowColor: "#000",
+                  shadowColor: theme.colors.black,
                   shadowOffset: { width: 0, height: -4 },
                   shadowOpacity: 0.1,
                   shadowRadius: 8,
@@ -451,7 +486,7 @@ const WeightTrackerScreen = () => {
                   style={{
                     width: 40,
                     height: 3,
-                    backgroundColor: "#D0D0D0",
+                    backgroundColor: theme.colors.textLight,
                     borderRadius: 2,
                     alignSelf: "center",
                     marginBottom: 20,
@@ -470,7 +505,7 @@ const WeightTrackerScreen = () => {
                       width: 36,
                       height: 36,
                       borderRadius: 10,
-                      backgroundColor: "#F3EDFF",
+                      backgroundColor: theme.colors.backgroundCardLight,
                       alignItems: "center",
                       justifyContent: "center",
                       marginRight: 12,
@@ -479,14 +514,14 @@ const WeightTrackerScreen = () => {
                     <MaterialCommunityIcons
                       name="weight"
                       size={18}
-                      color="#9747FF"
+                      color={theme.colors.secondPrimary}
                     />
                   </View>
                   <Text
                     style={{
-                      fontSize: 18,
-                      fontWeight: "700",
-                      color: "#1A1A1A",
+                      fontSize: theme.fontSizes.medium,
+                      fontWeight: theme.fontWeights.bold as "700",
+                      color: theme.colors.text,
                     }}
                   >
                     Log Your Weight
@@ -494,21 +529,21 @@ const WeightTrackerScreen = () => {
                 </View>
                 <TextInput
                   placeholder="Enter weight (kg)"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={theme.colors.textMuted}
                   keyboardType="numeric"
                   value={newWeight}
                   onChangeText={setNewWeight}
                   style={{
                     borderWidth: 1,
-                    borderColor: "#F5F5F5",
+                    borderColor: theme.colors.border,
                     borderRadius: 16,
                     padding: 16,
-                    fontSize: 15,
+                    fontSize: theme.fontSizes.regular,
                     width: "100%",
-                    backgroundColor: "#FFFFFF",
+                    backgroundColor: theme.colors.background,
                     marginBottom: 20,
-                    color: "#1A1A1A",
-                    shadowColor: "#000",
+                    color: theme.colors.text,
+                    shadowColor: theme.colors.black,
                     shadowOffset: { width: 0, height: 1 },
                     shadowOpacity: 0.05,
                     shadowRadius: 2,
@@ -525,7 +560,7 @@ const WeightTrackerScreen = () => {
                     width: "100%",
                     borderRadius: 30,
                     paddingVertical: 14,
-                    backgroundColor: addingWeight ? "#D0D0D0" : "#67C694",
+                    backgroundColor: addingWeight ? theme.colors.textLight : theme.colors.success,
                     marginBottom: 12,
                     shadowColor: "#67C694",
                     shadowOffset: { width: 0, height: 4 },
@@ -535,15 +570,15 @@ const WeightTrackerScreen = () => {
                   }}
                 >
                   {addingWeight ? (
-                    <ActivityIndicator color="#FFFFFF" size="small" />
+                    <ActivityIndicator color={theme.colors.textWhite} size="small" />
                   ) : (
-                    <Ionicons name="checkmark-circle" size={20} color="#FFFFFF" />
+                    <Ionicons name="checkmark-circle" size={20} color={theme.colors.textWhite} />
                   )}
                   <Text
                     style={{
-                      color: "#FFFFFF",
-                      fontWeight: "700",
-                      fontSize: 15,
+                      color: theme.colors.textWhite,
+                      fontWeight: theme.fontWeights.bold as "700",
+                      fontSize: theme.fontSizes.regular,
                       marginLeft: 8,
                     }}
                   >
@@ -559,9 +594,9 @@ const WeightTrackerScreen = () => {
                 >
                   <Text
                     style={{
-                      color: "#666",
-                      fontWeight: "600",
-                      fontSize: 14,
+                      color: theme.colors.textSecondary,
+                      fontWeight: theme.fontWeights.medium as "500",
+                      fontSize: theme.fontSizes.regularSmall,
                     }}
                   >
                     Cancel

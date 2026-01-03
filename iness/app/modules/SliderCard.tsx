@@ -13,9 +13,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { LinearGradient } from "expo-linear-gradient";
 import { setCurrentService } from "@/Slices/planSlice";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
 export default function SliderCard() {
+  const theme = useGlobalTheme();
+  const styles = getStyles(theme);
   const dispatch = useDispatch();
   const router = useRouter();
   const availableServices = useSelector(
@@ -31,7 +33,7 @@ export default function SliderCard() {
             <MaterialCommunityIcons
               name="briefcase-check"
               size={22}
-              color="#9747FF"
+              color={theme.colors.secondPrimary}
             />
           </View>
           <Text style={styles.headerTitle}>Our Services</Text>
@@ -80,7 +82,7 @@ export default function SliderCard() {
                   style={{
                     width: 140,
                     height: 200,
-                    backgroundColor: "#F9F9F9",
+                    backgroundColor: theme.colors.backgroundSecondary,
                     justifyContent: "center",
                     alignItems: "center",
                   }}
@@ -163,7 +165,7 @@ export default function SliderCard() {
                   flex: 1,
                   padding: 14,
                   justifyContent: "space-between",
-                  backgroundColor: "#F9F9F9",
+                  backgroundColor: theme.colors.backgroundSecondary,
                   height: 200,
                 }}
               >
@@ -215,7 +217,7 @@ export default function SliderCard() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   container: {
     marginBottom: 24,
   },
@@ -233,26 +235,26 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
   },
   headerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   headerDash: {
     width: 30,
     height: 3,
-    backgroundColor: "#9747FF",
+    backgroundColor: theme.colors.secondPrimary,
     borderRadius: 2,
   },
   description: {
-    fontSize: 13,
-    color: "#888",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textMuted,
     marginBottom: 16,
     marginLeft: 46,
     marginTop: 2,
@@ -263,19 +265,19 @@ const styles = StyleSheet.create({
     height: 200,
     borderRadius: 16,
     overflow: "hidden",
-    backgroundColor: "#fff",
-    shadowColor: "#000",
+    backgroundColor: theme.colors.background,
+    shadowColor: theme.colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 3,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   cardTitle: {
-    fontWeight: theme.fontWeights.bold,
-    fontSize: 15,
-    color: "#1A1A1A",
+    fontWeight: theme.fontWeights.bold as "700",
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.text,
     marginBottom: 8,
   },
   descItem: {
@@ -287,33 +289,33 @@ const styles = StyleSheet.create({
     width: 5,
     height: 5,
     borderRadius: 2.5,
-    backgroundColor: "#9747FF",
+    backgroundColor: theme.colors.secondPrimary,
     marginRight: 6,
     marginTop: 5,
   },
   descText: {
-    color: "#666",
-    fontSize: 11,
+    color: theme.colors.textSecondary,
+    fontSize: theme.fontSizes.small,
     flex: 1,
     lineHeight: 15,
-    fontWeight: "400",
+    fontWeight: theme.fontWeights.regular as "400",
   },
   checkButton: {
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     paddingVertical: 9,
     paddingHorizontal: 18,
     borderRadius: 30,
     alignSelf: "flex-start",
     marginTop: 8,
-    shadowColor: "#67C694",
+    shadowColor: theme.colors.success,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 6,
     elevation: 6,
   },
   checkButtonText: {
-    fontWeight: "700",
-    fontSize: 12,
-    color: "#fff",
+    fontWeight: theme.fontWeights.bold as "700",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textWhite,
   },
 });

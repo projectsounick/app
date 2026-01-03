@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
+import theme from "../../Theme/globalTheme";
 
 const SupportChatShimmer: React.FC = () => {
   // Simulate alternating user and support messages
@@ -96,12 +97,12 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   userBubble: {
-    backgroundColor: "#9747FF",
+    backgroundColor: theme.colors.secondPrimary,
     shadowColor: "#9747FF",
     shadowOpacity: 0.2,
   },
   supportBubble: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     shadowColor: "#000",
     borderWidth: 1,
     borderColor: "#F5F5F5",

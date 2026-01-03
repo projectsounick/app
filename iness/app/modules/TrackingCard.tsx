@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
+import theme from "../Theme/globalTheme";
 import {
   FontAwesome5,
   MaterialCommunityIcons,
@@ -55,7 +56,7 @@ const TrackingCard = () => {
   return (
     <View
       style={{
-        backgroundColor: "#662D91",
+        backgroundColor: theme.colors.secondPrimary,
         padding: 16,
         borderRadius: 16,
       }}
@@ -87,7 +88,7 @@ const TrackingCard = () => {
                 style={{
                   flex: 1,
                   height: 6,
-                  backgroundColor: "#9992A7",
+                  backgroundColor: theme.colors.textMuted,
                   borderRadius: 5,
                   marginHorizontal: 8,
                 }}
@@ -114,8 +115,8 @@ const TrackingCard = () => {
             ) : (
               <Text
                 style={{
-                  fontSize: 12,
-                  fontWeight: "600",
+                  fontSize: theme.fontSizes.small,
+                  fontWeight: theme.fontWeights.medium as "500",
                   color: item.color,
                 }}
               >

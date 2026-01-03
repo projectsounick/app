@@ -206,7 +206,7 @@ export default function DateBar({
                           width: 6,
                           height: 6,
                           borderRadius: 3,
-                          backgroundColor: "#2F8C62",
+                          backgroundColor: theme.colors.success,
                         }}
                       />
                     ) : null}
@@ -214,7 +214,7 @@ export default function DateBar({
                     style={{
                       color: textColor,
                       fontFamily: theme.fonts.medium,
-                      fontSize: 15,
+                      fontSize: theme.fontSizes.regular,
                       marginBottom: 2,
                     }}
                   >
@@ -224,7 +224,7 @@ export default function DateBar({
                   <Text
                     style={{
                       color: subTextColor,
-                      fontSize: 11,
+                      fontSize: theme.fontSizes.small,
                       fontFamily: theme.fonts.medium,
                     }}
                   >
@@ -233,7 +233,7 @@ export default function DateBar({
                   <Text
                     style={{
                       color: subTextColor,
-                      fontSize: 10,
+                      fontSize: theme.fontSizes.small,
                       fontFamily: theme.fonts.medium,
                     }}
                   >

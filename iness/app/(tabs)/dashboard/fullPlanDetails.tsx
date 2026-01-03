@@ -190,7 +190,7 @@ const FullPlanDetails = () => {
           <View style={{ paddingHorizontal: 16, paddingTop: 12 }}>
             <View
               style={{
-                backgroundColor: "#FFFFFF",
+                backgroundColor: theme.colors.background,
                 borderRadius: 20,
                 padding: 20,
                 shadowColor: "#000",
@@ -208,7 +208,7 @@ const FullPlanDetails = () => {
                     width: 90,
                     height: 90,
                     borderRadius: 14,
-                    backgroundColor: "#F3EDFF",
+                    backgroundColor: theme.colors.backgroundCardLight,
                     alignItems: "center",
                     justifyContent: "center",
                     overflow: "hidden",
@@ -222,7 +222,7 @@ const FullPlanDetails = () => {
                       resizeMode="contain"
                     />
                   ) : (
-                    <Text style={{ color: "#9747FF", fontWeight: "700" }}>
+                    <Text style={{ color: theme.colors.secondPrimary, fontWeight: theme.fontWeights.bold as "700" }}>
                       {title?.[0] ?? "P"}
                     </Text>
                   )}
@@ -230,21 +230,21 @@ const FullPlanDetails = () => {
                 <View style={{ flex: 1 }}>
                   <Text
                     style={{
-                      fontSize: 18,
-                      fontWeight: "700",
-                      color: "#000",
+                      fontSize: theme.fontSizes.medium,
+                      fontWeight: theme.fontWeights.bold as "700",
+                      color: theme.colors.dark,
                       marginBottom: 4,
                     }}
                   >
                     {title}
                   </Text>
-                  <Text style={{ color: "#666", marginBottom: 4, fontSize: 13 }}>
+                  <Text style={{ color: theme.colors.textSecondary, marginBottom: 4, fontSize: theme.fontSizes.regularSmall }}>
                     {type === "plan" ? "Active Plan" : "Active Service"}
                   </Text>
                   {/* Start and End Dates */}
                   {selectedPlanOrService?.planStartDate && selectedPlanOrService?.planEndDate && (
                     <View style={{ marginBottom: 12 }}>
-                      <Text style={{ color: "#666", fontSize: 12, fontFamily: theme.fonts.regular }}>
+                      <Text style={{ color: theme.colors.textSecondary, fontSize: theme.fontSizes.small, fontFamily: theme.fonts.regular }}>
                         {new Date(selectedPlanOrService.planStartDate).toLocaleDateString("en-US", {
                           month: "short",
                           day: "numeric",
@@ -262,7 +262,7 @@ const FullPlanDetails = () => {
                   <View style={{ flexDirection: "row", gap: 8, }}>
                     <View
                       style={{
-                        backgroundColor: "#E8F5E9",
+                        backgroundColor: theme.colors.greenLight,
                         borderRadius: 12,
                         paddingHorizontal: 10,
                         paddingVertical: 6,
@@ -271,20 +271,20 @@ const FullPlanDetails = () => {
                         gap: 6,
                       }}
                     >
-                      <Text style={{ color: "#2F8C62", fontWeight: "700",fontSize: 10 }}>
+                      <Text style={{ color: theme.colors.success, fontWeight: theme.fontWeights.bold as "700", fontSize: theme.fontSizes.small }}>
                         {sessionCount}
                       </Text>
-                      <Text style={{ color: "#2F8C62", fontSize: 10 }}>Sessions</Text>
+                      <Text style={{ color: theme.colors.success, fontSize: theme.fontSizes.small }}>Sessions</Text>
                     </View>
                     <View
                       style={{
-                        backgroundColor: "#FFF8E1",
+                        backgroundColor: theme.colors.warningLight,
                         borderRadius: 12,
                         paddingHorizontal: 10,
                         paddingVertical: 6,
                       }}
                     >
-                      <Text style={{ color: "#D99100", fontWeight: "700", fontSize: 10 }}>
+                      <Text style={{ color: theme.colors.warning, fontWeight: theme.fontWeights.bold as "700", fontSize: theme.fontSizes.small }}>
                         {remainingSessions} remaining
                       </Text>
                     </View>
@@ -312,9 +312,9 @@ const FullPlanDetails = () => {
                   >
                     <Text
                       style={{
-                        color: "#2F8C62",
-                        fontWeight: "700",
-                        fontSize: 9,
+                        color: theme.colors.success,
+                        fontWeight: theme.fontWeights.bold as "700",
+                        fontSize: theme.fontSizes.small,
                       }}
                     >
                       {downloading ? "Downloading..." : "Diet Plan"}
@@ -348,7 +348,7 @@ const FullPlanDetails = () => {
                       width: 36,
                       height: 36,
                       borderRadius: 10,
-                      backgroundColor: "#F3EDFF",
+                      backgroundColor: theme.colors.backgroundCardLight,
                       alignItems: "center",
                       justifyContent: "center",
                       marginRight: 10,
@@ -358,16 +358,16 @@ const FullPlanDetails = () => {
                   </View>
                   <Text
                     style={{
-                      fontSize: 18,
-                      fontWeight: "700",
-                      color: "#1A1A1A",
+                      fontSize: theme.fontSizes.medium,
+                      fontWeight: theme.fontWeights.bold as "700",
+                      color: theme.colors.text,
                     }}
                   >
                     Assigned Sessions
                   </Text>
                   <View
                     style={{
-                      backgroundColor: "#F3EDFF",
+                      backgroundColor: theme.colors.backgroundCardLight,
                       paddingHorizontal: 8,
                       paddingVertical: 4,
                       borderRadius: 8,
@@ -376,9 +376,9 @@ const FullPlanDetails = () => {
                   >
                     <Text
                       style={{
-                        fontSize: 12,
-                        fontWeight: "700",
-                        color: "#9747FF",
+                        fontSize: theme.fontSizes.small,
+                        fontWeight: theme.fontWeights.bold as "700",
+                        color: theme.colors.secondPrimary,
                       }}
                     >
                       {totalSessions}
@@ -389,7 +389,7 @@ const FullPlanDetails = () => {
                   style={{
                     width: 30,
                     height: 3,
-                    backgroundColor: "#9747FF",
+                    backgroundColor: theme.colors.secondPrimary,
                     borderRadius: 2,
                   }}
                 />
@@ -423,7 +423,7 @@ const FullPlanDetails = () => {
                       width: 36,
                       height: 36,
                       borderRadius: 10,
-                      backgroundColor: "#F3EDFF",
+                      backgroundColor: theme.colors.backgroundCardLight,
                       alignItems: "center",
                       justifyContent: "center",
                       marginRight: 10,
@@ -434,14 +434,14 @@ const FullPlanDetails = () => {
                   <View>
                     <Text
                       style={{
-                        fontSize: 18,
-                        fontWeight: "700",
-                        color: "#1A1A1A",
+                        fontSize: theme.fontSizes.medium,
+                        fontWeight: theme.fontWeights.bold as "700",
+                        color: theme.colors.text,
                       }}
                     >
                       Session Details
                     </Text>
-                    <Text style={{ fontSize: 12, color: "#888", marginTop: 2 }}>
+                    <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textMuted, marginTop: 2 }}>
                       {new Date(selectedSession.sessionDate).toLocaleDateString("en-US", {
                         weekday: "long",
                         month: "short",
@@ -460,7 +460,7 @@ const FullPlanDetails = () => {
                   style={{
                     width: 30,
                     height: 3,
-                    backgroundColor: "#9747FF",
+                    backgroundColor: theme.colors.secondPrimary,
                     borderRadius: 2,
                   }}
                 />
@@ -471,7 +471,7 @@ const FullPlanDetails = () => {
                 style={{
                   flexDirection: "row",
                   marginHorizontal: 20,
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: theme.colors.background,
                   borderRadius: 14,
                   padding: 4,
                   shadowColor: "#000",
@@ -540,9 +540,9 @@ const FullPlanDetails = () => {
                       {icons[tab]}
                       <Text
                         style={{
-                          color: isActive ? "#FFFFFF" : "#666",
-                          fontSize: 13,
-                          fontWeight: "700",
+                          color: isActive ? theme.colors.textWhite : theme.colors.textSecondary,
+                          fontSize: theme.fontSizes.regularSmall,
+                          fontWeight: theme.fontWeights.bold as "700",
                           marginLeft: 6,
                         }}
                       >
@@ -566,7 +566,7 @@ const FullPlanDetails = () => {
               {/* Plan/Service Details Section */}
               <View
                 style={{
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: theme.colors.background,
                   borderRadius: 20,
                   padding: 20,
                   shadowColor: "#000",
@@ -584,7 +584,7 @@ const FullPlanDetails = () => {
                       width: 36,
                       height: 36,
                       borderRadius: 10,
-                      backgroundColor: "#F3EDFF",
+                      backgroundColor: theme.colors.backgroundCardLight,
                       alignItems: "center",
                       justifyContent: "center",
                       marginRight: 10,
@@ -594,9 +594,9 @@ const FullPlanDetails = () => {
                   </View>
                   <Text
                     style={{
-                      fontSize: 18,
-                      fontWeight: "700",
-                      color: "#1A1A1A",
+                      fontSize: theme.fontSizes.medium,
+                      fontWeight: theme.fontWeights.bold as "700",
+                      color: theme.colors.text,
                     }}
                   >
                     {type === "plan" ? "Plan Description" : "Service Description"}
@@ -624,7 +624,7 @@ const FullPlanDetails = () => {
                                 width: 6,
                                 height: 6,
                                 borderRadius: 3,
-                                backgroundColor: "#9747FF",
+                                backgroundColor: theme.colors.secondPrimary,
                                 marginTop: 6,
                                 marginRight: 12,
                               }}
@@ -632,8 +632,8 @@ const FullPlanDetails = () => {
                             <Text
                               style={{
                                 flex: 1,
-                                fontSize: 13,
-                                color: "#666",
+                          fontSize: theme.fontSizes.regularSmall,
+                          color: theme.colors.textSecondary,
                                 lineHeight: 20,
                                 fontFamily: theme.fonts.regular,
                               }}
@@ -653,7 +653,7 @@ const FullPlanDetails = () => {
                       style={{
                         flexDirection: "row",
                         alignItems: "center",
-                        backgroundColor: "#F8F9FA",
+                        backgroundColor: theme.colors.backgroundSecondary,
                         borderRadius: 12,
                         padding: 12,
                       }}
@@ -664,10 +664,10 @@ const FullPlanDetails = () => {
                         color="#9747FF"
                         style={{ marginRight: 10 }}
                       />
-                      <Text style={{ fontSize: 13, color: "#666", fontFamily: theme.fonts.medium, marginRight: 8 }}>
+                      <Text style={{ fontSize: theme.fontSizes.regularSmall, color: theme.colors.textSecondary, fontFamily: theme.fonts.medium, marginRight: 8 }}>
                         Total Sessions:
                       </Text>
-                      <Text style={{ fontSize: 14, color: "#111", fontFamily: theme.fonts.bold }}>
+                      <Text style={{ fontSize: theme.fontSizes.regularSmall, color: theme.colors.text, fontFamily: theme.fonts.bold }}>
                         {selectedPlanOrService.plan.planItem.sessionCount}
                       </Text>
                     </View>
@@ -678,7 +678,7 @@ const FullPlanDetails = () => {
                       style={{
                         flexDirection: "row",
                         alignItems: "center",
-                        backgroundColor: "#F8F9FA",
+                        backgroundColor: theme.colors.backgroundSecondary,
                         borderRadius: 12,
                         padding: 12,
                       }}
@@ -689,10 +689,10 @@ const FullPlanDetails = () => {
                         color="#9747FF"
                         style={{ marginRight: 10 }}
                       />
-                      <Text style={{ fontSize: 13, color: "#666", fontFamily: theme.fonts.medium, marginRight: 8 }}>
+                      <Text style={{ fontSize: theme.fontSizes.regularSmall, color: theme.colors.textSecondary, fontFamily: theme.fonts.medium, marginRight: 8 }}>
                         Total Sessions:
                       </Text>
-                      <Text style={{ fontSize: 14, color: "#111", fontFamily: theme.fonts.bold }}>
+                      <Text style={{ fontSize: theme.fontSizes.regularSmall, color: theme.colors.text, fontFamily: theme.fonts.bold }}>
                         {selectedPlanOrService.serviceDetails.sessionCount}
                       </Text>
                     </View>
@@ -710,7 +710,7 @@ const FullPlanDetails = () => {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                backgroundColor: "#FFFFFF",
+                backgroundColor: theme.colors.background,
                 paddingHorizontal: 20,
                 paddingTop: 16,
                 paddingBottom: 32,
@@ -748,9 +748,9 @@ const FullPlanDetails = () => {
               >
                 <Text
                   style={{
-                    color: "#FFFFFF",
-                    fontSize: 16,
-                    fontWeight: "700",
+                    color: theme.colors.textWhite,
+                    fontSize: theme.fontSizes.regular,
+                    fontWeight: theme.fontWeights.bold as "700",
                     fontFamily: theme.fonts.bold,
                   }}
                 >

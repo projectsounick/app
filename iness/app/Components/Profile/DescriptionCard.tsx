@@ -1,7 +1,7 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { useEffect, useState } from "react";
 import { Feather } from "@expo/vector-icons";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
@@ -26,6 +26,8 @@ function calculateAge(dob: string | Date) {
 }
 
 export default function ProfileCard() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const [userDetails, setUserDetails] = useState<UserData | null>(null);
   const [imageUploadLoader, setimageUploadLoader] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
@@ -109,6 +111,8 @@ export default function ProfileCard() {
     router.push("/dashboard/profileedit");
   };
 
+  const styles = getStyles(theme, isDark);
+  
   return (
     <TouchableOpacity
       style={styles.container}
@@ -120,7 +124,7 @@ export default function ProfileCard() {
         {/* Profile Image */}
         <TouchableOpacity style={styles.avatarContainer} onPress={pickImage}>
           {imageUploadLoader ? (
-            <ActivityIndicator color="#9747FF" />
+            <ActivityIndicator color={theme.colors.secondPrimary} />
           ) : (
             <>
               {userDetails?.profilePic ? (
@@ -130,14 +134,14 @@ export default function ProfileCard() {
                 />
               ) : (
                 <View style={styles.avatarPlaceholder}>
-                  <Ionicons name="person" size={32} color="#9747FF" />
+                  <Ionicons name="person" size={32} color={theme.colors.secondPrimary} />
                 </View>
               )}
             </>
           )}
           {/* Edit Badge */}
           <View style={styles.editBadge}>
-            <Feather name="camera" size={12} color="#FFFFFF" />
+            <Feather name="camera" size={12} color={theme.colors.textWhite} />
           </View>
         </TouchableOpacity>
 
@@ -166,25 +170,27 @@ export default function ProfileCard() {
         </View>
 
         {/* Arrow */}
-        <Ionicons name="chevron-forward" size={20} color="#1A1A1A" />
+        <Ionicons name="chevron-forward" size={20} color={theme.colors.text} />
       </View>
     </TouchableOpacity>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
     borderRadius: 20,
     padding: 16,
     marginBottom: 16,
-    shadowColor: "#9747FF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 4,
     borderWidth: 1,
-    borderColor: "#F3EDFF",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      elevation: 4,
+    }),
   },
   topSection: {
     flexDirection: "row",
@@ -201,17 +207,17 @@ const styles = StyleSheet.create({
     height: 65,
     borderRadius: 32,
     borderWidth: 3,
-    borderColor: "#F3EDFF",
+    borderColor: theme.colors.border,
   },
   avatarPlaceholder: {
     width: 65,
     height: 65,
     borderRadius: 32,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 3,
-    borderColor: "#E8E0F5",
+    borderColor: theme.colors.border,
   },
   editBadge: {
     position: "absolute",
@@ -220,25 +226,25 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#9747FF",
+    backgroundColor: theme.colors.secondPrimary,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: "#FFFFFF",
+    borderColor: theme.colors.textWhite,
   },
   infoContainer: {
     flex: 1,
     marginLeft: 14,
   },
   nameText: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   emailText: {
-    fontSize: 13,
-    color: "#666",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
     fontFamily: theme.fonts.regular,
     marginTop: 2,
   },
@@ -248,13 +254,13 @@ const styles = StyleSheet.create({
     marginTop: 6,
   },
   detailText: {
-    fontSize: 13,
-    color: "#888",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textMuted,
     fontFamily: theme.fonts.regular,
   },
   separator: {
-    fontSize: 13,
-    color: "#CCC",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textLight,
     marginHorizontal: 8,
   },
 });

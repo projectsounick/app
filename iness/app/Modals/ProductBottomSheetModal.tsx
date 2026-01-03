@@ -25,7 +25,7 @@ import { RootState } from "@/store";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import { useDispatch, useSelector } from "react-redux";
 import { withAuthGuard } from "@/app/Hoc/WithAuthGuardButton";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const ProtectedAnimatedSubmitButton = withAuthGuard(AnimatedSubmitButton);
 const { width, height } = Dimensions.get("window");
@@ -43,6 +43,9 @@ const ProductModal: React.FC<ProductModalProps> = ({
   selectedProduct,
   bgColor,
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const cartItems = useSelector((state: RootState) => state.cart.cartItems);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedVariation, setSelectedVariation] = useState<number>(0);
@@ -210,7 +213,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
                   <MaterialCommunityIcons
                     name="format-list-bulleted"
                     size={16}
-                    color="#9747FF"
+                    color={theme.colors.secondPrimary}
                   />
                 </View>
                 <Text style={styles.variationTitle}>{variationType}</Text>
@@ -249,7 +252,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
               <MaterialCommunityIcons
                 name="tag-outline"
                 size={18}
-                color="#67C694"
+                color={theme.colors.success}
               />
             </View>
             <Text style={styles.priceLabel}>Total Price</Text>
@@ -271,17 +274,17 @@ const ProductModal: React.FC<ProductModalProps> = ({
           visible={snackbarOpen}
           message={snackbarMessage}
           onDismiss={() => setSnackbarOpen(false)}
-          bgColor="#67C694"
+          bgColor={theme.colors.success}
         />
       </View>
     </Modal>
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: theme.colors.overlay,
   },
   modalContent: {
     position: "absolute",
@@ -290,13 +293,13 @@ const styles = StyleSheet.create({
     width: "100%",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     padding: 20,
   },
   dashHandle: {
     width: 50,
     height: 5,
-    backgroundColor: "#E0E0E0",
+    backgroundColor: theme.colors.border,
     borderRadius: 3,
     alignSelf: "center",
     marginBottom: 16,
@@ -308,7 +311,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 12,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.mediumGrey,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 10,
@@ -318,7 +321,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     borderRadius: 16,
     overflow: "hidden",
-    backgroundColor: "#FAFAFA",
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   carouselImage: {
     width: width - 40,
@@ -339,24 +342,24 @@ const styles = StyleSheet.create({
     marginHorizontal: 4,
   },
   productName: {
-    fontSize: 20,
-    fontWeight: "700",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
     marginBottom: 10,
-    color: "#1A1A1A",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   description: {
-    fontSize: 13,
-    color: "#666",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
     marginBottom: 6,
     lineHeight: 20,
     fontFamily: theme.fonts.regular,
   },
   readMore: {
-    color: "#9747FF",
+    color: theme.colors.secondPrimary,
     marginBottom: 16,
-    fontWeight: "500",
-    fontSize: 13,
+    fontWeight: theme.fontWeights.medium as "500",
+    fontSize: theme.fontSizes.regularSmall,
     fontFamily: theme.fonts.medium,
   },
   variationSection: {
@@ -371,15 +374,15 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 10,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
   },
   variationTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   variationList: {
@@ -391,22 +394,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 10,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.lightGrey,
   },
   variationChipSelected: {
-    backgroundColor: "#F3EDFF",
-    borderColor: "#9747FF",
+    backgroundColor: theme.colors.backgroundCardLight,
+    borderColor: theme.colors.secondPrimary,
   },
   variationChipText: {
-    fontSize: 13,
-    color: "#666",
-    fontWeight: "500",
+    fontSize: theme.fontSizes.regularSmall,
+    color: isDark ? theme.colors.textWhite : theme.colors.textSecondary,
+    fontWeight: theme.fontWeights.medium as "500",
     fontFamily: theme.fonts.medium,
   },
   variationChipTextSelected: {
-    color: "#9747FF",
+    color: isDark ? theme.colors.textWhite : theme.colors.secondPrimary,
     fontWeight: "600",
   },
   priceSection: {
@@ -415,27 +418,27 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingBottom: 8,
     borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
+    borderTopColor: theme.colors.border,
   },
   priceIconContainer: {
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "#E8F5E9",
+    backgroundColor: theme.colors.greenLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
   },
   priceLabel: {
-    fontSize: 13,
-    color: "#888",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textMuted,
     flex: 1,
     fontFamily: theme.fonts.regular,
   },
   priceValue: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#67C694",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: isDark ? theme.colors.textWhite : theme.colors.success,
     fontFamily: theme.fonts.bold,
   },
 });

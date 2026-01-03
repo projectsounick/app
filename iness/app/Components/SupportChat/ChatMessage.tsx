@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { ChatMessageBubbleProps } from "@/app/interfaces/chatInterface";
 import { router } from "expo-router";
 import dayjs from "dayjs";
@@ -12,6 +12,9 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
   setSelectedImage,
   setImageModalVisible,
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const isUser = item.role === "user";
 
   // Format date - handle both ISO strings and Date strings
@@ -50,7 +53,7 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
           <Text
             style={[
               styles.messageText,
-              { color: isUser ? "#FFFFFF" : "#1A1A1A" },
+              { color: isUser ? theme.colors.textWhite : theme.colors.text },
             ]}
           >
             {item.content.replace(/\\n/g, "\n")}
@@ -71,7 +74,7 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
                   marginTop: item.content ? 10 : 0,
                   backgroundColor: isUser
                     ? "rgba(255,255,255,0.15)"
-                    : "#F8F8F8",
+                    : (isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary),
                 },
               ]}
               onPress={() => {
@@ -86,12 +89,12 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
                   <Ionicons
                     name="document-attach"
                     size={18}
-                    color={isUser ? "#FFFFFF" : "#9747FF"}
+                    color={isUser ? theme.colors.textWhite : theme.colors.secondPrimary}
                   />
                   <Text
                     style={[
                       styles.fileText,
-                      { color: isUser ? "#FFFFFF" : "#1A1A1A" },
+                      { color: isUser ? theme.colors.textWhite : theme.colors.text },
                     ]}
                     numberOfLines={1}
                   >
@@ -120,7 +123,7 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
         <Text
           style={[
             styles.dateText,
-            { color: isUser ? "rgba(255,255,255,0.8)" : "#999" },
+            { color: isUser ? "rgba(255,255,255,0.8)" : theme.colors.textMuted },
           ]}
         >
           {formatDate(item.date)}
@@ -130,7 +133,7 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     marginVertical: 6,
     maxWidth: "80%",
@@ -139,25 +142,31 @@ const styles = StyleSheet.create({
   bubble: {
     padding: 14,
     borderRadius: 18,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    ...(isDark ? {} : {
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
+    }),
   },
   userBubble: {
-    backgroundColor: "#9747FF",
-    shadowColor: "#9747FF",
-    shadowOpacity: 0.2,
+    backgroundColor: theme.colors.secondPrimary,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOpacity: 0.2,
+    }),
   },
   supportBubble: {
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#000",
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+    }),
   },
   messageText: {
-    fontSize: 14,
-    fontWeight: "500",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
     lineHeight: 20,
     fontFamily: theme.fonts.regular,
   },
@@ -178,12 +187,12 @@ const styles = StyleSheet.create({
   },
   fileText: {
     marginLeft: 8,
-    fontSize: 13,
-    fontWeight: "500",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
     fontFamily: theme.fonts.medium,
   },
   goToPlansBtn: {
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -193,16 +202,16 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   goToPlansText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 13,
+    color: theme.colors.textWhite,
+    fontWeight: theme.fontWeights.medium as "500",
+    fontSize: theme.fontSizes.regularSmall,
     marginRight: 6,
     fontFamily: theme.fonts.medium,
   },
   dateText: {
-    fontSize: 10,
+    fontSize: theme.fontSizes.small,
     marginTop: 8,
-    fontWeight: "400",
+    fontWeight: theme.fontWeights.regular as "400",
     fontFamily: theme.fonts.regular,
   },
 });

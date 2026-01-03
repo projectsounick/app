@@ -170,7 +170,7 @@ const OnboardingScreen = () => {
                   <TouchableOpacity
                     onPress={handleBack}
                     style={{
-                      backgroundColor: "#FFFFFF",
+                      backgroundColor: theme.colors.background,
                       width: 40,
                       height: 40,
                       borderRadius: 20,
@@ -191,7 +191,7 @@ const OnboardingScreen = () => {
                     style={{
                       flex: 1,
                       height: 8,
-                      backgroundColor: "#F0F0F0",
+                      backgroundColor: theme.colors.lightGrey,
                       borderRadius: 10,
                       overflow: "hidden",
                     }}
@@ -200,7 +200,7 @@ const OnboardingScreen = () => {
                       style={{
                         height: 8,
                         width: progressWidth,
-                        backgroundColor: "#9747FF",
+                        backgroundColor: theme.colors.secondPrimary,
                         borderRadius: 10,
                       }}
                     />

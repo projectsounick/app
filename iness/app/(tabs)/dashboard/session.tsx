@@ -19,7 +19,7 @@ const BookSessionScreen = () => {
   );
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}>
       <SmallHeader title="Sessions" weightShow={false} />
       <BackHeader />
 
@@ -38,11 +38,11 @@ const BookSessionScreen = () => {
         >
           <Text
             style={{
-              fontSize: 16,
-              fontWeight: "700",
+              fontSize: theme.fontSizes.regular,
+              fontWeight: theme.fontWeights.bold as "700",
               textAlign: "center",
               marginBottom: 6,
-              color: "#000",
+              color: theme.colors.black,
               fontFamily: theme.fonts.bold,
             }}
           >
@@ -50,8 +50,8 @@ const BookSessionScreen = () => {
           </Text>
           <Text
             style={{
-              fontSize: 14,
-              color: "#666",
+              fontSize: theme.fontSizes.regularSmall,
+              color: theme.colors.textSecondary,
               marginBottom: 16,
               lineHeight: 20,
               textAlign: "center",
@@ -69,7 +69,7 @@ const BookSessionScreen = () => {
         <View
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
-          <Text style={{ fontSize: 16, color: "#666", textAlign: "center" }}>
+          <Text style={{ fontSize: theme.fontSizes.regular, color: theme.colors.textSecondary, textAlign: "center" }}>
             No service available.{"\n"}We will be adding soon.
           </Text>
         </View>

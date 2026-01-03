@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet, ScrollView, Dimensions } from "react-native";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
+import theme from "../../Theme/globalTheme";
 
 const { width: screenWidth } = Dimensions.get("window");
 const categoryCardWidth = (screenWidth - 48) / 2;
@@ -189,7 +190,7 @@ const styles = StyleSheet.create({
   },
   categoryCard: {
     borderRadius: 14,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     padding: 12,
     marginBottom: 12,
     borderWidth: 1,
@@ -253,7 +254,7 @@ const styles = StyleSheet.create({
     width: 140,
     marginRight: 12,
     borderRadius: 12,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderWidth: 1,
     borderColor: "#F5F5F5",
     overflow: "hidden",

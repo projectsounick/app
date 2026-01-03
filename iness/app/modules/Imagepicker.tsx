@@ -23,6 +23,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { createStreak } from "../services/streaks.service";
 import { setStreakData } from "@/Slices/streakSlice";
+import theme from "../Theme/globalTheme";
 
 interface FloatingCameraButtonProps {}
 
@@ -252,7 +253,7 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#67C694",
@@ -270,7 +271,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#67C694",

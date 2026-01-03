@@ -34,7 +34,7 @@ const BottomBar = ({ onSubmit }: BotterBarInterface) => {
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: "#4B0082",
+        backgroundColor: theme.colors.secondPrimary,
         padding: 16,
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
@@ -55,9 +55,9 @@ const BottomBar = ({ onSubmit }: BotterBarInterface) => {
       >
         <Text
           style={{
-            fontWeight: "700",
-            color: "#000",
-            fontSize: 16,
+            fontWeight: theme.fontWeights.bold as "700",
+            color: theme.colors.black,
+            fontSize: theme.fontSizes.regular,
           }}
         >
           ₹1200
@@ -65,15 +65,15 @@ const BottomBar = ({ onSubmit }: BotterBarInterface) => {
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <Text
             style={{
-              fontWeight: "700",
-              color: "#000",
-              fontSize: 16,
+              fontWeight: theme.fontWeights.bold as "700",
+              color: theme.colors.text,
+              fontSize: theme.fontSizes.regular,
               marginRight: 4,
             }}
           >
             Add to Cart
           </Text>
-          <Icon name="chevron-right" size={18} color="#000" />
+          <Icon name="chevron-right" size={18} color={theme.colors.black} />
         </View>
       </TouchableOpacity>
     </Animated.View>

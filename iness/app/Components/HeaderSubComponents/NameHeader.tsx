@@ -10,9 +10,9 @@ export default function NameHeader({ userData }: any) {
     <>
       <Text
         style={{
-          fontSize: 20,
+          fontSize: theme.fontSizes.large,
           fontFamily: theme.fonts.bold,
-          color: "white",
+          color: theme.colors.textWhite,
           marginTop: 8,
         }}
       >
@@ -20,7 +20,7 @@ export default function NameHeader({ userData }: any) {
       </Text>
       <Text
         style={{
-          color: "white",
+          color: theme.colors.textWhite,
           fontFamily: theme.fonts.regular,
           marginTop: 4,
         }}

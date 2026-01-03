@@ -17,7 +17,7 @@ import {
 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { LineChart } from "react-native-chart-kit";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { weightService } from "@/app/services/weight.service";
 import { createStreak } from "@/app/services/streaks.service";
 import { useDispatch } from "react-redux";
@@ -34,6 +34,8 @@ export default function WeightTrackerBottomSheet({
   visible,
   onClose,
 }: WeightTrackerBottomSheetProps) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const [weightData, setWeightData] = useState<
     { weight: number; date: string; _id?: string }[]
   >([]);
@@ -173,16 +175,16 @@ export default function WeightTrackerBottomSheet({
             size={28}
             color="#7771de"
           />
-          <Text
-            style={{
-              fontFamily: theme.fonts.bold,
-              fontSize: 22,
-              color: "#fff",
-              marginLeft: 8,
-            }}
-          >
-            Weight Tracker
-          </Text>
+            <Text
+              style={{
+                fontFamily: theme.fonts.bold,
+                fontSize: theme.fontSizes.large,
+                color: theme.colors.textWhite,
+                marginLeft: 8,
+              }}
+            >
+              Weight Tracker
+            </Text>
         </View>
 
         <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
@@ -234,9 +236,9 @@ export default function WeightTrackerBottomSheet({
           >
             <Text
               style={{
-                fontSize: 14,
+                fontSize: theme.fontSizes.regularSmall,
                 fontFamily: theme.fonts.medium,
-                color: "#fff",
+                color: theme.colors.textWhite,
                 marginBottom: 6,
               }}
             >
@@ -253,9 +255,9 @@ export default function WeightTrackerBottomSheet({
                 borderColor: "rgba(255,255,255,0.3)",
                 borderRadius: 12,
                 padding: 12,
-                fontSize: 16,
+                fontSize: theme.fontSizes.regular,
                 fontFamily: theme.fonts.regular,
-                color: "#fff",
+                color: theme.colors.textWhite,
               }}
             />
             <TouchableOpacity
@@ -278,9 +280,9 @@ export default function WeightTrackerBottomSheet({
               <Feather name="save" size={18} color="#fff" />
               <Text
                 style={{
-                  color: "#fff",
+                  color: theme.colors.textWhite,
                   fontFamily: theme.fonts.bold,
-                  fontSize: 16,
+                  fontSize: theme.fontSizes.regular,
                   marginLeft: 8,
                 }}
               >
@@ -294,8 +296,8 @@ export default function WeightTrackerBottomSheet({
             <Text
               style={{
                 fontFamily: theme.fonts.bold,
-                fontSize: 18,
-                color: "#fff",
+                fontSize: theme.fontSizes.medium,
+                color: theme.colors.textWhite,
                 marginBottom: 12,
               }}
             >
@@ -331,8 +333,8 @@ export default function WeightTrackerBottomSheet({
                     <Text
                       style={{
                         fontFamily: theme.fonts.bold,
-                        fontSize: 18,
-                        color: "#fff",
+                        fontSize: theme.fontSizes.medium,
+                        color: theme.colors.textWhite,
                       }}
                     >
                       {entry.weight} kg
@@ -340,8 +342,8 @@ export default function WeightTrackerBottomSheet({
                     <Text
                       style={{
                         fontFamily: theme.fonts.regular,
-                        fontSize: 13,
-                        color: "#ccc",
+                        fontSize: theme.fontSizes.regularSmall,
+                        color: theme.colors.textMuted,
                         marginTop: 4,
                       }}
                     >

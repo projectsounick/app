@@ -2,13 +2,15 @@ import React from "react";
 import { View, ScrollView, Dimensions } from "react-native";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
+import { useGlobalTheme } from "../../Theme/ThemeContext";
 
 const { width } = Dimensions.get("window");
 
 export default function HomeShimmer() {
+  const theme = useGlobalTheme();
   return (
     <ScrollView
-      style={{ flex: 1, backgroundColor: "#f5f5f5", padding: 12 }}
+      style={{ flex: 1, backgroundColor: theme.colors.background, padding: 12 }}
       showsVerticalScrollIndicator={false}
     >
       {/* Section 1: Explore Plans */}
@@ -36,7 +38,7 @@ export default function HomeShimmer() {
                 width: width * 0.75,
                 marginRight: 15,
                 borderRadius: 15,
-                backgroundColor: "#fff",
+                backgroundColor: theme.colors.background,
                 padding: 12,
               }}
             >

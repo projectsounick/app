@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   Modal,
   TextInput,
-  ImageBackground,
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
   ScrollView,
@@ -23,9 +22,8 @@ import NormalHeader from "@/app/modules/NormalHeader";
 import useGetDataHook from "@/hooks/useFetchHook";
 import MeasurementList from "@/app/Components/MeasureMentList";
 import { ActivityIndicator } from "react-native-paper";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
-const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const { height } = Dimensions.get("window");
 
 const measurementFields = [
@@ -37,6 +35,9 @@ const measurementFields = [
 ];
 
 export default function MeasurementDashboard({ userId }: { userId: string }) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const [modalVisible, setModalVisible] = useState(false);
   const [form, setForm] = useState({
     chest: "",
@@ -92,15 +93,11 @@ export default function MeasurementDashboard({ userId }: { userId: string }) {
   };
 
   return (
-    <ImageBackground
-      source={backgroundImg}
-      style={{ flex: 1 }}
-      resizeMode="cover"
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      edges={["left", "right"]}
     >
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "transparent" }}
-        edges={["left", "right"]}
-      >
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
         <View
           style={{
             paddingHorizontal: 20,
@@ -112,7 +109,7 @@ export default function MeasurementDashboard({ userId }: { userId: string }) {
 
         {loading ? (
           <View style={styles.loaderContainer}>
-            <ActivityIndicator color="#9747FF" size="large" />
+            <ActivityIndicator color={theme.colors.secondPrimary} size="large" />
           </View>
         ) : (
           <>
@@ -122,7 +119,7 @@ export default function MeasurementDashboard({ userId }: { userId: string }) {
                   <MaterialCommunityIcons
                     name="tape-measure"
                     size={40}
-                    color="#9747FF"
+                    color={theme.colors.secondPrimary}
                   />
                 </View>
                 <Text style={styles.emptyTitle}>No measurements yet</Text>
@@ -150,12 +147,12 @@ export default function MeasurementDashboard({ userId }: { userId: string }) {
             style={styles.fab}
             activeOpacity={0.8}
           >
-            <LinearGradient
-              colors={["#9747FF", "#844ACF"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.fabGradient}
-            >
+                    <LinearGradient
+                      colors={isDark ? [theme.colors.backgroundCard, theme.colors.backgroundSecondary] : ["#9747FF", "#844ACF"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.fabGradient}
+                    >
               <Ionicons name="add" size={28} color="#FFFFFF" />
             </LinearGradient>
           </TouchableOpacity>
@@ -185,13 +182,13 @@ export default function MeasurementDashboard({ userId }: { userId: string }) {
                   onPress={() => setModalVisible(false)}
                   style={styles.closeBtn}
                 >
-                  <Ionicons name="close" size={20} color="#1A1A1A" />
+                  <Ionicons name="close" size={20} color={theme.colors.text} />
                 </TouchableOpacity>
 
                 {/* Icon */}
                 <View style={styles.iconWrapper}>
                   <LinearGradient
-                    colors={["#9747FF", "#844ACF"]}
+                    colors={isDark ? [theme.colors.backgroundCard, theme.colors.backgroundSecondary] : ["#9747FF", "#844ACF"]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.modalIconContainer}
@@ -218,7 +215,7 @@ export default function MeasurementDashboard({ userId }: { userId: string }) {
                     <TextInput
                       key={field.key}
                       placeholder={`${field.label} (cm)`}
-                      placeholderTextColor="#999"
+                      placeholderTextColor={theme.colors.textMuted}
                       keyboardType="numeric"
                       style={styles.input}
                       value={form[field.key as keyof typeof form]}
@@ -235,7 +232,7 @@ export default function MeasurementDashboard({ userId }: { userId: string }) {
                   activeOpacity={0.8}
                 >
                   <LinearGradient
-                    colors={["#9747FF", "#844ACF"]}
+                    colors={isDark ? [theme.colors.backgroundCard, theme.colors.backgroundSecondary] : ["#9747FF", "#844ACF"]}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                     style={styles.saveButton}
@@ -247,12 +244,12 @@ export default function MeasurementDashboard({ userId }: { userId: string }) {
             </KeyboardAvoidingView>
           </View>
         </Modal>
-      </SafeAreaView>
-    </ImageBackground>
+      </View>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   loaderContainer: {
     flex: 1,
     justifyContent: "center",
@@ -268,26 +265,28 @@ const styles = StyleSheet.create({
     width: 90,
     height: 90,
     borderRadius: 24,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 20,
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 8,
+      elevation: 6,
+    }),
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     marginBottom: 8,
     fontFamily: theme.fonts.bold,
   },
   emptySubtitle: {
-    fontSize: 14,
-    color: "#888",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textMuted,
     textAlign: "center",
     marginBottom: 24,
     fontFamily: theme.fonts.regular,
@@ -295,21 +294,23 @@ const styles = StyleSheet.create({
   emptyButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     paddingVertical: 14,
     paddingHorizontal: 24,
     borderRadius: 25,
     gap: 8,
-    shadowColor: "#67C694",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.success,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 6,
+    }),
   },
   emptyButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 15,
+    color: theme.colors.textWhite,
+    fontWeight: theme.fontWeights.medium as "500",
+    fontSize: theme.fontSizes.regular,
     fontFamily: theme.fonts.medium,
   },
   fab: {
@@ -319,11 +320,13 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     width: 60,
     height: 60,
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 8,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.4,
+      shadowRadius: 12,
+      elevation: 8,
+    }),
   },
   fabGradient: {
     width: "100%",
@@ -344,7 +347,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 20,
@@ -355,7 +358,7 @@ const styles = StyleSheet.create({
   dashHandle: {
     width: 50,
     height: 5,
-    backgroundColor: "#D0D0D0",
+    backgroundColor: theme.colors.border,
     borderRadius: 3,
     alignSelf: "center",
     marginBottom: 16,
@@ -367,12 +370,12 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.border,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 10,
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.border,
   },
   iconWrapper: {
     alignItems: "center",
@@ -391,9 +394,9 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     textAlign: "center",
     marginBottom: 20,
     fontFamily: theme.fonts.bold,
@@ -402,14 +405,14 @@ const styles = StyleSheet.create({
     maxHeight: 300,
   },
   input: {
-    backgroundColor: "#FAFAFA",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 14,
     padding: 16,
     marginBottom: 14,
     borderWidth: 1.5,
-    borderColor: "#F0F0F0",
-    fontSize: 15,
-    color: "#1A1A1A",
+    borderColor: theme.colors.border,
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.text,
     fontFamily: theme.fonts.regular,
   },
   saveButton: {
@@ -425,9 +428,9 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   saveButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 16,
+    color: theme.colors.textWhite,
+    fontWeight: theme.fontWeights.bold as "700",
+    fontSize: theme.fontSizes.regular,
     fontFamily: theme.fonts.bold,
   },
 });

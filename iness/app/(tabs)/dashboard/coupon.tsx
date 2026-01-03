@@ -6,7 +6,6 @@ import {
   Dimensions,
   TouchableOpacity,
   Alert,
-  ImageBackground,
   StyleSheet,
   Platform,
   ActivityIndicator,
@@ -15,7 +14,7 @@ import * as Clipboard from "expo-clipboard";
 import NormalHeader from "@/app/modules/NormalHeader";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { CouponInterface } from "@/app/interfaces/otherInterfaces";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { couponService } from "@/app/services/coupon.service";
@@ -24,9 +23,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const { height, width } = Dimensions.get("window");
 const topPadding = height * 0.05;
-const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 
 export default function CouponScreen() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const [coupons, setCoupons] = useState<CouponInterface[]>([]);
   const [loading, setLoading] = useState(false);
   const [snackbarOpen, setSnackBarOpen] = useState(false);
@@ -75,16 +76,11 @@ export default function CouponScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
-      <ImageBackground
-        source={backgroundImg}
-        style={{ flex: 1 }}
-        resizeMode="cover"
-      >
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: "transparent" }}
-          edges={["left", "right"]}
-        >
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      edges={["left", "right"]}
+    >
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
           {/* Header */}
           <View
             style={{
@@ -97,7 +93,7 @@ export default function CouponScreen() {
 
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#9747FF" />
+              <ActivityIndicator size="large" color={theme.colors.secondPrimary} />
               <Text style={styles.loadingText}>Loading coupons...</Text>
             </View>
           ) : coupons.length === 0 ? (
@@ -105,7 +101,7 @@ export default function CouponScreen() {
               <MaterialCommunityIcons
                 name="ticket-outline"
                 size={64}
-                color="#9747FF"
+                color={theme.colors.secondPrimary}
               />
               <Text style={styles.emptyTitle}>No Coupons Available</Text>
               <Text style={styles.emptyText}>
@@ -125,7 +121,7 @@ export default function CouponScreen() {
                   <MaterialCommunityIcons
                     name="ticket-percent"
                     size={24}
-                    color="#9747FF"
+                    color={theme.colors.secondPrimary}
                   />
                   <Text style={styles.descriptionTitle}>
                     Available Coupons
@@ -147,7 +143,7 @@ export default function CouponScreen() {
                     style={styles.couponCardWrapper}
                   >
                     <LinearGradient
-                      colors={["#9747FF", "#7B2CBF"]}
+                      colors={isDark ? [theme.colors.backgroundCard, theme.colors.backgroundSecondary] : ["#9747FF", "#7B2CBF"]}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 1 }}
                       style={styles.couponGradient}
@@ -188,7 +184,7 @@ export default function CouponScreen() {
                             <MaterialIcons
                               name="content-copy"
                               size={18}
-                              color="#9747FF"
+                              color={theme.colors.secondPrimary}
                             />
                             <Text style={styles.copyCodeText}>Copy</Text>
                           </TouchableOpacity>
@@ -205,15 +201,14 @@ export default function CouponScreen() {
             onDismiss={() => setSnackBarOpen(false)}
             visible={snackbarOpen}
             message={snackbarMessage}
-            bgColor="#FFFFFF"
+            bgColor={theme.colors.background}
           />
-        </SafeAreaView>
-      </ImageBackground>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
@@ -221,8 +216,8 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 12,
-    fontSize: 16,
-    color: "#666",
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.textSecondary,
     fontFamily: theme.fonts.regular,
   },
   emptyContainer: {
@@ -232,16 +227,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
   },
   emptyTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#000",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     marginTop: 20,
     marginBottom: 8,
     fontFamily: theme.fonts.bold,
   },
   emptyText: {
-    fontSize: 16,
-    color: "#666",
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.textSecondary,
     textAlign: "center",
     lineHeight: 24,
     fontFamily: theme.fonts.regular,
@@ -254,16 +249,20 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   descriptionContainer: {
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
     marginTop: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 4,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 4,
+    }),
   },
   descriptionHeader: {
     flexDirection: "row",
@@ -271,15 +270,15 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   descriptionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#000",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     marginLeft: 10,
     fontFamily: theme.fonts.bold,
   },
   descriptionText: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
     lineHeight: 20,
     fontFamily: theme.fonts.regular,
   },
@@ -292,11 +291,13 @@ const styles = StyleSheet.create({
   couponGradient: {
     borderRadius: 20,
     padding: 2,
-    shadowColor: "#9747FF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 8,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 12,
+      elevation: 8,
+    }),
   },
   couponCard: {
     backgroundColor: "transparent",
@@ -315,16 +316,16 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   couponTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#fff",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.textWhite,
     marginLeft: 8,
     flex: 1,
     fontFamily: theme.fonts.bold,
   },
   couponDescription: {
-    fontSize: 14,
-    color: "rgba(255, 255, 255, 0.9)",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textWhite,
     lineHeight: 20,
     marginBottom: 16,
     fontFamily: theme.fonts.regular,
@@ -343,7 +344,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.3)",
   },
   codeLabel: {
-    fontSize: 11,
+    fontSize: theme.fontSizes.small,
     color: "rgba(255, 255, 255, 0.7)",
     marginBottom: 6,
     textTransform: "uppercase",
@@ -355,25 +356,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   codeValue: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#fff",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.textWhite,
     letterSpacing: 2,
     fontFamily: theme.fonts.bold,
   },
   copyCodeButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 12,
     gap: 6,
   },
   copyCodeText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#9747FF",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.secondPrimary,
     fontFamily: theme.fonts.medium,
   },
 });

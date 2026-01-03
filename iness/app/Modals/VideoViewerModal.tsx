@@ -8,7 +8,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { Video, ResizeMode } from "expo-av";
-import theme from "@/app/Theme/globalTheme"; // adjust if needed
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 interface VideoViewerModalProps {
   visible: boolean;
@@ -21,6 +21,9 @@ const VideoViewerModal: React.FC<VideoViewerModalProps> = ({
   onClose,
   videoUrl,
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme);
   return (
     <Modal visible={visible} transparent animationType="fade">
       <Pressable style={styles.overlay} onPress={onClose}>
@@ -39,10 +42,10 @@ const VideoViewerModal: React.FC<VideoViewerModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.8)",
+    backgroundColor: theme.colors.overlay,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -50,12 +53,12 @@ const styles = StyleSheet.create({
     width: Dimensions.get("window").width * 0.9,
     height: Dimensions.get("window").height * 0.6,
     borderRadius: 12,
-    backgroundColor: "#000",
+    backgroundColor: theme.colors.black,
   },
   text: {
     marginTop: 20,
     color: theme.colors.text,
-    fontSize: 16,
+    fontSize: theme.fontSizes.regular,
     textAlignVertical: "center",
   },
 });

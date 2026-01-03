@@ -31,7 +31,7 @@ const ChooseDateSection: React.FC<Props> = ({
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.iconContainer}>
-          <Icon name="calendar" size={18} color="#9747FF" />
+          <Icon name="calendar" size={18} color={theme.colors.secondPrimary} />
         </View>
         <Text style={styles.title}>Choose a date</Text>
       </View>
@@ -66,17 +66,17 @@ const ChooseDateSection: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: "#000",
+    shadowColor: theme.colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
     shadowRadius: 4,
     elevation: 1,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   header: {
     flexDirection: "row",
@@ -86,15 +86,15 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
   title: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   content: {
@@ -107,24 +107,24 @@ const styles = StyleSheet.create({
     borderTopColor: "#F5F5F5",
   },
   dateText: {
-    fontSize: 15,
-    fontWeight: "500",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.text,
     fontFamily: theme.fonts.medium,
   },
   changeButton: {
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     paddingVertical: 8,
     paddingHorizontal: 18,
     borderRadius: 20,
   },
   changeButtonDisabled: {
-    backgroundColor: "#E0E0E0",
+    backgroundColor: theme.colors.textLight,
   },
   changeButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 13,
+    color: theme.colors.textWhite,
+    fontWeight: theme.fontWeights.medium as "500",
+    fontSize: theme.fontSizes.regularSmall,
     fontFamily: theme.fonts.medium,
   },
 });

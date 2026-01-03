@@ -13,7 +13,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { useRouter } from "expo-router";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 interface Category {
   _id: string;
@@ -22,6 +22,9 @@ interface Category {
 }
 
 function CategoryGrid() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const router = useRouter();
   const categories: any = useSelector(
     (state: RootState) => state.ecom.categories
@@ -49,7 +52,7 @@ function CategoryGrid() {
           <Text numberOfLines={1} style={styles.categoryName}>
             {item.name}
           </Text>
-          <MaterialIcons name="chevron-right" size={20} color="#1A1A1A" />
+            <MaterialIcons name="chevron-right" size={20} color={theme.colors.text} />
         </View>
       </TouchableOpacity>
     );
@@ -81,7 +84,7 @@ function CategoryGrid() {
             <MaterialCommunityIcons
               name="shopping-outline"
               size={40}
-              color="#9747FF"
+              color={theme.colors.secondPrimary}
             />
           </View>
           <Text style={styles.emptyTitle}>No categories yet</Text>
@@ -94,7 +97,7 @@ function CategoryGrid() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     marginTop: 20,
     marginBottom: 8,
@@ -107,15 +110,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   headerDash: {
     width: 40,
     height: 3,
-    backgroundColor: "#9747FF",
+    backgroundColor: theme.colors.secondPrimary,
     borderRadius: 2,
   },
   columnWrapper: {
@@ -125,23 +128,25 @@ const styles = StyleSheet.create({
   categoryCard: {
     width: (Dimensions.get("window").width - 48) / 2,
     borderRadius: 14,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     padding: 12,
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    }),
   },
   imageContainer: {
     alignItems: "center",
     justifyContent: "center",
     height: 90,
     marginBottom: 10,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 10,
     overflow: "hidden",
   },
@@ -156,12 +161,12 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingTop: 10,
     borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
+    borderTopColor: theme.colors.border,
   },
   categoryName: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.text,
     flex: 1,
     marginRight: 8,
     fontFamily: theme.fonts.medium,
@@ -176,21 +181,21 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 24,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 20,
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     marginBottom: 8,
     fontFamily: theme.fonts.bold,
   },
   emptySubtitle: {
-    fontSize: 14,
-    color: "#888",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textMuted,
     textAlign: "center",
     fontFamily: theme.fonts.regular,
   },

@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const { height } = Dimensions.get("window");
 
@@ -24,6 +24,8 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
   onClose,
   onAccept,
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const handleAccept = () => {
     if (onAccept) {
       onAccept();
@@ -41,7 +43,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
       <View
         style={{
           flex: 1,
-          backgroundColor: "rgba(0,0,0,0.5)",
+          backgroundColor: theme.colors.overlay,
           justifyContent: "flex-end",
         }}
       >
@@ -66,7 +68,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               style={{
                 width: 40,
                 height: 4,
-                backgroundColor: "#E0E0E0",
+                backgroundColor: theme.colors.divider,
                 borderRadius: 2,
               }}
             />
@@ -79,7 +81,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               paddingTop: 8,
               paddingBottom: 16,
               borderBottomWidth: 1,
-              borderBottomColor: "#F0F0F0",
+              borderBottomColor: theme.colors.border,
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "flex-start",
@@ -88,9 +90,9 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
             <View style={{ flex: 1 }}>
               <Text
                 style={{
-                  fontSize: 24,
-                  fontWeight: "700",
-                  color: "#222",
+                  fontSize: theme.fontSizes.large,
+                  fontWeight: theme.fontWeights.bold as "700",
+                  color: theme.colors.text,
                   fontFamily: theme.fonts.bold,
                 }}
               >
@@ -98,8 +100,8 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               </Text>
               <Text
                 style={{
-                  fontSize: 13,
-                  color: "#999",
+                  fontSize: theme.fontSizes.small,
+                  color: theme.colors.textMuted,
                   marginTop: 4,
                   fontFamily: theme.fonts.regular,
                 }}
@@ -114,12 +116,12 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 width: 32,
                 height: 32,
                 borderRadius: 16,
-                backgroundColor: "#F5F5F5",
+                backgroundColor: theme.colors.border,
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <MaterialCommunityIcons name="close" size={20} color="#666" />
+              <MaterialCommunityIcons name="close" size={20} color={theme.colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
@@ -188,7 +190,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               {/* Contact */}
               <View
                 style={{
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: theme.colors.backgroundCardLight,
                   borderRadius: 16,
                   padding: 16,
                   marginTop: 16,
@@ -200,13 +202,13 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                   <MaterialCommunityIcons
                     name="email-outline"
                     size={20}
-                    color="#9747FF"
+                    color={theme.colors.secondPrimary}
                   />
                   <Text
                     style={{
                       marginLeft: 10,
-                      fontSize: 14,
-                      color: "#333",
+                    fontSize: theme.fontSizes.regularSmall,
+                    color: theme.colors.text,
                       fontFamily: theme.fonts.medium,
                     }}
                   >
@@ -218,7 +220,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               {/* Cancellation Policy */}
               <View
                 style={{
-                  backgroundColor: "#FFF9E6",
+                  backgroundColor: theme.colors.warning + "20",
                   borderRadius: 16,
                   padding: 16,
                   marginTop: 16,
@@ -226,21 +228,21 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                   borderColor: "#F0E6CC",
                 }}
               >
+                  <Text
+                    style={{
+                      fontSize: theme.fontSizes.regular,
+                      fontWeight: theme.fontWeights.medium as "500",
+                      color: theme.colors.warning,
+                      marginBottom: 8,
+                      fontFamily: theme.fonts.bold,
+                    }}
+                  >
+                    Cancellation & Refund Policy
+                  </Text>
                 <Text
                   style={{
-                    fontSize: 15,
-                    fontWeight: "600",
-                    color: "#B8860B",
-                    marginBottom: 8,
-                    fontFamily: theme.fonts.bold,
-                  }}
-                >
-                  Cancellation & Refund Policy
-                </Text>
-                <Text
-                  style={{
-                    fontSize: 13,
-                    color: "#666",
+                    fontSize: theme.fontSizes.regularSmall,
+                    color: theme.colors.textSecondary,
                     lineHeight: 20,
                     fontFamily: theme.fonts.regular,
                   }}
@@ -254,7 +256,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               {/* User Conduct */}
               <View
                 style={{
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: theme.colors.backgroundCardLight,
                   borderRadius: 16,
                   padding: 16,
                   marginTop: 16,
@@ -264,9 +266,9 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               >
                 <Text
                   style={{
-                    fontSize: 15,
-                    fontWeight: "600",
-                    color: "#7B2FD6",
+                    fontSize: theme.fontSizes.regular,
+                    fontWeight: theme.fontWeights.medium as "500",
+                    color: theme.colors.secondPrimary,
                     marginBottom: 8,
                     fontFamily: theme.fonts.bold,
                   }}
@@ -275,8 +277,8 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 </Text>
                 <Text
                   style={{
-                    fontSize: 13,
-                    color: "#666",
+                    fontSize: theme.fontSizes.regularSmall,
+                    color: theme.colors.textSecondary,
                     lineHeight: 20,
                     fontFamily: theme.fonts.regular,
                   }}
@@ -290,8 +292,8 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               {/* Thank you */}
               <Text
                 style={{
-                  fontSize: 14,
-                  color: "#999",
+                  fontSize: theme.fontSizes.regularSmall,
+                  color: theme.colors.textMuted,
                   textAlign: "center",
                   marginTop: 24,
                   fontStyle: "italic",
@@ -308,16 +310,16 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 paddingHorizontal: 24,
                 paddingBottom: 20,
                 paddingTop: 12,
-                backgroundColor: "#fff",
+                backgroundColor: theme.colors.background,
                 borderTopWidth: 1,
-                borderTopColor: "#F0F0F0",
+                borderTopColor: theme.colors.border,
               }}
             >
               <TouchableOpacity
                 onPress={handleAccept}
                 activeOpacity={0.8}
                 style={{
-                  backgroundColor: "#67C694",
+                  backgroundColor: theme.colors.success,
                   borderRadius: 30,
                   paddingVertical: 16,
                   alignItems: "center",
@@ -333,14 +335,14 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 <MaterialCommunityIcons
                   name="check-circle"
                   size={22}
-                  color="#fff"
+                  color={theme.colors.textWhite}
                   style={{ marginRight: 8 }}
                 />
                 <Text
                   style={{
-                    color: "#fff",
-                    fontWeight: "700",
-                    fontSize: 17,
+                    color: theme.colors.textWhite,
+                    fontWeight: theme.fontWeights.bold as "700",
+                    fontSize: theme.fontSizes.medium,
                     fontFamily: theme.fonts.bold,
                   }}
                 >
@@ -364,17 +366,17 @@ const PolicySection: React.FC<{
   <View
     style={{
       marginTop: 16,
-      backgroundColor: "#FAFAFA",
+      backgroundColor: theme.colors.backgroundSecondary,
       borderRadius: 16,
       padding: 16,
       borderWidth: 1,
-      borderColor: "#F0F0F0",
+      borderColor: theme.colors.border,
     }}
   >
     <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
       <View
         style={{
-          backgroundColor: "#F3EDFF",
+          backgroundColor: theme.colors.backgroundCardLight,
           borderRadius: 10,
           padding: 8,
           marginRight: 12,
@@ -384,9 +386,9 @@ const PolicySection: React.FC<{
       </View>
       <Text
         style={{
-          fontSize: 15,
-          fontWeight: "600",
-          color: "#222",
+          fontSize: theme.fontSizes.regular,
+          fontWeight: theme.fontWeights.medium as "500",
+          color: theme.colors.text,
           flex: 1,
           fontFamily: theme.fonts.bold,
         }}
@@ -396,8 +398,8 @@ const PolicySection: React.FC<{
     </View>
     <Text
       style={{
-        fontSize: 13,
-        color: "#666",
+        fontSize: theme.fontSizes.small,
+        color: theme.colors.textSecondary,
         lineHeight: 20,
         fontFamily: theme.fonts.regular,
       }}

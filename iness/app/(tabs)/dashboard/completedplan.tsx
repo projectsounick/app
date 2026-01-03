@@ -39,7 +39,7 @@ export default function CompletedPlan() {
   const { plan, dietPlanDetails, planStartDate, planEndDate } = completedPlan;
   const planItems = plan?.planItem;
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}>
       <ImageBackground
         source={require("../../../assets/images/basicBackground.jpg")}
         style={{ flex: 1 }}
@@ -65,7 +65,7 @@ export default function CompletedPlan() {
               {/* Plan Title */}
               <Text
                 style={{
-                  fontSize: 22,
+                  fontSize: theme.fontSizes.large,
 
                   color: theme.colors.second,
                   marginBottom: 16,
@@ -124,12 +124,12 @@ export default function CompletedPlan() {
               {plan.descItems?.length > 0 && (
                 <View style={{ marginTop: 10 }}>
                   <Text
-                    style={{ fontSize: 15, color: "#666", marginBottom: 6 }}
+                    style={{ fontSize: theme.fontSizes.regular, color: theme.colors.textSecondary, marginBottom: 6 }}
                   >
                     Plan Highlights
                   </Text>
                   <Text
-                    style={{ fontSize: 16, fontWeight: "500", color: "#333" }}
+                    style={{ fontSize: theme.fontSizes.regular, fontWeight: theme.fontWeights.medium as "500", color: theme.colors.textSecondary }}
                   >
                     {plan.descItems.join(" • ")}
                   </Text>
@@ -148,9 +148,9 @@ export default function CompletedPlan() {
                 >
                   <Text
                     style={{
-                      fontSize: 18,
-                      fontWeight: "700",
-                      color: "#fff",
+                      fontSize: theme.fontSizes.medium,
+                      fontWeight: theme.fontWeights.bold as "700",
+                      color: theme.colors.textWhite,
                       marginBottom: 12,
                     }}
                   >
@@ -187,15 +187,15 @@ export default function CompletedPlan() {
                   {dietPlanDetails.descItems?.length > 0 && (
                     <View style={{ marginTop: 6 }}>
                       <Text
-                        style={{ fontSize: 14, color: "#ddd", marginBottom: 4 }}
+                        style={{ fontSize: theme.fontSizes.regularSmall, color: theme.colors.textLight, marginBottom: 4 }}
                       >
                         Diet Highlights
                       </Text>
                       <Text
                         style={{
-                          fontSize: 15,
-                          fontWeight: "500",
-                          color: "#fff",
+                          fontSize: theme.fontSizes.regular,
+                          fontWeight: theme.fontWeights.medium as "500",
+                          color: theme.colors.textWhite,
                         }}
                       >
                         {dietPlanDetails.descItems.join(" • ")}
@@ -244,7 +244,7 @@ export function Info({
         )}
         <Text
           style={{
-            fontSize: 13,
+            fontSize: theme.fontSizes.regularSmall,
             color: labelColor,
             fontFamily: theme.fonts.bold,
           }}
@@ -254,8 +254,7 @@ export function Info({
       </View>
       <Text
         style={{
-          fontSize: 15,
-
+          fontSize: theme.fontSizes.regular,
           color: valueColor,
           fontFamily: theme.fonts.regular,
         }}

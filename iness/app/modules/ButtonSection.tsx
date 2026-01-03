@@ -21,10 +21,12 @@ import { userService } from "../services/user.service";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import eventBus from "@/event";
+import { useGlobalTheme } from "../Theme/ThemeContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 function FloatingOptions() {
+  const theme = useGlobalTheme();
   const navigation = useNavigation();
   
   // Get current plans and services from Redux
@@ -156,17 +158,17 @@ function FloatingOptions() {
   return (
     <View
       style={{
-        backgroundColor: "#FFFFFF",
+        backgroundColor: theme.colors.background,
         borderRadius: 20,
         paddingVertical: 16,
         marginBottom: 16,
-        shadowColor: "#000",
+        shadowColor: theme.colors.black,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
         shadowRadius: 4,
         elevation: 2,
         borderWidth: 1,
-        borderColor: "#F5F5F5",
+        borderColor: theme.colors.border,
       }}
     >
       {/* Header Section */}
@@ -187,16 +189,16 @@ function FloatingOptions() {
             style={{
               width: 4,
               height: 20,
-              backgroundColor: "#9747FF",
+              backgroundColor: theme.colors.secondPrimary,
               borderRadius: 2,
               marginRight: 10,
             }}
           />
           <Text
             style={{
-              fontSize: 20,
-              fontWeight: "700",
-              color: "#1A1A1A",
+              fontSize: theme.fontSizes.large,
+              fontWeight: theme.fontWeights.bold as "700",
+              color: theme.colors.text,
               letterSpacing: 0.3,
             }}
           >
@@ -205,8 +207,8 @@ function FloatingOptions() {
         </View>
         <Text
           style={{
-            fontSize: 13,
-            color: "#888",
+            fontSize: theme.fontSizes.regularSmall,
+            color: theme.colors.textMuted,
             fontWeight: "400",
             marginLeft: 14,
             letterSpacing: 0.2,
@@ -291,8 +293,8 @@ function FloatingOptions() {
                 </Animated.View>
                 <Text
                   style={{
-                    fontSize: 12,
-                    color: "#333",
+                    fontSize: theme.fontSizes.small,
+                    color: theme.colors.text,
                     textAlign: "center",
                     fontWeight: "600",
                   }}

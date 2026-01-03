@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 
 import { userService } from "../services/user.service";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import theme from "../Theme/globalTheme";
 
 interface LoginJsxWrapperProps {
   children: React.ReactNode;
@@ -114,11 +115,11 @@ const LoginJsxWrapper: React.FC<LoginJsxWrapperProps> = ({
           <Ionicons name="lock-closed" size={45} color="#fff" />
           <Text
             style={{
-              color: "#fff",
-              fontSize: 15,
+              color: theme.colors.textWhite,
+              fontSize: theme.fontSizes.regular,
               marginTop: 10,
               textAlign: "center",
-              fontWeight: "500",
+              fontWeight: theme.fontWeights.medium as "500",
             }}
           >
             You need to log in to access this content.
@@ -128,21 +129,21 @@ const LoginJsxWrapper: React.FC<LoginJsxWrapperProps> = ({
             <>
               <Text
                 style={{
-                  color: "#ccc",
-                  fontSize: 14,
+                  color: theme.colors.textMuted,
+                  fontSize: theme.fontSizes.regularSmall,
                   marginTop: 12,
                   textAlign: "center",
                   lineHeight: 20,
                 }}
               >
-                You don’t have any account created with us.{"\n"}You need to
+                You don't have any account created with us.{"\n"}You need to
                 create one to access this page.
               </Text>
 
               <TouchableOpacity
                 onPress={() => router.push("/login")}
                 style={{
-                  backgroundColor: "#67C694",
+                  backgroundColor: theme.colors.success,
                   paddingVertical: 8,
                   paddingHorizontal: 30,
                   borderRadius: 25,
@@ -156,9 +157,9 @@ const LoginJsxWrapper: React.FC<LoginJsxWrapperProps> = ({
               >
                 <Text
                   style={{
-                    color: "#fff",
-                    fontWeight: "600",
-                    fontSize: 15,
+                    color: theme.colors.textWhite,
+                    fontWeight: theme.fontWeights.medium as "500",
+                    fontSize: theme.fontSizes.regular,
                   }}
                 >
                   Login

@@ -19,7 +19,7 @@ import eventBus from "@/event";
 import { getStoredNotifications } from "@/utils/notificationUtils";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
-
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { setStreakModalShow } from "@/Slices/streakSlice";
 
 const { height } = Dimensions.get("window");
@@ -60,6 +60,8 @@ export default function SmallHeader({
     useState(0);
   
   const insets = useSafeAreaInsets();
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
 
   useEffect(() => {
     const isMounted = { current: true };
@@ -101,9 +103,9 @@ export default function SmallHeader({
 
   return (
     <>
-      <StatusBar style="light" />
+      <StatusBar style={isDark ? "light" : "light"} />
       <LinearGradient
-        colors={["#140A21", "#522987"]}
+        colors={isDark ? [theme.colors.background, theme.colors.backgroundSecondary] : ["#140A21", "#522987"]}
         start={{ x: 0, y: 0 }}
         style={{
           paddingTop: Platform.OS === "android" ? Math.max(insets.top, 20) : 20,
@@ -164,7 +166,7 @@ export default function SmallHeader({
                   <Text
                     style={{
                       color: "white",
-                      fontSize: 14,
+                      fontSize: theme.fontSizes.regularSmall,
                       marginHorizontal: 4,
                     }}
                   >
@@ -181,7 +183,7 @@ export default function SmallHeader({
               style={{
                 color: "white",
                 fontWeight: "bold",
-                fontSize: 14,
+                fontSize: theme.fontSizes.regularSmall,
                 textAlign: "center",
               }}
             >
@@ -231,7 +233,7 @@ export default function SmallHeader({
                     position: "absolute",
                     top: -2,
                     right: -2,
-                    backgroundColor: "#FF3B3B",
+                    backgroundColor: theme.colors.error,
                     borderRadius: 6,
                     paddingHorizontal: 3,
                     paddingVertical: 0.5,
@@ -242,9 +244,9 @@ export default function SmallHeader({
                 >
                   <Text
                     style={{
-                      fontSize: 8,
-                      fontWeight: "bold",
-                      color: "#fff",
+                      fontSize: 10,
+                      fontWeight: theme.fontWeights.bold as "700",
+                      color: theme.colors.textWhite,
                     }}
                   >
                     {streakCount}
@@ -257,7 +259,7 @@ export default function SmallHeader({
             {showCart && (
               <TouchableOpacity
                 style={{
-                  backgroundColor: "#411D6E",
+                  backgroundColor: isDark ? theme.colors.backgroundCardLight : theme.colors.iconBackground,
                   borderRadius: 20,
                   padding: 8,
                   position: "relative",
@@ -285,7 +287,7 @@ export default function SmallHeader({
             {showBell && (
               <TouchableOpacity
                 style={{
-                  backgroundColor: "#411D6E",
+                  backgroundColor: isDark ? theme.colors.backgroundCardLight : theme.colors.iconBackground,
                   borderRadius: 20,
                   padding: 8,
                   position: "relative",
@@ -312,7 +314,7 @@ export default function SmallHeader({
             {showHistory && (
               <TouchableOpacity
                 style={{
-                  backgroundColor: "#411D6E",
+                  backgroundColor: theme.colors.secondPrimary,
                   borderRadius: 20,
                   padding: 8,
                 }}
@@ -325,7 +327,7 @@ export default function SmallHeader({
             {onCreatePost && (
               <TouchableOpacity
                 style={{
-                  backgroundColor: "#67C694",
+                  backgroundColor: theme.colors.success,
                   borderRadius: 20,
                   padding: 8,
                   width: 36,

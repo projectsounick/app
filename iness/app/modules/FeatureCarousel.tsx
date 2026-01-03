@@ -7,6 +7,7 @@ import {
   Dimensions,
 } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
+import theme from "../Theme/globalTheme";
 
 const { width } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.8;
@@ -54,7 +55,7 @@ const FeatureCarousel = () => {
       {/* Header */}
       <View
         style={{
-          backgroundColor: "#9C56F6",
+          backgroundColor: theme.colors.secondPrimary,
           padding: 12,
           borderBottomLeftRadius: 12,
           borderBottomRightRadius: 12,
@@ -67,19 +68,19 @@ const FeatureCarousel = () => {
         <Icon
           name="clock"
           size={20}
-          color="#fff"
+          color={theme.colors.textWhite}
           style={{ position: "absolute", left: 10, top: 10, opacity: 0.2 }}
         />
         <Icon
           name="target"
           size={20}
-          color="#fff"
+          color={theme.colors.textWhite}
           style={{ position: "absolute", right: 10, top: 10, opacity: 0.2 }}
         />
-        <Text style={{ color: "#fff", fontSize: 16, fontWeight: "bold" }}>
+        <Text style={{ color: theme.colors.textWhite, fontSize: theme.fontSizes.regular, fontWeight: theme.fontWeights.bold as "700" }}>
           Coming Soon
         </Text>
-        <Text style={{ color: "#e0e0e0", fontSize: 12, marginTop: 4 }}>
+        <Text style={{ color: theme.colors.textLight, fontSize: theme.fontSizes.small, marginTop: 4 }}>
           Features
         </Text>
       </View>

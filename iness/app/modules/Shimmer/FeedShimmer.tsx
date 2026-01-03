@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
+import theme from "../../Theme/globalTheme";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -103,10 +104,10 @@ const FeedShimmer: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
   },
   postCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     marginBottom: 20,
     borderBottomWidth: 1,
     borderBottomColor: "#F0F0F0",
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
   media: {
     width: screenWidth,
     height: screenWidth,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.mediumGrey,
   },
   actions: {
     flexDirection: "row",

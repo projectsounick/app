@@ -16,7 +16,7 @@ import {
   MaterialCommunityIcons,
   AntDesign,
 } from "@expo/vector-icons";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme } from "../Theme/ThemeContext";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { router } from "expo-router";
@@ -41,6 +41,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 // to avoid syntax errors. Can be restored from git history when needed.
 
 function HealthDashboard() {
+  const theme = useGlobalTheme();
   //// Store data -------------------------------------------------------/
   const currentDayTrackData = useSelector(
     (state: RootState) => state.track.currentDateTrackData
@@ -468,17 +469,17 @@ function HealthDashboard() {
           delayPressOut={0}
           style={{
             flex: 1,
-            backgroundColor: "#FFFFFF",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 16,
             minHeight: (isAvailable && canSyncSteps) ? 140 : 120,
-            shadowColor: "#000",
+            shadowColor: theme.colors.black,
             shadowOffset: { width: 0, height: 1 },
             shadowOpacity: 0.05,
             shadowRadius: 4,
             elevation: 2,
             borderWidth: 1,
-            borderColor: "#F5F5F5",
+            borderColor: theme.colors.border,
           }}
         >
           {/* Header Row */}
@@ -496,7 +497,7 @@ function HealthDashboard() {
                   width: 32,
                   height: 32,
                   borderRadius: 10,
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: theme.colors.backgroundCardLight,
                   alignItems: "center",
                   justifyContent: "center",
                   marginRight: 8,
@@ -505,15 +506,15 @@ function HealthDashboard() {
                 <MaterialCommunityIcons
                   name="walk"
                   size={18}
-                  color="#9747FF"
+                  color={theme.colors.secondPrimary}
                 />
               </View>
               <Text
                 style={{
                   fontFamily: theme.fonts.bold,
-                  fontSize: 15,
-                  fontWeight: "700",
-                  color: "#000",
+                  fontSize: theme.fontSizes.regular,
+                  fontWeight: theme.fontWeights.bold as "700",
+                  color: theme.colors.text,
                 }}
               >
                 Steps
@@ -527,7 +528,7 @@ function HealthDashboard() {
                 style={{ padding: 6 }}
                 activeOpacity={0.7}
               >
-                <AntDesign name="pluscircle" size={22} color="#67c694" />
+                <AntDesign name="pluscircle" size={22} color={theme.colors.success} />
               </TouchableOpacity>
             </View>
           </View>
@@ -535,8 +536,8 @@ function HealthDashboard() {
           <Progress.Bar
             progress={stepsCount / stepsGoal}
             width={null}
-            color="#9747FF"
-            unfilledColor="#F0F0F0"
+            color={theme.colors.secondPrimary}
+            unfilledColor={theme.colors.backgroundSecondary}
             borderWidth={0}
             height={8}
             borderRadius={4}
@@ -553,8 +554,8 @@ function HealthDashboard() {
               style={{
                 fontWeight: "600",
                 fontFamily: theme.fonts.regular,
-                fontSize: 13,
-                color: "#666",
+                fontSize: theme.fontSizes.regularSmall,
+                color: theme.colors.textSecondary,
               }}
             >
               {stepsCount.toLocaleString()}/{stepsGoal.toLocaleString()}
@@ -565,17 +566,17 @@ function HealthDashboard() {
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: theme.colors.backgroundCardLight,
                   paddingHorizontal: 6,
                   paddingVertical: 2,
                   borderRadius: 8,
                 }}
               >
-                <Ionicons name="heart" size={10} color="#9747FF" />
+                <Ionicons name="heart" size={10} color={theme.colors.secondPrimary} />
                 <Text
                   style={{
-                    fontSize: 9,
-                    color: "#9747FF",
+                    fontSize: theme.fontSizes.small,
+                    color: theme.colors.secondPrimary,
                     fontFamily: theme.fonts.medium,
                     marginLeft: 3,
                   }}
@@ -599,23 +600,23 @@ function HealthDashboard() {
                   justifyContent: "space-between",
                 }}
               >
-                <Text
-                  numberOfLines={1}
-                  style={{
-                    color: "#9747FF",
-                    fontFamily: theme.fonts.medium,
-                    fontWeight: "500",
-                    fontSize: 10,
-                    flexShrink: 1,
-                    flex: 1,
-                  }}
-                >
-                  Sync with Apple Health
-                </Text>
+                  <Text
+                    numberOfLines={1}
+                    style={{
+                      color: theme.colors.secondPrimary,
+                      fontFamily: theme.fonts.medium,
+                      fontWeight: theme.fontWeights.medium as "500",
+                      fontSize: theme.fontSizes.small,
+                      flexShrink: 1,
+                      flex: 1,
+                    }}
+                  >
+                    Sync with Apple Health
+                  </Text>
                 <Ionicons
                   name="chevron-forward"
                   size={16}
-                  color="#9747FF"
+                  color={theme.colors.secondPrimary}
                   style={{ marginLeft: 4 }}
                 />
               </TouchableOpacity>
@@ -635,17 +636,17 @@ function HealthDashboard() {
           delayPressOut={0}
           style={{
             flex: 1,
-            backgroundColor: "#FFFFFF",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 16,
             minHeight: (isAvailable && canSyncSleep) ? 140 : 120,
-            shadowColor: "#000",
+            shadowColor: theme.colors.black,
             shadowOffset: { width: 0, height: 1 },
             shadowOpacity: 0.05,
             shadowRadius: 4,
             elevation: 2,
             borderWidth: 1,
-            borderColor: "#F5F5F5",
+            borderColor: theme.colors.border,
           }}
         >
           {/* Header Row */}
@@ -663,7 +664,7 @@ function HealthDashboard() {
                   width: 32,
                   height: 32,
                   borderRadius: 10,
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: theme.colors.backgroundCardLight,
                   alignItems: "center",
                   justifyContent: "center",
                   marginRight: 8,
@@ -672,15 +673,15 @@ function HealthDashboard() {
                 <MaterialCommunityIcons
                   name="moon-waning-crescent"
                   size={18}
-                  color="#9747FF"
+                  color={theme.colors.secondPrimary}
                 />
               </View>
               <Text
                 style={{
-                  fontWeight: "700",
+                  fontWeight: theme.fontWeights.bold as "700",
                   fontFamily: theme.fonts.bold,
-                  fontSize: 15,
-                  color: "#000",
+                  fontSize: theme.fontSizes.regular,
+                  color: theme.colors.text,
                 }}
               >
                 Sleep
@@ -691,7 +692,7 @@ function HealthDashboard() {
                 onPress={() => openModal("sleep")}
                 style={{ padding: 6 }}
               >
-                <AntDesign name="pluscircle" size={22} color="#67c694" />
+                <AntDesign name="pluscircle" size={22} color={theme.colors.success} />
               </TouchableOpacity>
             </View>
           </View>
@@ -699,8 +700,8 @@ function HealthDashboard() {
           <Progress.Bar
             progress={sleepDuration / sleepGoal}
             width={null}
-            color="#9747FF"
-            unfilledColor="#F0F0F0"
+            color={theme.colors.secondPrimary}
+            unfilledColor={theme.colors.backgroundSecondary}
             borderWidth={0}
             height={8}
             borderRadius={4}
@@ -718,8 +719,8 @@ function HealthDashboard() {
               style={{
                 fontWeight: "600",
                 fontFamily: theme.fonts.regular,
-                fontSize: 13,
-                color: "#666",
+                fontSize: theme.fontSizes.regularSmall,
+                color: theme.colors.textSecondary,
               }}
             >
               {sleepDuration}/{sleepGoal} hrs
@@ -730,17 +731,17 @@ function HealthDashboard() {
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: theme.colors.backgroundCardLight,
                   paddingHorizontal: 6,
                   paddingVertical: 2,
                   borderRadius: 8,
                 }}
               >
-                <Ionicons name="heart" size={10} color="#9747FF" />
+                <Ionicons name="heart" size={10} color={theme.colors.secondPrimary} />
                 <Text
                   style={{
-                    fontSize: 9,
-                    color: "#9747FF",
+                    fontSize: theme.fontSizes.small,
+                    color: theme.colors.secondPrimary,
                     fontFamily: theme.fonts.medium,
                     marginLeft: 3,
                   }}
@@ -767,10 +768,10 @@ function HealthDashboard() {
                 <Text
                   numberOfLines={1}
                   style={{
-                    color: "#9747FF",
-                    fontWeight: "500",
+                    color: theme.colors.secondPrimary,
+                    fontWeight: theme.fontWeights.medium as "500",
                     fontFamily: theme.fonts.medium,
-                    fontSize: 10,
+                    fontSize: theme.fontSizes.small,
                     flexShrink: 1,
                     flex: 1,
                   }}
@@ -780,7 +781,7 @@ function HealthDashboard() {
                 <Ionicons
                   name="chevron-forward"
                   size={16}
-                  color="#9747FF"
+                  color={theme.colors.secondPrimary}
                   style={{ marginLeft: 4 }}
                 />
               </TouchableOpacity>
@@ -794,16 +795,16 @@ function HealthDashboard() {
       <View
         style={{
           marginTop: 12,
-          backgroundColor: "#FFFFFF",
+          backgroundColor: theme.colors.background,
           borderRadius: 20,
           padding: 16,
-          shadowColor: "#000",
+          shadowColor: theme.colors.dark,
           shadowOffset: { width: 0, height: 1 },
           shadowOpacity: 0.05,
           shadowRadius: 4,
           elevation: 2,
           borderWidth: 1,
-          borderColor: "#F5F5F5",
+          borderColor: theme.colors.border,
         }}
       >
         <View
@@ -820,7 +821,7 @@ function HealthDashboard() {
                 width: 32,
                 height: 32,
                 borderRadius: 10,
-                backgroundColor: "#F3EDFF",
+                backgroundColor: theme.colors.backgroundCardLight,
                 alignItems: "center",
                 justifyContent: "center",
                 marginRight: 8,
@@ -829,15 +830,15 @@ function HealthDashboard() {
               <MaterialCommunityIcons
                 name="cup-water"
                 size={18}
-                color="#9747FF"
+                color={theme.colors.secondPrimary}
               />
             </View>
             <Text
               style={{
-                fontWeight: "700",
+                fontWeight: theme.fontWeights.bold as "700",
                 fontFamily: theme.fonts.bold,
-                fontSize: 15,
-                color: "#000",
+                fontSize: theme.fontSizes.regular,
+                color: theme.colors.text,
               }}
             >
               Water
@@ -848,15 +849,15 @@ function HealthDashboard() {
             onPress={() => openModal("water")}
             style={{ padding: 6 }}
           >
-            <AntDesign name="pluscircle" size={24} color="#67c694" />
+            <AntDesign name="pluscircle" size={24} color={theme.colors.success} />
           </TouchableOpacity>
         </View>
 
         <Progress.Bar
           progress={waterIntake / waterGoal}
           width={null}
-          color="#9747FF"
-          unfilledColor="#F0F0F0"
+          color={theme.colors.secondPrimary}
+          unfilledColor={theme.colors.backgroundSecondary}
           borderWidth={0}
           height={8}
           borderRadius={4}
@@ -869,21 +870,21 @@ function HealthDashboard() {
             marginTop: 10,
           }}
         >
-          <Text
-            style={{
-              fontWeight: "600",
-              fontFamily: theme.fonts.regular,
-              fontSize: 13,
-              color: "#666",
-            }}
-          >
-            {waterIntake}/{waterGoal} Glasses
-          </Text>
+            <Text
+              style={{
+                fontWeight: theme.fontWeights.medium as "500",
+                fontFamily: theme.fonts.regular,
+                fontSize: theme.fontSizes.regularSmall,
+                color: theme.colors.textSecondary,
+              }}
+            >
+              {waterIntake}/{waterGoal} Glasses
+            </Text>
           <TouchableOpacity
             onPress={() => router.push("/(tabs)/dashboard/track")}
             style={{ padding: 8, marginRight: -8, marginVertical: -8 }}
           >
-            <Ionicons name="chevron-forward" size={18} color="#999" />
+            <Ionicons name="chevron-forward" size={18} color={theme.colors.textMuted} />
           </TouchableOpacity>
         </View>
       </View>

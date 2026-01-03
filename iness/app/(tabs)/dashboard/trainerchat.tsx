@@ -8,14 +8,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
-  ImageBackground,
   Image,
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import NormalHeader from "@/app/modules/NormalHeader";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import ChatMessage from "@/app/Components/SupportChat/ChatMessage";
 import useGetDataHook from "@/hooks/useFetchHook";
 import { chatService } from "@/app/services/chat.service";
@@ -35,6 +34,8 @@ const { height } = Dimensions.get("window");
 const topPadding = height * 0.05;
 
 export default function TrainerChatScreen() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const params = useLocalSearchParams();
   const chatId = params.chatId as string;
   const trainerName = params.trainerName as string;
@@ -155,16 +156,11 @@ export default function TrainerChatScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
-      <ImageBackground
-        source={require("../../../assets/images/basicBackground.jpg")}
-        style={{ flex: 1 }}
-        resizeMode="cover"
-      >
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: "transparent" }}
-          edges={["left", "right"]}
-        >
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      edges={["left", "right"]}
+    >
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
           <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -187,7 +183,7 @@ export default function TrainerChatScreen() {
                   alignItems: "center",
                 }}
               >
-                <ActivityIndicator color="#9747FF" size="large" />
+                <ActivityIndicator color={theme.colors.secondPrimary} size="large" />
               </View>
             ) : (
               <FlatList
@@ -219,8 +215,8 @@ export default function TrainerChatScreen() {
                   >
                     <Text
                       style={{
-                        color: "#666",
-                        fontSize: 16,
+                        color: theme.colors.textSecondary,
+                        fontSize: theme.fontSizes.regular,
                         textAlign: "center",
                         lineHeight: 24,
                         fontFamily: theme.fonts.regular,
@@ -239,18 +235,20 @@ export default function TrainerChatScreen() {
             {/* Input & Attachments */}
             <View
               style={{
-                backgroundColor: "#FFFFFF",
+                backgroundColor: theme.colors.background,
                 borderTopLeftRadius: 20,
                 borderTopRightRadius: 20,
                 padding: 16,
                 paddingBottom: insets.bottom + 16,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: -2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 8,
-                elevation: 10,
                 borderTopWidth: 1,
-                borderTopColor: "#F0F0F0",
+                borderTopColor: theme.colors.border,
+                ...(isDark ? {} : {
+                  shadowColor: theme.colors.black,
+                  shadowOffset: { width: 0, height: -2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 8,
+                  elevation: 10,
+                }),
               }}
             >
               {selectedAttachments.length > 0 && (
@@ -291,12 +289,12 @@ export default function TrainerChatScreen() {
                           width: 20,
                           height: 20,
                           borderRadius: 10,
-                          backgroundColor: "#FF6B6B",
+                          backgroundColor: theme.colors.error,
                           alignItems: "center",
                           justifyContent: "center",
                         }}
                       >
-                        <Ionicons name="close" size={12} color="#FFFFFF" />
+                        <Ionicons name="close" size={12} color={theme.colors.textWhite} />
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -306,12 +304,12 @@ export default function TrainerChatScreen() {
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  backgroundColor: "#F8F8F8",
+                  backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
                   borderRadius: 25,
                   paddingHorizontal: 12,
                   paddingVertical: 8,
                   borderWidth: 1,
-                  borderColor: "#E0E0E0",
+                  borderColor: theme.colors.border,
                 }}
               >
                 <TouchableOpacity
@@ -323,7 +321,7 @@ export default function TrainerChatScreen() {
                   <Ionicons
                     name="attach"
                     size={22}
-                    color="#9747FF"
+                    color={theme.colors.secondPrimary}
                   />
                 </TouchableOpacity>
                 <TextInput
@@ -331,11 +329,11 @@ export default function TrainerChatScreen() {
                     flex: 1,
                     paddingVertical: 8,
                     paddingHorizontal: 12,
-                    fontSize: 15,
-                    color: "#000",
+                    fontSize: theme.fontSizes.regular,
+                    color: theme.colors.text,
                   }}
                   placeholder="Type your message..."
-                  placeholderTextColor="#999"
+                  placeholderTextColor={theme.colors.textMuted}
                   value={inputText}
                   onChangeText={setInputText}
                   editable={!messageSendingLoader}
@@ -349,7 +347,7 @@ export default function TrainerChatScreen() {
                       padding: 6,
                     }}
                   >
-                    <ActivityIndicator color="#67C694" size="small" />
+                    <ActivityIndicator color={theme.colors.success} size="small" />
                   </View>
                 ) : (
                   <TouchableOpacity
@@ -358,12 +356,12 @@ export default function TrainerChatScreen() {
                       width: 36,
                       height: 36,
                       borderRadius: 18,
-                      backgroundColor: "#67C694",
+                      backgroundColor: theme.colors.success,
                       alignItems: "center",
                       justifyContent: "center",
                     }}
                   >
-                    <Ionicons name="send" size={18} color="#FFFFFF" />
+                    <Ionicons name="send" size={18} color={theme.colors.textWhite} />
                   </TouchableOpacity>
                 )}
               </View>
@@ -383,10 +381,9 @@ export default function TrainerChatScreen() {
             visible={snackbarVisible}
             message={snackbarMessage}
             onDismiss={() => setSnackbarVisible(false)}
-            bgColor="#67C694"
+            bgColor={theme.colors.success}
           />
-        </SafeAreaView>
-      </ImageBackground>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }

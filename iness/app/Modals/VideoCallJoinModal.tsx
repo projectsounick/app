@@ -14,7 +14,7 @@ import VideoCallScreen from "@/app/modules/VideoCallModule";
 import { VideoCallFrontend } from "../interfaces/videocallInterface";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import CustomSnackbar from "@/app/modules/Snackbar";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 
 const { width } = Dimensions.get("window");
@@ -36,6 +36,9 @@ export default function VideoCallChecker({
   videoCallSchedule,
   setVideoCallSchedule,
 }: Props) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [showVideoModal, setShowVideoModal] = useState(false);
@@ -129,12 +132,12 @@ export default function VideoCallChecker({
               onPress={handleDismiss}
               style={styles.closeButton}
             >
-              <Ionicons name="close" size={24} color="#666" />
+              <Ionicons name="close" size={24} color={theme.colors.textSecondary} />
             </TouchableOpacity>
 
             {/* Icon */}
             <View style={styles.iconContainer}>
-              <Ionicons name="videocam" size={48} color="#67C694" />
+              <Ionicons name="videocam" size={48} color={theme.colors.success} />
             </View>
 
             {/* Title */}
@@ -148,7 +151,7 @@ export default function VideoCallChecker({
             {/* Join Button */}
             {loading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="large" color="#67C694" />
+                <ActivityIndicator size="large" color={theme.colors.success} />
               </View>
             ) : (
               <TouchableOpacity
@@ -187,15 +190,15 @@ export default function VideoCallChecker({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   animatedWrapper: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    backgroundColor: theme.colors.overlay,
   },
   modalContent: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 24,
     padding: 24,
     width: width * 0.85,
@@ -206,7 +209,7 @@ const styles = StyleSheet.create({
     shadowRadius: 20,
     elevation: 8,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.mediumGrey,
   },
   closeButton: {
     position: "absolute",
@@ -215,7 +218,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.mediumGrey,
     justifyContent: "center",
     alignItems: "center",
     zIndex: 1,
@@ -224,24 +227,24 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#E8F5E9",
+    backgroundColor: theme.colors.greenLight,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 20,
     marginTop: 8,
   },
   title: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#000",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.black,
     marginBottom: 12,
     textAlign: "center",
     fontFamily: theme.fonts.bold,
   },
   description: {
-    fontSize: 15,
+    fontSize: theme.fontSizes.regular,
     textAlign: "center",
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginBottom: 28,
     lineHeight: 22,
     fontFamily: theme.fonts.regular,
@@ -255,23 +258,23 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#E8F5E9",
+    backgroundColor: theme.colors.greenLight,
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 30,
     width: "100%",
-    shadowColor: "#67C694",
+    shadowColor: theme.colors.success,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,
     elevation: 4,
     borderWidth: 1,
-    borderColor: "#67C694",
+    borderColor: theme.colors.success,
   },
   joinButtonText: {
-    color: "#67C694",
-    fontSize: 16,
-    fontWeight: "700",
+    color: theme.colors.success,
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.bold as "700",
     marginLeft: 8,
     fontFamily: theme.fonts.bold,
   },

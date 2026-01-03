@@ -5,9 +5,12 @@ import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import PlanCard from "@/app/modules/PlanCard";
 import SliderCard from "@/app/modules/SliderCard";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 export default function AvailablePlans() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const plans = useSelector((state: RootState) => state.plan.plans);
   const dietPlans = useSelector((state: RootState) => state.dietPlan.dietPlans);
 
@@ -35,7 +38,7 @@ export default function AvailablePlans() {
                 <MaterialCommunityIcons
                   name={icons[index % icons.length]}
                   size={22}
-                  color="#9747FF"
+                  color={theme.colors.secondPrimary}
                 />
               </View>
               <Text style={styles.sectionTitle}>{typeTitle}</Text>
@@ -79,7 +82,7 @@ export default function AvailablePlans() {
                 <MaterialCommunityIcons
                   name="food-apple"
                   size={22}
-                  color="#9747FF"
+                  color={theme.colors.secondPrimary}
                 />
               </View>
               <Text style={styles.sectionTitle}>Diet Plans</Text>
@@ -119,7 +122,7 @@ export default function AvailablePlans() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     paddingVertical: 8,
   },
@@ -140,26 +143,26 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: isDark ? theme.colors.textWhite : theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   headerDash: {
     width: 30,
     height: 3,
-    backgroundColor: "#9747FF",
+    backgroundColor: theme.colors.secondPrimary,
     borderRadius: 2,
   },
   sectionDescription: {
-    fontSize: 13,
-    color: "#888",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textMuted,
     marginBottom: 16,
     marginLeft: 46,
     marginTop: 2,

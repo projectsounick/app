@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
 interface SessionCardRowProps {
   selectedSession: any;
@@ -64,12 +64,13 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ icon, title, value, suffix }: any) => {
+  const theme = useGlobalTheme();
   const isLongValue = typeof value === "number" && value > 99;
   
   return (
     <View
       style={{
-        backgroundColor: "#fff",
+        backgroundColor: theme.colors.background,
         borderRadius: 12,
         padding: 10,
         flex: 1,
@@ -97,9 +98,9 @@ const Card: React.FC<CardProps> = ({ icon, title, value, suffix }: any) => {
         />
         <Text
           style={{
-            fontSize: 12,
-            fontWeight: "500",
-            color: "#444",
+            fontSize: theme.fontSizes.small,
+            fontWeight: theme.fontWeights.medium as "500",
+            color: theme.colors.text,
             fontFamily: theme.fonts.bold,
             flex: 1,
           }}
@@ -114,13 +115,13 @@ const Card: React.FC<CardProps> = ({ icon, title, value, suffix }: any) => {
         style={{
           fontSize: isLongValue ? 14 : 16,
           fontWeight: "bold",
-          color: "#6A1B9A",
+          color: theme.colors.secondPrimary,
           fontFamily: theme.fonts.medium,
         }}
         numberOfLines={1}
       >
         {value}{" "}
-        {suffix && <Text style={{ fontSize: 10, color: "#999" }}>{suffix}</Text>}
+        {suffix && <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textMuted }}>{suffix}</Text>}
       </Text>
     </View>
   );

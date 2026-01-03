@@ -8,8 +8,10 @@ import PostFeed from "@/app/Components/Community/CommunityFeed";
 import { communityService } from "@/app/services/community.service";
 import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
 import FeedShimmer from "@/app/modules/Shimmer/FeedShimmer";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
 function YourComponent() {
+  const theme = useGlobalTheme();
   const [posts, setPosts] = useState<any[]>([]);
   const [communityId, setCommunityId] = useState<any>(null);
   const [communitName, setCommunityName] = useState("");
@@ -40,7 +42,7 @@ function YourComponent() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#FFFFFF" }}
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
       edges={["left", "right"]}
     >
       <SmallHeader

@@ -8,7 +8,7 @@ import {
   Dimensions,
   StyleSheet,
 } from "react-native";
-import theme from "@/app/Theme/globalTheme"; // adjust this import if needed
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 interface ImageViewerModalProps {
   visible: boolean;
@@ -21,6 +21,9 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({
   onClose,
   imageUrl,
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme);
   return (
     <Modal visible={visible} transparent animationType="fade">
       <Pressable style={styles.overlay} onPress={onClose}>
@@ -37,10 +40,10 @@ const ImageViewerModal: React.FC<ImageViewerModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.8)",
+    backgroundColor: theme.colors.overlay,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -52,7 +55,7 @@ const styles = StyleSheet.create({
   text: {
     marginTop: 20,
     color: theme.colors.text,
-    fontSize: 16,
+    fontSize: theme.fontSizes.regular,
     textAlignVertical: "center",
   },
 });

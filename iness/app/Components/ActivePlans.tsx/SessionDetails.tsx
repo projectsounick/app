@@ -59,7 +59,7 @@ const TabbedSessionDetails = ({
           <Text
             style={{
               textAlign: "center",
-              color: "#999",
+              color: theme.colors.textMuted,
               fontFamily: theme.fonts.bold,
             }}
           >
@@ -71,7 +71,7 @@ const TabbedSessionDetails = ({
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
-              backgroundColor: "#fff",
+              backgroundColor: theme.colors.background,
               borderRadius: 12,
               paddingVertical: 16,
               paddingHorizontal: 20,
@@ -90,8 +90,8 @@ const TabbedSessionDetails = ({
           >
             <Text
               style={{
-                color: "#000",
-                fontSize: 16,
+                color: theme.colors.black,
+                fontSize: theme.fontSizes.regular,
                 fontWeight: "600",
                 fontFamily: theme.fonts.bold,
               }}
@@ -109,7 +109,7 @@ const TabbedSessionDetails = ({
         {/* Session Details Card - Date/Status shown in parent, so start with time/duration */}
         <View
           style={{
-            backgroundColor: "#FFFFFF",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 20,
             marginHorizontal: 16,
@@ -128,7 +128,7 @@ const TabbedSessionDetails = ({
             <View
               style={{
                 flex: 1,
-                backgroundColor: "#F8F9FA",
+                backgroundColor: theme.colors.backgroundSecondary,
                 borderRadius: 12,
                 padding: 12,
                 flexDirection: "row",
@@ -144,8 +144,8 @@ const TabbedSessionDetails = ({
               <View>
                 <Text
                   style={{
-                    color: "#666",
-                    fontSize: 11,
+                    color: theme.colors.textSecondary,
+                    fontSize: theme.fontSizes.small,
                     fontFamily: theme.fonts.medium,
                     marginBottom: 2,
                   }}
@@ -154,8 +154,8 @@ const TabbedSessionDetails = ({
                 </Text>
                 <Text
                   style={{
-                    color: "#111",
-                    fontSize: 14,
+                    color: theme.colors.text,
+                    fontSize: theme.fontSizes.regularSmall,
                     fontFamily: theme.fonts.bold,
                   }}
                 >
@@ -166,7 +166,7 @@ const TabbedSessionDetails = ({
             <View
               style={{
                 flex: 1,
-                backgroundColor: "#F8F9FA",
+                backgroundColor: theme.colors.backgroundSecondary,
                 borderRadius: 12,
                 padding: 12,
                 flexDirection: "row",
@@ -182,8 +182,8 @@ const TabbedSessionDetails = ({
               <View>
                 <Text
                   style={{
-                    color: "#666",
-                    fontSize: 11,
+                    color: theme.colors.textSecondary,
+                    fontSize: theme.fontSizes.small,
                     fontFamily: theme.fonts.medium,
                     marginBottom: 2,
                   }}
@@ -192,8 +192,8 @@ const TabbedSessionDetails = ({
                 </Text>
                 <Text
                   style={{
-                    color: "#111",
-                    fontSize: 14,
+                    color: theme.colors.text,
+                    fontSize: theme.fontSizes.regularSmall,
                     fontFamily: theme.fonts.bold,
                   }}
                 >
@@ -208,7 +208,7 @@ const TabbedSessionDetails = ({
             <View
               style={{
                 flex: 1,
-                backgroundColor: "#F8F9FA",
+                backgroundColor: theme.colors.backgroundSecondary,
                 borderRadius: 12,
                 padding: 12,
                 flexDirection: "row",
@@ -224,8 +224,8 @@ const TabbedSessionDetails = ({
               <View style={{ flex: 1 }}>
                 <Text
                   style={{
-                    color: "#666",
-                    fontSize: 11,
+                    color: theme.colors.textSecondary,
+                    fontSize: theme.fontSizes.small,
                     fontFamily: theme.fonts.medium,
                     marginBottom: 2,
                   }}
@@ -234,8 +234,8 @@ const TabbedSessionDetails = ({
                 </Text>
                 <Text
                   style={{
-                    color: "#111",
-                    fontSize: 14,
+                    color: theme.colors.text,
+                    fontSize: theme.fontSizes.regularSmall,
                     fontFamily: theme.fonts.bold,
                     textTransform: "capitalize",
                   }}
@@ -250,7 +250,7 @@ const TabbedSessionDetails = ({
               <View
                 style={{
                   flex: 1,
-                  backgroundColor: "#F8F9FA",
+                  backgroundColor: theme.colors.backgroundSecondary,
                   borderRadius: 12,
                   padding: 12,
                   flexDirection: "row",
@@ -266,8 +266,8 @@ const TabbedSessionDetails = ({
                 <View style={{ flex: 1 }}>
                   <Text
                     style={{
-                      color: "#666",
-                      fontSize: 11,
+                      color: theme.colors.textSecondary,
+                      fontSize: theme.fontSizes.small,
                       fontFamily: theme.fonts.medium,
                       marginBottom: 2,
                     }}
@@ -276,8 +276,8 @@ const TabbedSessionDetails = ({
                   </Text>
                   <Text
                     style={{
-                      color: "#111",
-                      fontSize: 14,
+                      color: theme.colors.text,
+                      fontSize: theme.fontSizes.regularSmall,
                       fontFamily: theme.fonts.medium,
                       lineHeight: 18,
                     }}
@@ -303,7 +303,7 @@ const TabbedSessionDetails = ({
                 onPress={() => setShowModal(true)}
                 activeOpacity={0.8}
                 style={{
-                  backgroundColor: "#67C694",
+                  backgroundColor: theme.colors.success,
                   borderRadius: 20,
                   paddingVertical: 8,
                   paddingHorizontal: 12,
@@ -324,8 +324,8 @@ const TabbedSessionDetails = ({
                 />
                 <Text
                   style={{
-                    color: "#FFFFFF",
-                    fontSize: 12,
+                    color: theme.colors.textWhite,
+                    fontSize: theme.fontSizes.small,
                     fontWeight: "600",
                     fontFamily: theme.fonts.medium,
                   }}
@@ -357,7 +357,7 @@ const TabbedSessionDetails = ({
       return (
         <View
           style={{
-            backgroundColor: "#FFFFFF",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 20,
             marginHorizontal: 20,
@@ -372,7 +372,7 @@ const TabbedSessionDetails = ({
             alignItems: "center",
           }}
         >
-          <Text style={{ textAlign: "center", color: "#999", fontSize: 14 }}>
+          <Text style={{ textAlign: "center", color: theme.colors.textMuted, fontSize: theme.fontSizes.regularSmall }}>
             No trainer data available
           </Text>
         </View>
@@ -414,7 +414,7 @@ const TabbedSessionDetails = ({
               width: 70,
               height: 70,
               borderRadius: 35,
-              backgroundColor: "#F3EDFF",
+              backgroundColor: theme.colors.backgroundCardLight,
               alignItems: "center",
               justifyContent: "center",
               marginRight: 14,
@@ -443,9 +443,9 @@ const TabbedSessionDetails = ({
           <View style={{ flex: 1 }}>
             <Text
               style={{
-                fontSize: 18,
+                fontSize: theme.fontSizes.medium,
                 fontFamily: theme.fonts.bold,
-                color: "#111",
+                color: theme.colors.text,
                 marginBottom: 6,
               }}
             >
@@ -453,7 +453,7 @@ const TabbedSessionDetails = ({
             </Text>
             <View
               style={{
-                backgroundColor: "#E8F5E9",
+                backgroundColor: theme.colors.greenLight,
                 paddingHorizontal: 10,
                 paddingVertical: 4,
                 borderRadius: 8,
@@ -462,8 +462,8 @@ const TabbedSessionDetails = ({
             >
               <Text
                 style={{
-                  color: "#2F8C62",
-                  fontSize: 11,
+                  color: theme.colors.success,
+                  fontSize: theme.fontSizes.small,
                   fontFamily: theme.fonts.bold,
                   textTransform: "uppercase",
                 }}
@@ -489,7 +489,7 @@ const TabbedSessionDetails = ({
           >
             <View
               style={{
-                backgroundColor: "#F3EDFF",
+                backgroundColor: theme.colors.backgroundCardLight,
                 borderRadius: 10,
                 padding: 8,
                 marginRight: 8,
@@ -504,8 +504,8 @@ const TabbedSessionDetails = ({
             <View style={{ flex: 1 }}>
               <Text
                 style={{
-                  color: "#666",
-                  fontSize: 11,
+                  color: theme.colors.textSecondary,
+                  fontSize: theme.fontSizes.small,
                   fontFamily: theme.fonts.medium,
                   marginBottom: 2,
                 }}
@@ -514,8 +514,8 @@ const TabbedSessionDetails = ({
               </Text>
               <Text
                 style={{
-                  color: "#111",
-                  fontSize: 14,
+                  color: theme.colors.text,
+                  fontSize: theme.fontSizes.regularSmall,
                   fontFamily: theme.fonts.bold,
                 }}
               >
@@ -529,7 +529,7 @@ const TabbedSessionDetails = ({
             <View
               style={{
                 flex: 1,
-                backgroundColor: "#F8F9FA",
+                backgroundColor: theme.colors.backgroundSecondary,
                 borderRadius: 12,
                 padding: 12,
                 flexDirection: "row",
@@ -538,7 +538,7 @@ const TabbedSessionDetails = ({
             >
               <View
                 style={{
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: theme.colors.backgroundCardLight,
                   borderRadius: 10,
                   padding: 8,
                   marginRight: 8,
@@ -553,8 +553,8 @@ const TabbedSessionDetails = ({
               <View style={{ flex: 1 }}>
                 <Text
                   style={{
-                    color: "#666",
-                    fontSize: 11,
+                    color: theme.colors.textSecondary,
+                    fontSize: theme.fontSizes.small,
                     fontFamily: theme.fonts.medium,
                     marginBottom: 2,
                   }}
@@ -563,8 +563,8 @@ const TabbedSessionDetails = ({
                 </Text>
                 <Text
                   style={{
-                    color: "#111",
-                    fontSize: 14,
+                    color: theme.colors.text,
+                    fontSize: theme.fontSizes.regularSmall,
                     fontFamily: theme.fonts.bold,
                   }}
                   numberOfLines={1}
@@ -589,7 +589,7 @@ const TabbedSessionDetails = ({
   const renderWorkoutTab = () => {
     if (!selectedSession?.workouts?.length)
       return (
-        <Text style={{ textAlign: "center", color: "#999" }}>
+        <Text style={{ textAlign: "center", color: theme.colors.textMuted }}>
           No workout data
         </Text>
       );
@@ -614,8 +614,8 @@ const TabbedSessionDetails = ({
             {/* Workout Name */}
             <Text
               style={{
-                color: "#fff",
-                fontSize: 16,
+                color: theme.colors.textWhite,
+                fontSize: theme.fontSizes.regular,
                 fontWeight: "bold",
                 marginBottom: 10,
               }}
@@ -631,8 +631,8 @@ const TabbedSessionDetails = ({
                 marginBottom: 6,
               }}
             >
-              <Text style={{ color: "#eee" }}>Reps: {workout.reps}</Text>
-              <Text style={{ color: "#eee" }}>Sets: {workout.sets}</Text>
+              <Text style={{ color: theme.colors.textLight }}>Reps: {workout.reps}</Text>
+              <Text style={{ color: theme.colors.textLight }}>Sets: {workout.sets}</Text>
             </View>
 
             {/* Timer and Status Row */}
@@ -642,8 +642,8 @@ const TabbedSessionDetails = ({
                 justifyContent: "space-between",
               }}
             >
-              <Text style={{ color: "#eee" }}>Timer: {workout.timer}</Text>
-              <Text style={{ color: "#eee" }}>
+              <Text style={{ color: theme.colors.textLight }}>Timer: {workout.timer}</Text>
+              <Text style={{ color: theme.colors.textLight }}>
                 Status: {workout.isComplete ? "Completed" : "Pending"}
               </Text>
             </View>
@@ -654,7 +654,7 @@ const TabbedSessionDetails = ({
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#F6F8F7" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}>
       {/* Tab Content */}
       <View
         style={{

@@ -61,12 +61,12 @@ const DualBannerCardRow = ({
         >
           {/* Top: Icon + Title */}
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Icon name={icon} size={22} color="#BDFF84" />
+            <Icon name={icon} size={22} color={theme.colors.primary} />
             <Text
               style={{
                 color: textColor,
-                fontSize: 12,
-                fontWeight: "600",
+                fontSize: theme.fontSizes.small,
+                fontWeight: theme.fontWeights.medium as "500",
                 marginLeft: 6,
                 fontFamily: theme.fonts.bold,
               }}
@@ -84,7 +84,7 @@ const DualBannerCardRow = ({
               })
             }
             style={{
-              backgroundColor: "#BDFF84",
+              backgroundColor: theme.colors.primary,
               borderRadius: 20,
               paddingHorizontal: 18,
               paddingVertical: 4, // use vertical padding instead of fixed height
@@ -97,9 +97,9 @@ const DualBannerCardRow = ({
           >
             <Text
               style={{
-                fontSize: 12,
-                color: "#000",
-                fontWeight: "600",
+                fontSize: theme.fontSizes.small,
+                color: theme.colors.text,
+                fontWeight: theme.fontWeights.medium as "500",
                 fontFamily: theme.fonts.bold,
               }}
             >

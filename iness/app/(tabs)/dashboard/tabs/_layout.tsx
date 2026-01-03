@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setStreakModalShow } from "@/Slices/streakSlice";
 import { RootState } from "@/store";
 import CustomTabBar from "@/app/modules/CustomTabBar";
+import theme from "@/app/Theme/globalTheme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -32,7 +33,7 @@ export default function DashboardLayout() {
       <Tabs
         tabBar={(props:any) => <CustomTabBar {...props} />}
         screenOptions={{
-          tabBarLabelStyle: { fontSize: 12, fontWeight: "500" },
+          tabBarLabelStyle: { fontSize: theme.fontSizes.small, fontWeight: theme.fontWeights.medium as "500" },
           tabBarActiveTintColor: "#fff",
           tabBarInactiveTintColor: "#888",
           headerShown: false,

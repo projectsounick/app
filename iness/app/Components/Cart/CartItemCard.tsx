@@ -14,6 +14,7 @@ import { ActivityIndicator } from "react-native-paper";
 import { useDispatch } from "react-redux";
 import CouponModal from "@/app/Modals/CouponModal";
 import { DiscountCoupon } from "@/app/interfaces/otherInterfaces";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -29,6 +30,8 @@ export default function CartItemList({
   couponDetails,
   setCouponDetails,
 }: Props) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const {
     loading,
     data,
@@ -125,11 +128,18 @@ export default function CartItemList({
     <View
       style={{
         flex: 1,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: isDark ? theme.colors.backgroundSecondary : theme.colors.background,
         padding: containerPadding,
         borderRadius: 20,
         borderWidth: 1,
-        borderColor: "#F5F5F5",
+        borderColor: theme.colors.border,
+        ...(isDark ? {} : {
+          shadowColor: theme.colors.black,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.05,
+          shadowRadius: 8,
+          elevation: 2,
+        }),
       }}
     >
       {/* Header */}
@@ -147,19 +157,19 @@ export default function CartItemList({
               width: 36,
               height: 36,
               borderRadius: 10,
-              backgroundColor: "#F3EDFF",
+              backgroundColor: theme.colors.backgroundCardLight,
               alignItems: "center",
               justifyContent: "center",
               marginRight: 10,
             }}
           >
-            <Ionicons name="bag-outline" size={18} color="#9747FF" />
+            <Ionicons name="bag-outline" size={18} color={theme.colors.secondPrimary} />
           </View>
           <Text
             style={{
-              fontSize: 18,
-              fontWeight: "700",
-              color: "#1A1A1A",
+              fontSize: theme.fontSizes.medium,
+              fontWeight: theme.fontWeights.bold as "700",
+              color: theme.colors.text,
             }}
           >
             Your Items
@@ -169,7 +179,7 @@ export default function CartItemList({
           style={{
             width: 30,
             height: 3,
-            backgroundColor: "#9747FF",
+            backgroundColor: theme.colors.secondPrimary,
             borderRadius: 2,
           }}
         />
@@ -185,7 +195,7 @@ export default function CartItemList({
             paddingVertical: 40,
           }}
         >
-          <ActivityIndicator color="#67C694" />
+          <ActivityIndicator color={theme.colors.success} />
         </View>
       ) : (
         <ScrollView
@@ -202,8 +212,8 @@ export default function CartItemList({
             >
               <Text
                 style={{
-                  color: "#666",
-                  fontSize: 15,
+                  color: theme.colors.textSecondary,
+                  fontSize: theme.fontSizes.regular,
                   fontWeight: "500",
                 }}
               >
@@ -220,12 +230,19 @@ export default function CartItemList({
                       flexDirection: "row",
                       alignItems: "flex-start",
                       marginBottom: itemMarginBottom,
-                      backgroundColor: "#FFFFFF",
+                      backgroundColor: theme.colors.background,
                       borderRadius: 14,
                       padding: itemPadding,
                       borderWidth: 1,
-                      borderColor: "#F5F5F5",
+                      borderColor: theme.colors.border,
                       overflow: "visible",
+                      ...(isDark ? {} : {
+                        shadowColor: theme.colors.black,
+                        shadowOffset: { width: 0, height: 1 },
+                        shadowOpacity: 0.05,
+                        shadowRadius: 4,
+                        elevation: 1,
+                      }),
                     }}
                   >
                     {/* Image */}
@@ -235,7 +252,7 @@ export default function CartItemList({
                         height: imageSize,
                         borderRadius: 10,
                         marginRight: spacing,
-                      backgroundColor: "#FFFFFF",
+                      backgroundColor: theme.colors.background,
                       overflow: "hidden",
                       alignItems: "center",
                       justifyContent: "center",
@@ -268,7 +285,7 @@ export default function CartItemList({
                           style={{
                             fontSize: isLargeScreen ? 14 : 13,
                             fontWeight: "600",
-                            color: "#000",
+                            color: theme.colors.text,
                             flex: 1,
                             marginRight: 8,
                             lineHeight: isLargeScreen ? 20 : 18,
@@ -287,7 +304,7 @@ export default function CartItemList({
                           <Ionicons
                             name="trash-outline"
                             size={18}
-                            color="#666"
+                            color={theme.colors.textMuted}
                           />
                         </TouchableOpacity>
                       </View>
@@ -304,7 +321,7 @@ export default function CartItemList({
                       >
                         {loading ? (
                           <View>
-                            <ActivityIndicator color="#67C694" size="small" />
+                            <ActivityIndicator color={theme.colors.success} size="small" />
                           </View>
                         ) : (
                           <View
@@ -312,11 +329,11 @@ export default function CartItemList({
                               flexDirection: "row",
                               alignItems: "center",
                               justifyContent: "center",
-                              backgroundColor: "#F8F8F8",
+                              backgroundColor: theme.colors.backgroundSecondary,
                               borderRadius: 10,
                               height: isLargeScreen ? 30 : 28,
                               borderWidth: 1,
-                              borderColor: "#E0E0E0",
+                              borderColor: theme.colors.border,
                               flexShrink: 1,
                               paddingHorizontal: 0,
                             }}
@@ -341,8 +358,8 @@ export default function CartItemList({
                                   fontSize: isLargeScreen ? 16 : 14,
                                   color:
                                     item.product && item.quantity >= 2
-                                      ? "#9747FF"
-                                      : "#CCC",
+                                      ? theme.colors.secondPrimary
+                                      : theme.colors.border,
                                   fontWeight: "600",
                                   includeFontPadding: false,
                                   textAlignVertical: "center",
@@ -363,7 +380,7 @@ export default function CartItemList({
                               <Text
                                 style={{
                                   fontSize: isLargeScreen ? 14 : 13,
-                                  color: "#000",
+                                  color: theme.colors.text,
                                   fontWeight: "600",
                                   includeFontPadding: false,
                                   textAlign: "center",
@@ -394,8 +411,8 @@ export default function CartItemList({
                                   fontSize: isLargeScreen ? 16 : 14,
                                   color:
                                     item.product && item.quantity >= 1
-                                      ? "#9747FF"
-                                      : "#CCC",
+                                      ? theme.colors.secondPrimary
+                                      : theme.colors.border,
                                   fontWeight: "600",
                                   includeFontPadding: false,
                                   textAlignVertical: "center",
@@ -412,7 +429,7 @@ export default function CartItemList({
                           style={{
                             fontSize: isLargeScreen ? 16 : 15,
                             fontWeight: "700",
-                            color: "#000",
+                            color: isDark ? theme.colors.textWhite : theme.colors.text,
                             marginLeft: isLargeScreen ? 12 : 10,
                             flexShrink: 0,
                           }}
@@ -436,10 +453,10 @@ export default function CartItemList({
             alignItems: "center",
             marginTop: 20,
             padding: 16,
-            backgroundColor: "#E8F5E9",
+            backgroundColor: theme.colors.background,
             borderRadius: 16,
             borderWidth: 1,
-            borderColor: "#C8E6C9",
+            borderColor: theme.colors.border,
           }}
         >
           <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
@@ -448,19 +465,19 @@ export default function CartItemList({
                 width: 32,
                 height: 32,
                 borderRadius: 8,
-                backgroundColor: "#67C694",
+                backgroundColor: theme.colors.success,
                 alignItems: "center",
                 justifyContent: "center",
                 marginRight: 10,
               }}
             >
-              <Ionicons name="checkmark" size={18} color="#fff" />
+              <Ionicons name="checkmark" size={18} color={theme.colors.textWhite} />
             </View>
             <View>
               <Text
                 style={{
-                  color: "#1A1A1A",
-                  fontSize: 13,
+                  color: theme.colors.text,
+                  fontSize: theme.fontSizes.regularSmall,
                   fontWeight: "600",
                   marginBottom: 2,
                 }}
@@ -469,8 +486,8 @@ export default function CartItemList({
               </Text>
               <Text
                 style={{
-                  color: "#2E7D32",
-                  fontSize: 14,
+                  color: theme.colors.success,
+                  fontSize: theme.fontSizes.regularSmall,
                   fontWeight: "700",
                 }}
               >
@@ -484,7 +501,7 @@ export default function CartItemList({
               padding: 6,
             }}
           >
-            <Ionicons name="close" size={20} color="#666" />
+            <Ionicons name="close" size={20} color={theme.colors.textMuted} />
           </TouchableOpacity>
         </View>
       ) : (
@@ -495,18 +512,25 @@ export default function CartItemList({
             alignItems: "center",
             marginTop: 20,
             padding: 16,
-            backgroundColor: "#fff",
+            backgroundColor: theme.colors.background,
             borderRadius: 16,
             borderWidth: 1,
-            borderColor: "#F5F5F5",
+            borderColor: theme.colors.border,
+            ...(isDark ? {} : {
+              shadowColor: theme.colors.black,
+              shadowOffset: { width: 0, height: 1 },
+              shadowOpacity: 0.05,
+              shadowRadius: 4,
+              elevation: 1,
+            }),
           }}
         >
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Ionicons name="pricetag-outline" size={18} color="#9747FF" style={{ marginRight: 8 }} />
+            <Ionicons name="pricetag-outline" size={18} color={theme.colors.secondPrimary} style={{ marginRight: 8 }} />
             <Text
               style={{
-                color: "#1A1A1A",
-                fontSize: 14,
+                color: theme.colors.text,
+                fontSize: theme.fontSizes.regularSmall,
                 fontWeight: "500",
               }}
             >
@@ -516,22 +540,24 @@ export default function CartItemList({
           <TouchableOpacity
             onPress={onAddItem}
             style={{
-              backgroundColor: "#67C694",
+              backgroundColor: theme.colors.success,
               paddingHorizontal: 16,
               paddingVertical: 8,
               borderRadius: 20,
-              shadowColor: "#67C694",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.3,
-              shadowRadius: 4,
-              elevation: 3,
+              ...(isDark ? {} : {
+                shadowColor: theme.colors.success,
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.3,
+                shadowRadius: 4,
+                elevation: 3,
+              }),
             }}
           >
             <Text
               style={{
-                color: "#fff",
+                color: theme.colors.textWhite,
                 fontWeight: "600",
-                fontSize: 13,
+                fontSize: theme.fontSizes.regularSmall,
               }}
             >
               Apply
@@ -545,7 +571,7 @@ export default function CartItemList({
       <CustomSnackbar
         visible={snackbarVisible}
         message={snackbarMessage}
-        bgColor="#67C694"
+        bgColor={theme.colors.success}
         onDismiss={() => setSnackbarVisible(false)}
       />
       {couponVisible ? (

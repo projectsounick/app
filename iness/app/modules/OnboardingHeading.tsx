@@ -57,7 +57,7 @@ export default function OnboardingHeading({
       {/* Icon */}
       {icon && (
         <View style={styles.iconContainer}>
-          <MaterialCommunityIcons name={icon} size={32} color="#9747FF" />
+          <MaterialCommunityIcons name={icon} size={32} color={theme.colors.secondPrimary} />
         </View>
       )}
 
@@ -91,27 +91,27 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 20,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 20,
-    shadowColor: "#9747FF",
+    shadowColor: theme.colors.secondPrimary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.15,
     shadowRadius: 8,
     elevation: 4,
   },
   headingText: {
-    fontSize: 28,
-    fontWeight: "700",
+    fontSize: theme.fontSizes.xlarge,
+    fontWeight: theme.fontWeights.bold as "700",
     textAlign: "center",
-    color: "#1A1A1A",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
     lineHeight: 36,
   },
   subtitleText: {
-    fontSize: 15,
-    color: "#666",
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.textSecondary,
     textAlign: "center",
     marginTop: 10,
     fontFamily: theme.fonts.regular,
@@ -128,9 +128,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   stepText: {
-    fontSize: 12,
-    color: "#67C694",
-    fontWeight: "600",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.success,
+    fontWeight: theme.fontWeights.medium as "500",
     fontFamily: theme.fonts.medium,
   },
 });

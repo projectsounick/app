@@ -8,7 +8,7 @@ import {
   Dimensions,
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-
+import theme from "../Theme/globalTheme";
 const { height } = Dimensions.get("window");
 
 const options = [
@@ -44,7 +44,7 @@ const FeedbackPanel = ({
         bottom: 0,
         left: 0,
         right: 0,
-        backgroundColor: "#fff",
+        backgroundColor: theme.colors.background,
         borderTopLeftRadius: 16,
         borderTopRightRadius: 16,
         padding: 20,
@@ -58,7 +58,7 @@ const FeedbackPanel = ({
       }}
     >
       {/* Header */}
-      <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 16 }}>
+      <Text style={{ fontSize: theme.fontSizes.medium, fontWeight: theme.fontWeights.bold as "700", marginBottom: 16 }}>
         Give your feedback
       </Text>
 
@@ -81,17 +81,17 @@ const FeedbackPanel = ({
             <MaterialCommunityIcons
               name={opt.icon as any}
               size={24}
-              color="#333"
+              color={theme.colors.textSecondary}
               style={{ marginRight: 10 }}
             />
-            <Text style={{ fontSize: 15, flex: 1 }}>{opt.label}</Text>
+            <Text style={{ fontSize: theme.fontSizes.regular, flex: 1 }}>{opt.label}</Text>
             <View
               style={{
                 height: 18,
                 width: 18,
                 borderRadius: 9,
                 borderWidth: 1,
-                borderColor: "#333",
+                borderColor: theme.colors.textSecondary,
                 justifyContent: "center",
                 alignItems: "center",
               }}
@@ -102,7 +102,7 @@ const FeedbackPanel = ({
                     height: 10,
                     width: 10,
                     borderRadius: 5,
-                    backgroundColor: "#333",
+                    backgroundColor: theme.colors.textSecondary,
                   }}
                 />
               )}
@@ -114,11 +114,11 @@ const FeedbackPanel = ({
           <TextInput
             style={{
               borderWidth: 1,
-              borderColor: "#ccc",
+              borderColor: theme.colors.border,
               borderRadius: 6,
               padding: 10,
               marginTop: 12,
-              fontSize: 14,
+              fontSize: theme.fontSizes.regularSmall,
             }}
             placeholder="Write your feedback..."
             value={customFeedback}
@@ -140,13 +140,13 @@ const FeedbackPanel = ({
         <Pressable
           onPress={onClose}
           style={{
-            backgroundColor: "#f8d7da",
+            backgroundColor: theme.colors.errorLight,
             paddingVertical: 10,
             paddingHorizontal: 16,
             borderRadius: 6,
           }}
         >
-          <Text style={{ color: "#721c24", fontWeight: "600" }}>Cancel</Text>
+          <Text style={{ color: theme.colors.error, fontWeight: theme.fontWeights.medium as "500" }}>Cancel</Text>
         </Pressable>
         <Pressable
           onPress={() =>
@@ -155,13 +155,13 @@ const FeedbackPanel = ({
             )
           }
           style={{
-            backgroundColor: "#d4edda",
+            backgroundColor: theme.colors.greenLight,
             paddingVertical: 10,
             paddingHorizontal: 16,
             borderRadius: 6,
           }}
         >
-          <Text style={{ color: "#155724", fontWeight: "600" }}>Submit</Text>
+          <Text style={{ color: theme.colors.success, fontWeight: theme.fontWeights.medium as "500" }}>Submit</Text>
         </Pressable>
       </View>
     </View>

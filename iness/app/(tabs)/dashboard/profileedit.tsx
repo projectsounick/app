@@ -33,6 +33,7 @@ import {
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { userService } from "@/app/services/user.service";
 import CustomSnackbar from "@/app/modules/Snackbar";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 // Custom dropdown modal
 const DropdownModal = ({
@@ -45,74 +46,79 @@ const DropdownModal = ({
   onClose: () => void;
   options: string[];
   onSelect: (option: string) => void;
-}) => (
-  <Modal transparent visible={visible} animationType="slide">
-    <TouchableOpacity
-      onPress={onClose}
-      style={{
-        flex: 1,
-        backgroundColor: "rgba(0,0,0,0.5)",
-        justifyContent: "flex-end",
-      }}
-      activeOpacity={1}
-    >
-      <View
+}) => {
+  const theme = useGlobalTheme();
+  return (
+    <Modal transparent visible={visible} animationType="slide">
+      <TouchableOpacity
+        onPress={onClose}
         style={{
-          backgroundColor: "#FFFFFF",
-          borderTopLeftRadius: 20,
-          borderTopRightRadius: 20,
-          padding: 20,
-          maxHeight: "50%",
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 8,
-          elevation: 10,
+          flex: 1,
+          backgroundColor: theme.colors.overlay,
+          justifyContent: "flex-end",
         }}
+        activeOpacity={1}
       >
         <View
           style={{
-            width: 40,
-            height: 4,
-            backgroundColor: "#E0E0E0",
-            borderRadius: 2,
-            alignSelf: "center",
-            marginBottom: 16,
+            backgroundColor: theme.colors.background,
+            borderTopLeftRadius: 20,
+            borderTopRightRadius: 20,
+            padding: 20,
+            maxHeight: "50%",
+            shadowColor: theme.colors.black,
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 10,
           }}
-        />
-        <ScrollView showsVerticalScrollIndicator={false}>
-          {options.map((option) => (
-            <TouchableOpacity
-              key={option}
-              onPress={() => {
-                onSelect(option);
-                onClose();
-              }}
-              style={{
-                paddingVertical: 16,
-                borderBottomWidth: 1,
-                borderBottomColor: "#F5F5F5",
-              }}
-            >
-              <Text
+        >
+          <View
+            style={{
+              width: 40,
+              height: 4,
+              backgroundColor: theme.colors.border,
+              borderRadius: 2,
+              alignSelf: "center",
+              marginBottom: 16,
+            }}
+          />
+          <ScrollView showsVerticalScrollIndicator={false}>
+            {options.map((option) => (
+              <TouchableOpacity
+                key={option}
+                onPress={() => {
+                  onSelect(option);
+                  onClose();
+                }}
                 style={{
-                  fontSize: 16,
-                  color: "#000",
-                  fontWeight: "500",
+                  paddingVertical: 16,
+                  borderBottomWidth: 1,
+                  borderBottomColor: theme.colors.border,
                 }}
               >
-                {option}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-      </View>
-    </TouchableOpacity>
-  </Modal>
-);
+                <Text
+                  style={{
+                    fontSize: theme.fontSizes.regular,
+                    color: theme.colors.text,
+                    fontWeight: theme.fontWeights.medium as "500",
+                  }}
+                >
+                  {option}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+        </View>
+      </TouchableOpacity>
+    </Modal>
+  );
+};
 
 //// Main functional component for the user data update screen ---------------------------/
 export default function EditOnboardingScreen() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const [editFields, setEditFields] = useState<{ [key: string]: boolean }>({});
   const [formValues, setFormValues] = useState<any>({});
   const [originalValues, setOriginalValues] = useState<Partial<UserData>>({});
@@ -232,17 +238,17 @@ export default function EditOnboardingScreen() {
         <View
           key={field}
           style={{
-            backgroundColor: "#FFFFFF",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 20,
             marginBottom: 16,
-            shadowColor: "#000",
+            shadowColor: theme.colors.black,
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.12,
             shadowRadius: 12,
             elevation: 5,
             borderWidth: 1,
-            borderColor: "#F5F5F5",
+            borderColor: theme.colors.border,
           }}
         >
           <View
@@ -255,9 +261,9 @@ export default function EditOnboardingScreen() {
           >
             <Text
               style={{
-                color: "#000",
-                fontSize: 16,
-                fontWeight: "600",
+                color: theme.colors.text,
+                fontSize: theme.fontSizes.regular,
+                fontWeight: theme.fontWeights.medium as "500",
               }}
             >
               {label}
@@ -268,7 +274,7 @@ export default function EditOnboardingScreen() {
                 width: 32,
                 height: 32,
                 borderRadius: 16,
-                backgroundColor: "#F0F0F0",
+                backgroundColor: theme.colors.lightGrey,
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -276,7 +282,7 @@ export default function EditOnboardingScreen() {
               <Ionicons
                 name={editFields[field] ? "checkmark" : "pencil"}
                 size={18}
-                color="#1A1A1A"
+                color={theme.colors.text}
               />
             </TouchableOpacity>
           </View>
@@ -290,13 +296,13 @@ export default function EditOnboardingScreen() {
                 keyboardType="numeric"
                 style={{
                   flex: 1,
-                  backgroundColor: "#F8F8F8",
+                  backgroundColor: theme.colors.darkGrey,
                   borderRadius: 12,
                   padding: 14,
-                  color: "#000",
+                  color: theme.colors.text,
                   borderWidth: 1,
-                  borderColor: "#E0E0E0",
-                  fontSize: 15,
+                  borderColor: theme.colors.border,
+                  fontSize: theme.fontSizes.regular,
                 }}
               />
               <TouchableOpacity
@@ -307,7 +313,7 @@ export default function EditOnboardingScreen() {
                   handleChange("weight", `${numberOnly}${newUnit}`);
                 }}
                 style={{
-                  backgroundColor: "#67C694",
+                  backgroundColor: theme.colors.success,
                   paddingHorizontal: 16,
                   paddingVertical: 14,
                   borderRadius: 12,
@@ -317,9 +323,9 @@ export default function EditOnboardingScreen() {
               >
                 <Text
                   style={{
-                    color: "#FFFFFF",
-                    fontWeight: "600",
-                    fontSize: 14,
+                    color: theme.colors.textWhite,
+                    fontWeight: theme.fontWeights.medium as "500",
+                    fontSize: theme.fontSizes.regularSmall,
                   }}
                 >
                   {weightUnit}
@@ -329,8 +335,8 @@ export default function EditOnboardingScreen() {
           ) : (
             <Text
               style={{
-                color: "#666",
-                fontSize: 15,
+                color: theme.colors.textSecondary,
+                fontSize: theme.fontSizes.regular,
                 lineHeight: 22,
               }}
             >
@@ -345,17 +351,17 @@ export default function EditOnboardingScreen() {
         <View
           key={field}
           style={{
-            backgroundColor: "#FFFFFF",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 20,
             marginBottom: 16,
-            shadowColor: "#000",
+            shadowColor: theme.colors.black,
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.12,
             shadowRadius: 12,
             elevation: 5,
             borderWidth: 1,
-            borderColor: "#F5F5F5",
+            borderColor: theme.colors.border,
           }}
         >
           <View
@@ -368,9 +374,9 @@ export default function EditOnboardingScreen() {
           >
             <Text
               style={{
-                color: "#000",
-                fontSize: 16,
-                fontWeight: "600",
+                color: theme.colors.text,
+                fontSize: theme.fontSizes.regular,
+                fontWeight: theme.fontWeights.medium as "500",
               }}
             >
               {label}
@@ -381,7 +387,7 @@ export default function EditOnboardingScreen() {
                 width: 32,
                 height: 32,
                 borderRadius: 16,
-                backgroundColor: "#F0F0F0",
+                backgroundColor: theme.colors.lightGrey,
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -389,7 +395,7 @@ export default function EditOnboardingScreen() {
               <Ionicons
                 name={editFields[field] ? "checkmark" : "pencil"}
                 size={18}
-                color="#1A1A1A"
+                color={theme.colors.text}
               />
             </TouchableOpacity>
           </View>
@@ -398,11 +404,11 @@ export default function EditOnboardingScreen() {
               <TouchableOpacity
                 onPress={() => setDobPickerVisible(true)}
                 style={{
-                  backgroundColor: "#F8F8F8",
+                  backgroundColor: theme.colors.darkGrey,
                   borderRadius: 12,
                   padding: 14,
                   borderWidth: 1,
-                  borderColor: "#E0E0E0",
+                  borderColor: theme.colors.border,
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "space-between",
@@ -410,15 +416,15 @@ export default function EditOnboardingScreen() {
               >
                 <Text
                   style={{
-                    color: formValues.dob ? "#000" : "#999",
-                    fontSize: 15,
+                    color: formValues.dob ? theme.colors.text : theme.colors.textMuted,
+                    fontSize: theme.fontSizes.regular,
                   }}
                 >
                   {formValues.dob
                     ? new Date(formValues.dob).toLocaleDateString()
                     : "Select Date of Birth"}
                 </Text>
-                <Ionicons name="calendar-outline" size={20} color="#1A1A1A" />
+                <Ionicons name="calendar-outline" size={20} color={theme.colors.text} />
               </TouchableOpacity>
 
               <DateTimePickerModal
@@ -441,8 +447,8 @@ export default function EditOnboardingScreen() {
           ) : (
             <Text
               style={{
-                color: "#666",
-                fontSize: 15,
+                color: theme.colors.textSecondary,
+                fontSize: theme.fontSizes.regular,
                 lineHeight: 22,
               }}
             >
@@ -460,17 +466,17 @@ export default function EditOnboardingScreen() {
         <View
           key={field}
           style={{
-            backgroundColor: "#FFFFFF",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 20,
             marginBottom: 16,
-            shadowColor: "#000",
+            shadowColor: theme.colors.black,
             shadowOffset: { width: 0, height: 4 },
             shadowOpacity: 0.12,
             shadowRadius: 12,
             elevation: 5,
             borderWidth: 1,
-            borderColor: "#F5F5F5",
+            borderColor: theme.colors.border,
           }}
         >
           <View
@@ -483,9 +489,9 @@ export default function EditOnboardingScreen() {
           >
             <Text
               style={{
-                color: "#000",
-                fontSize: 16,
-                fontWeight: "600",
+                color: theme.colors.text,
+                fontSize: theme.fontSizes.regular,
+                fontWeight: theme.fontWeights.medium as "500",
               }}
             >
               {label}
@@ -496,7 +502,7 @@ export default function EditOnboardingScreen() {
                 width: 32,
                 height: 32,
                 borderRadius: 16,
-                backgroundColor: "#F0F0F0",
+                backgroundColor: theme.colors.lightGrey,
                 alignItems: "center",
                 justifyContent: "center",
               }}
@@ -504,7 +510,7 @@ export default function EditOnboardingScreen() {
               <Ionicons
                 name={editFields[field] ? "checkmark" : "pencil"}
                 size={18}
-                color="#1A1A1A"
+                color={theme.colors.text}
               />
             </TouchableOpacity>
           </View>
@@ -513,22 +519,22 @@ export default function EditOnboardingScreen() {
               value={formValues[field] || ""}
               onChangeText={(text) => handleChange(field, text)}
               placeholder="e.g. 170cm or 5'6"
-              placeholderTextColor="#999"
+              placeholderTextColor={theme.colors.textMuted}
               style={{
-                backgroundColor: "#F8F8F8",
+                backgroundColor: theme.colors.backgroundSecondary,
                 borderRadius: 12,
                 padding: 14,
-                color: "#000",
+                color: theme.colors.text,
                 borderWidth: 1,
-                borderColor: "#E0E0E0",
-                fontSize: 15,
+                borderColor: theme.colors.border,
+                fontSize: theme.fontSizes.regular,
               }}
             />
           ) : (
             <Text
               style={{
-                color: "#666",
-                fontSize: 15,
+                color: theme.colors.textSecondary,
+                fontSize: theme.fontSizes.regular,
                 lineHeight: 22,
               }}
             >
@@ -543,7 +549,7 @@ export default function EditOnboardingScreen() {
       <View
         key={field}
         style={{
-          backgroundColor: "#FFFFFF",
+          backgroundColor: theme.colors.background,
           borderRadius: 20,
           padding: 20,
           marginBottom: 16,
@@ -553,7 +559,7 @@ export default function EditOnboardingScreen() {
           shadowRadius: 12,
           elevation: 5,
           borderWidth: 1,
-          borderColor: "#F5F5F5",
+          borderColor: theme.colors.border,
         }}
       >
         <View
@@ -566,9 +572,9 @@ export default function EditOnboardingScreen() {
         >
           <Text
             style={{
-              color: "#000",
-              fontSize: 16,
-              fontWeight: "600",
+              color: theme.colors.text,
+              fontSize: theme.fontSizes.regular,
+              fontWeight: theme.fontWeights.medium as "500",
             }}
           >
             {label === "Sex" ? "Gender" : label}
@@ -579,7 +585,7 @@ export default function EditOnboardingScreen() {
               width: 32,
               height: 32,
               borderRadius: 16,
-              backgroundColor: "#F0F0F0",
+              backgroundColor: theme.colors.backgroundSecondary,
               alignItems: "center",
               justifyContent: "center",
             }}
@@ -587,7 +593,7 @@ export default function EditOnboardingScreen() {
             <Ionicons
               name={editFields[field] ? "checkmark" : "pencil"}
               size={18}
-              color="#1A1A1A"
+              color={theme.colors.text}
             />
           </TouchableOpacity>
         </View>
@@ -597,13 +603,13 @@ export default function EditOnboardingScreen() {
               value={formValues[field] || ""}
               onChangeText={(text) => handleChange(field, text)}
               style={{
-                backgroundColor: "#F8F8F8",
+                backgroundColor: theme.colors.backgroundSecondary,
                 borderRadius: 12,
                 padding: 14,
-                color: "#000",
+                color: theme.colors.text,
                 borderWidth: 1,
-                borderColor: "#E0E0E0",
-                fontSize: 15,
+                borderColor: theme.colors.border,
+                fontSize: theme.fontSizes.regular,
               }}
             />
           ) : (
@@ -611,11 +617,11 @@ export default function EditOnboardingScreen() {
               <TouchableOpacity
                 onPress={() => setDropdownVisible(field)}
                 style={{
-                  backgroundColor: "#F8F8F8",
+                  backgroundColor: theme.colors.darkGrey,
                   borderRadius: 12,
                   padding: 14,
                   borderWidth: 1,
-                  borderColor: "#E0E0E0",
+                  borderColor: theme.colors.border,
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "space-between",
@@ -623,13 +629,13 @@ export default function EditOnboardingScreen() {
               >
                 <Text
                   style={{
-                    color: formValues[field] ? "#000" : "#999",
-                    fontSize: 15,
+                    color: formValues[field] ? theme.colors.text : theme.colors.textMuted,
+                    fontSize: theme.fontSizes.regular,
                   }}
                 >
                   {formValues[field] || "Select an option"}
                 </Text>
-                <Ionicons name="chevron-down" size={20} color="#1A1A1A" />
+                <Ionicons name="chevron-down" size={20} color={theme.colors.text} />
               </TouchableOpacity>
 
               <DropdownModal
@@ -643,8 +649,8 @@ export default function EditOnboardingScreen() {
         ) : (
           <Text
             style={{
-              color: "#666",
-              fontSize: 15,
+              color: theme.colors.textSecondary,
+              fontSize: theme.fontSizes.regular,
               lineHeight: 22,
             }}
           >
@@ -656,12 +662,26 @@ export default function EditOnboardingScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <ImageBackground
         source={backgroundImage}
         style={{ flex: 1 }}
         resizeMode="cover"
+        imageStyle={{ opacity: isDark ? 0.3 : 1 }}
       >
+        {isDark && (
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: theme.colors.background,
+              opacity: 0.9,
+            }}
+          />
+        )}
         <SafeAreaView
           style={{ flex: 1, backgroundColor: "transparent" }}
           edges={["left", "right"]}
@@ -701,7 +721,7 @@ export default function EditOnboardingScreen() {
               onPress={handleUpdate}
               disabled={loading}
               style={{
-                backgroundColor: "#67C694",
+                backgroundColor: theme.colors.success,
                 borderRadius: 30,
                 paddingVertical: 16,
                 alignItems: "center",
@@ -719,9 +739,9 @@ export default function EditOnboardingScreen() {
               ) : (
                 <Text
                   style={{
-                    color: "#FFFFFF",
-                    fontSize: 16,
-                    fontWeight: "700",
+                    color: theme.colors.textWhite,
+                    fontSize: theme.fontSizes.regular,
+                    fontWeight: theme.fontWeights.bold as "700",
                   }}
                 >
                   Update Profile
@@ -733,7 +753,7 @@ export default function EditOnboardingScreen() {
             onDismiss={() => setSnackbarVisible(false)}
             visible={snackbarVisible}
             message={snackbarMessage}
-            bgColor="#67C694"
+            bgColor={theme.colors.success}
           />
         </SafeAreaView>
       </ImageBackground>

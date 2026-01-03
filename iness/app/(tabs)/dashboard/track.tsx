@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
@@ -33,23 +33,33 @@ const screenWidth = Dimensions.get("window").width;
 const tabNames = ["Sleep", "Steps", "Water"] as const;
 type TabType = (typeof tabNames)[number];
 
-const getChartConfig = (tab: TabType) => {
+const getChartConfig = (tab: TabType, theme: any, isDark: boolean) => {
   const colors = {
     Sleep: { primary: "#B39DDB", gradient: "#EDE7F6" },
     Steps: { primary: "#9747FF", gradient: "#F3EDFF" },
     Water: { primary: "#4FC3F7", gradient: "#E3F2FD" },
   };
   const color = colors[tab];
+  const bgColor = isDark ? theme.colors.backgroundCard : "#FFFFFF";
+  const textColor = isDark ? theme.colors.text : "#000000";
+  const labelColor = isDark ? theme.colors.textSecondary : "rgba(51, 51, 51, 1)";
+  const gridColor = isDark ? theme.colors.border : "#E8E8E8";
   
   return {
-    backgroundGradientFrom: "#FFFFFF",
-    backgroundGradientTo: "#FFFFFF",
+    backgroundGradientFrom: bgColor,
+    backgroundGradientTo: bgColor,
     color: (opacity = 1) => {
       const rgb = tab === "Sleep" ? "179, 157, 219" : tab === "Steps" ? "151, 71, 255" : "79, 195, 247";
       return `rgba(${rgb}, ${opacity})`;
     },
     labelColor: (opacity = 1) => {
-      // Y-axis labels should be darker
+      if (isDark) {
+        const hex = theme.colors.textSecondary.replace('#', '');
+        const r = parseInt(hex.substr(0, 2), 16);
+        const g = parseInt(hex.substr(2, 2), 16);
+        const b = parseInt(hex.substr(4, 2), 16);
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      }
       return `rgba(51, 51, 51, ${opacity})`;
     },
     strokeWidth: 3,
@@ -57,28 +67,28 @@ const getChartConfig = (tab: TabType) => {
       r: "6",
       strokeWidth: "2",
       stroke: color.primary,
-      fill: "#FFFFFF",
+      fill: bgColor,
     },
     propsForLabels: {
-      fontSize: 10,
+      fontSize: theme.fontSizes.small,
       fontFamily: theme.fonts.regular,
       fontWeight: "500",
-      fill: "#000000",
+      fill: textColor,
     },
     propsForVerticalLabels: {
-      fontSize: 10,
+      fontSize: theme.fontSizes.small,
       fontFamily: theme.fonts.regular,
       fontWeight: "500",
-      fill: "#000000",
-      color: "#000000",
+      fill: textColor,
+      color: textColor,
     },
     propsForBackgroundLines: {
       strokeWidth: 1.5,
-      stroke: "#E8E8E8",
+      stroke: gridColor,
       strokeDasharray: "0", // Solid lines
     },
     decimalPlaces: 0,
-    formatYLabel: (value) => {
+    formatYLabel: (value: string) => {
       const num = parseFloat(value);
       if (num >= 1000) {
         return `${(num / 1000).toFixed(1)}k`;
@@ -110,6 +120,8 @@ interface ChartPoint {
 }
 
 export default function TrackingGraphPage() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const [selectedTab, setSelectedTab] = useState<TabType>("Sleep");
   const [monthOffset, setMonthOffset] = useState(0);
   const currentMonth = dayjs().add(monthOffset, "month");
@@ -491,7 +503,21 @@ export default function TrackingGraphPage() {
       source={require("../../../assets/images/basicBackground.jpg")}
       resizeMode="cover"
       style={{ flex: 1 }}
+      imageStyle={{ opacity: isDark ? 0.3 : 1 }}
     >
+      {isDark && (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: theme.colors.background,
+            opacity: 0.9,
+          }}
+        />
+      )}
       <SafeAreaView
         style={{ flex: 1, backgroundColor: "transparent" }}
         edges={["left", "right"]}
@@ -532,16 +558,16 @@ export default function TrackingGraphPage() {
                     flexDirection: "row",
                     justifyContent: "space-between",
                     marginBottom: 24,
-                    backgroundColor: "#FFFFFF",
+                    backgroundColor: theme.colors.background,
                     borderRadius: 16,
                     padding: 4,
-                    shadowColor: "#000",
+                    shadowColor: theme.colors.black,
                     shadowOffset: { width: 0, height: 1 },
                     shadowOpacity: 0.05,
                     shadowRadius: 3,
                     elevation: 2,
                     borderWidth: 1,
-                    borderColor: "#F5F5F5",
+                    borderColor: theme.colors.border,
                   }}
                 >
                   {tabNames.map((tab) => {
@@ -594,7 +620,7 @@ export default function TrackingGraphPage() {
                           style={{
                             color: color.text,
                             fontWeight: "700",
-                            fontSize: 13,
+                            fontSize: theme.fontSizes.regularSmall,
                             fontFamily: theme.fonts.bold,
                           }}
                         >
@@ -608,7 +634,7 @@ export default function TrackingGraphPage() {
                 {/* Month Switcher Card */}
                 <View
                   style={{
-                    backgroundColor: "#FFFFFF",
+                    backgroundColor: theme.colors.background,
                     borderRadius: 16,
                     padding: 16,
                     marginBottom: 24,
@@ -673,9 +699,9 @@ export default function TrackingGraphPage() {
                           </TouchableOpacity>
                           <Text
                             style={{
-                              fontSize: 16,
-                              fontWeight: "700",
-                              color: "#1A1A1A",
+                              fontSize: theme.fontSizes.regular,
+                              fontWeight: theme.fontWeights.bold as "700",
+                              color: theme.colors.text,
                               fontFamily: theme.fonts.bold,
                               marginHorizontal: 12,
                             }}
@@ -749,22 +775,22 @@ export default function TrackingGraphPage() {
                             alignItems: "center",
                             paddingVertical: 8,
                             paddingHorizontal: 12,
-                            backgroundColor: "#67C694",
+                            backgroundColor: theme.colors.success,
                             borderRadius: 20,
                             opacity: syncingSteps ? 0.6 : 1,
                           }}
                         >
                           {syncingSteps ? (
-                            <ActivityIndicator size="small" color="#FFFFFF" />
+                            <ActivityIndicator size="small" color={theme.colors.textWhite} />
                           ) : (
                             <>
-                              <Ionicons name="refresh" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                              <Ionicons name="refresh" size={16} color={theme.colors.textWhite} style={{ marginRight: 6 }} />
                               <Text
                                 style={{
-                                  color: "#FFFFFF",
+                                  color: theme.colors.textWhite,
                                   fontFamily: theme.fonts.medium,
-                                  fontWeight: "600",
-                                  fontSize: 12,
+                                  fontWeight: theme.fontWeights.medium as "500",
+                                  fontSize: theme.fontSizes.small,
                                 }}
                               >
                                 Sync Now
@@ -816,22 +842,22 @@ export default function TrackingGraphPage() {
                             alignItems: "center",
                             paddingVertical: 8,
                             paddingHorizontal: 12,
-                            backgroundColor: "#67C694",
+                            backgroundColor: theme.colors.success,
                             borderRadius: 20,
                             opacity: syncingSleep ? 0.6 : 1,
                           }}
                         >
                           {syncingSleep ? (
-                            <ActivityIndicator size="small" color="#FFFFFF" />
+                            <ActivityIndicator size="small" color={theme.colors.textWhite} />
                           ) : (
                             <>
-                              <Ionicons name="refresh" size={16} color="#FFFFFF" style={{ marginRight: 6 }} />
+                              <Ionicons name="refresh" size={16} color={theme.colors.textWhite} style={{ marginRight: 6 }} />
                               <Text
                                 style={{
-                                  color: "#FFFFFF",
+                                  color: theme.colors.textWhite,
                                   fontFamily: theme.fonts.medium,
-                                  fontWeight: "600",
-                                  fontSize: 12,
+                                  fontWeight: theme.fontWeights.medium as "500",
+                                  fontSize: theme.fontSizes.small,
                                 }}
                               >
                                 Sync Now
@@ -847,7 +873,7 @@ export default function TrackingGraphPage() {
                 {/* Chart Card */}
                 <View
                   style={{
-                    backgroundColor: "#FFFFFF",
+                    backgroundColor: theme.colors.background,
                     borderRadius: 20,
                     padding: 20,
                     marginBottom: 24,
@@ -858,7 +884,7 @@ export default function TrackingGraphPage() {
                   <View>
                     {getGraphData.labels.length > 0 && getGraphData.labels[0] !== "No data" ? (
                       <View style={{ 
-                        backgroundColor: "#FAFAFA", 
+                        backgroundColor: theme.colors.backgroundSecondary, 
                         borderRadius: 16, 
                         paddingTop: 8,
                         paddingBottom: 8,
@@ -870,7 +896,7 @@ export default function TrackingGraphPage() {
                           data={getGraphData}
                           width={screenWidth - 64}
                           height={240}
-                          chartConfig={getChartConfig(selectedTab)}
+                          chartConfig={getChartConfig(selectedTab, theme, isDark)}
                           bezier
                           withShadow={false}
                           withInnerLines={true}
@@ -887,8 +913,8 @@ export default function TrackingGraphPage() {
                         />
                       </View>
                     ) : (
-                      <View style={{ height: 240, justifyContent: 'center', alignItems: 'center', backgroundColor: "#FAFAFA", borderRadius: 16 }}>
-                        <Text style={{ color: '#999', fontSize: 14, fontFamily: theme.fonts.regular }}>No data available</Text>
+                      <View style={{ height: 240, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.backgroundSecondary, borderRadius: 16 }}>
+                        <Text style={{ color: theme.colors.textMuted, fontSize: theme.fontSizes.regularSmall, fontFamily: theme.fonts.regular }}>No data available</Text>
                       </View>
                     )}
                   </View>
@@ -956,9 +982,9 @@ export default function TrackingGraphPage() {
                       >
                         <Text
                           style={{
-                            fontSize: 18,
-                            fontWeight: "700",
-                            color: "#1A1A1A",
+                            fontSize: theme.fontSizes.medium,
+                            fontWeight: theme.fontWeights.bold as "700",
+                            color: theme.colors.text,
                             fontFamily: theme.fonts.bold,
                           }}
                         >
@@ -968,7 +994,7 @@ export default function TrackingGraphPage() {
                           style={{
                             width: 30,
                             height: 3,
-                            backgroundColor: "#9747FF",
+                            backgroundColor: theme.colors.secondPrimary,
                             borderRadius: 2,
                           }}
                         />
@@ -977,7 +1003,7 @@ export default function TrackingGraphPage() {
                       {/* Summary Report Card */}
                       <View
                         style={{
-                          backgroundColor: "#FFFFFF",
+                          backgroundColor: theme.colors.background,
                           borderRadius: 16,
                           padding: 20,
                           marginBottom: 24,
@@ -1004,7 +1030,7 @@ export default function TrackingGraphPage() {
                           <View style={{ alignItems: "center", flex: 1 }}>
                             <Text
                               style={{
-                                fontSize: 24,
+                                fontSize: theme.fontSizes.xl,
                                 fontWeight: "700",
                                 color: color.text,
                                 fontFamily: theme.fonts.bold,
@@ -1019,8 +1045,8 @@ export default function TrackingGraphPage() {
                             </Text>
                             <Text
                               style={{
-                                fontSize: 13,
-                                color: "#666",
+                                fontSize: theme.fontSizes.regularSmall,
+                                color: theme.colors.textSecondary,
                                 fontFamily: theme.fonts.medium,
                               }}
                             >
@@ -1032,7 +1058,7 @@ export default function TrackingGraphPage() {
                             style={{
                               width: 1,
                               height: 50,
-                              backgroundColor: "#E8E8E8",
+                              backgroundColor: theme.colors.divider,
                               marginHorizontal: 16,
                             }}
                           />
@@ -1040,7 +1066,7 @@ export default function TrackingGraphPage() {
                           <View style={{ alignItems: "center", flex: 1 }}>
                             <Text
                               style={{
-                                fontSize: 24,
+                                fontSize: theme.fontSizes.xl,
                                 fontWeight: "700",
                                 color: color.text,
                                 fontFamily: theme.fonts.bold,
@@ -1055,8 +1081,8 @@ export default function TrackingGraphPage() {
                             </Text>
                             <Text
                               style={{
-                                fontSize: 13,
-                                color: "#666",
+                                fontSize: theme.fontSizes.regularSmall,
+                                color: theme.colors.textSecondary,
                                 fontFamily: theme.fonts.medium,
                               }}
                             >
@@ -1081,19 +1107,19 @@ export default function TrackingGraphPage() {
                           <View
                             style={{
                               flex: 1,
-                              backgroundColor: "#E8F5E9",
+                              backgroundColor: theme.colors.greenLight,
                               borderRadius: 12,
                               padding: 16,
                               borderWidth: 1,
-                              borderColor: "#C8E6C9",
+                              borderColor: theme.colors.greenLight,
                             }}
                           >
                             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-                              <Ionicons name="trophy" size={18} color="#2F8C62" style={{ marginRight: 6 }} />
+                              <Ionicons name="trophy" size={18} color={theme.colors.success} style={{ marginRight: 6 }} />
                               <Text
                                 style={{
-                                  fontSize: 12,
-                                  color: "#666",
+                                  fontSize: theme.fontSizes.small,
+                                  color: theme.colors.textSecondary,
                                   fontFamily: theme.fonts.medium,
                                   fontWeight: "600",
                                 }}
@@ -1105,9 +1131,9 @@ export default function TrackingGraphPage() {
                               <>
                                 <Text
                                   style={{
-                                    fontSize: 22,
-                                    fontWeight: "700",
-                                    color: "#2F8C62",
+                                    fontSize: theme.fontSizes.large,
+                                    fontWeight: theme.fontWeights.bold as "700",
+                                    color: theme.colors.success,
                                     fontFamily: theme.fonts.bold,
                                     marginBottom: 4,
                                   }}
@@ -1120,8 +1146,8 @@ export default function TrackingGraphPage() {
                                 </Text>
                                 <Text
                                   style={{
-                                    fontSize: 13,
-                                    color: "#666",
+                                    fontSize: theme.fontSizes.regularSmall,
+                                    color: theme.colors.textSecondary,
                                     fontFamily: theme.fonts.medium,
                                   }}
                                 >
@@ -1131,8 +1157,8 @@ export default function TrackingGraphPage() {
                             ) : (
                               <Text
                                 style={{
-                                  fontSize: 14,
-                                  color: "#999",
+                                  fontSize: theme.fontSizes.regularSmall,
+                                  color: theme.colors.textMuted,
                                   fontFamily: theme.fonts.regular,
                                 }}
                               >
@@ -1145,19 +1171,19 @@ export default function TrackingGraphPage() {
                           <View
                             style={{
                               flex: 1,
-                              backgroundColor: "#FFEBEE",
+                              backgroundColor: theme.colors.errorLight,
                               borderRadius: 12,
                               padding: 16,
                               borderWidth: 1,
-                              borderColor: "#FFCDD2",
+                              borderColor: theme.colors.errorLight,
                             }}
                           >
                             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-                              <Ionicons name="trending-down" size={18} color="#D32F2F" style={{ marginRight: 6 }} />
+                              <Ionicons name="trending-down" size={18} color={theme.colors.error} style={{ marginRight: 6 }} />
                               <Text
                                 style={{
-                                  fontSize: 12,
-                                  color: "#666",
+                                  fontSize: theme.fontSizes.small,
+                                  color: theme.colors.textSecondary,
                                   fontFamily: theme.fonts.medium,
                                   fontWeight: "600",
                                 }}
@@ -1169,9 +1195,9 @@ export default function TrackingGraphPage() {
                               <>
                                 <Text
                                   style={{
-                                    fontSize: 22,
-                                    fontWeight: "700",
-                                    color: "#D32F2F",
+                                    fontSize: theme.fontSizes.large,
+                                    fontWeight: theme.fontWeights.bold as "700",
+                                    color: theme.colors.error,
                                     fontFamily: theme.fonts.bold,
                                     marginBottom: 4,
                                   }}
@@ -1184,8 +1210,8 @@ export default function TrackingGraphPage() {
                                 </Text>
                                 <Text
                                   style={{
-                                    fontSize: 13,
-                                    color: "#666",
+                                    fontSize: theme.fontSizes.regularSmall,
+                                    color: theme.colors.textSecondary,
                                     fontFamily: theme.fonts.medium,
                                   }}
                                 >
@@ -1195,8 +1221,8 @@ export default function TrackingGraphPage() {
                             ) : (
                               <Text
                                 style={{
-                                  fontSize: 14,
-                                  color: "#999",
+                                  fontSize: theme.fontSizes.regularSmall,
+                                  color: theme.colors.textMuted,
                                   fontFamily: theme.fonts.regular,
                                 }}
                               >
@@ -1218,9 +1244,9 @@ export default function TrackingGraphPage() {
                       >
                         <Text
                           style={{
-                            fontSize: 18,
-                            fontWeight: "700",
-                            color: "#1A1A1A",
+                            fontSize: theme.fontSizes.medium,
+                            fontWeight: theme.fontWeights.bold as "700",
+                            color: theme.colors.text,
                             fontFamily: theme.fonts.bold,
                           }}
                         >
@@ -1230,7 +1256,7 @@ export default function TrackingGraphPage() {
                           style={{
                             width: 30,
                             height: 3,
-                            backgroundColor: "#9747FF",
+                            backgroundColor: theme.colors.secondPrimary,
                             borderRadius: 2,
                           }}
                         />
@@ -1239,7 +1265,7 @@ export default function TrackingGraphPage() {
                       {/* Monthly Analysis Card */}
                       <View
                         style={{
-                          backgroundColor: "#FFFFFF",
+                          backgroundColor: theme.colors.background,
                           borderRadius: 16,
                           padding: 20,
                           marginBottom: 24,
@@ -1255,11 +1281,11 @@ export default function TrackingGraphPage() {
                         {/* Analysis Section */}
                         <View
                           style={{
-                            backgroundColor: "#F9F9F9",
+                            backgroundColor: theme.colors.backgroundFaded,
                             borderRadius: 12,
                             padding: 16,
                             borderWidth: 1,
-                            borderColor: "#F0F0F0",
+                            borderColor: theme.colors.border,
                             marginBottom: 16,
                           }}
                         >
@@ -1275,7 +1301,7 @@ export default function TrackingGraphPage() {
                                 width: 36,
                                 height: 36,
                                 borderRadius: 10,
-                                backgroundColor: isLagging ? "#FFEBEE" : "#EDE7F6",
+                                backgroundColor: isLagging ? theme.colors.errorLight : theme.colors.backgroundCardLight,
                                 alignItems: "center",
                                 justifyContent: "center",
                                 marginRight: 10,
@@ -1284,14 +1310,14 @@ export default function TrackingGraphPage() {
                               <Ionicons
                                 name={isLagging ? "trending-down" : "trending-up"}
                                 size={20}
-                                color={isLagging ? "#D32F2F" : "#2F8C62"}
+                                color={isLagging ? theme.colors.error : theme.colors.success}
                               />
                             </View>
                             <Text
                               style={{
-                                fontSize: 16,
-                                fontWeight: "700",
-                                color: "#1A1A1A",
+                                fontSize: theme.fontSizes.regular,
+                                fontWeight: theme.fontWeights.bold as "700",
+                                color: theme.colors.text,
                                 fontFamily: theme.fonts.bold,
                               }}
                             >
@@ -1311,8 +1337,8 @@ export default function TrackingGraphPage() {
                             >
                               <Text
                                 style={{
-                                  fontSize: 12,
-                                  color: "#888",
+                                  fontSize: theme.fontSizes.small,
+                                  color: theme.colors.textMuted,
                                   fontFamily: theme.fonts.medium,
                                 }}
                               >
@@ -1320,7 +1346,7 @@ export default function TrackingGraphPage() {
                               </Text>
                               <Text
                                 style={{
-                                  fontSize: 14,
+                                  fontSize: theme.fontSizes.regularSmall,
                                   fontWeight: "700",
                                   color: isLagging ? "#D32F2F" : selectedTab === "Sleep" ? "#B39DDB" : "#2F8C62",
                                   fontFamily: theme.fonts.bold,
@@ -1333,7 +1359,7 @@ export default function TrackingGraphPage() {
                             <View
                               style={{
                                 height: 10,
-                                backgroundColor: "#E8E8E8",
+                                backgroundColor: theme.colors.divider,
                                 borderRadius: 5,
                                 overflow: "hidden",
                                 marginBottom: 16,
@@ -1343,7 +1369,7 @@ export default function TrackingGraphPage() {
                                 style={{
                                   height: "100%",
                                   width: `${Math.min(percentage, 100)}%`,
-                                  backgroundColor: isLagging ? "#FF6B6B" : "#B39DDB",
+                                  backgroundColor: isLagging ? theme.colors.error : "#B39DDB",
                                   borderRadius: 5,
                                 }}
                               />
@@ -1362,17 +1388,17 @@ export default function TrackingGraphPage() {
                             <View
                               style={{
                                 flex: 1,
-                                backgroundColor: "#FFFFFF",
+                                backgroundColor: theme.colors.background,
                                 borderRadius: 12,
                                 padding: 14,
                                 borderWidth: 1,
-                                borderColor: "#E8E8E8",
+                                borderColor: theme.colors.border,
                               }}
                             >
                               <Text
                                 style={{
-                                  fontSize: 11,
-                                  color: "#888",
+                                  fontSize: theme.fontSizes.small,
+                                  color: theme.colors.textMuted,
                                   fontFamily: theme.fonts.medium,
                                   marginBottom: 6,
                                 }}
@@ -1381,9 +1407,9 @@ export default function TrackingGraphPage() {
                               </Text>
                               <Text
                                 style={{
-                                  fontSize: 18,
-                                  fontWeight: "700",
-                                  color: "#1A1A1A",
+                                  fontSize: theme.fontSizes.medium,
+                                  fontWeight: theme.fontWeights.bold as "700",
+                                  color: theme.colors.text,
                                   fontFamily: theme.fonts.bold,
                                   marginBottom: 2,
                                 }}
@@ -1396,8 +1422,8 @@ export default function TrackingGraphPage() {
                               </Text>
                               <Text
                                 style={{
-                                  fontSize: 10,
-                                  color: "#999",
+                                  fontSize: theme.fontSizes.small,
+                                  color: theme.colors.textMuted,
                                   fontFamily: theme.fonts.regular,
                                 }}
                               >
@@ -1418,8 +1444,8 @@ export default function TrackingGraphPage() {
                             >
                               <Text
                                 style={{
-                                  fontSize: 11,
-                                  color: "#888",
+                                  fontSize: theme.fontSizes.small,
+                                  color: theme.colors.textMuted,
                                   fontFamily: theme.fonts.medium,
                                   marginBottom: 6,
                                 }}
@@ -1428,8 +1454,8 @@ export default function TrackingGraphPage() {
                               </Text>
                               <Text
                                 style={{
-                                  fontSize: 18,
-                                  fontWeight: "700",
+                                  fontSize: theme.fontSizes.medium,
+                                  fontWeight: theme.fontWeights.bold as "700",
                                   color: color.text,
                                   fontFamily: theme.fonts.bold,
                                   marginBottom: 2,
@@ -1443,8 +1469,8 @@ export default function TrackingGraphPage() {
                               </Text>
                               <Text
                                 style={{
-                                  fontSize: 10,
-                                  color: "#999",
+                                  fontSize: theme.fontSizes.small,
+                                  color: theme.colors.textMuted,
                                   fontFamily: theme.fonts.regular,
                                 }}
                               >
@@ -1456,11 +1482,11 @@ export default function TrackingGraphPage() {
                           {/* Difference Card */}
                           <View
                             style={{
-                              backgroundColor: isLagging ? "#FFEBEE" : "#E8F5E9",
+                              backgroundColor: isLagging ? theme.colors.errorLight : theme.colors.greenLight,
                               borderRadius: 12,
                               padding: 14,
                               borderWidth: 1,
-                              borderColor: isLagging ? "#FFCDD2" : "#C8E6C9",
+                              borderColor: isLagging ? theme.colors.errorLight : theme.colors.greenLight,
                               flexDirection: "row",
                               alignItems: "center",
                               justifyContent: "space-between",
@@ -1470,14 +1496,14 @@ export default function TrackingGraphPage() {
                               <Ionicons
                                 name={isLagging ? "alert-circle" : "checkmark-circle"}
                                 size={20}
-                                color={isLagging ? "#D32F2F" : "#2F8C62"}
+                                color={isLagging ? theme.colors.error : theme.colors.success}
                                 style={{ marginRight: 10 }}
                               />
                               <View style={{ flex: 1 }}>
                                 <Text
                                   style={{
-                                    fontSize: 11,
-                                    color: "#666",
+                                    fontSize: theme.fontSizes.small,
+                                    color: theme.colors.textSecondary,
                                     fontFamily: theme.fonts.medium,
                                     marginBottom: 2,
                                   }}
@@ -1486,7 +1512,7 @@ export default function TrackingGraphPage() {
                                 </Text>
                                 <Text
                                   style={{
-                                    fontSize: 16,
+                                    fontSize: theme.fontSizes.regular,
                                     fontWeight: "700",
                                     color: isLagging ? "#D32F2F" : "#2F8C62",
                                     fontFamily: theme.fonts.bold,
@@ -1508,19 +1534,19 @@ export default function TrackingGraphPage() {
                           <View
                             style={{
                               flex: 1,
-                              backgroundColor: "#FFFFFF",
+                              backgroundColor: theme.colors.background,
                               borderRadius: 12,
                               padding: 14,
                               borderWidth: 1,
-                              borderColor: "#E8E8E8",
+                              borderColor: theme.colors.border,
                             }}
                           >
                             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-                              <Ionicons name="calendar" size={16} color="#666" style={{ marginRight: 6 }} />
+                              <Ionicons name="calendar" size={16} color={theme.colors.textSecondary} style={{ marginRight: 6 }} />
                               <Text
                                 style={{
-                                  fontSize: 11,
-                                  color: "#888",
+                                  fontSize: theme.fontSizes.small,
+                                  color: theme.colors.textMuted,
                                   fontFamily: theme.fonts.medium,
                                 }}
                               >
@@ -1529,9 +1555,9 @@ export default function TrackingGraphPage() {
                             </View>
                             <Text
                               style={{
-                                fontSize: 18,
-                                fontWeight: "700",
-                                color: "#1A1A1A",
+                                fontSize: theme.fontSizes.medium,
+                                fontWeight: theme.fontWeights.bold as "700",
+                                color: theme.colors.text,
                                 fontFamily: theme.fonts.bold,
                                 marginBottom: 4,
                               }}
@@ -1540,8 +1566,8 @@ export default function TrackingGraphPage() {
                             </Text>
                             <Text
                               style={{
-                                fontSize: 10,
-                                color: "#999",
+                                fontSize: theme.fontSizes.small,
+                                color: theme.colors.textMuted,
                                 fontFamily: theme.fonts.regular,
                               }}
                             >
@@ -1552,19 +1578,19 @@ export default function TrackingGraphPage() {
                           <View
                             style={{
                               flex: 1,
-                              backgroundColor: "#FFFFFF",
+                              backgroundColor: theme.colors.background,
                               borderRadius: 12,
                               padding: 14,
                               borderWidth: 1,
-                              borderColor: "#E8E8E8",
+                              borderColor: theme.colors.border,
                             }}
                           >
                             <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
-                              <Ionicons name="flag" size={16} color="#666" style={{ marginRight: 6 }} />
+                              <Ionicons name="flag" size={16} color={theme.colors.textSecondary} style={{ marginRight: 6 }} />
                               <Text
                                 style={{
-                                  fontSize: 11,
-                                  color: "#888",
+                                  fontSize: theme.fontSizes.small,
+                                  color: theme.colors.textMuted,
                                   fontFamily: theme.fonts.medium,
                                 }}
                               >
@@ -1573,8 +1599,8 @@ export default function TrackingGraphPage() {
                             </View>
                             <Text
                               style={{
-                                fontSize: 18,
-                                fontWeight: "700",
+                                fontSize: theme.fontSizes.medium,
+                                fontWeight: theme.fontWeights.bold as "700",
                                 color: selectedTab === "Sleep" 
                                   ? (targetAchievementRate >= 70 ? "#B39DDB" : targetAchievementRate >= 50 ? "#CE93D8" : "#D32F2F")
                                   : (targetAchievementRate >= 70 ? "#2F8C62" : targetAchievementRate >= 50 ? "#FF9800" : "#D32F2F"),
@@ -1586,8 +1612,8 @@ export default function TrackingGraphPage() {
                             </Text>
                             <Text
                               style={{
-                                fontSize: 10,
-                                color: "#999",
+                                fontSize: theme.fontSizes.small,
+                                color: theme.colors.textMuted,
                                 fontFamily: theme.fonts.regular,
                               }}
                             >
@@ -1612,9 +1638,9 @@ export default function TrackingGraphPage() {
                   >
                     <Text
                       style={{
-                        fontSize: 18,
-                        fontWeight: "700",
-                        color: "#1A1A1A",
+                        fontSize: theme.fontSizes.medium,
+                        fontWeight: theme.fontWeights.bold as "700",
+                        color: theme.colors.text,
                         fontFamily: theme.fonts.bold,
                       }}
                     >
@@ -1624,7 +1650,7 @@ export default function TrackingGraphPage() {
                       style={{
                         width: 30,
                         height: 3,
-                        backgroundColor: selectedTab === "Sleep" ? "#B39DDB" : selectedTab === "Steps" ? "#9747FF" : "#4FC3F7",
+                        backgroundColor: selectedTab === "Sleep" ? "#B39DDB" : selectedTab === "Steps" ? theme.colors.secondPrimary : "#4FC3F7",
                         borderRadius: 2,
                       }}
                     />
@@ -1634,7 +1660,7 @@ export default function TrackingGraphPage() {
                 {getSelectedData.length === 0 ? (
                   <View
                     style={{
-                      backgroundColor: "#FFFFFF",
+                      backgroundColor: theme.colors.background,
                       borderRadius: 20,
                       padding: 40,
                       alignItems: "center",
@@ -1652,7 +1678,7 @@ export default function TrackingGraphPage() {
                         width: 64,
                         height: 64,
                         borderRadius: 16,
-                        backgroundColor: selectedTab === "Sleep" ? "#EDE7F6" : selectedTab === "Steps" ? "#F3EDFF" : "#E3F2FD",
+                        backgroundColor: selectedTab === "Sleep" ? theme.colors.backgroundCardLight : selectedTab === "Steps" ? theme.colors.backgroundCardLight : "#E3F2FD",
                         alignItems: "center",
                         justifyContent: "center",
                         marginBottom: 16,
@@ -1661,7 +1687,7 @@ export default function TrackingGraphPage() {
                       <Ionicons 
                         name="bar-chart-outline" 
                         size={32} 
-                        color={selectedTab === "Sleep" ? "#B39DDB" : selectedTab === "Steps" ? "#9747FF" : "#4FC3F7"} 
+                        color={selectedTab === "Sleep" ? "#B39DDB" : selectedTab === "Steps" ? theme.colors.secondPrimary : "#4FC3F7"} 
                       />
                     </View>
                     <Text
@@ -1669,8 +1695,8 @@ export default function TrackingGraphPage() {
                         textAlign: "center",
                         color: "#666",
                         marginTop: 12,
-                        fontSize: 14,
-                        fontWeight: "500",
+                        fontSize: theme.fontSizes.regularSmall,
+                        fontWeight: theme.fontWeights.medium as "500",
                       }}
                     >
                       No data available for this month
@@ -1690,7 +1716,7 @@ export default function TrackingGraphPage() {
                         <View
                           key={index}
                           style={{
-                            backgroundColor: "#FFFFFF",
+                            backgroundColor: theme.colors.background,
                             padding: 16,
                             marginBottom: 12,
                             borderRadius: 16,
@@ -1715,9 +1741,9 @@ export default function TrackingGraphPage() {
                           >
                             <Text
                               style={{
-                                color: "#000",
+                                color: theme.colors.text,
                                 fontWeight: "600",
-                                fontSize: 15,
+                                fontSize: theme.fontSizes.regular,
                                 fontFamily: theme.fonts.medium,
                               }}
                             >
@@ -1727,8 +1753,8 @@ export default function TrackingGraphPage() {
 
                           <Text
                             style={{
-                              fontSize: 16,
-                              fontWeight: "700",
+                              fontSize: theme.fontSizes.regular,
+                              fontWeight: theme.fontWeights.bold as "700",
                               color: color.text,
                             }}
                           >

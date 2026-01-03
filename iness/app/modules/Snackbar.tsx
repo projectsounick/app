@@ -82,7 +82,7 @@ const CustomSnackbar: React.FC<CustomSnackbarProps> = ({
         <View>
           <Animated.Text
             style={{
-              color: "#000000",
+              color: theme.colors.text,
               fontSize: theme.fontSizes.regular,
               fontWeight: "500",
               fontFamily: theme.fonts.regular,

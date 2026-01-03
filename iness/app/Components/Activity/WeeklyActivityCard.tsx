@@ -60,7 +60,7 @@ const WeeklyActivityCard = () => {
   return (
     <View
       style={{
-        backgroundColor: "#fff",
+        backgroundColor: theme.colors.background,
         borderRadius: 20,
         padding: 16,
         marginVertical: 12,
@@ -81,9 +81,9 @@ const WeeklyActivityCard = () => {
       >
         <Text
           style={{
-            fontSize: 18,
+            fontSize: theme.fontSizes.medium,
             fontFamily: theme.fonts.bold,
-            color: "#140A21",
+            color: theme.colors.text,
           }}
         >
           Weekly Activity
@@ -133,7 +133,7 @@ const WeeklyActivityCard = () => {
                 alignItems: "center",
               }}
             >
-              <Text style={{ color: "#999", fontSize: 16 }}>
+              <Text style={{ color: theme.colors.textMuted, fontSize: theme.fontSizes.regular }}>
                 No activities this week
               </Text>
             </View>
@@ -175,7 +175,7 @@ const WeeklyActivityCard = () => {
                   <Text
                     style={{
                       fontFamily: theme.fonts.medium,
-                      fontSize: 13,
+                      fontSize: theme.fontSizes.regularSmall,
                       marginLeft: 4,
                       textAlign: "center",
                     }}
@@ -183,7 +183,7 @@ const WeeklyActivityCard = () => {
                     {act.name}
                   </Text>
                 </View>
-                <Text style={{ fontSize: 11, color: "#777", marginTop: 4 }}>
+                <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textSecondary, marginTop: 4 }}>
                   {act.duration} min
                 </Text>
               </View>
@@ -193,16 +193,16 @@ const WeeklyActivityCard = () => {
               style={{
                 padding: 12,
                 borderRadius: 12,
-                backgroundColor: "#f0f0f0",
+                backgroundColor: theme.colors.lightGrey,
                 alignItems: "center",
                 justifyContent: "center",
                 minWidth: 120,
               }}
             >
-              <Text style={{ color: "#777", fontSize: 14 }}>
+              <Text style={{ color: theme.colors.textSecondary, fontSize: theme.fontSizes.regularSmall }}>
                 No activities available
               </Text>
-              <Text style={{ color: "#777", fontSize: 12, marginTop: 4 }}>
+              <Text style={{ color: theme.colors.textSecondary, fontSize: theme.fontSizes.small, marginTop: 4 }}>
                 Try adding some!
               </Text>
             </View>

@@ -224,11 +224,11 @@ const OTPInputScreen = () => {
                 width: "100%",
               }}
             >
-              <NormalHeader screenName="Enter OTP" />
+              <NormalHeader screenName="Enter OTP" textColor={theme.colors.dark} />
               <Text
                 style={{
                   fontSize: theme.fontSizes.small,
-                  color: theme.colors.gray,
+                  color: theme.colors.textSecondary,
                   marginTop: 12,
                 }}
               >
@@ -250,12 +250,12 @@ const OTPInputScreen = () => {
                     width: 40,
                     height: 50,
                     borderWidth: 1,
-                    borderColor: theme.colors.normal,
+                    borderColor: theme.colors.dark,
                     borderRadius: 10,
                     textAlign: "center",
-                    fontSize: 24,
+                    fontSize: theme.fontSizes.large,
                     color: theme.colors.dark,
-                    backgroundColor: "#f9f9f9",
+                    backgroundColor: theme.colors.backgroundSecondary,
                   }}
                 />
               ))}

@@ -4,13 +4,12 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  ImageBackground,
   Dimensions,
   Platform,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { ActivityIndicator } from "react-native-paper";
 import NotificationShimmer from "@/app/modules/Shimmer/NotificationShimmer";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -38,6 +37,8 @@ interface NotificationItem {
 }
 
 function NotificationScreen() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const router = useRouter();
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [videoCallSchedule, setVideoCallSchedule] = useState<any>({
@@ -115,14 +116,10 @@ function NotificationScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
       edges={["left", "right"]}
     >
-      <ImageBackground
-        source={require("../../../assets/images/basicBackground.jpg")}
-        style={{ flex: 1 }}
-        resizeMode="cover"
-      >
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
         {/* Header */}
         <View
           style={{
@@ -148,25 +145,27 @@ function NotificationScreen() {
             {notifications.length === 0 ? (
               <View
                 style={{
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
                   borderRadius: 20,
                   padding: 40,
                   alignItems: "center",
                   marginTop: 40,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.08,
-                  shadowRadius: 12,
-                  elevation: 3,
                   borderWidth: 1,
-                  borderColor: "#F5F5F5",
+                  borderColor: theme.colors.border,
+                  ...(isDark ? {} : {
+                    shadowColor: theme.colors.black,
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 12,
+                    elevation: 3,
+                  }),
                 }}
               >
-                <Ionicons name="notifications-outline" size={48} color="#999" />
+                <Ionicons name="notifications-outline" size={48} color={theme.colors.textMuted} />
                 <Text
                   style={{
-                    color: "#666",
-                    fontSize: 16,
+                    color: theme.colors.textSecondary,
+                    fontSize: theme.fontSizes.regular,
                     fontWeight: "600",
                     marginTop: 12,
                     textAlign: "center",
@@ -187,17 +186,19 @@ function NotificationScreen() {
                       activeOpacity={0.7}
                       onPress={() => handleNotificationClick(item)}
                       style={{
-                        backgroundColor: "#FFFFFF",
+                        backgroundColor: theme.colors.background,
                         borderRadius: 20,
                         padding: 16,
-                        shadowColor: "#000",
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: 0.08,
-                        shadowRadius: 12,
-                        elevation: 3,
                         borderWidth: 1,
-                        borderColor: "#F5F5F5",
+                        borderColor: theme.colors.border,
                         position: "relative",
+                        ...(isDark ? {} : {
+                          shadowColor: theme.colors.black,
+                          shadowOffset: { width: 0, height: 2 },
+                          shadowOpacity: 0.08,
+                          shadowRadius: 12,
+                          elevation: 3,
+                        }),
                       }}
                     >
                       <View
@@ -246,8 +247,8 @@ function NotificationScreen() {
                           >
                             <Text
                               style={{
-                                color: "#000",
-                                fontSize: 16,
+                                color: theme.colors.text,
+                                fontSize: theme.fontSizes.regular,
                                 fontWeight: "700",
                                 flex: 1,
                                 paddingRight: 8,
@@ -262,7 +263,7 @@ function NotificationScreen() {
                                 width: 32,
                                 height: 32,
                                 borderRadius: 16,
-                                backgroundColor: "#F8F8F8",
+                                backgroundColor: theme.colors.backgroundSecondary,
                                 justifyContent: "center",
                                 alignItems: "center",
                                 marginLeft: 8,
@@ -270,12 +271,12 @@ function NotificationScreen() {
                               disabled={deletingId === (item as any)._id}
                             >
                               {deletingId === (item as any)._id ? (
-                                <ActivityIndicator size={16} color="#666" />
+                                <ActivityIndicator size={16} color={theme.colors.textSecondary} />
                               ) : (
                                 <Ionicons
                                   name="trash-outline"
                                   size={18}
-                                  color="#666"
+                                  color={theme.colors.textSecondary}
                                 />
                               )}
                             </TouchableOpacity>
@@ -283,8 +284,8 @@ function NotificationScreen() {
 
                           <Text
                             style={{
-                              color: "#666",
-                              fontSize: 14,
+                              color: theme.colors.textSecondary,
+                              fontSize: theme.fontSizes.regularSmall,
                               lineHeight: 20,
                               marginBottom: 8,
                               fontWeight: "500",
@@ -294,8 +295,8 @@ function NotificationScreen() {
                           </Text>
                           <Text
                             style={{
-                              color: "#999",
-                              fontSize: 12,
+                              color: theme.colors.textMuted,
+                              fontSize: theme.fontSizes.small,
                               fontWeight: "500",
                             }}
                           >
@@ -312,30 +313,32 @@ function NotificationScreen() {
                                 alignItems: "center",
                                 justifyContent: "center",
                                 alignSelf: "flex-start",
-                                backgroundColor: "#E8F5E9",
+                                backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.greenLight,
                                 paddingVertical: 10,
                                 paddingHorizontal: 20,
                                 borderRadius: 25,
                                 marginTop: 12,
                                 borderWidth: 1,
-                                borderColor: "#67C694",
-                                shadowColor: "#67C694",
-                                shadowOffset: { width: 0, height: 2 },
-                                shadowOpacity: 0.15,
-                                shadowRadius: 6,
-                                elevation: 3,
+                                borderColor: theme.colors.success,
+                                ...(isDark ? {} : {
+                                  shadowColor: theme.colors.success,
+                                  shadowOffset: { width: 0, height: 2 },
+                                  shadowOpacity: 0.15,
+                                  shadowRadius: 6,
+                                  elevation: 3,
+                                }),
                               }}
                             >
                               <Ionicons
                                 name="videocam"
                                 size={16}
-                                color="#67C694"
+                                color={theme.colors.success}
                                 style={{ marginRight: 6 }}
                               />
                               <Text
                                 style={{
-                                  color: "#67C694",
-                                  fontSize: 14,
+                                  color: theme.colors.success,
+                                  fontSize: theme.fontSizes.regularSmall,
                                   fontWeight: "700",
                                   fontFamily: theme.fonts.bold,
                                 }}
@@ -367,7 +370,7 @@ function NotificationScreen() {
           bgColor={theme.colors.primary}
           onDismiss={() => setSnackbarOpen(false)}
         />
-      </ImageBackground>
+      </View>
     </SafeAreaView>
   );
 }

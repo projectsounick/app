@@ -4,6 +4,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Modal from "react-native-modal";
 import { Session } from "@/app/interfaces/sessionInterface";
 import { sessionService } from "@/app/services/sessionService";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 const options = [
   { icon: "emoticon-happy-outline", label: "Good" },
   { icon: "star-circle-outline", label: "Excellent" },
@@ -24,6 +25,8 @@ const FeedbackModal = ({
   setCurrentSession: (session: Session | null) => void;
   currentSession: Session | null;
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [customFeedback, setCustomFeedback] = useState("");
   const [feedbackLoading, setFeedbackLoading] = useState(false);
@@ -69,19 +72,19 @@ const FeedbackModal = ({
       <View
         style={{
           flex: 1,
-          backgroundColor: "rgba(0,0,0,0.5)",
+          backgroundColor: theme.colors.overlay,
           justifyContent: "center",
           padding: 20,
         }}
       >
         <View
           style={{
-            backgroundColor: "#fff",
+            backgroundColor: theme.colors.background,
             borderRadius: 12,
             padding: 20,
           }}
         >
-          <Text style={{ fontSize: 18, fontWeight: "bold", marginBottom: 16 }}>
+          <Text style={{ fontSize: theme.fontSizes.medium, fontWeight: theme.fontWeights.bold as "700", marginBottom: 16 }}>
             Give your feedback
           </Text>
 
@@ -103,17 +106,17 @@ const FeedbackModal = ({
                 <MaterialCommunityIcons
                   name={opt.icon}
                   size={24}
-                  color="#333"
+                  color={theme.colors.textSecondary}
                   style={{ marginRight: 10 }}
                 />
-                <Text style={{ fontSize: 15, flex: 1 }}>{opt.label}</Text>
+                <Text style={{ fontSize: theme.fontSizes.regular, flex: 1 }}>{opt.label}</Text>
                 <View
                   style={{
                     height: 18,
                     width: 18,
                     borderRadius: 9,
                     borderWidth: 1,
-                    borderColor: "#333",
+                    borderColor: theme.colors.textSecondary,
                     justifyContent: "center",
                     alignItems: "center",
                   }}
@@ -124,7 +127,7 @@ const FeedbackModal = ({
                         height: 10,
                         width: 10,
                         borderRadius: 5,
-                        backgroundColor: "#333",
+                        backgroundColor: theme.colors.textSecondary,
                       }}
                     />
                   )}
@@ -136,11 +139,11 @@ const FeedbackModal = ({
               <TextInput
                 style={{
                   borderWidth: 1,
-                  borderColor: "#ccc",
+                  borderColor: theme.colors.border,
                   borderRadius: 6,
                   padding: 10,
                   marginTop: 12,
-                  fontSize: 14,
+                  fontSize: theme.fontSizes.regularSmall,
                 }}
                 placeholder="Write your feedback..."
                 value={customFeedback}
@@ -160,13 +163,13 @@ const FeedbackModal = ({
             <Pressable
               onPress={onClose}
               style={{
-                backgroundColor: "#f8d7da",
+                backgroundColor: theme.colors.errorLight,
                 paddingVertical: 10,
                 paddingHorizontal: 16,
                 borderRadius: 20,
               }}
             >
-              <Text style={{ color: "#721c24", fontWeight: "600" }}>
+              <Text style={{ color: theme.colors.error, fontWeight: theme.fontWeights.medium as "500" }}>
                 Cancel
               </Text>
             </Pressable>
@@ -180,14 +183,14 @@ const FeedbackModal = ({
               }
               disabled={feedbackLoading}
               style={{
-                backgroundColor: "#d4edda",
+                backgroundColor: theme.colors.greenLight,
                 paddingVertical: 10,
                 paddingHorizontal: 16,
                 borderRadius: 20,
                 opacity: feedbackLoading ? 0.6 : 1,
               }}
             >
-              <Text style={{ color: "#155724", fontWeight: "600" }}>
+              <Text style={{ color: theme.colors.success, fontWeight: theme.fontWeights.medium as "500" }}>
                 {feedbackLoading ? "Submitting..." : "Submit"}
               </Text>
             </Pressable>

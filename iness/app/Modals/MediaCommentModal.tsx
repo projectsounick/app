@@ -15,7 +15,7 @@ import {
   PodcastInterface,
 } from "@/app/interfaces/podcastsInterface";
 import CustomSnackbar from "@/app/modules/Snackbar";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 // Functional Component
 const MediaComponentModal: React.FC<MediaComponentModalProps> = ({
@@ -25,6 +25,8 @@ const MediaComponentModal: React.FC<MediaComponentModalProps> = ({
 
   handleAddComment,
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const [commentInput, setCommentInput] = useState("");
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -55,7 +57,7 @@ const MediaComponentModal: React.FC<MediaComponentModalProps> = ({
         <KeyboardAvoidingView
           style={{
             flex: 1,
-            backgroundColor: "rgba(0,0,0,0.5)",
+            backgroundColor: theme.colors.overlay,
             justifyContent: "center",
             paddingHorizontal: 20,
           }}
@@ -63,7 +65,7 @@ const MediaComponentModal: React.FC<MediaComponentModalProps> = ({
         >
           <View
             style={{
-              backgroundColor: "#fff",
+              backgroundColor: theme.colors.background,
               borderRadius: 16,
               padding: 20,
               maxHeight: "80%",
@@ -76,7 +78,7 @@ const MediaComponentModal: React.FC<MediaComponentModalProps> = ({
                 position: "absolute",
                 top: 12,
                 right: 12,
-                backgroundColor: "#eee",
+                backgroundColor: theme.colors.backgroundSecondary,
                 borderRadius: 20,
                 width: 32,
                 height: 32,
@@ -84,15 +86,15 @@ const MediaComponentModal: React.FC<MediaComponentModalProps> = ({
                 alignItems: "center",
               }}
             >
-              <Ionicons name="close" size={20} color="#333" />
+              <Ionicons name="close" size={20} color={theme.colors.text} />
             </TouchableOpacity>
 
             <Text
               style={{
-                fontSize: 20,
-                fontWeight: "bold",
+                fontSize: theme.fontSizes.medium,
+                fontWeight: theme.fontWeights.bold as "700",
                 marginBottom: 12,
-                color: "#333",
+                color: theme.colors.text,
               }}
             >
               Comments
@@ -109,21 +111,21 @@ const MediaComponentModal: React.FC<MediaComponentModalProps> = ({
                     style={{
                       flexDirection: "row",
                       marginBottom: 8,
-                      backgroundColor: "#F5F5F5",
+                      backgroundColor: theme.colors.border,
                       padding: 8,
                       borderRadius: 6,
                     }}
                   >
                     <Text
                       style={{
-                        fontWeight: "bold",
-                        color: "#333",
+                        fontWeight: theme.fontWeights.bold as "700",
+                        color: theme.colors.text,
                         marginRight: 4,
                       }}
                     >
                       {item.userName}:
                     </Text>
-                    <Text style={{ color: "#444", flex: 1 }}>{item.comment}</Text>
+                    <Text style={{ color: theme.colors.text, flex: 1 }}>{item.comment}</Text>
                   </View>
                 ))
               ) : (
@@ -134,7 +136,7 @@ const MediaComponentModal: React.FC<MediaComponentModalProps> = ({
                     justifyContent: "center",
                   }}
                 >
-                  <Text style={{ color: "#999", fontSize: 14 }}>
+                  <Text style={{ color: theme.colors.textMuted, fontSize: theme.fontSizes.regularSmall }}>
                     No comments yet. Be the first to comment!
                   </Text>
                 </View>
@@ -146,7 +148,7 @@ const MediaComponentModal: React.FC<MediaComponentModalProps> = ({
                 flexDirection: "row",
                 alignItems: "center",
                 borderTopWidth: 1,
-                borderTopColor: "#ccc",
+                borderTopColor: theme.colors.divider,
                 paddingTop: 10,
               }}
             >
@@ -157,24 +159,24 @@ const MediaComponentModal: React.FC<MediaComponentModalProps> = ({
                 style={{
                   flex: 1,
                   borderWidth: 1,
-                  borderColor: "#ccc",
+                  borderColor: theme.colors.divider,
                   borderRadius: 8,
                   paddingHorizontal: 10,
                   paddingVertical: 6,
-                  fontSize: 14,
+                  fontSize: theme.fontSizes.regularSmall,
                   marginRight: 10,
                 }}
               />
               <TouchableOpacity
                 onPress={() => addingComment(podcast)}
                 style={{
-                  backgroundColor: "#34A853",
+                  backgroundColor: theme.colors.success,
                   paddingVertical: 8,
                   paddingHorizontal: 12,
                   borderRadius: 8,
                 }}
               >
-                <Text style={{ color: "#fff", fontWeight: "bold" }}>Post</Text>
+                <Text style={{ color: theme.colors.textWhite, fontWeight: theme.fontWeights.bold as "700" }}>Post</Text>
               </TouchableOpacity>
             </View>
           </View>

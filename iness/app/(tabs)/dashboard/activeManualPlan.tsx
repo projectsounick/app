@@ -23,6 +23,7 @@ import BackHeader from "@/app/modules/BackHeader";
 import { LinearGradient } from "expo-linear-gradient";
 import ImageViewerModal from "@/app/Modals/ImageViewerModal";
 import VideoViewerModal from "@/app/Modals/VideoViewerModal";
+import theme from "@/app/Theme/globalTheme";
 
 const dayKeys: (keyof WorkoutPlanInterface)[] = [
   "sun",
@@ -67,7 +68,7 @@ const ManualPlanViewer = () => {
   if (!plan) {
     return (
       <View style={{ padding: 20 }}>
-        <Text style={{ fontSize: 16, textAlign: "center" }}>
+        <Text style={{ fontSize: theme.fontSizes.regular, textAlign: "center" }}>
           No active manual plan found.
         </Text>
       </View>
@@ -88,10 +89,10 @@ const ManualPlanViewer = () => {
       <BackHeader />
 
       <View style={{ paddingHorizontal: 16, paddingTop: 2 }}>
-        <Text style={{ fontSize: 22, fontWeight: "800", color: "#1A1A1A" }}>
+        <Text style={{ fontSize: theme.fontSizes.large, fontWeight: theme.fontWeights.bold as "700", color: theme.colors.text }}>
           {plan.planName}
         </Text>
-        <Text style={{ fontSize: 15, color: "#666", marginTop: 4 }}>
+        <Text style={{ fontSize: theme.fontSizes.regular, color: theme.colors.textSecondary, marginTop: 4 }}>
           {plan.description || "No description available."}
         </Text>
       </View>
@@ -130,7 +131,7 @@ const ManualPlanViewer = () => {
                 style={{
                   fontWeight: "600",
                   color: isActive ? "#fff" : "#222",
-                  fontSize: 14,
+                  fontSize: theme.fontSizes.regularSmall,
                 }}
               >
                 {key.toUpperCase()}
@@ -145,7 +146,7 @@ const ManualPlanViewer = () => {
         contentContainerStyle={{ paddingBottom: 40 }}
       >
         {exercises.length === 0 ? (
-          <Text style={{ textAlign: "center", color: "#999", marginTop: 30 }}>
+          <Text style={{ textAlign: "center", color: theme.colors.textMuted, marginTop: 30 }}>
             No exercises for this day.
           </Text>
         ) : (
@@ -162,14 +163,14 @@ const ManualPlanViewer = () => {
                 borderRadius: 14,
               }}
             >
-              <Text style={{ fontSize: 18, fontWeight: "700", color: "#fff" }}>
+              <Text style={{ fontSize: theme.fontSizes.medium, fontWeight: theme.fontWeights.bold as "700", color: theme.colors.textWhite }}>
                 {item.exercise.name}
               </Text>
 
               {item.sets.map((set, i) => (
                 <Text
                   key={i}
-                  style={{ fontSize: 14, color: "#f0f0f0", marginTop: 4 }}
+                  style={{ fontSize: theme.fontSizes.regularSmall, color: theme.colors.textLight, marginTop: 4 }}
                 >
                   • Set {i + 1}: {set.repRange} reps{" "}
                   {set.timer && `| Timer: ${set.timer}`}
@@ -196,7 +197,7 @@ const ManualPlanViewer = () => {
                       alignItems: "center",
                     }}
                   >
-                    <Text style={{ color: "#fff", fontWeight: "600" }}>
+                    <Text style={{ color: theme.colors.textWhite, fontWeight: theme.fontWeights.medium as "500" }}>
                       Images
                     </Text>
                     <Ionicons
@@ -230,7 +231,7 @@ const ManualPlanViewer = () => {
                               height: 80,
                               marginRight: 10,
                               borderRadius: 8,
-                              backgroundColor: "#ddd",
+                              backgroundColor: theme.colors.textLight,
                             }}
                           />
                         </TouchableOpacity>
@@ -260,7 +261,7 @@ const ManualPlanViewer = () => {
                       alignItems: "center",
                     }}
                   >
-                    <Text style={{ color: "#fff", fontWeight: "600" }}>
+                    <Text style={{ color: theme.colors.textWhite, fontWeight: theme.fontWeights.medium as "500" }}>
                       Videos
                     </Text>
                     <Ionicons
@@ -288,7 +289,7 @@ const ManualPlanViewer = () => {
                             borderRadius: 10,
                             marginRight: 10,
                             overflow: "hidden",
-                            backgroundColor: "#000",
+                            backgroundColor: theme.colors.black,
                           }}
                           onPress={() => {
                             setSelectedVideoUrl(vid);

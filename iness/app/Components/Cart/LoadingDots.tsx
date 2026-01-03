@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Text } from "react-native";
+import theme from "@/app/Theme/globalTheme";
 
 const AnimatedDots = () => {
   const [dots, setDots] = useState("");
@@ -13,7 +14,7 @@ const AnimatedDots = () => {
   }, []);
 
   return (
-    <Text style={{ color: "#000", fontSize: 16, fontWeight: "bold" }}>
+    <Text style={{ color: theme.colors.black, fontSize: theme.fontSizes.regular, fontWeight: theme.fontWeights.bold as "700" }}>
       Loading{dots}
     </Text>
   );

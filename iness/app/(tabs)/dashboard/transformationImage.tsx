@@ -6,14 +6,13 @@ import {
   TouchableOpacity,
   SectionList,
   Dimensions,
-  ImageBackground,
   ScrollView,
   Alert,
   Platform,
   StyleSheet,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import NormalHeader from "@/app/modules/NormalHeader";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import useGetDataHook from "@/hooks/useFetchHook";
@@ -42,6 +41,8 @@ const formatDateDisplay = (dateStr: string) => {
 };
 
 export default function TransformationImage() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const {
     data,
     loading,
@@ -184,16 +185,14 @@ export default function TransformationImage() {
     0
   ) || 0;
 
+  const styles = getStyles(theme, isDark);
+
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "transparent" }}
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
       edges={[ "left", "right"]}
     >
-      <ImageBackground
-        source={require("../../../assets/images/basicBackground.jpg")}
-        style={{ flex: 1 }}
-        resizeMode="cover"
-      >
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
         {/* Header */}
         <View
             style={{
@@ -220,7 +219,7 @@ export default function TransformationImage() {
                       <MaterialCommunityIcons
                         name="image-multiple"
                         size={22}
-                        color="#9747FF"
+                        color={theme.colors.secondPrimary}
                       />
                     </View>
                     <View style={styles.infoTextContainer}>
@@ -241,7 +240,7 @@ export default function TransformationImage() {
                           <MaterialCommunityIcons
                             name="folder-image"
                             size={18}
-                            color="#9747FF"
+                            color={theme.colors.secondPrimary}
                           />
                         </View>
                         <Text style={styles.statValue}>{totalMedia}</Text>
@@ -253,7 +252,7 @@ export default function TransformationImage() {
                           <MaterialCommunityIcons
                             name="calendar-check"
                             size={18}
-                            color="#9747FF"
+                            color={theme.colors.secondPrimary}
                           />
                         </View>
                         <Text style={styles.statValue}>{data?.length || 0}</Text>
@@ -269,7 +268,7 @@ export default function TransformationImage() {
                     <MaterialCommunityIcons
                       name="camera-plus-outline"
                       size={40}
-                      color="#9747FF"
+                      color={theme.colors.secondPrimary}
                     />
                   </View>
                   <Text style={styles.emptyTitle}>No Photos Yet</Text>
@@ -284,7 +283,7 @@ export default function TransformationImage() {
                     <MaterialCommunityIcons
                       name="upload"
                       size={18}
-                      color="#fff"
+                      color={theme.colors.textWhite}
                     />
                     <Text style={styles.emptyButtonText}>Upload Now</Text>
                   </TouchableOpacity>
@@ -298,7 +297,7 @@ export default function TransformationImage() {
                       <MaterialCommunityIcons
                         name="calendar"
                         size={14}
-                        color="#9747FF"
+                        color={theme.colors.secondPrimary}
                       />
                     </View>
                     <Text style={styles.dateText}>
@@ -340,14 +339,14 @@ export default function TransformationImage() {
                                 <Ionicons
                                   name="play"
                                   size={24}
-                                  color="#fff"
+                                  color={theme.colors.textWhite}
                                 />
                               </View>
                               <View style={styles.videoBadge}>
                                 <MaterialCommunityIcons
                                   name="video"
                                   size={10}
-                                  color="#fff"
+                                  color={theme.colors.textWhite}
                                 />
                                 <Text style={styles.videoBadgeText}>Video</Text>
                               </View>
@@ -362,7 +361,7 @@ export default function TransformationImage() {
                                 <MaterialCommunityIcons
                                   name="image"
                                   size={10}
-                                  color="#fff"
+                                  color={theme.colors.textWhite}
                                 />
                               </View>
                             </View>
@@ -421,14 +420,14 @@ export default function TransformationImage() {
           visible={snackbarVisible}
           message={snackbarMessage}
           onDismiss={() => setSnackbarVisible(false)}
-          bgColor="#67C694"
+          bgColor={theme.colors.success}
         />
-      </ImageBackground>
+      </View>
     </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   headerContainer: {
     paddingTop: 20,
     paddingLeft: 20,
@@ -442,25 +441,27 @@ const styles = StyleSheet.create({
   },
   // Info Card
   infoCard: {
-    backgroundColor: "#fff",
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
     flexDirection: "row",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    }),
   },
   infoIconContainer: {
     width: 44,
     height: 44,
     borderRadius: 12,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 14,
@@ -469,34 +470,36 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   infoTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
     marginBottom: 4,
   },
   infoSubtitle: {
-    fontSize: 13,
-    color: "#666",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
     fontFamily: theme.fonts.regular,
     lineHeight: 18,
   },
   // Stats Card
   statsCard: {
-    backgroundColor: "#fff",
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
     borderRadius: 16,
     padding: 16,
     marginBottom: 20,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    }),
   },
   statItem: {
     alignItems: "center",
@@ -506,83 +509,87 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
   },
   statValue: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   statLabel: {
-    fontSize: 12,
-    color: "#888",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textMuted,
     fontFamily: theme.fonts.regular,
     marginTop: 2,
   },
   statDivider: {
     width: 1,
     height: 50,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   // Empty State
   emptyStateCard: {
-    backgroundColor: "#fff",
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
     borderRadius: 20,
     padding: 32,
     alignItems: "center",
     marginTop: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    }),
   },
   emptyIconContainer: {
     width: 80,
     height: 80,
     borderRadius: 20,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 20,
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 14,
-    color: "#888",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textMuted,
     fontFamily: theme.fonts.regular,
     textAlign: "center",
     lineHeight: 20,
     marginBottom: 20,
   },
   emptyButton: {
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 14,
-    shadowColor: "#67C694",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.success,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.3,
+      shadowRadius: 4,
+      elevation: 3,
+    }),
   },
   emptyButtonText: {
-    color: "#fff",
-    fontSize: 15,
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.regular,
     fontWeight: "700",
     fontFamily: theme.fonts.bold,
     marginLeft: 8,
@@ -597,47 +604,49 @@ const styles = StyleSheet.create({
   dateContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 2,
+      elevation: 1,
+    }),
   },
   dateIconContainer: {
     width: 22,
     height: 22,
     borderRadius: 6,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 8,
   },
   dateText: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.text,
     fontFamily: theme.fonts.medium,
   },
   dateLine: {
     flex: 1,
     height: 1,
-    backgroundColor: "#E0E0E0",
+    backgroundColor: theme.colors.divider,
     marginHorizontal: 12,
   },
   countBadge: {
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 12,
   },
   countText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#9747FF",
+    fontSize: theme.fontSizes.small,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.secondPrimary,
     fontFamily: theme.fonts.bold,
   },
   // Media Container
@@ -651,12 +660,14 @@ const styles = StyleSheet.create({
     marginRight: 12,
     borderRadius: 14,
     overflow: "hidden",
-    backgroundColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 4,
+      elevation: 2,
+    }),
   },
   mediaImage: {
     width: "100%",
@@ -672,7 +683,7 @@ const styles = StyleSheet.create({
   },
   videoPlaceholder: {
     width: "100%",
-    backgroundColor: "#1A1A1A",
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
     borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
@@ -697,42 +708,46 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   videoBadgeText: {
-    color: "#fff",
-    fontSize: 10,
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.small,
     fontWeight: "600",
     marginLeft: 4,
   },
   // White Bottom Sheet
   bottomSheet: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     paddingHorizontal: 16,
     paddingTop: 16,
     paddingBottom: Platform.OS === "ios" ? 34 : 20,
     borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 8,
+    borderTopColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: -2 },
+      shadowOpacity: 0.05,
+      shadowRadius: 8,
+      elevation: 8,
+    }),
   },
   uploadButton: {
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 16,
     borderRadius: 30,
-    shadowColor: "#67C694",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 3,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.success,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.2,
+      shadowRadius: 4,
+      elevation: 3,
+    }),
   },
   uploadButtonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.bold as "700",
     fontFamily: theme.fonts.bold,
     marginLeft: 10,
   },

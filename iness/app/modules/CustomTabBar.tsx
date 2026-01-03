@@ -5,10 +5,13 @@ import { BottomTabBarProps } from "@react-navigation/bottom-tabs";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { Dimensions } from "react-native";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
 export default function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const insets = useSafeAreaInsets();
   
   // Check if we're on the home page (index route)
@@ -54,7 +57,7 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
       ]}
     >
       <LinearGradient
-        colors={["#140A21", "#522987"]}
+        colors={isDark ? [theme.colors.background, theme.colors.backgroundSecondary] : ["#140A21", "#522987"]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={StyleSheet.absoluteFill}

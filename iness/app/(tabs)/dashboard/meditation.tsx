@@ -498,7 +498,7 @@ export default function MeditationScreen() {
 
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}>
       <ImageBackground
         source={backgroundImg}
         style={{ flex: 1 }}
@@ -597,7 +597,7 @@ const styles = StyleSheet.create({
     marginHorizontal: responsiveSpacing(16),
     marginTop: responsiveSpacing(16),
     marginBottom: responsiveSpacing(24),
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: responsiveSpacing(16),
     padding: responsiveSpacing(4),
     shadowColor: "#000",
@@ -648,12 +648,12 @@ const styles = StyleSheet.create({
   timerText: {
     fontSize: responsiveFontSize(48),
     fontWeight: "700",
-    color: "#fff",
+    color: theme.colors.textWhite,
     fontFamily: theme.fonts.bold,
   },
   timerLabel: {
     fontSize: responsiveFontSize(18),
-    color: "#fff",
+    color: theme.colors.textWhite,
     marginTop: responsiveSpacing(8),
     fontFamily: theme.fonts.medium,
   },
@@ -670,7 +670,7 @@ const styles = StyleSheet.create({
     borderRadius: responsiveWidth(28),
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.04,
@@ -683,7 +683,7 @@ const styles = StyleSheet.create({
     width: responsiveWidth(72),
     height: responsiveWidth(72),
     borderRadius: responsiveWidth(36),
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     borderWidth: 0,
     shadowColor: "#67C694",
     shadowOffset: { width: 0, height: 4 },
@@ -705,7 +705,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: responsiveFontSize(22),
     fontWeight: "700",
-    color: "#1A1A1A",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
     lineHeight: responsiveFontSize(28),
   },
@@ -718,7 +718,7 @@ const styles = StyleSheet.create({
   sessionCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: responsiveSpacing(20),
     padding: responsiveSpacing(18),
     marginBottom: responsiveSpacing(16),
@@ -751,14 +751,14 @@ const styles = StyleSheet.create({
   sessionTitle: {
     fontSize: responsiveFontSize(18),
     fontWeight: "700",
-    color: "#1A1A1A",
+    color: theme.colors.text,
     marginBottom: responsiveSpacing(6),
     fontFamily: theme.fonts.bold,
     lineHeight: responsiveFontSize(24),
   },
   sessionDescription: {
     fontSize: responsiveFontSize(14),
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginBottom: responsiveSpacing(8),
     fontFamily: theme.fonts.regular,
     lineHeight: responsiveFontSize(20),
@@ -793,7 +793,7 @@ const styles = StyleSheet.create({
   breathingPhaseText: {
     fontSize: responsiveFontSize(32),
     fontWeight: "700",
-    color: "#fff",
+    color: theme.colors.textWhite,
     marginBottom: responsiveSpacing(20),
     fontFamily: theme.fonts.bold,
   },
@@ -806,7 +806,7 @@ const styles = StyleSheet.create({
   },
   breathingProgressFill: {
     height: "100%",
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.background,
     borderRadius: 2,
   },
   breathingControls: {
@@ -827,12 +827,12 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   startBreathingButton: {
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
   },
   breathingButtonText: {
     fontSize: responsiveFontSize(18),
     fontWeight: "700",
-    color: "#fff",
+    color: theme.colors.textWhite,
     fontFamily: theme.fonts.bold,
   },
   breathingPatterns: {
@@ -848,7 +848,7 @@ const styles = StyleSheet.create({
   breathingPatternCard: {
     flex: 1,
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: responsiveSpacing(18),
     padding: responsiveSpacing(18),
     borderWidth: 1.5,
@@ -864,7 +864,7 @@ const styles = StyleSheet.create({
   breathingPatternCardActive: {
     borderColor: theme.colors.secondPrimary,
     borderWidth: 2.5,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     shadowColor: theme.colors.secondPrimary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
@@ -874,7 +874,7 @@ const styles = StyleSheet.create({
   breathingPatternName: {
     fontSize: responsiveFontSize(16),
     fontWeight: "700",
-    color: "#1A1A1A",
+    color: theme.colors.text,
     textAlign: "center",
     marginBottom: responsiveSpacing(10),
     fontFamily: theme.fonts.bold,
@@ -882,7 +882,7 @@ const styles = StyleSheet.create({
   },
   breathingPatternDesc: {
     fontSize: responsiveFontSize(13),
-    color: "#666",
+    color: theme.colors.textSecondary,
     textAlign: "center",
     fontFamily: theme.fonts.regular,
     lineHeight: responsiveFontSize(18),
@@ -891,7 +891,7 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   comingSoonCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: responsiveSpacing(20),
     padding: responsiveSpacing(48),
     marginHorizontal: 0,
@@ -907,7 +907,7 @@ const styles = StyleSheet.create({
   comingSoonTitle: {
     fontSize: responsiveFontSize(24),
     fontWeight: "700",
-    color: "#1A1A1A",
+    color: theme.colors.text,
     marginTop: responsiveSpacing(20),
     marginBottom: responsiveSpacing(12),
     fontFamily: theme.fonts.bold,
@@ -915,13 +915,13 @@ const styles = StyleSheet.create({
   },
   comingSoonText: {
     fontSize: responsiveFontSize(15),
-    color: "#666",
+    color: theme.colors.textSecondary,
     textAlign: "center",
     lineHeight: responsiveFontSize(22),
     fontFamily: theme.fonts.regular,
   },
   sessionInfoCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: responsiveSpacing(20),
     padding: responsiveSpacing(24),
     marginTop: responsiveSpacing(24),
@@ -942,7 +942,7 @@ const styles = StyleSheet.create({
     width: responsiveWidth(44),
     height: responsiveWidth(44),
     borderRadius: responsiveSpacing(12),
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: responsiveSpacing(14),
@@ -955,13 +955,13 @@ const styles = StyleSheet.create({
   sessionInfoTitle: {
     fontSize: responsiveFontSize(20),
     fontWeight: "700",
-    color: "#1A1A1A",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
     lineHeight: responsiveFontSize(26),
   },
   sessionInfoText: {
     fontSize: responsiveFontSize(15),
-    color: "#666",
+    color: theme.colors.textSecondary,
     lineHeight: responsiveFontSize(24),
     fontFamily: theme.fonts.regular,
     textAlign: "left",
@@ -973,7 +973,7 @@ const styles = StyleSheet.create({
     marginTop: responsiveSpacing(8),
     paddingVertical: responsiveSpacing(12),
     paddingHorizontal: responsiveSpacing(16),
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     borderRadius: responsiveSpacing(12),
     alignSelf: "flex-start",
     shadowColor: theme.colors.secondPrimary,
@@ -993,7 +993,7 @@ const styles = StyleSheet.create({
     width: responsiveWidth(32),
     height: responsiveWidth(32),
     borderRadius: responsiveWidth(16),
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     justifyContent: "center",
     alignItems: "center",
   },

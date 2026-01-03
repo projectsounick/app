@@ -14,7 +14,7 @@ import { Calendar } from "react-native-calendars";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const { height, width } = Dimensions.get("window");
 
@@ -23,6 +23,9 @@ export default function StreaksBottomSheet({
 }: {
   onClose: () => void;
 }) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme);
   // Redux store
   const streakData = useSelector((state: RootState) => state.streak.streakData);
   const totalStreak = useSelector(
@@ -123,7 +126,7 @@ export default function StreaksBottomSheet({
             style={styles.closeButton}
             activeOpacity={0.7}
           >
-            <Ionicons name="close" size={20} color="#FFFFFF" />
+            <Ionicons name="close" size={20} color={theme.colors.textWhite} />
           </TouchableOpacity>
 
           {/* Streak Icon and Title */}
@@ -135,7 +138,7 @@ export default function StreaksBottomSheet({
                 end={{ x: 1, y: 1 }}
                 style={styles.iconGradient}
               >
-                <Ionicons name="flame" size={44} color="#FFFFFF" />
+                <Ionicons name="flame" size={44} color={theme.colors.textWhite} />
               </LinearGradient>
             </View>
             <Text style={styles.streakTitle}>
@@ -158,9 +161,9 @@ export default function StreaksBottomSheet({
           <View style={styles.calendarContainer}>
             <Calendar
               theme={{
-                backgroundColor: "#FFFFFF",
-                calendarBackground: "#FFFFFF",
-                dayTextColor: "#1A1A1A",
+                backgroundColor: theme.colors.background,
+                calendarBackground: theme.colors.background,
+                dayTextColor: theme.colors.text,
                 monthTextColor: theme.colors.secondPrimary,
                 arrowColor: theme.colors.secondPrimary,
                 todayTextColor: theme.colors.secondPrimary,
@@ -171,10 +174,10 @@ export default function StreaksBottomSheet({
                 textMonthFontSize: 18,
                 textDayHeaderFontSize: 12,
                 selectedDayBackgroundColor: theme.colors.secondPrimary,
-                selectedDayTextColor: "#FFFFFF",
+                selectedDayTextColor: theme.colors.textWhite,
                 todayBackgroundColor: `${theme.colors.secondPrimary}20`,
                 dotColor: theme.colors.secondPrimary,
-                selectedDotColor: "#FFFFFF",
+                selectedDotColor: theme.colors.textWhite,
               }}
               markedDates={markedDates}
               markingType="dot"
@@ -186,11 +189,11 @@ export default function StreaksBottomSheet({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: "flex-end",
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: theme.colors.overlay,
   },
   confetti: {
     position: "absolute",
@@ -200,7 +203,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     height: height * 0.75,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     overflow: "hidden",
@@ -265,9 +268,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   streakTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#FFFFFF",
+    fontSize: theme.fontSizes.xlarge,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.textWhite,
     marginTop: 4,
     fontFamily: theme.fonts.heading,
     textShadowColor: "rgba(0, 0, 0, 0.2)",
@@ -278,7 +281,7 @@ const styles = StyleSheet.create({
     color: "rgba(255, 255, 255, 0.9)",
     textAlign: "center",
     marginTop: 8,
-    fontSize: 15,
+    fontSize: theme.fontSizes.regular,
     paddingHorizontal: 40,
     lineHeight: 22,
     fontFamily: theme.fonts.body,
@@ -290,7 +293,7 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   calendarContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     marginHorizontal: 20,
     marginTop: 20,
@@ -301,6 +304,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 4,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.lightGrey,
   },
 });

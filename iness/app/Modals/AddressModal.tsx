@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const INDIAN_STATES = [
   "Andhra Pradesh",
@@ -81,7 +81,10 @@ export default function AddressModal({
   address,
   setAddress,
 }: AddressModalProps) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const [showStatePicker, setShowStatePicker] = useState(false);
+  const styles = getStyles(theme);
 
   return (
     <Modal
@@ -103,7 +106,7 @@ export default function AddressModal({
 
               {/* Close Button */}
               <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-                <Ionicons name="close" size={20} color="#1A1A1A" />
+                <Ionicons name="close" size={20} color={theme.colors.text} />
               </TouchableOpacity>
 
               {/* Icon */}
@@ -112,7 +115,7 @@ export default function AddressModal({
                   <MaterialCommunityIcons
                     name="map-marker-outline"
                     size={36}
-                    color="#9747FF"
+                    color={theme.colors.secondPrimary}
                   />
                 </View>
               </View>
@@ -133,7 +136,7 @@ export default function AddressModal({
                     <MaterialCommunityIcons
                       name="home-outline"
                       size={18}
-                      color="#9747FF"
+                      color={theme.colors.secondPrimary}
                     />
                   </View>
                   <TextInput
@@ -153,7 +156,7 @@ export default function AddressModal({
                     <MaterialCommunityIcons
                       name="city-variant-outline"
                       size={18}
-                      color="#9747FF"
+                      color={theme.colors.secondPrimary}
                     />
                   </View>
                   <TextInput
@@ -173,7 +176,7 @@ export default function AddressModal({
                     <MaterialCommunityIcons
                       name="map-outline"
                       size={18}
-                      color="#9747FF"
+                      color={theme.colors.secondPrimary}
                     />
                   </View>
                   <TouchableOpacity
@@ -183,7 +186,7 @@ export default function AddressModal({
                     <Text
                       style={[
                         styles.dropdownText,
-                        !address.state && { color: "#999" },
+                        !address.state && { color: theme.colors.textMuted },
                       ]}
                     >
                       {address.state || "Select State"}
@@ -200,7 +203,7 @@ export default function AddressModal({
                     <MaterialCommunityIcons
                       name="numeric"
                       size={18}
-                      color="#9747FF"
+                      color={theme.colors.secondPrimary}
                     />
                   </View>
                   <TextInput
@@ -247,7 +250,7 @@ export default function AddressModal({
                   <MaterialCommunityIcons
                     name="map-outline"
                     size={20}
-                    color="#9747FF"
+                    color={theme.colors.secondPrimary}
                   />
                 </View>
                 <Text style={styles.pickerTitle}>Select State</Text>
@@ -256,7 +259,7 @@ export default function AddressModal({
                 onPress={() => setShowStatePicker(false)}
                 style={styles.closeBtn}
               >
-                <Ionicons name="close" size={20} color="#1A1A1A" />
+                <Ionicons name="close" size={20} color={theme.colors.text} />
               </TouchableOpacity>
             </View>
 
@@ -288,7 +291,7 @@ export default function AddressModal({
                     </Text>
                     {isSelected && (
                       <View style={styles.checkmarkContainer}>
-                        <Ionicons name="checkmark" size={16} color="#FFFFFF" />
+                        <Ionicons name="checkmark" size={16} color={theme.colors.textWhite} />
                       </View>
                     )}
                   </TouchableOpacity>
@@ -303,14 +306,14 @@ export default function AddressModal({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: theme.colors.overlay,
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 20,
@@ -321,7 +324,7 @@ const styles = StyleSheet.create({
   dashHandle: {
     width: 50,
     height: 5,
-    backgroundColor: "#E0E0E0",
+    backgroundColor: theme.colors.border,
     borderRadius: 3,
     alignSelf: "center",
     marginBottom: 16,
@@ -333,7 +336,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.mediumGrey,
     alignItems: "center",
     justifyContent: "center",
     zIndex: 10,
@@ -346,14 +349,14 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 20,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     textAlign: "center",
     marginBottom: 20,
     fontFamily: theme.fonts.bold,
@@ -370,48 +373,48 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
   input: {
     flex: 1,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 12,
     padding: 14,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
-    fontSize: 14,
-    color: "#1A1A1A",
+    borderColor: theme.colors.lightGrey,
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.text,
     fontFamily: theme.fonts.regular,
   },
   dropdownInput: {
     flex: 1,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 12,
     padding: 14,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.lightGrey,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
   dropdownText: {
-    fontSize: 14,
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.text,
     fontFamily: theme.fonts.regular,
   },
   dropdownArrow: {
     width: 24,
     height: 24,
     borderRadius: 8,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
   },
   placeOrderButton: {
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     paddingVertical: 16,
     borderRadius: 30,
     alignItems: "center",
@@ -419,19 +422,19 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   placeOrderButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 16,
+    color: theme.colors.textWhite,
+    fontWeight: theme.fontWeights.bold as "700",
+    fontSize: theme.fontSizes.regular,
     fontFamily: theme.fonts.bold,
   },
   // State Picker Modal
   pickerOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: theme.colors.overlay,
     justifyContent: "flex-end",
   },
   pickerContent: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 20,
@@ -446,7 +449,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
+    borderBottomColor: theme.colors.border,
   },
   pickerHeaderLeft: {
     flexDirection: "row",
@@ -456,15 +459,15 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
   },
   pickerTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   stateItem: {
@@ -474,28 +477,28 @@ const styles = StyleSheet.create({
     padding: 14,
     borderRadius: 12,
     marginBottom: 6,
-    backgroundColor: "#FAFAFA",
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   stateItemSelected: {
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     borderWidth: 1,
-    borderColor: "#9747FF",
+    borderColor: theme.colors.secondPrimary,
   },
   stateText: {
-    fontSize: 14,
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.text,
     fontFamily: theme.fonts.regular,
   },
   stateTextSelected: {
-    fontWeight: "600",
-    color: "#9747FF",
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.secondPrimary,
     fontFamily: theme.fonts.medium,
   },
   checkmarkContainer: {
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: "#9747FF",
+    backgroundColor: theme.colors.secondPrimary,
     alignItems: "center",
     justifyContent: "center",
   },

@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 import { useDispatch, useSelector } from "react-redux";
 import { setCalendarSheetOpen } from "@/Slices/componentOpenSlice";
 import { RootState } from "@/store";
@@ -65,6 +65,7 @@ const formatDateTime = (isoString: string) => {
 };
 
 const UpcomingSessionsCard = () => {
+  const theme = useGlobalTheme();
   const sessionsData = useSelector(
     (state: RootState) => state.session.sessions
   );
@@ -95,18 +96,18 @@ const UpcomingSessionsCard = () => {
   return (
     <View
       style={{
-        backgroundColor: "#FFFFFF",
+        backgroundColor: theme.colors.background,
         borderRadius: 20,
         paddingVertical: mainCardPadding,
         paddingHorizontal: 16,
         marginBottom: 16,
-        shadowColor: "#000",
+        shadowColor: theme.colors.dark,
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.05,
         shadowRadius: 4,
         elevation: 2,
         borderWidth: 1,
-        borderColor: "#F5F5F5",
+        borderColor: theme.colors.border,
       }}
     >
       {/* Header */}
@@ -124,7 +125,7 @@ const UpcomingSessionsCard = () => {
               width: screenHeight < 700 ? 30 : screenHeight < 900 ? 32 : 34,
               height: screenHeight < 700 ? 30 : screenHeight < 900 ? 32 : 34,
               borderRadius: 10,
-              backgroundColor: "#F3EDFF",
+              backgroundColor: theme.colors.backgroundCardLight,
               alignItems: "center",
               justifyContent: "center",
               marginRight: 12,
@@ -133,15 +134,15 @@ const UpcomingSessionsCard = () => {
             <MaterialCommunityIcons
               name="calendar-clock"
               size={screenHeight < 700 ? 18 : screenHeight < 900 ? 19 : 20}
-              color="#9747FF"
+              color={theme.colors.secondPrimary}
             />
           </View>
           <Text
             style={{
-              fontSize: screenHeight < 700 ? 16 : screenHeight < 900 ? 17 : 18,
+              fontSize: theme.fontSizes.medium,
               fontFamily: theme.fonts.bold,
-              color: "#000",
-              fontWeight: "700",
+              color: theme.colors.text,
+              fontWeight: theme.fontWeights.bold as "700",
             }}
           >
             Upcoming Sessions
@@ -155,11 +156,11 @@ const UpcomingSessionsCard = () => {
           >
             <Text
               style={{
-                fontSize: screenHeight < 700 ? 13 : 14,
+                fontSize: theme.fontSizes.regularSmall,
                 fontFamily: theme.fonts.medium,
-                color: "#666",
+                color: theme.colors.textSecondary,
                 marginRight: 4,
-                fontWeight: "600",
+                fontWeight: theme.fontWeights.medium as "500",
               }}
             >
               See All
@@ -167,7 +168,7 @@ const UpcomingSessionsCard = () => {
             <Ionicons 
               name="chevron-forward" 
               size={screenHeight < 700 ? 14 : 16} 
-              color="#666" 
+              color={theme.colors.textSecondary} 
             />
           </TouchableOpacity>
         )}
@@ -177,12 +178,12 @@ const UpcomingSessionsCard = () => {
       {latestSessions.length === 0 ? (
         <View
           style={{
-            backgroundColor: "#FFFFFF",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             padding: 40,
             alignItems: "center",
             borderWidth: 1,
-            borderColor: "#F5F5F5",
+            borderColor: theme.colors.border,
           }}
         >
           <View
@@ -190,7 +191,7 @@ const UpcomingSessionsCard = () => {
               width: 50,
               height: 50,
               borderRadius: 14,
-              backgroundColor: "#F3EDFF",
+              backgroundColor: theme.colors.backgroundCardLight,
               alignItems: "center",
               justifyContent: "center",
               marginBottom: 16,
@@ -199,17 +200,17 @@ const UpcomingSessionsCard = () => {
             <MaterialCommunityIcons
               name="calendar-clock"
               size={26}
-              color="#9747FF"
+              color={theme.colors.secondPrimary}
             />
           </View>
           <Text
             style={{
-              fontSize: 16,
+              fontSize: theme.fontSizes.regular,
               fontFamily: theme.fonts.bold,
-              color: "#666",
+              color: theme.colors.textSecondary,
               textAlign: "center",
               marginBottom: 16,
-              fontWeight: "600",
+              fontWeight: theme.fontWeights.medium as "500",
             }}
           >
             You do not have any sessions with us right now
@@ -218,11 +219,11 @@ const UpcomingSessionsCard = () => {
           <TouchableOpacity
             onPress={() => router.push("/(tabs)/dashboard/tabs/train")}
             style={{
-              backgroundColor: "#67C694",
+              backgroundColor: theme.colors.success,
               paddingVertical: 12,
               paddingHorizontal: 32,
               borderRadius: 16,
-              shadowColor: "#67C694",
+              shadowColor: theme.colors.success,
               shadowOffset: { width: 0, height: 1 },
               shadowOpacity: 0.15,
               shadowRadius: 2,
@@ -231,10 +232,10 @@ const UpcomingSessionsCard = () => {
           >
             <Text
               style={{
-                color: "#fff",
-                fontSize: 14,
+                color: theme.colors.textWhite,
+                fontSize: theme.fontSizes.regularSmall,
                 fontFamily: theme.fonts.bold,
-                fontWeight: "700",
+                fontWeight: theme.fontWeights.bold as "700",
               }}
             >
               Get Now
@@ -290,17 +291,17 @@ const UpcomingSessionsCard = () => {
                   <TouchableOpacity
                     onPress={() => dispatch(setCalendarSheetOpen(true))}
                     style={{
-                      backgroundColor: session.sessionStatus === "completed" ? "#F5F5F5" : "#FFFFFF",
+                      backgroundColor: session.sessionStatus === "completed" ? theme.colors.backgroundSecondary : theme.colors.backgroundCard,
                       borderRadius: responsiveSpacing(20),
                       paddingVertical: responsiveSpacing(12),
                       paddingHorizontal: responsiveSpacing(16),
-                      shadowColor: "#000",
+                      shadowColor: theme.colors.black,
                       shadowOffset: { width: 0, height: 1 },
                       shadowOpacity: 0.05,
                       shadowRadius: 4,
                       elevation: 2,
                       borderWidth: 1,
-                      borderColor: session.sessionStatus === "completed" ? "#E0E0E0" : "#F5F5F5",
+                      borderColor: session.sessionStatus === "completed" ? theme.colors.border : theme.colors.border,
                       position: "relative",
                       height: CARD_HEIGHT - responsiveSpacing(16),
                       justifyContent: "space-between",
@@ -328,10 +329,10 @@ const UpcomingSessionsCard = () => {
                         style={{
                           color:
                             session.sessionStatus === "completed"
-                              ? "#000000"
+                              ? theme.colors.text
                               : session.sessionStatus === "missed"
-                                ? "#F44336"
-                                : "#FF9800",
+                                ? theme.colors.error
+                                : theme.colors.warning,
                           fontSize: responsiveFontSize(9),
                           fontFamily: theme.fonts.bold,
                           textTransform: "uppercase",
@@ -359,7 +360,7 @@ const UpcomingSessionsCard = () => {
                           borderRadius: responsiveWidth(25),
                           marginRight: responsiveSpacing(12),
                           overflow: "hidden",
-                          backgroundColor: "#F8F8F8",
+                          backgroundColor: theme.colors.backgroundSecondary,
                         }}
                       >
                         <Image
@@ -387,9 +388,9 @@ const UpcomingSessionsCard = () => {
                         <View>
                           <Text
                             style={{
-                              fontSize: responsiveFontSize(14),
+                              fontSize: theme.fontSizes.regularSmall,
                               fontFamily: theme.fonts.bold,
-                              color: session.sessionStatus === "completed" ? "#000000" : "#000",
+                              color: theme.colors.text,
                               marginBottom: responsiveSpacing(6),
                               fontWeight: "700",
                               lineHeight: responsiveFontSize(18),
@@ -413,13 +414,13 @@ const UpcomingSessionsCard = () => {
                                   : "location-outline"
                               }
                               size={responsiveFontSize(13)}
-                              color={session.sessionStatus === "completed" ? "#333" : "#666"}
+                              color={theme.colors.textSecondary}
                               style={{ marginRight: responsiveSpacing(6) }}
                             />
                             <Text
                               style={{
-                                fontSize: responsiveFontSize(11),
-                                color: session.sessionStatus === "completed" ? "#000000" : "#666",
+                                fontSize: theme.fontSizes.small,
+                                color: theme.colors.textSecondary,
                                 fontWeight: "500",
                                 textTransform: "uppercase",
                                 letterSpacing: 0.5,
@@ -438,13 +439,13 @@ const UpcomingSessionsCard = () => {
                             <Ionicons
                               name="time-outline"
                               size={responsiveFontSize(13)}
-                              color={session.sessionStatus === "completed" ? "#333" : "#666"}
+                              color={theme.colors.textSecondary}
                               style={{ marginRight: responsiveSpacing(6) }}
                             />
                             <Text
                               style={{
-                                fontSize: responsiveFontSize(11),
-                                color: session.sessionStatus === "completed" ? "#000000" : "#666",
+                                fontSize: theme.fontSizes.small,
+                                color: theme.colors.textSecondary,
                                 fontWeight: "500",
                               }}
                               numberOfLines={1}
@@ -459,13 +460,13 @@ const UpcomingSessionsCard = () => {
                     {/* View Button - Fixed at bottom */}
                     <TouchableOpacity
                       style={{
-                        backgroundColor: "#67C694",
+                        backgroundColor: theme.colors.success,
                         paddingVertical: responsiveSpacing(7),
                         paddingHorizontal: responsiveSpacing(16),
                         borderRadius: responsiveSpacing(10),
                         alignSelf: "flex-start",
                         marginTop: responsiveSpacing(6),
-                        shadowColor: "#67C694",
+                        shadowColor: theme.colors.success,
                         shadowOffset: { width: 0, height: 2 },
                         shadowOpacity: 0.3,
                         shadowRadius: 4,
@@ -476,9 +477,9 @@ const UpcomingSessionsCard = () => {
                     >
                       <Text
                         style={{
-                          color: "#fff",
+                          color: theme.colors.textWhite,
                           fontFamily: theme.fonts.bold,
-                          fontSize: responsiveFontSize(12),
+                          fontSize: theme.fontSizes.small,
                           fontWeight: "700",
                         }}
                       >

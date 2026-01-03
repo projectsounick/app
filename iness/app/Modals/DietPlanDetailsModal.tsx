@@ -17,7 +17,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { WebView } from "react-native-webview";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 interface DietPlanDetailsModalProps {
   visible: boolean;
@@ -34,6 +34,9 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
   dietPlanUrl,
   dietPlanAssignDate,
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme);
   const [showPdfViewer, setShowPdfViewer] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -292,14 +295,14 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: theme.colors.overlay,
     justifyContent: "flex-end",
   },
   modalContainer: {
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     maxHeight: "90%",
@@ -329,7 +332,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     marginBottom: 20,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: theme.colors.mediumGrey,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -340,7 +343,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: theme.fontSizes.large,
     fontWeight: theme.fontWeights.bold,
-    color: theme.colors.dark,
+    color: theme.colors.text,
     marginBottom: 12,
     textAlign: "center",
     fontFamily: theme.fonts.bold,
@@ -364,7 +367,7 @@ const styles = StyleSheet.create({
     minWidth: "45%",
   },
   durationText: {
-    fontSize: 12,
+    fontSize: theme.fontSizes.small,
     color: theme.colors.secondPrimary,
     fontWeight: theme.fontWeights.medium,
     marginLeft: 8,
@@ -382,7 +385,7 @@ const styles = StyleSheet.create({
     minWidth: "45%",
   },
   assignedText: {
-    fontSize: 12,
+    fontSize: theme.fontSizes.small,
     color: theme.colors.secondPrimary,
     fontWeight: theme.fontWeights.medium,
     marginLeft: 8,
@@ -401,7 +404,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 8,
-    backgroundColor: "#ECFDF5",
+    backgroundColor: theme.colors.greenLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
@@ -409,7 +412,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: theme.fontSizes.medium,
     fontWeight: theme.fontWeights.bold,
-    color: theme.colors.dark,
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   descItem: {
@@ -429,14 +432,14 @@ const styles = StyleSheet.create({
   descText: {
     flex: 1,
     fontSize: theme.fontSizes.regularSmall,
-    color: "#666",
+    color: theme.colors.textSecondary,
     lineHeight: 20,
     fontWeight: theme.fontWeights.regular,
     fontFamily: theme.fonts.regular,
   },
   descriptionText: {
     fontSize: theme.fontSizes.regularSmall,
-    color: "#666",
+    color: theme.colors.textSecondary,
     lineHeight: 22,
     fontWeight: theme.fontWeights.regular,
     fontFamily: theme.fonts.regular,
@@ -447,14 +450,14 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingVertical: 16,
     paddingHorizontal: 20,
-    backgroundColor: "#F9F9F9",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 12,
     marginTop: 8,
   },
   priceLabel: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#666",
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.textSecondary,
   },
   priceValue: {
     fontSize: theme.fontSizes.medium,
@@ -476,25 +479,25 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: theme.fontSizes.regularSmall,
-    color: "#666",
+    color: theme.colors.textSecondary,
     fontWeight: theme.fontWeights.medium,
     marginLeft: 8,
     fontFamily: theme.fonts.medium,
   },
   infoValue: {
     fontSize: theme.fontSizes.regularSmall,
-    color: theme.colors.dark,
+    color: theme.colors.text,
     fontWeight: theme.fontWeights.semiBold,
     fontFamily: theme.fonts.semiBold,
   },
   viewDietPlanButton: {
     marginTop: 20,
     marginBottom: 12,
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     borderRadius: 16,
     paddingVertical: 16,
     paddingHorizontal: 20,
-    shadowColor: "#67C694",
+    shadowColor: theme.colors.success,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -505,7 +508,7 @@ const styles = StyleSheet.create({
   viewDietPlanButtonText: {
     fontSize: theme.fontSizes.medium,
     fontWeight: theme.fontWeights.bold,
-    color: "#fff",
+    color: theme.colors.textWhite,
     fontFamily: theme.fonts.bold,
   },
   downloadIconButton: {
@@ -513,16 +516,16 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: theme.colors.mediumGrey,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
     borderWidth: 1,
-    borderColor: "#e0e0e0",
+    borderColor: theme.colors.border,
   },
   pdfViewerContainer: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.background,
   },
   pdfViewerHeader: {
     flexDirection: "row",
@@ -531,10 +534,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     paddingTop: 50,
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.background,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
-    shadowColor: "#000",
+    borderBottomColor: theme.colors.border,
+    shadowColor: theme.colors.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -544,14 +547,14 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: theme.colors.mediumGrey,
     justifyContent: "center",
     alignItems: "center",
   },
   pdfViewerTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
   },
   webViewContainer: {
     flex: 1,
@@ -566,14 +569,14 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    backgroundColor: theme.colors.background + "E6",
     justifyContent: "center",
     alignItems: "center",
   },
   loadingText: {
     marginTop: 12,
-    fontSize: 14,
-    color: "#666",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
   },
   showMoreButton: {
     flexDirection: "row",
@@ -583,9 +586,9 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   showMoreText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#67C694",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.success,
     marginRight: 4,
   },
 });

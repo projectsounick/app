@@ -19,11 +19,15 @@ import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { userService } from "../services/user.service";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const { height, width } = Dimensions.get("window");
 const MODAL_DISMISSED_FLAG_KEY = "notificationModalDismissed";
 
 export default function NotificationPermissionBottomSheet() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme);
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const slideAnim = useRef(new Animated.Value(height)).current;
@@ -224,10 +228,10 @@ export default function NotificationPermissionBottomSheet() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: theme.colors.overlay,
   },
   modalContainer: {
     position: "absolute",
@@ -236,14 +240,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 30,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
   handle: {
     width: 50,
     height: 5,
-    backgroundColor: "#ccc",
+    backgroundColor: theme.colors.border,
     borderRadius: 3,
     alignSelf: "center",
     marginBottom: 20,
@@ -253,15 +257,15 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#000",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     marginBottom: 12,
     textAlign: "center",
   },
   message: {
-    fontSize: 15,
-    color: "#666",
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.textSecondary,
     textAlign: "center",
     marginBottom: 30,
     lineHeight: 22,
@@ -274,28 +278,28 @@ const styles = StyleSheet.create({
   },
   turnOnButton: {
     flex: 1,
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     paddingVertical: 16,
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
   },
   turnOnText: {
-    color: "#FFFFFF",
-    fontSize: 16,
-    fontWeight: "700",
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.bold as "700",
   },
   maybeLaterButton: {
     flex: 1,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: theme.colors.backgroundSecondary,
     paddingVertical: 16,
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
   },
   maybeLaterText: {
-    color: "#666",
-    fontSize: 16,
-    fontWeight: "700",
+    color: theme.colors.textSecondary,
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.bold as "700",
   },
 });

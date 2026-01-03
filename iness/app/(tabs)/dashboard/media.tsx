@@ -133,7 +133,7 @@ export default function MediaScreen() {
   }, [podcasts]);
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
+    <View style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}>
       <ImageBackground
         source={require("../../../assets/images/basicBackground.jpg")}
         style={{ flex: 1 }}
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
     minHeight: height * 0.6,
   },
   emptyCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 24,
     padding: 32,
     alignItems: "center",
@@ -270,16 +270,16 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   emptyTitle: {
-    fontSize: 22,
+    fontSize: theme.fontSizes.large,
     fontFamily: theme.fonts.bold,
     color: theme.colors.dark,
     textAlign: "center",
     marginBottom: 8,
   },
   emptySubtitle: {
-    fontSize: 15,
+    fontSize: theme.fontSizes.regular,
     fontFamily: theme.fonts.regular,
-    color: "#666",
+    color: theme.colors.textSecondary,
     textAlign: "center",
     marginBottom: 24,
   },
@@ -303,9 +303,9 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   loadMoreText: {
-    color: "#FFFFFF",
+    color: theme.colors.textWhite,
     fontFamily: theme.fonts.bold,
-    fontSize: 15,
-    fontWeight: "700",
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.bold as "700",
   },
 });

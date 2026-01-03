@@ -62,7 +62,7 @@ const PlansStatusCard = () => {
         <Text
           style={{
             color: isSelected ? "#fff" : "#7B61FF",
-            fontSize: 13,
+            fontSize: theme.fontSizes.regularSmall,
             fontWeight: "600",
             fontFamily: theme.fonts.bold,
             marginBottom: 2,
@@ -72,7 +72,7 @@ const PlansStatusCard = () => {
         </Text>
         <Text
           style={{
-            fontSize: 20,
+            fontSize: theme.fontSizes.large,
             fontWeight: "bold",
             fontFamily: theme.fonts.bold,
             color: isSelected ? "#fff" : "#7B61FF",

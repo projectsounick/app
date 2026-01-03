@@ -174,7 +174,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
                 textAlign: "center",
                 color: theme.colors.text,
                 fontFamily: theme.fonts.bold,
-                fontSize: 14,
+                fontSize: theme.fontSizes.regularSmall,
               }}
             >
               {title}
@@ -193,7 +193,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
               {/* Cart */}
               <TouchableOpacity
                 style={{
-                  backgroundColor: "#411D6E",
+                  backgroundColor: theme.colors.iconBackground,
                   borderRadius: 20,
                   padding: 8,
                   position: "relative",
@@ -219,7 +219,7 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
               {/* Bell */}
               <TouchableOpacity
                 style={{
-                  backgroundColor: "#411D6E",
+                  backgroundColor: theme.colors.iconBackground,
                   borderRadius: 20,
                   padding: 8,
                   position: "relative",

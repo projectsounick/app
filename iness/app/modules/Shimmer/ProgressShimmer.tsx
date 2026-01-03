@@ -2,6 +2,7 @@ import React from "react";
 import { View, ScrollView, StyleSheet, Dimensions } from "react-native";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
+import theme from "../../Theme/globalTheme";
 
 const { width: screenWidth } = Dimensions.get("window");
 const imageSize = (screenWidth - 64) / 3;
@@ -138,7 +139,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   shimmerCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -197,7 +198,7 @@ const styles = StyleSheet.create({
   shimmerStatDivider: {
     width: 1,
     height: 50,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: theme.colors.lightGrey,
   },
   shimmerSection: {
     marginBottom: 20,

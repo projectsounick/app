@@ -394,7 +394,7 @@ export default function VideoCallScreen({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: theme.colors.black,
   },
   topBar: {
     position: "absolute",
@@ -421,8 +421,8 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   timerText: {
-    color: "#fff",
-    fontSize: 16,
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.regular,
     fontWeight: "700",
     fontFamily: theme.fonts.bold,
   },
@@ -446,14 +446,14 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   hostBadgeText: {
-    color: "#fff",
-    fontSize: 10,
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.small,
     fontWeight: "700",
     fontFamily: theme.fonts.bold,
   },
   remoteContainer: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: theme.colors.black,
   },
   emptyStateContainer: {
     flex: 1,
@@ -475,8 +475,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   emptyStateTitle: {
-    color: "#fff",
-    fontSize: 20,
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.large,
     fontWeight: "700",
     marginBottom: 8,
     fontFamily: theme.fonts.bold,
@@ -484,19 +484,19 @@ const styles = StyleSheet.create({
   },
   emptyStateSubtitle: {
     color: "rgba(255, 255, 255, 0.8)",
-    fontSize: 14,
+    fontSize: theme.fontSizes.regularSmall,
     fontFamily: theme.fonts.regular,
     textAlign: "center",
   },
   singleRemoteContainer: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: theme.colors.black,
   },
   singleRemoteView: {
     flex: 1,
     width: "100%",
     height: "100%",
-    backgroundColor: "#111",
+    backgroundColor: theme.colors.text,
   },
   twoRemoteContainer: {
     flex: 1,
@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
   twoRemoteView: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#111",
+    backgroundColor: theme.colors.text,
   },
   gridContainer: {
     flex: 1,
@@ -526,7 +526,7 @@ const styles = StyleSheet.create({
   gridView: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#111",
+    backgroundColor: theme.colors.text,
   },
   localViewContainer: {
     position: "absolute",
@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 12,
     elevation: 8,
-    backgroundColor: "#000",
+    backgroundColor: theme.colors.black,
   },
   localView: {
     width: "100%",

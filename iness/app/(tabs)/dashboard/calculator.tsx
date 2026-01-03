@@ -4,7 +4,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  ImageBackground,
   Modal,
   Pressable,
   Platform,
@@ -17,12 +16,14 @@ import { Ionicons } from "@expo/vector-icons";
 import NormalHeader from "@/app/modules/NormalHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
-const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const { height } = Dimensions.get("window");
 
 export default function CalculatorScreen() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const [heightValue, setHeight] = useState("");
   const [weight, setWeight] = useState("");
   const [age, setAge] = useState("");
@@ -81,16 +82,11 @@ export default function CalculatorScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
-      <ImageBackground
-        source={backgroundImg}
-        style={{ flex: 1 }}
-        resizeMode="cover"
-      >
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: "transparent" }}
-          edges={["left", "right"]}
-        >
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      edges={["left", "right"]}
+    >
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
           <View
             style={{
               paddingLeft: 20,
@@ -110,7 +106,7 @@ export default function CalculatorScreen() {
             <View style={styles.card}>
               <View style={styles.cardHeader}>
                 <View style={styles.iconContainer}>
-                  <Ionicons name="body-outline" size={20} color="#9747FF" />
+                  <Ionicons name="body-outline" size={20} color={theme.colors.secondPrimary} />
                 </View>
                 <Text style={styles.cardTitle}>BMI Calculator</Text>
                 <TouchableOpacity
@@ -120,7 +116,7 @@ export default function CalculatorScreen() {
                   <Ionicons
                     name="information-circle-outline"
                     size={18}
-                    color="#9747FF"
+                    color={theme.colors.secondPrimary}
                   />
                 </TouchableOpacity>
               </View>
@@ -128,7 +124,7 @@ export default function CalculatorScreen() {
               <View style={styles.cardContent}>
                 <TextInput
                   placeholder="Height (cm)"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={theme.colors.textMuted}
                   value={heightValue}
                   onChangeText={setHeight}
                   keyboardType="numeric"
@@ -136,7 +132,7 @@ export default function CalculatorScreen() {
                 />
                 <TextInput
                   placeholder="Weight (kg)"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={theme.colors.textMuted}
                   value={weight}
                   onChangeText={setWeight}
                   keyboardType="numeric"
@@ -182,7 +178,7 @@ export default function CalculatorScreen() {
                   <Ionicons
                     name="information-circle-outline"
                     size={18}
-                    color="#9747FF"
+                    color={theme.colors.secondPrimary}
                   />
                 </TouchableOpacity>
               </View>
@@ -190,7 +186,7 @@ export default function CalculatorScreen() {
               <View style={styles.cardContent}>
                 <TextInput
                   placeholder="Age"
-                  placeholderTextColor="#999"
+                  placeholderTextColor={theme.colors.textMuted}
                   value={age}
                   onChangeText={setAge}
                   keyboardType="numeric"
@@ -209,7 +205,7 @@ export default function CalculatorScreen() {
                     <Ionicons
                       name="male"
                       size={18}
-                      color={gender === "male" ? "#FFFFFF" : "#9747FF"}
+                      color={gender === "male" ? theme.colors.textWhite : theme.colors.secondPrimary}
                     />
                     <Text
                       style={[
@@ -230,7 +226,7 @@ export default function CalculatorScreen() {
                     <Ionicons
                       name="female"
                       size={18}
-                      color={gender === "female" ? "#FFFFFF" : "#9747FF"}
+                      color={gender === "female" ? theme.colors.textWhite : theme.colors.secondPrimary}
                     />
                     <Text
                       style={[
@@ -279,14 +275,14 @@ export default function CalculatorScreen() {
                     <Ionicons
                       name="information-circle"
                       size={28}
-                      color="#9747FF"
+                      color={theme.colors.secondPrimary}
                     />
                   </View>
                   <TouchableOpacity
                     onPress={closeModal}
                     style={styles.modalCloseBtn}
                   >
-                    <Ionicons name="close" size={20} color="#1A1A1A" />
+                    <Ionicons name="close" size={20} color={theme.colors.text} />
                   </TouchableOpacity>
                 </View>
 
@@ -377,29 +373,30 @@ export default function CalculatorScreen() {
               </View>
             </View>
           </Modal>
-        </SafeAreaView>
-      </ImageBackground>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   scrollContent: {
     padding: 20,
     paddingBottom: 40,
   },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    }),
   },
   cardHeader: {
     flexDirection: "row",
@@ -409,15 +406,15 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 12,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
   cardTitle: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.text,
     flex: 1,
     fontFamily: theme.fonts.bold,
   },
@@ -425,7 +422,7 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -433,17 +430,17 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
+    borderTopColor: theme.colors.border,
   },
   input: {
-    backgroundColor: "#FAFAFA",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 12,
     padding: 14,
     marginBottom: 10,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
-    fontSize: 14,
-    color: "#1A1A1A",
+    borderColor: theme.colors.border,
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.text,
     fontFamily: theme.fonts.regular,
   },
   genderRow: {
@@ -457,71 +454,71 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: 12,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     borderRadius: 12,
     gap: 8,
   },
   genderBtnSelected: {
-    backgroundColor: "#9747FF",
+    backgroundColor: theme.colors.secondPrimary,
   },
   genderBtnText: {
-    color: "#9747FF",
+    color: theme.colors.secondPrimary,
     fontWeight: "600",
-    fontSize: 14,
+    fontSize: theme.fontSizes.regularSmall,
     fontFamily: theme.fonts.medium,
   },
   genderBtnTextSelected: {
-    color: "#FFFFFF",
+    color: theme.colors.textWhite,
   },
   calculateBtn: {
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     paddingVertical: 14,
     borderRadius: 25,
     alignItems: "center",
     justifyContent: "center",
   },
   calculateBtnText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 15,
+    color: theme.colors.textWhite,
+    fontWeight: theme.fontWeights.medium as "500",
+    fontSize: theme.fontSizes.regular,
     fontFamily: theme.fonts.bold,
   },
   resultContainer: {
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
+    borderTopColor: theme.colors.border,
     alignItems: "center",
   },
   resultLabel: {
-    fontSize: 13,
-    fontWeight: "500",
-    color: "#888",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.textMuted,
     marginBottom: 6,
     fontFamily: theme.fonts.regular,
   },
   resultValue: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#9747FF",
+    fontSize: theme.fontSizes.xlarge,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.secondPrimary,
     fontFamily: theme.fonts.bold,
   },
   resultHint: {
-    fontSize: 12,
-    color: "#67C694",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.success,
     marginTop: 4,
     fontFamily: theme.fonts.medium,
   },
   // Modal styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: theme.colors.overlay,
     justifyContent: "center",
     alignItems: "center",
     padding: 20,
   },
   modalContent: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     padding: 20,
     borderRadius: 20,
     width: "100%",
@@ -537,7 +534,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 16,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -545,13 +542,13 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.mediumGrey,
     alignItems: "center",
     justifyContent: "center",
   },
   modalText: {
-    fontSize: 14,
-    color: "#333",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.text,
     lineHeight: 22,
     marginBottom: 16,
     fontFamily: theme.fonts.regular,
@@ -559,18 +556,18 @@ const styles = StyleSheet.create({
   disclaimerSection: {
     paddingTop: 14,
     borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
+    borderTopColor: theme.colors.border,
   },
   disclaimerTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     marginBottom: 6,
     fontFamily: theme.fonts.bold,
   },
   disclaimerText: {
-    fontSize: 12,
-    color: "#666",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textSecondary,
     lineHeight: 18,
     fontFamily: theme.fonts.regular,
   },
@@ -578,12 +575,12 @@ const styles = StyleSheet.create({
     marginTop: 14,
     paddingTop: 14,
     borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
+    borderTopColor: theme.colors.border,
   },
   citationTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     marginBottom: 10,
     fontFamily: theme.fonts.bold,
   },
@@ -591,43 +588,43 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   citationText: {
-    fontSize: 12,
-    color: "#666",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textSecondary,
     lineHeight: 18,
     marginBottom: 4,
     fontFamily: theme.fonts.regular,
   },
   citationLink: {
-    fontSize: 12,
-    color: "#67C694",
-    fontWeight: "600",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.success,
+    fontWeight: theme.fontWeights.medium as "500",
     fontFamily: theme.fonts.medium,
   },
   viewAllCitationsBtn: {
     marginTop: 10,
     paddingVertical: 10,
     paddingHorizontal: 14,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     borderRadius: 12,
     alignItems: "center",
   },
   viewAllCitationsText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#9747FF",
+    fontSize: theme.fontSizes.small,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.secondPrimary,
     fontFamily: theme.fonts.medium,
   },
   modalCloseButton: {
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     paddingVertical: 14,
     borderRadius: 25,
     alignItems: "center",
     marginTop: 16,
   },
   modalCloseButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "600",
-    fontSize: 15,
+    color: theme.colors.textWhite,
+    fontWeight: theme.fontWeights.medium as "500",
+    fontSize: theme.fontSizes.regular,
     fontFamily: theme.fonts.bold,
   },
 });

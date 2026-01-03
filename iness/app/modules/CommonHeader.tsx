@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import theme from "../Theme/globalTheme";
 
 export default function CommonHeader() {
   return (
@@ -22,16 +23,16 @@ export default function CommonHeader() {
             />
             <View style={{ marginLeft: 8 }}>
               <Text style={styles.weightText}>
-                <Text style={{ color: "#00FF85" }}>↑ </Text>
-                79 kgs <Text style={{ color: "#00FF85" }}>+</Text>
+                <Text style={{ color: theme.colors.primary }}>↑ </Text>
+                79 kgs <Text style={{ color: theme.colors.primary }}>+</Text>
               </Text>
               <Text style={styles.trainLabel}>TRAIN</Text>
             </View>
           </View>
 
           <View style={styles.iconContainer}>
-            <Ionicons name="cart" size={22} color="#fff" style={styles.icon} />
-            <Ionicons name="notifications" size={22} color="#fff" />
+            <Ionicons name="cart" size={22} color={theme.colors.textWhite} style={styles.icon} />
+            <Ionicons name="notifications" size={22} color={theme.colors.textWhite} />
           </View>
         </View>
 
@@ -62,7 +63,7 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 20,
     overflow: "hidden",
-    backgroundColor: "#7541B7", // fallback if image doesn't load
+    backgroundColor: theme.colors.secondPrimary, // fallback if image doesn't load
   },
   headerTopRow: {
     flexDirection: "row",
@@ -82,14 +83,14 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
   },
   weightText: {
-    color: "#fff",
-    fontSize: 13,
-    fontWeight: "600",
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
   },
   trainLabel: {
-    color: "#fff",
-    fontSize: 13,
-    fontWeight: "bold",
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.bold as "700",
   },
   iconContainer: {
     flexDirection: "row",
@@ -99,27 +100,27 @@ const styles = StyleSheet.create({
     marginRight: 12,
   },
   title: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "bold",
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
     lineHeight: 24,
     marginBottom: 6,
   },
   subtitle: {
-    color: "#E0E0E0",
-    fontSize: 13,
+    color: theme.colors.textLight,
+    fontSize: theme.fontSizes.regularSmall,
     marginBottom: 12,
   },
   button: {
-    backgroundColor: "#fff",
+    backgroundColor: theme.colors.background,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
     alignSelf: "flex-start",
   },
   buttonText: {
-    color: "#6C1B9B",
-    fontWeight: "bold",
-    fontSize: 13,
+    color: theme.colors.secondPrimary,
+    fontWeight: theme.fontWeights.bold as "700",
+    fontSize: theme.fontSizes.regularSmall,
   },
 });

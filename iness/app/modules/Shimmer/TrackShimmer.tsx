@@ -2,6 +2,7 @@ import React from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
 import ShimmerPlaceHolder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
+import theme from "../../Theme/globalTheme";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 24,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 4,
     borderWidth: 1,
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 2,
   },
   monthContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 16,
     marginBottom: 24,
@@ -176,7 +177,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 12,
   },
   chartContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 16,
     marginBottom: 24,
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,

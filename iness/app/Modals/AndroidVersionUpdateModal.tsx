@@ -16,6 +16,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { userService } from "@/app/services/user.service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "../Theme/ThemeContext";
 
 const { height } = Dimensions.get("window");
 
@@ -35,6 +36,9 @@ const isNewerVersion = (latest: string, current: string) => {
 };
 
 const AppUpdateBottomSheet = () => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme);
   const [isVisible, setIsVisible] = useState(false);
   const [latestVersion, setLatestVersion] = useState<string | null>(null);
   const [releaseNote, setReleaseNote] = useState<string | null>(null);
@@ -255,7 +259,7 @@ const AppUpdateBottomSheet = () => {
               style={styles.closeButtonTop}
               onPress={handleInteraction}
             >
-              <Ionicons name="close" size={20} color="#000" />
+              <Ionicons name="close" size={20} color={theme.colors.text} />
             </TouchableOpacity>
           )}
 
@@ -265,7 +269,7 @@ const AppUpdateBottomSheet = () => {
               <Ionicons
                 name={Platform.OS === "ios" ? "logo-apple" : "logo-android"}
                 size={40}
-                color={Platform.OS === "ios" ? "#000" : "#67C694"}
+                color={Platform.OS === "ios" ? theme.colors.text : theme.colors.success}
               />
             </View>
           </View>
@@ -324,14 +328,14 @@ const AppUpdateBottomSheet = () => {
 export default AppUpdateBottomSheet;
 
 // Styles
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   modal: {
     justifyContent: "flex-end",
     margin: 0,
   },
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+      backgroundColor: theme.colors.overlay,
     justifyContent: "flex-end",
   },
   container: {
@@ -341,14 +345,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 30,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
   handle: {
     width: 50,
     height: 5,
-    backgroundColor: "#ccc",
+    backgroundColor: theme.colors.textLight,
     borderRadius: 3,
     alignSelf: "center",
     marginBottom: 20,
@@ -357,7 +361,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 18,
     right: 20,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 16,
     width: 32,
     height: 32,
@@ -373,42 +377,42 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "#E8F5E9",
+    backgroundColor: theme.colors.success + "20",
     alignItems: "center",
     justifyContent: "center",
   },
   title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#000",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     marginBottom: 12,
     textAlign: "center",
     fontFamily: theme.fonts.bold,
   },
   description: {
-    fontSize: 15,
-    color: "#666",
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.textSecondary,
     textAlign: "center",
     marginBottom: 20,
     lineHeight: 22,
     fontFamily: theme.fonts.regular,
   },
   releaseNoteBox: {
-    backgroundColor: "#F0F0F0",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 12,
     padding: 16,
     marginBottom: 24,
   },
   releaseNoteTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#000",
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     marginBottom: 8,
     fontFamily: theme.fonts.bold,
   },
   releaseNoteText: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
     lineHeight: 20,
     fontFamily: theme.fonts.regular,
   },
@@ -420,12 +424,12 @@ const styles = StyleSheet.create({
   },
   updateButton: {
     flex: 1,
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     paddingVertical: 16,
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
+    shadowColor: theme.colors.black,
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
@@ -435,23 +439,23 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   updateText: {
-    color: "#FFFFFF",
-    fontSize: 15,
-    fontWeight: "700",
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.bold as "700",
     fontFamily: theme.fonts.bold,
   },
   maybeLaterButton: {
     flex: 1,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: theme.colors.backgroundSecondary,
     paddingVertical: 16,
     borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
   },
   maybeLaterText: {
-    color: "#666",
-    fontSize: 15,
-    fontWeight: "700",
+    color: theme.colors.textSecondary,
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.bold as "700",
     fontFamily: theme.fonts.bold,
   },
 });

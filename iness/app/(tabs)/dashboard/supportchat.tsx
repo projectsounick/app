@@ -8,14 +8,13 @@ import {
   KeyboardAvoidingView,
   Platform,
   Keyboard,
-  ImageBackground,
   Image,
   Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import NormalHeader from "@/app/modules/NormalHeader";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import ChatMessage from "@/app/Components/SupportChat/ChatMessage";
 import useGetDataHook from "@/hooks/useFetchHook";
 import { chatService } from "@/app/services/chat.service";
@@ -40,6 +39,8 @@ const { height } = Dimensions.get("window");
 const topPadding = height * 0.05; // 2% of screen height
 
 export default function SupportScreen() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const { planTitle, requestType } = useLocalSearchParams<{
     planTitle?: string;
     requestType?: string;
@@ -174,16 +175,11 @@ export default function SupportScreen() {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
-      <ImageBackground
-        source={require("../../../assets/images/basicBackground.jpg")}
-        style={{ flex: 1 }}
-        resizeMode="cover"
-      >
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: "transparent" }}
-          edges={["left", "right"]}
-        >
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      edges={["left", "right"]}
+    >
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
           <KeyboardAvoidingView
             style={{ flex: 1 }}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -225,17 +221,19 @@ export default function SupportScreen() {
                     style={{
                       alignItems: "center",
                       paddingHorizontal: 20,
-                      backgroundColor: "#FFFFFF",
+                      backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
                       borderRadius: 20,
                       padding: 24,
                       marginHorizontal: 20,
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 4 },
-                      shadowOpacity: 0.12,
-                      shadowRadius: 12,
-                      elevation: 5,
                       borderWidth: 1,
-                      borderColor: "#F5F5F5",
+                      borderColor: theme.colors.border,
+                      ...(isDark ? {} : {
+                        shadowColor: theme.colors.black,
+                        shadowOffset: { width: 0, height: 4 },
+                        shadowOpacity: 0.12,
+                        shadowRadius: 12,
+                        elevation: 5,
+                      }),
                     }}
                   >
                     <View
@@ -243,18 +241,18 @@ export default function SupportScreen() {
                         width: 60,
                         height: 60,
                         borderRadius: 30,
-                        backgroundColor: "#F0F0F0",
+                        backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
                         alignItems: "center",
                         justifyContent: "center",
                         marginBottom: 16,
                       }}
                     >
-                      <Ionicons name="chatbubble-ellipses" size={30} color="#9747FF" />
+                      <Ionicons name="chatbubble-ellipses" size={30} color={theme.colors.secondPrimary} />
                     </View>
                     <Text
                       style={{
-                        color: "#000",
-                        fontSize: 18,
+                        color: theme.colors.text,
+                        fontSize: theme.fontSizes.medium,
                         fontWeight: "700",
                         textAlign: "center",
                         marginBottom: 8,
@@ -264,8 +262,8 @@ export default function SupportScreen() {
                     </Text>
                     <Text
                       style={{
-                        color: "#666",
-                        fontSize: 14,
+                        color: theme.colors.textSecondary,
+                        fontSize: theme.fontSizes.regularSmall,
                         textAlign: "center",
                         lineHeight: 20,
                       }}
@@ -286,18 +284,20 @@ export default function SupportScreen() {
                 style={{
                   marginHorizontal: 16,
                   marginBottom: 12,
-                  backgroundColor: "#FFFFFF",
+                  backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
                   borderRadius: 16,
                   padding: 16,
-                  shadowColor: "#000",
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 8,
-                  elevation: 4,
                   borderWidth: 1,
-                  borderColor: "#E8F5E9",
+                  borderColor: theme.colors.greenLight,
                   borderLeftWidth: 4,
-                  borderLeftColor: "#67C694",
+                  borderLeftColor: theme.colors.success,
+                  ...(isDark ? {} : {
+                    shadowColor: theme.colors.black,
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 8,
+                    elevation: 4,
+                  }),
                 }}
               >
                 <View
@@ -311,9 +311,9 @@ export default function SupportScreen() {
                   <View style={{ flex: 1, marginRight: 8 }}>
                     <Text
                       style={{
-                        fontSize: 14,
-                        fontWeight: "700",
-                        color: "#1A1A1A",
+                        fontSize: theme.fontSizes.regularSmall,
+                        fontWeight: theme.fontWeights.bold as "700",
+                        color: theme.colors.text,
                         marginBottom: 6,
                         fontFamily: theme.fonts.bold,
                       }}
@@ -322,8 +322,8 @@ export default function SupportScreen() {
                     </Text>
                     <Text
                       style={{
-                        fontSize: 13,
-                        color: "#666",
+                        fontSize: theme.fontSizes.regularSmall,
+                        color: theme.colors.textSecondary,
                         fontFamily: theme.fonts.regular,
                       }}
                     >
@@ -336,19 +336,19 @@ export default function SupportScreen() {
                       width: 24,
                       height: 24,
                       borderRadius: 12,
-                      backgroundColor: "#F0F0F0",
+                      backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
                       alignItems: "center",
                       justifyContent: "center",
                     }}
                     hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                   >
-                    <Ionicons name="close" size={16} color="#666" />
+                    <Ionicons name="close" size={16} color={theme.colors.textSecondary} />
                   </TouchableOpacity>
                 </View>
                 <Text
                   style={{
-                    fontSize: 13,
-                    color: "#666",
+                    fontSize: theme.fontSizes.regularSmall,
+                    color: theme.colors.textSecondary,
                     lineHeight: 18,
                     marginBottom: 12,
                     fontFamily: theme.fonts.regular,
@@ -363,7 +363,7 @@ export default function SupportScreen() {
                     setShowTemplateCard(false);
                   }}
                   style={{
-                    backgroundColor: "#67C694",
+                    backgroundColor: theme.colors.success,
                     borderRadius: 12,
                     paddingVertical: 10,
                     paddingHorizontal: 16,
@@ -374,8 +374,8 @@ export default function SupportScreen() {
                 >
                   <Text
                     style={{
-                      color: "#FFFFFF",
-                      fontSize: 13,
+                      color: theme.colors.textWhite,
+                      fontSize: theme.fontSizes.regularSmall,
                       fontWeight: "700",
                       fontFamily: theme.fonts.bold,
                     }}
@@ -389,18 +389,20 @@ export default function SupportScreen() {
             {/* Input & Attachments */}
             <View
               style={{
-                backgroundColor: "#FFFFFF",
+                backgroundColor: theme.colors.background,
                 borderTopLeftRadius: 20,
                 borderTopRightRadius: 20,
                 padding: 16,
                 paddingBottom: insets.bottom + 16,
-                shadowColor: "#000",
-                shadowOffset: { width: 0, height: -2 },
-                shadowOpacity: 0.1,
-                shadowRadius: 8,
-                elevation: 10,
                 borderTopWidth: 1,
-                borderTopColor: "#F0F0F0",
+                borderTopColor: theme.colors.border,
+                ...(isDark ? {} : {
+                  shadowColor: theme.colors.black,
+                  shadowOffset: { width: 0, height: -2 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 8,
+                  elevation: 10,
+                }),
               }}
             >
               {selectedAttachments.length > 0 && (
@@ -441,12 +443,12 @@ export default function SupportScreen() {
                           width: 20,
                           height: 20,
                           borderRadius: 10,
-                          backgroundColor: "#FF6B6B",
+                          backgroundColor: theme.colors.error,
                           alignItems: "center",
                           justifyContent: "center",
                         }}
                       >
-                        <Ionicons name="close" size={12} color="#FFFFFF" />
+                        <Ionicons name="close" size={12} color={theme.colors.textWhite} />
                       </TouchableOpacity>
                     </View>
                   ))}
@@ -456,12 +458,12 @@ export default function SupportScreen() {
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
-                  backgroundColor: "#F8F8F8",
+                  backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
                   borderRadius: 25,
                   paddingHorizontal: 12,
                   paddingVertical: 8,
                   borderWidth: 1,
-                  borderColor: "#E0E0E0",
+                  borderColor: theme.colors.border,
                 }}
               >
                 <TouchableOpacity
@@ -473,7 +475,7 @@ export default function SupportScreen() {
                   <Ionicons
                     name="attach"
                     size={22}
-                    color="#9747FF"
+                      color={theme.colors.secondPrimary}
                   />
                 </TouchableOpacity>
                 <TextInput
@@ -481,11 +483,11 @@ export default function SupportScreen() {
                     flex: 1,
                     paddingVertical: 8,
                     paddingHorizontal: 12,
-                    fontSize: 15,
-                    color: "#000",
+                    fontSize: theme.fontSizes.regular,
+                    color: theme.colors.text,
                   }}
                   placeholder="Type your message..."
-                  placeholderTextColor="#999"
+                  placeholderTextColor={theme.colors.textMuted}
                   value={inputText}
                   onChangeText={setInputText}
                   editable={!messageSendingLoader}
@@ -499,7 +501,7 @@ export default function SupportScreen() {
                       padding: 6,
                     }}
                   >
-                    <ActivityIndicator color="#67C694" size="small" />
+                    <ActivityIndicator color={theme.colors.success} size="small" />
                   </View>
                 ) : (
                   <TouchableOpacity
@@ -508,12 +510,12 @@ export default function SupportScreen() {
                       width: 36,
                       height: 36,
                       borderRadius: 18,
-                      backgroundColor: "#67C694",
+                      backgroundColor: theme.colors.success,
                       alignItems: "center",
                       justifyContent: "center",
                     }}
                   >
-                    <Ionicons name="send" size={18} color="#FFFFFF" />
+                    <Ionicons name="send" size={18} color={theme.colors.textWhite} />
                   </TouchableOpacity>
                 )}
               </View>
@@ -535,8 +537,7 @@ export default function SupportScreen() {
             onDismiss={() => setSnackbarVisible(false)}
             bgColor="#67C694"
           />
-        </SafeAreaView>
-      </ImageBackground>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Text, View, Animated } from "react-native";
+import theme from "../Theme/globalTheme";
 
 //// Main functional component for the LoadingDots ///// -----------------------------------/
 const LoadingDots = () => {
@@ -55,7 +56,7 @@ const LoadingDots = () => {
         alignItems: "center",
         height: 24,
         width: "100%", // ensures full width for centering
-        backgroundColor: "blue",
+        backgroundColor: "transparent",
       }}
     >
       {[dot1Opacity, dot2Opacity, dot3Opacity].map((opacity, idx) => (
@@ -63,7 +64,7 @@ const LoadingDots = () => {
           key={idx}
           style={{
             opacity,
-            fontSize: 20,
+            fontSize: theme.fontSizes.medium,
             marginHorizontal: 4,
             transform: [{ scale: 2 }],
             textAlign: "center",

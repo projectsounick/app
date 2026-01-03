@@ -25,6 +25,7 @@ import { sessionService } from "../services/sessionService";
 import { Session } from "../interfaces/sessionInterface";
 import { useDispatch } from "react-redux";
 import { setCalendarSheetOpen } from "@/Slices/componentOpenSlice";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const { height } = Dimensions.get("window");
 
@@ -43,6 +44,9 @@ function SessionCalendar({
   currentSession,
   setShowFeedbackModal,
 }: SessionCalendarProps) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme);
   const dispatch = useDispatch();
   const { data: sessionData, loading } = useGetDataHook(
     sessionService.getSessions
@@ -314,7 +318,7 @@ function SessionCalendar({
                 backgroundColor: "#FFFFFF",
                 justifyContent: "center",
                 alignItems: "center",
-                shadowColor: "#000",
+                shadowColor: theme.colors.black,
                 shadowOffset: { width: 0, height: 1 },
                 shadowOpacity: 0.1,
                 shadowRadius: 2,
@@ -329,7 +333,7 @@ function SessionCalendar({
           {loading && (
             <View style={styles.loader}>
               <ActivityIndicator size="large" color="#9747FF" />
-              <Text style={{ marginTop: 10, color: "#666", fontSize: 14, fontWeight: "500" }}>
+              <Text style={{ marginTop: 10, color: theme.colors.textSecondary, fontSize: theme.fontSizes.regularSmall, fontWeight: theme.fontWeights.medium as "500" }}>
                 Loading sessions...
               </Text>
             </View>
@@ -370,20 +374,20 @@ function SessionCalendar({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: theme.colors.overlay,
     justifyContent: "flex-end",
   },
   bottomSheetContainer: {
     maxHeight: height * 0.85,
-    backgroundColor: "#F8F8F8",
+    backgroundColor: theme.colors.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 20,
     paddingTop: 12,
-    shadowColor: "#000",
+    shadowColor: theme.colors.black,
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
@@ -392,7 +396,7 @@ const styles = StyleSheet.create({
   dragHandle: {
     width: 40,
     height: 4,
-    backgroundColor: "#D0D0D0",
+    backgroundColor: theme.colors.border,
     borderRadius: 2,
     alignSelf: "center",
     marginBottom: 12,
@@ -403,12 +407,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    borderBottomColor: theme.colors.border,
   },
   modalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#000",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     flex: 1,
   },
   loader: {
@@ -422,18 +426,18 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 20,
     marginBottom: 16,
-    shadowColor: "#000",
+    shadowColor: theme.colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   planTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#000",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     flex: 1,
   },
   headerRow: {
@@ -443,13 +447,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    borderBottomColor: theme.colors.border,
   },
   headerLeft: { flexDirection: "row", alignItems: "center" },
-  sessionType: { fontSize: 14, fontWeight: "700", color: "#000" },
+  sessionType: { fontSize: theme.fontSizes.regularSmall, fontWeight: theme.fontWeights.bold as "700", color: theme.colors.text },
   sessionStatus: {
-    fontSize: 12,
-    fontWeight: "700",
+    fontSize: theme.fontSizes.small,
+    fontWeight: theme.fontWeights.bold as "700",
     textTransform: "uppercase",
   },
   infoRow: {
@@ -457,14 +461,14 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 12,
   },
-  infoText: { fontSize: 14, color: "#666", flex: 1, lineHeight: 20 },
+  infoText: { fontSize: theme.fontSizes.regularSmall, color: theme.colors.textSecondary, flex: 1, lineHeight: 20 },
   trainerRow: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "#F0F0F0",
+    borderTopColor: theme.colors.border,
   },
   trainerImage: {
     width: 50,
@@ -472,29 +476,29 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     marginRight: 12,
     borderWidth: 2,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
-  trainerName: { fontSize: 15, fontWeight: "700", color: "#000", marginBottom: 2 },
-  trainerEmail: { fontSize: 13, color: "#666" },
+  trainerName: { fontSize: theme.fontSizes.regular, fontWeight: theme.fontWeights.bold as "700", color: theme.colors.text, marginBottom: 2 },
+  trainerEmail: { fontSize: theme.fontSizes.regularSmall, color: theme.colors.textSecondary },
   feedbackButton: {
     marginTop: 16,
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     paddingVertical: 14,
     paddingHorizontal: 16,
     borderRadius: 16,
     alignItems: "center",
     flexDirection: "row",
     justifyContent: "center",
-    shadowColor: "#67C694",
+    shadowColor: theme.colors.success,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 3,
   },
   feedbackButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 15,
+    color: theme.colors.textWhite,
+    fontWeight: theme.fontWeights.bold as "700",
+    fontSize: theme.fontSizes.regular,
   },
 });
 

@@ -17,7 +17,7 @@ import { paymentService } from "@/app/services/payment.service";
 import { ActivityIndicator } from "react-native-paper";
 
 import CustomSnackbar from "@/app/modules/Snackbar";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AddressModal from "@/app/Modals/AddressModal";
 import CouponModal from "@/app/Modals/CouponModal";
@@ -34,6 +34,7 @@ export interface PhonePeTransactionResponse {
 
 ///// Main functional component for the cart screen -------------------------/
 function CartScreen() {
+  const theme = useGlobalTheme();
   //// getting the cart values from the store -------------------------/
   const cartItems = useSelector((state: RootState) => state.cart.cartItems);
 
@@ -182,10 +183,10 @@ function CartScreen() {
     <>
       {/* Header + Content */}
       <SafeAreaView
-        style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+        style={{ flex: 1, backgroundColor: theme.colors.background }}
         edges={["left", "right"]}
       >
-        <View style={{ flex: 1, backgroundColor: "#fff" }}>
+        <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
           <SmallHeader title="Cart" />
           <BackHeader />
           {dataFetchLogin ? (
@@ -197,10 +198,10 @@ function CartScreen() {
                 alignItems: "center",
               }}
             >
-              <ActivityIndicator />
+              <ActivityIndicator color={theme.colors.secondPrimary} />
             </View>
           ) : (
-            <View style={{ padding: 20, flex: 1, backgroundColor: "#fff" }}>
+            <View style={{ padding: 20, flex: 1, backgroundColor: theme.colors.background }}>
               <CartItemList
                 items={cartItems}
                 setCouponDetails={setCouponDetails}

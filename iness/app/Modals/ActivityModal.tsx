@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const { height } = Dimensions.get("window");
 
@@ -33,6 +33,8 @@ export default function AddActivityModal({
   onClose,
   onAddActivity,
 }: AddActivityModalProps) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const [selectedActivity, setSelectedActivity] = useState<string | null>(null);
   const [duration, setDuration] = useState<string>("");
 
@@ -49,7 +51,7 @@ export default function AddActivityModal({
       <View
         style={{
           flex: 1,
-          backgroundColor: "rgba(0,0,0,0.5)",
+          backgroundColor: theme.colors.overlay,
           justifyContent: "flex-end",
         }}
       >
@@ -89,15 +91,15 @@ export default function AddActivityModal({
               zIndex: 2,
             }}
           >
-            <Ionicons name="close" size={20} color="#fff" />
+            <Ionicons name="close" size={20} color={theme.colors.textWhite} />
           </TouchableOpacity>
 
           {/* Title */}
           <Text
             style={{
-              fontSize: 22,
+              fontSize: theme.fontSizes.large,
               fontFamily: theme.fonts.bold,
-              color: "#fff",
+              color: theme.colors.textWhite,
               marginBottom: 20,
             }}
           >
@@ -134,9 +136,9 @@ export default function AddActivityModal({
                 />
                 <Text
                   style={{
-                    fontSize: 16,
+                    fontSize: theme.fontSizes.regular,
                     fontFamily: theme.fonts.medium,
-                    color: "#fff",
+                    color: theme.colors.textWhite,
                   }}
                 >
                   {cat.name}
@@ -156,9 +158,9 @@ export default function AddActivityModal({
               >
                 <Text
                   style={{
-                    fontSize: 14,
+                    fontSize: theme.fontSizes.regularSmall,
                     fontFamily: theme.fonts.medium,
-                    color: "#fff",
+                    color: theme.colors.textWhite,
                     marginBottom: 6,
                   }}
                 >
@@ -175,9 +177,9 @@ export default function AddActivityModal({
                     borderColor: "rgba(255,255,255,0.3)",
                     borderRadius: 10,
                     padding: 10,
-                    fontSize: 16,
+                    fontSize: theme.fontSizes.regular,
                     fontFamily: theme.fonts.regular,
-                    color: "#fff",
+                    color: theme.colors.textWhite,
                   }}
                 />
               </View>
@@ -196,12 +198,12 @@ export default function AddActivityModal({
                 justifyContent: "center",
               }}
             >
-              <Ionicons name="checkmark" size={20} color="#000" />
+              <Ionicons name="checkmark" size={20} color={theme.colors.black} />
               <Text
                 style={{
-                  color: "#000",
+                  color: theme.colors.black,
                   fontFamily: theme.fonts.bold,
-                  fontSize: 16,
+                  fontSize: theme.fontSizes.regular,
                   marginLeft: 8,
                 }}
               >

@@ -57,7 +57,7 @@ const FitnessGoalsCard = () => {
         style={{
           flex: 1,
           height: 6,
-          backgroundColor: "#3E2A6A",
+          backgroundColor: theme.colors.secondPrimary,
           borderRadius: 6,
           marginHorizontal: 6,
           overflow: "hidden",
@@ -70,7 +70,7 @@ const FitnessGoalsCard = () => {
             top: 0,
             bottom: 0,
             width: "30%",
-            backgroundColor: "#6D4DC3",
+            backgroundColor: theme.colors.secondPrimary,
             opacity: 0.6,
             transform: [{ translateX }],
           }}
@@ -87,7 +87,7 @@ const FitnessGoalsCard = () => {
         style={{
           flex: 1,
           height: 6,
-          backgroundColor: "#3E2A6A",
+          backgroundColor: theme.colors.secondPrimary,
           borderRadius: 6,
           overflow: "hidden",
           marginHorizontal: 6,
@@ -116,8 +116,8 @@ const FitnessGoalsCard = () => {
         {renderProgressBar(progressSleep, "#ADD8E6")}
         <Text
           style={{
-            color: "#FFFFFF",
-            fontSize: 10,
+            color: theme.colors.textWhite,
+            fontSize: theme.fontSizes.small,
             width: 50,
             fontFamily: theme.fonts.regular,
             textAlign: "right",
@@ -140,8 +140,8 @@ const FitnessGoalsCard = () => {
         {renderProgressBar(progressWater, "#00E5FF")}
         <Text
           style={{
-            color: "#FFFFFF",
-            fontSize: 10,
+            color: theme.colors.textWhite,
+            fontSize: theme.fontSizes.small,
             width: 50,
             textAlign: "right",
             fontFamily: theme.fonts.regular,
@@ -164,8 +164,8 @@ const FitnessGoalsCard = () => {
         {renderProgressBar(progressSteps, "#FFD700")}
         <Text
           style={{
-            color: "#FFFFFF",
-            fontSize: 10,
+            color: theme.colors.textWhite,
+            fontSize: theme.fontSizes.small,
             width: 50,
             fontFamily: theme.fonts.regular,
             textAlign: "right",
@@ -185,7 +185,7 @@ const FitnessGoalsCard = () => {
       >
         <TouchableOpacity
           style={{
-            backgroundColor: "#4A2A75",
+            backgroundColor: theme.colors.secondPrimary,
             paddingVertical: 4,
             paddingHorizontal: 16,
             borderRadius: 20,
@@ -196,8 +196,8 @@ const FitnessGoalsCard = () => {
         >
           <Text
             style={{
-              color: "#A4FF55",
-              fontSize: 14,
+              color: theme.colors.primary,
+              fontSize: theme.fontSizes.regularSmall,
               fontFamily: theme.fonts.regular,
             }}
           >
@@ -206,7 +206,7 @@ const FitnessGoalsCard = () => {
         </TouchableOpacity>
         <TouchableOpacity
           style={{
-            backgroundColor: "#FFFFFF",
+            backgroundColor: theme.colors.background,
             borderRadius: 20,
             paddingVertical: 6,
             paddingHorizontal: 16,
@@ -217,9 +217,9 @@ const FitnessGoalsCard = () => {
         >
           <Text
             style={{
-              color: "#000000",
-              fontWeight: "500",
-              fontSize: 14,
+              color: theme.colors.black,
+              fontWeight: theme.fontWeights.medium as "500",
+              fontSize: theme.fontSizes.regularSmall,
               fontFamily: theme.fonts.regular,
             }}
           >

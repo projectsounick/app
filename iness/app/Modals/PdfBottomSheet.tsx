@@ -30,6 +30,9 @@ export default function DietPlanBottomSheet({
   visible,
   onClose,
 }: DietPlanBottomsheet) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme);
   const [dietPlans, setDietPlans] = useState<string[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -230,19 +233,19 @@ export default function DietPlanBottomSheet({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: theme.colors.overlay,
     justifyContent: "flex-end",
   },
   sheet: {
     height: height * 0.9,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     overflow: "hidden",
-    shadowColor: "#000",
+    shadowColor: theme.colors.black,
     shadowOpacity: 0.15,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: -4 },
@@ -292,9 +295,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   headerText: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#FFFFFF",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.textWhite,
     fontFamily: theme.fonts.bold,
     textShadowColor: "rgba(0, 0, 0, 0.2)",
     textShadowOffset: { width: 0, height: 1 },
@@ -339,7 +342,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 80,
     right: 20,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     paddingVertical: 8,
     width: 200,
@@ -350,7 +353,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 10,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
     zIndex: 100,
   },
   menuItem: {
@@ -373,8 +376,8 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     flex: 1,
-    fontSize: 15,
-    color: "#666",
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.textSecondary,
     fontWeight: "500",
     fontFamily: theme.fonts.medium,
   },
@@ -390,8 +393,8 @@ const styles = StyleSheet.create({
   },
   noPlansText: {
     marginTop: 12,
-    fontSize: 14,
-    color: "#999",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textMuted,
     fontWeight: "500",
     fontFamily: theme.fonts.medium,
   },
@@ -402,14 +405,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     borderRadius: 16,
     overflow: "hidden",
-    backgroundColor: "#F9F9F9",
+    backgroundColor: theme.colors.backgroundSecondary,
     shadowColor: theme.colors.secondPrimary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
   },
   webView: {
     flex: 1,
@@ -420,15 +423,15 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
+    backgroundColor: theme.colors.background + "F2",
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 16,
   },
   loadingText: {
     marginTop: 12,
-    fontSize: 15,
-    color: "#666",
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.textSecondary,
     fontWeight: "500",
     fontFamily: theme.fonts.medium,
   },
@@ -452,15 +455,15 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   emptyTitle: {
-    fontSize: 18,
+    fontSize: theme.fontSizes.medium,
     fontWeight: "700",
-    color: theme.colors.dark,
+    color: theme.colors.text,
     marginBottom: 8,
     fontFamily: theme.fonts.bold,
   },
   emptyText: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
     textAlign: "center",
     lineHeight: 20,
     fontFamily: theme.fonts.regular,

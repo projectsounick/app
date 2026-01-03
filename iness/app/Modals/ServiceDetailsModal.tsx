@@ -10,6 +10,7 @@ import {
   Dimensions,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 const { width: screenWidth } = Dimensions.get("window");
 
 interface PlanModalProps {
@@ -43,6 +44,8 @@ export default function PlanModal({
   cartLoading,
   cardData,
 }: PlanModalProps) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   return (
     <Modal
       visible={modalVisible}
@@ -186,9 +189,9 @@ export default function PlanModal({
                         </View>
                         <Text
                           style={{
-                            fontSize: 20,
-                            fontWeight: "700",
-                            color: "#000",
+                            fontSize: theme.fontSizes.large,
+                            fontWeight: theme.fontWeights.bold as "700",
+                            color: theme.colors.text,
                             flex: 1,
                           }}
                         >
@@ -198,8 +201,8 @@ export default function PlanModal({
                       {cardData.descItems.length > 0 && (
                         <Text
                           style={{
-                            color: "#666",
-                            fontSize: 13,
+                            color: theme.colors.textSecondary,
+                            fontSize: theme.fontSizes.regularSmall,
                             lineHeight: 18,
                           }}
                           numberOfLines={2}
@@ -251,15 +254,15 @@ export default function PlanModal({
                     </View>
                     <Text
                       style={{
-                        fontWeight: "700",
-                        fontSize: 20,
+                        fontWeight: theme.fontWeights.bold as "700",
+                        fontSize: theme.fontSizes.large,
                         marginTop: 4,
-                        color: "#9747FF",
+                        color: theme.colors.secondPrimary,
                       }}
                     >
                       {cardData.sessionCount}
                     </Text>
-                    <Text style={{ color: "#666", fontSize: 12, marginTop: 2 }}>
+                    <Text style={{ color: theme.colors.textSecondary, fontSize: theme.fontSizes.small, marginTop: 2 }}>
                       Sessions
                     </Text>
                   </View>
@@ -295,15 +298,15 @@ export default function PlanModal({
                     </View>
                     <Text
                       style={{
-                        fontWeight: "700",
-                        fontSize: 20,
+                        fontWeight: theme.fontWeights.bold as "700",
+                        fontSize: theme.fontSizes.large,
                         marginTop: 4,
-                        color: "#67C694",
+                        color: theme.colors.success,
                       }}
                     >
                       ₹{cardData.price}
                     </Text>
-                    <Text style={{ color: "#666", fontSize: 12, marginTop: 2 }}>
+                    <Text style={{ color: theme.colors.textSecondary, fontSize: theme.fontSizes.small, marginTop: 2 }}>
                       Price
                     </Text>
                   </View>
@@ -347,9 +350,9 @@ export default function PlanModal({
                     </View>
                     <Text
                       style={{
-                        fontWeight: "700",
-                        fontSize: 18,
-                        color: "#000",
+                        fontWeight: theme.fontWeights.bold as "700",
+                        fontSize: theme.fontSizes.medium,
+                        color: theme.colors.text,
                       }}
                     >
                       What's Included
@@ -384,11 +387,11 @@ export default function PlanModal({
                       </View>
                       <Text
                         style={{
-                          color: "#333",
+                          color: theme.colors.text,
                           flex: 1,
-                          fontSize: 14,
+                          fontSize: theme.fontSizes.regularSmall,
                           lineHeight: 22,
-                          fontWeight: "500",
+                          fontWeight: theme.fontWeights.medium as "500",
                         }}
                       >
                         {item}
@@ -436,9 +439,9 @@ export default function PlanModal({
                       </View>
                       <Text
                         style={{
-                          fontWeight: "700",
-                          fontSize: 18,
-                          color: "#000",
+                          fontWeight: theme.fontWeights.bold as "700",
+                          fontSize: theme.fontSizes.medium,
+                          color: theme.colors.text,
                         }}
                       >
                         Gallery
@@ -482,8 +485,8 @@ export default function PlanModal({
               <Text
                 style={{
                   textAlign: "center",
-                  color: "#888",
-                  fontSize: 16,
+                  color: theme.colors.textMuted,
+                  fontSize: theme.fontSizes.regular,
                   marginVertical: 40,
                 }}
               >
@@ -532,9 +535,9 @@ export default function PlanModal({
               />
               <Text
                 style={{
-                  color: "#fff",
-                  fontWeight: "700",
-                  fontSize: 16,
+                  color: theme.colors.textWhite,
+                  fontWeight: theme.fontWeights.bold as "700",
+                  fontSize: theme.fontSizes.regular,
                 }}
               >
                 {cartLoading ? "Adding..." : "Add to Cart"}

@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme } from "../Theme/ThemeContext";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { router } from "expo-router";
@@ -20,6 +20,7 @@ const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.85; // Responsive card width - 85% of screen width
 
 function BlogSliderCard() {
+  const theme = useGlobalTheme();
   const blogs = useSelector((state: RootState) => state.blog.blogs);
   const screenHeight = height;
 
@@ -31,7 +32,7 @@ function BlogSliderCard() {
         borderRadius: 20,
         ...(Platform.OS === "ios"
           ? {
-              shadowColor: "#000",
+              shadowColor: theme.colors.black,
               shadowOffset: { width: 0, height: 2 },
               shadowOpacity: 0.08,
               shadowRadius: 12,
@@ -39,10 +40,10 @@ function BlogSliderCard() {
           : {
               elevation: 1,
             }),
-        backgroundColor: "#FFFFFF",
+        backgroundColor: theme.colors.background,
         marginBottom: 16,
         borderWidth: 1,
-        borderColor: "#F5F5F5",
+        borderColor: theme.colors.border,
       }}
     >
       {/* Fixed Header */}
@@ -65,7 +66,7 @@ function BlogSliderCard() {
               width: 34,
               height: 34,
               borderRadius: 10,
-              backgroundColor: "#F3EDFF",
+              backgroundColor: theme.colors.backgroundCardLight,
               alignItems: "center",
               justifyContent: "center",
               marginRight: 12,
@@ -74,15 +75,15 @@ function BlogSliderCard() {
             <MaterialCommunityIcons
               name="book-open-variant"
               size={20}
-              color="#9747FF"
+              color={theme.colors.secondPrimary}
             />
           </View>
           <Text
             style={{
-              fontSize: 18,
+              fontSize: theme.fontSizes.medium,
               fontFamily: theme.fonts.bold,
-              color: "#000",
-              fontWeight: "700",
+              color: theme.colors.text,
+              fontWeight: theme.fontWeights.bold as "700",
             }}
           >
             Read our Blogs
@@ -106,7 +107,7 @@ function BlogSliderCard() {
               })
             }
             style={{
-              backgroundColor: "#FFFFFF",
+              backgroundColor: theme.colors.background,
               borderRadius: 20,
               marginRight: 16,
               marginTop: 4,
@@ -114,7 +115,7 @@ function BlogSliderCard() {
               width: CARD_WIDTH,
               ...(Platform.OS === "ios"
                 ? {
-                    shadowColor: "#000",
+                    shadowColor: theme.colors.dark,
                     shadowOffset: { width: 0, height: 2 },
                     shadowOpacity: 0.08,
                     shadowRadius: 12,
@@ -123,7 +124,7 @@ function BlogSliderCard() {
                     elevation: 1,
                   }),
               borderWidth: 1,
-              borderColor: "#F5F5F5",
+              borderColor: theme.colors.border,
               overflow: "hidden",
             }}
           >
@@ -132,7 +133,7 @@ function BlogSliderCard() {
               style={{
                 width: "100%",
                 height: 180,
-                backgroundColor: "#F8F8F8",
+                backgroundColor: theme.colors.backgroundSecondary,
                 position: "relative",
                 alignItems: "center",
                 justifyContent: "center",
@@ -162,9 +163,9 @@ function BlogSliderCard() {
                 <Text
                   numberOfLines={2}
                   style={{
-                    fontSize: screenHeight < 700 ? 14 : screenHeight < 900 ? 15 : 15, // Reduced from responsive calculation
-                    fontWeight: "700",
-                    color: "#000",
+                    fontSize: theme.fontSizes.regular,
+                    fontWeight: theme.fontWeights.bold as "700",
+                    color: theme.colors.text,
                     marginBottom: 8,
                     lineHeight: screenHeight < 700 ? 20 : screenHeight < 900 ? 21 : 22,
                     fontFamily: theme.fonts.bold,
@@ -177,14 +178,14 @@ function BlogSliderCard() {
               {/* Right Section - Button */}
               <TouchableOpacity
                 style={{
-                  backgroundColor: "#67C694",
+                  backgroundColor: theme.colors.success,
                   paddingVertical: screenHeight < 700 ? 8 : screenHeight < 900 ? 9 : 10,
                   paddingHorizontal: screenHeight < 700 ? 16 : screenHeight < 900 ? 18 : 20,
                   borderRadius: 12,
                   alignSelf: "flex-start",
                   ...(Platform.OS === "ios"
                     ? {
-                        shadowColor: "#67C694",
+                        shadowColor: theme.colors.success,
                         shadowOffset: { width: 0, height: 2 },
                         shadowOpacity: 0.3,
                         shadowRadius: 4,
@@ -202,9 +203,9 @@ function BlogSliderCard() {
               >
                 <Text
                   style={{
-                    fontSize: screenHeight < 700 ? 13 : screenHeight < 900 ? 14 : 14,
-                    fontWeight: "700",
-                    color: "#FFFFFF",
+                    fontSize: theme.fontSizes.regularSmall,
+                    fontWeight: theme.fontWeights.bold as "700",
+                    color: theme.colors.textWhite,
                     fontFamily: theme.fonts.bold,
                   }}
                 >

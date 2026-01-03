@@ -11,6 +11,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils"; // ⬅️ adjust path as needed
 import { userService } from "../services/user.service";
+import theme from "../Theme/globalTheme";
 
 export interface OverlayLockWrapperProps {
   loginButton?: boolean;
@@ -125,9 +126,9 @@ export function LoginWrapper<P extends object>(
                           >
                             <Text
                               style={{
-                                color: "#374151",
-                                fontWeight: "600",
-                                fontSize: 14,
+                                color: theme.colors.textSecondary,
+                                fontWeight: theme.fontWeights.medium as "500",
+                                fontSize: theme.fontSizes.regularSmall,
                               }}
                             >
                               Cancel
@@ -188,14 +189,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   overlayText: {
-    color: "#fff",
-    fontSize: 14,
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.regularSmall,
     marginTop: 12,
     textAlign: "center",
     lineHeight: 20,
   },
   loginButton: {
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     paddingVertical: 10,
     paddingHorizontal: 30,
     borderRadius: 25,
@@ -207,8 +208,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   loginButtonText: {
-    color: "#fff",
-    fontWeight: "600",
-    fontSize: 16,
+    color: theme.colors.textWhite,
+    fontWeight: theme.fontWeights.medium as "500",
+    fontSize: theme.fontSizes.regular,
   },
 });

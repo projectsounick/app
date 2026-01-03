@@ -56,7 +56,7 @@ const MeasurementList = ({ measurements }: { measurements: any[] }) => {
 
           {/* Measurements Grid - 2 columns */}
           <View style={styles.measurementsGrid}>
-            {measurementItems.map(({ key, label, icon, color }) => {
+            {measurementItems.map(({ key, label, icon, color }:any) => {
               const value = item[key];
               return (
                 <View key={key} style={styles.measurementItem}>
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     paddingBottom: 100,
   },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 20,
     marginBottom: 16,
     overflow: "hidden",
@@ -128,9 +128,9 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   recordLabel: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#FFFFFF",
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.textWhite,
     fontFamily: theme.fonts.bold,
   },
   dateContainer: {
@@ -143,8 +143,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   dateText: {
-    fontSize: 12,
-    color: "#FFFFFF",
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textWhite,
     fontFamily: theme.fonts.medium,
     fontWeight: "600",
   },
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
   },
   measurementItem: {
     width: "48%",
-    backgroundColor: "#FAFAFA",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
@@ -181,8 +181,8 @@ const styles = StyleSheet.create({
     elevation: 3,
   },
   measurementLabel: {
-    fontSize: 13,
-    color: "#666",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
     fontFamily: theme.fonts.medium,
     fontWeight: "600",
     flex: 1,
@@ -193,15 +193,15 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   measurementValue: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   measurementUnit: {
-    fontSize: 11,
-    fontWeight: "500",
-    color: "#999",
+    fontSize: theme.fontSizes.small,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.textMuted,
     fontFamily: theme.fonts.regular,
   },
 });

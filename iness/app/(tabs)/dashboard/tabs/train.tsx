@@ -18,12 +18,14 @@ import AvailablePlans from "@/app/Components/Train/AvaialblePlan";
 import { otherService } from "@/app/services/singleService.service";
 import eventBus from "@/event";
 import { router } from "expo-router";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
 const MainHeader = withAnimatedHeader(
   PlanProgressStatus as unknown as React.FC
 );
 
 export default function TrainScreen() {
+  const theme = useGlobalTheme();
   const scrollY = useRef(new Animated.Value(0)).current;
 
 
@@ -321,7 +323,7 @@ export default function TrainScreen() {
   }, [activeTab, loading, activePlans, activeServices, handlePress]);
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}
       edges={["left", "right"]}
     >
       {loading ? (
@@ -359,7 +361,7 @@ export default function TrainScreen() {
             <View
               style={{
                 flexDirection: "row",
-                backgroundColor: "#fff",
+                backgroundColor: theme.colors.background,
                 borderRadius: 16,
                 padding: 4,
                 width: 300,
@@ -370,7 +372,7 @@ export default function TrainScreen() {
                 shadowRadius: 8,
                 elevation: 3,
                 borderWidth: 1,
-                borderColor: "#F5F5F5",
+                borderColor: theme.colors.border,
               }}
             >
               {/* Sliding Highlight */}
@@ -381,7 +383,7 @@ export default function TrainScreen() {
                   bottom: 4,
                   width: "50%",
                   borderRadius: 12,
-                  backgroundColor: "#67C694",
+                  backgroundColor: theme.colors.success,
                   transform: [
                     {
                       translateX: translateX.interpolate({
@@ -390,7 +392,7 @@ export default function TrainScreen() {
                       }),
                     },
                   ],
-                  shadowColor: "#67C694",
+                  shadowColor: theme.colors.success,
                   shadowOffset: { width: 0, height: 2 },
                   shadowOpacity: 0.3,
                   shadowRadius: 4,
@@ -411,9 +413,9 @@ export default function TrainScreen() {
               >
                 <Text
                   style={{
-                    color: activeTab === "current" ? "#fff" : "#666",
-                    fontWeight: "700",
-                    fontSize: 14,
+                    color: activeTab === "current" ? theme.colors.textWhite : theme.colors.textSecondary,
+                    fontWeight: theme.fontWeights.bold as "700",
+                    fontSize: theme.fontSizes.regularSmall,
                   }}
                 >
                   Current Plans
@@ -433,9 +435,9 @@ export default function TrainScreen() {
               >
                 <Text
                   style={{
-                    color: activeTab === "available" ? "#fff" : "#666",
-                    fontWeight: "700",
-                    fontSize: 14,
+                    color: activeTab === "available" ? theme.colors.textWhite : theme.colors.textSecondary,
+                    fontWeight: theme.fontWeights.bold as "700",
+                    fontSize: theme.fontSizes.regularSmall,
                   }}
                 >
                   Available Plans

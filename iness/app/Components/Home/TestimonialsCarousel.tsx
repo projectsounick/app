@@ -11,7 +11,7 @@ import {
   StyleSheet,
 } from "react-native";
 import { MaterialCommunityIcons, Ionicons, AntDesign } from "@expo/vector-icons";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 import { useRouter } from "expo-router";
 
 const { width, height } = Dimensions.get("window");
@@ -26,6 +26,8 @@ interface Testimonial {
 }
 
 const TestimonialsCarousel = () => {
+  const theme = useGlobalTheme();
+  const styles = getStyles(theme);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -290,34 +292,35 @@ const TestimonialsCarousel = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => {
+  return StyleSheet.create({
   mainContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingTop: 12,
     paddingBottom: 10,
     marginBottom: 16,
-    shadowColor: "#9747FF",
+    shadowColor: theme.colors.secondPrimary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.08,
     shadowRadius: 8,
     elevation: 3,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
   },
   container: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 20,
     paddingHorizontal: 16,
     marginBottom: 16,
-    shadowColor: "#000",
+    shadowColor: theme.colors.black,
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
     alignItems: "center",
     justifyContent: "center",
     minHeight: 200,
@@ -332,27 +335,27 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 10,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
   title: {
-    fontSize: 18,
+    fontSize: theme.fontSizes.medium,
     fontFamily: theme.fonts.bold,
-    color: "#000",
-    fontWeight: "700",
+    color: theme.colors.text,
+    fontWeight: theme.fontWeights.bold as "700",
   },
   seeAllButton: {
     flexDirection: "row",
     alignItems: "center",
   },
   seeAllText: {
-    fontSize: 14,
+    fontSize: theme.fontSizes.regularSmall,
     fontFamily: theme.fonts.medium,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginRight: 4,
-    fontWeight: "600",
+    fontWeight: theme.fontWeights.medium as "500",
   },
   carouselContainer: {
     height: 260, // Adjusted for larger image
@@ -366,17 +369,17 @@ const styles = StyleSheet.create({
     width: CARD_WIDTH,
   },
   card: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 0, // Remove padding so image can start from top
     overflow: "hidden", // Ensure image respects border radius
-    shadowColor: "#9747FF",
+    shadowColor: theme.colors.secondPrimary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 8,
     elevation: 4,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
   },
   imageContainer: {
     width: "100%",
@@ -385,7 +388,7 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 0,
     borderBottomRightRadius: 0,
     overflow: "hidden",
-    backgroundColor: "#F8F8F8",
+    backgroundColor: theme.colors.backgroundSecondary,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -400,9 +403,9 @@ const styles = StyleSheet.create({
     paddingTop: 10,
   },
   reviewerName: {
-    fontSize: 14,
+    fontSize: theme.fontSizes.regularSmall,
     fontFamily: theme.fonts.bold,
-    color: "#1A1A1A",
+    color: theme.colors.text,
     fontWeight: "700",
     marginBottom: 5,
   },
@@ -412,9 +415,9 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   ratingText: {
-    fontSize: 10,
+    fontSize: theme.fontSizes.small,
     fontFamily: theme.fonts.medium,
-    color: "#666",
+    color: theme.colors.textSecondary,
     marginLeft: 4,
     fontWeight: "600",
   },
@@ -423,11 +426,12 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   reviewText: {
-    fontSize: 11,
+    fontSize: theme.fontSizes.small,
     fontFamily: theme.fonts.regular,
-    color: "#555",
+    color: theme.colors.text,
     lineHeight: 16,
   },
-});
+  });
+};
 
 export default TestimonialsCarousel;

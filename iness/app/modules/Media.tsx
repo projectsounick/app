@@ -68,7 +68,7 @@ export default function MediaScreen() {
   }
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}
       edges={["left", "right"]}
     >
       {/* <SmallHeader title="Media" weightShow={false} />
@@ -124,7 +124,7 @@ export default function MediaScreen() {
                   style={{
                     fontSize: theme.fontSizes.regularSmall,
                     fontWeight: "500",
-                    color: theme.colors.dark,
+                    color: theme.colors.text,
 
                     textAlign: "center",
                   }}

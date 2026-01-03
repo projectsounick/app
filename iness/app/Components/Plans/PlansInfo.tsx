@@ -18,6 +18,7 @@ import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { PlanInterface } from "@/app/interfaces/planInterface";
 import DietPlanInfoModal from "@/app/Modals/DietPlanModal";
 import { withAuthGuard } from "@/app/Hoc/WithAuthGuardButton";
+import theme from "@/app/Theme/globalTheme";
 const ProtectedAnimatedSubmitButton = withAuthGuard(AnimatedSubmitButton);
 interface Props {
   screenWidth: number;
@@ -70,17 +71,17 @@ const PlansInfo: React.FC<Props> = ({
           {/* Overview Card */}
           <View
             style={{
-              backgroundColor: "#FFFFFF",
+              backgroundColor: theme.colors.background,
               borderRadius: 20,
               padding: 20,
               marginBottom: 16,
-              shadowColor: "#000",
+              shadowColor: theme.colors.dark,
               shadowOffset: { width: 0, height: 1 },
               shadowOpacity: 0.05,
               shadowRadius: 4,
               elevation: 2,
               borderWidth: 1,
-              borderColor: "#F5F5F5",
+              borderColor: theme.colors.border,
             }}
           >
             <View
@@ -95,19 +96,19 @@ const PlansInfo: React.FC<Props> = ({
                   width: 36,
                   height: 36,
                   borderRadius: 10,
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: theme.colors.backgroundCardLight,
                   alignItems: "center",
                   justifyContent: "center",
                   marginRight: 12,
                 }}
               >
-                <Ionicons name="information-circle" size={22} color="#9747FF" />
+                <Ionicons name="information-circle" size={22} color={theme.colors.secondPrimary} />
               </View>
               <Text
                 style={{
-                  fontSize: 20,
-                  fontWeight: "700",
-                  color: "#000",
+                  fontSize: theme.fontSizes.large,
+                  fontWeight: theme.fontWeights.bold as "700",
+                  color: theme.colors.dark,
                 }}
               >
                 Overview
@@ -115,8 +116,8 @@ const PlansInfo: React.FC<Props> = ({
             </View>
             <Text
               style={{
-                fontSize: 15,
-                color: "#666",
+                fontSize: theme.fontSizes.regular,
+                color: theme.colors.textSecondary,
                 lineHeight: 22,
               }}
             >
@@ -127,17 +128,17 @@ const PlansInfo: React.FC<Props> = ({
           {/* What it provides Card */}
           <View
             style={{
-              backgroundColor: "#FFFFFF",
+              backgroundColor: theme.colors.background,
               borderRadius: 20,
               padding: 20,
               marginBottom: 16,
-              shadowColor: "#000",
+              shadowColor: theme.colors.dark,
               shadowOffset: { width: 0, height: 1 },
               shadowOpacity: 0.05,
               shadowRadius: 4,
               elevation: 2,
               borderWidth: 1,
-              borderColor: "#F5F5F5",
+              borderColor: theme.colors.border,
             }}
           >
             <View
@@ -152,19 +153,19 @@ const PlansInfo: React.FC<Props> = ({
                   width: 36,
                   height: 36,
                   borderRadius: 10,
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: theme.colors.backgroundCardLight,
                   alignItems: "center",
                   justifyContent: "center",
                   marginRight: 12,
                 }}
               >
-                <Ionicons name="checkmark-circle" size={22} color="#9747FF" />
+                <Ionicons name="checkmark-circle" size={22} color={theme.colors.secondPrimary} />
               </View>
               <Text
                 style={{
-                  fontSize: 18,
-                  fontWeight: "700",
-                  color: "#000",
+                  fontSize: theme.fontSizes.medium,
+                  fontWeight: theme.fontWeights.bold as "700",
+                  color: theme.colors.dark,
                 }}
               >
                 What it provides
@@ -185,7 +186,7 @@ const PlansInfo: React.FC<Props> = ({
                     width: 24,
                     height: 24,
                     borderRadius: 8,
-                    backgroundColor: "#F3EDFF",
+                    backgroundColor: theme.colors.backgroundCardLight,
                     alignItems: "center",
                     justifyContent: "center",
                     marginRight: 12,
@@ -195,16 +196,16 @@ const PlansInfo: React.FC<Props> = ({
                   <Ionicons
                     name="checkmark"
                     size={18}
-                    color="#9747FF"
+                    color={theme.colors.secondPrimary}
                   />
                 </View>
                 <Text
                   style={{
-                    fontSize: 14,
-                    color: "#333",
+                    fontSize: theme.fontSizes.regularSmall,
+                    color: theme.colors.text,
                     flex: 1,
                     lineHeight: 22,
-                    fontWeight: "500",
+                    fontWeight: theme.fontWeights.medium as "500",
                   }}
                 >
                   {item}
@@ -218,17 +219,17 @@ const PlansInfo: React.FC<Props> = ({
           {currentPlan?.otherImages?.length > 0 && (
             <View
               style={{
-                backgroundColor: "#FFFFFF",
+                backgroundColor: theme.colors.background,
                 borderRadius: 20,
                 padding: 20,
                 marginBottom: 16,
-                shadowColor: "#000",
+                shadowColor: theme.colors.dark,
                 shadowOffset: { width: 0, height: 1 },
                 shadowOpacity: 0.05,
                 shadowRadius: 4,
                 elevation: 2,
                 borderWidth: 1,
-                borderColor: "#F5F5F5",
+                borderColor: theme.colors.border,
               }}
             >
               <View
@@ -243,19 +244,19 @@ const PlansInfo: React.FC<Props> = ({
                     width: 36,
                     height: 36,
                     borderRadius: 10,
-                    backgroundColor: "#F3EDFF",
+                    backgroundColor: theme.colors.backgroundCardLight,
                     alignItems: "center",
                     justifyContent: "center",
                     marginRight: 12,
                   }}
                 >
-                  <Ionicons name="images" size={22} color="#9747FF" />
+                  <Ionicons name="images" size={22} color={theme.colors.secondPrimary} />
                 </View>
                 <Text
                   style={{
-                    fontSize: 18,
-                    fontWeight: "700",
-                    color: "#000",
+                    fontSize: theme.fontSizes.medium,
+                    fontWeight: theme.fontWeights.bold as "700",
+                    color: theme.colors.dark,
                   }}
                 >
                   Plan Gallery
@@ -276,8 +277,8 @@ const PlansInfo: React.FC<Props> = ({
                         marginRight: 12,
                         borderRadius: 12,
                         overflow: "hidden",
-                        backgroundColor: "#F8F8F8",
-                        shadowColor: "#000",
+                        backgroundColor: theme.colors.backgroundSecondary,
+                        shadowColor: theme.colors.dark,
                         shadowOffset: { width: 0, height: 2 },
                         shadowOpacity: 0.1,
                         shadowRadius: 4,
@@ -321,7 +322,7 @@ const PlansInfo: React.FC<Props> = ({
             }}
             onPress={() => setSelectedImage(null)}
           >
-            <Ionicons name="close" size={30} color="#fff" />
+            <Ionicons name="close" size={30} color={theme.colors.textWhite} />
           </TouchableOpacity>
           {selectedImage ? (
             <Image
@@ -352,14 +353,14 @@ const PlansInfo: React.FC<Props> = ({
       >
         <View
           style={{
-            backgroundColor: "#FFFFFF",
+            backgroundColor: theme.colors.background,
             paddingTop: 12,
             paddingLeft: Math.min(20, screenWidth * 0.05),
             paddingRight: Math.min(20, screenWidth * 0.05),
             paddingBottom: 12,
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
-            shadowColor: "#000",
+            shadowColor: theme.colors.black,
             shadowOffset: { width: 0, height: -2 },
             shadowOpacity: 0.1,
             shadowRadius: 8,
@@ -367,7 +368,7 @@ const PlansInfo: React.FC<Props> = ({
             borderTopWidth: 1,
             borderLeftWidth: 1,
             borderRightWidth: 1,
-            borderColor: "#F5F5F5",
+            borderColor: theme.colors.border,
           }}
         >
           {/* Pricing Cards */}
@@ -397,13 +398,13 @@ const PlansInfo: React.FC<Props> = ({
                   style={{
                     width: isSingle ? cardWidth : undefined,
                     flex: isSingle ? 0 : 1,
-                    backgroundColor: isSelected ? "#F3EDFF" : "#FFFFFF",
+                    backgroundColor: isSelected ? theme.colors.backgroundCardLight : theme.colors.background,
                     borderWidth: isSelected ? 2 : 1.5,
-                    borderColor: isSelected ? "#9747FF" : "#E0E0E0",
+                    borderColor: isSelected ? theme.colors.secondPrimary : theme.colors.divider,
                     borderRadius: 14,
                     padding: 10,
                     paddingVertical: 12,
-                    shadowColor: isSelected ? "#9747FF" : "#000",
+                    shadowColor: isSelected ? theme.colors.secondPrimary : theme.colors.dark,
                     shadowOffset: { width: 0, height: 2 },
                     shadowOpacity: isSelected ? 0.15 : 0.08,
                     shadowRadius: isSelected ? 6 : 4,
@@ -422,9 +423,9 @@ const PlansInfo: React.FC<Props> = ({
                     <View style={{ flex: 1 }}>
                       <Text
                         style={{
-                          fontSize: 12,
-                          fontWeight: "700",
-                          color: "#000",
+                          fontSize: theme.fontSizes.small,
+                          fontWeight: theme.fontWeights.bold as "700",
+                          color: theme.colors.dark,
                           marginBottom: 1,
                         }}
                       >
@@ -433,9 +434,9 @@ const PlansInfo: React.FC<Props> = ({
                       {plan.sessionCount != null && (
                         <Text
                           style={{
-                            fontSize: 10,
-                            color: "#666",
-                            fontWeight: "400",
+                            fontSize: theme.fontSizes.small,
+                            color: theme.colors.textSecondary,
+                            fontWeight: theme.fontWeights.regular as "400",
                           }}
                         >
                           {plan.sessionCount} sessions
@@ -447,15 +448,15 @@ const PlansInfo: React.FC<Props> = ({
                         width: 20,
                         height: 20,
                         borderRadius: 10,
-                        backgroundColor: isSelected ? "#9747FF" : "#FFFFFF",
+                        backgroundColor: isSelected ? theme.colors.secondPrimary : theme.colors.background,
                         alignItems: "center",
                         justifyContent: "center",
                         borderWidth: 2,
-                        borderColor: "#9747FF",
+                        borderColor: theme.colors.secondPrimary,
                       }}
                     >
                       {isSelected && (
-                        <Ionicons name="checkmark" size={12} color="#FFFFFF" />
+                        <Ionicons name="checkmark" size={12} color={theme.colors.textWhite} />
                       )}
                     </View>
                   </View>
@@ -468,9 +469,9 @@ const PlansInfo: React.FC<Props> = ({
                   >
                     <Text
                       style={{
-                        fontSize: 20,
-                        fontWeight: "700",
-                        color: "#9747FF",
+                        fontSize: theme.fontSizes.large,
+                        fontWeight: theme.fontWeights.bold as "700",
+                        color: theme.colors.secondPrimary,
                         marginRight: 4,
                       }}
                     >
@@ -481,7 +482,7 @@ const PlansInfo: React.FC<Props> = ({
                     style={{
                       flexDirection: "row",
                       alignItems: "center",
-                      backgroundColor: isSelected ? "#FFFFFF" : "#F8F8F8",
+                      backgroundColor: isSelected ? theme.colors.background : theme.colors.backgroundSecondary,
                       paddingHorizontal: 6,
                       paddingVertical: 3,
                       borderRadius: 6,
@@ -491,14 +492,14 @@ const PlansInfo: React.FC<Props> = ({
                     <Ionicons
                       name={plan.isOnline ? "videocam" : "location"}
                       size={15}
-                      color={isSelected ? "#9747FF" : "#666"}
+                      color={isSelected ? theme.colors.secondPrimary : theme.colors.textSecondary}
                       style={{ marginRight: 3 }}
                     />
                     <Text
                       style={{
-                        fontSize: 10,
-                        color: isSelected ? "#9747FF" : "#666",
-                        fontWeight: "600",
+                        fontSize: theme.fontSizes.small,
+                        color: isSelected ? theme.colors.secondPrimary : theme.colors.textSecondary,
+                        fontWeight: theme.fontWeights.medium as "500",
                       }}
                     >
                       {plan.isOnline ? "Online" : "Offline"}
@@ -515,25 +516,25 @@ const PlansInfo: React.FC<Props> = ({
             }}
             disabled={cartLoading}
             style={{
-              backgroundColor: "#67C694",
+              backgroundColor: theme.colors.success,
               borderRadius: 30,
               paddingVertical: 14,
               alignItems: "center",
               flexDirection: "row",
               justifyContent: "center",
-              shadowColor: "#67C694",
+              shadowColor: theme.colors.success,
               shadowOffset: { width: 0, height: 4 },
               shadowOpacity: 0.3,
               shadowRadius: 8,
               elevation: 5,
             }}
           >
-            <Ionicons name="cart" size={22} color="#ffffff" />
+            <Ionicons name="cart" size={22} color={theme.colors.textWhite} />
             <Text
               style={{
-                color: "#ffffff",
-                fontSize: 16,
-                fontWeight: "700",
+                color: theme.colors.textWhite,
+                fontSize: theme.fontSizes.regular,
+                fontWeight: theme.fontWeights.bold as "700",
                 marginLeft: 8,
               }}
             >

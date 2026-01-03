@@ -8,10 +8,12 @@ import {
   Linking,
   ActivityIndicator,
 } from "react-native";
+import { useGlobalTheme } from "../Theme/ThemeContext";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 const OffersCards = () => {
+  const theme = useGlobalTheme();
   const [offers, setOffers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const flatListRef: any = useRef<FlatList>(null);
@@ -64,10 +66,10 @@ const OffersCards = () => {
           flex: 1,
           justifyContent: "center",
           alignItems: "center",
-          backgroundColor: "#000",
+          backgroundColor: theme.colors.background,
         }}
       >
-        <ActivityIndicator size="large" color="#fff" />
+        <ActivityIndicator size="large" color={theme.colors.primary} />
       </View>
     );
   }

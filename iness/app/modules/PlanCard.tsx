@@ -10,7 +10,7 @@ import { useDispatch } from "react-redux";
 import { useRouter } from "expo-router";
 
 import { setCurrentPlan } from "@/Slices/planSlice";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 interface PlanCardProps {
   item: any;
@@ -19,6 +19,8 @@ interface PlanCardProps {
 }
 
 const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -36,14 +38,16 @@ const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
         height: 200,
         borderRadius: 16,
         overflow: "hidden",
-        backgroundColor: "#fff",
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 8,
-        elevation: 3,
+        backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
         borderWidth: 1,
-        borderColor: "#F5F5F5",
+        borderColor: theme.colors.border,
+        ...(isDark ? {} : {
+          shadowColor: theme.colors.black,
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 8,
+          elevation: 3,
+        }),
       }}
     >
       {/* Image and Content Layout */}
@@ -54,7 +58,7 @@ const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
             style={{
               width: 140,
               height: 200,
-              backgroundColor: "#F9F9F9",
+              backgroundColor: theme.colors.backgroundFaded,
               justifyContent: "center",
               alignItems: "center",
             }}
@@ -92,9 +96,9 @@ const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
               {/* Title */}
               <Text
                 style={{
-                  fontWeight: theme.fontWeights.bold,
-                  fontSize: 15,
-                  color: "#1A1A1A",
+                  fontWeight: theme.fontWeights.bold as "700",
+                  fontSize: theme.fontSizes.regular,
+                  color: theme.colors.text,
                   marginBottom: 8,
                 }}
                 numberOfLines={2}
@@ -119,18 +123,18 @@ const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
                         width: 5,
                         height: 5,
                         borderRadius: 2.5,
-                        backgroundColor: "#9747FF",
+                        backgroundColor: theme.colors.secondPrimary,
                         marginRight: 6,
                         marginTop: 5,
                       }}
                     />
                     <Text
                       style={{
-                        color: "#666",
-                        fontSize: 11,
+                        color: theme.colors.textSecondary,
+                        fontSize: theme.fontSizes.small,
                         flex: 1,
                         lineHeight: 15,
-                        fontWeight: "400",
+                        fontWeight: "400" as "400",
                       }}
                       numberOfLines={2}
                       ellipsizeMode="tail"
@@ -145,13 +149,13 @@ const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
             {/* Button */}
             <TouchableOpacity
               style={{
-                backgroundColor: "#67C694",
+                backgroundColor: theme.colors.success,
                 paddingVertical: 9,
                 paddingHorizontal: 18,
                 borderRadius: 30,
                 alignSelf: "flex-start",
                 marginTop: 8,
-                shadowColor: "#67C694",
+                shadowColor: theme.colors.success,
                 shadowOffset: { width: 0, height: 4 },
                 shadowOpacity: 0.4,
                 shadowRadius: 6,
@@ -161,9 +165,9 @@ const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
             >
               <Text
                 style={{
-                  fontWeight: "700",
-                  fontSize: 12,
-                  color: "#fff",
+                  fontWeight: theme.fontWeights.bold as "700",
+                  fontSize: theme.fontSizes.small,
+                  color: theme.colors.textWhite,
                 }}
               >
                 Continue
@@ -178,23 +182,23 @@ const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
             flex: 1,
             padding: 14,
             justifyContent: "space-between",
-            backgroundColor: "#F9F9F9",
+            backgroundColor: theme.colors.backgroundSecondary,
             height: 200,
           }}
         >
           <View style={{ flexShrink: 1 }}>
-            <Text
-              style={{
-                fontWeight: theme.fontWeights.bold,
-                fontSize: 15,
-                color: "#1A1A1A",
-                marginBottom: 8,
-              }}
-              numberOfLines={2}
-              ellipsizeMode="tail"
-            >
-              {item.title}
-            </Text>
+              <Text
+                style={{
+                  fontWeight: theme.fontWeights.bold as "700",
+                  fontSize: theme.fontSizes.regular,
+                  color: theme.colors.text,
+                  marginBottom: 8,
+                }}
+                numberOfLines={2}
+                ellipsizeMode="tail"
+              >
+                {item.title}
+              </Text>
 
             {item.descItems?.length > 0 && (
               <View>
@@ -212,18 +216,18 @@ const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
                         width: 5,
                         height: 5,
                         borderRadius: 2.5,
-                        backgroundColor: "#9747FF",
+                        backgroundColor: theme.colors.secondPrimary,
                         marginRight: 6,
                         marginTop: 5,
                       }}
                     />
                     <Text
                       style={{
-                        color: "#666",
-                        fontSize: 11,
+                        color: theme.colors.textSecondary,
+                        fontSize: theme.fontSizes.small,
                         flex: 1,
                         lineHeight: 15,
-                        fontWeight: "400",
+                        fontWeight: theme.fontWeights.regular as "400",
                       }}
                       numberOfLines={2}
                       ellipsizeMode="tail"
@@ -238,25 +242,27 @@ const PlanCard = ({ item, index, planGroupLength }: PlanCardProps) => {
 
           <TouchableOpacity
             style={{
-              backgroundColor: "#67C694",
+              backgroundColor: theme.colors.success,
               paddingVertical: 9,
               paddingHorizontal: 18,
               borderRadius: 30,
               alignSelf: "flex-start",
               marginTop: 8,
-              shadowColor: "#67C694",
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.4,
-              shadowRadius: 6,
-              elevation: 6,
+              ...(isDark ? {} : {
+                shadowColor: theme.colors.success,
+                shadowOffset: { width: 0, height: 4 },
+                shadowOpacity: 0.4,
+                shadowRadius: 6,
+                elevation: 6,
+              }),
             }}
             onPress={handlePress}
           >
             <Text
               style={{
-                fontWeight: "700",
-                fontSize: 12,
-                color: "#fff",
+                fontWeight: theme.fontWeights.bold as "700",
+                fontSize: theme.fontSizes.small,
+                color: theme.colors.textWhite,
               }}
             >
               Continue

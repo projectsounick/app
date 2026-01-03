@@ -24,6 +24,7 @@ import {
   NotificationData,
   NotificationNavigationData,
 } from "@/app/utils/notificationRouter";
+import { ThemeProvider } from "@/app/Theme/ThemeContext";
 
 // Fonts
 SplashScreen.preventAutoHideAsync();
@@ -278,16 +279,18 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
   return (
     <GestureHandlerRootView style={styles.container}>
-      <Provider store={store}>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-          }}
-        >
-          <Stack.Screen name="index" />
-          <Stack.Screen name="login" />
-        </Stack>
-      </Provider>
+      <ThemeProvider>
+        <Provider store={store}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+            }}
+          >
+            <Stack.Screen name="index" />
+            <Stack.Screen name="login" />
+          </Stack>
+        </Provider>
+      </ThemeProvider>
     </GestureHandlerRootView>
   );
 }

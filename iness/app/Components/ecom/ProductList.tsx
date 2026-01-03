@@ -14,9 +14,12 @@ import { AntDesign, MaterialIcons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { Product } from "@/app/interfaces/ecommerceInterface";
 import ProductModal from "@/app/Modals/ProductBottomSheetModal";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const GroupedProductDisplay = () => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const products: Product[] = useSelector(
     (state: RootState) => state.ecom.products
   );
@@ -63,7 +66,7 @@ const GroupedProductDisplay = () => {
             />
           ) : (
             <View style={styles.noImageContainer}>
-              <MaterialIcons name="image" size={40} color="#999" />
+              <MaterialIcons name="image" size={40} color={theme.colors.textMuted} />
             </View>
           )}
 
@@ -72,7 +75,7 @@ const GroupedProductDisplay = () => {
             style={styles.plusIcon}
             onPress={() => handleCheck(item)}
           >
-            <AntDesign name="pluscircle" size={28} color="#67C694" />
+            <AntDesign name="pluscircle" size={28} color={theme.colors.success} />
           </TouchableOpacity>
 
           {/* Variation Label Badge */}
@@ -111,7 +114,7 @@ const GroupedProductDisplay = () => {
               <MaterialCommunityIcons
                 name="tag-outline"
                 size={16}
-                color="#9747FF"
+                color={theme.colors.secondPrimary}
               />
             </View>
             <Text style={styles.categoryName}>{category}</Text>
@@ -145,7 +148,7 @@ const GroupedProductDisplay = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     marginTop: 24,
     marginBottom: 8,
@@ -158,29 +161,31 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   headerDash: {
     width: 40,
     height: 3,
-    backgroundColor: "#9747FF",
+    backgroundColor: theme.colors.secondPrimary,
     borderRadius: 2,
   },
   categoryContainer: {
     marginBottom: 20,
     padding: 14,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    }),
   },
   categoryHeader: {
     flexDirection: "row",
@@ -188,49 +193,51 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     paddingBottom: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
+    borderBottomColor: theme.colors.border,
   },
   categoryIconContainer: {
     width: 32,
     height: 32,
     borderRadius: 10,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 10,
   },
   categoryName: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.text,
     flex: 1,
     fontFamily: theme.fonts.bold,
   },
   itemCountBadge: {
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 8,
   },
   itemCountText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#9747FF",
+    fontSize: theme.fontSizes.small,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.secondPrimary,
     fontFamily: theme.fonts.medium,
   },
   productCard: {
     width: 150,
     borderRadius: 14,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     overflow: "hidden",
     marginRight: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    }),
   },
   imageContainer: {
     width: "100%",
@@ -238,7 +245,7 @@ const styles = StyleSheet.create({
     position: "relative",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#FAFAFA",
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   productImage: {
     width: "100%",
@@ -248,7 +255,7 @@ const styles = StyleSheet.create({
   noImageContainer: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.border,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -261,15 +268,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 8,
     left: 8,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
   },
   variationText: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#9747FF",
+    fontSize: theme.fontSizes.small,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.secondPrimary,
     fontFamily: theme.fonts.medium,
   },
   productDetails: {
@@ -277,17 +284,17 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
   },
   productName: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.small,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.text,
     marginBottom: 6,
     lineHeight: 16,
     fontFamily: theme.fonts.medium,
   },
   productPrice: {
-    fontSize: 15,
+    fontSize: theme.fontSizes.regular,
     fontWeight: "700",
-    color: "#9747FF",
+    color: isDark ? theme.colors.textWhite : theme.colors.secondPrimary,
     fontFamily: theme.fonts.bold,
   },
 });

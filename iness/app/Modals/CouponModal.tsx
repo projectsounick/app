@@ -11,6 +11,7 @@ import {
   Keyboard,
   Platform,
 } from "react-native";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 interface CouponModalProps {
   visible: boolean;
@@ -27,6 +28,8 @@ const CouponModal: React.FC<CouponModalProps> = ({
   couponCode,
   setCouponCode,
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   return (
     <Modal
       transparent
@@ -107,9 +110,9 @@ const CouponModal: React.FC<CouponModalProps> = ({
               {/* Title */}
               <Text
                 style={{
-                  fontSize: 24,
-                  fontWeight: "700",
-                  color: "#000",
+                  fontSize: theme.fontSizes.large,
+                  fontWeight: theme.fontWeights.bold as "700",
+                  color: theme.colors.text,
                   textAlign: "center",
                   marginBottom: 20,
                 }}
@@ -124,15 +127,15 @@ const CouponModal: React.FC<CouponModalProps> = ({
                 value={couponCode}
                 onChangeText={setCouponCode}
                 style={{
-                  backgroundColor: "#F8F8F8",
+                  backgroundColor: theme.colors.backgroundSecondary,
                   borderRadius: 16,
                   paddingHorizontal: 16,
                   paddingVertical: 16,
                   marginBottom: 20,
-                  fontSize: 16,
-                  color: "#000",
+                  fontSize: theme.fontSizes.regular,
+                  color: theme.colors.text,
                   borderWidth: 1,
-                  borderColor: "#E0E0E0",
+                  borderColor: theme.colors.border,
                 }}
               />
 
@@ -149,9 +152,9 @@ const CouponModal: React.FC<CouponModalProps> = ({
               >
                 <Text
                   style={{
-                    color: "#FFFFFF",
-                    fontWeight: "700",
-                    fontSize: 16,
+                    color: theme.colors.textWhite,
+                    fontWeight: theme.fontWeights.bold as "700",
+                    fontSize: theme.fontSizes.regular,
                   }}
                 >
                   Apply Coupon

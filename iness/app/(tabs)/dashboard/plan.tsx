@@ -38,7 +38,7 @@ export default function SliderCard() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}
       edges={["left", "right", "bottom"]}
     >
       <SmallHeader title="Plans" />
@@ -51,7 +51,7 @@ export default function SliderCard() {
               style={{
                 marginBottom: 24,
                 marginHorizontal: 12,
-                backgroundColor: "#FFFFFF",
+                backgroundColor: theme.colors.background,
                 borderRadius: 12,
                 paddingVertical: 12,
                 paddingHorizontal: 16,

@@ -23,6 +23,7 @@ import { setActivePlans } from "@/Slices/planSlice";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { clearCart } from "@/Slices/cartSlice";
+import theme from "@/app/Theme/globalTheme";
 
 const PaymentSuccessScreen = () => {
   const router = useRouter();
@@ -143,7 +144,7 @@ const PaymentSuccessScreen = () => {
   }
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}
       edges={["left", "right"]}
     >
       <ImageBackground
@@ -230,7 +231,7 @@ const PaymentSuccessScreen = () => {
                 <View style={{ flex: 1 }}>
                   <Text
                     style={{
-                      fontSize: 16,
+                      fontSize: theme.fontSizes.regular,
                       color: messageType === "success" 
                         ? "#1B5E20" 
                         : messageType === "error" 
@@ -252,7 +253,7 @@ const PaymentSuccessScreen = () => {
                   </Text>
                   <Text
                     style={{
-                      fontSize: 14,
+                      fontSize: theme.fontSizes.regularSmall,
                       color: messageType === "success" 
                         ? "#2E7D32" 
                         : messageType === "error" 
@@ -280,7 +281,7 @@ const PaymentSuccessScreen = () => {
                 style={{
                   width: "90%",
                   borderRadius: 20,
-                  backgroundColor: "#fff",
+                  backgroundColor: theme.colors.background,
                   padding: 20,
                   flexDirection: "row",
                   alignItems: "center",
@@ -305,23 +306,23 @@ const PaymentSuccessScreen = () => {
                 ) : (
                   <View
                     style={{
-                      backgroundColor: "#E6FFF0",
+                      backgroundColor: theme.colors.greenLight,
                       borderRadius: 50,
                       padding: 12,
                       marginRight: 16,
                     }}
                   >
-                    <Text style={{ fontSize: 20 }}>📄</Text>
+                    <Text style={{ fontSize: theme.fontSizes.large }}>📄</Text>
                   </View>
                 )}
 
                 <View>
                   <Text
-                    style={{ fontSize: 16, fontWeight: "600", color: "#222" }}
+                    style={{ fontSize: theme.fontSizes.regular, fontWeight: theme.fontWeights.medium as "500", color: theme.colors.text }}
                   >
                     Download your receipt
                   </Text>
-                  <Text style={{ fontSize: 12, color: "#666" }}>
+                  <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textSecondary }}>
                     Tap to get your payment receipt
                   </Text>
                 </View>
@@ -343,7 +344,7 @@ const PaymentSuccessScreen = () => {
           {/* White Bottom Sheet for All Cases */}
           <View
             style={{
-              backgroundColor: "#FFFFFF",
+              backgroundColor: theme.colors.background,
               borderTopLeftRadius: 24,
               borderTopRightRadius: 24,
               paddingTop: 12,
@@ -365,7 +366,7 @@ const PaymentSuccessScreen = () => {
               style={{
                 width: 50,
                 height: 5,
-                backgroundColor: "#E0E0E0",
+                backgroundColor: theme.colors.border,
                 borderRadius: 3,
                 alignSelf: "center",
                 marginBottom: 20,
@@ -378,7 +379,7 @@ const PaymentSuccessScreen = () => {
                 <TouchableOpacity
                   onPress={() => router.replace("/(tabs)/dashboard/cart")}
                   style={{
-                    backgroundColor: "#67C694",
+                    backgroundColor: theme.colors.success,
                     paddingVertical: 14,
                     borderRadius: 25,
                     alignItems: "center",
@@ -395,8 +396,8 @@ const PaymentSuccessScreen = () => {
                   <Ionicons name="cart" size={20} color="#FFFFFF" />
                   <Text
                     style={{
-                      color: "#FFFFFF",
-                      fontSize: 16,
+                      color: theme.colors.textWhite,
+                      fontSize: theme.fontSizes.regular,
                       fontWeight: "600",
                       marginLeft: 8,
                     }}
@@ -409,7 +410,7 @@ const PaymentSuccessScreen = () => {
                 <TouchableOpacity
                   onPress={() => router.replace("/(tabs)/dashboard/tabs/train")}
                   style={{
-                    backgroundColor: "#F3EDFF",
+                    backgroundColor: theme.colors.backgroundCardLight,
                     paddingVertical: 14,
                     borderRadius: 25,
                     alignItems: "center",
@@ -423,8 +424,8 @@ const PaymentSuccessScreen = () => {
                   <MaterialCommunityIcons name="format-list-bulleted" size={20} color="#9747FF" />
                   <Text
                     style={{
-                      color: "#9747FF",
-                      fontSize: 16,
+                      color: theme.colors.secondPrimary,
+                      fontSize: theme.fontSizes.regular,
                       fontWeight: "600",
                       marginLeft: 8,
                     }}
@@ -447,8 +448,8 @@ const PaymentSuccessScreen = () => {
                   <Ionicons name="compass-outline" size={18} color="#666" />
                   <Text
                     style={{
-                      color: "#666",
-                      fontSize: 14,
+                      color: theme.colors.textSecondary,
+                      fontSize: theme.fontSizes.regularSmall,
                       fontWeight: "500",
                       marginLeft: 8,
                     }}
@@ -463,7 +464,7 @@ const PaymentSuccessScreen = () => {
                 <TouchableOpacity
                   onPress={() => router.replace("/(tabs)/dashboard/tabs/train")}
                   style={{
-                    backgroundColor: "#67C694",
+                    backgroundColor: theme.colors.success,
                     paddingVertical: 14,
                     borderRadius: 25,
                     alignItems: "center",
@@ -480,8 +481,8 @@ const PaymentSuccessScreen = () => {
                   <MaterialCommunityIcons name="clipboard-check" size={20} color="#FFFFFF" />
                   <Text
                     style={{
-                      color: "#FFFFFF",
-                      fontSize: 16,
+                      color: theme.colors.textWhite,
+                      fontSize: theme.fontSizes.regular,
                       fontWeight: "600",
                       marginLeft: 8,
                     }}
@@ -504,8 +505,8 @@ const PaymentSuccessScreen = () => {
                   <Ionicons name="compass-outline" size={18} color="#666" />
                   <Text
                     style={{
-                      color: "#666",
-                      fontSize: 14,
+                      color: theme.colors.textSecondary,
+                      fontSize: theme.fontSizes.regularSmall,
                       fontWeight: "500",
                       marginLeft: 8,
                     }}

@@ -28,6 +28,7 @@ import { userService } from "../services/user.service";
 import { Post } from "../interfaces/communityService";
 import useServiceWithSnackbar from "@/hooks/usePostDataHook";
 import { communityService } from "../services/community.service";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -38,6 +39,9 @@ interface CustomPostModalProps {
 
 const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostModalProps>(
   ({ setPosts, communityId }, ref) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme);
   const [modalVisible, setModalVisible] = useState(false);
 
   React.useImperativeHandle(ref, () => ({
@@ -226,14 +230,14 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                 {/* Header with Close Button */}
                 <View style={styles.headerContainer}>
                   <View style={styles.iconContainer}>
-                    <Ionicons name="create-outline" size={20} color="#9747FF" />
+                    <Ionicons name="create-outline" size={20} color={theme.colors.secondPrimary} />
                   </View>
                   <Text style={styles.modalTitle}>Create a Post</Text>
                   <TouchableOpacity
                     onPress={handleClose}
                     style={styles.closeButton}
                   >
-                    <Ionicons name="close" size={18} color="#1A1A1A" />
+                    <Ionicons name="close" size={18} color={theme.colors.text} />
                   </TouchableOpacity>
                 </View>
 
@@ -272,7 +276,7 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                           <Ionicons
                             name={icon as any}
                             size={18}
-                            color={postType === type ? "#9747FF" : "#666"}
+                            color={postType === type ? theme.colors.secondPrimary : theme.colors.textSecondary}
                           />
                         </View>
                         <Text
@@ -292,7 +296,7 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                     <View style={styles.inputContainer}>
                       <TextInput
                         placeholder="Write your caption..."
-                        placeholderTextColor="#999"
+                        placeholderTextColor={theme.colors.textMuted}
                         multiline
                         style={styles.captionInput}
                         value={caption}
@@ -344,7 +348,7 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                                 onPress={() => handleRemoveMedia(index)}
                                 style={styles.removeMediaButton}
                               >
-                                <Ionicons name="close-circle" size={32} color="#1A1A1A" />
+                                <Ionicons name="close-circle" size={32} color={theme.colors.text} />
                               </TouchableOpacity>
                             </View>
                           )}
@@ -375,7 +379,7 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                       <Ionicons
                         name="cloud-upload-outline"
                         size={22}
-                        color="#FFFFFF"
+                        color={theme.colors.textWhite}
                       />
                       <Text style={styles.uploadButtonText}>
                         {media.length > 0 ? "Add More" : `Upload ${postType}`}
@@ -395,7 +399,7 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
 
                   {loading ? (
                     <View style={styles.postButton}>
-                      <ActivityIndicator color="#FFFFFF" />
+                      <ActivityIndicator color={theme.colors.textWhite} />
                     </View>
                   ) : (
                     <TouchableOpacity
@@ -409,7 +413,7 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                       <Ionicons
                         name="send-outline"
                         size={20}
-                        color="#FFFFFF"
+                        color={theme.colors.textWhite}
                         style={{ marginRight: 6 }}
                       />
                       <Text style={styles.postButtonText}>Post</Text>
@@ -429,25 +433,25 @@ CustomPostModal.displayName = "CustomPostModal";
 
 export default CustomPostModal;
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: theme.colors.overlay,
     justifyContent: "flex-end",
   },
   modalContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
     maxHeight: "92%",
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   handleBar: {
     width: 40,
     height: 3,
-    backgroundColor: "#D0D0D0",
+    backgroundColor: theme.colors.border,
     borderRadius: 2,
     alignSelf: "center",
     marginBottom: 20,
@@ -462,22 +466,22 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginRight: 12,
   },
   modalTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     flex: 1,
   },
   closeButton: {
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.backgroundSecondary,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -497,8 +501,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
-    backgroundColor: "#FFFFFF",
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.background,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -509,9 +513,9 @@ const styles = StyleSheet.create({
   },
   optionButtonSelected: {
     borderWidth: 2,
-    borderColor: "#9747FF",
-    backgroundColor: "#FFFFFF",
-    shadowColor: "#9747FF",
+    borderColor: theme.colors.secondPrimary,
+    backgroundColor: theme.colors.background,
+    shadowColor: theme.colors.secondPrimary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
@@ -521,35 +525,35 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.backgroundSecondary,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 8,
   },
   optionIconContainerSelected: {
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.backgroundCardLight,
   },
   optionButtonText: {
-    color: "#666",
-    fontSize: 13,
-    fontWeight: "600",
+    color: theme.colors.textSecondary,
+    fontSize: theme.fontSizes.small,
+    fontWeight: theme.fontWeights.medium as "500",
   },
   optionButtonTextSelected: {
-    color: "#9747FF",
-    fontWeight: "700",
+    color: theme.colors.secondPrimary,
+    fontWeight: theme.fontWeights.bold as "700",
   },
   inputContainer: {
     marginBottom: 16,
   },
   captionInput: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 16,
     textAlignVertical: "top",
-    fontSize: 15,
+    fontSize: theme.fontSizes.regular,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
-    color: "#1A1A1A",
+    borderColor: theme.colors.border,
+    color: theme.colors.text,
     minHeight: 120,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -569,9 +573,9 @@ const styles = StyleSheet.create({
     height: 280,
     borderRadius: 16,
     overflow: "hidden",
-    backgroundColor: "#F9F9F9",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
     position: "relative",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -582,7 +586,7 @@ const styles = StyleSheet.create({
   media: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#F9F9F9",
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   removeMediaButton: {
     position: "absolute",
@@ -597,12 +601,12 @@ const styles = StyleSheet.create({
   dot: {
     width: 6,
     height: 6,
-    backgroundColor: "#D0D0D0",
+    backgroundColor: theme.colors.border,
     borderRadius: 3,
     marginHorizontal: 4,
   },
   activeDot: {
-    backgroundColor: "#9747FF",
+    backgroundColor: theme.colors.secondPrimary,
     width: 8,
     height: 8,
     borderRadius: 4,
@@ -610,22 +614,22 @@ const styles = StyleSheet.create({
   uploadButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     paddingVertical: 14,
     borderRadius: 30,
     justifyContent: "center",
     marginTop: 8,
-    shadowColor: "#67C694",
+    shadowColor: theme.colors.success,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 6,
     elevation: 6,
   },
   uploadButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
+    color: theme.colors.textWhite,
+    fontWeight: theme.fontWeights.bold as "700",
     marginLeft: 8,
-    fontSize: 15,
+    fontSize: theme.fontSizes.regular,
   },
   actionRow: {
     flexDirection: "row",
@@ -633,47 +637,47 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
+    borderTopColor: theme.colors.border,
     gap: 12,
   },
   cancelButton: {
     paddingVertical: 14,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.backgroundSecondary,
     borderRadius: 30,
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.divider,
   },
   cancelButtonText: {
-    color: "#666",
-    fontWeight: "600",
-    fontSize: 15,
+    color: theme.colors.textSecondary,
+    fontWeight: theme.fontWeights.medium as "500",
+    fontSize: theme.fontSizes.regular,
   },
   postButton: {
     paddingVertical: 14,
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     borderRadius: 30,
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#67C694",
+    shadowColor: theme.colors.success,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.4,
     shadowRadius: 6,
     elevation: 6,
   },
   postButtonDisabled: {
-    backgroundColor: "#D0D0D0",
+    backgroundColor: theme.colors.border,
     opacity: 0.6,
     shadowOpacity: 0,
     elevation: 0,
   },
   postButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 15,
+    color: theme.colors.textWhite,
+    fontWeight: theme.fontWeights.bold as "700",
+    fontSize: theme.fontSizes.regular,
   },
 });

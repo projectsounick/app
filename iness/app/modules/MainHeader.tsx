@@ -101,7 +101,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({
                 <Ionicons name="person" size={25} color={theme.colors.text} />
               )}
             </TouchableOpacity>
-            <Text style={{ color: "#fff", marginLeft: 8 }}>↑ 79 kgs</Text>
+            <Text style={{ color: theme.colors.textWhite, marginLeft: 8 }}>↑ 79 kgs</Text>
           </View>
 
           {/* Icons */}
@@ -120,7 +120,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({
         {/* Greeting */}
         <Text
           style={{
-            fontSize: 20,
+            fontSize: theme.fontSizes.large,
             fontWeight: "bold",
             color: "white",
             marginTop: 8,
@@ -142,7 +142,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({
         >
           <TouchableOpacity
             style={{
-              backgroundColor: "#4A2A75",
+              backgroundColor: theme.colors.secondPrimary,
               paddingVertical: 8,
               paddingHorizontal: 16,
               borderRadius: 20,
@@ -151,7 +151,7 @@ const MainHeader: React.FC<MainHeaderProps> = ({
             }}
             onPress={() => router.push("/dashboard/supportchat")}
           >
-            <Text style={{ color: "#A4FF55" }}>💬 Chat with us</Text>
+            <Text style={{ color: theme.colors.primary }}>💬 Chat with us</Text>
           </TouchableOpacity>
         </View>
       </Animated.View>

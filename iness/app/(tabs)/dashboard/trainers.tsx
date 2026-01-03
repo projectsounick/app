@@ -7,7 +7,6 @@ import {
   Image,
   ActivityIndicator,
   Platform,
-  ImageBackground,
   Dimensions,
   TouchableOpacity,
 } from "react-native";
@@ -15,12 +14,11 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import NormalHeader from "@/app/modules/NormalHeader";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { userService } from "@/app/services/user.service";
 import { router } from "expo-router";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 
-const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const { height } = Dimensions.get("window");
 
 interface Trainer {
@@ -34,6 +32,9 @@ interface Trainer {
 }
 
 export default function TrainersScreen() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const [trainers, setTrainers] = useState<Trainer[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -60,16 +61,11 @@ export default function TrainersScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: "#f2f2f2" }}>
-      <ImageBackground
-        source={backgroundImg}
-        style={{ flex: 1 }}
-        resizeMode="cover"
-      >
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: "transparent" }}
-          edges={["left", "right"]}
-        >
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      edges={["left", "right"]}
+    >
+      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
           <View style={styles.headerContainer}>
             <NormalHeader screenName="My Trainers" />
           </View>
@@ -81,7 +77,7 @@ export default function TrainersScreen() {
           >
           {loading ? (
             <View style={styles.loadingContainer}>
-              <ActivityIndicator size="large" color="#9747FF" />
+              <ActivityIndicator size="large" color={theme.colors.secondPrimary} />
               <Text style={styles.loadingText}>Loading trainers...</Text>
             </View>
           ) : error ? (
@@ -89,7 +85,7 @@ export default function TrainersScreen() {
               <MaterialCommunityIcons
                 name="alert-circle-outline"
                 size={64}
-                color="#FF6B6B"
+                color={theme.colors.errorRed}
               />
               <Text style={styles.emptyTitle}>Error</Text>
               <Text style={styles.emptyText}>{error}</Text>
@@ -99,7 +95,7 @@ export default function TrainersScreen() {
               <MaterialCommunityIcons
                 name="account-off-outline"
                 size={64}
-                color="#9747FF"
+                color={theme.colors.secondPrimary}
               />
               <Text style={styles.emptyTitle}>No Trainers Available</Text>
               <Text style={styles.emptyText}>
@@ -115,7 +111,7 @@ export default function TrainersScreen() {
                   <MaterialCommunityIcons
                     name="account-group"
                     size={24}
-                    color="#9747FF"
+                    color={theme.colors.secondPrimary}
                   />
                   <Text style={styles.descriptionTitle}>
                     Your Personal Trainers
@@ -140,7 +136,7 @@ export default function TrainersScreen() {
                 >
                   {trainer.isActive ? (
                     <LinearGradient
-                      colors={["#9747FF", "#7B2CBF"]}
+                      colors={isDark ? [theme.colors.backgroundCard, theme.colors.backgroundSecondary] : [theme.colors.secondPrimary, "#7B2CBF"]}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 1 }}
                       style={styles.trainerGradient}
@@ -155,7 +151,7 @@ export default function TrainersScreen() {
                             />
                           ) : (
                             <View style={styles.profilePlaceholder}>
-                              <Ionicons name="person" size={28} color="#fff" />
+                              <Ionicons name="person" size={28} color={theme.colors.textWhite} />
                             </View>
                           )}
                         </View>
@@ -170,7 +166,7 @@ export default function TrainersScreen() {
                               <MaterialCommunityIcons
                                 name="dumbbell"
                                 size={12}
-                                color="#fff"
+                                color={theme.colors.textWhite}
                               />
                               <Text style={styles.trainerRoleText}>
                                 Trainer
@@ -203,7 +199,7 @@ export default function TrainersScreen() {
                             }
                           }}
                         >
-                          <Ionicons name="chatbubble-ellipses" size={26} color="#67C694" />
+                          <Ionicons name="chatbubble-ellipses" size={26} color={theme.colors.success} />
                         </TouchableOpacity>
                       </View>
                     </LinearGradient>
@@ -234,7 +230,7 @@ export default function TrainersScreen() {
                               <MaterialCommunityIcons
                                 name="dumbbell"
                                 size={12}
-                                color="#666"
+                                color={theme.colors.textMuted}
                               />
                               <Text style={styles.trainerRoleTextInactive}>
                                 Trainer
@@ -280,13 +276,12 @@ export default function TrainersScreen() {
             </View>
           )}
           </ScrollView>
-        </SafeAreaView>
-      </ImageBackground>
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   headerContainer: {
     paddingHorizontal: 20,
     marginTop: Platform.OS === "ios" ? height * 0.05 : "4%",
@@ -307,8 +302,8 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 16,
-    fontSize: 14,
-    color: "#666",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
     fontFamily: theme.fonts.regular,
   },
   emptyContainer: {
@@ -319,16 +314,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 32,
   },
   emptyTitle: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     marginTop: 20,
     marginBottom: 8,
     fontFamily: theme.fonts.bold,
   },
   emptyText: {
-    fontSize: 14,
-    color: "#666",
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
     textAlign: "center",
     lineHeight: 20,
     fontFamily: theme.fonts.regular,
@@ -337,17 +332,19 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   descriptionContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 3,
+    }),
   },
   descriptionHeader: {
     flexDirection: "row",
@@ -355,16 +352,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   descriptionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     marginLeft: 10,
     fontFamily: theme.fonts.bold,
   },
   descriptionText: {
-    fontSize: 14,
+    fontSize: theme.fontSizes.regularSmall,
     lineHeight: 22,
-    color: "#666",
+    color: theme.colors.textSecondary,
     fontFamily: theme.fonts.regular,
   },
   trainersContainer: {
@@ -374,26 +371,30 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 3,
+    }),
   },
   trainerCardActive: {
-    shadowColor: "#9747FF",
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 5,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOpacity: 0.2,
+      shadowRadius: 12,
+      elevation: 5,
+    }),
   },
   trainerGradient: {
     padding: 16,
   },
   trainerContentInactive: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
   },
   trainerRow: {
     flexDirection: "row",
@@ -414,7 +415,7 @@ const styles = StyleSheet.create({
     height: 60,
     borderRadius: 30,
     borderWidth: 2,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.border,
   },
   profilePlaceholder: {
     width: 60,
@@ -430,26 +431,26 @@ const styles = StyleSheet.create({
     width: 60,
     height: 60,
     borderRadius: 30,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.border,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 2,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.border,
   },
   infoSection: {
     flex: 1,
   },
   trainerName: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#FFFFFF",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.textWhite,
     marginBottom: 8,
     fontFamily: theme.fonts.bold,
   },
   trainerNameInactive: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1A1A1A",
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
     marginBottom: 8,
     fontFamily: theme.fonts.bold,
   },
@@ -469,22 +470,22 @@ const styles = StyleSheet.create({
   trainerRoleBadgeInactive: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.border,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
   },
   trainerRoleText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#FFFFFF",
+    fontSize: theme.fontSizes.small,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.textWhite,
     marginLeft: 4,
     fontFamily: theme.fonts.medium,
   },
   trainerRoleTextInactive: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#666",
+    fontSize: theme.fontSizes.small,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.textSecondary,
     marginLeft: 4,
     fontFamily: theme.fonts.medium,
   },
@@ -499,7 +500,7 @@ const styles = StyleSheet.create({
   statusBadgeInactive: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.border,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -508,26 +509,26 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#67C694",
+    backgroundColor: theme.colors.success,
     marginRight: 6,
   },
   statusDotInactive: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#999",
+    backgroundColor: theme.colors.textMuted,
     marginRight: 6,
   },
   statusText: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#FFFFFF",
+    fontSize: theme.fontSizes.small,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.textWhite,
     fontFamily: theme.fonts.medium,
   },
   statusTextInactive: {
-    fontSize: 11,
-    fontWeight: "600",
-    color: "#666",
+    fontSize: theme.fontSizes.small,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.textSecondary,
     fontFamily: theme.fonts.medium,
   },
   chatIconContainer: {
@@ -535,24 +536,26 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.15,
+      shadowRadius: 4,
+      elevation: 3,
+    }),
   },
   chatIconContainerInactive: {
     marginLeft: 12,
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "#F0F0F0",
+    backgroundColor: theme.colors.lightGrey,
     justifyContent: "center",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#E0E0E0",
+    borderColor: theme.colors.border,
   },
 });

@@ -68,7 +68,7 @@ export default function BlogDetailsScreen() {
   }, []);
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "#f2f2f2" }}
+      style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}
       edges={[ "left", "right", ]}
     >
       <ImageBackground
@@ -95,7 +95,7 @@ export default function BlogDetailsScreen() {
             }}
           >
             <ActivityIndicator size="large" color="#9747FF" />
-            <Text style={{ marginTop: 10, color: "#666" }}>
+            <Text style={{ marginTop: 10, color: theme.colors.textSecondary }}>
               Loading blog...
             </Text>
           </View>
@@ -134,7 +134,7 @@ export default function BlogDetailsScreen() {
                 style={{
                   fontSize: responsiveFontSize(20),
                   fontWeight: "700",
-                  color: "#000",
+                  color: theme.colors.dark,
                   lineHeight: responsiveFontSize(28),
                   marginBottom: responsiveSpacing(20),
                 }}
@@ -153,7 +153,7 @@ export default function BlogDetailsScreen() {
                         style={{
                           fontSize: responsiveFontSize(18),
                           fontWeight: "700",
-                          color: "#000",
+                          color: theme.colors.dark,
                           marginTop: index > 0 ? responsiveSpacing(24) : 0,
                           marginBottom: responsiveSpacing(12),
                         }}
@@ -170,7 +170,7 @@ export default function BlogDetailsScreen() {
                         style={{
                           fontSize: responsiveFontSize(15),
                           lineHeight: responsiveFontSize(24),
-                          color: "#666",
+                          color: theme.colors.textSecondary,
                           marginBottom: responsiveSpacing(16),
                           fontWeight: "400",
                         }}
@@ -188,7 +188,7 @@ export default function BlogDetailsScreen() {
                           marginVertical: responsiveSpacing(16),
                           borderRadius: responsiveSpacing(16),
                           overflow: "hidden",
-                          backgroundColor: "#F8F8F8",
+                          backgroundColor: theme.colors.backgroundSecondary,
                           alignItems: "center",
                           justifyContent: "center",
                         }}
@@ -212,7 +212,7 @@ export default function BlogDetailsScreen() {
               {/* Medical Disclaimer for Health-Related Content */}
               <View
                 style={{
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: theme.colors.backgroundCardLight,
                   borderRadius: responsiveSpacing(12),
                   padding: responsiveSpacing(16),
                   marginTop: responsiveSpacing(24),
@@ -231,7 +231,7 @@ export default function BlogDetailsScreen() {
                       width: responsiveSpacing(40),
                       height: responsiveSpacing(40),
                       borderRadius: responsiveSpacing(20),
-                      backgroundColor: "#9747FF",
+                      backgroundColor: theme.colors.secondPrimary,
                       alignItems: "center",
                       justifyContent: "center",
                       marginRight: responsiveSpacing(12),
@@ -247,7 +247,7 @@ export default function BlogDetailsScreen() {
                     style={{
                       fontSize: responsiveFontSize(16),
                       fontWeight: "700",
-                      color: "#000",
+                      color: theme.colors.dark,
                     }}
                   >
                     Medical Information Disclaimer
@@ -256,7 +256,7 @@ export default function BlogDetailsScreen() {
                 <Text
                   style={{
                     fontSize: responsiveFontSize(14),
-                    color: "#666",
+                    color: theme.colors.textSecondary,
                     lineHeight: responsiveFontSize(20),
                     fontWeight: "500",
                   }}
