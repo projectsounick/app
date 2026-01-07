@@ -138,7 +138,7 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
         <View
           style={{
             height: height * 0.7, // 70% height
-            backgroundColor: "#FFFFFF",
+            backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
             borderTopLeftRadius: 24,
             borderTopRightRadius: 24,
             padding: 20,
@@ -162,13 +162,13 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                   width: 80,
                   height: 80,
                   borderRadius: 40,
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundCardLight,
                   alignItems: "center",
                   justifyContent: "center",
                   marginBottom: 16,
                 }}
               >
-                <MaterialCommunityIcons name="podcast" size={40} color="#9747FF" />
+                <MaterialCommunityIcons name="podcast" size={40} color={theme.colors.secondPrimary} />
               </View>
               <Text
                 style={{
@@ -185,9 +185,9 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                   marginTop: 12,
                   paddingHorizontal: 24,
                   paddingVertical: 12,
-                  backgroundColor: "#67C694",
+                  backgroundColor: theme.colors.success,
                   borderRadius: 16,
-                  shadowColor: "#67C694",
+                  shadowColor: theme.colors.success,
                   shadowOffset: { width: 0, height: 2 },
                   shadowOpacity: 0.3,
                   shadowRadius: 4,
@@ -213,7 +213,7 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                 style={{
                   width: 50,
                   height: 5,
-                  backgroundColor: "#ccc",
+                  backgroundColor: isDark ? theme.colors.border : "#ccc",
                   borderRadius: 3,
                   alignSelf: "center",
                   marginBottom: 20,
@@ -235,7 +235,7 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                       width: 40,
                       height: 40,
                       borderRadius: 20,
-                      backgroundColor: "#F3EDFF",
+                      backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundCardLight,
                       alignItems: "center",
                       justifyContent: "center",
                       marginRight: 12,
@@ -244,7 +244,7 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                     <MaterialCommunityIcons
                       name="podcast"
                       size={20}
-                      color="#9747FF"
+                      color={theme.colors.secondPrimary}
                     />
                   </View>
                   <Text
@@ -269,25 +269,25 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                       width: 40,
                       height: 40,
                       borderRadius: 20,
-                      backgroundColor: "#E8F5E9",
+                      backgroundColor: isDark ? theme.colors.background : theme.colors.greenLight,
                       justifyContent: "center",
                       alignItems: "center",
                     }}
                   >
-                    <Ionicons name="share-outline" size={20} color="#67C694" />
+                    <Ionicons name="share-outline" size={20} color={theme.colors.success} />
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={{
                       width: 40,
                       height: 40,
                       borderRadius: 20,
-                      backgroundColor: "#F8F8F8",
+                      backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundSecondary,
                       justifyContent: "center",
                       alignItems: "center",
                     }}
                     onPress={onClose}
                   >
-                    <Ionicons name="close" size={20} color="#666" />
+                    <Ionicons name="close" size={20} color={isDark ? theme.colors.text : "#666"} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -329,17 +329,17 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                           width: 70,
                           height: 70,
                           borderRadius: 35,
-                          backgroundColor: "#9747FF",
+                          backgroundColor: theme.colors.secondPrimary,
                           justifyContent: "center",
                           alignItems: "center",
-                          shadowColor: "#9747FF",
+                          shadowColor: theme.colors.secondPrimary,
                           shadowOffset: { width: 0, height: 4 },
                           shadowOpacity: 0.4,
                           shadowRadius: 8,
                           elevation: 5,
                         }}
                       >
-                        <Ionicons name="play" size={36} color="#FFFFFF" />
+                        <Ionicons name="play" size={36} color={theme.colors.textWhite} />
                       </View>
                     </TouchableOpacity>
                   ) : (
@@ -377,7 +377,7 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                 {/* Description Card */}
                 <View
                   style={{
-                    backgroundColor: "#FFFFFF",
+                    backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundCard,
                     borderRadius: 20,
                     padding: 20,
                     marginBottom: 12,
@@ -387,7 +387,7 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                     shadowRadius: 12,
                     elevation: 3,
                     borderWidth: 1,
-                    borderColor: "#F5F5F5",
+                    borderColor: theme.colors.border,
                   }}
                 >
                   <Text
@@ -447,7 +447,7 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
         >
           <View
             style={{
-              backgroundColor: "#FFFFFF",
+              backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
               borderRadius: 24,
               padding: 24,
               width: "90%",
@@ -458,7 +458,7 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
               shadowRadius: 16,
               elevation: 8,
               borderWidth: 1,
-              borderColor: "#F5F5F5",
+              borderColor: theme.colors.border,
             }}
           >
             <View
@@ -474,13 +474,13 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                   width: 40,
                   height: 40,
                   borderRadius: 20,
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundCardLight,
                   alignItems: "center",
                   justifyContent: "center",
                   marginRight: 12,
                 }}
               >
-                <Ionicons name="share-social" size={20} color="#9747FF" />
+                <Ionicons name="share-social" size={20} color={theme.colors.secondPrimary} />
               </View>
               <Text
                 style={{
@@ -600,7 +600,7 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                 style={{
                   flex: 1,
                   padding: 16,
-                  backgroundColor: "#F8F8F8",
+                  backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundSecondary,
                   borderRadius: 16,
                   alignItems: "center",
                   marginRight: 8,
@@ -621,10 +621,10 @@ const PodcastBottomSheetModal: React.FC<PodcastBottomSheetModalProps> = ({
                 style={{
                   flex: 1,
                   padding: 16,
-                  backgroundColor: "#67C694",
+                  backgroundColor: theme.colors.success,
                   borderRadius: 16,
                   alignItems: "center",
-                  shadowColor: "#67C694",
+                  shadowColor: theme.colors.success,
                   shadowOffset: { width: 0, height: 2 },
                   shadowOpacity: 0.3,
                   shadowRadius: 4,

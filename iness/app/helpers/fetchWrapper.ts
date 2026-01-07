@@ -101,6 +101,14 @@ async function download(url: string) {
 async function post<T extends object>(url: string, body: T) {
   const authHeader = await getAuthHeader();
 
+  // Log request details
+  console.log("=== FetchWrapper POST Request ===");
+  console.log("URL:", url);
+  console.log("Request Body:", JSON.stringify(body, null, 2));
+  console.log("Request Body (parsed):", body);
+  console.log("Has Auth Header:", !!authHeader.Authorization);
+  console.log("Timestamp:", new Date().toISOString());
+
   const requestOptions: RequestInit = {
     method: "POST",
     headers: {
@@ -110,7 +118,29 @@ async function post<T extends object>(url: string, body: T) {
     body: JSON.stringify(body),
   };
 
-  return handleResponseWithRetry(url, requestOptions);
+  console.log("Request Options:", {
+    method: requestOptions.method,
+    headers: requestOptions.headers,
+    bodyLength: requestOptions.body?.length || 0,
+  });
+
+  try {
+    const response = await handleResponseWithRetry(url, requestOptions);
+    console.log("=== FetchWrapper POST Response ===");
+    console.log("URL:", url);
+    console.log("Response Success:", response?.success);
+    console.log("Response Message:", response?.message);
+    console.log("Response Data exists:", !!response?.data);
+    console.log("Full Response:", JSON.stringify(response, null, 2));
+    return response;
+  } catch (error: any) {
+    console.error("=== FetchWrapper POST Error ===");
+    console.error("URL:", url);
+    console.error("Request Body:", JSON.stringify(body, null, 2));
+    console.error("Error:", error);
+    console.error("Error Message:", error?.message);
+    throw error;
+  }
 }
 
 async function put<T extends object>(url: string, body: T) {

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from "react";
+import React, { useRef, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   Dimensions,
   Animated,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { useGlobalTheme } from "@/app/Theme/ThemeContext";
@@ -71,6 +72,7 @@ const UpcomingSessionsCard = () => {
   );
   const dispatch = useDispatch();
   const router = useRouter();
+  const [layoutReady, setLayoutReady] = useState(false);
   const scrollX = useRef(new Animated.Value(0)).current;
   const scrollRef = useRef<ScrollView>(null);
 
@@ -82,13 +84,33 @@ const UpcomingSessionsCard = () => {
     )
     .slice(0, 5);
 
+  // Scroll to middle card after layout is ready (especially important for Android)
   useEffect(() => {
-    if (latestSessions.length > 0) {
+    if (layoutReady && latestSessions.length > 0 && scrollRef.current) {
       const middleIndex = Math.floor(latestSessions.length / 2);
       const initialScrollX = middleIndex * (CARD_WIDTH + SPACING);
-      scrollRef.current?.scrollTo({ x: initialScrollX, animated: false });
+      
+      // Initialize scrollX value immediately so cards render with correct scale
+      scrollX.setValue(initialScrollX);
+      
+      // Use requestAnimationFrame for Android to ensure layout is complete
+      if (Platform.OS === 'android') {
+        // Double RAF for Android to ensure layout is fully complete
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            setTimeout(() => {
+              scrollRef.current?.scrollTo({ x: initialScrollX, animated: false });
+            }, 100);
+          });
+        });
+      } else {
+        // For iOS, a single RAF is usually enough
+        requestAnimationFrame(() => {
+          scrollRef.current?.scrollTo({ x: initialScrollX, animated: false });
+        });
+      }
     }
-  }, [latestSessions]);
+  }, [layoutReady, latestSessions.length]);
 
   const { height: screenHeight } = Dimensions.get("window");
   const mainCardPadding = screenHeight < 700 ? 12 : screenHeight < 900 ? 14 : 16;
@@ -243,7 +265,14 @@ const UpcomingSessionsCard = () => {
           </TouchableOpacity>
         </View>
       ) : (
-        <View style={{ height: CARD_HEIGHT - (height < 700 ? 16 : height < 900 ? 18 : 20) + 20 }}>
+        <View 
+          style={{ height: CARD_HEIGHT - (height < 700 ? 16 : height < 900 ? 18 : 20) + 20 }}
+          onLayout={() => {
+            if (!layoutReady) {
+              setLayoutReady(true);
+            }
+          }}
+        >
           <Animated.ScrollView
             ref={scrollRef}
             horizontal

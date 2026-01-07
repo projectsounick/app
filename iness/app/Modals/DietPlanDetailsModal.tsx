@@ -36,7 +36,7 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
 }) => {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
-  const styles = getStyles(theme);
+  const styles = getStyles(theme, isDark);
   const [showPdfViewer, setShowPdfViewer] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [downloading, setDownloading] = useState(false);
@@ -118,8 +118,10 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           {/* Close Button */}
-          <Pressable onPress={handleClose} style={styles.closeButton}>
-            <Ionicons name="close" size={24} color="#333" />
+          <Pressable onPress={handleClose} style={[styles.closeButton, {
+            backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
+          }]}>
+            <Ionicons name="close" size={24} color={theme.colors.text} />
           </Pressable>
 
           <ScrollView
@@ -144,7 +146,7 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
             <View style={styles.durationRowContainer}>
               {/* Duration Card */}
               <View style={styles.durationCard}>
-                <Ionicons name="time-outline" size={16} color="#9747FF" />
+                <Ionicons name="time-outline" size={16} color={theme.colors.secondPrimary} />
                 <Text style={styles.durationText}>
                   Duration: {dietPlan.duration} {dietPlan.durationType}
                   {dietPlan.duration > 1 ? "s" : ""}
@@ -154,7 +156,7 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
               {/* Assigned Date Card */}
               {dietPlanAssignDate && (
                 <View style={styles.assignedCard}>
-                  <Ionicons name="calendar-outline" size={16} color="#9747FF" />
+                  <Ionicons name="calendar-outline" size={16} color={theme.colors.secondPrimary} />
                   <Text style={styles.assignedText}>
                     Assigned: {formatDate(dietPlanAssignDate)}
                   </Text>
@@ -167,7 +169,7 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
                   <View style={styles.iconContainer}>
-                    <Ionicons name="document-text-outline" size={20} color="#9747FF" />
+                    <Ionicons name="document-text-outline" size={20} color={theme.colors.secondPrimary} />
                   </View>
                   <Text style={styles.sectionTitle}>Description</Text>
                 </View>
@@ -180,7 +182,7 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
                   <View style={styles.iconContainer}>
-                    <Ionicons name="leaf" size={20} color="#10B981" />
+                    <Ionicons name="leaf" size={20} color={theme.colors.success} />
                   </View>
                   <Text style={styles.sectionTitle}>Plan Highlights</Text>
                 </View>
@@ -203,7 +205,7 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
                     <Ionicons
                       name={showAllDescItems ? "chevron-up" : "chevron-down"}
                       size={18}
-                      color="#67C694"
+                      color={theme.colors.success}
                     />
                   </TouchableOpacity>
                 )}
@@ -241,12 +243,12 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
                 disabled={downloading}
               >
                 {downloading ? (
-                  <ActivityIndicator size="small" color="#666" />
+                  <ActivityIndicator size="small" color={theme.colors.textMuted} />
                 ) : (
                   <Ionicons
                     name="cloud-download-outline"
                     size={24}
-                    color="#666"
+                    color={theme.colors.textMuted}
                   />
                 )}
               </TouchableOpacity>
@@ -267,7 +269,7 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
             {/* Header */}
             <View style={styles.pdfViewerHeader}>
               <Pressable onPress={handleClosePdfViewer} style={styles.pdfCloseButton}>
-                <Ionicons name="arrow-back" size={24} color="#333" />
+                <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
               </Pressable>
               <Text style={styles.pdfViewerTitle}>Diet Plan</Text>
               <View style={{ width: 40 }} />
@@ -283,7 +285,7 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
               />
               {pdfLoading && (
                 <View style={styles.loadingOverlay}>
-                  <ActivityIndicator size="large" color="#67C694" />
+                  <ActivityIndicator size="large" color={theme.colors.success} />
                   <Text style={styles.loadingText}>Loading diet plan...</Text>
                 </View>
               )}
@@ -295,7 +297,7 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
   );
 };
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   modalOverlay: {
     flex: 1,
     backgroundColor: theme.colors.overlay,
@@ -317,10 +319,9 @@ const getStyles = (theme: any) => StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: theme.colors.cardLight,
     justifyContent: "center",
     alignItems: "center",
-    zIndex: 1,
+    zIndex: 10,
   },
   scrollContent: {
     paddingBottom: 20,

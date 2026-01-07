@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, TextInput, StyleSheet } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 interface Props {
   place: string;
@@ -20,6 +20,9 @@ const PlaceSelectionSection: React.FC<Props> = ({
   onChooseLocation,
   preferences,
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -63,17 +66,19 @@ const PlaceSelectionSection: React.FC<Props> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: theme.colors.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    }),
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
@@ -93,14 +98,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: theme.fontSizes.regular,
     fontWeight: theme.fontWeights.medium as "500",
-    color: theme.colors.text,
+    color: isDark ? theme.colors.textWhite : theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   content: {
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
+    borderTopColor: theme.colors.border,
   },
   placeLabel: {
     flexDirection: "row",
@@ -122,21 +127,21 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: theme.colors.backgroundSecondary,
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: theme.colors.lightGrey,
+    borderColor: theme.colors.border,
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
   inputContainerDisabled: {
-    backgroundColor: theme.colors.mediumGrey,
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.mediumGrey,
     borderColor: theme.colors.border,
   },
   input: {
     flex: 1,
     fontSize: theme.fontSizes.regularSmall,
-    color: theme.colors.text,
+    color: isDark ? theme.colors.textWhite : theme.colors.text,
     fontFamily: theme.fonts.regular,
   },
   inputDisabled: {

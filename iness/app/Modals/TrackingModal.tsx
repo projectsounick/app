@@ -55,8 +55,12 @@ const TrackerModal = ({
   const handleAdd = (type: "sleep" | "steps" | "water") => {
     const val = values[type];
     if (val !== "" && val !== null && val !== undefined) {
-      onSubmit(type, Number(val));
+      // Close modal FIRST to prevent UI blocking
       onClose();
+      // Then submit data in next tick to ensure modal is closed
+      setTimeout(() => {
+        onSubmit(type, Number(val));
+      }, 0);
     }
   };
 
@@ -69,12 +73,12 @@ const TrackerModal = ({
               width: 80,
               height: 80,
               borderRadius: 40,
-              backgroundColor: "#E8F5E9", // Matches card bgColor
+              backgroundColor: isDark ? theme.colors.backgroundCard : "#E8F5E9",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Ionicons name="moon-outline" size={40} color="#67C694" /> 
+            <Ionicons name="moon-outline" size={40} color={theme.colors.success} /> 
           </View>
         );
       case "steps":
@@ -84,12 +88,12 @@ const TrackerModal = ({
               width: 80,
               height: 80,
               borderRadius: 40,
-              backgroundColor: "#F3EDFF", // Matches card bgColor
+              backgroundColor: isDark ? theme.colors.backgroundCard : "#F3EDFF",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Ionicons name="walk-outline" size={40} color="#9747FF" /> 
+            <Ionicons name="walk-outline" size={40} color={theme.colors.secondPrimary} /> 
           </View>
         );
       case "water":
@@ -99,12 +103,12 @@ const TrackerModal = ({
               width: 80,
               height: 80,
               borderRadius: 40,
-              backgroundColor: "#E3F2FD", // Matches card bgColor
+              backgroundColor: isDark ? theme.colors.backgroundCard : "#E3F2FD",
               alignItems: "center",
               justifyContent: "center",
             }}
           >
-            <Ionicons name="water-outline" size={40} color="#4FC3F7" /> 
+            <Ionicons name="water-outline" size={40} color={isDark ? theme.colors.text : "#4FC3F7"} /> 
           </View>
         );
       default:
@@ -153,19 +157,21 @@ const TrackerModal = ({
       animationType="fade"
       presentationStyle="overFullScreen"
       statusBarTranslucent={true}
+      onRequestClose={onClose}
     >
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         style={{
           flex: 1,
           justifyContent: "flex-end",
-          backgroundColor: "rgba(0,0,0,0.5)",
+          backgroundColor: theme.colors.overlay,
         }}
+        pointerEvents="box-none"
       >
         <View
           style={{
             height: type === "water" ? 400 : 370,
-            backgroundColor: "#FFFFFF",
+            backgroundColor: theme.colors.background,
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
             paddingHorizontal: 20,
@@ -173,13 +179,14 @@ const TrackerModal = ({
             paddingBottom: Platform.OS === "android" ? 20 : 40,
             overflow: "hidden",
           }}
+          pointerEvents="auto"
         >
           {/* Handle Bar */}
           <View
             style={{
               width: 50,
               height: 5,
-              backgroundColor: "#ccc",
+              backgroundColor: theme.colors.border,
               borderRadius: 3,
               alignSelf: "center",
               marginBottom: 20,
@@ -193,7 +200,7 @@ const TrackerModal = ({
               position: "absolute",
               top: 18,
               right: 20,
-              backgroundColor: "#F0F0F0",
+              backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
               borderRadius: 16,
               width: 32,
               height: 32,
@@ -202,7 +209,7 @@ const TrackerModal = ({
               zIndex: 10,
             }}
           >
-            <Ionicons name="close" size={20} color="#000" />
+            <Ionicons name="close" size={20} color={theme.colors.text} />
           </TouchableOpacity>
 
           {/* Content */}
@@ -229,7 +236,7 @@ const TrackerModal = ({
               >
                 <TouchableOpacity
                   style={{
-                    backgroundColor: "#67C694",
+                    backgroundColor: theme.colors.success,
                     borderRadius: 30,
                     width: 50,
                     height: 50,
@@ -252,14 +259,14 @@ const TrackerModal = ({
 
                 <View
                   style={{
-                    backgroundColor: "#F8F8F8",
+                    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
                     borderRadius: 16,
                     paddingVertical: 16,
                     paddingHorizontal: 24,
                     minWidth: 120,
                     alignItems: "center",
                     borderWidth: 1,
-                    borderColor: "#E0E0E0",
+                    borderColor: theme.colors.border,
                   }}
                 >
                   <Text
@@ -285,7 +292,7 @@ const TrackerModal = ({
 
                 <TouchableOpacity
                   style={{
-                    backgroundColor: "#67C694",
+                    backgroundColor: theme.colors.success,
                     borderRadius: 30,
                     width: 50,
                     height: 50,
@@ -310,7 +317,7 @@ const TrackerModal = ({
               <TextInput
                 keyboardType="numeric"
                 placeholder={getPlaceholder()}
-                placeholderTextColor="#999"
+                placeholderTextColor={theme.colors.textMuted}
                 style={{
                   width: "100%",
                   borderWidth: 1,
@@ -320,7 +327,7 @@ const TrackerModal = ({
                   marginVertical: 30,
                   fontSize: theme.fontSizes.regular,
                   color: theme.colors.text,
-                  backgroundColor: theme.colors.backgroundSecondary,
+                  backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
                 }}
                 value={values[type] || ""}
                 onChangeText={handleChange}
@@ -328,18 +335,17 @@ const TrackerModal = ({
             )}
 
             {dataLoading ? (
-              <ActivityIndicator color="#67C694" size="large" style={{ marginTop: 10, marginBottom: 0 }} />
+              <ActivityIndicator color={theme.colors.success} size="large" style={{ marginTop: 10, marginBottom: 0 }} />
             ) : (
               <TouchableOpacity
                 style={{
-                  backgroundColor: "#67C694",
+                  backgroundColor: theme.colors.success,
                   paddingVertical: 16,
                   borderRadius: 30,
                   width: "100%",
                   marginTop: 10,
                   alignItems: "center",
                   justifyContent: "center",
-            
                 }}
                 onPress={() => handleAdd(type)}
               >

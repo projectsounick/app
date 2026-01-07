@@ -22,8 +22,10 @@ import { ActivityIndicator } from "react-native-paper";
 import { registerForPushNotificationsAsync } from "@/utils/notificationUtils";
 import NormalHeader from "./modules/NormalHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useTheme } from "./Theme/ThemeContext";
 /// Main functional component for the OTP input screen ///// -----------------------------------/
 const OTPInputScreen = () => {
+  const { reloadThemeFromUserData } = useTheme();
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const navigation = useNavigation<any>();
   const [otpResendLoading, setOtpResendLoading] = useState(false);
@@ -124,6 +126,11 @@ const OTPInputScreen = () => {
         if (response?.success) {
           /// Store user data in AsyncStorage
           await asyncStorageUtils.storeUserInAsyncStorage(response.data);
+
+          // Reload theme from user data immediately after login to prevent flicker
+          // This ensures theme is set correctly before navigation
+          // Don't show modal here - it will be shown on home screen if needed
+          await reloadThemeFromUserData(false);
 
           setSnackbarVisible(true);
           setSnackbarMessage("OTP verified successfully!");

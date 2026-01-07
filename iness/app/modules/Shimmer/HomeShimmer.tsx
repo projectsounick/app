@@ -2,12 +2,17 @@ import React from "react";
 import { View, ScrollView, Dimensions } from "react-native";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
-import { useGlobalTheme } from "../../Theme/ThemeContext";
+import { useGlobalTheme, useTheme } from "../../Theme/ThemeContext";
 
 const { width } = Dimensions.get("window");
 
 export default function HomeShimmer() {
   const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const shimmerColors = isDark 
+    ? ["#1a1a1a", "#2a2a2a", "#1a1a1a"]
+    : ["#ebebeb", "#c5c5c5", "#ebebeb"];
+
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: theme.colors.background, padding: 12 }}
@@ -17,12 +22,12 @@ export default function HomeShimmer() {
       <View style={{ marginBottom: 16 }}>
         <ShimmerPlaceholder
           LinearGradient={LinearGradient as any}
-          shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+          shimmerColors={shimmerColors}
           style={{ width: 180, height: 20, borderRadius: 6, marginBottom: 6 }}
         />
         <ShimmerPlaceholder
           LinearGradient={LinearGradient as any}
-          shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+          shimmerColors={shimmerColors}
           style={{ width: 240, height: 14, borderRadius: 6 }}
         />
 
@@ -45,7 +50,7 @@ export default function HomeShimmer() {
               {/* Title inside card */}
               <ShimmerPlaceholder
                 LinearGradient={LinearGradient as any}
-                shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+                shimmerColors={shimmerColors}
                 style={{
                   width: "60%",
                   height: 18,
@@ -56,7 +61,7 @@ export default function HomeShimmer() {
               {/* Subtitle lines */}
               <ShimmerPlaceholder
                 LinearGradient={LinearGradient as any}
-                shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+                shimmerColors={shimmerColors}
                 style={{
                   width: "85%",
                   height: 14,
@@ -66,7 +71,7 @@ export default function HomeShimmer() {
               />
               <ShimmerPlaceholder
                 LinearGradient={LinearGradient as any}
-                shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+                shimmerColors={shimmerColors}
                 style={{
                   width: "70%",
                   height: 14,
@@ -84,12 +89,12 @@ export default function HomeShimmer() {
               >
                 <ShimmerPlaceholder
                   LinearGradient={LinearGradient as any}
-                  shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+                  shimmerColors={shimmerColors}
                   style={{ width: 100, height: 35, borderRadius: 20 }}
                 />
                 <ShimmerPlaceholder
                   LinearGradient={LinearGradient as any}
-                  shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+                  shimmerColors={shimmerColors}
                   style={{ width: 80, height: 80, borderRadius: 12 }}
                 />
               </View>
@@ -113,14 +118,14 @@ export default function HomeShimmer() {
               flex: 1,
               marginHorizontal: 5,
               borderRadius: 15,
-              backgroundColor: "#fff",
+              backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
               padding: 12,
               height: 140,
             }}
           >
             <ShimmerPlaceholder
               LinearGradient={LinearGradient as any}
-              shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+              shimmerColors={shimmerColors}
               style={{
                 width: "65%",
                 height: 18,
@@ -130,7 +135,7 @@ export default function HomeShimmer() {
             />
             <ShimmerPlaceholder
               LinearGradient={LinearGradient as any}
-              shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+              shimmerColors={shimmerColors}
               style={{
                 width: "90%",
                 height: 14,
@@ -140,7 +145,7 @@ export default function HomeShimmer() {
             />
             <ShimmerPlaceholder
               LinearGradient={LinearGradient as any}
-              shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+              shimmerColors={shimmerColors}
               style={{ width: "60%", height: 35, borderRadius: 20 }}
             />
           </View>
@@ -151,12 +156,12 @@ export default function HomeShimmer() {
       <View style={{ marginBottom: 16 }}>
         <ShimmerPlaceholder
           LinearGradient={LinearGradient as any}
-          shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+          shimmerColors={shimmerColors}
           style={{ width: 160, height: 20, borderRadius: 6, marginBottom: 6 }}
         />
         <ShimmerPlaceholder
           LinearGradient={LinearGradient as any}
-          shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+          shimmerColors={shimmerColors}
           style={{ width: 240, height: 14, borderRadius: 6 }}
         />
 
@@ -165,7 +170,7 @@ export default function HomeShimmer() {
             marginTop: 12,
             width: "100%",
             borderRadius: 15,
-            backgroundColor: "#fff",
+            backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
             padding: 12,
             flexDirection: "row",
             justifyContent: "space-between",
@@ -175,7 +180,7 @@ export default function HomeShimmer() {
           <View style={{ flex: 1, marginRight: 10 }}>
             <ShimmerPlaceholder
               LinearGradient={LinearGradient as any}
-              shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+              shimmerColors={shimmerColors}
               style={{
                 width: "85%",
                 height: 18,
@@ -185,7 +190,7 @@ export default function HomeShimmer() {
             />
             <ShimmerPlaceholder
               LinearGradient={LinearGradient as any}
-              shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+              shimmerColors={shimmerColors}
               style={{
                 width: "100%",
                 height: 14,
@@ -195,13 +200,13 @@ export default function HomeShimmer() {
             />
             <ShimmerPlaceholder
               LinearGradient={LinearGradient as any}
-              shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+              shimmerColors={shimmerColors}
               style={{ width: "70%", height: 14, borderRadius: 5 }}
             />
           </View>
           <ShimmerPlaceholder
             LinearGradient={LinearGradient as any}
-            shimmerColors={["#ebebeb", "#c5c5c5", "#ebebeb"]}
+            shimmerColors={shimmerColors}
             style={{ width: 100, height: 100, borderRadius: 12 }}
           />
         </View>

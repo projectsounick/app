@@ -1,7 +1,7 @@
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import HeaderContent from "@/app/modules/HeaderContent";
 import SmallHeader from "@/app/modules/SmallHeader";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { RootState } from "@/store";
 import { convertToCartItem, isProductAddableToCart } from "@/utils/cartUtils";
 
@@ -19,6 +19,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const WorkoutPlanScreen = () => {
   /// Getting the current selected plan from the store ----------------/
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const currentPlan = useSelector((state: RootState) => state.plan.currentPlan);
   const cartItems = useSelector((state: RootState) => state.cart.cartItems);
   const [cartLoading, setCardLoading] = useState(false);
@@ -100,15 +102,13 @@ const WorkoutPlanScreen = () => {
   };
 
   return (
-    <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpg")}
-      style={{ flex: 1 }}
-      resizeMode="cover"
-    >
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "transparent" }}
-        edges={["left", "right", "bottom"]}
-      >
+    <>
+      {isDark ? (
+        <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+          <SafeAreaView
+            style={{ flex: 1, backgroundColor: theme.colors.background }}
+            edges={["left", "right", "bottom"]}
+          >
         <SmallHeader
           title="Overview"
           bottomComponent={
@@ -144,14 +144,69 @@ const WorkoutPlanScreen = () => {
             bottomSectionHeight={bottomSectionHeight}
           />
         )}
-        <CustomSnackbar
-          visible={snackbarOpen}
-          message={snackbarMessage}
-          onDismiss={() => setSnackbarOpen(false)}
-          bgColor={theme.colors.primary}
-        />
-      </SafeAreaView>
-    </ImageBackground>
+            <CustomSnackbar
+              visible={snackbarOpen}
+              message={snackbarMessage}
+              onDismiss={() => setSnackbarOpen(false)}
+              bgColor={theme.colors.background}
+            />
+          </SafeAreaView>
+        </View>
+      ) : (
+        <ImageBackground
+          source={require("../../../assets/images/basicBackground.jpg")}
+          style={{ flex: 1 }}
+          resizeMode="cover"
+        >
+          <SafeAreaView
+            style={{ flex: 1, backgroundColor: "transparent" }}
+            edges={["left", "right", "bottom"]}
+          >
+            <SmallHeader
+              title="Overview"
+              bottomComponent={
+                <HeaderContent
+                  title={currentPlan ? currentPlan?.planType?.title : "Diet Plan"}
+                  subtitle={currentPlan?.title ? currentPlan.title : ""}
+                />
+              }
+            />
+            {currentPlan?.planType ? (
+              <PlansInfo
+                screenWidth={screenWidth}
+                cartLoading={cartLoading}
+                currentPlan={currentPlan}
+                selectedPlanItem={selectedPlanItem}
+                setSelectedPlanItem={setSelectedPlanItem}
+                setBottomSectionHeight={setBottomSectionHeight}
+                addingIntoToCart={addingIntoToCart}
+                theme={theme}
+                bottomSectionHeight={bottomSectionHeight}
+              />
+            ) : (
+              <DietPlanInfo
+                screenWidth={screenWidth}
+                showBottomBar={true}
+                cartLoading={cartLoading}
+                currentPlan={currentPlan}
+                selectedPlanItem={selectedPlanItem}
+                setSelectedPlanItem={setSelectedPlanItem}
+                setBottomSectionHeight={setBottomSectionHeight}
+                addingIntoToCart={addingIntoToCart}
+                theme={theme}
+                bottomSectionHeight={bottomSectionHeight}
+              />
+            )}
+            <CustomSnackbar
+              visible={snackbarOpen}
+              message={snackbarMessage}
+              onDismiss={() => setSnackbarOpen(false)}
+              bgColor={theme.colors.primary}
+            />
+          </SafeAreaView>
+        </ImageBackground>
+      )}
+    </>
   );
 };
 

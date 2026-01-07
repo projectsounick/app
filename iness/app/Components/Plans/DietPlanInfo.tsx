@@ -11,7 +11,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { withAuthGuard } from "@/app/Hoc/WithAuthGuardButton";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 const ProtectedAnimatedSubmitButton = withAuthGuard(AnimatedSubmitButton);
 interface Props {
   screenWidth: number;
@@ -34,10 +34,12 @@ const DietPlanInfo: React.FC<Props> = ({
   setSelectedPlanItem,
   setBottomSectionHeight,
   addingIntoToCart,
-  theme,
+  theme: themeProp,
   bottomSectionHeight,
   showBottomBar,
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const translateY = useRef(new Animated.Value(100)).current;
 
   const planDetails = currentPlan?.dietPlanDetails ?? currentPlan;
@@ -384,9 +386,9 @@ const DietPlanInfo: React.FC<Props> = ({
                 >
                   <Text
                     style={{
-                      fontSize: theme.fontSizes.large,
+                      fontSize: theme.fontSizes.regularSmall,
                       fontWeight: theme.fontWeights.bold as "700",
-                      color: theme.colors.secondPrimary,
+                      color: isDark ? theme.colors.textWhite : theme.colors.secondPrimary,
                       marginRight: 4,
                     }}
                   >

@@ -35,6 +35,8 @@ interface UserData {
     lastSync: Date;
   };
   expoPushToken: string | null;
+  darkMode?: boolean;
+  darkModeModalShown?: boolean;
 }
 
 export type { UserData };

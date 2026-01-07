@@ -282,25 +282,23 @@ function HealthDashboard() {
             console.log(`[HealthCards] updateTrackingData - scheduling Redux update...`);
             const reduxStartTime = performance.now();
             
-            // CRITICAL: Use InteractionManager to defer Redux update until all interactions complete
-            // This ensures the UI stays responsive and cards remain clickable
-            InteractionManager.runAfterInteractions(() => {
-              // Additional deferral to ensure modal is closed and UI is fully responsive
-              setTimeout(() => {
-                const reduxTime = performance.now() - reduxStartTime;
-                console.log(`[HealthCards] updateTrackingData - Redux dispatch starting, time since schedule: ${reduxTime.toFixed(2)}ms`);
-                
-                const dispatchStartTime = performance.now();
-                dispatch(
-                  updateTrackingField({
-                    type: type,
-                    data: response.data,
-                  })
-                );
-                const dispatchTime = performance.now() - dispatchStartTime;
-                console.log(`[HealthCards] updateTrackingData - Redux dispatch completed in ${dispatchTime.toFixed(2)}ms`);
-              }, 200); // Additional delay to ensure UI is fully responsive
-            });
+            // CRITICAL: Use setTimeout instead of InteractionManager to avoid blocking
+            // InteractionManager can wait indefinitely if interactions don't complete
+            // Use a fixed delay to ensure modal is closed and UI is responsive
+            setTimeout(() => {
+              const reduxTime = performance.now() - reduxStartTime;
+              console.log(`[HealthCards] updateTrackingData - Redux dispatch starting, time since schedule: ${reduxTime.toFixed(2)}ms`);
+              
+              const dispatchStartTime = performance.now();
+              dispatch(
+                updateTrackingField({
+                  type: type,
+                  data: response.data,
+                })
+              );
+              const dispatchTime = performance.now() - dispatchStartTime;
+              console.log(`[HealthCards] updateTrackingData - Redux dispatch completed in ${dispatchTime.toFixed(2)}ms`);
+            }, 300); // Fixed delay to ensure modal is closed and UI is responsive
             
             // Update streak in background (fire and forget) - defer significantly
             console.log(`[HealthCards] updateTrackingData - creating streak...`);
@@ -471,8 +469,8 @@ function HealthDashboard() {
             flex: 1,
             backgroundColor: theme.colors.background,
             borderRadius: 20,
-            padding: 16,
-            minHeight: (isAvailable && canSyncSteps) ? 140 : 120,
+            padding: 12,
+            minHeight: (isAvailable && canSyncSteps) ? 120 : 100,
             shadowColor: theme.colors.black,
             shadowOffset: { width: 0, height: 1 },
             shadowOpacity: 0.05,
@@ -488,15 +486,15 @@ function HealthDashboard() {
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
-              marginBottom: 12,
+              marginBottom: 8,
             }}
           >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <View
                 style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 10,
+                  width: 28,
+                  height: 28,
+                  borderRadius: 8,
                   backgroundColor: theme.colors.backgroundCardLight,
                   alignItems: "center",
                   justifyContent: "center",
@@ -505,7 +503,7 @@ function HealthDashboard() {
               >
                 <MaterialCommunityIcons
                   name="walk"
-                  size={18}
+                  size={16}
                   color={theme.colors.secondPrimary}
                 />
               </View>
@@ -525,10 +523,10 @@ function HealthDashboard() {
                 onPress={() => {
                   openModal("steps");
                 }}
-                style={{ padding: 6 }}
+                style={{ padding: 4 }}
                 activeOpacity={0.7}
               >
-                <AntDesign name="pluscircle" size={22} color={theme.colors.success} />
+                <AntDesign name="pluscircle" size={20} color={theme.colors.success} />
               </TouchableOpacity>
             </View>
           </View>
@@ -588,7 +586,7 @@ function HealthDashboard() {
           </View>
           {/* Sync row - Show "Sync with Health" when sync is NOT enabled */}
           {isAvailable && canSyncSteps && (
-            <View pointerEvents="box-none" style={{ marginTop: 8 }}>
+            <View pointerEvents="box-none" style={{ marginTop: 6 }}>
               <TouchableOpacity
                 onPress={() => {
                   handleSyncSteps();
@@ -638,8 +636,8 @@ function HealthDashboard() {
             flex: 1,
             backgroundColor: theme.colors.background,
             borderRadius: 20,
-            padding: 16,
-            minHeight: (isAvailable && canSyncSleep) ? 140 : 120,
+            padding: 12,
+            minHeight: (isAvailable && canSyncSleep) ? 120 : 100,
             shadowColor: theme.colors.black,
             shadowOffset: { width: 0, height: 1 },
             shadowOpacity: 0.05,
@@ -655,15 +653,15 @@ function HealthDashboard() {
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
-              marginBottom: 12,
+              marginBottom: 8,
             }}
           >
             <View style={{ flexDirection: "row", alignItems: "center" }}>
               <View
                 style={{
-                  width: 32,
-                  height: 32,
-                  borderRadius: 10,
+                  width: 28,
+                  height: 28,
+                  borderRadius: 8,
                   backgroundColor: theme.colors.backgroundCardLight,
                   alignItems: "center",
                   justifyContent: "center",
@@ -672,7 +670,7 @@ function HealthDashboard() {
               >
                 <MaterialCommunityIcons
                   name="moon-waning-crescent"
-                  size={18}
+                  size={16}
                   color={theme.colors.secondPrimary}
                 />
               </View>
@@ -690,9 +688,9 @@ function HealthDashboard() {
             <View>
               <TouchableOpacity
                 onPress={() => openModal("sleep")}
-                style={{ padding: 6 }}
+                style={{ padding: 4 }}
               >
-                <AntDesign name="pluscircle" size={22} color={theme.colors.success} />
+                <AntDesign name="pluscircle" size={20} color={theme.colors.success} />
               </TouchableOpacity>
             </View>
           </View>
@@ -712,7 +710,7 @@ function HealthDashboard() {
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
-              marginTop: 10,
+              marginTop: 6,
             }}
           >
             <Text
@@ -753,7 +751,7 @@ function HealthDashboard() {
           </View>
           {/* Sync row - Show "Sync with Health" when sync is NOT enabled */}
           {isAvailable && canSyncSleep && (
-            <View pointerEvents="box-none" style={{ marginTop: 8 }}>
+            <View pointerEvents="box-none" style={{ marginTop: 6 }}>
               <TouchableOpacity
                 onPress={() => {
                   handleSyncSleep();
@@ -794,10 +792,10 @@ function HealthDashboard() {
       {/* Water Card */}
       <View
         style={{
-          marginTop: 12,
+          marginTop: 8,
           backgroundColor: theme.colors.background,
           borderRadius: 20,
-          padding: 16,
+          padding: 12,
           shadowColor: theme.colors.dark,
           shadowOffset: { width: 0, height: 1 },
           shadowOpacity: 0.05,
@@ -812,15 +810,15 @@ function HealthDashboard() {
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: 12,
+            marginBottom: 8,
           }}
         >
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <View
               style={{
-                width: 32,
-                height: 32,
-                borderRadius: 10,
+                width: 28,
+                height: 28,
+                borderRadius: 8,
                 backgroundColor: theme.colors.backgroundCardLight,
                 alignItems: "center",
                 justifyContent: "center",
@@ -829,7 +827,7 @@ function HealthDashboard() {
             >
               <MaterialCommunityIcons
                 name="cup-water"
-                size={18}
+                size={16}
                 color={theme.colors.secondPrimary}
               />
             </View>
@@ -847,9 +845,9 @@ function HealthDashboard() {
 
           <TouchableOpacity
             onPress={() => openModal("water")}
-            style={{ padding: 6 }}
+            style={{ padding: 4 }}
           >
-            <AntDesign name="pluscircle" size={24} color={theme.colors.success} />
+            <AntDesign name="pluscircle" size={20} color={theme.colors.success} />
           </TouchableOpacity>
         </View>
 
@@ -867,7 +865,7 @@ function HealthDashboard() {
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
-            marginTop: 10,
+            marginTop: 6,
           }}
         >
             <Text

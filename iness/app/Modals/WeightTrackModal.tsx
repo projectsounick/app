@@ -123,14 +123,14 @@ export default function WeightTrackerBottomSheet({
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={{ flex: 1, justifyContent: "flex-end" }}
     >
-      <LinearGradient
-        colors={["#2C1453", "#1C0E33"]}
+      <View
         style={{
           height: height * 0.7,
           borderTopLeftRadius: 25,
           borderTopRightRadius: 25,
           padding: 20,
           overflow: "hidden",
+          backgroundColor: theme.colors.background,
         }}
       >
         {/* Dash handle */}
@@ -138,7 +138,7 @@ export default function WeightTrackerBottomSheet({
           style={{
             width: 50,
             height: 5,
-            backgroundColor: "rgba(255,255,255,0.3)",
+            backgroundColor: theme.colors.border,
             borderRadius: 3,
             alignSelf: "center",
             marginTop: 4,
@@ -153,13 +153,13 @@ export default function WeightTrackerBottomSheet({
             position: "absolute",
             top: 18,
             right: 20,
-            backgroundColor: "rgba(255,255,255,0.2)",
+            backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.border,
             borderRadius: 20,
             padding: 6,
             zIndex: 2,
           }}
         >
-          <Ionicons name="close" size={20} color="#fff" />
+          <Ionicons name="close" size={20} color={theme.colors.text} />
         </TouchableOpacity>
 
         {/* Header */}
@@ -173,13 +173,13 @@ export default function WeightTrackerBottomSheet({
           <MaterialCommunityIcons
             name="weight-kilogram"
             size={28}
-            color="#7771de"
+            color={theme.colors.secondPrimary}
           />
             <Text
               style={{
                 fontFamily: theme.fonts.bold,
                 fontSize: theme.fontSizes.large,
-                color: theme.colors.textWhite,
+                color: theme.colors.text,
                 marginLeft: 8,
               }}
             >
@@ -211,13 +211,15 @@ export default function WeightTrackerBottomSheet({
                   width: width - 64,
                   height: 200,
                   borderRadius: 16,
-                  backgroundColor: "rgba(255,255,255,0.1)",
+                  backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
                   justifyContent: "center",
                   alignItems: "center",
+                  borderWidth: 1,
+                  borderColor: theme.colors.border,
                 }}
               >
                 <Text
-                  style={{ color: "#ccc", fontFamily: theme.fonts.regular }}
+                  style={{ color: theme.colors.textMuted, fontFamily: theme.fonts.regular }}
                 >
                   No weight data to display
                 </Text>
@@ -230,15 +232,17 @@ export default function WeightTrackerBottomSheet({
             style={{
               marginBottom: 20,
               padding: 16,
-              backgroundColor: "rgba(255,255,255,0.08)",
+              backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
               borderRadius: 16,
+              borderWidth: 1,
+              borderColor: theme.colors.border,
             }}
           >
             <Text
               style={{
                 fontSize: theme.fontSizes.regularSmall,
                 fontFamily: theme.fonts.medium,
-                color: theme.colors.textWhite,
+                color: theme.colors.text,
                 marginBottom: 6,
               }}
             >
@@ -249,15 +253,16 @@ export default function WeightTrackerBottomSheet({
               onChangeText={setNewWeight}
               keyboardType="numeric"
               placeholder="e.g., 70"
-              placeholderTextColor="#ccc"
+              placeholderTextColor={theme.colors.textMuted}
               style={{
                 borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.3)",
+                borderColor: theme.colors.border,
                 borderRadius: 12,
                 padding: 12,
                 fontSize: theme.fontSizes.regular,
                 fontFamily: theme.fonts.regular,
-                color: theme.colors.textWhite,
+                color: theme.colors.text,
+                backgroundColor: theme.colors.background,
               }}
             />
             <TouchableOpacity
@@ -270,14 +275,16 @@ export default function WeightTrackerBottomSheet({
                 justifyContent: "center",
                 borderRadius: 20,
                 paddingVertical: 14,
-                backgroundColor: addingWeight ? "#a6a3f0" : "#67c694",
-                shadowColor: "#000",
-                shadowOpacity: 0.2,
-                shadowRadius: 5,
-                elevation: 4,
+                backgroundColor: addingWeight ? theme.colors.textMuted : theme.colors.success,
+                ...(isDark ? {} : {
+                  shadowColor: "#000",
+                  shadowOpacity: 0.2,
+                  shadowRadius: 5,
+                  elevation: 4,
+                }),
               }}
             >
-              <Feather name="save" size={18} color="#fff" />
+              <Feather name="save" size={18} color={theme.colors.textWhite} />
               <Text
                 style={{
                   color: theme.colors.textWhite,
@@ -297,7 +304,7 @@ export default function WeightTrackerBottomSheet({
               style={{
                 fontFamily: theme.fonts.bold,
                 fontSize: theme.fontSizes.medium,
-                color: theme.colors.textWhite,
+                color: theme.colors.text,
                 marginBottom: 12,
               }}
             >
@@ -316,17 +323,21 @@ export default function WeightTrackerBottomSheet({
                 <View
                   key={idx}
                   style={{
-                    backgroundColor: "rgba(255,255,255,0.08)",
+                    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
                     padding: 16,
                     borderRadius: 16,
                     marginBottom: 12,
                     flexDirection: "row",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    shadowColor: "#000",
-                    shadowOpacity: 0.1,
-                    shadowRadius: 4,
-                    elevation: 2,
+                    borderWidth: 1,
+                    borderColor: theme.colors.border,
+                    ...(isDark ? {} : {
+                      shadowColor: "#000",
+                      shadowOpacity: 0.1,
+                      shadowRadius: 4,
+                      elevation: 2,
+                    }),
                   }}
                 >
                   <View>
@@ -334,7 +345,7 @@ export default function WeightTrackerBottomSheet({
                       style={{
                         fontFamily: theme.fonts.bold,
                         fontSize: theme.fontSizes.medium,
-                        color: theme.colors.textWhite,
+                        color: theme.colors.text,
                       }}
                     >
                       {entry.weight} kg
@@ -366,10 +377,10 @@ export default function WeightTrackerBottomSheet({
                       />
                     </TouchableOpacity>
                   </View>
-                </View>
-              ))}
-        </ScrollView>
-      </LinearGradient>
+                  </View>
+                ))}
+          </ScrollView>
+      </View>
     </KeyboardAvoidingView>
   );
 }

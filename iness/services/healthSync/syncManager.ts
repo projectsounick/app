@@ -326,9 +326,18 @@ function syncToBackendInBackground(
 
 /**
  * Sync new data since last sync (background operation)
+ * IMPORTANT: This should NOT trigger the iOS permission modal
+ * Only runs if HealthKit was already initialized in this session
  */
 export async function syncNewData(status: SyncStatus): Promise<boolean> {
   if (!HealthKit.isHealthKitAvailable()) return false;
+
+  // CRITICAL: Don't do background sync if HealthKit hasn't been initialized in this session
+  // This prevents the iOS permission modal from showing on app open
+  if (!HealthKit.isHealthKitInitialized()) {
+    console.log(`${LOG_PREFIX.BACKGROUND} Skipping sync - HealthKit not initialized in this session`);
+    return false;
+  }
 
   // Check date range - will fetch from last sync time to now
   // Use the most recent of steps or sleep sync dates
@@ -514,6 +523,7 @@ export async function syncNewData(status: SyncStatus): Promise<boolean> {
 /**
  * Retry any pending syncs
  * Re-fetches from HealthKit (we don't store data, only failure info)
+ * IMPORTANT: Only runs if HealthKit is already initialized to prevent modal
  */
 export async function retryPendingSync(status: SyncStatus | null): Promise<boolean> {
   const pendingSync = await Storage.getPendingSync();
@@ -530,7 +540,15 @@ export async function retryPendingSync(status: SyncStatus | null): Promise<boole
     return false;
   }
 
+  // CRITICAL: Don't retry if HealthKit hasn't been initialized in this session
+  // This prevents the iOS permission modal from showing automatically
+  if (!HealthKit.isHealthKitInitialized()) {
+    console.log(`${LOG_PREFIX.BACKGROUND} Skipping retry - HealthKit not initialized in this session`);
+    return false;
+  }
+
   try {
+    // HealthKit is already initialized, but we still need to verify
     const initialized = await HealthKit.initializeHealthKit();
     if (!initialized) {
       return false;

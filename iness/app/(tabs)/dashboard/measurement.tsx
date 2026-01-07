@@ -12,6 +12,7 @@ import {
   Platform,
   Dimensions,
   StyleSheet,
+  ImageBackground,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
@@ -97,154 +98,224 @@ export default function MeasurementDashboard({ userId }: { userId: string }) {
       style={{ flex: 1, backgroundColor: theme.colors.background }}
       edges={["left", "right"]}
     >
-      <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-        <View
-          style={{
-            paddingHorizontal: 20,
-            marginTop: Platform.OS === "ios" ? height * 0.05 : "4%",
-          }}
-        >
-          <NormalHeader screenName="Measurements" />
-        </View>
-
-        {loading ? (
-          <View style={styles.loaderContainer}>
-            <ActivityIndicator color={theme.colors.secondPrimary} size="large" />
-          </View>
-        ) : (
-          <>
-            {measurements.length === 0 ? (
-              <View style={styles.emptyContainer}>
-                <View style={styles.emptyIconContainer}>
-                  <MaterialCommunityIcons
-                    name="tape-measure"
-                    size={40}
-                    color={theme.colors.secondPrimary}
-                  />
-                </View>
-                <Text style={styles.emptyTitle}>No measurements yet</Text>
-                <Text style={styles.emptySubtitle}>
-                  Track your body measurements to monitor your progress
-                </Text>
-                <TouchableOpacity
-                  onPress={() => setModalVisible(true)}
-                  style={styles.emptyButton}
-                >
-                  <Ionicons name="add" size={20} color="#FFFFFF" />
-                  <Text style={styles.emptyButtonText}>Add Measurement</Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <MeasurementList measurements={measurements.measurementUnits} />
-            )}
-          </>
-        )}
-
-        {/* FAB */}
-        {measurements.length > 0 && (
-          <TouchableOpacity
-            onPress={() => setModalVisible(true)}
-            style={styles.fab}
-            activeOpacity={0.8}
+      {isDark ? (
+        <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+          <View
+            style={{
+              paddingHorizontal: 20,
+              marginTop: Platform.OS === "ios" ? height * 0.05 : "4%",
+            }}
           >
-                    <LinearGradient
-                      colors={isDark ? [theme.colors.backgroundCard, theme.colors.backgroundSecondary] : ["#9747FF", "#844ACF"]}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.fabGradient}
-                    >
-              <Ionicons name="add" size={28} color="#FFFFFF" />
-            </LinearGradient>
-          </TouchableOpacity>
-        )}
+            <NormalHeader screenName="Measurements" />
+          </View>
 
-        {/* Add Measurement Modal - Bottom Sheet */}
-        <Modal
-          visible={modalVisible}
-          animationType="slide"
-          transparent
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View style={styles.modalOverlay}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View style={styles.overlayTouchable} />
-            </TouchableWithoutFeedback>
-            <KeyboardAvoidingView
-              behavior={Platform.OS === "ios" ? "padding" : "height"}
-              style={styles.keyboardAvoidingContainer}
-            >
-              <View style={styles.modalContent}>
-                {/* Dash Handle */}
-                <View style={styles.dashHandle} />
-
-                {/* Close Button */}
-                <TouchableOpacity
-                  onPress={() => setModalVisible(false)}
-                  style={styles.closeBtn}
-                >
-                  <Ionicons name="close" size={20} color={theme.colors.text} />
-                </TouchableOpacity>
-
-                {/* Icon */}
-                <View style={styles.iconWrapper}>
-                  <LinearGradient
-                    colors={isDark ? [theme.colors.backgroundCard, theme.colors.backgroundSecondary] : ["#9747FF", "#844ACF"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.modalIconContainer}
-                  >
+          {loading ? (
+            <View style={styles.loaderContainer}>
+              <ActivityIndicator color={theme.colors.secondPrimary} size="large" />
+            </View>
+          ) : (
+            <>
+              {!measurements || !measurements.measurementUnits || measurements.measurementUnits.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <View style={styles.emptyIconContainer}>
                     <MaterialCommunityIcons
                       name="tape-measure"
                       size={40}
-                      color="#FFFFFF"
+                      color={theme.colors.secondPrimary}
                     />
-                  </LinearGradient>
-                </View>
-
-                {/* Title */}
-                <Text style={styles.modalTitle}>Add Measurements</Text>
-
-                {/* Form */}
-                <ScrollView
-                  keyboardShouldPersistTaps="handled"
-                  showsVerticalScrollIndicator={false}
-                  style={styles.formContainer}
-                  contentContainerStyle={{ paddingBottom: 10 }}
-                >
-                  {measurementFields.map((field) => (
-                    <TextInput
-                      key={field.key}
-                      placeholder={`${field.label} (cm)`}
-                      placeholderTextColor={theme.colors.textMuted}
-                      keyboardType="numeric"
-                      style={styles.input}
-                      value={form[field.key as keyof typeof form]}
-                      onChangeText={(text) =>
-                        setForm((prev) => ({ ...prev, [field.key]: text }))
-                      }
-                    />
-                  ))}
-                </ScrollView>
-
-                {/* Save Button */}
-                <TouchableOpacity
-                  onPress={handleSubmit}
-                  activeOpacity={0.8}
-                >
-                  <LinearGradient
-                    colors={isDark ? [theme.colors.backgroundCard, theme.colors.backgroundSecondary] : ["#9747FF", "#844ACF"]}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                    style={styles.saveButton}
+                  </View>
+                  <Text style={styles.emptyTitle}>No measurements yet</Text>
+                  <Text style={styles.emptySubtitle}>
+                    Track your body measurements to monitor your progress
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => setModalVisible(true)}
+                    style={styles.emptyButton}
                   >
-                    <Text style={styles.saveButtonText}>Save Measurements</Text>
-                  </LinearGradient>
-                </TouchableOpacity>
+                    <Ionicons name="add" size={20} color="#FFFFFF" />
+                    <Text style={styles.emptyButtonText}>Add Measurement</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <MeasurementList measurements={measurements.measurementUnits} />
+              )}
+            </>
+          )}
+
+          {/* FAB */}
+          {measurements && measurements.measurementUnits && measurements.measurementUnits.length > 0 && (
+            <TouchableOpacity
+              onPress={() => setModalVisible(true)}
+              style={styles.fab}
+              activeOpacity={0.8}
+            >
+              <LinearGradient
+                colors={[theme.colors.success, "#4CAF50"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.fabGradient}
+              >
+                <Ionicons name="add" size={28} color="#FFFFFF" />
+              </LinearGradient>
+            </TouchableOpacity>
+          )}
+        </View>
+      ) : (
+        <ImageBackground
+          source={require("../../../assets/images/basicBackground.jpg")}
+          resizeMode="cover"
+          style={{ flex: 1 }}
+        >
+          <View style={{ flex: 1, backgroundColor: "transparent" }}>
+            <View
+              style={{
+                paddingHorizontal: 20,
+                marginTop: Platform.OS === "ios" ? height * 0.05 : "4%",
+              }}
+            >
+              <NormalHeader screenName="Measurements" />
+            </View>
+
+            {loading ? (
+              <View style={styles.loaderContainer}>
+                <ActivityIndicator color={theme.colors.secondPrimary} size="large" />
               </View>
-            </KeyboardAvoidingView>
+            ) : (
+              <>
+                {!measurements || !measurements.measurementUnits || measurements.measurementUnits.length === 0 ? (
+                  <View style={styles.emptyContainer}>
+                    <View style={styles.emptyIconContainer}>
+                      <MaterialCommunityIcons
+                        name="tape-measure"
+                        size={40}
+                        color={theme.colors.secondPrimary}
+                      />
+                    </View>
+                    <Text style={styles.emptyTitle}>No measurements yet</Text>
+                    <Text style={styles.emptySubtitle}>
+                      Track your body measurements to monitor your progress
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => setModalVisible(true)}
+                      style={styles.emptyButton}
+                    >
+                      <Ionicons name="add" size={20} color="#FFFFFF" />
+                      <Text style={styles.emptyButtonText}>Add Measurement</Text>
+                    </TouchableOpacity>
+                  </View>
+                ) : (
+                  <MeasurementList measurements={measurements.measurementUnits} />
+                )}
+              </>
+            )}
+
+            {/* FAB */}
+            {measurements && measurements.measurementUnits && measurements.measurementUnits.length > 0 && (
+              <TouchableOpacity
+                onPress={() => setModalVisible(true)}
+                style={styles.fab}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={[theme.colors.success, "#4CAF50"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.fabGradient}
+                >
+                  <Ionicons name="add" size={28} color="#FFFFFF" />
+                </LinearGradient>
+              </TouchableOpacity>
+            )}
           </View>
-        </Modal>
-      </View>
+        </ImageBackground>
+      )}
+
+      {/* Add Measurement Modal - Bottom Sheet */}
+      <Modal
+        visible={modalVisible}
+        animationType="slide"
+        transparent
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+            <View style={styles.overlayTouchable} />
+          </TouchableWithoutFeedback>
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={styles.keyboardAvoidingContainer}
+          >
+            <View style={styles.modalContent}>
+              {/* Dash Handle */}
+              <View style={styles.dashHandle} />
+
+              {/* Close Button */}
+              <TouchableOpacity
+                onPress={() => setModalVisible(false)}
+                style={styles.closeBtn}
+              >
+                <Ionicons name="close" size={20} color={theme.colors.text} />
+              </TouchableOpacity>
+
+              {/* Icon */}
+              <View style={styles.iconWrapper}>
+                <LinearGradient
+                  colors={[theme.colors.success, "#4CAF50"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.modalIconContainer}
+                >
+                  <MaterialCommunityIcons
+                    name="tape-measure"
+                    size={40}
+                    color="#FFFFFF"
+                  />
+                </LinearGradient>
+              </View>
+
+              {/* Title */}
+              <Text style={styles.modalTitle}>Add Measurements</Text>
+
+              {/* Form */}
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+                style={styles.formContainer}
+                contentContainerStyle={{ paddingBottom: 10 }}
+              >
+                {measurementFields.map((field) => (
+                  <TextInput
+                    key={field.key}
+                    placeholder={`${field.label} (cm)`}
+                    placeholderTextColor={theme.colors.textMuted}
+                    keyboardType="numeric"
+                    style={styles.input}
+                    value={form[field.key as keyof typeof form]}
+                    onChangeText={(text) =>
+                      setForm((prev) => ({ ...prev, [field.key]: text }))
+                    }
+                  />
+                ))}
+              </ScrollView>
+
+              {/* Save Button */}
+              <TouchableOpacity
+                onPress={handleSubmit}
+                activeOpacity={0.8}
+              >
+                <LinearGradient
+                  colors={[theme.colors.success, "#4CAF50"]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.saveButton}
+                >
+                  <Text style={styles.saveButtonText}>Save Measurements</Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </KeyboardAvoidingView>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -320,8 +391,9 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     borderRadius: 28,
     width: 60,
     height: 60,
+    zIndex: 1000,
     ...(isDark ? {} : {
-      shadowColor: theme.colors.secondPrimary,
+      shadowColor: theme.colors.success,
       shadowOffset: { width: 0, height: 4 },
       shadowOpacity: 0.4,
       shadowRadius: 12,
@@ -387,7 +459,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: theme.colors.secondPrimary,
+    shadowColor: theme.colors.success,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,
@@ -421,7 +493,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginTop: 16,
-    shadowColor: theme.colors.secondPrimary,
+    shadowColor: theme.colors.success,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 8,

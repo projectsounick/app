@@ -2,13 +2,20 @@ import React from "react";
 import { View, StyleSheet, ScrollView } from "react-native";
 import ShimmerPlaceHolder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "../../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "../../Theme/ThemeContext";
 
 interface TrainerShimmerProps {
   screenName: "train" | "session";
 }
 
 const TrainerShimmer: React.FC<TrainerShimmerProps> = ({ screenName }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
+  const shimmerColors = isDark 
+    ? ["#1a1a1a", "#2a2a2a", "#1a1a1a"]
+    : ["#E1E9EE", "#F2F8FC", "#E1E9EE"];
+
   return (
     <View style={styles.wrapper}>
       <ScrollView
@@ -22,10 +29,12 @@ const TrainerShimmer: React.FC<TrainerShimmerProps> = ({ screenName }) => {
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.box}
+                shimmerColors={shimmerColors}
               />
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.box}
+                shimmerColors={shimmerColors}
               />
             </View>
 
@@ -33,14 +42,17 @@ const TrainerShimmer: React.FC<TrainerShimmerProps> = ({ screenName }) => {
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.title}
+                shimmerColors={shimmerColors}
               />
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.subTitle}
+                shimmerColors={shimmerColors}
               />
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.image}
+                shimmerColors={shimmerColors}
               />
             </View>
 
@@ -48,14 +60,17 @@ const TrainerShimmer: React.FC<TrainerShimmerProps> = ({ screenName }) => {
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.title}
+                shimmerColors={shimmerColors}
               />
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.subTitle}
+                shimmerColors={shimmerColors}
               />
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.image}
+                shimmerColors={shimmerColors}
               />
             </View>
           </>
@@ -66,6 +81,7 @@ const TrainerShimmer: React.FC<TrainerShimmerProps> = ({ screenName }) => {
             <ShimmerPlaceHolder
               LinearGradient={LinearGradient}
               style={styles.headerPlaceholder}
+              shimmerColors={shimmerColors}
             />
 
             {/* Title + subtitle */}
@@ -83,14 +99,17 @@ const TrainerShimmer: React.FC<TrainerShimmerProps> = ({ screenName }) => {
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.calendarBox}
+                shimmerColors={shimmerColors}
               />
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.calendarBox}
+                shimmerColors={shimmerColors}
               />
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.calendarBox}
+                shimmerColors={shimmerColors}
               />
             </View>
 
@@ -99,14 +118,17 @@ const TrainerShimmer: React.FC<TrainerShimmerProps> = ({ screenName }) => {
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.smallBox}
+                shimmerColors={shimmerColors}
               />
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.smallBox}
+                shimmerColors={shimmerColors}
               />
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.smallBox}
+                shimmerColors={shimmerColors}
               />
             </View>
 
@@ -115,10 +137,12 @@ const TrainerShimmer: React.FC<TrainerShimmerProps> = ({ screenName }) => {
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.statsBox}
+                shimmerColors={shimmerColors}
               />
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.statsBox}
+                shimmerColors={shimmerColors}
               />
             </View>
 
@@ -126,10 +150,12 @@ const TrainerShimmer: React.FC<TrainerShimmerProps> = ({ screenName }) => {
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.statsBox}
+                shimmerColors={shimmerColors}
               />
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.statsBox}
+                shimmerColors={shimmerColors}
               />
             </View>
 
@@ -138,14 +164,17 @@ const TrainerShimmer: React.FC<TrainerShimmerProps> = ({ screenName }) => {
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.fullWidthLine}
+                shimmerColors={shimmerColors}
               />
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.fullWidthLine}
+                shimmerColors={shimmerColors}
               />
               <ShimmerPlaceHolder
                 LinearGradient={LinearGradient}
                 style={styles.fullWidthLine}
+                shimmerColors={shimmerColors}
               />
             </View>
           </>
@@ -155,7 +184,7 @@ const TrainerShimmer: React.FC<TrainerShimmerProps> = ({ screenName }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   wrapper: {
     flex: 1,
     backgroundColor: theme.colors.backgroundSecondary,

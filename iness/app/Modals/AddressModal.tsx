@@ -84,7 +84,7 @@ export default function AddressModal({
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
   const [showStatePicker, setShowStatePicker] = useState(false);
-  const styles = getStyles(theme);
+  const styles = getStyles(theme, isDark);
 
   return (
     <Modal
@@ -306,7 +306,7 @@ export default function AddressModal({
   );
 }
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: theme.colors.overlay,

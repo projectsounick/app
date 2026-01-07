@@ -40,6 +40,7 @@ export default function TrainerChatScreen() {
   const chatId = params.chatId as string;
   const trainerName = params.trainerName as string;
   const [inputText, setInputText] = useState("");
+  const [remountKey, setRemountKey] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const [selectedAttachments, setSelectedAttachments] = useState<string[]>([]);
   const {
@@ -153,6 +154,24 @@ export default function TrainerChatScreen() {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
   }, [data]);
+
+  // Force remount when theme changes
+  useEffect(() => {
+    setRemountKey(prev => prev + 1);
+  }, [isDark]);
+
+  // Re-render and scroll when theme changes
+  useEffect(() => {
+    // Force FlatList to recalculate layout when theme changes
+    if (flatListRef.current && data.length > 0) {
+      // Use requestAnimationFrame to ensure layout is complete
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: false });
+        }, 200);
+      });
+    }
+  }, [isDark, remountKey]);
   const insets = useSafeAreaInsets();
 
   return (
@@ -187,10 +206,20 @@ export default function TrainerChatScreen() {
               </View>
             ) : (
               <FlatList
+                key={`flatlist-${remountKey}-${isDark ? 'dark' : 'light'}`}
                 data={data}
-                keyExtractor={(_, index) => index.toString()}
+                keyExtractor={(item, index) => {
+                  // Use unique ID if available, otherwise use index with date
+                  return `${item._id || item.date || `msg-${index}`}-${isDark ? 'dark' : 'light'}`;
+                }}
+                extraData={`${isDark}-${remountKey}`}
+                removeClippedSubviews={false}
+                initialNumToRender={50}
+                maxToRenderPerBatch={20}
+                windowSize={21}
                 renderItem={({ item, index }) => (
                   <ChatMessage
+                    key={`${item._id || item.date || index}-${isDark ? 'dark' : 'light'}`}
                     index={index}
                     item={item}
                     setSelectedImage={setSelectedImage}

@@ -2,11 +2,18 @@ import React from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
 import ShimmerPlaceHolder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "../../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "../../Theme/ThemeContext";
 
 const screenWidth = Dimensions.get("window").width;
 
 const TrackShimmer: React.FC = () => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
+  const shimmerColors = isDark 
+    ? ["#1a1a1a", "#2a2a2a", "#1a1a1a"]
+    : ["#E1E9EE", "#F2F8FC", "#E1E9EE"];
+
   return (
     <View style={styles.container}>
       {/* Header Shimmer */}
@@ -14,7 +21,7 @@ const TrackShimmer: React.FC = () => {
         <ShimmerPlaceHolder
           LinearGradient={LinearGradient}
           style={styles.headerTitle}
-          shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+          shimmerColors={shimmerColors}
           visible={false}
         />
       </View>
@@ -24,19 +31,19 @@ const TrackShimmer: React.FC = () => {
         <ShimmerPlaceHolder
           LinearGradient={LinearGradient}
           style={styles.tab}
-          shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+          shimmerColors={shimmerColors}
           visible={false}
         />
         <ShimmerPlaceHolder
           LinearGradient={LinearGradient}
           style={styles.tab}
-          shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+          shimmerColors={shimmerColors}
           visible={false}
         />
         <ShimmerPlaceHolder
           LinearGradient={LinearGradient}
           style={styles.tab}
-          shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+          shimmerColors={shimmerColors}
           visible={false}
         />
       </View>
@@ -46,19 +53,19 @@ const TrackShimmer: React.FC = () => {
         <ShimmerPlaceHolder
           LinearGradient={LinearGradient}
           style={styles.monthButton}
-          shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+          shimmerColors={shimmerColors}
           visible={false}
         />
         <ShimmerPlaceHolder
           LinearGradient={LinearGradient}
           style={styles.monthText}
-          shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+          shimmerColors={shimmerColors}
           visible={false}
         />
         <ShimmerPlaceHolder
           LinearGradient={LinearGradient}
           style={styles.monthButton}
-          shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+          shimmerColors={shimmerColors}
           visible={false}
         />
       </View>
@@ -68,7 +75,7 @@ const TrackShimmer: React.FC = () => {
         <ShimmerPlaceHolder
           LinearGradient={LinearGradient}
           style={styles.chart}
-          shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+          shimmerColors={shimmerColors}
           visible={false}
         />
       </View>
@@ -79,13 +86,13 @@ const TrackShimmer: React.FC = () => {
           <ShimmerPlaceHolder
             LinearGradient={LinearGradient}
             style={styles.statLabel}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
           <ShimmerPlaceHolder
             LinearGradient={LinearGradient}
             style={styles.statValue}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
         </View>
@@ -93,13 +100,13 @@ const TrackShimmer: React.FC = () => {
           <ShimmerPlaceHolder
             LinearGradient={LinearGradient}
             style={styles.statLabel}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
           <ShimmerPlaceHolder
             LinearGradient={LinearGradient}
             style={styles.statValue}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
         </View>
@@ -107,13 +114,13 @@ const TrackShimmer: React.FC = () => {
           <ShimmerPlaceHolder
             LinearGradient={LinearGradient}
             style={styles.statLabel}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
           <ShimmerPlaceHolder
             LinearGradient={LinearGradient}
             style={styles.statValue}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
         </View>
@@ -122,7 +129,7 @@ const TrackShimmer: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 16,
@@ -146,7 +153,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 4,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   tab: {
     flex: 1,
@@ -163,7 +170,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   monthButton: {
     width: 40,
@@ -182,7 +189,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
     minHeight: 300,
   },
   chart: {
@@ -201,7 +208,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   statLabel: {
     width: "60%",

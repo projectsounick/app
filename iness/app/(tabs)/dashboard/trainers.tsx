@@ -332,7 +332,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     flex: 1,
   },
   descriptionContainer: {
-    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
@@ -391,7 +391,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     padding: 16,
   },
   trainerContentInactive: {
-    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
+    backgroundColor: theme.colors.background,
     padding: 16,
     borderWidth: 1,
     borderColor: theme.colors.border,
@@ -536,7 +536,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
+    backgroundColor: theme.colors.background,
     justifyContent: "center",
     alignItems: "center",
     ...(isDark ? {} : {

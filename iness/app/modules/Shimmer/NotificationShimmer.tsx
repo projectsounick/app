@@ -2,9 +2,16 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "../../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "../../Theme/ThemeContext";
 
 const NotificationShimmer: React.FC = () => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
+  const shimmerColors = isDark 
+    ? ["#1a1a1a", "#2a2a2a", "#1a1a1a"]
+    : ["#E1E9EE", "#F2F8FC", "#E1E9EE"];
+
   // Simulate 4-5 notification cards
   const notifications = [1, 2, 3, 4, 5];
 
@@ -17,7 +24,7 @@ const NotificationShimmer: React.FC = () => {
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={styles.iconContainer}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
 
@@ -28,13 +35,13 @@ const NotificationShimmer: React.FC = () => {
                 <ShimmerPlaceholder
                   LinearGradient={LinearGradient}
                   style={styles.title}
-                  shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                  shimmerColors={shimmerColors}
                   visible={false}
                 />
                 <ShimmerPlaceholder
                   LinearGradient={LinearGradient}
                   style={styles.deleteButton}
-                  shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                  shimmerColors={shimmerColors}
                   visible={false}
                 />
               </View>
@@ -43,13 +50,13 @@ const NotificationShimmer: React.FC = () => {
               <ShimmerPlaceholder
                 LinearGradient={LinearGradient}
                 style={styles.bodyText}
-                shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                shimmerColors={shimmerColors}
                 visible={false}
               />
               <ShimmerPlaceholder
                 LinearGradient={LinearGradient}
                 style={[styles.bodyText, { width: "70%", marginTop: 6 }]}
-                shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                shimmerColors={shimmerColors}
                 visible={false}
               />
 
@@ -57,7 +64,7 @@ const NotificationShimmer: React.FC = () => {
               <ShimmerPlaceholder
                 LinearGradient={LinearGradient}
                 style={styles.dateText}
-                shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                shimmerColors={shimmerColors}
                 visible={false}
               />
 
@@ -66,7 +73,7 @@ const NotificationShimmer: React.FC = () => {
                 <ShimmerPlaceholder
                   LinearGradient={LinearGradient}
                   style={styles.button}
-                  shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                  shimmerColors={shimmerColors}
                   visible={false}
                 />
               )}
@@ -78,7 +85,7 @@ const NotificationShimmer: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     flex: 1,
     paddingBottom: 100,
@@ -96,7 +103,7 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 3,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   cardContent: {
     flexDirection: "row",

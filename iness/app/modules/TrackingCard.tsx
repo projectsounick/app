@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text } from "react-native";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "../Theme/ThemeContext";
 import {
   FontAwesome5,
   MaterialCommunityIcons,
@@ -10,6 +10,11 @@ import {
 } from "@expo/vector-icons";
 
 const TrackingCard = () => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const shimmerColors = isDark 
+    ? ["#1a1a1a", "#2a2a2a", "#1a1a1a"]
+    : ["#E1E9EE", "#F2F8FC", "#E1E9EE"];
   const [loading, setLoading] = useState(true);
 
   // Simulate loading delay
@@ -82,6 +87,7 @@ const TrackingCard = () => {
                   flex: 1,
                   marginHorizontal: 8,
                 }}
+                shimmerColors={shimmerColors}
               />
             ) : (
               <View
@@ -111,6 +117,7 @@ const TrackingCard = () => {
                   height: 10,
                   borderRadius: 5,
                 }}
+                shimmerColors={shimmerColors}
               />
             ) : (
               <Text

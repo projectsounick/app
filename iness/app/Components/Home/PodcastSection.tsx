@@ -20,7 +20,7 @@ import { PAGINATION_LIMITS } from "@/app/shared/paginationLimits";
 import { useRouter } from "expo-router";
 
 const { width } = Dimensions.get("window");
-const CARD_WIDTH = width * 0.85; // Responsive card width - 85% of screen width to ensure at least one card is fully visible
+const CARD_WIDTH = width * 0.78; // Responsive card width - 78% of screen width to show peek of next card
 
 interface PodcastMediaCardInterface {
   loggedUser: UserData | null;
@@ -45,8 +45,8 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
       style={{
         backgroundColor: theme.colors.background,
         borderRadius: 20,
-        paddingVertical: 16,
-        paddingHorizontal: 16,
+        paddingVertical: 12,
+        paddingHorizontal: 12,
         marginBottom: 16,
         ...(Platform.OS === "ios"
           ? {
@@ -68,24 +68,24 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 16,
+          marginBottom: 10,
         }}
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <View
             style={{
-              width: 34,
-              height: 34,
-              borderRadius: 10,
+              width: 28,
+              height: 28,
+              borderRadius: 8,
               backgroundColor: theme.colors.backgroundCardLight,
               alignItems: "center",
               justifyContent: "center",
-              marginRight: 12,
+              marginRight: 10,
             }}
           >
             <MaterialCommunityIcons
               name="podcast"
-              size={20}
+              size={16}
                     color={theme.colors.secondPrimary}
             />
           </View>
@@ -124,7 +124,7 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingLeft: 4, paddingRight: 16, paddingTop: 8, paddingBottom: 8 }}
+        contentContainerStyle={{ paddingLeft: 4, paddingRight: 12, paddingTop: 6, paddingBottom: 6 }}
       >
         {podCasts.slice(0, PAGINATION_LIMITS.PODCAST_INITIAL).map((podcast, index) => (
           <TouchableOpacity
@@ -160,7 +160,7 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
             <View
               style={{
                 width: "100%",
-                height: 180,
+                height: 160,
                 backgroundColor: theme.colors.backgroundSecondary,
                 alignItems: "center",
                 justifyContent: "center",
@@ -174,13 +174,13 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
             </View>
 
             {/* Content */}
-            <View style={{ padding: 16 }}>
+            <View style={{ padding: 12 }}>
               <Text
                 style={{
                   fontSize: theme.fontSizes.regular,
                   fontFamily: theme.fonts.bold,
                   color: theme.colors.text,
-                  marginBottom: 8,
+                  marginBottom: 6,
                   fontWeight: theme.fontWeights.bold as "700",
                 }}
                 numberOfLines={1}
@@ -191,9 +191,9 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
                 style={{
                   fontSize: theme.fontSizes.regularSmall,
                   color: theme.colors.textSecondary,
-                  marginBottom: 8,
+                  marginBottom: 6,
                   fontWeight: theme.fontWeights.medium as "500",
-                  lineHeight: 20,
+                  lineHeight: 18,
                 }}
                 numberOfLines={2}
               >
@@ -204,7 +204,7 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "space-between",
-                  marginTop: 4,
+                  marginTop: 2,
                 }}
               >
                 <Text
@@ -214,9 +214,9 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
                     fontFamily: theme.fonts.medium,
                     fontWeight: "600",
                     backgroundColor: theme.colors.greenLight,
-                    paddingVertical: 4,
-                    paddingHorizontal: 10,
-                    borderRadius: 12,
+                    paddingVertical: 3,
+                    paddingHorizontal: 8,
+                    borderRadius: 10,
                   }}
                 >
                   {podcast.category}
@@ -225,9 +225,9 @@ function PodcastMediaCard({ loggedUser }: PodcastMediaCardInterface) {
                 <TouchableOpacity
                   style={{
                     backgroundColor: theme.colors.success,
-                    paddingVertical: 6,
-                    paddingHorizontal: 14,
-                    borderRadius: 12,
+                    paddingVertical: 5,
+                    paddingHorizontal: 12,
+                    borderRadius: 10,
                     flexDirection: "row",
                     alignItems: "center",
                     justifyContent: "center",

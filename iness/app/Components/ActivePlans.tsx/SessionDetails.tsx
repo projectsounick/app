@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -17,9 +17,8 @@ import {
   Ionicons,
   Feather,
 } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
 import { Session } from "@/app/interfaces/sessionInterface";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { router } from "expo-router";
 import FeedbackModal from "@/app/Modals/SessionFeedbackModal";
 import useServiceWithSnackbar from "@/hooks/usePostDataHook";
@@ -27,6 +26,7 @@ import { sessionService } from "@/app/services/sessionService";
 import { ActivityIndicator } from "react-native-paper";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import SessionCardRow from "@/app/modules/SessionDetailsCard";
+import WorkoutDetailModal from "@/app/Modals/WorkoutDetailModal";
 
 interface TabbedSessionDetailsProps {
   selectedSession: Session | null;
@@ -43,8 +43,11 @@ const TabbedSessionDetails = ({
 
   activeTab = "info",
 }: TabbedSessionDetailsProps) => {
-
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const [showModal, setShowModal] = useState(false);
+  const [workoutModalVisible, setWorkoutModalVisible] = useState(false);
+  const [selectedWorkout, setSelectedWorkout] = useState<any>(null);
 
   const {
     loading,
@@ -71,18 +74,22 @@ const TabbedSessionDetails = ({
               flexDirection: "row",
               justifyContent: "space-between",
               alignItems: "center",
-              backgroundColor: theme.colors.background,
+              backgroundColor: isDark ? theme.colors.background : theme.colors.background,
               borderRadius: 12,
               paddingVertical: 16,
               paddingHorizontal: 20,
               marginTop: 20,
               width: "90%",
               alignSelf: "center",
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.1,
-              shadowRadius: 4,
-              elevation: 3,
+              ...(isDark ? {} : {
+                shadowColor: "#000",
+                shadowOffset: { width: 0, height: 2 },
+                shadowOpacity: 0.1,
+                shadowRadius: 4,
+                elevation: 3,
+              }),
+              borderWidth: 1,
+              borderColor: theme.colors.border,
             }}
             onPress={() => {
               router.push("/dashboard/supportchat");
@@ -90,7 +97,7 @@ const TabbedSessionDetails = ({
           >
             <Text
               style={{
-                color: theme.colors.black,
+                color: isDark ? theme.colors.text : theme.colors.black,
                 fontSize: theme.fontSizes.regular,
                 fontWeight: "600",
                 fontFamily: theme.fonts.bold,
@@ -99,7 +106,7 @@ const TabbedSessionDetails = ({
               Request a Session
             </Text>
 
-            <Feather name="arrow-right" size={24} color="#000" />
+            <Feather name="arrow-right" size={24} color={isDark ? theme.colors.text : "#000"} />
           </TouchableOpacity>
         </View>
       );
@@ -109,17 +116,19 @@ const TabbedSessionDetails = ({
         {/* Session Details Card - Date/Status shown in parent, so start with time/duration */}
         <View
           style={{
-            backgroundColor: theme.colors.background,
+            backgroundColor: isDark ? theme.colors.background : theme.colors.background,
             borderRadius: 20,
             padding: 20,
             marginHorizontal: 16,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.08,
-            shadowRadius: 6,
-            elevation: 3,
+            ...(isDark ? {} : {
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.08,
+              shadowRadius: 6,
+              elevation: 3,
+            }),
             borderWidth: 1,
-            borderColor: "#F1F3F1",
+            borderColor: theme.colors.border,
             position: "relative",
           }}
         >
@@ -357,18 +366,20 @@ const TabbedSessionDetails = ({
       return (
         <View
           style={{
-            backgroundColor: theme.colors.background,
+            backgroundColor: isDark ? theme.colors.background : theme.colors.background,
             borderRadius: 20,
             padding: 20,
-            marginHorizontal: 20,
-            marginTop: 32,
-            shadowColor: "#000",
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.08,
-            shadowRadius: 6,
-            elevation: 3,
+            marginHorizontal: 16,
+            marginTop: 0,
+            ...(isDark ? {} : {
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.08,
+              shadowRadius: 6,
+              elevation: 3,
+            }),
             borderWidth: 1,
-            borderColor: "#F1F3F1",
+            borderColor: theme.colors.border,
             alignItems: "center",
           }}
         >
@@ -385,39 +396,47 @@ const TabbedSessionDetails = ({
       : "Other";
 
     return (
-      <View
-        style={{
-          backgroundColor: "#FFFFFF",
-          borderRadius: 20,
-          padding: 16,
-          marginHorizontal: 20,
-          marginTop: 32,
-          shadowColor: "#000",
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.08,
-          shadowRadius: 6,
-          elevation: 3,
-          borderWidth: 1,
-          borderColor: "#F1F3F1",
-        }}
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ paddingBottom: 20 }}
+        showsVerticalScrollIndicator={false}
       >
+        <View
+          style={{
+            backgroundColor: isDark ? theme.colors.background : "#FFFFFF",
+            borderRadius: 20,
+            padding: 12,
+            marginHorizontal: 16,
+            marginTop: 0,
+            ...(isDark ? {} : {
+              shadowColor: "#000",
+              shadowOffset: { width: 0, height: 2 },
+              shadowOpacity: 0.08,
+              shadowRadius: 6,
+              elevation: 3,
+            }),
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+          }}
+        >
         {/* Trainer Profile Header */}
         <View
           style={{
             flexDirection: "row",
             alignItems: "center",
-            marginBottom: 16,
+            marginBottom: 12,
+            paddingBottom: 12,
           }}
         >
           <View
             style={{
-              width: 70,
-              height: 70,
-              borderRadius: 35,
+              width: 50,
+              height: 50,
+              borderRadius: 25,
               backgroundColor: theme.colors.backgroundCardLight,
               alignItems: "center",
               justifyContent: "center",
-              marginRight: 14,
+              marginRight: 10,
               overflow: "hidden",
               borderWidth: 2,
               borderColor: "#9747FF",
@@ -435,7 +454,7 @@ const TabbedSessionDetails = ({
             ) : (
               <MaterialCommunityIcons
                 name="account"
-                size={35}
+                size={24}
                 color="#9747FF"
               />
             )}
@@ -443,10 +462,10 @@ const TabbedSessionDetails = ({
           <View style={{ flex: 1 }}>
             <Text
               style={{
-                fontSize: theme.fontSizes.medium,
+                fontSize: theme.fontSizes.regular,
                 fontFamily: theme.fonts.bold,
                 color: theme.colors.text,
-                marginBottom: 6,
+                marginBottom: 4,
               }}
             >
               {selectedSession.trainer.name}
@@ -454,9 +473,9 @@ const TabbedSessionDetails = ({
             <View
               style={{
                 backgroundColor: theme.colors.greenLight,
-                paddingHorizontal: 10,
-                paddingVertical: 4,
-                borderRadius: 8,
+                paddingHorizontal: 8,
+                paddingVertical: 3,
+                borderRadius: 6,
                 alignSelf: "flex-start",
               }}
             >
@@ -474,15 +493,48 @@ const TabbedSessionDetails = ({
           </View>
         </View>
 
+        {/* Stylish Divider */}
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            marginBottom: 12,
+          }}
+        >
+          <View
+            style={{
+              flex: 1,
+              height: 1,
+              backgroundColor: isDark ? theme.colors.border : "#E8E8E8",
+            }}
+          />
+          <View
+            style={{
+              width: 6,
+              height: 6,
+              borderRadius: 3,
+              backgroundColor: isDark ? theme.colors.secondPrimary : "#9747FF",
+              marginHorizontal: 8,
+            }}
+          />
+          <View
+            style={{
+              flex: 1,
+              height: 1,
+              backgroundColor: isDark ? theme.colors.border : "#E8E8E8",
+            }}
+          />
+        </View>
+
         {/* Gender and DOB Row */}
-        <View style={{ flexDirection: "row", gap: 12 }}>
+        <View style={{ flexDirection: "row", gap: 10 }}>
           {/* Gender */}
           <View
             style={{
               flex: 1,
-              backgroundColor: "#F8F9FA",
+              backgroundColor: isDark ? theme.colors.backgroundCard : "#F8F9FA",
               borderRadius: 12,
-              padding: 12,
+              padding: 10,
               flexDirection: "row",
               alignItems: "center",
             }}
@@ -491,13 +543,13 @@ const TabbedSessionDetails = ({
               style={{
                 backgroundColor: theme.colors.backgroundCardLight,
                 borderRadius: 10,
-                padding: 8,
+                padding: 6,
                 marginRight: 8,
               }}
             >
               <MaterialCommunityIcons
                 name="gender-male-female"
-                size={18}
+                size={16}
                 color="#9747FF"
               />
             </View>
@@ -531,7 +583,7 @@ const TabbedSessionDetails = ({
                 flex: 1,
                 backgroundColor: theme.colors.backgroundSecondary,
                 borderRadius: 12,
-                padding: 12,
+                padding: 10,
                 flexDirection: "row",
                 alignItems: "center",
               }}
@@ -540,13 +592,13 @@ const TabbedSessionDetails = ({
                 style={{
                   backgroundColor: theme.colors.backgroundCardLight,
                   borderRadius: 10,
-                  padding: 8,
+                  padding: 6,
                   marginRight: 8,
                 }}
               >
                 <MaterialCommunityIcons
                   name="calendar-outline"
-                  size={18}
+                  size={16}
                   color="#9747FF"
                 />
               </View>
@@ -582,97 +634,75 @@ const TabbedSessionDetails = ({
             </View>
           )}
         </View>
-      </View>
-    );
-  };
-
-  const renderWorkoutTab = () => {
-    if (!selectedSession?.workouts?.length)
-      return (
-        <Text style={{ textAlign: "center", color: theme.colors.textMuted }}>
-          No workout data
-        </Text>
-      );
-
-    return (
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        {selectedSession.workouts.map((workout, idx) => (
-          <LinearGradient
-            key={idx}
-            colors={["#9C56F6", "#3A1B63"]}
-            style={{
-              borderRadius: 16,
-              padding: 16,
-              marginBottom: 12,
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.25,
-              shadowRadius: 3.84,
-              elevation: 5,
-            }}
-          >
-            {/* Workout Name */}
-            <Text
-              style={{
-                color: theme.colors.textWhite,
-                fontSize: theme.fontSizes.regular,
-                fontWeight: "bold",
-                marginBottom: 10,
-              }}
-            >
-              Workout Name: {workout.exercise}
-            </Text>
-
-            {/* Reps and Sets Row */}
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                marginBottom: 6,
-              }}
-            >
-              <Text style={{ color: theme.colors.textLight }}>Reps: {workout.reps}</Text>
-              <Text style={{ color: theme.colors.textLight }}>Sets: {workout.sets}</Text>
-            </View>
-
-            {/* Timer and Status Row */}
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-              }}
-            >
-              <Text style={{ color: theme.colors.textLight }}>Timer: {workout.timer}</Text>
-              <Text style={{ color: theme.colors.textLight }}>
-                Status: {workout.isComplete ? "Completed" : "Pending"}
-              </Text>
-            </View>
-          </LinearGradient>
-        ))}
+        </View>
       </ScrollView>
     );
   };
 
+  // Auto-open modal when workout tab is selected
+  useEffect(() => {
+    if (activeTab === "workout" && selectedSession?.workouts?.length > 0) {
+      setWorkoutModalVisible(true);
+      setSelectedWorkout(selectedSession.workouts[0]);
+    }
+  }, [activeTab, selectedSession?.workouts]);
+
+  const renderWorkoutTab = () => {
+
+    if (!selectedSession?.workouts?.length)
+      return (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
+          <Text style={{ textAlign: "center", color: theme.colors.textMuted, fontSize: theme.fontSizes.regular }}>
+            No workout data available
+          </Text>
+        </View>
+      );
+
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", padding: 20 }}>
+        <MaterialCommunityIcons
+          name="dumbbell"
+          size={48}
+          color={isDark ? theme.colors.textSecondary : "#9747FF"}
+          style={{ marginBottom: 16 }}
+        />
+        <Text style={{ textAlign: "center", color: theme.colors.text, fontSize: theme.fontSizes.medium, fontFamily: theme.fonts.bold, marginBottom: 8 }}>
+          View All Workouts
+        </Text>
+        <Text style={{ textAlign: "center", color: theme.colors.textSecondary, fontSize: theme.fontSizes.regularSmall }}>
+          {selectedSession.workouts.length} workout{selectedSession.workouts.length > 1 ? 's' : ''} available
+        </Text>
+      </View>
+    );
+  };
+
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}>
+    <View style={{ flex: 1, backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundSecondary }}>
       {/* Tab Content */}
       <View
         style={{
           flex: 1,
-      
-        
-      marginTop:32,
-          shadowColor: "rgba(0,0,0,0.06)",
-          shadowOffset: { width: 0, height: -1 },
-          shadowOpacity: 0.6,
-          shadowRadius: 4,
-          elevation: 2,
+          marginTop: 32,
+          ...(isDark ? {} : {
+            shadowColor: "rgba(0,0,0,0.06)",
+            shadowOffset: { width: 0, height: -1 },
+            shadowOpacity: 0.6,
+            shadowRadius: 4,
+            elevation: 2,
+          }),
         }}
       >
         {activeTab === "info" && renderInfoTab()}
         {activeTab === "trainer" && renderTrainerTab()}
         {activeTab === "workout" && renderWorkoutTab()}
       </View>
+
+      {/* Workout Detail Modal */}
+      <WorkoutDetailModal
+        visible={workoutModalVisible}
+        onClose={() => setWorkoutModalVisible(false)}
+        workouts={selectedSession?.workouts || []}
+      />
     </View>
   );
 };

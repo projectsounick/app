@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import moment from "moment";
 import Icon from "react-native-vector-icons/Feather";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 interface Props {
   selectedDate: Date;
@@ -16,6 +16,9 @@ const ChooseDateSection: React.FC<Props> = ({
   onDateChange,
   preferences,
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const [isPickerVisible, setPickerVisible] = useState(false);
 
   const showDatePicker = () => setPickerVisible(true);
@@ -64,17 +67,19 @@ const ChooseDateSection: React.FC<Props> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: theme.colors.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    }),
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
@@ -94,7 +99,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: theme.fontSizes.regular,
     fontWeight: theme.fontWeights.medium as "500",
-    color: theme.colors.text,
+    color: isDark ? theme.colors.textWhite : theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   content: {
@@ -104,12 +109,12 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
+    borderTopColor: theme.colors.border,
   },
   dateText: {
     fontSize: theme.fontSizes.regular,
     fontWeight: theme.fontWeights.medium as "500",
-    color: theme.colors.text,
+    color: isDark ? theme.colors.textWhite : theme.colors.text,
     fontFamily: theme.fonts.medium,
   },
   changeButton: {

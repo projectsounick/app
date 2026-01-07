@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 interface Props {
   slots: string[];
@@ -14,6 +14,9 @@ const SlotSelectionSection: React.FC<Props> = ({
   selectedSlot,
   onSelectSlot,
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const [isExpanded, setIsExpanded] = useState(false);
   const visibleSlots = isExpanded ? slots : slots.slice(0, 3);
 
@@ -73,17 +76,19 @@ const SlotSelectionSection: React.FC<Props> = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
-    shadowColor: theme.colors.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    }),
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
@@ -103,7 +108,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: theme.fontSizes.regular,
     fontWeight: theme.fontWeights.medium as "500",
-    color: theme.colors.text,
+    color: isDark ? theme.colors.textWhite : theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   slotsContainer: {
@@ -113,15 +118,15 @@ const styles = StyleSheet.create({
     marginTop: 12,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
+    borderTopColor: theme.colors.border,
   },
   slotButton: {
-    backgroundColor: theme.colors.darkGrey,
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.darkGrey,
     paddingVertical: 10,
     paddingHorizontal: 16,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: theme.colors.lightGrey,
+    borderColor: theme.colors.border,
     minWidth: 100,
     alignItems: "center",
   },
@@ -131,7 +136,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   slotText: {
-    color: theme.colors.textSecondary,
+    color: isDark ? theme.colors.textWhite : theme.colors.textSecondary,
     fontSize: theme.fontSizes.regularSmall,
     fontWeight: theme.fontWeights.medium as "500",
     fontFamily: theme.fonts.medium,

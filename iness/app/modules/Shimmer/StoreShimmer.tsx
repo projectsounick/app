@@ -2,12 +2,19 @@ import React from "react";
 import { View, StyleSheet, ScrollView, Dimensions } from "react-native";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "../../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "../../Theme/ThemeContext";
 
 const { width: screenWidth } = Dimensions.get("window");
 const categoryCardWidth = (screenWidth - 48) / 2;
 
 const StoreShimmer: React.FC = () => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
+  const shimmerColors = isDark 
+    ? ["#1a1a1a", "#2a2a2a", "#1a1a1a"]
+    : ["#E1E9EE", "#F2F8FC", "#E1E9EE"];
+
   return (
     <ScrollView
       style={styles.container}
@@ -21,13 +28,13 @@ const StoreShimmer: React.FC = () => {
           <ShimmerPlaceholder
             LinearGradient={LinearGradient}
             style={styles.headerTitle}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
           <ShimmerPlaceholder
             LinearGradient={LinearGradient}
             style={styles.headerDash}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
         </View>
@@ -40,7 +47,7 @@ const StoreShimmer: React.FC = () => {
               <ShimmerPlaceholder
                 LinearGradient={LinearGradient}
                 style={styles.categoryImage}
-                shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                shimmerColors={shimmerColors}
                 visible={false}
               />
               {/* Footer */}
@@ -48,13 +55,13 @@ const StoreShimmer: React.FC = () => {
                 <ShimmerPlaceholder
                   LinearGradient={LinearGradient}
                   style={styles.categoryName}
-                  shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                  shimmerColors={shimmerColors}
                   visible={false}
                 />
                 <ShimmerPlaceholder
                   LinearGradient={LinearGradient}
                   style={styles.chevronIcon}
-                  shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                  shimmerColors={shimmerColors}
                   visible={false}
                 />
               </View>
@@ -70,13 +77,13 @@ const StoreShimmer: React.FC = () => {
           <ShimmerPlaceholder
             LinearGradient={LinearGradient}
             style={styles.headerTitle}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
           <ShimmerPlaceholder
             LinearGradient={LinearGradient}
             style={styles.headerDash}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
         </View>
@@ -89,19 +96,19 @@ const StoreShimmer: React.FC = () => {
               <ShimmerPlaceholder
                 LinearGradient={LinearGradient}
                 style={styles.categoryIcon}
-                shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                shimmerColors={shimmerColors}
                 visible={false}
               />
               <ShimmerPlaceholder
                 LinearGradient={LinearGradient}
                 style={styles.productCategoryName}
-                shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                shimmerColors={shimmerColors}
                 visible={false}
               />
               <ShimmerPlaceholder
                 LinearGradient={LinearGradient}
                 style={styles.itemCountBadge}
-                shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                shimmerColors={shimmerColors}
                 visible={false}
               />
             </View>
@@ -118,14 +125,14 @@ const StoreShimmer: React.FC = () => {
                   <ShimmerPlaceholder
                     LinearGradient={LinearGradient}
                     style={styles.productImage}
-                    shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                    shimmerColors={shimmerColors}
                     visible={false}
                   />
                   {/* Plus Icon */}
                   <ShimmerPlaceholder
                     LinearGradient={LinearGradient}
                     style={styles.plusIcon}
-                    shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                    shimmerColors={shimmerColors}
                     visible={false}
                   />
                   {/* Product Details */}
@@ -133,13 +140,13 @@ const StoreShimmer: React.FC = () => {
                     <ShimmerPlaceholder
                       LinearGradient={LinearGradient}
                       style={styles.productName}
-                      shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                      shimmerColors={shimmerColors}
                       visible={false}
                     />
                     <ShimmerPlaceholder
                       LinearGradient={LinearGradient}
                       style={styles.productPrice}
-                      shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                      shimmerColors={shimmerColors}
                       visible={false}
                     />
                   </View>
@@ -153,7 +160,7 @@ const StoreShimmer: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     flex: 1,
   },
@@ -194,7 +201,7 @@ const styles = StyleSheet.create({
     padding: 12,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   categoryImage: {
     width: "100%",
@@ -256,7 +263,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: theme.colors.background,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
     overflow: "hidden",
   },
   productImage: {

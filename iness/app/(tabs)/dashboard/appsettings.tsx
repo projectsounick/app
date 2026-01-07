@@ -401,7 +401,8 @@ const InfoModal: React.FC<InfoModalProps> = ({
   content,
 }) => {
   const theme = useGlobalTheme();
-  const styles = getStyles(theme);
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   return (
     <Modal
       transparent
@@ -1030,7 +1031,7 @@ export default function AppSettingsScreen() {
                     <Switch
                       value={isDark}
                       onValueChange={handleDarkModeToggle}
-                      trackColor={{ false: theme.colors.border, true: theme.colors.secondPrimary }}
+                      trackColor={{ false: theme.colors.border, true: theme.colors.success }}
                       thumbColor={isDark ? theme.colors.textWhite : "#F4F3F4"}
                       ios_backgroundColor={theme.colors.border}
                     />

@@ -35,6 +35,14 @@ let isInitialized = false;
 let permissionDenied = false;
 let AppleHealthKit: HealthKitModule | null = null;
 
+/**
+ * Check if HealthKit has been initialized in this app session
+ * Used to prevent showing permission modal on background sync
+ */
+export function isHealthKitInitialized(): boolean {
+  return isInitialized;
+}
+
 // ============================================
 // Initialization
 // ============================================

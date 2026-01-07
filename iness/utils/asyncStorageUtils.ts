@@ -84,7 +84,23 @@ async function updateUserDataInAsyncStorage(updates: Partial<UserData>) {
   try {
     const existing = await AsyncStorage.getItem("user");
     const user: UserData = existing ? JSON.parse(existing) : {};
+    
+    // Preserve the original _id from stored user data
+    // Backend might return userDetails._id which should not overwrite user._id
+    // userDetails has userId field that references user._id, not its own _id
+    const originalUserId = user._id;
+    
+    // Merge updates with existing user data
     const updated = { ...user, ...updates };
+    
+    // Always preserve the original user._id unless it's explicitly being updated
+    // This prevents userDetails._id (if present in backend response) from overwriting user._id
+    // For theme changes and other updates, we should never change the _id
+    if (originalUserId) {
+      // Only keep the original _id if updates._id is undefined or matches original
+      // If updates explicitly provides a different _id, we still preserve original (shouldn't happen)
+      updated._id = originalUserId;
+    }
 
     let response = await AsyncStorage.setItem("user", JSON.stringify(updated));
   } catch (error) {

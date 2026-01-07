@@ -13,6 +13,8 @@ export default function MediaVideoModal({
   visible,
   onClose,
 }: MediaVideoModalProps) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const videoSource = podcast?.podcastLink;
 
   const player = useVideoPlayer(videoSource, (player) => {

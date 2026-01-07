@@ -144,7 +144,7 @@ const ProductModal: React.FC<ProductModalProps> = ({
 
         {/* Close Button */}
         <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-          <Ionicons name="close" size={20} color="#1A1A1A" />
+          <Ionicons name="close" size={20} color={theme.colors.text} />
         </TouchableOpacity>
 
         {/* Image Carousel */}

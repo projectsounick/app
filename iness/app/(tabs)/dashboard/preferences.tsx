@@ -6,7 +6,7 @@ import SlotSelectionSection from "@/app/Components/PurchaseDetails.tsx/SlotSelec
 import PlaceSelectionSection from "@/app/Components/PurchaseDetails.tsx/PlaceSelection";
 
 import CustomSnackbar from "@/app/modules/Snackbar";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import NormalHeader from "@/app/modules/NormalHeader";
 import { ActivityIndicator } from "react-native-paper";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
@@ -17,6 +17,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 ///// Main functional component for the Book session details screen --------------/
 const BookSessionDetailsScreen = () => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const [slots, setSlots] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
@@ -144,14 +146,10 @@ const BookSessionDetailsScreen = () => {
   useEffect(() => {
     getSlotsFromCloud();
   }, []);
-  return (
-    <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpg")}
-      style={{ flex: 1 }}
-      resizeMode="cover"
-    >
+  const content = (
+    <>
       <SafeAreaView
-        style={{ flex: 1, backgroundColor: "transparent" }}
+        style={{ flex: 1, backgroundColor: isDark ? theme.colors.background : "transparent" }}
         edges={["top", "left", "right"]}
       >
         <View style={{ paddingLeft: 20, paddingTop: 20 }}>
@@ -203,7 +201,7 @@ const BookSessionDetailsScreen = () => {
             left: 0,
             right: 0,
             padding: 20,
-            backgroundColor: "transparent",
+            backgroundColor: isDark ? theme.colors.background : "transparent",
           }}
         >
           <AnimatedSubmitButton
@@ -220,7 +218,25 @@ const BookSessionDetailsScreen = () => {
         onDismiss={() => setSnackbarOpen(false)}
         bgColor={theme.colors.success}
       />
-    </ImageBackground>
+    </>
+  );
+
+  return (
+    <>
+      {isDark ? (
+        <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+          {content}
+        </View>
+      ) : (
+        <ImageBackground
+          source={require("../../../assets/images/basicBackground.jpg")}
+          style={{ flex: 1 }}
+          resizeMode="cover"
+        >
+          {content}
+        </ImageBackground>
+      )}
+    </>
   );
 };
 

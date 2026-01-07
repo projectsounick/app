@@ -441,7 +441,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   },
   // Info Card
   infoCard: {
-    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
@@ -484,7 +484,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   },
   // Stats Card
   statsCard: {
-    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 16,
     marginBottom: 20,
@@ -533,7 +533,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   },
   // Empty State
   emptyStateCard: {
-    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
+    backgroundColor: theme.colors.background,
     borderRadius: 20,
     padding: 32,
     alignItems: "center",
@@ -604,7 +604,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   dateContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
+    backgroundColor: theme.colors.background,
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 20,
@@ -660,7 +660,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     marginRight: 12,
     borderRadius: 14,
     overflow: "hidden",
-    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
+    backgroundColor: theme.colors.background,
     ...(isDark ? {} : {
       shadowColor: theme.colors.black,
       shadowOffset: { width: 0, height: 2 },

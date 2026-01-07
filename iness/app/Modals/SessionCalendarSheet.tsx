@@ -46,7 +46,7 @@ function SessionCalendar({
 }: SessionCalendarProps) {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
-  const styles = getStyles(theme);
+  const styles = getStyles(theme, isDark);
   const dispatch = useDispatch();
   const { data: sessionData, loading } = useGetDataHook(
     sessionService.getSessions
@@ -121,13 +121,13 @@ function SessionCalendar({
                 width: 32,
                 height: 32,
                 borderRadius: 16,
-                backgroundColor: "#F3EDFF",
+                backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCardLight,
                 alignItems: "center",
                 justifyContent: "center",
                 marginRight: 12,
               }}
             >
-              <Ionicons name="calendar" size={18} color="#9747FF" />
+              <Ionicons name="calendar" size={18} color={theme.colors.secondPrimary} />
             </View>
             <Text style={styles.planTitle}>{planTitle}</Text>
           </View>
@@ -151,13 +151,13 @@ function SessionCalendar({
           </View>
           <View
             style={{
-              backgroundColor: session.color ? `${session.color}20` : "#F3EDFF",
+              backgroundColor: session.color ? `${session.color}20` : (isDark ? theme.colors.backgroundCard : theme.colors.backgroundCardLight),
               paddingHorizontal: 10,
               paddingVertical: 4,
               borderRadius: 12,
             }}
           >
-            <Text style={[styles.sessionStatus, { color: session.color || "#9747FF" }]}>
+            <Text style={[styles.sessionStatus, { color: session.color || theme.colors.secondPrimary }]}>
               {session.sessionStatus}
             </Text>
           </View>
@@ -170,13 +170,13 @@ function SessionCalendar({
               width: 28,
               height: 28,
               borderRadius: 14,
-              backgroundColor: "#F3EDFF",
+              backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCardLight,
               alignItems: "center",
               justifyContent: "center",
               marginRight: 10,
             }}
           >
-            <MaterialIcons name="date-range" size={16} color="#9747FF" />
+            <MaterialIcons name="date-range" size={16} color={theme.colors.secondPrimary} />
           </View>
           <Text style={styles.infoText}>
             {new Date(session.sessionDate).toLocaleString("en-IN", {
@@ -201,7 +201,7 @@ function SessionCalendar({
               marginRight: 10,
             }}
           >
-            <Entypo name="clock" size={16} color="#9747FF" />
+            <Entypo name="clock" size={16} color={theme.colors.secondPrimary} />
           </View>
           <Text style={styles.infoText}>
             {session.sessionTime} ({session.sessionDuration})
@@ -221,7 +221,7 @@ function SessionCalendar({
                 marginRight: 10,
               }}
             >
-              <FontAwesome5 name="map-marker-alt" size={14} color="#9747FF" />
+              <FontAwesome5 name="map-marker-alt" size={14} color={theme.colors.secondPrimary} />
             </View>
             <Text style={styles.infoText}>{session.sessionAddress}</Text>
           </View>
@@ -241,13 +241,13 @@ function SessionCalendar({
                   width: 50,
                   height: 50,
                   borderRadius: 25,
-                  backgroundColor: "#F3EDFF",
+                  backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCardLight,
                   alignItems: "center",
                   justifyContent: "center",
                   marginRight: 12,
                 }}
               >
-                <Ionicons name="person" size={24} color="#9747FF" />
+                <Ionicons name="person" size={24} color={theme.colors.secondPrimary} />
               </View>
             )}
             <View style={{ flex: 1 }}>
@@ -297,12 +297,12 @@ function SessionCalendar({
                   width: 32,
                   height: 32,
                   borderRadius: 16,
-                  backgroundColor: "#F5F5F5",
+                  backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                <AntDesign name="arrowleft" size={18} color="#666" />
+                <AntDesign name="arrowleft" size={18} color={theme.colors.text} />
               </TouchableOpacity>
             )}
             <Text style={styles.modalTitle}>
@@ -315,24 +315,26 @@ function SessionCalendar({
                 width: 32,
                 height: 32,
                 borderRadius: 16,
-                backgroundColor: "#FFFFFF",
+                backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
                 justifyContent: "center",
                 alignItems: "center",
-                shadowColor: theme.colors.black,
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.1,
-                shadowRadius: 2,
-                elevation: 2,
+                ...(isDark ? {} : {
+                  shadowColor: theme.colors.black,
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.1,
+                  shadowRadius: 2,
+                  elevation: 2,
+                }),
               }}
             >
-              <Ionicons name="close" size={18} color="#666" />
+              <Ionicons name="close" size={18} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
 
           {/* Loader */}
           {loading && (
             <View style={styles.loader}>
-              <ActivityIndicator size="large" color="#9747FF" />
+              <ActivityIndicator size="large" color={theme.colors.secondPrimary} />
               <Text style={{ marginTop: 10, color: theme.colors.textSecondary, fontSize: theme.fontSizes.regularSmall, fontWeight: theme.fontWeights.medium as "500" }}>
                 Loading sessions...
               </Text>
@@ -347,14 +349,19 @@ function SessionCalendar({
               markedDates={markedDates}
               onDayPress={onDayPress}
               theme={{
-                todayTextColor: "#9747FF",
-                arrowColor: "#9747FF",
-                monthTextColor: "#000",
+                todayTextColor: theme.colors.secondPrimary,
+                arrowColor: theme.colors.secondPrimary,
+                monthTextColor: theme.colors.text,
                 textDayFontWeight: "500",
                 textMonthFontWeight: "700",
                 textDayHeaderFontWeight: "600",
-                selectedDayBackgroundColor: "#9747FF",
-                selectedDayTextColor: "#FFFFFF",
+                selectedDayBackgroundColor: theme.colors.secondPrimary,
+                selectedDayTextColor: theme.colors.textWhite,
+                textDisabledColor: theme.colors.textMuted,
+                textSectionTitleColor: theme.colors.text,
+                backgroundColor: theme.colors.background,
+                calendarBackground: theme.colors.background,
+                dayTextColor: theme.colors.text,
               }}
               style={{ marginBottom: 10 }}
             />
@@ -374,7 +381,7 @@ function SessionCalendar({
   );
 }
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   backdrop: {
     flex: 1,
     backgroundColor: theme.colors.overlay,
@@ -387,11 +394,13 @@ const getStyles = (theme: any) => StyleSheet.create({
     borderTopRightRadius: 24,
     padding: 20,
     paddingTop: 12,
-    shadowColor: theme.colors.black,
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 8,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: -2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 8,
+      elevation: 8,
+    }),
   },
   dragHandle: {
     width: 40,
@@ -422,17 +431,19 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   card: {
     width: "100%",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
     padding: 20,
     borderRadius: 20,
     marginBottom: 16,
-    shadowColor: theme.colors.black,
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
     borderWidth: 1,
     borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    }),
   },
   planTitle: {
     fontSize: theme.fontSizes.medium,

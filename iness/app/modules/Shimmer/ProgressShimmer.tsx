@@ -2,12 +2,19 @@ import React from "react";
 import { View, ScrollView, StyleSheet, Dimensions } from "react-native";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "../../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "../../Theme/ThemeContext";
 
 const { width: screenWidth } = Dimensions.get("window");
 const imageSize = (screenWidth - 64) / 3;
 
 const ProgressShimmer: React.FC = () => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
+  const shimmerColors = isDark 
+    ? ["#1a1a1a", "#2a2a2a", "#1a1a1a"]
+    : ["#E1E9EE", "#F2F8FC", "#E1E9EE"];
+
   return (
     <ScrollView
       style={styles.shimmerContainer}
@@ -19,20 +26,20 @@ const ProgressShimmer: React.FC = () => {
         <ShimmerPlaceholder
           LinearGradient={LinearGradient}
           style={styles.shimmerIcon}
-          shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+          shimmerColors={shimmerColors}
           visible={false}
         />
         <View style={styles.shimmerTextContainer}>
           <ShimmerPlaceholder
             LinearGradient={LinearGradient}
             style={styles.shimmerTitle}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
           <ShimmerPlaceholder
             LinearGradient={LinearGradient}
             style={styles.shimmerSubtitle}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
         </View>
@@ -45,19 +52,19 @@ const ProgressShimmer: React.FC = () => {
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={styles.shimmerStatIcon}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={styles.shimmerStatValue}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={styles.shimmerStatLabel}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
           </View>
@@ -66,19 +73,19 @@ const ProgressShimmer: React.FC = () => {
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={styles.shimmerStatIcon}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={styles.shimmerStatValue}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={styles.shimmerStatLabel}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
           </View>
@@ -92,19 +99,19 @@ const ProgressShimmer: React.FC = () => {
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={styles.shimmerDateBadge}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={styles.shimmerDateLine}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={styles.shimmerCountBadge}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
           </View>
@@ -119,7 +126,7 @@ const ProgressShimmer: React.FC = () => {
                 key={item}
                 LinearGradient={LinearGradient}
                 style={[styles.shimmerMediaItem, { width: imageSize, height: imageSize }]}
-                shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                shimmerColors={shimmerColors}
                 visible={false}
               />
             ))}
@@ -130,7 +137,7 @@ const ProgressShimmer: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   shimmerContainer: {
     flex: 1,
   },
@@ -144,7 +151,7 @@ const styles = StyleSheet.create({
     padding: 16,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   shimmerInfoCard: {
     flexDirection: "row",

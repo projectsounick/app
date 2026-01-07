@@ -19,13 +19,16 @@ import ProductModal from "@/app/Modals/ProductBottomSheetModal";
 import SmallHeader from "@/app/modules/SmallHeader";
 import { useLocalSearchParams } from "expo-router";
 import BackHeader from "@/app/modules/BackHeader";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const screenWidth = Dimensions.get("window").width;
 const CARD_WIDTH = (screenWidth - 48) / 2;
 
 const CategoryProductsScreen = () => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const { category, categoryId }: any = useLocalSearchParams();
 
   const products: Product[] = useSelector(
@@ -105,7 +108,7 @@ const CategoryProductsScreen = () => {
             />
           ) : (
             <View style={styles.noImageContainer}>
-              <MaterialCommunityIcons name="image-off" size={36} color="#999" />
+              <MaterialCommunityIcons name="image-off" size={36} color={theme.colors.textMuted} />
             </View>
           )}
 
@@ -114,7 +117,7 @@ const CategoryProductsScreen = () => {
             style={styles.plusButton}
             onPress={() => handleCheck(item)}
           >
-            <AntDesign name="pluscircle" size={28} color="#67C694" />
+            <AntDesign name="pluscircle" size={28} color={theme.colors.success} />
           </TouchableOpacity>
 
           {/* Variation Label Badge */}
@@ -136,82 +139,101 @@ const CategoryProductsScreen = () => {
     );
   };
 
-  return (
-    <ImageBackground
-      source={backgroundImg}
-      style={{ flex: 1 }}
-      resizeMode="cover"
-    >
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "transparent" }}
-        edges={["left", "right"]}
-      >
-        {/* Header */}
-        <SmallHeader title="Products" />
-        <BackHeader />
+  const content = (
+    <>
+      {/* Header */}
+      <SmallHeader title="Products" />
+      <BackHeader />
 
-        {/* Category Header Section */}
-        <View style={styles.categoryHeader}>
-          <View style={styles.categoryTitleRow}>
-            <Text style={styles.categoryTitle}>{category}</Text>
-            <View style={styles.headerDash} />
-          </View>
-          {categoryProducts.length > 0 && (
-            <View style={styles.countBadge}>
-              <MaterialCommunityIcons
-                name="package-variant"
-                size={14}
-                color="#9747FF"
-              />
-              <Text style={styles.countText}>
-                {categoryProducts.length}{" "}
-                {categoryProducts.length === 1 ? "product" : "products"}
-              </Text>
-            </View>
-          )}
+      {/* Category Header Section */}
+      <View style={styles.categoryHeader}>
+        <View style={styles.categoryTitleRow}>
+          <Text style={styles.categoryTitle}>{category}</Text>
+          <View style={styles.headerDash} />
         </View>
-
-        {/* Product Grid */}
-        <FlatList
-          contentContainerStyle={styles.listContent}
-          data={categoryProducts}
-          keyExtractor={(item) => item._id}
-          numColumns={2}
-          renderItem={({ item, index }) => renderProductCard({ item, index })}
-          showsVerticalScrollIndicator={false}
-          columnWrapperStyle={styles.columnWrapper}
-          ListEmptyComponent={() => (
-            <View style={styles.emptyContainer}>
-              <View style={styles.emptyIconContainer}>
-                <MaterialCommunityIcons
-                  name="package-variant-closed"
-                  size={40}
-                  color="#9747FF"
-                />
-              </View>
-              <Text style={styles.emptyTitle}>No products available</Text>
-              <Text style={styles.emptySubtitle}>
-                Check back later for new products in this category
-              </Text>
-            </View>
-          )}
-        />
-
-        {/* Modal */}
-        {product && (
-          <ProductModal
-            visible={showModal}
-            onClose={() => setShowModal(false)}
-            selectedProduct={product}
-            bgColor="#FFFFFF"
-          />
+        {categoryProducts.length > 0 && (
+          <View style={styles.countBadge}>
+            <MaterialCommunityIcons
+              name="package-variant"
+              size={14}
+              color={isDark ? theme.colors.textWhite : theme.colors.secondPrimary}
+            />
+            <Text style={styles.countText}>
+              {categoryProducts.length}{" "}
+              {categoryProducts.length === 1 ? "product" : "products"}
+            </Text>
+          </View>
         )}
-      </SafeAreaView>
-    </ImageBackground>
+      </View>
+
+      {/* Product Grid */}
+      <FlatList
+        contentContainerStyle={styles.listContent}
+        data={categoryProducts}
+        keyExtractor={(item) => item._id}
+        numColumns={2}
+        renderItem={({ item, index }) => renderProductCard({ item, index })}
+        showsVerticalScrollIndicator={false}
+        columnWrapperStyle={styles.columnWrapper}
+        ListEmptyComponent={() => (
+          <View style={styles.emptyContainer}>
+            <View style={styles.emptyIconContainer}>
+              <MaterialCommunityIcons
+                name="package-variant-closed"
+                size={40}
+                color={theme.colors.secondPrimary}
+              />
+            </View>
+            <Text style={styles.emptyTitle}>No products available</Text>
+            <Text style={styles.emptySubtitle}>
+              Check back later for new products in this category
+            </Text>
+          </View>
+        )}
+      />
+
+      {/* Modal */}
+      {product && (
+        <ProductModal
+          visible={showModal}
+          onClose={() => setShowModal(false)}
+          selectedProduct={product}
+          bgColor="#FFFFFF"
+        />
+      )}
+    </>
+  );
+
+  return (
+    <>
+      {isDark ? (
+        <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+          <SafeAreaView
+            style={{ flex: 1, backgroundColor: theme.colors.background }}
+            edges={["left", "right"]}
+          >
+            {content}
+          </SafeAreaView>
+        </View>
+      ) : (
+        <ImageBackground
+          source={backgroundImg}
+          style={{ flex: 1 }}
+          resizeMode="cover"
+        >
+          <SafeAreaView
+            style={{ flex: 1, backgroundColor: "transparent" }}
+            edges={["left", "right"]}
+          >
+            {content}
+          </SafeAreaView>
+        </ImageBackground>
+      )}
+    </>
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   categoryHeader: {
     paddingHorizontal: 20,
     marginTop: 12,
@@ -226,7 +248,7 @@ const styles = StyleSheet.create({
   categoryTitle: {
     fontSize: theme.fontSizes.large,
     fontWeight: theme.fontWeights.bold as "700",
-    color: theme.colors.text,
+    color: isDark ? theme.colors.textWhite : theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   headerDash: {
@@ -238,7 +260,7 @@ const styles = StyleSheet.create({
   countBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: theme.colors.backgroundCardLight,
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCardLight,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 8,
@@ -247,7 +269,7 @@ const styles = StyleSheet.create({
   },
   countText: {
     fontSize: theme.fontSizes.small,
-    color: theme.colors.secondPrimary,
+    color: isDark ? theme.colors.textWhite : theme.colors.secondPrimary,
     fontWeight: theme.fontWeights.medium as "500",
     fontFamily: theme.fonts.medium,
   },
@@ -263,16 +285,18 @@ const styles = StyleSheet.create({
   productCard: {
     width: CARD_WIDTH,
     borderRadius: 14,
-    backgroundColor: theme.colors.background,
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
     overflow: "hidden",
     marginBottom: 12,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    }),
   },
   imageContainer: {
     height: 140,
@@ -303,7 +327,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 8,
     left: 8,
-    backgroundColor: theme.colors.backgroundCardLight,
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCardLight,
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
@@ -321,7 +345,7 @@ const styles = StyleSheet.create({
   productName: {
     fontSize: theme.fontSizes.small,
     fontWeight: theme.fontWeights.medium as "500",
-    color: theme.colors.text,
+    color: isDark ? theme.colors.textWhite : theme.colors.text,
     marginBottom: 6,
     lineHeight: 16,
     fontFamily: theme.fonts.medium,
@@ -329,7 +353,7 @@ const styles = StyleSheet.create({
   productPrice: {
     fontSize: theme.fontSizes.regular,
     fontWeight: theme.fontWeights.bold as "700",
-    color: theme.colors.secondPrimary,
+    color: isDark ? theme.colors.textWhite : theme.colors.secondPrimary,
     fontFamily: theme.fonts.bold,
   },
   emptyContainer: {
@@ -342,7 +366,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 24,
-    backgroundColor: theme.colors.backgroundCardLight,
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCardLight,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 20,

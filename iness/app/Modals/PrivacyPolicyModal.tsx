@@ -92,7 +92,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 style={{
                   fontSize: theme.fontSizes.large,
                   fontWeight: theme.fontWeights.bold as "700",
-                  color: theme.colors.text,
+                  color: "#000",
                   fontFamily: theme.fonts.bold,
                 }}
               >
@@ -101,7 +101,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               <Text
                 style={{
                   fontSize: theme.fontSizes.small,
-                  color: theme.colors.textMuted,
+                  color: "#666",
                   marginTop: 4,
                   fontFamily: theme.fonts.regular,
                 }}
@@ -116,12 +116,12 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 width: 32,
                 height: 32,
                 borderRadius: 16,
-                backgroundColor: theme.colors.border,
+                backgroundColor: "#E5E5E5",
                 alignItems: "center",
                 justifyContent: "center",
               }}
             >
-              <MaterialCommunityIcons name="close" size={20} color={theme.colors.textSecondary} />
+              <MaterialCommunityIcons name="close" size={20} color="#000" />
             </TouchableOpacity>
           </View>
 
@@ -133,14 +133,14 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               contentContainerStyle={{ paddingBottom: 20 }}
             >
               {/* Section 1 */}
-              <PolicySection
+              <PolicySection theme={theme}
                 icon="account-circle"
                 title="1. Information We Collect"
                 content="We collect personal data including your name, email, phone number, gender, age, address, fitness goals, health-related data, and payment information. We may also collect data about your usage of the app and device-related information to improve your experience."
               />
 
               {/* Section 2 */}
-              <PolicySection
+              <PolicySection theme={theme}
                 icon="key-variant"
                 title="2. Permissions We Request"
                 content="• Camera Access: Used to upload profile pictures.
@@ -148,7 +148,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               />
 
               {/* Section 3 */}
-              <PolicySection
+              <PolicySection theme={theme}
                 icon="cog"
                 title="3. How We Use Your Information"
                 content="• Provide personalized experiences
@@ -158,21 +158,21 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               />
 
               {/* Section 4 */}
-              <PolicySection
+              <PolicySection theme={theme}
                 icon="lock"
                 title="4. Data Security"
                 content="We use encryption and industry protocols to protect your data. However, no system is 100% secure."
               />
 
               {/* Section 5 */}
-              <PolicySection
+              <PolicySection theme={theme}
                 icon="share-variant"
                 title="5. Sharing Your Information"
                 content="Only with your consent or for legal compliance. Your data is never sold."
               />
 
               {/* Section 6 */}
-              <PolicySection
+              <PolicySection theme={theme}
                 icon="account-check"
                 title="6. Your Rights"
                 content="• Update or delete your data
@@ -181,7 +181,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               />
 
               {/* Section 7 */}
-              <PolicySection
+              <PolicySection theme={theme}
                 icon="update"
                 title="7. Changes to This Policy"
                 content="Updates will be posted here and communicated via email."
@@ -190,12 +190,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               {/* Contact */}
               <View
                 style={{
-                  backgroundColor: theme.colors.backgroundCardLight,
-                  borderRadius: 16,
-                  padding: 16,
                   marginTop: 16,
-                  borderWidth: 1,
-                  borderColor: "#E8E0F5",
                 }}
               >
                 <View style={{ flexDirection: "row", alignItems: "center" }}>
@@ -208,7 +203,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                     style={{
                       marginLeft: 10,
                     fontSize: theme.fontSizes.regularSmall,
-                    color: theme.colors.text,
+                    color: "#000",
                       fontFamily: theme.fonts.medium,
                     }}
                   >
@@ -220,12 +215,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               {/* Cancellation Policy */}
               <View
                 style={{
-                  backgroundColor: theme.colors.warning + "20",
-                  borderRadius: 16,
-                  padding: 16,
                   marginTop: 16,
-                  borderWidth: 1,
-                  borderColor: "#F0E6CC",
                 }}
               >
                   <Text
@@ -242,7 +232,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 <Text
                   style={{
                     fontSize: theme.fontSizes.regularSmall,
-                    color: theme.colors.textSecondary,
+                    color: "#666",
                     lineHeight: 20,
                     fontFamily: theme.fonts.regular,
                   }}
@@ -256,12 +246,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               {/* User Conduct */}
               <View
                 style={{
-                  backgroundColor: theme.colors.backgroundCardLight,
-                  borderRadius: 16,
-                  padding: 16,
                   marginTop: 16,
-                  borderWidth: 1,
-                  borderColor: "#E8E0F5",
                 }}
               >
                 <Text
@@ -278,7 +263,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 <Text
                   style={{
                     fontSize: theme.fontSizes.regularSmall,
-                    color: theme.colors.textSecondary,
+                    color: "#666",
                     lineHeight: 20,
                     fontFamily: theme.fonts.regular,
                   }}
@@ -293,7 +278,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               <Text
                 style={{
                   fontSize: theme.fontSizes.regularSmall,
-                  color: theme.colors.textMuted,
+                  color: "#666",
                   textAlign: "center",
                   marginTop: 24,
                   fontStyle: "italic",
@@ -310,7 +295,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 paddingHorizontal: 24,
                 paddingBottom: 20,
                 paddingTop: 12,
-                backgroundColor: theme.colors.background,
+                backgroundColor: "#fff",
                 borderTopWidth: 1,
                 borderTopColor: theme.colors.border,
               }}
@@ -362,44 +347,40 @@ const PolicySection: React.FC<{
   icon: string;
   title: string;
   content: string;
-}> = ({ icon, title, content }) => (
+  theme: any;
+}> = ({ icon, title, content, theme }) => (
   <View
     style={{
       marginTop: 16,
-      backgroundColor: theme.colors.backgroundSecondary,
-      borderRadius: 16,
-      padding: 16,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
     }}
   >
     <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 10 }}>
       <View
         style={{
-          backgroundColor: theme.colors.backgroundCardLight,
+          backgroundColor: "#F5F5F5",
           borderRadius: 10,
           padding: 8,
           marginRight: 12,
         }}
       >
-        <MaterialCommunityIcons name={icon} size={20} color="#9747FF" />
+        <MaterialCommunityIcons name={icon} size={20} color={theme.colors.secondPrimary} />
       </View>
-      <Text
-        style={{
-          fontSize: theme.fontSizes.regular,
-          fontWeight: theme.fontWeights.medium as "500",
-          color: theme.colors.text,
-          flex: 1,
-          fontFamily: theme.fonts.bold,
-        }}
-      >
-        {title}
-      </Text>
+              <Text
+                style={{
+                  fontSize: theme.fontSizes.regular,
+                  fontWeight: theme.fontWeights.medium as "500",
+                  color: "#000",
+                  flex: 1,
+                  fontFamily: theme.fonts.bold,
+                }}
+              >
+                {title}
+              </Text>
     </View>
     <Text
       style={{
         fontSize: theme.fontSizes.small,
-        color: theme.colors.textSecondary,
+        color: "#666",
         lineHeight: 20,
         fontFamily: theme.fonts.regular,
       }}

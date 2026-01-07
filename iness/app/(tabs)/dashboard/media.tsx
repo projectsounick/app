@@ -6,7 +6,7 @@ import { PodcastInterface } from "@/app/interfaces/podcastsInterface";
 import { podCastService } from "@/app/services/podcast.service";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { UserData } from "@/app/interfaces/UserInterface";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import FullScreenLoader from "@/app/modules/FullScreenLoader";
@@ -21,6 +21,8 @@ const topPadding = height * 0.05;
 
 ///// Main functional component for the Media Screen ---------------------------/
 export default function MediaScreen() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const dispatch = useDispatch();
   const podcasts = useSelector((state: RootState) => state.podcast.podcasts);
   const [loggedUser, setLoggedUser] = useState<UserData | null>(null);
@@ -132,17 +134,94 @@ export default function MediaScreen() {
     return uniquePodcasts;
   }, [podcasts]);
 
+  const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
+    emptyContainer: {
+      flex: 1,
+      alignItems: "center",
+      justifyContent: "center",
+      padding: 40,
+      minHeight: height * 0.6,
+    },
+    emptyCard: {
+      backgroundColor: isDark ? theme.colors.background : theme.colors.background,
+      borderRadius: 24,
+      padding: 32,
+      alignItems: "center",
+      width: "100%",
+      ...(isDark ? {} : {
+        shadowColor: theme.colors.secondPrimary,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.15,
+        shadowRadius: 16,
+        elevation: 8,
+      }),
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    emptyIconContainer: {
+      width: 90,
+      height: 90,
+      borderRadius: 45,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 20,
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 6,
+    },
+    emptyTitle: {
+      fontSize: theme.fontSizes.large,
+      fontFamily: theme.fonts.bold,
+      color: isDark ? theme.colors.textWhite : theme.colors.dark,
+      textAlign: "center",
+      marginBottom: 8,
+    },
+    emptySubtitle: {
+      fontSize: theme.fontSizes.regular,
+      fontFamily: theme.fonts.regular,
+      color: isDark ? theme.colors.textWhite : theme.colors.textSecondary,
+      textAlign: "center",
+      marginBottom: 24,
+    },
+    emptyImage: {
+      width: 200,
+      height: 200,
+      resizeMode: "contain",
+    },
+    footerContainer: {
+      padding: 20,
+      alignItems: "center",
+    },
+    loadMoreButton: {
+      paddingVertical: 14,
+      paddingHorizontal: 32,
+      borderRadius: 24,
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 6,
+    },
+    loadMoreText: {
+      color: theme.colors.textWhite,
+      fontFamily: theme.fonts.bold,
+      fontSize: theme.fontSizes.regular,
+      fontWeight: theme.fontWeights.bold as "700",
+    },
+  });
+
+  const styles = getStyles(theme, isDark);
+
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}>
-      <ImageBackground
-        source={require("../../../assets/images/basicBackground.jpg")}
-        style={{ flex: 1 }}
-        resizeMode="cover"
-      >
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: "transparent" }}
-          edges={["left", "right"]}
-        >
+    <>
+      {isDark ? (
+        <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+          <SafeAreaView
+            style={{ flex: 1, backgroundColor: theme.colors.background }}
+            edges={["left", "right"]}
+          >
           <View
             style={{
               paddingLeft: 20,
@@ -227,85 +306,109 @@ export default function MediaScreen() {
             />
           )}
 
-          {updateLoader && <FullScreenLoader />}
-        </SafeAreaView>
-      </ImageBackground>
-    </View>
+            {updateLoader && <FullScreenLoader />}
+          </SafeAreaView>
+        </View>
+      ) : (
+        <View style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}>
+          <ImageBackground
+            source={require("../../../assets/images/basicBackground.jpg")}
+            style={{ flex: 1 }}
+            resizeMode="cover"
+          >
+            <SafeAreaView
+              style={{ flex: 1, backgroundColor: "transparent" }}
+              edges={["left", "right"]}
+            >
+              <View
+                style={{
+                  paddingLeft: 20,
+                  marginTop: Platform.OS === "ios" ? topPadding : "4%",
+                }}
+              >
+                <NormalHeader screenName="Media" />
+              </View>
+
+              {displayPodcasts.length === 0 && loggedUser ? (
+                <View style={styles.emptyContainer}>
+                  <View style={styles.emptyCard}>
+                    <LinearGradient
+                      colors={["#9747FF", "#844ACF"]}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                      style={styles.emptyIconContainer}
+                    >
+                      <MaterialCommunityIcons
+                        name="podcast"
+                        size={44}
+                        color="#FFFFFF"
+                      />
+                    </LinearGradient>
+
+                    <Text style={styles.emptyTitle}>
+                      No Media Available
+                    </Text>
+
+                    <Text style={styles.emptySubtitle}>
+                      We will update soon
+                    </Text>
+
+                    <Image
+                      source={require("../../../assets/images/placeholderMedia.png")}
+                      style={styles.emptyImage}
+                    />
+                  </View>
+                </View>
+              ) : (
+                <FlatList
+                  data={displayPodcasts}
+                  keyExtractor={keyExtractor}
+                  renderItem={({ item }) => (
+                    <View style={{ paddingHorizontal: 20, marginBottom: 20 }}>
+                      <VideoCard
+                        podcast={item}
+                        updatePodcastData={updatePodcastData}
+                        loggedUser={loggedUser}
+                      />
+                    </View>
+                  )}
+                  contentContainerStyle={{ paddingTop: 0, paddingBottom: 100 }}
+                  onEndReached={handleEndReached}
+                  onEndReachedThreshold={0.3}
+                  showsVerticalScrollIndicator={false}
+                  ListFooterComponent={
+                    loadingMore ? (
+                      <View style={styles.footerContainer}>
+                        <ActivityIndicator size="small" color={theme.colors.secondPrimary} />
+                      </View>
+                    ) : hasMore && displayPodcasts.length > 0 ? (
+                      <View style={styles.footerContainer}>
+                        <TouchableOpacity
+                          onPress={fetchMorePodcasts}
+                          activeOpacity={0.8}
+                        >
+                          <LinearGradient
+                            colors={["#9747FF", "#844ACF"]}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 1 }}
+                            style={styles.loadMoreButton}
+                          >
+                            <Text style={styles.loadMoreText}>
+                              Load More
+                            </Text>
+                          </LinearGradient>
+                        </TouchableOpacity>
+                      </View>
+                    ) : null
+                  }
+                />
+              )}
+
+              {updateLoader && <FullScreenLoader />}
+            </SafeAreaView>
+          </ImageBackground>
+        </View>
+      )}
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  emptyContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 40,
-    minHeight: height * 0.6,
-  },
-  emptyCard: {
-    backgroundColor: theme.colors.background,
-    borderRadius: 24,
-    padding: 32,
-    alignItems: "center",
-    width: "100%",
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    elevation: 8,
-    borderWidth: 1,
-    borderColor: "#F0F0F0",
-  },
-  emptyIconContainer: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    justifyContent: "center",
-    alignItems: "center",
-    marginBottom: 20,
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  emptyTitle: {
-    fontSize: theme.fontSizes.large,
-    fontFamily: theme.fonts.bold,
-    color: theme.colors.dark,
-    textAlign: "center",
-    marginBottom: 8,
-  },
-  emptySubtitle: {
-    fontSize: theme.fontSizes.regular,
-    fontFamily: theme.fonts.regular,
-    color: theme.colors.textSecondary,
-    textAlign: "center",
-    marginBottom: 24,
-  },
-  emptyImage: {
-    width: 200,
-    height: 200,
-    resizeMode: "contain",
-  },
-  footerContainer: {
-    padding: 20,
-    alignItems: "center",
-  },
-  loadMoreButton: {
-    paddingVertical: 14,
-    paddingHorizontal: 32,
-    borderRadius: 24,
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
-  },
-  loadMoreText: {
-    color: theme.colors.textWhite,
-    fontFamily: theme.fonts.bold,
-    fontSize: theme.fontSizes.regular,
-    fontWeight: theme.fontWeights.bold as "700",
-  },
-});

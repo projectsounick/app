@@ -2,17 +2,24 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import ShimmerPlaceHolder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "../../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "../../Theme/ThemeContext";
 
 // Main functional component for the Shimmer skeleton card
 const ShimmerCard = () => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
+  const shimmerColors = isDark 
+    ? ["#1a1a1a", "#2a2a2a", "#1a1a1a"]
+    : ["#E1E9EE", "#F2F8FC", "#E1E9EE"];
+
   return (
     <View style={styles.card}>
       {/* Thumbnail */}
       <ShimmerPlaceHolder
         LinearGradient={LinearGradient}
         style={styles.thumbnail}
-        shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+        shimmerColors={shimmerColors}
         visible={false}
       />
 
@@ -21,13 +28,13 @@ const ShimmerCard = () => {
         <ShimmerPlaceHolder
           LinearGradient={LinearGradient}
           style={styles.title}
-          shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+          shimmerColors={shimmerColors}
           visible={false}
         />
         <ShimmerPlaceHolder
           LinearGradient={LinearGradient}
           style={styles.description}
-          shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+          shimmerColors={shimmerColors}
           visible={false}
         />
 
@@ -36,19 +43,19 @@ const ShimmerCard = () => {
           <ShimmerPlaceHolder
             LinearGradient={LinearGradient}
             style={styles.icon}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
           <ShimmerPlaceHolder
             LinearGradient={LinearGradient}
             style={styles.icon}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
           <ShimmerPlaceHolder
             LinearGradient={LinearGradient}
             style={styles.share}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
         </View>
@@ -57,7 +64,7 @@ const ShimmerCard = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   card: {
     backgroundColor: theme.colors.background,
     marginBottom: 20,

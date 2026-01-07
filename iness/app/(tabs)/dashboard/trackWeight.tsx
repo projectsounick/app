@@ -147,12 +147,12 @@ const WeightTrackerScreen = () => {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+    <View style={{ flex: 1, backgroundColor: isDark ? theme.colors.black : theme.colors.background }}>
       <ImageBackground
         source={require("../../../assets/images/basicBackground.jpg")}
         style={{ flex: 1 }}
         resizeMode="cover"
-        imageStyle={{ opacity: isDark ? 0.3 : 1 }}
+        imageStyle={{ opacity: isDark ? 0 : 1 }}
       >
         {isDark && (
           <View
@@ -162,8 +162,7 @@ const WeightTrackerScreen = () => {
               left: 0,
               right: 0,
               bottom: 0,
-              backgroundColor: theme.colors.background,
-              opacity: 0.9,
+              backgroundColor: theme.colors.black,
             }}
           />
         )}
@@ -199,15 +198,17 @@ const WeightTrackerScreen = () => {
               {/* Chart Card */}
               <View
                 style={{
-                  backgroundColor: theme.colors.background,
+                  backgroundColor: isDark ? theme.colors.background : "#FFFFFF",
                   borderRadius: 24,
                   padding: 20,
                   marginBottom: 24,
-                  shadowColor: theme.colors.black,
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.08,
-                  shadowRadius: 16,
-                  elevation: 3,
+                  ...(isDark ? {} : {
+                    shadowColor: theme.colors.black,
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.08,
+                    shadowRadius: 16,
+                    elevation: 3,
+                  }),
                   borderWidth: 1,
                   borderColor: theme.colors.border,
                 }}
@@ -379,15 +380,17 @@ const WeightTrackerScreen = () => {
                   <View
                     key={index}
                     style={{
-                      backgroundColor: theme.colors.background,
+                      backgroundColor: isDark ? theme.colors.background : "#FFFFFF",
                       padding: 16,
                       borderRadius: 20,
                       marginBottom: 12,
-                      shadowColor: theme.colors.black,
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.08,
-                      shadowRadius: 12,
-                      elevation: 3,
+                      ...(isDark ? {} : {
+                        shadowColor: theme.colors.black,
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.08,
+                        shadowRadius: 12,
+                        elevation: 3,
+                      }),
                       borderWidth: 1,
                       borderColor: theme.colors.border,
                       flexDirection: "row",

@@ -3,6 +3,8 @@ import { useColorScheme as useRNColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { lightColors, darkColors, ColorTheme } from './colors';
 import { responsiveFontSize, responsiveSpacing } from './responsiveFontSize';
+import { asyncStorageUtils } from '@/utils/asyncStorageUtils';
+import { userService } from '@/app/services/user.service';
 
 const THEME_STORAGE_KEY = '@app_theme_mode';
 
@@ -48,6 +50,7 @@ interface ThemeContextType {
   theme: Theme;
   setThemeMode: (mode: ThemeMode) => Promise<void>;
   isDark: boolean;
+  reloadThemeFromUserData: (showModal?: boolean) => Promise<void>;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -84,16 +87,44 @@ export function ThemeProvider({ children, initialMode = 'light' }: ThemeProvider
   const [mode, setMode] = useState<ThemeMode>(initialMode);
   const [isLoading, setIsLoading] = useState(true);
   
-  // Load theme preference from AsyncStorage on mount
+  // Load theme preference from user data on mount - CRITICAL: Load synchronously if possible
   useEffect(() => {
     const loadThemePreference = async () => {
       try {
-        const savedMode = await AsyncStorage.getItem(THEME_STORAGE_KEY);
-        if (savedMode && (savedMode === 'light' || savedMode === 'dark')) {
-          setMode(savedMode as ThemeMode);
+        // First, try to load from user data (backend)
+        const userResponse = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+        if (userResponse.exists && userResponse.data) {
+          const userData = userResponse.data;
+          
+          // Check if dark mode is set in user data - use this as source of truth
+          if (userData.darkMode !== undefined) {
+            // Set mode immediately to prevent flicker
+            setMode(userData.darkMode ? 'dark' : 'light');
+          } else {
+            // If darkMode is undefined, default to light mode (not dark)
+            // This prevents showing dark mode when user hasn't set a preference
+            setMode('light');
+            // Fallback to AsyncStorage if user data doesn't have darkMode
+            const savedMode = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+            if (savedMode && (savedMode === 'light' || savedMode === 'dark')) {
+              setMode(savedMode as ThemeMode);
+            }
+          }
+          
+          // Modal logic removed - users will toggle dark mode manually from app settings
+        } else {
+          // No user data, default to light mode (not dark)
+          setMode('light');
+          // Try AsyncStorage fallback
+          const savedMode = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+          if (savedMode && (savedMode === 'light' || savedMode === 'dark')) {
+            setMode(savedMode as ThemeMode);
+          }
         }
       } catch (error) {
         console.error('Error loading theme preference:', error);
+        // On error, default to light mode
+        setMode('light');
       } finally {
         setIsLoading(false);
       }
@@ -128,14 +159,64 @@ export function ThemeProvider({ children, initialMode = 'light' }: ThemeProvider
   const setThemeMode = async (newMode: ThemeMode) => {
     try {
       setMode(newMode);
-      await AsyncStorage.setItem(THEME_STORAGE_KEY, newMode);
+      
+      // Update backend via user service
+      try {
+        const userResponse = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+        if (userResponse.exists && userResponse.data) {
+          const userData = userResponse.data;
+          const updateData = {
+            darkMode: newMode === 'dark',
+          };
+          
+          const response = await userService.updateUser(updateData);
+          
+          if (response.success && response.user) {
+            // Update local storage with new user data
+            await asyncStorageUtils.updateUserDataInAsyncStorage(response.user);
+          }
+        }
+      } catch (error) {
+        console.error('Error updating dark mode in backend:', error);
+        // Fallback to AsyncStorage if backend update fails
+        await AsyncStorage.setItem(THEME_STORAGE_KEY, newMode);
+      }
     } catch (error) {
       console.error('Error saving theme preference:', error);
     }
   };
 
+  // Function to reload theme from user data (called after login)
+  // showModal: if true, will check and show modal if needed. If false, only updates theme.
+  const reloadThemeFromUserData = async (showModal: boolean = false) => {
+    try {
+      const userResponse = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+      if (userResponse.exists && userResponse.data) {
+        const userData = userResponse.data;
+        
+        // Check if dark mode is set in user data
+        // If undefined, default to light mode (not dark) to prevent flicker
+        if (userData.darkMode !== undefined) {
+          setMode(userData.darkMode ? 'dark' : 'light');
+        } else {
+          // Default to light mode if darkMode is undefined
+          setMode('light');
+        }
+        
+        // Modal logic removed - users will toggle dark mode manually from app settings
+      } else {
+        // No user data, default to light mode
+        setMode('light');
+      }
+    } catch (error) {
+      console.error('Error reloading theme from user data:', error);
+      // On error, default to light mode
+      setMode('light');
+    }
+  };
+
   return (
-    <ThemeContext.Provider value={{ theme, setThemeMode, isDark }}>
+    <ThemeContext.Provider value={{ theme, setThemeMode, isDark, reloadThemeFromUserData }}>
       {children}
     </ThemeContext.Provider>
   );

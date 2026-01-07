@@ -20,7 +20,7 @@ import { Feather, AntDesign, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { Linking, Alert } from "react-native";
-import { useGlobalTheme } from "@/app/Theme/ThemeContext";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import {
   PodcastInterface,
   PodcastVideoCardPropsInterface,
@@ -45,7 +45,8 @@ const VideoCard = ({
   updatePodcastData,
 }: PodcastVideoCardPropsInterface) => {
   const theme = useGlobalTheme();
-  const styles = getStyles(theme);
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const [commentModalVisible, setCommentModalVisible] = useState(false);
   const [expandedIndex, setExpandedIndex] = useState<any>(null);
   const [showMenuForPost, setShowMenuForPost] = useState<any>();
@@ -198,7 +199,7 @@ const VideoCard = ({
             {loggedUser?._id && podcast.likes.includes(loggedUser._id) ? (
               <AntDesign name={"heart"} size={20} color={"#F44336"} />
             ) : (
-              <AntDesign name={"hearto"} size={20} color={"#666"} />
+              <AntDesign name={"hearto"} size={20} color={isDark ? theme.colors.textWhite : "#666"} />
             )}
             <Text style={styles.likeText}>
               {podcast.likes ? podcast.likes.length : 0}
@@ -223,7 +224,7 @@ const VideoCard = ({
               }}
               activeOpacity={0.7}
             >
-              <Ionicons name="ellipsis-vertical" size={20} color="#666" />
+              <Ionicons name="ellipsis-vertical" size={20} color={isDark ? theme.colors.textWhite : "#666"} />
             </TouchableOpacity>
           )}
         </View>
@@ -240,19 +241,21 @@ const VideoCard = ({
   );
 };
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   cardContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: isDark ? theme.colors.background : "#FFFFFF",
     marginBottom: 20,
     borderRadius: 20,
     overflow: "hidden",
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 6,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.12,
+      shadowRadius: 16,
+      elevation: 6,
+    }),
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
   },
   playButton: {
     borderRadius: 35,
@@ -267,21 +270,21 @@ const getStyles = (theme: any) => StyleSheet.create({
     elevation: 8,
   },
   contentContainer: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: isDark ? theme.colors.background : "#FFFFFF",
     padding: 16,
   },
   title: {
     fontSize: theme.fontSizes.medium,
     fontWeight: theme.fontWeights.bold as "700",
     marginTop: 4,
-    color: theme.colors.text,
+    color: isDark ? theme.colors.textWhite : theme.colors.text,
     fontFamily: theme.fonts.bold,
     marginBottom: 8,
   },
   description: {
     marginTop: 4,
     fontSize: theme.fontSizes.regularSmall,
-    color: theme.colors.textSecondary,
+    color: isDark ? theme.colors.textWhite : theme.colors.textSecondary,
     fontFamily: theme.fonts.regular,
     lineHeight: 20,
   },
@@ -304,7 +307,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   },
   likeText: {
     marginLeft: 8,
-    color: theme.colors.textSecondary,
+    color: isDark ? theme.colors.textWhite : theme.colors.textSecondary,
     fontSize: theme.fontSizes.regularSmall,
     fontFamily: theme.fonts.medium,
   },

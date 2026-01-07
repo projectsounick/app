@@ -47,6 +47,7 @@ export default function SupportScreen() {
   }>();
   const [inputText, setInputText] = useState("");
   const [showTemplateCard, setShowTemplateCard] = useState(!!planTitle);
+  const [remountKey, setRemountKey] = useState(0);
   
   // Get template based on request type
   const template: SupportChatTemplate | undefined = requestType === "session" 
@@ -66,6 +67,7 @@ export default function SupportScreen() {
     snackbarVisible,
     snackbarMessage,
   } = useGetDataHook(chatService.getSupportConversation);
+  console.log("data", data);
   const [messageSendingLoader, setMessageSendingLoader] = useState(false);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -172,6 +174,24 @@ export default function SupportScreen() {
       flatListRef.current?.scrollToEnd({ animated: true });
     }, 100);
   }, [data]);
+
+  // Force remount when theme changes
+  useEffect(() => {
+    setRemountKey(prev => prev + 1);
+  }, [isDark]);
+
+  // Re-render and scroll when theme changes
+  useEffect(() => {
+    // Force FlatList to recalculate layout when theme changes
+    if (flatListRef.current && data.length > 0) {
+      // Use requestAnimationFrame to ensure layout is complete
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: false });
+        }, 200);
+      });
+    }
+  }, [isDark, remountKey]);
   const insets = useSafeAreaInsets();
 
   return (
@@ -198,10 +218,20 @@ export default function SupportScreen() {
               <SupportChatShimmer />
             ) : (
               <FlatList
+                key={`flatlist-${remountKey}-${isDark ? 'dark' : 'light'}`}
                 data={data}
-                keyExtractor={(_, index) => index.toString()}
+                keyExtractor={(item, index) => {
+                  // Use unique ID if available, otherwise use index with date
+                  return `${item._id || item.date || `msg-${index}`}-${isDark ? 'dark' : 'light'}`;
+                }}
+                extraData={`${isDark}-${remountKey}`}
+                removeClippedSubviews={false}
+                initialNumToRender={50}
+                maxToRenderPerBatch={20}
+                windowSize={21}
                 renderItem={({ item, index }) => (
                   <ChatMessage
+                    key={`${item._id || item.date || index}-${isDark ? 'dark' : 'light'}`}
                     index={index}
                     item={item}
                     setSelectedImage={setSelectedImage}

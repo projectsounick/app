@@ -7,7 +7,8 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import { useTheme, useGlobalTheme } from "./Theme/ThemeContext";
+import { lightColors } from "./Theme/colors";
+import { responsiveFontSize, responsiveSpacing } from "./Theme/responsiveFontSize";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useNavigation } from "@react-navigation/native";
 import AnimatedSubmitButton from "./modules/AnimatedSubmitButton";
@@ -26,8 +27,41 @@ const { width, height } = Dimensions.get("window");
 type NavigationProp = StackNavigationProp<RootStackParamList, "Home">;
 
 const HomeScreen = () => {
-  const theme = useGlobalTheme();
-  const { isDark } = useTheme();
+  // Always use light theme for login screen
+  const theme = {
+    colors: lightColors,
+    fontSizes: {
+      small: responsiveFontSize(12),
+      regularSmall: responsiveFontSize(14),
+      regular: responsiveFontSize(16),
+      medium: responsiveFontSize(18),
+      large: responsiveFontSize(24),
+      xlarge: responsiveFontSize(28),
+      xl: responsiveFontSize(32),
+      xxl: responsiveFontSize(38),
+    },
+    fontWeights: {
+      regular: "400",
+      medium: "500",
+      bold: "700",
+    },
+    spacing: {
+      xs: responsiveSpacing(4),
+      sm: responsiveSpacing(8),
+      md: responsiveSpacing(16),
+      lg: responsiveSpacing(24),
+      xl: responsiveSpacing(32),
+      xxl: responsiveSpacing(48),
+    },
+    fonts: {
+      heading: "SatoshiBold",
+      subheading: "SatoshiMedium",
+      body: "SatoshiRegular",
+      regular: "SatoshiRegular",
+      medium: "SatoshiMedium",
+      bold: "SatoshiBold",
+    },
+  };
   const navigation = useNavigation<NavigationProp>();
   const [showSplash, setShowSplash] = useState(true);
   const router = useRouter();
@@ -83,139 +117,15 @@ const HomeScreen = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
-      {isDark ? (
-        // Dark mode: Use solid dark background
-        <View
-          style={{
-            flex: 1,
-            paddingHorizontal: theme.spacing.md,
-            justifyContent: "space-between",
-            backgroundColor: theme.colors.background,
-          }}
-        >
-        {/* ✅ Skip Button (Top Right) - Smaller and less prominent */}
-        <TouchableOpacity
-          onPress={handleSkip}
-          style={{
-            position: "absolute",
-            top: 50,
-            right: 20,
-            backgroundColor: theme.colors.backgroundSecondary,
-            paddingVertical: 4,
-            paddingHorizontal: 10,
-            borderRadius: 16,
-            zIndex: 10,
-            borderWidth: 1,
-            borderColor: theme.colors.border,
-          }}
-        >
-          <Text
-            style={{
-              color: theme.colors.text,
-              fontWeight: "500",
-              fontSize: theme.fontSizes.small,
-              letterSpacing: 0.2,
-            }}
-          >
-            Skip Now
-          </Text>
-        </TouchableOpacity>
-
-        {/* Logo section */}
-        <View
-          style={{
-            alignItems: "center",
-            marginTop: height * 0.2,
-          }}
-        >
-          <Image
-            source={require("../assets/images/logowithoutbackground.png")}
-            style={{
-              width: 100,
-              height: 100,
-              resizeMode: "contain",
-            }}
-          />
-          <Text
-            allowFontScaling={false}
-            style={{
-              color: theme.colors.textWhite,
-              fontSize: theme.fontSizes.large,
-              fontFamily: theme.fonts.heading,
-              fontWeight: theme.fontWeights.medium as any,
-              marginTop: 4,
-            }}
-          >
-            INESS
-          </Text>
-        </View>
-
-        {/* Bottom section - positioned at absolute bottom */}
-        <View
-          style={{
-            alignItems: "center",
-            paddingBottom: 40,
-            paddingHorizontal: 16,
-          }}
-        >
-          <Text
-            allowFontScaling={false}
-            style={{
-              fontSize: theme.fontSizes.xxl,
-              fontWeight: theme.fontWeights.bold as any,
-              color: theme.colors.textWhite,
-              fontFamily: theme.fonts.bold,
-              textAlign: "center",
-            }}
-          >
-            TRANSFORMING LIVES
-          </Text>
-          <Text
-            allowFontScaling={false}
-            style={{
-              fontSize: theme.fontSizes.large,
-              fontWeight: "400",
-              marginTop: 8,
-              color: theme.colors.textWhite,
-              fontFamily: theme.fonts.regular,
-            }}
-          >
-            Since 2015
-          </Text>
-
-          <Text
-            allowFontScaling={false}
-            style={{
-              fontSize: theme.fontSizes.small,
-              color: theme.colors.textWhite,
-              fontFamily: theme.fonts.regular,
-              textAlign: "center",
-              marginTop: 24,
-              lineHeight: 18,
-            }}
-          >
-            Personal Coaching | Sustainable Diet Plans | FitTube | Fitness
-            shopping
-          </Text>
-
-          <AnimatedSubmitButton
-            loading={false}
-            onPress={handlePress}
-            title="Login"
-            height={50}
-          />
-        </View>
-        </View>
-      ) : (
-        // Light mode: Use image background
-        <ImageBackground
-          source={require("../assets/images/getstartedBackground.jpg")}
-          style={{
-            flex: 1,
-            paddingHorizontal: theme.spacing.md,
-            justifyContent: "space-between",
-          }}
-        >
+      {/* Always use light mode: Use image background */}
+      <ImageBackground
+        source={require("../assets/images/getstartedBackground.jpg")}
+        style={{
+          flex: 1,
+          paddingHorizontal: theme.spacing.md,
+          justifyContent: "space-between",
+        }}
+      >
           {/* ✅ Skip Button (Top Right) - Smaller and less prominent */}
           <TouchableOpacity
             onPress={handleSkip}
@@ -327,7 +237,6 @@ const HomeScreen = () => {
             />
           </View>
         </ImageBackground>
-      )}
     </View>
   );
 };

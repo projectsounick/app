@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import NormalHeader from "@/app/modules/NormalHeader";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -125,6 +125,9 @@ const breathingPatterns = [
 ];
 
 export default function MeditationScreen() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const [selectedType, setSelectedType] = useState<MeditationType>("breathing");
   const [isActive, setIsActive] = useState(false);
   const [timeRemaining, setTimeRemaining] = useState(300); // 5 minutes in seconds
@@ -279,7 +282,7 @@ export default function MeditationScreen() {
               style={[styles.controlButton, styles.resetButton]}
               onPress={resetTimer}
             >
-              <Ionicons name="refresh" size={responsiveFontSize(24)} color="#666" />
+              <Ionicons name="refresh" size={responsiveFontSize(24)} color={theme.colors.textSecondary} />
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -301,7 +304,7 @@ export default function MeditationScreen() {
                 setTimeRemaining(300);
               }}
             >
-              <Ionicons name="stop" size={responsiveFontSize(24)} color="#666" />
+              <Ionicons name="stop" size={responsiveFontSize(24)} color={theme.colors.textSecondary} />
             </TouchableOpacity>
           </View>
 
@@ -313,7 +316,7 @@ export default function MeditationScreen() {
                   <MaterialCommunityIcons
                     name="information-outline"
                     size={responsiveFontSize(20)}
-                    color="#9747FF"
+                    color={theme.colors.secondPrimary}
                   />
                 </View>
                 <Text style={styles.sessionInfoTitle}>About This Session</Text>
@@ -458,7 +461,7 @@ export default function MeditationScreen() {
               <MaterialCommunityIcons
                 name="information-outline"
                 size={responsiveFontSize(20)}
-                color="#9747FF"
+                color={theme.colors.secondPrimary}
               />
             </View>
             <Text style={styles.sessionInfoTitle}>About This Pattern</Text>
@@ -469,7 +472,7 @@ export default function MeditationScreen() {
               style={styles.infoLinkButton}
               onPress={() => Linking.openURL(selectedBreathing.link!)}
             >
-              <Ionicons name="open-outline" size={responsiveFontSize(16)} color="#9747FF" />
+              <Ionicons name="open-outline" size={responsiveFontSize(16)} color={theme.colors.textWhite} />
               <Text style={styles.infoLinkText}>Learn More</Text>
             </TouchableOpacity>
           )}
@@ -485,7 +488,7 @@ export default function MeditationScreen() {
         <MaterialCommunityIcons
           name="meditation"
           size={responsiveFontSize(48)}
-          color="#9747FF"
+          color={theme.colors.secondPrimary}
         />
         <Text style={styles.comingSoonTitle}>Coming Soon</Text>
         <Text style={styles.comingSoonText}>
@@ -498,16 +501,86 @@ export default function MeditationScreen() {
 
 
   return (
-    <View style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}>
-      <ImageBackground
-        source={backgroundImg}
-        style={{ flex: 1 }}
-        resizeMode="cover"
-      >
-        <SafeAreaView
-          style={{ flex: 1, backgroundColor: "transparent" }}
-          edges={["left", "right"]}
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: theme.colors.background }}
+      edges={["left", "right"]}
+    >
+      {isDark ? (
+        <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+          <View style={styles.headerContainer}>
+            <NormalHeader screenName="Meditation" />
+          </View>
+
+          {/* Fixed Type Selector - Like Track Section */}
+          <View style={styles.fixedTabsContainer}>
+            {[
+              { type: "breathing" as MeditationType, label: "Breathing", icon: "leaf-outline" },
+              { type: "timer" as MeditationType, label: "Timer", icon: "timer-outline" },
+              { type: "guided" as MeditationType, label: "Guided", icon: "headset-outline" },
+            ].map((item) => {
+              const isSelected = selectedType === item.type;
+              return (
+                <TouchableOpacity
+                  key={item.type}
+                  onPress={() => {
+                    setSelectedType(item.type);
+                    setIsActive(false);
+                    setSelectedSession(null);
+                  }}
+                  style={[
+                    styles.tabButton,
+                    {
+                      backgroundColor: isSelected ? theme.colors.success : "transparent",
+                      shadowColor: isSelected ? theme.colors.success : "transparent",
+                      shadowOffset: { width: 0, height: isSelected ? 2 : 0 },
+                      shadowOpacity: isSelected ? 0.3 : 0,
+                      shadowRadius: isSelected ? 4 : 0,
+                      elevation: isSelected ? 3 : 0,
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name={item.icon as any}
+                    size={responsiveFontSize(18)}
+                    color={isSelected ? theme.colors.textWhite : theme.colors.textSecondary}
+                    style={{ marginRight: responsiveSpacing(6) }}
+                  />
+                  <Text
+                    style={[
+                      styles.tabButtonText,
+                      {
+                        color: isSelected ? theme.colors.textWhite : theme.colors.textSecondary,
+                      },
+                    ]}
+                  >
+                    {item.label}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+
+          {/* Scrollable Content */}
+          <ScrollView
+            style={styles.scrollView}
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={{ paddingHorizontal: responsiveSpacing(16), paddingTop: responsiveSpacing(16), paddingBottom: responsiveSpacing(100) }}>
+              {/* Content */}
+              {selectedType === "timer" && renderTimerView()}
+              {selectedType === "breathing" && renderBreathingView()}
+              {selectedType === "guided" && renderGuidedView()}
+            </View>
+          </ScrollView>
+        </View>
+      ) : (
+        <ImageBackground
+          source={backgroundImg}
+          style={{ flex: 1 }}
+          resizeMode="cover"
         >
+          <View style={{ flex: 1, backgroundColor: "transparent" }}>
           <View style={styles.headerContainer}>
             <NormalHeader screenName="Meditation" />
           </View>
@@ -561,26 +634,76 @@ export default function MeditationScreen() {
             })}
           </View>
 
-          {/* Scrollable Content */}
-          <ScrollView
-            style={styles.scrollView}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <View style={{ paddingHorizontal: responsiveSpacing(16), paddingTop: responsiveSpacing(16), paddingBottom: responsiveSpacing(100) }}>
-              {/* Content */}
-              {selectedType === "timer" && renderTimerView()}
-              {selectedType === "breathing" && renderBreathingView()}
-              {selectedType === "guided" && renderGuidedView()}
+            {/* Fixed Type Selector - Like Track Section */}
+            <View style={styles.fixedTabsContainer}>
+              {[
+                { type: "breathing" as MeditationType, label: "Breathing", icon: "leaf-outline" },
+                { type: "timer" as MeditationType, label: "Timer", icon: "timer-outline" },
+                { type: "guided" as MeditationType, label: "Guided", icon: "headset-outline" },
+              ].map((item) => {
+                const isSelected = selectedType === item.type;
+                return (
+                  <TouchableOpacity
+                    key={item.type}
+                    onPress={() => {
+                      setSelectedType(item.type);
+                      setIsActive(false);
+                      setSelectedSession(null);
+                    }}
+                    style={[
+                      styles.tabButton,
+                      {
+                        backgroundColor: isSelected ? "#67C694" : "transparent",
+                        shadowColor: isSelected ? "#67C694" : "transparent",
+                        shadowOffset: { width: 0, height: isSelected ? 2 : 0 },
+                        shadowOpacity: isSelected ? 0.3 : 0,
+                        shadowRadius: isSelected ? 4 : 0,
+                        elevation: isSelected ? 3 : 0,
+                      },
+                    ]}
+                  >
+                    <Ionicons
+                      name={item.icon as any}
+                      size={responsiveFontSize(18)}
+                      color={isSelected ? "#FFFFFF" : "#999"}
+                      style={{ marginRight: responsiveSpacing(6) }}
+                    />
+                    <Text
+                      style={[
+                        styles.tabButtonText,
+                        {
+                          color: isSelected ? "#FFFFFF" : "#666",
+                        },
+                      ]}
+                    >
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
             </View>
-          </ScrollView>
-        </SafeAreaView>
-      </ImageBackground>
-    </View>
+
+            {/* Scrollable Content */}
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={{ paddingHorizontal: responsiveSpacing(16), paddingTop: responsiveSpacing(16), paddingBottom: responsiveSpacing(100) }}>
+                {/* Content */}
+                {selectedType === "timer" && renderTimerView()}
+                {selectedType === "breathing" && renderBreathingView()}
+                {selectedType === "guided" && renderGuidedView()}
+              </View>
+            </ScrollView>
+          </View>
+        </ImageBackground>
+      )}
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   headerContainer: {
     paddingHorizontal: responsiveSpacing(20),
     marginTop: Platform.OS === "ios" ? height * 0.05 : "4%",
@@ -600,13 +723,15 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     borderRadius: responsiveSpacing(16),
     padding: responsiveSpacing(4),
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 3,
-    elevation: 2,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 3,
+      elevation: 2,
+    }),
   },
   tabButton: {
     flex: 1,
@@ -671,13 +796,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: theme.colors.background,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.04,
-    shadowRadius: 4,
-    elevation: 1,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.04,
+      shadowRadius: 4,
+      elevation: 1,
+    }),
   },
   playButton: {
     width: responsiveWidth(72),
@@ -723,13 +850,15 @@ const styles = StyleSheet.create({
     padding: responsiveSpacing(18),
     marginBottom: responsiveSpacing(16),
     marginHorizontal: 0,
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 6,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.12,
+      shadowRadius: 12,
+      elevation: 6,
+    }),
   },
   sessionGradient: {
     width: responsiveWidth(64),
@@ -852,24 +981,28 @@ const styles = StyleSheet.create({
     borderRadius: responsiveSpacing(18),
     padding: responsiveSpacing(18),
     borderWidth: 1.5,
-    borderColor: "#F0F0F0",
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 3,
+    borderColor: theme.colors.border,
     minHeight: responsiveHeight(150),
     justifyContent: "center",
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.08,
+      shadowRadius: 8,
+      elevation: 3,
+    }),
   },
   breathingPatternCardActive: {
     borderColor: theme.colors.secondPrimary,
     borderWidth: 2.5,
-    backgroundColor: theme.colors.backgroundCardLight,
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 6,
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCardLight,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.2,
+      shadowRadius: 12,
+      elevation: 6,
+    }),
   },
   breathingPatternName: {
     fontSize: responsiveFontSize(16),
@@ -896,13 +1029,15 @@ const styles = StyleSheet.create({
     padding: responsiveSpacing(48),
     marginHorizontal: 0,
     alignItems: "center",
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 6,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      elevation: 6,
+    }),
   },
   comingSoonTitle: {
     fontSize: responsiveFontSize(24),
@@ -925,13 +1060,15 @@ const styles = StyleSheet.create({
     borderRadius: responsiveSpacing(20),
     padding: responsiveSpacing(24),
     marginTop: responsiveSpacing(24),
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 6,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 12,
+      elevation: 6,
+    }),
   },
   sessionInfoHeader: {
     flexDirection: "row",
@@ -973,18 +1110,20 @@ const styles = StyleSheet.create({
     marginTop: responsiveSpacing(8),
     paddingVertical: responsiveSpacing(12),
     paddingHorizontal: responsiveSpacing(16),
-    backgroundColor: theme.colors.backgroundCardLight,
+    backgroundColor: theme.colors.secondPrimary,
     borderRadius: responsiveSpacing(12),
     alignSelf: "flex-start",
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
+    }),
   },
   infoLinkText: {
     fontSize: responsiveFontSize(14),
-    color: theme.colors.secondPrimary,
+    color: theme.colors.textWhite,
     fontWeight: "700",
     marginLeft: responsiveSpacing(8),
     fontFamily: theme.fonts.bold,

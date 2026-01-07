@@ -134,10 +134,14 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     marginBottom: 4,
+    flexWrap: "wrap",
   },
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
+    flex: 1,
+    flexShrink: 1,
+    marginRight: 12,
   },
   iconContainer: {
     width: 36,
@@ -153,6 +157,8 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     fontWeight: theme.fontWeights.bold as "700",
     color: isDark ? theme.colors.textWhite : theme.colors.text,
     fontFamily: theme.fonts.bold,
+    flex: 1,
+    flexShrink: 1,
   },
   headerDash: {
     width: 30,

@@ -17,7 +17,7 @@ import { WebView } from "react-native-webview";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "../Theme/ThemeContext";
 
 const { height } = Dimensions.get("window");
 
@@ -32,7 +32,7 @@ export default function DietPlanBottomSheet({
 }: DietPlanBottomsheet) {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
-  const styles = getStyles(theme);
+  const styles = getStyles(theme, isDark);
   const [dietPlans, setDietPlans] = useState<string[]>([]);
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -233,7 +233,7 @@ export default function DietPlanBottomSheet({
   );
 }
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   backdrop: {
     flex: 1,
     backgroundColor: theme.colors.overlay,

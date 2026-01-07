@@ -111,9 +111,11 @@ const MediaComponentModal: React.FC<MediaComponentModalProps> = ({
                     style={{
                       flexDirection: "row",
                       marginBottom: 8,
-                      backgroundColor: theme.colors.border,
+                      backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
                       padding: 8,
                       borderRadius: 6,
+                      borderWidth: 1,
+                      borderColor: theme.colors.border,
                     }}
                   >
                     <Text
@@ -154,17 +156,20 @@ const MediaComponentModal: React.FC<MediaComponentModalProps> = ({
             >
               <TextInput
                 placeholder="Add a comment..."
+                placeholderTextColor={theme.colors.textMuted}
                 value={commentInput}
                 onChangeText={setCommentInput}
                 style={{
                   flex: 1,
                   borderWidth: 1,
-                  borderColor: theme.colors.divider,
+                  borderColor: theme.colors.border,
                   borderRadius: 8,
                   paddingHorizontal: 10,
                   paddingVertical: 6,
                   fontSize: theme.fontSizes.regularSmall,
                   marginRight: 10,
+                  backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
+                  color: theme.colors.text,
                 }}
               />
               <TouchableOpacity

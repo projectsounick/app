@@ -18,7 +18,7 @@ import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { PlanInterface } from "@/app/interfaces/planInterface";
 import DietPlanInfoModal from "@/app/Modals/DietPlanModal";
 import { withAuthGuard } from "@/app/Hoc/WithAuthGuardButton";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 const ProtectedAnimatedSubmitButton = withAuthGuard(AnimatedSubmitButton);
 interface Props {
   screenWidth: number;
@@ -42,9 +42,11 @@ const PlansInfo: React.FC<Props> = ({
   setSelectedPlanItem,
   setBottomSectionHeight,
   addingIntoToCart,
-  theme,
+  theme: themeProp,
   bottomSectionHeight,
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   if (!currentPlan) return null;
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
@@ -71,15 +73,17 @@ const PlansInfo: React.FC<Props> = ({
           {/* Overview Card */}
           <View
             style={{
-              backgroundColor: theme.colors.background,
+              backgroundColor: isDark ? theme.colors.background : theme.colors.background,
               borderRadius: 20,
               padding: 20,
               marginBottom: 16,
-              shadowColor: theme.colors.dark,
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.05,
-              shadowRadius: 4,
-              elevation: 2,
+              ...(isDark ? {} : {
+                shadowColor: theme.colors.dark,
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }),
               borderWidth: 1,
               borderColor: theme.colors.border,
             }}
@@ -108,7 +112,7 @@ const PlansInfo: React.FC<Props> = ({
                 style={{
                   fontSize: theme.fontSizes.large,
                   fontWeight: theme.fontWeights.bold as "700",
-                  color: theme.colors.dark,
+                  color: isDark ? theme.colors.textWhite : theme.colors.dark,
                 }}
               >
                 Overview
@@ -116,8 +120,8 @@ const PlansInfo: React.FC<Props> = ({
             </View>
             <Text
               style={{
-                fontSize: theme.fontSizes.regular,
-                color: theme.colors.textSecondary,
+                fontSize: theme.fontSizes.regularSmall,
+                color: isDark ? theme.colors.textWhite : theme.colors.textSecondary,
                 lineHeight: 22,
               }}
             >
@@ -128,15 +132,17 @@ const PlansInfo: React.FC<Props> = ({
           {/* What it provides Card */}
           <View
             style={{
-              backgroundColor: theme.colors.background,
+              backgroundColor: isDark ? theme.colors.background : theme.colors.background,
               borderRadius: 20,
               padding: 20,
               marginBottom: 16,
-              shadowColor: theme.colors.dark,
-              shadowOffset: { width: 0, height: 1 },
-              shadowOpacity: 0.05,
-              shadowRadius: 4,
-              elevation: 2,
+              ...(isDark ? {} : {
+                shadowColor: theme.colors.dark,
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }),
               borderWidth: 1,
               borderColor: theme.colors.border,
             }}
@@ -165,7 +171,7 @@ const PlansInfo: React.FC<Props> = ({
                 style={{
                   fontSize: theme.fontSizes.medium,
                   fontWeight: theme.fontWeights.bold as "700",
-                  color: theme.colors.dark,
+                  color: isDark ? theme.colors.textWhite : theme.colors.dark,
                 }}
               >
                 What it provides
@@ -201,8 +207,8 @@ const PlansInfo: React.FC<Props> = ({
                 </View>
                 <Text
                   style={{
-                    fontSize: theme.fontSizes.regularSmall,
-                    color: theme.colors.text,
+                    fontSize: theme.fontSizes.small,
+                    color: isDark ? theme.colors.textWhite : theme.colors.text,
                     flex: 1,
                     lineHeight: 22,
                     fontWeight: theme.fontWeights.medium as "500",
@@ -219,15 +225,17 @@ const PlansInfo: React.FC<Props> = ({
           {currentPlan?.otherImages?.length > 0 && (
             <View
               style={{
-                backgroundColor: theme.colors.background,
+                backgroundColor: isDark ? theme.colors.background : theme.colors.background,
                 borderRadius: 20,
                 padding: 20,
                 marginBottom: 16,
-                shadowColor: theme.colors.dark,
-                shadowOffset: { width: 0, height: 1 },
-                shadowOpacity: 0.05,
-                shadowRadius: 4,
-                elevation: 2,
+                ...(isDark ? {} : {
+                  shadowColor: theme.colors.dark,
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }),
                 borderWidth: 1,
                 borderColor: theme.colors.border,
               }}
@@ -256,7 +264,7 @@ const PlansInfo: React.FC<Props> = ({
                   style={{
                     fontSize: theme.fontSizes.medium,
                     fontWeight: theme.fontWeights.bold as "700",
-                    color: theme.colors.dark,
+                    color: isDark ? theme.colors.textWhite : theme.colors.dark,
                   }}
                 >
                   Plan Gallery
@@ -425,7 +433,7 @@ const PlansInfo: React.FC<Props> = ({
                         style={{
                           fontSize: theme.fontSizes.small,
                           fontWeight: theme.fontWeights.bold as "700",
-                          color: theme.colors.dark,
+                          color: isDark ? theme.colors.textWhite : theme.colors.dark,
                           marginBottom: 1,
                         }}
                       >
@@ -469,9 +477,9 @@ const PlansInfo: React.FC<Props> = ({
                   >
                     <Text
                       style={{
-                        fontSize: theme.fontSizes.large,
+                        fontSize: theme.fontSizes.regularSmall,
                         fontWeight: theme.fontWeights.bold as "700",
-                        color: theme.colors.secondPrimary,
+                        color: isDark ? theme.colors.textWhite : theme.colors.secondPrimary,
                         marginRight: 4,
                       }}
                     >

@@ -369,7 +369,7 @@ export default function AdditionalInfoScreen() {
         <View key={index} style={styles.citationCard}>
           <View style={styles.cardHeader}>
             <View style={styles.iconContainer}>
-              <MaterialCommunityIcons name={citation.icon as any} size={18} color="#9747FF" />
+              <MaterialCommunityIcons name={citation.icon as any} size={18} color={isDark ? theme.colors.text : "#9747FF"} />
             </View>
             <Text style={styles.cardTitle}>{citation.title}</Text>
           </View>
@@ -390,7 +390,7 @@ export default function AdditionalInfoScreen() {
             onPress={() => openCitation(citation.url)}
             style={styles.sourceButton}
           >
-            <Ionicons name="globe-outline" size={14} color="#9747FF" />
+            <Ionicons name="globe-outline" size={14} color={isDark ? theme.colors.text : "#9747FF"} />
             <Text style={styles.sourceTextLink}>{citation.source}</Text>
           </TouchableOpacity>
         </View>
@@ -411,10 +411,10 @@ export default function AdditionalInfoScreen() {
             style={styles.resourceItem}
           >
             <View style={styles.resourceItemIcon}>
-              <Ionicons name="globe-outline" size={14} color="#9747FF" />
+              <Ionicons name="globe-outline" size={14} color={isDark ? theme.colors.text : "#9747FF"} />
             </View>
             <Text style={styles.resourceItemText}>{resource.title}</Text>
-            <Ionicons name="chevron-forward" size={16} color="#999" />
+            <Ionicons name="chevron-forward" size={16} color={isDark ? theme.colors.textMuted : "#999"} />
           </TouchableOpacity>
         ))}
       </View>
@@ -565,6 +565,9 @@ export default function AdditionalInfoScreen() {
                           color: color.text,
                         },
                       ]}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit={true}
+                      minimumFontScale={0.7}
                     >
                       {tab}
                     </Text>
@@ -624,7 +627,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     marginBottom: 24,
     backgroundColor: theme.colors.background,
     borderRadius: 16,
-    padding: 4,
+    padding: 2,
     borderWidth: 1,
     borderColor: theme.colors.border,
     ...(isDark ? {} : {
@@ -638,14 +641,14 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   tabButton: {
     flex: 1,
     paddingVertical: 10,
-    paddingHorizontal: 8,
+    paddingHorizontal: 4,
     borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
   },
   tabText: {
     fontWeight: "700",
-    fontSize: theme.fontSizes.regularSmall,
+    fontSize: SCREEN_WIDTH < 375 ? 11 : (SCREEN_WIDTH < 414 ? 12 : 13),
     fontFamily: theme.fonts.bold,
   },
   infoCard: {
@@ -921,7 +924,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   formulaText: {
     fontSize: theme.fontSizes.small,
     fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
-    color: theme.colors.secondPrimary,
+    color: isDark ? theme.colors.text : theme.colors.secondPrimary,
     lineHeight: 16,
   },
   sourceText: {
@@ -949,7 +952,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   },
   sourceTextLink: {
     fontSize: theme.fontSizes.small,
-    color: theme.colors.secondPrimary,
+    color: isDark ? theme.colors.text : theme.colors.secondPrimary,
     fontFamily: theme.fonts.medium,
     marginLeft: 6,
     textDecorationLine: "underline",

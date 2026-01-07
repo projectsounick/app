@@ -1,7 +1,7 @@
 import { Snackbar } from "react-native-paper";
 import { Animated, Easing, Dimensions, View } from "react-native";
 import { useEffect, useRef, useState } from "react";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { CustomSnackbarProps } from "../interfaces/moduleInterfaces";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -14,6 +14,8 @@ const CustomSnackbar: React.FC<CustomSnackbarProps> = ({
   bgColor,
   duration = 2000,
 }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const translateY = useRef(new Animated.Value(100)).current;
   const insets = useSafeAreaInsets();
   const bottomOffset = insets.bottom + 20; // 20px spacing from bottom
@@ -82,7 +84,7 @@ const CustomSnackbar: React.FC<CustomSnackbarProps> = ({
         <View>
           <Animated.Text
             style={{
-              color: theme.colors.text,
+              color: isDark ? theme.colors.textWhite : theme.colors.text,
               fontSize: theme.fontSizes.regular,
               fontWeight: "500",
               fontFamily: theme.fonts.regular,

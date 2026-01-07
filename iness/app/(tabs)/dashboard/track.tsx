@@ -499,29 +499,13 @@ export default function TrackingGraphPage() {
   const topPadding = height * 0.05;
 
   return (
-    <ImageBackground
-      source={require("../../../assets/images/basicBackground.jpg")}
-      resizeMode="cover"
-      style={{ flex: 1 }}
-      imageStyle={{ opacity: isDark ? 0.3 : 1 }}
-    >
-      {isDark && (
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: theme.colors.background,
-            opacity: 0.9,
-          }}
-        />
-      )}
-      <SafeAreaView
-        style={{ flex: 1, backgroundColor: "transparent" }}
-        edges={["left", "right"]}
-      >
+    <>
+      {isDark ? (
+        <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+          <SafeAreaView
+            style={{ flex: 1, backgroundColor: theme.colors.background }}
+            edges={["left", "right"]}
+          >
           {loading ? (
             <ScrollView
               style={{ flex: 1 }}
@@ -558,14 +542,16 @@ export default function TrackingGraphPage() {
                     flexDirection: "row",
                     justifyContent: "space-between",
                     marginBottom: 24,
-                    backgroundColor: theme.colors.background,
+                    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
                     borderRadius: 16,
                     padding: 4,
-                    shadowColor: theme.colors.black,
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.05,
-                    shadowRadius: 3,
-                    elevation: 2,
+                    ...(isDark ? {} : {
+                      shadowColor: theme.colors.black,
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.05,
+                      shadowRadius: 3,
+                      elevation: 2,
+                    }),
                     borderWidth: 1,
                     borderColor: theme.colors.border,
                   }}
@@ -634,17 +620,19 @@ export default function TrackingGraphPage() {
                 {/* Month Switcher Card */}
                 <View
                   style={{
-                    backgroundColor: theme.colors.background,
+                    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
                     borderRadius: 16,
                     padding: 16,
                     marginBottom: 24,
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.05,
-                    shadowRadius: 4,
-                    elevation: 2,
+                    ...(isDark ? {} : {
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.05,
+                      shadowRadius: 4,
+                      elevation: 2,
+                    }),
                     borderWidth: 1,
-                    borderColor: "#F5F5F5",
+                    borderColor: theme.colors.border,
                     flexDirection: "row",
                     alignItems: "center",
                     justifyContent: "space-between",
@@ -873,12 +861,12 @@ export default function TrackingGraphPage() {
                 {/* Chart Card */}
                 <View
                   style={{
-                    backgroundColor: theme.colors.background,
+                    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
                     borderRadius: 20,
                     padding: 20,
                     marginBottom: 24,
                     borderWidth: 1,
-                    borderColor: "#F5F5F5",
+                    borderColor: theme.colors.border,
                   }}
                 >
                   <View>
@@ -1003,17 +991,19 @@ export default function TrackingGraphPage() {
                       {/* Summary Report Card */}
                       <View
                         style={{
-                          backgroundColor: theme.colors.background,
+                          backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCard,
                           borderRadius: 16,
                           padding: 20,
                           marginBottom: 24,
-                          shadowColor: "#000",
-                          shadowOffset: { width: 0, height: 1 },
-                          shadowOpacity: 0.05,
-                          shadowRadius: 4,
-                          elevation: 2,
+                          ...(isDark ? {} : {
+                            shadowColor: "#000",
+                            shadowOffset: { width: 0, height: 1 },
+                            shadowOpacity: 0.05,
+                            shadowRadius: 4,
+                            elevation: 2,
+                          }),
                           borderWidth: 1,
-                          borderColor: "#F5F5F5",
+                          borderColor: theme.colors.border,
                         }}
                       >
                         {/* Stats Row - Enhanced */}
@@ -1024,7 +1014,7 @@ export default function TrackingGraphPage() {
                             marginBottom: 20,
                             paddingBottom: 20,
                             borderBottomWidth: 1,
-                            borderBottomColor: "#F5F5F5",
+                            borderBottomColor: theme.colors.border,
                           }}
                         >
                           <View style={{ alignItems: "center", flex: 1 }}>
@@ -1099,7 +1089,7 @@ export default function TrackingGraphPage() {
                             marginBottom: 20,
                             paddingBottom: 20,
                             borderBottomWidth: 1,
-                            borderBottomColor: "#F5F5F5",
+                            borderBottomColor: theme.colors.border,
                             gap: 12,
                           }}
                         >
@@ -1265,17 +1255,19 @@ export default function TrackingGraphPage() {
                       {/* Monthly Analysis Card */}
                       <View
                         style={{
-                          backgroundColor: theme.colors.background,
+                          backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCard,
                           borderRadius: 16,
                           padding: 20,
                           marginBottom: 24,
-                          shadowColor: "#000",
-                          shadowOffset: { width: 0, height: 1 },
-                          shadowOpacity: 0.05,
-                          shadowRadius: 4,
-                          elevation: 2,
+                          ...(isDark ? {} : {
+                            shadowColor: "#000",
+                            shadowOffset: { width: 0, height: 1 },
+                            shadowOpacity: 0.05,
+                            shadowRadius: 4,
+                            elevation: 2,
+                          }),
                           borderWidth: 1,
-                          borderColor: "#F5F5F5",
+                          borderColor: theme.colors.border,
                         }}
                       >
                         {/* Analysis Section */}
@@ -1388,7 +1380,7 @@ export default function TrackingGraphPage() {
                             <View
                               style={{
                                 flex: 1,
-                                backgroundColor: theme.colors.background,
+                                backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
                                 borderRadius: 12,
                                 padding: 14,
                                 borderWidth: 1,
@@ -1435,11 +1427,11 @@ export default function TrackingGraphPage() {
                             <View
                               style={{
                                 flex: 1,
-                                backgroundColor: color.bg,
+                                backgroundColor: isDark ? theme.colors.backgroundCard : color.bg,
                                 borderRadius: 12,
                                 padding: 14,
                                 borderWidth: 1,
-                                borderColor: color.text + "20",
+                                borderColor: isDark ? theme.colors.border : color.text + "20",
                               }}
                             >
                               <Text
@@ -1456,7 +1448,7 @@ export default function TrackingGraphPage() {
                                 style={{
                                   fontSize: theme.fontSizes.medium,
                                   fontWeight: theme.fontWeights.bold as "700",
-                                  color: color.text,
+                                  color: isDark ? theme.colors.textWhite : color.text,
                                   fontFamily: theme.fonts.bold,
                                   marginBottom: 2,
                                 }}
@@ -1534,7 +1526,7 @@ export default function TrackingGraphPage() {
                           <View
                             style={{
                               flex: 1,
-                              backgroundColor: theme.colors.background,
+                              backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCard,
                               borderRadius: 12,
                               padding: 14,
                               borderWidth: 1,
@@ -1578,7 +1570,7 @@ export default function TrackingGraphPage() {
                           <View
                             style={{
                               flex: 1,
-                              backgroundColor: theme.colors.background,
+                              backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCard,
                               borderRadius: 12,
                               padding: 14,
                               borderWidth: 1,
@@ -1660,17 +1652,19 @@ export default function TrackingGraphPage() {
                 {getSelectedData.length === 0 ? (
                   <View
                     style={{
-                      backgroundColor: theme.colors.background,
+                      backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCard,
                       borderRadius: 20,
                       padding: 40,
                       alignItems: "center",
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.08,
-                      shadowRadius: 12,
-                      elevation: 3,
+                      ...(isDark ? {} : {
+                        shadowColor: "#000",
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.08,
+                        shadowRadius: 12,
+                        elevation: 3,
+                      }),
                       borderWidth: 1,
-                      borderColor: "#F5F5F5",
+                      borderColor: theme.colors.border,
                     }}
                   >
                     <View
@@ -1693,7 +1687,7 @@ export default function TrackingGraphPage() {
                     <Text
                       style={{
                         textAlign: "center",
-                        color: "#666",
+                        color: theme.colors.textMuted,
                         marginTop: 12,
                         fontSize: theme.fontSizes.regularSmall,
                         fontWeight: theme.fontWeights.medium as "500",
@@ -1716,17 +1710,19 @@ export default function TrackingGraphPage() {
                         <View
                           key={index}
                           style={{
-                            backgroundColor: theme.colors.background,
+                            backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCard,
                             padding: 16,
                             marginBottom: 12,
                             borderRadius: 16,
-                            shadowColor: "#000",
-                            shadowOffset: { width: 0, height: 1 },
-                            shadowOpacity: 0.05,
-                            shadowRadius: 4,
-                            elevation: 2,
+                            ...(isDark ? {} : {
+                              shadowColor: "#000",
+                              shadowOffset: { width: 0, height: 1 },
+                              shadowOpacity: 0.05,
+                              shadowRadius: 4,
+                              elevation: 2,
+                            }),
                             borderWidth: 1,
-                            borderColor: "#F5F5F5",
+                            borderColor: theme.colors.border,
                             flexDirection: "row",
                             alignItems: "center",
                             justifyContent: "space-between",
@@ -1777,9 +1773,667 @@ export default function TrackingGraphPage() {
             visible={snackbarVisible}
             message={snackbarMessage}
             onDismiss={() => setSnackbarVisible(false)}
-            bgColor="#FFFFFF"
+            bgColor={theme.colors.background}
           />
-        </SafeAreaView>
-    </ImageBackground>
+          </SafeAreaView>
+        </View>
+      ) : (
+        <ImageBackground
+          source={require("../../../assets/images/basicBackground.jpg")}
+          resizeMode="cover"
+          style={{ flex: 1 }}
+        >
+          <SafeAreaView
+            style={{ flex: 1, backgroundColor: "transparent" }}
+            edges={["left", "right"]}
+          >
+            {loading ? (
+              <ScrollView
+                style={{ flex: 1 }}
+                showsVerticalScrollIndicator={false}
+              >
+                <View
+                  style={{
+                    paddingHorizontal: 20,
+                    marginTop: Platform.OS === "ios" ? topPadding : "4%",
+                  }}
+                >
+                  <NormalHeader screenName="Track" />
+                </View>
+                <TrackShimmer />
+              </ScrollView>
+            ) : (
+              <ScrollView
+                style={{ flex: 1 }}
+                showsVerticalScrollIndicator={false}
+              >
+                <View
+                  style={{
+                    paddingHorizontal: 20,
+                    marginTop: Platform.OS === "ios" ? topPadding : "4%",
+                  }}
+                >
+                  <NormalHeader screenName="Track" />
+                </View>
+
+                <View style={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 100 }}>
+                  {/* Tabs */}
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      marginBottom: 24,
+                      backgroundColor: theme.colors.background,
+                      borderRadius: 16,
+                      padding: 4,
+                      shadowColor: theme.colors.black,
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.05,
+                      shadowRadius: 3,
+                      elevation: 2,
+                      borderWidth: 1,
+                      borderColor: theme.colors.border,
+                    }}
+                  >
+                    {tabNames.map((tab) => {
+                      const isSelected = selectedTab === tab;
+                      const tabColors = {
+                        Sleep: { bg: "#B39DDB", text: "#FFFFFF", icon: "#FFFFFF" },
+                        Steps: { bg: "#9747FF", text: "#FFFFFF", icon: "#FFFFFF" },
+                        Water: { bg: "#4FC3F7", text: "#FFFFFF", icon: "#FFFFFF" },
+                      };
+                      const inactiveColors = {
+                        Sleep: { bg: "transparent", text: "#666", icon: "#999" },
+                        Steps: { bg: "transparent", text: "#666", icon: "#999" },
+                        Water: { bg: "transparent", text: "#666", icon: "#999" },
+                      };
+                      const color = isSelected ? tabColors[tab] : inactiveColors[tab];
+                      
+                      return (
+                        <TouchableOpacity
+                          key={tab}
+                          onPress={() => setSelectedTab(tab)}
+                          style={{
+                            flex: 1,
+                            paddingVertical: 10,
+                            paddingHorizontal: 8,
+                            borderRadius: 12,
+                            backgroundColor: color.bg,
+                            alignItems: "center",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            gap: 6,
+                            shadowColor: isSelected ? color.bg : "transparent",
+                            shadowOffset: { width: 0, height: isSelected ? 2 : 0 },
+                            shadowOpacity: isSelected ? 0.3 : 0,
+                            shadowRadius: isSelected ? 4 : 0,
+                            elevation: isSelected ? 3 : 0,
+                          }}
+                        >
+                          <MaterialCommunityIcons
+                            name={
+                              tab === "Sleep"
+                                ? "moon-waning-crescent"
+                                : tab === "Steps"
+                                  ? "walk"
+                                  : "cup-water"
+                            }
+                            size={18}
+                            color={color.icon}
+                          />
+                          <Text
+                            style={{
+                              color: color.text,
+                              fontWeight: "700",
+                              fontSize: theme.fontSizes.regularSmall,
+                              fontFamily: theme.fonts.bold,
+                            }}
+                          >
+                            {tab}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+
+                  {/* Month Switcher Card */}
+                  <View
+                    style={{
+                      backgroundColor: theme.colors.background,
+                      borderRadius: 16,
+                      padding: 16,
+                      marginBottom: 24,
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.05,
+                      shadowRadius: 4,
+                      elevation: 2,
+                      borderWidth: 1,
+                      borderColor: theme.colors.border,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    {/* Left side: Arrows and Month */}
+                    <View style={{ 
+                      flexDirection: "row", 
+                      alignItems: "center", 
+                      flex: isAvailable && 
+                        ((selectedTab === "Steps" && syncStatus?.stepSync) || 
+                         (selectedTab === "Sleep" && syncStatus?.sleepSync)) ? 1 : undefined,
+                      justifyContent: isAvailable && 
+                        ((selectedTab === "Steps" && syncStatus?.stepSync) || 
+                         (selectedTab === "Sleep" && syncStatus?.sleepSync)) ? "flex-start" : "center",
+                      width: isAvailable && 
+                        ((selectedTab === "Steps" && syncStatus?.stepSync) || 
+                         (selectedTab === "Sleep" && syncStatus?.sleepSync)) ? undefined : "100%",
+                    }}>
+                      {(() => {
+                        const arrowColors = {
+                          Sleep: "#B39DDB",
+                          Steps: "#9747FF",
+                          Water: "#4FC3F7",
+                        };
+                        const arrowBgColors = {
+                          Sleep: "#EDE7F6",
+                          Steps: "#F3EDFF",
+                          Water: "#E3F2FD",
+                        };
+                        const arrowColor = arrowColors[selectedTab];
+                        const arrowBg = arrowBgColors[selectedTab];
+                        
+                        return (
+                          <>
+                            <TouchableOpacity
+                              onPress={() => setMonthOffset((prev) => prev - 1)}
+                              style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 12,
+                                backgroundColor: arrowBg,
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <Ionicons
+                                name="chevron-back"
+                                size={20}
+                                color={arrowColor}
+                              />
+                            </TouchableOpacity>
+                            <Text
+                              style={{
+                                fontSize: theme.fontSizes.regular,
+                                fontWeight: theme.fontWeights.bold as "700",
+                                color: theme.colors.text,
+                                fontFamily: theme.fonts.bold,
+                                marginHorizontal: 12,
+                              }}
+                            >
+                              {currentMonth.format("MMMM YYYY")}
+                            </Text>
+                            <TouchableOpacity
+                              onPress={() => setMonthOffset((prev) => prev + 1)}
+                              style={{
+                                width: 40,
+                                height: 40,
+                                borderRadius: 12,
+                                backgroundColor: arrowBg,
+                                alignItems: "center",
+                                justifyContent: "center",
+                              }}
+                            >
+                              <Ionicons
+                                name="chevron-forward"
+                                size={20}
+                                color={arrowColor}
+                              />
+                            </TouchableOpacity>
+                          </>
+                        );
+                      })()}
+                    </View>
+
+                    {/* Right side: Sync buttons (only when sync is enabled) */}
+                    {isAvailable && (
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                        {/* Steps Sync Button */}
+                        {selectedTab === "Steps" && syncStatus?.stepSync && (
+                          <TouchableOpacity
+                            onPress={async () => {
+                              if (!isAvailable || syncingSteps) return;
+                              setSyncingSteps(true);
+                              try {
+                                const result = await syncData("steps");
+                                if (result.success) {
+                                  // Refresh data for current month
+                                  const monthKey = currentMonth.format("YYYY-MM");
+                                  setLoadedMonths((prev) => {
+                                    const next = new Set(prev);
+                                    next.delete(monthKey);
+                                    return next;
+                                  });
+                                  fetchDataForMonth(currentMonth);
+                                  // Show success message
+                                  const message = result.syncedCount 
+                                    ? `Steps synced successfully! (${result.syncedCount} entries)`
+                                    : "Steps synced successfully!";
+                                  setSnackbarMessage(message);
+                                  setTimeout(() => setSnackbarVisible(true), 100);
+                                } else {
+                                  // Show error message
+                                  setSnackbarMessage(result.error || "Failed to sync steps");
+                                  setSnackbarVisible(true);
+                                }
+                              } catch (error) {
+                                console.error("[Track] Manual sync error:", error);
+                                setSnackbarMessage("An error occurred while syncing steps");
+                                setSnackbarVisible(true);
+                              } finally {
+                                setSyncingSteps(false);
+                              }
+                            }}
+                            disabled={syncingSteps}
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                              paddingVertical: 8,
+                              paddingHorizontal: 12,
+                              backgroundColor: theme.colors.success,
+                              borderRadius: 20,
+                              opacity: syncingSteps ? 0.6 : 1,
+                            }}
+                          >
+                            {syncingSteps ? (
+                              <ActivityIndicator size="small" color={theme.colors.textWhite} />
+                            ) : (
+                              <>
+                                <Ionicons name="refresh" size={16} color={theme.colors.textWhite} style={{ marginRight: 6 }} />
+                                <Text
+                                  style={{
+                                    color: theme.colors.textWhite,
+                                    fontFamily: theme.fonts.medium,
+                                    fontWeight: theme.fontWeights.medium as "500",
+                                    fontSize: theme.fontSizes.small,
+                                  }}
+                                >
+                                  Sync Now
+                                </Text>
+                              </>
+                            )}
+                          </TouchableOpacity>
+                        )}
+
+                        {/* Sleep Sync Button */}
+                        {selectedTab === "Sleep" && syncStatus?.sleepSync && (
+                          <TouchableOpacity
+                            onPress={async () => {
+                              if (!isAvailable || syncingSleep) return;
+                              setSyncingSleep(true);
+                              try {
+                                const result = await syncData("sleep");
+                                if (result.success) {
+                                  // Refresh data for current month
+                                  const monthKey = currentMonth.format("YYYY-MM");
+                                  setLoadedMonths((prev) => {
+                                    const next = new Set(prev);
+                                    next.delete(monthKey);
+                                    return next;
+                                  });
+                                  fetchDataForMonth(currentMonth);
+                                  // Show success message
+                                  const message = result.syncedCount 
+                                    ? `Sleep synced successfully! (${result.syncedCount} entries)`
+                                    : "Sleep synced successfully!";
+                                  setSnackbarMessage(message);
+                                  setTimeout(() => setSnackbarVisible(true), 100);
+                                } else {
+                                  // Show error message
+                                  setSnackbarMessage(result.error || "Failed to sync sleep");
+                                  setSnackbarVisible(true);
+                                }
+                              } catch (error) {
+                                console.error("[Track] Manual sync error:", error);
+                                setSnackbarMessage("An error occurred while syncing sleep");
+                                setSnackbarVisible(true);
+                              } finally {
+                                setSyncingSleep(false);
+                              }
+                            }}
+                            disabled={syncingSleep}
+                            style={{
+                              flexDirection: "row",
+                              alignItems: "center",
+                              paddingVertical: 8,
+                              paddingHorizontal: 12,
+                              backgroundColor: theme.colors.success,
+                              borderRadius: 20,
+                              opacity: syncingSleep ? 0.6 : 1,
+                            }}
+                          >
+                            {syncingSleep ? (
+                              <ActivityIndicator size="small" color={theme.colors.textWhite} />
+                            ) : (
+                              <>
+                                <Ionicons name="refresh" size={16} color={theme.colors.textWhite} style={{ marginRight: 6 }} />
+                                <Text
+                                  style={{
+                                    color: theme.colors.textWhite,
+                                    fontFamily: theme.fonts.medium,
+                                    fontWeight: theme.fontWeights.medium as "500",
+                                    fontSize: theme.fontSizes.small,
+                                  }}
+                                >
+                                  Sync Now
+                                </Text>
+                              </>
+                            )}
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    )}
+                  </View>
+
+                  {/* Chart Card */}
+                  <View
+                    style={{
+                      backgroundColor: theme.colors.background,
+                      borderRadius: 20,
+                      padding: 20,
+                      marginBottom: 24,
+                      borderWidth: 1,
+                      borderColor: theme.colors.border,
+                    }}
+                  >
+                    <View>
+                      {getGraphData.labels.length > 0 && getGraphData.labels[0] !== "No data" ? (
+                        <View style={{ 
+                          backgroundColor: theme.colors.backgroundSecondary, 
+                          borderRadius: 16, 
+                          paddingTop: 8,
+                          paddingBottom: 8,
+                          paddingRight: 8,
+                          paddingLeft: 0,
+                        }}>
+                          <LineChart
+                            key={`chart-${selectedTab}-${currentMonth.format("YYYY-MM")}-${chartKey}`}
+                            data={getGraphData}
+                            width={screenWidth - 64}
+                            height={240}
+                            chartConfig={getChartConfig(selectedTab, theme, isDark)}
+                            bezier
+                            withShadow={false}
+                            withInnerLines={true}
+                            withVerticalLines={false}
+                            withHorizontalLines={true}
+                            withVerticalLabels={true}
+                            withHorizontalLabels={true}
+                            segments={5}
+                            fromZero={true}
+                            style={{ 
+                              borderRadius: 12,
+                              marginLeft: -8,
+                            }}
+                          />
+                        </View>
+                      ) : (
+                        <View style={{ height: 240, justifyContent: 'center', alignItems: 'center', backgroundColor: theme.colors.backgroundSecondary, borderRadius: 16 }}>
+                          <Text style={{ color: theme.colors.textMuted, fontSize: theme.fontSizes.regularSmall, fontFamily: theme.fonts.regular }}>No data available</Text>
+                        </View>
+                      )}
+                    </View>
+                  </View>
+
+                  {/* Detailed Report Section - Light Mode */}
+                  {getSelectedData.length > 0 && (() => {
+                    const selectedData = getSelectedData;
+                    const total = selectedData.reduce((sum, item) => sum + item.value, 0);
+                    const count = selectedData.length;
+                    
+                    const dailyTargets = {
+                      Sleep: 8,
+                      Steps: 10000,
+                      Water: 8,
+                    };
+                    
+                    const daysInMonth = currentMonth.daysInMonth();
+                    const targetTotal = dailyTargets[selectedTab] * daysInMonth;
+                    const difference = total - targetTotal;
+                    const percentage = targetTotal > 0 ? (total / targetTotal) * 100 : 0;
+                    const isLagging = difference < 0;
+                    const averagePerDay = count > 0 ? total / count : 0;
+                    
+                    const bestDay = selectedData.length > 0 
+                      ? selectedData.reduce((max, item) => item.value > max.value ? item : max, selectedData[0])
+                      : null;
+                    const worstDay = selectedData.length > 0 
+                      ? selectedData.reduce((min, item) => item.value < min.value ? item : min, selectedData[0])
+                      : null;
+                    
+                    const daysWithData = count;
+                    const dataCompleteness = (daysWithData / daysInMonth) * 100;
+                    const daysAboveTarget = selectedData.filter(item => item.value >= dailyTargets[selectedTab]).length;
+                    const daysBelowTarget = selectedData.filter(item => item.value < dailyTargets[selectedTab]).length;
+                    const targetAchievementRate = count > 0 ? (daysAboveTarget / count) * 100 : 0;
+                    
+                    const colors = {
+                      Sleep: { text: "#B39DDB", bg: "#EDE7F6" },
+                      Steps: { text: "#9747FF", bg: "#F3EDFF" },
+                      Water: { text: "#4FC3F7", bg: "#E3F2FD" },
+                    };
+                    const color = colors[selectedTab];
+                    
+                    return (
+                      <>
+                        {/* Summary Report Header */}
+                        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                          <Text style={{ fontSize: theme.fontSizes.medium, fontWeight: theme.fontWeights.bold as "700", color: theme.colors.text, fontFamily: theme.fonts.bold }}>
+                            Summary Report
+                          </Text>
+                          <View style={{ width: 30, height: 3, backgroundColor: theme.colors.secondPrimary, borderRadius: 2 }} />
+                        </View>
+                        
+                        {/* Summary Report Card */}
+                        <View style={{ backgroundColor: theme.colors.backgroundCard, borderRadius: 16, padding: 20, marginBottom: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2, borderWidth: 1, borderColor: theme.colors.border }}>
+                          <View style={{ flexDirection: "row", justifyContent: "space-around", marginBottom: 20, paddingBottom: 20, borderBottomWidth: 1, borderBottomColor: theme.colors.border }}>
+                            <View style={{ alignItems: "center", flex: 1 }}>
+                              <Text style={{ fontSize: theme.fontSizes.xl, fontWeight: "700", color: color.text, fontFamily: theme.fonts.bold, marginBottom: 4 }}>
+                                {selectedTab === "Sleep" ? `${total.toFixed(1)} hrs` : selectedTab === "Steps" ? total.toLocaleString() : `${total} glasses`}
+                              </Text>
+                              <Text style={{ fontSize: theme.fontSizes.regularSmall, color: theme.colors.textSecondary, fontFamily: theme.fonts.medium }}>
+                                Total {selectedTab}
+                              </Text>
+                            </View>
+                            <View style={{ width: 1, height: 50, backgroundColor: theme.colors.divider, marginHorizontal: 16 }} />
+                            <View style={{ alignItems: "center", flex: 1 }}>
+                              <Text style={{ fontSize: theme.fontSizes.xl, fontWeight: "700", color: color.text, fontFamily: theme.fonts.bold, marginBottom: 4 }}>
+                                {selectedTab === "Sleep" ? `${averagePerDay.toFixed(1)}` : selectedTab === "Steps" ? Math.round(averagePerDay).toLocaleString() : `${averagePerDay.toFixed(1)}`}
+                              </Text>
+                              <Text style={{ fontSize: theme.fontSizes.regularSmall, color: theme.colors.textSecondary, fontFamily: theme.fonts.medium }}>Avg/Day</Text>
+                            </View>
+                          </View>
+                          
+                          {/* Best & Worst Day Row */}
+                          <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 12 }}>
+                            <View style={{ flex: 1, backgroundColor: theme.colors.greenLight, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: theme.colors.greenLight }}>
+                              <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                                <Ionicons name="trophy" size={18} color={theme.colors.success} style={{ marginRight: 6 }} />
+                                <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textSecondary, fontFamily: theme.fonts.medium, fontWeight: "600" }}>Best Day</Text>
+                              </View>
+                              {bestDay ? (
+                                <>
+                                  <Text style={{ fontSize: theme.fontSizes.large, fontWeight: theme.fontWeights.bold as "700", color: theme.colors.success, fontFamily: theme.fonts.bold, marginBottom: 4 }}>
+                                    {selectedTab === "Sleep" ? `${bestDay.value.toFixed(1)} hrs` : selectedTab === "Steps" ? `${Math.round(bestDay.value).toLocaleString()} steps` : `${bestDay.value} glasses`}
+                                  </Text>
+                                  <Text style={{ fontSize: theme.fontSizes.regularSmall, color: theme.colors.textSecondary, fontFamily: theme.fonts.medium }}>
+                                    {dayjs(bestDay.date).format("MMMM D, YYYY")}
+                                  </Text>
+                                </>
+                              ) : (
+                                <Text style={{ fontSize: theme.fontSizes.regularSmall, color: theme.colors.textMuted, fontFamily: theme.fonts.regular }}>No data</Text>
+                              )}
+                            </View>
+                            <View style={{ flex: 1, backgroundColor: theme.colors.errorLight, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: theme.colors.errorLight }}>
+                              <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                                <Ionicons name="trending-down" size={18} color={theme.colors.error} style={{ marginRight: 6 }} />
+                                <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textSecondary, fontFamily: theme.fonts.medium, fontWeight: "600" }}>Worst Day</Text>
+                              </View>
+                              {worstDay ? (
+                                <>
+                                  <Text style={{ fontSize: theme.fontSizes.large, fontWeight: theme.fontWeights.bold as "700", color: theme.colors.error, fontFamily: theme.fonts.bold, marginBottom: 4 }}>
+                                    {selectedTab === "Sleep" ? `${worstDay.value.toFixed(1)} hrs` : selectedTab === "Steps" ? `${Math.round(worstDay.value).toLocaleString()} steps` : `${worstDay.value} glasses`}
+                                  </Text>
+                                  <Text style={{ fontSize: theme.fontSizes.regularSmall, color: theme.colors.textSecondary, fontFamily: theme.fonts.medium }}>
+                                    {dayjs(worstDay.date).format("MMMM D, YYYY")}
+                                  </Text>
+                                </>
+                              ) : (
+                                <Text style={{ fontSize: theme.fontSizes.regularSmall, color: theme.colors.textMuted, fontFamily: theme.fonts.regular }}>No data</Text>
+                              )}
+                            </View>
+                          </View>
+                        </View>
+                        
+                        {/* Monthly Analysis Header */}
+                        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                          <Text style={{ fontSize: theme.fontSizes.medium, fontWeight: theme.fontWeights.bold as "700", color: theme.colors.text, fontFamily: theme.fonts.bold }}>
+                            Monthly Analysis
+                          </Text>
+                          <View style={{ width: 30, height: 3, backgroundColor: theme.colors.secondPrimary, borderRadius: 2 }} />
+                        </View>
+                        
+                        {/* Monthly Analysis Card */}
+                        <View style={{ backgroundColor: theme.colors.backgroundCard, borderRadius: 16, padding: 20, marginBottom: 24, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2, borderWidth: 1, borderColor: theme.colors.border }}>
+                          <View style={{ backgroundColor: theme.colors.backgroundFaded, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: theme.colors.border, marginBottom: 16 }}>
+                            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 16 }}>
+                              <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: isLagging ? theme.colors.errorLight : theme.colors.backgroundCardLight, alignItems: "center", justifyContent: "center", marginRight: 10 }}>
+                                <Ionicons name={isLagging ? "trending-down" : "trending-up"} size={20} color={isLagging ? theme.colors.error : theme.colors.success} />
+                              </View>
+                              <Text style={{ fontSize: theme.fontSizes.regular, fontWeight: theme.fontWeights.bold as "700", color: theme.colors.text, fontFamily: theme.fonts.bold }}>
+                                Monthly Analysis
+                              </Text>
+                            </View>
+                            
+                            <View style={{ marginBottom: 20 }}>
+                              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+                                <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textMuted, fontFamily: theme.fonts.medium }}>Progress</Text>
+                                <Text style={{ fontSize: theme.fontSizes.regularSmall, fontWeight: "700", color: isLagging ? "#D32F2F" : selectedTab === "Sleep" ? "#B39DDB" : "#2F8C62", fontFamily: theme.fonts.bold }}>
+                                  {percentage.toFixed(1)}%
+                                </Text>
+                              </View>
+                              <View style={{ height: 10, backgroundColor: theme.colors.divider, borderRadius: 5, overflow: "hidden", marginBottom: 16 }}>
+                                <View style={{ height: "100%", width: `${Math.min(percentage, 100)}%`, backgroundColor: isLagging ? theme.colors.error : "#B39DDB", borderRadius: 5 }} />
+                              </View>
+                            </View>
+                            
+                            <View style={{ flexDirection: "row", gap: 12, marginBottom: 16 }}>
+                              <View style={{ flex: 1, backgroundColor: theme.colors.background, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: theme.colors.border }}>
+                                <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textMuted, fontFamily: theme.fonts.medium, marginBottom: 6 }}>Target</Text>
+                                <Text style={{ fontSize: theme.fontSizes.medium, fontWeight: theme.fontWeights.bold as "700", color: theme.colors.text, fontFamily: theme.fonts.bold, marginBottom: 2 }}>
+                                  {selectedTab === "Sleep" ? `${targetTotal.toFixed(1)} hrs` : selectedTab === "Steps" ? targetTotal.toLocaleString() : `${targetTotal} glasses`}
+                                </Text>
+                                <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textMuted, fontFamily: theme.fonts.regular }}>
+                                  {dailyTargets[selectedTab].toLocaleString()} {selectedTab === "Sleep" ? "hrs" : selectedTab === "Steps" ? "steps" : "glasses"}/day
+                                </Text>
+                              </View>
+                              <View style={{ flex: 1, backgroundColor: color.bg, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: color.text + "20" }}>
+                                <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textMuted, fontFamily: theme.fonts.medium, marginBottom: 6 }}>Actual</Text>
+                                <Text style={{ fontSize: theme.fontSizes.medium, fontWeight: theme.fontWeights.bold as "700", color: color.text, fontFamily: theme.fonts.bold, marginBottom: 2 }}>
+                                  {selectedTab === "Sleep" ? `${total.toFixed(1)} hrs` : selectedTab === "Steps" ? total.toLocaleString() : `${total} glasses`}
+                                </Text>
+                                <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textMuted, fontFamily: theme.fonts.regular }}>{count} {count === 1 ? "entry" : "entries"}</Text>
+                              </View>
+                            </View>
+                            
+                            <View style={{ backgroundColor: isLagging ? theme.colors.errorLight : theme.colors.greenLight, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: isLagging ? theme.colors.errorLight : theme.colors.greenLight, flexDirection: "row", alignItems: "center" }}>
+                              <Ionicons name={isLagging ? "alert-circle" : "checkmark-circle"} size={20} color={isLagging ? theme.colors.error : theme.colors.success} style={{ marginRight: 10 }} />
+                              <View style={{ flex: 1 }}>
+                                <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textSecondary, fontFamily: theme.fonts.medium, marginBottom: 2 }}>
+                                  {isLagging ? "Lagging by" : "Ahead by"}
+                                </Text>
+                                <Text style={{ fontSize: theme.fontSizes.regular, fontWeight: "700", color: isLagging ? "#D32F2F" : "#2F8C62", fontFamily: theme.fonts.bold }}>
+                                  {selectedTab === "Sleep" ? `${Math.abs(difference).toFixed(1)} hrs` : selectedTab === "Steps" ? Math.abs(difference).toLocaleString() : `${Math.abs(difference)} glasses`}
+                                </Text>
+                              </View>
+                            </View>
+                          </View>
+                          
+                          <View style={{ flexDirection: "row", gap: 12 }}>
+                            <View style={{ flex: 1, backgroundColor: theme.colors.backgroundCard, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: theme.colors.border }}>
+                              <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                                <Ionicons name="calendar" size={16} color={theme.colors.textSecondary} style={{ marginRight: 6 }} />
+                                <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textMuted, fontFamily: theme.fonts.medium }}>Data Completeness</Text>
+                              </View>
+                              <Text style={{ fontSize: theme.fontSizes.medium, fontWeight: theme.fontWeights.bold as "700", color: theme.colors.text, fontFamily: theme.fonts.bold, marginBottom: 4 }}>{dataCompleteness.toFixed(0)}%</Text>
+                              <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textMuted, fontFamily: theme.fonts.regular }}>{daysWithData} of {daysInMonth} days</Text>
+                            </View>
+                            <View style={{ flex: 1, backgroundColor: theme.colors.backgroundCard, borderRadius: 12, padding: 14, borderWidth: 1, borderColor: theme.colors.border }}>
+                              <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8 }}>
+                                <Ionicons name="flag" size={16} color={theme.colors.textSecondary} style={{ marginRight: 6 }} />
+                                <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textMuted, fontFamily: theme.fonts.medium }}>Target Achievement</Text>
+                              </View>
+                              <Text style={{ fontSize: theme.fontSizes.medium, fontWeight: theme.fontWeights.bold as "700", color: selectedTab === "Sleep" ? (targetAchievementRate >= 70 ? "#B39DDB" : targetAchievementRate >= 50 ? "#CE93D8" : "#D32F2F") : (targetAchievementRate >= 70 ? "#2F8C62" : targetAchievementRate >= 50 ? "#FF9800" : "#D32F2F"), fontFamily: theme.fonts.bold, marginBottom: 4 }}>
+                                {targetAchievementRate.toFixed(0)}%
+                              </Text>
+                              <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textMuted, fontFamily: theme.fonts.regular }}>{daysAboveTarget} above, {daysBelowTarget} below</Text>
+                            </View>
+                          </View>
+                        </View>
+                      </>
+                    );
+                  })()}
+                  
+                  {/* Records Section Header - Light Mode */}
+                  {getSelectedData.length > 0 && (
+                    <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+                      <Text style={{ fontSize: theme.fontSizes.medium, fontWeight: theme.fontWeights.bold as "700", color: theme.colors.text, fontFamily: theme.fonts.bold }}>
+                        {selectedTab} Records
+                      </Text>
+                      <View style={{ width: 30, height: 3, backgroundColor: selectedTab === "Sleep" ? "#B39DDB" : selectedTab === "Steps" ? theme.colors.secondPrimary : "#4FC3F7", borderRadius: 2 }} />
+                    </View>
+                  )}
+                  
+                  {getSelectedData.length === 0 ? (
+                    <View style={{ backgroundColor: theme.colors.backgroundCard, borderRadius: 20, padding: 40, alignItems: "center", shadowColor: "#000", shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.08, shadowRadius: 12, elevation: 3, borderWidth: 1, borderColor: theme.colors.border }}>
+                      <View style={{ width: 64, height: 64, borderRadius: 16, backgroundColor: selectedTab === "Sleep" ? theme.colors.backgroundCardLight : selectedTab === "Steps" ? theme.colors.backgroundCardLight : "#E3F2FD", alignItems: "center", justifyContent: "center", marginBottom: 16 }}>
+                        <Ionicons name="bar-chart-outline" size={32} color={selectedTab === "Sleep" ? "#B39DDB" : selectedTab === "Steps" ? theme.colors.secondPrimary : "#4FC3F7"} />
+                      </View>
+                      <Text style={{ textAlign: "center", color: theme.colors.textMuted, marginTop: 12, fontSize: theme.fontSizes.regularSmall, fontWeight: theme.fontWeights.medium as "500" }}>
+                        No data available for this month
+                      </Text>
+                    </View>
+                  ) : (
+                    <View style={{ marginBottom: 20 }}>
+                      {getSelectedData.map((item, index) => {
+                        const recordColors = {
+                          Sleep: { bg: "#EDE7F6", icon: "#B39DDB", text: "#B39DDB" },
+                          Steps: { bg: "#F3EDFF", icon: "#9747FF", text: "#9747FF" },
+                          Water: { bg: "#E3F2FD", icon: "#4FC3F7", text: "#4FC3F7" },
+                        };
+                        const recordColor = recordColors[selectedTab];
+                        
+                        return (
+                          <View key={index} style={{ backgroundColor: theme.colors.backgroundCard, padding: 16, marginBottom: 12, borderRadius: 16, shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.05, shadowRadius: 4, elevation: 2, borderWidth: 1, borderColor: theme.colors.border, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                            <View style={{ flexDirection: "row", alignItems: "center", flex: 1 }}>
+                              <Text style={{ color: theme.colors.text, fontWeight: "600", fontSize: theme.fontSizes.regular, fontFamily: theme.fonts.medium }}>
+                                {dayjs(item.date).format("MMM D, YYYY")}
+                              </Text>
+                            </View>
+                            <Text style={{ fontSize: theme.fontSizes.regular, fontWeight: theme.fontWeights.bold as "700", color: recordColor.text }}>
+                              {selectedTab === "Sleep" ? `${item.value} hrs` : selectedTab === "Steps" ? `${item.value.toLocaleString()} steps` : `${item.value} glasses`}
+                            </Text>
+                          </View>
+                        );
+                      })}
+                    </View>
+                  )}
+                </View>
+              </ScrollView>
+            )}
+          </SafeAreaView>
+        </ImageBackground>
+      )}
+    </>
   );
 }

@@ -17,7 +17,7 @@ import { router } from "expo-router";
 import { Blog } from "../interfaces/blogInterface";
 
 const { width, height } = Dimensions.get("window");
-const CARD_WIDTH = width * 0.85; // Responsive card width - 85% of screen width
+const CARD_WIDTH = width * 0.78; // Responsive card width - 78% of screen width to show peek of next card
 
 function BlogSliderCard() {
   const theme = useGlobalTheme();
@@ -27,8 +27,8 @@ function BlogSliderCard() {
   return (
     <View
       style={{
-        paddingVertical: 16,
-        paddingHorizontal: 16,
+        paddingVertical: 12,
+        paddingHorizontal: 12,
         borderRadius: 20,
         ...(Platform.OS === "ios"
           ? {
@@ -52,7 +52,7 @@ function BlogSliderCard() {
           flexDirection: "row",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: 16,
+          marginBottom: 10,
         }}
       >
         <View
@@ -63,18 +63,18 @@ function BlogSliderCard() {
         >
           <View
             style={{
-              width: 34,
-              height: 34,
-              borderRadius: 10,
+              width: 28,
+              height: 28,
+              borderRadius: 8,
               backgroundColor: theme.colors.backgroundCardLight,
               alignItems: "center",
               justifyContent: "center",
-              marginRight: 12,
+              marginRight: 10,
             }}
           >
             <MaterialCommunityIcons
               name="book-open-variant"
-              size={20}
+              size={16}
               color={theme.colors.secondPrimary}
             />
           </View>
@@ -95,7 +95,7 @@ function BlogSliderCard() {
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ paddingLeft: 4, paddingRight: 16, paddingTop: 8, paddingBottom: 8 }}
+        contentContainerStyle={{ paddingLeft: 4, paddingRight: 12, paddingTop: 6, paddingBottom: 6 }}
       >
         {blogs.map((item: Blog, index) => (
           <TouchableOpacity
@@ -132,7 +132,7 @@ function BlogSliderCard() {
             <View
               style={{
                 width: "100%",
-                height: 180,
+                height: 160,
                 backgroundColor: theme.colors.backgroundSecondary,
                 position: "relative",
                 alignItems: "center",
@@ -152,22 +152,22 @@ function BlogSliderCard() {
             {/* Content Section */}
             <View
               style={{
-                padding: 16,
+                padding: 12,
                 flexDirection: "row",
                 alignItems: "flex-start",
                 justifyContent: "space-between",
               }}
             >
               {/* Left Section - Title */}
-              <View style={{ flex: 1, marginRight: 12 }}>
+              <View style={{ flex: 1, marginRight: 10 }}>
                 <Text
                   numberOfLines={2}
                   style={{
                     fontSize: theme.fontSizes.regular,
                     fontWeight: theme.fontWeights.bold as "700",
                     color: theme.colors.text,
-                    marginBottom: 8,
-                    lineHeight: screenHeight < 700 ? 20 : screenHeight < 900 ? 21 : 22,
+                    marginBottom: 6,
+                    lineHeight: screenHeight < 700 ? 18 : screenHeight < 900 ? 19 : 20,
                     fontFamily: theme.fonts.bold,
                   }}
                 >
@@ -179,9 +179,9 @@ function BlogSliderCard() {
               <TouchableOpacity
                 style={{
                   backgroundColor: theme.colors.success,
-                  paddingVertical: screenHeight < 700 ? 8 : screenHeight < 900 ? 9 : 10,
-                  paddingHorizontal: screenHeight < 700 ? 16 : screenHeight < 900 ? 18 : 20,
-                  borderRadius: 12,
+                  paddingVertical: screenHeight < 700 ? 6 : screenHeight < 900 ? 7 : 8,
+                  paddingHorizontal: screenHeight < 700 ? 12 : screenHeight < 900 ? 14 : 16,
+                  borderRadius: 10,
                   alignSelf: "flex-start",
                   ...(Platform.OS === "ios"
                     ? {

@@ -16,7 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { ImageBackground } from "react-native";
 import { useRouter } from "expo-router";
 import { AntDesign, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import NormalHeader from "@/app/modules/NormalHeader";
 
 const { width, height } = Dimensions.get("window");
@@ -30,6 +30,9 @@ interface Testimonial {
 }
 
 export default function TestimonialsScreen() {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTestimonialIndex, setSelectedTestimonialIndex] = useState<number | null>(null);
@@ -107,35 +110,53 @@ export default function TestimonialsScreen() {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container} edges={["left", "right"]}>
-        <ImageBackground
-          source={require("../../../assets/images/basicBackground.jpg")}
-          style={{ flex: 1 }}
-          resizeMode="cover"
-        >
-          <View
-            style={{
-              paddingLeft: 20,
-              marginTop: Platform.OS === "ios" ? topPadding : "4%",
-            }}
-          >
-            <NormalHeader screenName="Testimonials" />
+      <>
+        {isDark ? (
+          <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+            <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={["left", "right"]}>
+              <View
+                style={{
+                  paddingLeft: 20,
+                  marginTop: Platform.OS === "ios" ? topPadding : "4%",
+                }}
+              >
+                <NormalHeader screenName="Testimonials" />
+              </View>
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color={theme.colors.secondPrimary} />
+              </View>
+            </SafeAreaView>
           </View>
-          <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#9747FF" />
-          </View>
-        </ImageBackground>
-      </SafeAreaView>
+        ) : (
+          <SafeAreaView style={styles.container} edges={["left", "right"]}>
+            <ImageBackground
+              source={require("../../../assets/images/basicBackground.jpg")}
+              style={{ flex: 1 }}
+              resizeMode="cover"
+            >
+              <View
+                style={{
+                  paddingLeft: 20,
+                  marginTop: Platform.OS === "ios" ? topPadding : "4%",
+                }}
+              >
+                <NormalHeader screenName="Testimonials" />
+              </View>
+              <View style={styles.loadingContainer}>
+                <ActivityIndicator size="large" color="#9747FF" />
+              </View>
+            </ImageBackground>
+          </SafeAreaView>
+        )}
+      </>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["left", "right"]}>
-      <ImageBackground
-        source={require("../../../assets/images/basicBackground.jpg")}
-        style={{ flex: 1 }}
-        resizeMode="cover"
-      >
+    <>
+      {isDark ? (
+        <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
+          <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={["left", "right"]}>
         <View
           style={{
             paddingLeft: 20,
@@ -225,11 +246,9 @@ export default function TestimonialsScreen() {
                               style={styles.image}
                               resizeMode="contain"
                             />
-                            {/* Gradient Overlay */}
-                            <View style={styles.imageOverlay} />
                             {/* Expand Icon */}
                             <View style={styles.expandIcon}>
-                              <Ionicons name="expand" size={14} color="#9747FF" />
+                              <Ionicons name="expand" size={14} color={isDark ? theme.colors.textWhite : "#9747FF"} />
                             </View>
                           </View>
 
@@ -308,7 +327,7 @@ export default function TestimonialsScreen() {
                 onPress={closeModal}
                 style={styles.modalCloseBtn}
               >
-                <Ionicons name="close" size={20} color="#000" />
+                <Ionicons name="close" size={20} color={isDark ? theme.colors.textWhite : "#000"} />
               </TouchableOpacity>
 
               {/* Carousel */}
@@ -393,12 +412,278 @@ export default function TestimonialsScreen() {
             </View>
           </KeyboardAvoidingView>
         </Modal>
-      </ImageBackground>
-    </SafeAreaView>
+          </SafeAreaView>
+        </View>
+      ) : (
+        <SafeAreaView style={styles.container} edges={["left", "right"]}>
+          <ImageBackground
+            source={require("../../../assets/images/basicBackground.jpg")}
+            style={{ flex: 1 }}
+            resizeMode="cover"
+          >
+            <View
+              style={{
+                paddingLeft: 20,
+                marginTop: Platform.OS === "ios" ? topPadding : "4%",
+              }}
+            >
+              <NormalHeader screenName="Testimonials" />
+            </View>
+
+            {/* Statistics Card - Fixed at Top */}
+            {validTestimonials.length > 0 && (
+              <View style={styles.statsCard}>
+                <View style={styles.statItem}>
+                  <View style={styles.statIconContainer}>
+                    <MaterialCommunityIcons
+                      name="account-star"
+                      size={18}
+                      color="#9747FF"
+                    />
+                  </View>
+                  <Text style={styles.statValue}>{totalTestimonials}</Text>
+                  <Text style={styles.statLabel}>Total Reviews</Text>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <View style={styles.statIconContainer}>
+                    <MaterialCommunityIcons
+                      name="star"
+                      size={18}
+                      color="#9747FF"
+                    />
+                  </View>
+                  <Text style={styles.statValue}>{averageRating}</Text>
+                  <Text style={styles.statLabel}>Avg Rating</Text>
+                </View>
+                <View style={styles.statDivider} />
+                <View style={styles.statItem}>
+                  <View style={styles.statIconContainer}>
+                    <MaterialCommunityIcons
+                      name="star-circle"
+                      size={18}
+                      color="#9747FF"
+                    />
+                  </View>
+                  <Text style={styles.statValue}>{fiveStarCount}</Text>
+                  <Text style={styles.statLabel}>5 Star Reviews</Text>
+                </View>
+              </View>
+            )}
+
+            {/* Testimonials Grid - Scrollable */}
+            <ScrollView
+              style={styles.scrollView}
+              contentContainerStyle={styles.scrollContent}
+              showsVerticalScrollIndicator={false}
+            >
+              {validTestimonials.length === 0 ? (
+                <View style={styles.emptyContainer}>
+                  <View style={styles.emptyIconContainer}>
+                    <MaterialCommunityIcons
+                      name="account-star-outline"
+                      size={64}
+                      color="#CCC"
+                    />
+                  </View>
+                  <Text style={styles.emptyText}>No testimonials available</Text>
+                </View>
+              ) : (
+                <View style={styles.testimonialsContainer}>
+                  {groupedTestimonials.map((row, rowIndex) => {
+                    const startIndex = rowIndex * 2;
+                    return (
+                      <View key={rowIndex} style={styles.testimonialRow}>
+                        {row.map((testimonial, index) => {
+                          const globalIndex = startIndex + index;
+                          return (
+                            <TouchableOpacity
+                              key={`${testimonial.reviewerName}-${rowIndex}-${index}`}
+                              style={styles.testimonialCard}
+                              activeOpacity={0.8}
+                              onPress={() => openModal(globalIndex)}
+                            >
+                              {/* Image - Full image without cropping */}
+                              <View style={styles.imageContainer}>
+                                <Image
+                                  source={{ uri: testimonial.imageUrl }}
+                                  style={styles.image}
+                                  resizeMode="contain"
+                                />
+                                {/* Expand Icon */}
+                                <View style={styles.expandIcon}>
+                                  <Ionicons name="expand" size={14} color={isDark ? theme.colors.textWhite : "#9747FF"} />
+                                </View>
+                              </View>
+
+                              {/* Content */}
+                              <View style={styles.cardContent}>
+                                <Text
+                                  style={styles.reviewerName}
+                                  numberOfLines={1}
+                                >
+                                  {testimonial.reviewerName}
+                                </Text>
+
+                                {/* Rating */}
+                                <View style={styles.ratingContainer}>
+                                  {Array.from({ length: 5 }).map((_, i) => (
+                                    <AntDesign
+                                      key={i}
+                                      name={i < testimonial.rating ? "star" : "staro"}
+                                      size={12}
+                                      color="#FFB800"
+                                      style={{ marginRight: 2 }}
+                                    />
+                                  ))}
+                                  {testimonial.rating > 0 && (
+                                    <Text style={styles.ratingText}>
+                                      {testimonial.rating.toFixed(1)}
+                                    </Text>
+                                  )}
+                                </View>
+
+                                {/* Review Text - Properly constrained */}
+                                <Text
+                                  style={styles.reviewText}
+                                  numberOfLines={3}
+                                  ellipsizeMode="tail"
+                                >
+                                  {testimonial.review}
+                                </Text>
+                            </View>
+                          </TouchableOpacity>
+                        );
+                      })}
+                      {/* Only show empty space if row has exactly 1 valid item */}
+                      {row.length === 1 && (
+                        <View style={styles.testimonialCard} />
+                      )}
+                      </View>
+                    );
+                  })}
+                </View>
+              )}
+            </ScrollView>
+
+            {/* Bottom Sheet Modal */}
+            <Modal
+              visible={selectedTestimonialIndex !== null}
+              transparent
+              animationType="slide"
+              onRequestClose={closeModal}
+            >
+              <KeyboardAvoidingView
+                behavior={Platform.OS === "ios" ? "padding" : undefined}
+                style={styles.modalOverlay}
+              >
+                <TouchableOpacity
+                  style={styles.modalBackdrop}
+                  activeOpacity={1}
+                  onPress={closeModal}
+                />
+                <View style={styles.modalSheet}>
+                  {/* Handle Bar */}
+                  <View style={styles.dashHandle} />
+
+                  {/* Close Button */}
+                  <TouchableOpacity
+                    onPress={closeModal}
+                    style={styles.modalCloseBtn}
+                  >
+                    <Ionicons name="close" size={20} color="#000" />
+                  </TouchableOpacity>
+
+                  {/* Carousel */}
+                  {validTestimonials.length > 0 && (
+                    <ScrollView
+                      ref={scrollRef}
+                      horizontal
+                      pagingEnabled
+                      showsHorizontalScrollIndicator={false}
+                      onScroll={handleScroll}
+                      scrollEventThrottle={16}
+                      style={styles.modalCarousel}
+                      contentContainerStyle={styles.modalCarouselContent}
+                    >
+                      {validTestimonials.map((testimonial, index) => (
+                          <View key={index} style={styles.modalSlide}>
+                            {/* Image */}
+                            <View style={styles.modalImageContainer}>
+                              <Image
+                                source={{ uri: testimonial.imageUrl }}
+                                style={styles.modalImage}
+                                resizeMode="contain"
+                              />
+                            </View>
+
+                            {/* Content */}
+                            <View style={styles.modalContent}>
+                              {/* Header with Icon */}
+                              <View style={styles.modalHeader}>
+                                <View style={styles.modalHeaderIconContainer}>
+                                  <MaterialCommunityIcons
+                                    name="account-star"
+                                    size={24}
+                                    color="#9747FF"
+                                  />
+                                </View>
+                                <View style={styles.modalHeaderText}>
+                                  <Text style={styles.modalReviewerName}>
+                                    {testimonial.reviewerName}
+                                  </Text>
+                                  {/* Rating */}
+                                  <View style={styles.modalRatingContainer}>
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                      <AntDesign
+                                        key={i}
+                                        name={i < testimonial.rating ? "star" : "staro"}
+                                        size={16}
+                                        color="#FFD700"
+                                        style={{ marginRight: 2 }}
+                                      />
+                                    ))}
+                                    <Text style={styles.modalRatingText}>
+                                      {testimonial.rating}/5
+                                    </Text>
+                                  </View>
+                                </View>
+                              </View>
+
+                              {/* Divider */}
+                              <View style={styles.modalDivider} />
+
+                              {/* Review Text with Icon */}
+                              <View style={styles.modalReviewSection}>
+                                <View style={styles.modalReviewIconContainer}>
+                                  <MaterialCommunityIcons
+                                    name="format-quote-open"
+                                    size={20}
+                                    color="#9747FF"
+                                  />
+                                </View>
+                                <Text style={styles.modalReviewText}>
+                                  {testimonial.review}
+                                </Text>
+                              </View>
+                            </View>
+                          </View>
+                        ))}
+                    </ScrollView>
+                  )}
+
+                  {/* Dots Indicator - Removed */}
+                </View>
+              </KeyboardAvoidingView>
+            </Modal>
+          </ImageBackground>
+        </SafeAreaView>
+      )}
+    </>
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "transparent",
@@ -418,7 +703,7 @@ const styles = StyleSheet.create({
   },
   // Statistics Card
   statsCard: {
-    backgroundColor: theme.colors.background,
+    backgroundColor: isDark ? theme.colors.background : theme.colors.background,
     borderRadius: 16,
     padding: 16,
     margin: 16,
@@ -426,13 +711,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-around",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    ...(isDark ? {} : {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 1 },
+      shadowOpacity: 0.05,
+      shadowRadius: 4,
+      elevation: 2,
+    }),
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   statItem: {
     alignItems: "center",
@@ -450,13 +737,13 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: theme.fontSizes.large,
     fontWeight: theme.fontWeights.bold as "700",
-    color: theme.colors.secondPrimary,
+    color: isDark ? theme.colors.textWhite : theme.colors.secondPrimary,
     fontFamily: theme.fonts.bold,
     marginBottom: 4,
   },
   statLabel: {
     fontSize: theme.fontSizes.small,
-    color: theme.colors.textSecondary,
+    color: isDark ? theme.colors.textWhite : theme.colors.textSecondary,
     fontFamily: theme.fonts.regular,
     textAlign: "center",
   },
@@ -478,16 +765,18 @@ const styles = StyleSheet.create({
   },
   testimonialCard: {
     flex: 1,
-    backgroundColor: theme.colors.background,
+    backgroundColor: isDark ? theme.colors.background : theme.colors.background,
     borderRadius: 20,
     overflow: "hidden",
-    shadowColor: "#9747FF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 6,
+    ...(isDark ? {} : {
+      shadowColor: "#9747FF",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.12,
+      shadowRadius: 12,
+      elevation: 6,
+    }),
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
     maxWidth: (width - 48) / 2, // 2 cards with padding and gaps
   },
   imageContainer: {
@@ -495,7 +784,7 @@ const styles = StyleSheet.create({
     height: 120, // Reduced height for better proportion
     overflow: "hidden",
     position: "relative",
-    backgroundColor: theme.colors.backgroundSecondary,
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
     justifyContent: "center",
     alignItems: "center",
     borderTopLeftRadius: 20,
@@ -506,16 +795,6 @@ const styles = StyleSheet.create({
     height: "100%",
     resizeMode: "contain", // Show full image without cropping
   },
-  imageOverlay: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 30,
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
   expandIcon: {
     position: "absolute",
     top: 8,
@@ -523,16 +802,18 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "rgba(255,255,255,0.95)",
+    backgroundColor: isDark ? theme.colors.backgroundCard : "rgba(255,255,255,0.95)",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#9747FF",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 4,
+    ...(isDark ? {} : {
+      shadowColor: "#9747FF",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 4,
+    }),
     borderWidth: 1,
-    borderColor: "rgba(151, 71, 255, 0.1)",
+    borderColor: isDark ? theme.colors.border : "rgba(151, 71, 255, 0.1)",
   },
   cardContent: {
     padding: 12,
@@ -542,7 +823,7 @@ const styles = StyleSheet.create({
   reviewerName: {
     fontSize: theme.fontSizes.regularSmall,
     fontFamily: theme.fonts.bold,
-    color: theme.colors.text,
+    color: isDark ? theme.colors.textWhite : theme.colors.text,
     fontWeight: "700",
     marginBottom: 6,
   },
@@ -554,14 +835,14 @@ const styles = StyleSheet.create({
   ratingText: {
     fontSize: theme.fontSizes.small,
     fontFamily: theme.fonts.medium,
-    color: theme.colors.textSecondary,
+    color: isDark ? theme.colors.textWhite : theme.colors.textSecondary,
     marginLeft: 4,
     fontWeight: "600",
   },
   reviewText: {
     fontSize: theme.fontSizes.small,
     fontFamily: theme.fonts.regular,
-    color: theme.colors.textSecondary,
+    color: isDark ? theme.colors.textWhite : theme.colors.textSecondary,
     lineHeight: 16,
     marginTop: 2,
   },
@@ -584,7 +865,7 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: theme.fontSizes.regular,
     fontFamily: theme.fonts.regular,
-    color: theme.colors.textMuted,
+    color: isDark ? theme.colors.textWhite : theme.colors.textMuted,
   },
   // Modal Styles - Bottom Sheet
   modalOverlay: {
@@ -597,17 +878,19 @@ const styles = StyleSheet.create({
   },
   modalSheet: {
     maxHeight: height * 0.85,
-    backgroundColor: theme.colors.background,
+    backgroundColor: isDark ? theme.colors.background : theme.colors.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: Platform.OS === "android" ? 20 : 40,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.1,
-    shadowRadius: 16,
-    elevation: 10,
+    ...(isDark ? {} : {
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: -4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 16,
+      elevation: 10,
+    }),
   },
   dashHandle: {
     width: 50,
@@ -621,7 +904,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 50,
     right: 20,
-    backgroundColor: theme.colors.backgroundSecondary,
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
     borderRadius: 16,
     width: 32,
     height: 32,
@@ -642,7 +925,7 @@ const styles = StyleSheet.create({
   modalImageContainer: {
     width: width - 40,
     height: height * 0.35,
-    backgroundColor: theme.colors.border,
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.border,
     borderRadius: 16,
     overflow: "hidden",
     marginBottom: 16,
@@ -676,7 +959,7 @@ const styles = StyleSheet.create({
   modalReviewerName: {
     fontSize: theme.fontSizes.large,
     fontFamily: theme.fonts.bold,
-    color: theme.colors.black,
+    color: isDark ? theme.colors.textWhite : theme.colors.black,
     fontWeight: "700",
     marginBottom: 8,
   },
@@ -687,7 +970,7 @@ const styles = StyleSheet.create({
   modalRatingText: {
     fontSize: theme.fontSizes.regularSmall,
     fontFamily: theme.fonts.medium,
-    color: theme.colors.textSecondary,
+    color: isDark ? theme.colors.textWhite : theme.colors.textSecondary,
     marginLeft: 8,
   },
   modalDivider: {
@@ -713,7 +996,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: theme.fontSizes.regular,
     fontFamily: theme.fonts.regular,
-    color: theme.colors.textSecondary,
+    color: isDark ? theme.colors.textWhite : theme.colors.textSecondary,
     lineHeight: 22,
     fontStyle: "italic",
   },

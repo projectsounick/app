@@ -21,7 +21,7 @@ import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 const PromoVideoModal = () => {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
-  const styles = getStyles(theme);
+  const styles = getStyles(theme, isDark);
   const [showModal, setShowModal] = useState(false);
   const [currentVideo, setCurrentVideo] = useState<PromotionalVideoItem | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
@@ -63,13 +63,27 @@ const PromoVideoModal = () => {
 
   const handleClose = async () => {
     try {
-      // Store the entire video object in AsyncStorage when closed
-      if (currentVideo) {
-        await promotionalVideoService.storePromotionalVideo(currentVideo);
+      // Stop video playback immediately
+      if (videoRef.current) {
+        try {
+          await videoRef.current.pauseAsync();
+          await videoRef.current.unloadAsync();
+        } catch (err) {
+          console.error("Error stopping video:", err);
+        }
       }
+      
+      // Close modal immediately to prevent UI freeze
       setShowModal(false);
+      
+      // Store the entire video object in AsyncStorage in background (non-blocking)
+      if (currentVideo) {
+        promotionalVideoService.storePromotionalVideo(currentVideo).catch((err) => {
+          console.error("Error saving promotional video:", err);
+        });
+      }
     } catch (err) {
-      console.error("Error saving promotional video:", err);
+      console.error("Error closing modal:", err);
       setShowModal(false);
     }
   };
@@ -151,6 +165,10 @@ const PromoVideoModal = () => {
                   resizeMode={ResizeMode.CONTAIN}
                   style={styles.video}
                   onLoad={() => setLoading(false)}
+                  onError={(error) => {
+                    console.error("Video error:", error);
+                    setLoading(false);
+                  }}
                 />
                 {/* Play/Pause Overlay Button (Center) */}
                 <TouchableOpacity
@@ -201,7 +219,7 @@ const PromoVideoModal = () => {
 
 export default PromoVideoModal;
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: theme.colors.overlay,
@@ -262,7 +280,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   modalTitle: {
     fontSize: theme.fontSizes.large,
     fontWeight: theme.fontWeights.bold as "700",
-    color: theme.colors.black,
+    color: isDark ? theme.colors.textWhite : theme.colors.black,
     marginBottom: 4,
   },
   modalSubtitle: {

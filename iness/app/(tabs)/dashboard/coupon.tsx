@@ -184,7 +184,7 @@ export default function CouponScreen() {
                             <MaterialIcons
                               name="content-copy"
                               size={18}
-                              color={theme.colors.secondPrimary}
+                              color={theme.colors.textWhite}
                             />
                             <Text style={styles.copyCodeText}>Copy</Text>
                           </TouchableOpacity>
@@ -249,7 +249,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     paddingBottom: 20,
   },
   descriptionContainer: {
-    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 20,
     marginBottom: 20,
@@ -365,7 +365,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   copyCodeButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
+    backgroundColor: theme.colors.success,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderRadius: 12,
@@ -374,7 +374,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   copyCodeText: {
     fontSize: theme.fontSizes.regularSmall,
     fontWeight: theme.fontWeights.medium as "500",
-    color: theme.colors.secondPrimary,
+    color: theme.colors.textWhite,
     fontFamily: theme.fonts.medium,
   },
 });

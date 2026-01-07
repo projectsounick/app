@@ -52,7 +52,7 @@ const CouponModal: React.FC<CouponModalProps> = ({
           >
             <View
               style={{
-                backgroundColor: "#FFFFFF",
+                backgroundColor: theme.colors.background,
                 paddingHorizontal: 20,
                 paddingTop: 20,
                 paddingBottom: 40,
@@ -65,7 +65,7 @@ const CouponModal: React.FC<CouponModalProps> = ({
                 style={{
                   width: 50,
                   height: 5,
-                  backgroundColor: "#ccc",
+                  backgroundColor: theme.colors.border,
                   borderRadius: 3,
                   alignSelf: "center",
                   marginBottom: 20,
@@ -82,13 +82,13 @@ const CouponModal: React.FC<CouponModalProps> = ({
                   width: 32,
                   height: 32,
                   borderRadius: 16,
-                  backgroundColor: "#F0F0F0",
+                  backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.border,
                   alignItems: "center",
                   justifyContent: "center",
                   zIndex: 10,
                 }}
               >
-                <Ionicons name="close" size={20} color="#000" />
+                <Ionicons name="close" size={20} color={theme.colors.text} />
               </TouchableOpacity>
 
               {/* Icon Container */}
@@ -98,12 +98,12 @@ const CouponModal: React.FC<CouponModalProps> = ({
                     width: 80,
                     height: 80,
                     borderRadius: 40,
-                    backgroundColor: "#FFF3E0",
+                    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCardLight,
                     alignItems: "center",
                     justifyContent: "center",
                   }}
                 >
-                  <Ionicons name="ticket-outline" size={40} color="#FF9800" />
+                  <Ionicons name="ticket-outline" size={40} color={theme.colors.secondPrimary} />
                 </View>
               </View>
 
@@ -123,11 +123,11 @@ const CouponModal: React.FC<CouponModalProps> = ({
               {/* Input */}
               <TextInput
                 placeholder="Enter coupon code"
-                placeholderTextColor="#999"
+                placeholderTextColor={theme.colors.textMuted}
                 value={couponCode}
                 onChangeText={setCouponCode}
                 style={{
-                  backgroundColor: theme.colors.backgroundSecondary,
+                  backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
                   borderRadius: 16,
                   paddingHorizontal: 16,
                   paddingVertical: 16,
@@ -142,7 +142,7 @@ const CouponModal: React.FC<CouponModalProps> = ({
               {/* Apply Button */}
               <TouchableOpacity
                 style={{
-                  backgroundColor: "#67C694",
+                  backgroundColor: theme.colors.success,
                   paddingVertical: 16,
                   borderRadius: 30,
                   alignItems: "center",

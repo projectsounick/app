@@ -3,7 +3,7 @@ import { FlatList, View, Text, StyleSheet } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const measurementItems = [
   { key: "chest", label: "Chest", icon: "body-outline", color: ["#9747FF", "#844ACF"] },
@@ -14,6 +14,10 @@ const measurementItems = [
 ];
 
 const MeasurementList = ({ measurements }: { measurements: any[] }) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
+  
   return (
     <FlatList
       data={measurements}
@@ -23,7 +27,7 @@ const MeasurementList = ({ measurements }: { measurements: any[] }) => {
         <View style={styles.card}>
           {/* Header with Gradient */}
           <LinearGradient
-            colors={["#9747FF", "#844ACF"]}
+            colors={isDark ? [theme.colors.secondPrimary, "#7B2CBF"] : ["#9747FF", "#844ACF"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             style={styles.cardHeader}
@@ -89,7 +93,7 @@ const MeasurementList = ({ measurements }: { measurements: any[] }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   listContainer: {
     padding: 16,
     paddingBottom: 100,
@@ -99,13 +103,15 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 16,
     overflow: "hidden",
-    shadowColor: theme.colors.secondPrimary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 12,
-    elevation: 6,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
+    ...(isDark ? {} : {
+      shadowColor: theme.colors.secondPrimary,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.12,
+      shadowRadius: 12,
+      elevation: 6,
+    }),
   },
   cardHeader: {
     flexDirection: "row",
@@ -156,11 +162,11 @@ const styles = StyleSheet.create({
   },
   measurementItem: {
     width: "48%",
-    backgroundColor: theme.colors.backgroundSecondary,
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
     borderRadius: 14,
     padding: 14,
     borderWidth: 1,
-    borderColor: "#F0F0F0",
+    borderColor: theme.colors.border,
   },
   measurementItemHeader: {
     flexDirection: "row",

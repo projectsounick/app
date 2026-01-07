@@ -7,6 +7,7 @@ import { fetchWrapper } from "../helpers/fetchWrapper";
 import { router } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { store } from "@/store";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 const baseUrl = `${config.apiUrl}/api`;
 ///// Exporting userservice functions --------------------------------------/
 export const userService = {
@@ -27,13 +28,31 @@ export const userService = {
 
 //// Function for sending the otp to the user ---------------/
 async function sendLoginOtp(email: string): Promise<ApiResponseInterface> {
+  console.log("=== sendLoginOtp Function Started ===");
+  console.log("Email received:", email);
+  console.log("Base URL:", baseUrl);
+  console.log("Full URL:", `${baseUrl}/user-app-login`);
+  console.log("Request payload:", { email });
+  console.log("Timestamp:", new Date().toISOString());
+  
   try {
     let response = await fetchWrapper.post(`${baseUrl}/user-app-login`, {
       email,
     });
 
+    console.log("=== sendLoginOtp Response Received ===");
+    console.log("Response success:", response?.success);
+    console.log("Response message:", response?.message);
+    console.log("Response data exists:", !!response?.data);
+    console.log("Full response:", JSON.stringify(response, null, 2));
+
     return response;
   } catch (error: any) {
+    console.error("=== sendLoginOtp Error ===");
+    console.error("Email:", email);
+    console.error("Error:", error);
+    console.error("Error message:", error?.message);
+    console.error("Error stack:", error?.stack);
     throw new Error("Error sending OTP: " + error.message);
   }
 }
@@ -44,6 +63,19 @@ async function verifyLoginOtp(data: {
   otp: string;
   expoPushToken: string;
 }): Promise<ApiResponseInterface> {
+  console.log("=== verifyLoginOtp Function Started ===");
+  console.log("Email:", data.email);
+  console.log("OTP:", data.otp);
+  console.log("Expo Push Token:", data.expoPushToken ? "Present" : "Not present");
+  console.log("Base URL:", baseUrl);
+  console.log("Full URL:", `${baseUrl}/user-otp-verify`);
+  console.log("Request payload:", {
+    email: data.email,
+    otp: data.otp,
+    expoPushToken: data.expoPushToken ? "***" : undefined,
+  });
+  console.log("Timestamp:", new Date().toISOString());
+  
   try {
     let response = await fetchWrapper.post(`${baseUrl}/user-otp-verify`, {
       email: data.email,
@@ -51,9 +83,19 @@ async function verifyLoginOtp(data: {
       expoPushToken: data.expoPushToken,
     });
     
+    console.log("=== verifyLoginOtp Response Received ===");
+    console.log("Response success:", response?.success);
+    console.log("Response message:", response?.message);
+    console.log("Response data exists:", !!response?.data);
+    console.log("Full response:", JSON.stringify(response, null, 2));
 
     return response;
   } catch (error: any) {
+    console.error("=== verifyLoginOtp Error ===");
+    console.error("Email:", data.email);
+    console.error("Error:", error);
+    console.error("Error message:", error?.message);
+    console.error("Error stack:", error?.stack);
     throw new Error("Error sending OTP: " + error.message);
   }
 }
@@ -61,7 +103,19 @@ async function verifyLoginOtp(data: {
 //// Funciton for updating the user in using backend then storing in AsyncStorage----/
 async function updateUser(userData: any): Promise<any> {
   try {
-    return fetchWrapper.put(`${baseUrl}/update-user`, { data: userData });
+    const response = await fetchWrapper.put(`${baseUrl}/update-user`, { data: userData });
+    
+    // If update is successful and response contains user data, update AsyncStorage
+    if (response.success && response.user) {
+      try {
+        await asyncStorageUtils.updateUserDataInAsyncStorage(response.user);
+      } catch (storageError) {
+        console.error('Error updating AsyncStorage after user update:', storageError);
+        // Don't throw error, just log it - the backend update was successful
+      }
+    }
+    
+    return response;
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }

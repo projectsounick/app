@@ -35,9 +35,11 @@ import OnboardingHeight from "@/components/Onboarding/OnboardingHeight";
 import OnboardingDOB from "@/components/Onboarding/OnboardingDOB";
 import OnboardingphoneNumber from "@/components/Onboarding/OnboardingPhoneNumber";
 import InfoModal from "@/components/Onboarding/Information";
+import { useGlobalTheme } from "./Theme/ThemeContext";
 
 //// Main functional component for the Onboarding screen ///// -----------------------------------/
 const OnboardingScreen = () => {
+  const theme = useGlobalTheme();
   const insets = useSafeAreaInsets();
   const [currentStep, setCurrentStep] = useState(0);
   const [showIntroModal, setShowIntroModal] = useState(true); // Show intro first
@@ -153,71 +155,69 @@ const OnboardingScreen = () => {
             style={{ flex: 1 }}
             behavior={Platform.OS === "ios" ? "padding" : undefined}
           >
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-              <View style={{ 
-                flex: 1, 
-                paddingTop: Platform.OS === "android" ? Math.max(insets.top, 20) : "8%", 
-                paddingHorizontal: 20 
-              }}>
-                {/* Row with Back Button + Progress Bar */}
-                <View
+            <View style={{ 
+              flex: 1, 
+              paddingTop: Platform.OS === "android" ? Math.max(insets.top, 20) : "8%", 
+              paddingHorizontal: 20 
+            }}>
+              {/* Row with Back Button + Progress Bar */}
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 30,
+                }}
+              >
+                <TouchableOpacity
+                  onPress={handleBack}
                   style={{
-                    flexDirection: "row",
+                    backgroundColor: "#FFFFFF",
+                    width: 40,
+                    height: 40,
+                    borderRadius: 20,
                     alignItems: "center",
-                    marginBottom: 30,
+                    justifyContent: "center",
+                    marginRight: 12,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
                   }}
                 >
-                  <TouchableOpacity
-                    onPress={handleBack}
-                    style={{
-                      backgroundColor: theme.colors.background,
-                      width: 40,
-                      height: 40,
-                      borderRadius: 20,
-                      alignItems: "center",
-                      justifyContent: "center",
-                      marginRight: 12,
-                      shadowColor: "#000",
-                      shadowOffset: { width: 0, height: 2 },
-                      shadowOpacity: 0.1,
-                      shadowRadius: 4,
-                      elevation: 3,
-                    }}
-                  >
-                    <Ionicons name="arrow-back" size={20} color="#000" />
-                  </TouchableOpacity>
+                    <Ionicons name="arrow-back" size={20} color="#000000" />
+                </TouchableOpacity>
 
+                <View
+                  style={{
+                    flex: 1,
+                    height: 8,
+                    backgroundColor: theme.colors.lightGrey,
+                    borderRadius: 10,
+                    overflow: "hidden",
+                  }}
+                >
                   <View
                     style={{
-                      flex: 1,
                       height: 8,
-                      backgroundColor: theme.colors.lightGrey,
+                      width: progressWidth,
+                      backgroundColor: theme.colors.secondPrimary,
                       borderRadius: 10,
-                      overflow: "hidden",
                     }}
-                  >
-                    <View
-                      style={{
-                        height: 8,
-                        width: progressWidth,
-                        backgroundColor: theme.colors.secondPrimary,
-                        borderRadius: 10,
-                      }}
-                    />
-                  </View>
+                  />
                 </View>
-
-                {/* Step Content */}
-                <View style={{ flex: 1 }}>{renderStepComponent(loading)}</View>
-
-                <CustomSnackbar
-                  visible={snackbarVisible}
-                  message={snackbarMessage}
-                  bgColor="#67C694"
-                  onDismiss={() => setSnackbarVisible(false)}
-                />
               </View>
-            </TouchableWithoutFeedback>
+
+              {/* Step Content */}
+              <View style={{ flex: 1 }}>{renderStepComponent(loading)}</View>
+
+              <CustomSnackbar
+                visible={snackbarVisible}
+                message={snackbarMessage}
+                bgColor="#67C694"
+                onDismiss={() => setSnackbarVisible(false)}
+              />
+            </View>
           </KeyboardAvoidingView>
         </SafeAreaView>
       </ImageBackground>

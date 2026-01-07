@@ -38,7 +38,7 @@ export default function VideoCallChecker({
 }: Props) {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
-  const styles = getStyles(theme);
+  const styles = getStyles(theme, isDark);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [showVideoModal, setShowVideoModal] = useState(false);
@@ -159,7 +159,7 @@ export default function VideoCallChecker({
                 style={styles.joinButton}
                 activeOpacity={0.8}
               >
-                <Ionicons name="videocam" size={20} color="#67C694" />
+                <Ionicons name="videocam" size={20} color={theme.colors.textWhite} />
                 <Text style={styles.joinButtonText}>Join Call</Text>
               </TouchableOpacity>
             )}
@@ -190,7 +190,7 @@ export default function VideoCallChecker({
   );
 }
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   animatedWrapper: {
     flex: 1,
     justifyContent: "center",
@@ -236,7 +236,7 @@ const getStyles = (theme: any) => StyleSheet.create({
   title: {
     fontSize: theme.fontSizes.large,
     fontWeight: theme.fontWeights.bold as "700",
-    color: theme.colors.black,
+    color: isDark ? theme.colors.textWhite : theme.colors.black,
     marginBottom: 12,
     textAlign: "center",
     fontFamily: theme.fonts.bold,
@@ -258,7 +258,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: theme.colors.greenLight,
+    backgroundColor: theme.colors.success,
     paddingVertical: 14,
     paddingHorizontal: 32,
     borderRadius: 30,
@@ -272,7 +272,7 @@ const getStyles = (theme: any) => StyleSheet.create({
     borderColor: theme.colors.success,
   },
   joinButtonText: {
-    color: theme.colors.success,
+    color: theme.colors.textWhite,
     fontSize: theme.fontSizes.regular,
     fontWeight: theme.fontWeights.bold as "700",
     marginLeft: 8,

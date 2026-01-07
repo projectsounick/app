@@ -646,20 +646,24 @@ const CommunityPosts = ({
             position: "absolute",
             right: "10%",
             top: "5%",
-            backgroundColor: theme.colors.background,
+            backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
             borderRadius: 12,
-            shadowColor: "#000",
-            shadowOpacity: 0.15,
-            shadowOffset: { width: 0, height: 3 },
-            shadowRadius: 6,
-            elevation: 5,
+            ...(isDark ? {} : {
+              shadowColor: "#000",
+              shadowOpacity: 0.15,
+              shadowOffset: { width: 0, height: 3 },
+              shadowRadius: 6,
+              elevation: 5,
+            }),
             paddingVertical: 8,
             width: 180,
             zIndex: 1300,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
           }}
         >
           {showTooltipForPost === item._id ? (
-            <ActivityIndicator style={{ paddingVertical: 12 }} />
+            <ActivityIndicator style={{ paddingVertical: 12 }} color={isDark ? theme.colors.textWhite : theme.colors.secondPrimary} />
           ) : (
             <TouchableOpacity
               onPress={() => toolTipAction(item, "complain")}
@@ -675,7 +679,7 @@ const CommunityPosts = ({
                 style={{
                   marginLeft: 10,
                   fontSize: theme.fontSizes.regular,
-                  color: theme.colors.text,
+                  color: isDark ? theme.colors.textWhite : theme.colors.text,
                   fontWeight: "500",
                 }}
               >
@@ -688,7 +692,7 @@ const CommunityPosts = ({
           <View
             style={{
               height: 1,
-              backgroundColor: theme.colors.backgroundSecondary,
+              backgroundColor: theme.colors.border,
               marginHorizontal: 10,
             }}
           />
@@ -732,7 +736,7 @@ const CommunityPosts = ({
             }}
           >
             {blockLoading ? (
-              <ActivityIndicator />
+              <ActivityIndicator color={isDark ? theme.colors.textWhite : "red"} />
             ) : (
               <>
                 <Ionicons name="close-circle-outline" size={20} color="red" />

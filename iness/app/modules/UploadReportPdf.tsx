@@ -12,8 +12,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as DocumentPicker from "expo-document-picker";
 import { Ionicons } from "@expo/vector-icons";
-import { LinearGradient } from "expo-linear-gradient";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "../Theme/ThemeContext";
 import { userService } from "../services/user.service";
 import { uploadToAzureFromExpo } from "@/utils/azureUtils";
 
@@ -28,6 +27,8 @@ const HealthReportUploader = ({
   modalVisible,
   setModalVisible,
 }: HealthReportUploaderProps) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const [loading, setLoading] = useState(false);
   const [uploadedUrl, setUploadedUrl] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string>("");
@@ -136,59 +137,63 @@ const HealthReportUploader = ({
             borderRadius: 20,
             backgroundColor: theme.colors.background,
             overflow: "hidden",
-            elevation: 10,
-            shadowColor: theme.colors.black,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 8,
+            ...(isDark ? {} : {
+              elevation: 10,
+              shadowColor: theme.colors.black,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+            }),
           }}
         >
-          <LinearGradient
-            colors={[theme.colors.primary, theme.colors.secondPrimary]}
+          {/* Simple Header */}
+          <View
             style={{
-              padding: 20,
+              paddingTop: 20,
+              paddingBottom: 20,
+              paddingHorizontal: 20,
               alignItems: "center",
               justifyContent: "center",
               position: "relative",
-            }}
-          />
-          <Text
-            style={{
-              color: theme.colors.text,
-              fontSize: theme.fontSizes.large,
-              fontWeight: theme.fontWeights.bold as "700",
-              textAlign: "center",
-              fontFamily: theme.fonts.bold,
-            }}
-          >
-            Upload Health Report
-          </Text>
-
-          <TouchableOpacity
-            onPress={handleClose}
-            style={{
-              position: "absolute",
-              top: 10,
-              right: 10,
               backgroundColor: theme.colors.background,
-              width: 32,
-              height: 32,
-              borderRadius: 16,
-              justifyContent: "center",
-              alignItems: "center",
-              elevation: 5,
-              shadowColor: theme.colors.black,
-              shadowOffset: { width: 0, height: 2 },
-              shadowOpacity: 0.25,
-              shadowRadius: 3,
+              borderBottomWidth: 1,
+              borderBottomColor: theme.colors.border,
             }}
           >
-            {loading ? (
-              <ActivityIndicator size="small" color={theme.colors.primary} />
-            ) : (
-              <Ionicons name="close" size={20} color={theme.colors.primary} />
-            )}
-          </TouchableOpacity>
+            <Text
+              style={{
+                color: theme.colors.text,
+                fontSize: theme.fontSizes.large,
+                fontWeight: theme.fontWeights.bold as "700",
+                textAlign: "center",
+                fontFamily: theme.fonts.bold,
+                marginTop: 10,
+              }}
+            >
+              Upload Health Report
+            </Text>
+
+            <TouchableOpacity
+              onPress={handleClose}
+              style={{
+                position: "absolute",
+                top: 20,
+                right: 15,
+                width: 32,
+                height: 32,
+                borderRadius: 16,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
+              }}
+            >
+              {loading ? (
+                <ActivityIndicator size="small" color={theme.colors.text} />
+              ) : (
+                <Ionicons name="close" size={20} color={theme.colors.text} />
+              )}
+            </TouchableOpacity>
+          </View>
 
           <View style={{ padding: 25, alignItems: "center" }}>
             <Text
@@ -229,7 +234,7 @@ const HealthReportUploader = ({
                   marginVertical: 15,
                 }}
               >
-                <ActivityIndicator size="large" color={theme.colors.primary} />
+                <ActivityIndicator size="large" color={theme.colors.secondPrimary} />
                 <Text style={{ marginTop: 10, color: theme.colors.text }}>
                   Uploading {fileName}...
                 </Text>
@@ -241,23 +246,26 @@ const HealthReportUploader = ({
                   flexDirection: "row",
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: theme.colors.primary,
+                  backgroundColor: theme.colors.success,
                   paddingVertical: 14,
                   paddingHorizontal: 25,
                   borderRadius: 35,
                   marginBottom: 10,
                   borderWidth: 1,
-                  borderColor: theme.colors.black,
-                  shadowColor: theme.colors.black,
-                  shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.3,
-                  shadowRadius: 5,
+                  borderColor: theme.colors.border,
+                  ...(isDark ? {} : {
+                    shadowColor: theme.colors.black,
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 5,
+                    elevation: 3,
+                  }),
                 }}
               >
-                <Ionicons name="cloud-upload" size={24} color={theme.colors.black} />
+                <Ionicons name="cloud-upload" size={24} color={theme.colors.textWhite} />
                 <Text
                   style={{
-                    color: theme.colors.black,
+                    color: theme.colors.textWhite,
                     fontWeight: theme.fontWeights.bold as "700",
                     marginLeft: 12,
                     fontSize: theme.fontSizes.regular,

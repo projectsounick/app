@@ -43,13 +43,12 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={60}
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.container}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            keyboardShouldPersistTaps="handled"
-            showsVerticalScrollIndicator={false}
-          >
+      <View style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
             {/* Header */}
             <OnboardingHeading
               icon="account-outline"
@@ -92,6 +91,8 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
                   onBlur={() => setIsFocused(false)}
                   returnKeyType="done"
                   autoCapitalize="words"
+                  editable={true}
+                  pointerEvents="auto"
                   style={styles.textInput}
                 />
                 {isValid && (
@@ -128,38 +129,37 @@ const OnboardingName = ({ onNext }: { onNext: () => void }) => {
                 <FeatureItem icon="account-group" text="Expert guidance" />
               </View>
             </View>
-          </ScrollView>
+        </ScrollView>
 
-          {/* Bottom Button */}
-          <View style={styles.bottomContainer}>
-            <TouchableOpacity
-              onPress={handleNext}
-              disabled={!isValid}
+        {/* Bottom Button */}
+        <View style={styles.bottomContainer}>
+          <TouchableOpacity
+            onPress={handleNext}
+            disabled={!isValid}
+            style={[
+              styles.nextButton,
+              {
+                backgroundColor: isValid ? "#67C694" : "#E0E0E0",
+              },
+            ]}
+          >
+            <Text
               style={[
-                styles.nextButton,
-                {
-                  backgroundColor: isValid ? "#67C694" : "#E0E0E0",
-                },
+                styles.nextButtonText,
+                { color: isValid ? "#FFFFFF" : "#999" },
               ]}
             >
-              <Text
-                style={[
-                  styles.nextButtonText,
-                  { color: isValid ? "#FFFFFF" : "#999" },
-                ]}
-              >
-                Continue
-              </Text>
-              <MaterialCommunityIcons
-                name="arrow-right"
-                size={20}
-                color={isValid ? "#FFFFFF" : "#999"}
-                style={{ marginLeft: 8 }}
-              />
-            </TouchableOpacity>
-          </View>
+              Continue
+            </Text>
+            <MaterialCommunityIcons
+              name="arrow-right"
+              size={20}
+              color={isValid ? "#FFFFFF" : "#999"}
+              style={{ marginLeft: 8 }}
+            />
+          </TouchableOpacity>
         </View>
-      </TouchableWithoutFeedback>
+      </View>
     </KeyboardAvoidingView>
   );
 };

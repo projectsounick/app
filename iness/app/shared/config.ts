@@ -4,7 +4,7 @@ const dev = Object.freeze({
    
  //apiUrl: "https://iness-backend.azurewebsites.net",
   // Local development backend
-  apiUrl: "http://172.20.10.5:7071",
+ apiUrl: "http://192.168.1.53:7071",
 });
 
 // export const config = process.env.NODE_ENV === "development" ? dev : prod;

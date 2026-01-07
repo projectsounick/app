@@ -55,14 +55,14 @@ export default function AddActivityModal({
           justifyContent: "flex-end",
         }}
       >
-        <LinearGradient
-          colors={["#2C1453", "#1C0E33"]}
+        <View
           style={{
             height: height * 0.7,
             borderTopLeftRadius: 25,
             borderTopRightRadius: 25,
             padding: 20,
             overflow: "hidden",
+            backgroundColor: theme.colors.background,
           }}
         >
           {/* Handle */}
@@ -70,7 +70,7 @@ export default function AddActivityModal({
             style={{
               width: 45,
               height: 5,
-              backgroundColor: "rgba(255,255,255,0.4)",
+              backgroundColor: theme.colors.border,
               borderRadius: 3,
               alignSelf: "center",
               marginTop: 4,
@@ -85,13 +85,13 @@ export default function AddActivityModal({
               position: "absolute",
               top: 18,
               right: 20,
-              backgroundColor: "rgba(255,255,255,0.2)",
+              backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.border,
               borderRadius: 20,
               padding: 6,
               zIndex: 2,
             }}
           >
-            <Ionicons name="close" size={20} color={theme.colors.textWhite} />
+            <Ionicons name="close" size={20} color={theme.colors.text} />
           </TouchableOpacity>
 
           {/* Title */}
@@ -99,7 +99,7 @@ export default function AddActivityModal({
             style={{
               fontSize: theme.fontSizes.large,
               fontFamily: theme.fonts.bold,
-              color: theme.colors.textWhite,
+              color: theme.colors.text,
               marginBottom: 20,
             }}
           >
@@ -120,11 +120,11 @@ export default function AddActivityModal({
                   marginBottom: 12,
                   backgroundColor:
                     selectedActivity === cat.name
-                      ? "rgba(255,255,255,0.1)"
-                      : "rgba(255,255,255,0.05)",
+                      ? isDark ? theme.colors.backgroundCard : theme.colors.backgroundCardLight
+                      : isDark ? theme.colors.backgroundSecondary : theme.colors.backgroundSecondary,
                   borderWidth: selectedActivity === cat.name ? 1 : 0,
                   borderColor:
-                    selectedActivity === cat.name ? cat.color : "transparent",
+                    selectedActivity === cat.name ? cat.color : theme.colors.border,
                 }}
                 onPress={() => setSelectedActivity(cat.name)}
               >
@@ -138,7 +138,7 @@ export default function AddActivityModal({
                   style={{
                     fontSize: theme.fontSizes.regular,
                     fontFamily: theme.fonts.medium,
-                    color: theme.colors.textWhite,
+                    color: theme.colors.text,
                   }}
                 >
                   {cat.name}
@@ -152,15 +152,17 @@ export default function AddActivityModal({
                 style={{
                   marginTop: 20,
                   padding: 14,
-                  backgroundColor: "rgba(255,255,255,0.1)",
+                  backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
                   borderRadius: 12,
+                  borderWidth: 1,
+                  borderColor: theme.colors.border,
                 }}
               >
                 <Text
                   style={{
                     fontSize: theme.fontSizes.regularSmall,
                     fontFamily: theme.fonts.medium,
-                    color: theme.colors.textWhite,
+                    color: theme.colors.text,
                     marginBottom: 6,
                   }}
                 >
@@ -171,15 +173,16 @@ export default function AddActivityModal({
                   onChangeText={setDuration}
                   keyboardType="numeric"
                   placeholder="e.g., 45"
-                  placeholderTextColor="#ccc"
+                  placeholderTextColor={theme.colors.textMuted}
                   style={{
                     borderWidth: 1,
-                    borderColor: "rgba(255,255,255,0.3)",
+                    borderColor: theme.colors.border,
                     borderRadius: 10,
                     padding: 10,
                     fontSize: theme.fontSizes.regular,
                     fontFamily: theme.fonts.regular,
-                    color: theme.colors.textWhite,
+                    color: theme.colors.text,
+                    backgroundColor: theme.colors.background,
                   }}
                 />
               </View>
@@ -190,7 +193,7 @@ export default function AddActivityModal({
               onPress={handleAdd}
               style={{
                 marginTop: 24,
-                backgroundColor: theme.colors.primary,
+                backgroundColor: theme.colors.success,
                 padding: 14,
                 borderRadius: 20,
                 alignItems: "center",
@@ -198,10 +201,10 @@ export default function AddActivityModal({
                 justifyContent: "center",
               }}
             >
-              <Ionicons name="checkmark" size={20} color={theme.colors.black} />
+              <Ionicons name="checkmark" size={20} color={theme.colors.textWhite} />
               <Text
                 style={{
-                  color: theme.colors.black,
+                  color: theme.colors.textWhite,
                   fontFamily: theme.fonts.bold,
                   fontSize: theme.fontSizes.regular,
                   marginLeft: 8,
@@ -211,7 +214,7 @@ export default function AddActivityModal({
               </Text>
             </TouchableOpacity>
           </ScrollView>
-        </LinearGradient>
+        </View>
       </View>
     </Modal>
   );

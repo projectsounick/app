@@ -6,7 +6,7 @@ import {
   MaterialIcons,
 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import theme from "../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { Divider } from "react-native-paper";
 
 type BackTitleInfoProps = {
@@ -20,6 +20,8 @@ export default function HeaderContent({
   subtitle,
   children,
 }: BackTitleInfoProps) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const router = useRouter();
 
   return (
@@ -36,7 +38,7 @@ export default function HeaderContent({
           <MaterialCommunityIcons
             name="chevron-left"
             size={34}
-            color={theme.colors.text}
+            color={theme.colors.textWhite}
           />
         </TouchableOpacity>
 

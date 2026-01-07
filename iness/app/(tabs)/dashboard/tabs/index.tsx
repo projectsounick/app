@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
 import { View, Animated, ScrollView } from "react-native";
 import { usePathname, useRouter } from "expo-router";
-import { useGlobalTheme } from "@/app/Theme/ThemeContext";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 
 import { useDispatch, useSelector } from "react-redux";
@@ -30,6 +30,7 @@ import HomeShimmer from "@/app/modules/Shimmer/HomeShimmer";
 import HealthReportUploader from "@/app/modules/UploadReportPdf";
 import OffersCards from "@/app/modules/OfferCard";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import SmallHeader from "@/app/modules/SmallHeader";
 import FloatingOptions from "@/app/modules/ButtonSection";
 import HealthDashboard from "@/app/modules/HealthCards";
@@ -87,6 +88,8 @@ const YourComponent = () => {
       fetchUserData();
     }, 2000);
   }, []);
+
+  // Dark mode modal logic removed - users will toggle dark mode manually from app settings
   //// Getting the loader from the state ----------------------------/
 
   const configs = useMemo(

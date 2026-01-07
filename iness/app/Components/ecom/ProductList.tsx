@@ -163,7 +163,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   headerTitle: {
     fontSize: theme.fontSizes.large,
     fontWeight: theme.fontWeights.bold as "700",
-    color: theme.colors.text,
+    color: isDark ? theme.colors.textWhite : theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   headerDash: {
@@ -207,7 +207,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   categoryName: {
     fontSize: theme.fontSizes.regular,
     fontWeight: theme.fontWeights.medium as "500",
-    color: theme.colors.text,
+    color: isDark ? theme.colors.textWhite : theme.colors.text,
     flex: 1,
     fontFamily: theme.fonts.bold,
   },
@@ -220,13 +220,13 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   itemCountText: {
     fontSize: theme.fontSizes.small,
     fontWeight: theme.fontWeights.medium as "500",
-    color: theme.colors.secondPrimary,
+    color: isDark ? theme.colors.textWhite : theme.colors.secondPrimary,
     fontFamily: theme.fonts.medium,
   },
   productCard: {
     width: 150,
     borderRadius: 14,
-    backgroundColor: theme.colors.background,
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
     overflow: "hidden",
     marginRight: 12,
     borderWidth: 1,
@@ -286,7 +286,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   productName: {
     fontSize: theme.fontSizes.small,
     fontWeight: theme.fontWeights.medium as "500",
-    color: theme.colors.text,
+    color: isDark ? theme.colors.textWhite : theme.colors.text,
     marginBottom: 6,
     lineHeight: 16,
     fontFamily: theme.fonts.medium,

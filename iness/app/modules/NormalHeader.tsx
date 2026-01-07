@@ -83,7 +83,7 @@ export default function NormalHeader({ screenName, rightIcon, showSupportChat, t
               justifyContent: "center",
             }}
           >
-            <Ionicons name="chatbubble-ellipses-outline" size={24} color={theme.colors.textWhite} />
+            <Ionicons name="chatbubble-ellipses-outline" size={24} color={isDark ? theme.colors.textWhite : theme.colors.black} />
           </TouchableOpacity>
         ) : null}
         {/* {rightIcon ? (

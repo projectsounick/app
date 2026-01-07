@@ -34,7 +34,7 @@ const DietPlanInfoModal: React.FC<DietPlanInfoModalProps> = ({ dietPlan }) => {
           style={{
             marginLeft: 8,
             fontSize: theme.fontSizes.regular,
-            color: theme.colors.dark,
+            color: theme.colors.text,
             fontWeight: theme.fontWeights.medium as "500",
           }}
         >

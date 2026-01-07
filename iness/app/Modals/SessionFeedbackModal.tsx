@@ -84,7 +84,12 @@ const FeedbackModal = ({
             padding: 20,
           }}
         >
-          <Text style={{ fontSize: theme.fontSizes.medium, fontWeight: theme.fontWeights.bold as "700", marginBottom: 16 }}>
+          <Text style={{ 
+            fontSize: theme.fontSizes.medium, 
+            fontWeight: theme.fontWeights.bold as "700", 
+            marginBottom: 16,
+            color: theme.colors.text,
+          }}>
             Give your feedback
           </Text>
 
@@ -109,7 +114,11 @@ const FeedbackModal = ({
                   color={theme.colors.textSecondary}
                   style={{ marginRight: 10 }}
                 />
-                <Text style={{ fontSize: theme.fontSizes.regular, flex: 1 }}>{opt.label}</Text>
+                <Text style={{ 
+                  fontSize: theme.fontSizes.regular, 
+                  flex: 1,
+                  color: theme.colors.text,
+                }}>{opt.label}</Text>
                 <View
                   style={{
                     height: 18,
@@ -144,8 +153,11 @@ const FeedbackModal = ({
                   padding: 10,
                   marginTop: 12,
                   fontSize: theme.fontSizes.regularSmall,
+                  backgroundColor: isDark ? theme.colors.backgroundCard : "#FFFFFF",
+                  color: theme.colors.text,
                 }}
                 placeholder="Write your feedback..."
+                placeholderTextColor={theme.colors.textMuted}
                 value={customFeedback}
                 onChangeText={setCustomFeedback}
               />

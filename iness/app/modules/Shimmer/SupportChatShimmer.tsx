@@ -2,9 +2,16 @@ import React from "react";
 import { View, StyleSheet } from "react-native";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "../../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "../../Theme/ThemeContext";
 
 const SupportChatShimmer: React.FC = () => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
+  const shimmerColors = isDark 
+    ? ["#1a1a1a", "#2a2a2a", "#1a1a1a"]
+    : ["#E1E9EE", "#F2F8FC", "#E1E9EE"];
+
   // Simulate alternating user and support messages
   const messages = [
     { isUser: false, hasImage: false },
@@ -40,7 +47,7 @@ const SupportChatShimmer: React.FC = () => {
                 styles.messageText,
                 { width: message.isUser ? "70%" : "80%" },
               ]}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
             <ShimmerPlaceholder
@@ -49,7 +56,7 @@ const SupportChatShimmer: React.FC = () => {
                 styles.messageText,
                 { width: message.isUser ? "50%" : "60%", marginTop: 6 },
               ]}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
 
@@ -58,7 +65,7 @@ const SupportChatShimmer: React.FC = () => {
               <ShimmerPlaceholder
                 LinearGradient={LinearGradient}
                 style={styles.attachmentImage}
-                shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                shimmerColors={shimmerColors}
                 visible={false}
               />
             )}
@@ -67,7 +74,7 @@ const SupportChatShimmer: React.FC = () => {
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={styles.dateText}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
           </View>
@@ -77,7 +84,7 @@ const SupportChatShimmer: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
@@ -105,7 +112,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     shadowColor: "#000",
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   messageText: {
     height: 16,

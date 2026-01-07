@@ -2,11 +2,18 @@ import React from "react";
 import { View, StyleSheet, Dimensions } from "react-native";
 import ShimmerPlaceholder from "react-native-shimmer-placeholder";
 import { LinearGradient } from "expo-linear-gradient";
-import theme from "../../Theme/globalTheme";
+import { useGlobalTheme, useTheme } from "../../Theme/ThemeContext";
 
 const { width: screenWidth } = Dimensions.get("window");
 
 const FeedShimmer: React.FC = () => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
+  const shimmerColors = isDark 
+    ? ["#1a1a1a", "#2a2a2a", "#1a1a1a"]
+    : ["#E1E9EE", "#F2F8FC", "#E1E9EE"];
+
   // Simulate 3-4 feed posts
   const posts = [1, 2, 3, 4];
 
@@ -20,20 +27,20 @@ const FeedShimmer: React.FC = () => {
               <ShimmerPlaceholder
                 LinearGradient={LinearGradient}
                 style={styles.avatar}
-                shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                shimmerColors={shimmerColors}
                 visible={false}
               />
               <View style={styles.userInfo}>
                 <ShimmerPlaceholder
                   LinearGradient={LinearGradient}
                   style={styles.username}
-                  shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                  shimmerColors={shimmerColors}
                   visible={false}
                 />
                 <ShimmerPlaceholder
                   LinearGradient={LinearGradient}
                   style={styles.timeText}
-                  shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                  shimmerColors={shimmerColors}
                   visible={false}
                 />
               </View>
@@ -41,7 +48,7 @@ const FeedShimmer: React.FC = () => {
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={styles.menuButton}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
           </View>
@@ -50,7 +57,7 @@ const FeedShimmer: React.FC = () => {
           <ShimmerPlaceholder
             LinearGradient={LinearGradient}
             style={styles.media}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
 
@@ -60,13 +67,13 @@ const FeedShimmer: React.FC = () => {
               <ShimmerPlaceholder
                 LinearGradient={LinearGradient}
                 style={styles.actionIcon}
-                shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                shimmerColors={shimmerColors}
                 visible={false}
               />
               <ShimmerPlaceholder
                 LinearGradient={LinearGradient}
                 style={styles.actionIcon}
-                shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+                shimmerColors={shimmerColors}
                 visible={false}
               />
             </View>
@@ -76,7 +83,7 @@ const FeedShimmer: React.FC = () => {
           <ShimmerPlaceholder
             LinearGradient={LinearGradient}
             style={styles.likesText}
-            shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+            shimmerColors={shimmerColors}
             visible={false}
           />
 
@@ -85,13 +92,13 @@ const FeedShimmer: React.FC = () => {
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={styles.captionLine}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
             <ShimmerPlaceholder
               LinearGradient={LinearGradient}
               style={[styles.captionLine, { width: "70%", marginTop: 6 }]}
-              shimmerColors={["#E1E9EE", "#F2F8FC", "#E1E9EE"]}
+              shimmerColors={shimmerColors}
               visible={false}
             />
           </View>
@@ -101,7 +108,7 @@ const FeedShimmer: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
@@ -110,7 +117,7 @@ const styles = StyleSheet.create({
     backgroundColor: theme.colors.background,
     marginBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#F0F0F0",
+    borderBottomColor: theme.colors.border,
     paddingBottom: 16,
   },
   header: {
