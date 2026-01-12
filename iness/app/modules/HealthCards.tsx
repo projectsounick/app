@@ -93,8 +93,6 @@ function HealthDashboard() {
 
   // Helper function to trigger auto-sync - FIRE AND FORGET, NO BLOCKING
   const triggerAutoSync = useCallback((type: "steps" | "sleep") => {
-    console.log(`[HealthCards] Auto-syncing ${type} after reactivation...`);
-    
     // Fire sync - don't await, don't block UI
     syncData(type).then((result) => {
       if (result.success) {
@@ -138,8 +136,6 @@ function HealthDashboard() {
   // Also check for reactivation and auto-sync
   useFocusEffect(
     useCallback(() => {
-      console.log("[HealthCards] Screen focused, checking sync status...");
-      
       // Store current status BEFORE refresh (to compare after)
       const statusBeforeRefresh = syncStatusRef.current 
         ? { stepSync: syncStatusRef.current.stepSync, sleepSync: syncStatusRef.current.sleepSync }
@@ -154,7 +150,6 @@ function HealthDashboard() {
           if (statusBeforeRefresh && currentStatus) {
             // Check if steps sync was reactivated (false -> true)
             if (!statusBeforeRefresh.stepSync && currentStatus.stepSync) {
-              console.log("[HealthCards] Steps sync reactivated, triggering auto-sync...");
               setTimeout(() => {
                 triggerAutoSync("steps");
               }, 300);
@@ -162,7 +157,6 @@ function HealthDashboard() {
             
             // Check if sleep sync was reactivated (false -> true)
             if (!statusBeforeRefresh.sleepSync && currentStatus.sleepSync) {
-              console.log("[HealthCards] Sleep sync reactivated, triggering auto-sync...");
               setTimeout(() => {
                 triggerAutoSync("sleep");
               }, 300);
@@ -207,28 +201,19 @@ function HealthDashboard() {
   }, [syncStatus?.syncModalShown]);
 
   const onClose = () => {
-    console.log(`[HealthCards] onClose called`);
-    const startTime = Date.now();
     // Close modal immediately - don't wait for anything
     setModalVisible(false);
-    console.log(`[HealthCards] onClose completed in ${Date.now() - startTime}ms`);
   };
   const openModal = (key: "sleep" | "steps" | "water") => {
-    console.log(`[HealthCards] openModal called for ${key}`);
-    const startTime = Date.now();
     // Set state directly - React state updates are already async
     setOpenModalFor(key);
     setModalVisible(true);
-    console.log(`[HealthCards] openModal completed in ${Date.now() - startTime}ms`);
   };
 
   function updateTrackingData(
     type: "sleep" | "steps" | "water",
     value: number
   ) {
-    console.log(`[HealthCards] updateTrackingData START - type: ${type}, value: ${value}`);
-    const startTime = performance.now();
-    
     // CRITICAL: This function must return IMMEDIATELY - no async, no blocking
     // All work happens in background - UI stays completely responsive
     
@@ -238,7 +223,6 @@ function HealthDashboard() {
     try {
       existingData = currentDayTrackData[type];
     } catch (error) {
-      console.error(`[HealthCards] updateTrackingData - error accessing currentDayTrackData:`, error);
       existingData = null;
     }
     
@@ -252,21 +236,12 @@ function HealthDashboard() {
       else if (type === "water") newValue += existingData.waterIntake || 0;
     }
 
-    const syncTime = performance.now() - startTime;
-    console.log(`[HealthCards] updateTrackingData - calculated newValue: ${newValue}, sync time: ${syncTime.toFixed(2)}ms`);
-
     // CRITICAL: Use setTimeout(0) to ensure function returns BEFORE async work starts
     // This ensures the modal can close immediately
     setTimeout(() => {
-      const asyncStartTime = performance.now();
-      console.log(`[HealthCards] updateTrackingData - async operation started`);
-      
       // Fire and forget - simple async IIFE, no complex nesting
       (async () => {
         try {
-          console.log(`[HealthCards] updateTrackingData - calling API for ${apiType}...`);
-          const apiStartTime = performance.now();
-          
           // Call API: send _id if exists, so backend knows to update
           const response = await trackService.updateTrackingData(
             newValue,
@@ -274,39 +249,24 @@ function HealthDashboard() {
             apiType
           );
 
-          const apiTime = performance.now() - apiStartTime;
-          console.log(`[HealthCards] updateTrackingData - API call completed in ${apiTime.toFixed(2)}ms`);
-          console.log(`[HealthCards] updateTrackingData - API response:`, response.success ? "success" : "failed");
-
           if (response.success && response.data) {
-            console.log(`[HealthCards] updateTrackingData - scheduling Redux update...`);
-            const reduxStartTime = performance.now();
-            
             // CRITICAL: Use setTimeout instead of InteractionManager to avoid blocking
             // InteractionManager can wait indefinitely if interactions don't complete
             // Use a fixed delay to ensure modal is closed and UI is responsive
             setTimeout(() => {
-              const reduxTime = performance.now() - reduxStartTime;
-              console.log(`[HealthCards] updateTrackingData - Redux dispatch starting, time since schedule: ${reduxTime.toFixed(2)}ms`);
-              
-              const dispatchStartTime = performance.now();
               dispatch(
                 updateTrackingField({
                   type: type,
                   data: response.data,
                 })
               );
-              const dispatchTime = performance.now() - dispatchStartTime;
-              console.log(`[HealthCards] updateTrackingData - Redux dispatch completed in ${dispatchTime.toFixed(2)}ms`);
             }, 300); // Fixed delay to ensure modal is closed and UI is responsive
             
             // Update streak in background (fire and forget) - defer significantly
-            console.log(`[HealthCards] updateTrackingData - creating streak...`);
             setTimeout(() => {
               createStreak()
                 .then((responseStreak) => {
                   if (responseStreak.success) {
-                    console.log(`[HealthCards] updateTrackingData - streak created, updating Redux...`);
                     // Defer streak Redux update even more
                     setTimeout(() => {
                       requestAnimationFrame(() => {
@@ -315,29 +275,20 @@ function HealthDashboard() {
                     }, 50);
                   }
                 })
-                .catch((error) => {
-                  console.error(`[HealthCards] updateTrackingData - streak error:`, error);
+                .catch(() => {
+                  // Streak error
                 });
             }, 200); // Delay streak creation to not block main update
           } else {
-            console.log(`[HealthCards] updateTrackingData - API failed, showing error`);
             setSnackbarMsg("Some error has happened, try again");
             setSnackbarVisible(true);
           }
-          
-          const asyncTime = performance.now() - asyncStartTime;
-          console.log(`[HealthCards] updateTrackingData - async operation completed in ${asyncTime.toFixed(2)}ms`);
         } catch (error) {
-          console.error(`[HealthCards] updateTrackingData - EXCEPTION:`, error);
-          console.error(`[HealthCards] updateTrackingData - exception stack:`, error instanceof Error ? error.stack : "no stack");
           setSnackbarVisible(true);
           setSnackbarMsg("Some error has happened, try again");
         }
       })();
     }, 0);
-    
-    const totalTime = performance.now() - startTime;
-    console.log(`[HealthCards] updateTrackingData END - function returned in ${totalTime.toFixed(2)}ms`);
   }
 
   /**
@@ -378,14 +329,7 @@ function HealthDashboard() {
     syncData("steps").then(async (result) => {
       // Clear sync flag when done
       await AsyncStorage.removeItem("healthSyncInProgress");
-      
-      if (result.success) {
-        console.log("[HealthCards] Steps sync completed successfully");
-      } else {
-        console.error("[HealthCards] Steps sync failed:", result.error);
-      }
     }).catch(async (error: any) => {
-      console.error("[HealthCards] EXCEPTION in handleSyncSteps:", error);
       // Clear sync flag on error
       await AsyncStorage.removeItem("healthSyncInProgress");
     });
@@ -430,14 +374,7 @@ function HealthDashboard() {
     syncData("sleep").then(async (result) => {
       // Clear sync flag when done
       await AsyncStorage.removeItem("healthSyncInProgress");
-      
-      if (result.success) {
-        console.log("[HealthCards] Sleep sync completed successfully");
-      } else {
-        console.error("[HealthCards] Sleep sync failed:", result.error);
-      }
     }).catch(async (error: any) => {
-      console.error("[HealthCards] EXCEPTION in handleSyncSleep:", error);
       // Clear sync flag on error
       await AsyncStorage.removeItem("healthSyncInProgress");
     });
@@ -459,7 +396,6 @@ function HealthDashboard() {
         {/* Steps Card */}
         <TouchableOpacity
           onPress={() => {
-            console.log(`[HealthCards] Steps card clicked`);
             router.push("/(tabs)/dashboard/track");
           }}
           activeOpacity={0.7}
@@ -626,7 +562,6 @@ function HealthDashboard() {
         {/* Sleep Card */}
         <TouchableOpacity
           onPress={() => {
-            console.log(`[HealthCards] Sleep card clicked`);
             router.push("/(tabs)/dashboard/track");
           }}
           activeOpacity={0.7}
@@ -938,14 +873,7 @@ function HealthDashboard() {
                 
                 // Clear sync flag when done
                 await AsyncStorage.removeItem("healthSyncInProgress");
-                
-                if (result.success) {
-                  console.log(`[HealthCards] Sync completed successfully for ${healthConnectModalType}`);
-                } else {
-                  console.error(`[HealthCards] Sync failed:`, result.error);
-                }
               } catch (error: any) {
-                console.error(`[HealthCards] EXCEPTION in handleSync${healthConnectModalType === "steps" ? "Steps" : "Sleep"}:`, error);
                 // Clear sync flag on error
                 await AsyncStorage.removeItem("healthSyncInProgress");
               } finally {

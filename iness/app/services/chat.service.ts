@@ -18,12 +18,10 @@ async function getSupportConversation(): Promise<ApiResponseInterface> {
     const loggedUser = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
       "user"
     );
-    console.log("loggedUser", loggedUser);
     let userId;
     if (loggedUser.exists) {
       userId = loggedUser.data._id;
     }
-    console.log("userId", userId);
     return fetchWrapper.get(`${baseUrl}/get-supportchat/${userId}`);
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);

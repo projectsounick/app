@@ -7,6 +7,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { trackService } from "./services/track.service";
 import { useDispatch } from "react-redux";
 import { updateTrackingField } from "@/Slices/trackSlice";
+import { userService } from "./services/user.service";
 // Removed unused imports - navigation is handled in dashboard component
 
 import { router } from "expo-router";
@@ -56,7 +57,7 @@ const SecondSplashScreen = () => {
             console.log("[SecondSplash] Data refreshed successfully");
           }
         } catch (error) {
-          console.error("[SecondSplash] Error refreshing data:", error);
+          // Error refreshing data
         }
         return; // Exit when sync is complete
       }
@@ -73,6 +74,21 @@ const SecondSplashScreen = () => {
   useEffect(() => {
     const runAnimation = async () => {
       await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+
+      // Initialize database connection in the background during splash
+      // This establishes the MongoDB connection so subsequent API calls are faster
+      console.log("[SecondSplash] Initializing DB connection...");
+      userService.initDbConnection()
+        .then((response) => {
+          if (response.success) {
+            console.log("[SecondSplash] DB connection initialized successfully");
+          } else {
+            console.log("[SecondSplash] DB connection init failed:", response.message);
+          }
+        })
+        .catch((error) => {
+          console.log("[SecondSplash] DB connection init error:", error?.message || error);
+        });
 
       // Check if health sync is in progress
       const syncFlag = await AsyncStorage.getItem("healthSyncInProgress");

@@ -67,7 +67,6 @@ export default function SupportScreen() {
     snackbarVisible,
     snackbarMessage,
   } = useGetDataHook(chatService.getSupportConversation);
-  console.log("data", data);
   const [messageSendingLoader, setMessageSendingLoader] = useState(false);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);

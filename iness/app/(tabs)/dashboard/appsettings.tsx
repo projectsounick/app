@@ -643,13 +643,11 @@ export default function AppSettingsScreen() {
 
     if (value && !stepsSyncEnabled) {
       // Turning ON - show guidance modal
-      console.log("[AppSettings] Turning ON steps sync - showing guide");
       setSyncGuideModalType("steps");
       setSyncGuideModalAction("enable");
       setSyncGuideModalVisible(true);
     } else if (!value && stepsSyncEnabled) {
       // Turning OFF - show guidance modal
-      console.log("[AppSettings] Turning OFF steps sync - showing guide");
       setSyncGuideModalType("steps");
       setSyncGuideModalAction("disable");
       setSyncGuideModalVisible(true);
@@ -665,13 +663,11 @@ export default function AppSettingsScreen() {
 
     if (value && !sleepSyncEnabled) {
       // Turning ON - show guidance modal
-      console.log("[AppSettings] Turning ON sleep sync - showing guide");
       setSyncGuideModalType("sleep");
       setSyncGuideModalAction("enable");
       setSyncGuideModalVisible(true);
     } else if (!value && sleepSyncEnabled) {
       // Turning OFF - show guidance modal
-      console.log("[AppSettings] Turning OFF sleep sync - showing guide");
       setSyncGuideModalType("sleep");
       setSyncGuideModalAction("disable");
       setSyncGuideModalVisible(true);
@@ -693,8 +689,6 @@ export default function AppSettingsScreen() {
     try {
       if (action === "enable") {
         // Enabling sync
-        console.log(`[AppSettings] User pressed Continue for ${type} sync ON`);
-        
         if (type === "steps") {
           setSyncingSteps(true);
         } else {
@@ -725,8 +719,6 @@ export default function AppSettingsScreen() {
         }
       } else {
         // Disabling sync
-        console.log(`[AppSettings] User pressed Continue for ${type} sync OFF`);
-        
         // Check if permissions are actually OFF
         HealthKit.resetInitialization();
         const hasPermissions = await HealthKit.checkPermissionsStatus(type);

@@ -24,35 +24,18 @@ export const userService = {
   googleSignIn,
   appleSignIn,
   getUserTrainers,
+  initDbConnection,
 };
 
 //// Function for sending the otp to the user ---------------/
 async function sendLoginOtp(email: string): Promise<ApiResponseInterface> {
-  console.log("=== sendLoginOtp Function Started ===");
-  console.log("Email received:", email);
-  console.log("Base URL:", baseUrl);
-  console.log("Full URL:", `${baseUrl}/user-app-login`);
-  console.log("Request payload:", { email });
-  console.log("Timestamp:", new Date().toISOString());
-  
   try {
     let response = await fetchWrapper.post(`${baseUrl}/user-app-login`, {
       email,
     });
 
-    console.log("=== sendLoginOtp Response Received ===");
-    console.log("Response success:", response?.success);
-    console.log("Response message:", response?.message);
-    console.log("Response data exists:", !!response?.data);
-    console.log("Full response:", JSON.stringify(response, null, 2));
-
     return response;
   } catch (error: any) {
-    console.error("=== sendLoginOtp Error ===");
-    console.error("Email:", email);
-    console.error("Error:", error);
-    console.error("Error message:", error?.message);
-    console.error("Error stack:", error?.stack);
     throw new Error("Error sending OTP: " + error.message);
   }
 }
@@ -63,39 +46,15 @@ async function verifyLoginOtp(data: {
   otp: string;
   expoPushToken: string;
 }): Promise<ApiResponseInterface> {
-  console.log("=== verifyLoginOtp Function Started ===");
-  console.log("Email:", data.email);
-  console.log("OTP:", data.otp);
-  console.log("Expo Push Token:", data.expoPushToken ? "Present" : "Not present");
-  console.log("Base URL:", baseUrl);
-  console.log("Full URL:", `${baseUrl}/user-otp-verify`);
-  console.log("Request payload:", {
-    email: data.email,
-    otp: data.otp,
-    expoPushToken: data.expoPushToken ? "***" : undefined,
-  });
-  console.log("Timestamp:", new Date().toISOString());
-  
   try {
     let response = await fetchWrapper.post(`${baseUrl}/user-otp-verify`, {
       email: data.email,
       otp: data.otp,
       expoPushToken: data.expoPushToken,
     });
-    
-    console.log("=== verifyLoginOtp Response Received ===");
-    console.log("Response success:", response?.success);
-    console.log("Response message:", response?.message);
-    console.log("Response data exists:", !!response?.data);
-    console.log("Full response:", JSON.stringify(response, null, 2));
 
     return response;
   } catch (error: any) {
-    console.error("=== verifyLoginOtp Error ===");
-    console.error("Email:", data.email);
-    console.error("Error:", error);
-    console.error("Error message:", error?.message);
-    console.error("Error stack:", error?.stack);
     throw new Error("Error sending OTP: " + error.message);
   }
 }
@@ -110,8 +69,7 @@ async function updateUser(userData: any): Promise<any> {
       try {
         await asyncStorageUtils.updateUserDataInAsyncStorage(response.user);
       } catch (storageError) {
-        console.error('Error updating AsyncStorage after user update:', storageError);
-        // Don't throw error, just log it - the backend update was successful
+        // Don't throw error - the backend update was successful
       }
     }
     
@@ -134,16 +92,14 @@ async function logout() {
         try {
           if (router?.replace) {
             router.replace("/"); // Navigate to root
-          } else {
-            console.warn("Router not ready yet, skipping navigation");
           }
         } catch (err) {
-          console.error("Router navigation failed:", err);
+          // Router navigation failed
         }
       }, 150);
     });
   } catch (error) {
-    console.error("Logout error:", error);
+    // Logout error
   }
 }
 
@@ -151,7 +107,7 @@ async function deleteaccount() {
   try {
     return fetchWrapper.delete(`${baseUrl}/delete-user`);
   } catch (error) {
-    console.error("Logout error:", error);
+    // Error deleting account
   }
 }
 
@@ -170,7 +126,6 @@ async function updateAccessTokenInStorage(newAccessToken: string) {
     const userDataString = await AsyncStorage.getItem("user");
 
     if (!userDataString) {
-      console.warn("User not found in AsyncStorage");
       return;
     }
 
@@ -179,7 +134,7 @@ async function updateAccessTokenInStorage(newAccessToken: string) {
 
     await AsyncStorage.setItem("user", JSON.stringify(userData));
   } catch (e) {
-    console.error("Error updating accessToken in AsyncStorage:", e);
+    // Error updating accessToken
   }
 }
 ///// Function for getting the getting new refresh token  ------------------------------/
@@ -269,5 +224,20 @@ async function appleSignIn(data: {
     return response;
   } catch (error: any) {
     throw new Error("Error with Apple sign-in: " + error.message);
+  }
+}
+
+//// Function for initializing database connection ---------------/
+async function initDbConnection(): Promise<ApiResponseInterface> {
+  try {
+    // Use GET method for simplicity, no body needed
+    const response = await fetchWrapper.get(`${baseUrl}/init-db-connection`);
+    return response;
+  } catch (error: any) {
+    // Don't throw error - this is a background optimization, app should continue even if it fails
+    return {
+      success: false,
+      message: error?.message || "Failed to initialize database connection",
+    };
   }
 }

@@ -3,7 +3,7 @@
     "name": "iness",
     "slug": "iness",
     "jsEngine": "hermes",
-    "version": "1.0.46",
+    "version": "1.0.47",
     "orientation": "default",
     "notification": {
       "icon": "./assets/images/logonew.png",
@@ -18,7 +18,7 @@
       "icon": "./assets/images/logonew.png",
       "supportsTablet": false,
       "bundleIdentifier": "com.iness.fitness",
-      "buildNumber": "59",
+      "buildNumber": "60",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSMicrophoneUsageDescription": "We use the microphone for video recording.",
@@ -32,7 +32,7 @@
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "versionCode": 33,
+      "versionCode": 34,
       "googleServicesFile": "./android/app/google-services.json",
       "permissions": [
         "NOTIFICATIONS",

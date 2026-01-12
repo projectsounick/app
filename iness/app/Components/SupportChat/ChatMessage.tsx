@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, Image, TouchableOpacity, StyleSheet, Linking } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { ChatMessageBubbleProps } from "@/app/interfaces/chatInterface";
@@ -32,6 +32,59 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
     }
   };
 
+  // Detect and render links in text
+  const renderTextWithLinks = (text: string) => {
+    // URL regex pattern
+    const urlRegex = /(https?:\/\/[^\s]+|www\.[^\s]+)/gi;
+    const parts = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = urlRegex.exec(text)) !== null) {
+      // Add text before the link
+      if (match.index > lastIndex) {
+        parts.push(
+          <Text key={`text-${lastIndex}`}>
+            {text.substring(lastIndex, match.index)}
+          </Text>
+        );
+      }
+
+      // Add the link
+      const url = match[0].startsWith("http") ? match[0] : `https://${match[0]}`;
+      parts.push(
+        <Text
+          key={`link-${match.index}`}
+          style={{
+            color: isUser ? "#FFD700" : theme.colors.secondPrimary,
+            textDecorationLine: "underline",
+            fontWeight: "600" as "600",
+          }}
+          onPress={() => {
+            Linking.openURL(url).catch((err) =>
+              console.error("Failed to open URL:", err)
+            );
+          }}
+        >
+          {match[0]}
+        </Text>
+      );
+
+      lastIndex = match.index + match[0].length;
+    }
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(
+        <Text key={`text-${lastIndex}`}>
+          {text.substring(lastIndex)}
+        </Text>
+      );
+    }
+
+    return parts.length > 0 ? parts : <Text>{text}</Text>;
+  };
+
   return (
     <View
       style={[
@@ -56,7 +109,7 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
               { color: isUser ? theme.colors.textWhite : theme.colors.text },
             ]}
           >
-            {item.content.replace(/\\n/g, "\n")}
+            {renderTextWithLinks(item.content.replace(/\\n/g, "\n"))}
           </Text>
         ) : null}
 

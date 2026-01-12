@@ -42,17 +42,7 @@ async function getActivePlans(): Promise<{
   data: PlanInterface[];
   success: boolean;
 }> {
-  console.log('[getActivePlans] Starting to fetch active plans...');
-  console.log('[getActivePlans] API URL:', `${config.apiUrl}/api/get-active-plans`);
-  
-  const startTime = Date.now();
   let respone = await fetchWrapper.get(`${config.apiUrl}/api/get-active-plans`);
-  
-  const duration = Date.now() - startTime;
-  console.log('[getActivePlans] Fetch completed in', duration, 'ms');
-  console.log('[getActivePlans] Response success:', respone.success);
-  console.log('[getActivePlans] Response data length:', respone.data?.length || 0);
-  console.log('[getActivePlans] Full response:', JSON.stringify(respone, null, 2));
   
   return respone;
 }
