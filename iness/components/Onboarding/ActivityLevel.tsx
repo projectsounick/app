@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions, Animated } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Animated } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import OnboardingCard from "@/app/modules/OnboardingCard";
 import { activityLevelOptions } from "@/utils/onboardingStaticValues";
@@ -7,11 +7,8 @@ import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
 import { UserData } from "@/app/interfaces/UserInterface";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
-const { width: screenWidth } = Dimensions.get("window");
-
-//// Main functional component for the activityLevel Level screen--------------------/
 const ActivityLevel = ({
   onNext,
   onBack,
@@ -21,9 +18,9 @@ const ActivityLevel = ({
   onBack: () => void;
   loading: boolean;
 }) => {
+  const theme = useGlobalTheme();
   const [activityLevel, setactivityLevel] = useState<string>("");
 
-  /// Custom hook to load data from AsyncStorage-----------------------/
   useLoadFromAsyncStorage<UserData, any>({
     key: "user",
     property: "activityLevel",
@@ -32,17 +29,17 @@ const ActivityLevel = ({
 
   const handleNext = () => {
     if (activityLevel.length > 0) {
-      asyncStorageUtils.updateUserDataInAsyncStorage({
-        activityLevel,
-      });
+      asyncStorageUtils.updateUserDataInAsyncStorage({ activityLevel });
       onNext();
     }
   };
+
   const updateState = (value: string) => {
     setactivityLevel(value);
   };
 
   const isValid = activityLevel.length > 0;
+  const styles = getStyles(theme, isValid, loading);
 
   return (
     <View style={styles.container}>
@@ -50,7 +47,6 @@ const ActivityLevel = ({
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
         <OnboardingHeading
           icon="shoe-sneaker"
           subtitle="This helps us understand your current fitness baseline"
@@ -58,68 +54,49 @@ const ActivityLevel = ({
           Typical day{"\n"}for you?
         </OnboardingHeading>
 
-        {/* Activity Cards */}
         <View style={styles.cardsContainer}>
-          {activityLevelOptions.map(
-            ({ label, icon, description }: any, index) => (
-              <OnboardingCard
-                key={label}
-                index={index}
-                option={label}
-                state={activityLevel}
-                icon={icon}
-                description={description}
-                updateState={updateState}
-                fontSize={Math.max(screenWidth * 0.038, 14)}
-                height={Math.min(screenWidth * 0.2, 75)}
-              />
-            )
-          )}
+          {activityLevelOptions.map(({ label, icon, description }: any, index) => (
+            <OnboardingCard
+              key={label}
+              index={index}
+              option={label}
+              state={activityLevel}
+              icon={icon}
+              description={description}
+              updateState={updateState}
+              height={68}
+              fontSize={15}
+            />
+          ))}
         </View>
 
-        {/* Motivation Box */}
-        <View style={styles.motivationBox}>
+        <View style={styles.tipBox}>
           <MaterialCommunityIcons
             name="trending-up"
-            size={24}
-            color="#9747FF"
+            size={18}
+            color={theme.colors.success}
           />
-          <View style={styles.motivationTextContainer}>
-            <Text style={styles.motivationTitle}>Start where you are! 🚀</Text>
-            <Text style={styles.motivationText}>
-              We'll create a plan that matches your current lifestyle and grows with you.
-            </Text>
-          </View>
+          <Text style={styles.tipText}>
+            We'll create a plan that matches your current lifestyle and grows with you.
+          </Text>
         </View>
       </ScrollView>
 
-      {/* Next Button - Always at bottom */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity
           onPress={handleNext}
           disabled={loading || !isValid}
-          style={[
-            styles.nextButton,
-            {
-              backgroundColor: loading || !isValid ? "#E0E0E0" : "#67C694",
-            },
-          ]}
+          style={styles.nextButton}
+          activeOpacity={0.8}
         >
-          <Text
-            style={[
-              styles.nextButtonText,
-              {
-                color: loading || !isValid ? "#999" : "#FFFFFF",
-              },
-            ]}
-          >
-            {loading ? <DotLoader /> : "Continue"}
+          <Text style={styles.nextButtonText}>
+            {loading ? <DotLoader theme={theme} /> : "Complete Setup"}
           </Text>
-          {!loading && isValid && (
+          {!loading && (
             <MaterialCommunityIcons
-              name="arrow-right"
+              name="check"
               size={20}
-              color="#FFFFFF"
+              color={isValid ? "#FFFFFF" : theme.colors.textMuted}
               style={{ marginLeft: 8 }}
             />
           )}
@@ -129,75 +106,61 @@ const ActivityLevel = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isValid: boolean, loading: boolean) => StyleSheet.create({
   container: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 24,
-    paddingTop: 20,
+    paddingTop: 24,
     paddingBottom: 30,
   },
   cardsContainer: {
     marginTop: 8,
   },
-  motivationBox: {
+  tipBox: {
     flexDirection: "row",
     alignItems: "flex-start",
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.greenLight,
     borderRadius: 16,
     padding: 16,
     marginTop: 20,
-    borderWidth: 1,
-    borderColor: "#E8E0F5",
   },
-  motivationTextContainer: {
+  tipText: {
     flex: 1,
-    marginLeft: 12,
-  },
-  motivationTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#1A1A1A",
-    marginBottom: 4,
-    fontFamily: theme.fonts.bold,
-  },
-  motivationText: {
     fontSize: 13,
-    color: "#666",
-    lineHeight: 18,
+    color: theme.colors.textSecondary,
+    lineHeight: 20,
     fontFamily: theme.fonts.regular,
+    marginLeft: 12,
   },
   bottomContainer: {
     paddingHorizontal: 24,
-    paddingBottom: 30,
+    paddingBottom: 34,
     paddingTop: 16,
   },
   nextButton: {
-    borderRadius: 30,
+    borderRadius: 16,
     paddingVertical: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#67C694",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    backgroundColor: loading || !isValid ? theme.colors.lightGrey : theme.colors.success,
   },
   nextButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: 17,
+    fontWeight: "600",
     fontFamily: theme.fonts.bold,
+    color: loading || !isValid ? theme.colors.textMuted : "#FFFFFF",
   },
 });
 
 export default ActivityLevel;
 
-const DotLoader = () => {
-  const dot1 = useRef(new Animated.Value(0)).current;
-  const dot2 = useRef(new Animated.Value(0)).current;
-  const dot3 = useRef(new Animated.Value(0)).current;
+const DotLoader = ({ theme }: { theme: any }) => {
+  const dot1 = useRef(new Animated.Value(0.3)).current;
+  const dot2 = useRef(new Animated.Value(0.3)).current;
+  const dot3 = useRef(new Animated.Value(0.3)).current;
 
   useEffect(() => {
     const createAnimation = (anim: Animated.Value, delay: number) =>
@@ -210,7 +173,7 @@ const DotLoader = () => {
             useNativeDriver: true,
           }),
           Animated.timing(anim, {
-            toValue: 0.2,
+            toValue: 0.3,
             duration: 300,
             useNativeDriver: true,
           }),

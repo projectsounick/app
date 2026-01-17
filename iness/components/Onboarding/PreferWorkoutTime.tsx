@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Dimensions } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import OnboardingCard from "@/app/modules/OnboardingCard";
 import { onboardingPreferredWorkoutTimeOptions } from "@/utils/onboardingStaticValues";
@@ -7,11 +7,8 @@ import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { UserData } from "@/app/interfaces/UserInterface";
 import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
-const { width: screenWidth } = Dimensions.get("window");
-
-//// Main functional component for the PreferredWorkout Time screen--------------------/
 const PreferredWorkoutTime = ({
   onNext,
   onBack,
@@ -19,9 +16,9 @@ const PreferredWorkoutTime = ({
   onNext: () => void;
   onBack: () => void;
 }) => {
+  const theme = useGlobalTheme();
   const [preferredWorkoutTime, setPreferredWorkoutTime] = useState<string>("");
 
-  /// Custom hook to load data from AsyncStorage-----------------------/
   useLoadFromAsyncStorage<UserData, any>({
     key: "user",
     property: "preferredWorkoutTime",
@@ -30,17 +27,17 @@ const PreferredWorkoutTime = ({
 
   const handleNext = () => {
     if (preferredWorkoutTime.trim()) {
-      asyncStorageUtils.updateUserDataInAsyncStorage({
-        preferredWorkoutTime,
-      });
+      asyncStorageUtils.updateUserDataInAsyncStorage({ preferredWorkoutTime });
       onNext();
     }
   };
+
   const updateState = (value: string) => {
     setPreferredWorkoutTime(value);
   };
 
   const isValid = preferredWorkoutTime.trim().length > 0;
+  const styles = getStyles(theme, isValid);
 
   return (
     <View style={styles.container}>
@@ -48,7 +45,6 @@ const PreferredWorkoutTime = ({
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
         <OnboardingHeading
           icon="clock-time-eight-outline"
           subtitle="Choose the time that works best for your schedule"
@@ -56,7 +52,6 @@ const PreferredWorkoutTime = ({
           When do you{"\n"}prefer to workout?
         </OnboardingHeading>
 
-        {/* Time Cards */}
         <View style={styles.cardsContainer}>
           {onboardingPreferredWorkoutTimeOptions.map((item, index) => (
             <OnboardingCard
@@ -67,124 +62,90 @@ const PreferredWorkoutTime = ({
               icon={item.icon}
               description={item.description}
               updateState={updateState}
-              height={Math.min(screenWidth * 0.2, 75)}
-              fontSize={Math.max(screenWidth * 0.04, 15)}
+              height={68}
+              fontSize={15}
             />
           ))}
         </View>
 
-        {/* Motivation Box */}
-        <View style={styles.motivationBox}>
+        <View style={styles.tipBox}>
           <MaterialCommunityIcons
             name="calendar-check"
-            size={24}
-            color="#9747FF"
+            size={18}
+            color={theme.colors.success}
           />
-          <View style={styles.motivationTextContainer}>
-            <Text style={styles.motivationTitle}>Consistency is key! 📅</Text>
-            <Text style={styles.motivationText}>
-              Working out at the same time daily helps build lasting habits.
-            </Text>
-          </View>
+          <Text style={styles.tipText}>
+            Working out at the same time daily helps build lasting habits.
+          </Text>
         </View>
       </ScrollView>
 
-      {/* Next Button - Always at bottom */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity
           onPress={handleNext}
           disabled={!isValid}
-          style={[
-            styles.nextButton,
-            {
-              backgroundColor: isValid ? "#67C694" : "#E0E0E0",
-            },
-          ]}
+          style={styles.nextButton}
+          activeOpacity={0.8}
         >
-          <Text
-            style={[
-              styles.nextButtonText,
-              {
-                color: isValid ? "#FFFFFF" : "#999",
-              },
-            ]}
-          >
-            Continue
-          </Text>
-          {isValid && (
-            <MaterialCommunityIcons
-              name="arrow-right"
-              size={20}
-              color="#FFFFFF"
-              style={{ marginLeft: 8 }}
-            />
-          )}
+          <Text style={styles.nextButtonText}>Continue</Text>
+          <MaterialCommunityIcons
+            name="arrow-right"
+            size={20}
+            color={isValid ? "#FFFFFF" : theme.colors.textMuted}
+            style={{ marginLeft: 8 }}
+          />
         </TouchableOpacity>
       </View>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isValid: boolean) => StyleSheet.create({
   container: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: 24,
-    paddingTop: 20,
+    paddingTop: 24,
     paddingBottom: 30,
   },
   cardsContainer: {
     marginTop: 8,
   },
-  motivationBox: {
+  tipBox: {
     flexDirection: "row",
     alignItems: "flex-start",
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.greenLight,
     borderRadius: 16,
     padding: 16,
     marginTop: 20,
-    borderWidth: 1,
-    borderColor: "#E8E0F5",
   },
-  motivationTextContainer: {
+  tipText: {
     flex: 1,
-    marginLeft: 12,
-  },
-  motivationTitle: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#1A1A1A",
-    marginBottom: 4,
-    fontFamily: theme.fonts.bold,
-  },
-  motivationText: {
     fontSize: 13,
-    color: "#666",
-    lineHeight: 18,
+    color: theme.colors.textSecondary,
+    lineHeight: 20,
     fontFamily: theme.fonts.regular,
+    marginLeft: 12,
   },
   bottomContainer: {
     paddingHorizontal: 24,
-    paddingBottom: 30,
+    paddingBottom: 34,
     paddingTop: 16,
   },
   nextButton: {
-    borderRadius: 30,
+    borderRadius: 16,
     paddingVertical: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#67C694",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
+    backgroundColor: isValid ? theme.colors.success : theme.colors.lightGrey,
   },
   nextButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
+    fontSize: 17,
+    fontWeight: "600",
     fontFamily: theme.fonts.bold,
+    color: isValid ? "#FFFFFF" : theme.colors.textMuted,
   },
 });
 

@@ -11,17 +11,15 @@ import {
   TouchableOpacity,
   Modal,
   FlatList,
-  Dimensions,
 } from "react-native";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import CustomSnackbar from "@/app/modules/Snackbar";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
-import theme from "@/app/Theme/globalTheme";
-
-const { width: screenWidth } = Dimensions.get("window");
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
 const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
+  const theme = useGlobalTheme();
   const [heightFeet, setHeightFeet] = useState<string | null>(null);
   const [heightInches, setHeightInches] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -33,13 +31,11 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
   const feetOptions = Array.from({ length: 4 }, (_, i) => `${4 + i}`);
   const inchOptions = Array.from({ length: 12 }, (_, i) => `${i}`);
 
-  // Load saved height from AsyncStorage
   useEffect(() => {
     const loadSavedHeight = async () => {
       try {
         const userData = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
         if (userData?.exists && userData.data?.height) {
-          // Height is stored as "5'10" format
           const heightMatch = userData.data.height.match(/(\d+)'(\d+)/);
           if (heightMatch) {
             setHeightFeet(heightMatch[1]);
@@ -64,9 +60,7 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
 
     try {
       setLoading(true);
-      await asyncStorageUtils.updateUserDataInAsyncStorage({
-        height: formattedHeight,
-      });
+      await asyncStorageUtils.updateUserDataInAsyncStorage({ height: formattedHeight });
       setLoading(false);
       onNext();
     } catch (error: any) {
@@ -89,14 +83,13 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
 
   const getOptions = () => (modalType === "feet" ? feetOptions : inchOptions);
   const isValid = heightFeet && heightInches;
+  const displayHeight = heightFeet && heightInches ? `${heightFeet}'${heightInches}"` : `--'--"`;
 
-  // Display height
-  const displayHeight =
-    heightFeet && heightInches ? `${heightFeet}'${heightInches}"` : `--'--"`;
+  const styles = getStyles(theme);
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      style={styles.keyboardView}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={60}
     >
@@ -107,7 +100,6 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            {/* Header */}
             <OnboardingHeading
               icon="human-male-height"
               subtitle="We use this to calculate your BMI and personalize recommendations"
@@ -115,15 +107,13 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
               What is your{"\n"}height?
             </OnboardingHeading>
 
-            {/* Height Display Card - Horizontal */}
+            {/* Height Display */}
             <View style={styles.displayCard}>
-              <View style={styles.displayIconContainer}>
-                <MaterialCommunityIcons
-                  name="ruler"
-                  size={20}
-                  color="#9747FF"
-                />
-              </View>
+              <MaterialCommunityIcons
+                name="ruler"
+                size={20}
+                color={theme.colors.success}
+              />
               <Text style={styles.displayHeight}>{displayHeight}</Text>
             </View>
 
@@ -134,34 +124,20 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
                 <View style={styles.pickerColumn}>
                   <Text style={styles.pickerLabel}>Feet</Text>
                   <TouchableOpacity
-                    style={[
-                      styles.pickerButton,
-                      heightFeet && styles.pickerButtonSelected,
-                    ]}
+                    style={[styles.pickerButton, heightFeet && styles.pickerButtonSelected]}
                     onPress={() => openModal("feet")}
                   >
-                    <MaterialCommunityIcons
-                      name="ruler-square"
-                      size={Math.min(screenWidth * 0.05, 18)}
-                      color={heightFeet ? "#9747FF" : "#888"}
-                    />
-                    <Text
-                      style={[
-                        styles.pickerText,
-                        heightFeet && styles.pickerTextSelected,
-                      ]}
-                    >
+                    <Text style={[styles.pickerText, heightFeet && styles.pickerTextSelected]}>
                       {heightFeet ?? "Select"}
                     </Text>
                     <MaterialCommunityIcons
                       name="chevron-down"
-                      size={Math.min(screenWidth * 0.05, 18)}
-                      color={heightFeet ? "#9747FF" : "#888"}
+                      size={20}
+                      color={heightFeet ? theme.colors.success : theme.colors.textMuted}
                     />
                   </TouchableOpacity>
                 </View>
 
-                {/* Separator */}
                 <View style={styles.separatorContainer}>
                   <Text style={styles.separatorText}>'</Text>
                 </View>
@@ -170,29 +146,16 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
                 <View style={styles.pickerColumn}>
                   <Text style={styles.pickerLabel}>Inches</Text>
                   <TouchableOpacity
-                    style={[
-                      styles.pickerButton,
-                      heightInches && styles.pickerButtonSelected,
-                    ]}
+                    style={[styles.pickerButton, heightInches && styles.pickerButtonSelected]}
                     onPress={() => openModal("inches")}
                   >
-                    <MaterialCommunityIcons
-                      name="tape-measure"
-                      size={Math.min(screenWidth * 0.05, 18)}
-                      color={heightInches ? "#9747FF" : "#888"}
-                    />
-                    <Text
-                      style={[
-                        styles.pickerText,
-                        heightInches && styles.pickerTextSelected,
-                      ]}
-                    >
+                    <Text style={[styles.pickerText, heightInches && styles.pickerTextSelected]}>
                       {heightInches ?? "Select"}
                     </Text>
                     <MaterialCommunityIcons
                       name="chevron-down"
-                      size={Math.min(screenWidth * 0.05, 18)}
-                      color={heightInches ? "#9747FF" : "#888"}
+                      size={20}
+                      color={heightInches ? theme.colors.success : theme.colors.textMuted}
                     />
                   </TouchableOpacity>
                 </View>
@@ -204,11 +167,10 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
               <MaterialCommunityIcons
                 name="information-outline"
                 size={18}
-                color="#67C694"
+                color={theme.colors.success}
               />
               <Text style={styles.infoText}>
-                Height helps us calculate your ideal weight range and customize
-                workout intensity
+                Height helps us calculate your ideal weight range and customize workout intensity
               </Text>
             </View>
           </ScrollView>
@@ -220,24 +182,18 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
               disabled={loading || !isValid}
               style={[
                 styles.nextButton,
-                {
-                  backgroundColor: isValid ? "#67C694" : "#E0E0E0",
-                },
+                { backgroundColor: isValid ? theme.colors.success : theme.colors.lightGrey },
               ]}
+              activeOpacity={0.8}
             >
-              <Text
-                style={[
-                  styles.nextButtonText,
-                  { color: isValid ? "#FFFFFF" : "#999" },
-                ]}
-              >
+              <Text style={[styles.nextButtonText, { color: isValid ? "#FFFFFF" : theme.colors.textMuted }]}>
                 {loading ? "Saving..." : "Continue"}
               </Text>
               {!loading && (
                 <MaterialCommunityIcons
                   name="arrow-right"
                   size={20}
-                  color={isValid ? "#FFFFFF" : "#999"}
+                  color={isValid ? "#FFFFFF" : theme.colors.textMuted}
                   style={{ marginLeft: 8 }}
                 />
               )}
@@ -246,7 +202,7 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
 
           <CustomSnackbar
             visible={snackbarVisible}
-            bgColor="#FF6B6B"
+            bgColor={theme.colors.error}
             message={snackbarMessage}
             onDismiss={() => setSnackbarVisible(false)}
           />
@@ -269,11 +225,7 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
                     onPress={() => setModalVisible(false)}
                     style={styles.modalCloseButton}
                   >
-                    <MaterialCommunityIcons
-                      name="close"
-                      size={22}
-                      color="#666"
-                    />
+                    <MaterialCommunityIcons name="close" size={22} color={theme.colors.textSecondary} />
                   </TouchableOpacity>
                 </View>
                 <FlatList
@@ -286,26 +238,14 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
                       (modalType === "inches" && heightInches === item);
                     return (
                       <TouchableOpacity
-                        style={[
-                          styles.option,
-                          isItemSelected && styles.optionSelected,
-                        ]}
+                        style={[styles.option, isItemSelected && styles.optionSelected]}
                         onPress={() => selectValue(item)}
                       >
-                        <Text
-                          style={[
-                            styles.optionText,
-                            isItemSelected && styles.optionTextSelected,
-                          ]}
-                        >
+                        <Text style={[styles.optionText, isItemSelected && styles.optionTextSelected]}>
                           {item} {modalType === "feet" ? "ft" : "in"}
                         </Text>
                         {isItemSelected && (
-                          <MaterialCommunityIcons
-                            name="check-circle"
-                            size={22}
-                            color="#9747FF"
-                          />
+                          <MaterialCommunityIcons name="check-circle" size={22} color={theme.colors.success} />
                         )}
                       </TouchableOpacity>
                     );
@@ -320,61 +260,41 @@ const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
   );
 };
 
-export default OnboardingHeight;
-
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
+  keyboardView: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    justifyContent: "space-between",
   },
   scrollContent: {
-    paddingTop: 20,
+    paddingTop: 24,
     paddingHorizontal: 24,
     paddingBottom: 30,
   },
   displayCard: {
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.greenLight,
     borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    alignItems: "center",
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: "#E8E0F5",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     flexDirection: "row",
-    justifyContent: "center",
-  },
-  displayIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
-    shadowColor: "#9747FF",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    marginBottom: 16,
   },
   displayHeight: {
-    fontSize: Math.max(screenWidth * 0.07, 24),
+    fontSize: 24,
     fontWeight: "700",
-    color: "#1A1A1A",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
+    marginLeft: 12,
   },
   pickerCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: Math.min(screenWidth * 0.05, 16),
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    elevation: 3,
+    backgroundColor: theme.colors.background,
+    borderRadius: 20,
+    padding: 20,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   pickerRow: {
     flexDirection: "row",
@@ -384,51 +304,49 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   pickerLabel: {
-    fontSize: Math.max(screenWidth * 0.03, 12),
-    color: "#666",
-    marginBottom: Math.min(screenWidth * 0.025, 8),
+    fontSize: 13,
+    color: theme.colors.textSecondary,
+    marginBottom: 8,
     fontFamily: theme.fonts.medium,
     marginLeft: 4,
   },
   pickerButton: {
     borderWidth: 2,
-    borderColor: "#E8E8E8",
-    borderRadius: 12,
-    paddingVertical: Math.min(screenWidth * 0.035, 12),
-    paddingHorizontal: Math.min(screenWidth * 0.035, 12),
-    backgroundColor: "#F8F9FA",
+    borderColor: theme.colors.border,
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    backgroundColor: theme.colors.backgroundSecondary,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   pickerButtonSelected: {
-    borderColor: "#9747FF",
-    backgroundColor: "#FAFAFF",
+    borderColor: theme.colors.success,
+    backgroundColor: theme.colors.greenLight,
   },
   pickerText: {
-    fontSize: Math.max(screenWidth * 0.042, 16),
-    color: "#999",
+    fontSize: 17,
+    color: theme.colors.textMuted,
     fontWeight: "600",
-    flex: 1,
-    textAlign: "center",
     fontFamily: theme.fonts.medium,
   },
   pickerTextSelected: {
-    color: "#1A1A1A",
+    color: theme.colors.text,
   },
   separatorContainer: {
-    paddingHorizontal: Math.min(screenWidth * 0.02, 6),
-    paddingBottom: Math.min(screenWidth * 0.035, 12),
+    paddingHorizontal: 8,
+    paddingBottom: 14,
   },
   separatorText: {
-    fontSize: Math.max(screenWidth * 0.08, 24),
+    fontSize: 24,
     fontWeight: "700",
-    color: "#9747FF",
+    color: theme.colors.success,
   },
   infoBox: {
     flexDirection: "row",
     alignItems: "flex-start",
-    backgroundColor: "#E8F5E9",
+    backgroundColor: theme.colors.greenLight,
     borderRadius: 16,
     padding: 16,
     marginTop: 20,
@@ -436,31 +354,26 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: 13,
-    color: "#555",
-    marginLeft: 10,
+    color: theme.colors.textSecondary,
+    marginLeft: 12,
     lineHeight: 20,
     fontFamily: theme.fonts.regular,
   },
   bottomContainer: {
     paddingHorizontal: 24,
-    paddingBottom: 30,
+    paddingBottom: 34,
     paddingTop: 16,
   },
   nextButton: {
-    borderRadius: 30,
+    borderRadius: 16,
     paddingVertical: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#67C694",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
   },
   nextButtonText: {
     fontSize: 17,
-    fontWeight: "700",
+    fontWeight: "600",
     fontFamily: theme.fonts.bold,
   },
   modalOverlay: {
@@ -469,7 +382,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalContent: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingBottom: 30,
@@ -478,7 +391,7 @@ const styles = StyleSheet.create({
   modalHandle: {
     width: 40,
     height: 4,
-    backgroundColor: "#E0E0E0",
+    backgroundColor: theme.colors.lightGrey,
     borderRadius: 2,
     alignSelf: "center",
     marginTop: 12,
@@ -491,19 +404,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
+    borderBottomColor: theme.colors.border,
   },
   modalTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#1A1A1A",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   modalCloseButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "#F5F5F5",
+    backgroundColor: theme.colors.backgroundSecondary,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -511,22 +424,24 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingHorizontal: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#F5F5F5",
+    borderBottomColor: theme.colors.border,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
   optionSelected: {
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.greenLight,
   },
   optionText: {
     fontSize: 17,
-    color: "#333",
+    color: theme.colors.text,
     fontWeight: "500",
     fontFamily: theme.fonts.medium,
   },
   optionTextSelected: {
-    color: "#9747FF",
+    color: theme.colors.success,
     fontWeight: "600",
   },
 });
+
+export default OnboardingHeight;

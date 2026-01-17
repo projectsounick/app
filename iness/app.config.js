@@ -28,5 +28,22 @@ if (process.env.GOOGLE_SERVICES_JSON) {
   console.warn("⚠️  GOOGLE_SERVICES_JSON environment variable not found during EAS build");
 }
 
-// Export the config
-module.exports = appJson;
+// Export the config with extra properties
+module.exports = {
+  ...appJson,
+  expo: {
+    ...appJson.expo,
+    extra: {
+      ...appJson.expo?.extra,
+      // Google OAuth Client IDs
+      // Get these from Google Cloud Console: https://console.cloud.google.com/apis/credentials
+      googleWebClientId: process.env.GOOGLE_WEB_CLIENT_ID || "340636011235-mbdr1fc9p1260jaeh0ud7rik8qi340gu.apps.googleusercontent.com",
+      googleIosClientId: process.env.GOOGLE_IOS_CLIENT_ID || "340636011235-env4nm4jkj7mb81g4dk5qb79hdu1l75o.apps.googleusercontent.com",
+      googleAndroidClientId: process.env.GOOGLE_ANDROID_CLIENT_ID || "340636011235-0o6medtg1lb9fkua9mop87kqgp2eil9k.apps.googleusercontent.com",
+      // EAS Project ID (for push notifications)
+      eas: {
+        projectId: appJson.expo?.extra?.eas?.projectId || "87dfba75-ecf1-4c1c-9b9a-74df81667288",
+      },
+    },
+  },
+};

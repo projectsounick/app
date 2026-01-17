@@ -18,18 +18,17 @@ export default function OnboardingCard({
   option,
   state,
   updateState,
-  height = 80,
+  height = 64,
   icon,
   description,
-  fontSize = 18,
+  fontSize = 16,
 }: OnboardingCardInterface) {
   const theme = useGlobalTheme();
-  const styles = getStyles(theme);
   const isSelected = Array.isArray(state)
     ? state.includes(option)
     : state === option;
 
-  const translateY = useRef(new Animated.Value(40)).current;
+  const translateY = useRef(new Animated.Value(30)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -37,14 +36,14 @@ export default function OnboardingCard({
     Animated.parallel([
       Animated.timing(translateY, {
         toValue: 0,
-        duration: 400,
-        delay: index * 80,
+        duration: 350,
+        delay: index * 60,
         useNativeDriver: true,
       }),
       Animated.timing(opacity, {
         toValue: 1,
-        duration: 400,
-        delay: index * 80,
+        duration: 350,
+        delay: index * 60,
         useNativeDriver: true,
       }),
     ]).start();
@@ -52,7 +51,7 @@ export default function OnboardingCard({
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
-      toValue: 0.97,
+      toValue: 0.98,
       useNativeDriver: true,
     }).start();
   };
@@ -64,6 +63,8 @@ export default function OnboardingCard({
       useNativeDriver: true,
     }).start();
   };
+
+  const styles = getStyles(theme, isSelected);
 
   return (
     <Animated.View
@@ -77,67 +78,35 @@ export default function OnboardingCard({
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         activeOpacity={1}
-        style={[
-          styles.card,
-          {
-            height,
-            borderColor: isSelected ? "#9747FF" : "#F0F0F0",
-            borderWidth: isSelected ? 2 : 1,
-            backgroundColor: isSelected ? "#FAFAFF" : "#FFFFFF",
-          },
-        ]}
+        style={[styles.card, { minHeight: height }]}
       >
         {/* Icon Container */}
         {icon && (
-          <View
-            style={[
-              styles.iconContainer,
-              {
-                backgroundColor: isSelected ? "#F3EDFF" : "#F8F8F8",
-              },
-            ]}
-          >
+          <View style={styles.iconContainer}>
             <MaterialCommunityIcons
               name={icon}
-              size={Math.min(screenWidth * 0.06, 20)}
-              color={isSelected ? "#9747FF" : "#666"}
+              size={20}
+              color={isSelected ? theme.colors.success : theme.colors.textSecondary}
             />
           </View>
         )}
 
         {/* Content */}
         <View style={styles.contentContainer}>
-          <Text
-            style={[
-              styles.label,
-              {
-                fontSize,
-                color: isSelected ? "#1A1A1A" : "#333",
-              },
-            ]}
-          >
+          <Text style={[styles.label, { fontSize }]}>
             {option}
           </Text>
-
           {description && (
             <Text style={styles.description}>{description}</Text>
           )}
         </View>
 
         {/* Selection Indicator */}
-        <View
-          style={[
-            styles.checkContainer,
-            {
-              backgroundColor: isSelected ? "#9747FF" : "#F0F0F0",
-              borderColor: isSelected ? "#9747FF" : "#E0E0E0",
-            },
-          ]}
-        >
+        <View style={styles.checkContainer}>
           {isSelected && (
             <MaterialCommunityIcons 
               name="check" 
-              size={Math.min(screenWidth * 0.04, 14)} 
+              size={14} 
               color="#FFFFFF" 
             />
           )}
@@ -147,27 +116,28 @@ export default function OnboardingCard({
   );
 }
 
-const getStyles = (theme: any) => StyleSheet.create({
+const getStyles = (theme: any, isSelected: boolean) => StyleSheet.create({
   card: {
-    marginBottom: Math.min(screenWidth * 0.035, 12),
+    marginBottom: 12,
     borderRadius: 16,
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: Math.min(screenWidth * 0.04, 14),
-    paddingVertical: Math.min(screenWidth * 0.03, 10),
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    elevation: 2,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    backgroundColor: isSelected ? theme.colors.greenLight : theme.colors.background,
+    borderWidth: 2,
+    borderColor: isSelected ? theme.colors.success : theme.colors.border,
   },
   iconContainer: {
-    width: Math.min(screenWidth * 0.12, 42),
-    height: Math.min(screenWidth * 0.12, 42),
-    borderRadius: Math.min(screenWidth * 0.035, 12),
+    width: 40,
+    height: 40,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: Math.min(screenWidth * 0.035, 12),
+    marginRight: 14,
+    backgroundColor: isSelected 
+      ? `${theme.colors.success}20` 
+      : theme.colors.backgroundSecondary,
   },
   contentContainer: {
     flex: 1,
@@ -176,21 +146,24 @@ const getStyles = (theme: any) => StyleSheet.create({
   label: {
     fontWeight: "600",
     fontFamily: theme.fonts.medium,
+    color: isSelected ? theme.colors.text : theme.colors.text,
   },
   description: {
-    marginTop: 3,
-    fontSize: Math.max(screenWidth * 0.03, 12),
-    color: theme.colors.textMuted,
+    marginTop: 4,
+    fontSize: 13,
+    color: theme.colors.textSecondary,
     fontFamily: theme.fonts.regular,
-    lineHeight: Math.max(screenWidth * 0.045, 16),
+    lineHeight: 18,
   },
   checkContainer: {
-    width: Math.min(screenWidth * 0.065, 24),
-    height: Math.min(screenWidth * 0.065, 24),
-    borderRadius: Math.min(screenWidth * 0.0325, 12),
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    marginLeft: Math.min(screenWidth * 0.025, 8),
+    marginLeft: 12,
+    backgroundColor: isSelected ? theme.colors.success : "transparent",
+    borderColor: isSelected ? theme.colors.success : theme.colors.border,
   },
 });

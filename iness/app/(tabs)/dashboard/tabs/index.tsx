@@ -37,6 +37,7 @@ import HealthDashboard from "@/app/modules/HealthCards";
 
 import SessionCarousel from "@/app/Components/Home/SessionCards";
 import TestimonialsCarousel from "@/app/Components/Home/TestimonialsCarousel";
+import EmailPromptCard from "@/app/Components/Home/EmailPromptCard";
 
 import PodcastMediaCard from "@/app/Components/Home/PodcastSection";
 import { podCastService } from "@/app/services/podcast.service";
@@ -65,15 +66,30 @@ const YourComponent = () => {
   const dispatch = useDispatch();
   const insets = useSafeAreaInsets();
   const podCasts = useSelector((state: RootState) => state.podcast.podcasts);
+  // State for email prompt
+  const [showEmailPrompt, setShowEmailPrompt] = useState(false);
+
   // Fetch user data and modal flag from AsyncStorage
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const [userStr] = await Promise.all([AsyncStorage.getItem("user")]);
+        const [userStr, emailDismissed] = await Promise.all([
+          AsyncStorage.getItem("user"),
+          AsyncStorage.getItem("emailPromptDismissed")
+        ]);
 
         if (userStr) {
           const user = JSON.parse(userStr);
           setLoggedUser(user);
+
+          // Check if user needs to add email (signed in without email or using Apple's private relay)
+          const hasNoEmail = !user.email || user.email === "";
+          const hasApplePrivateRelay = user.email?.includes("privaterelay.appleid.com");
+          const needsEmail = hasNoEmail || hasApplePrivateRelay;
+          
+          if (needsEmail && !emailDismissed) {
+            setShowEmailPrompt(true);
+          }
 
           if (user.healthReport == null) {
             // null or undefined
@@ -212,6 +228,14 @@ const YourComponent = () => {
           <HomeShimmer />
         ) : (
           <>
+            {/* Email Prompt Card for users without email */}
+            {showEmailPrompt && (
+              <EmailPromptCard 
+                onEmailUpdated={() => setShowEmailPrompt(false)}
+                onDismiss={() => setShowEmailPrompt(false)}
+              />
+            )}
+            
             <OffersCards />
             <FloatingOptions />
             <LoginJsxWrapper loginButton={false} backButton={false}>

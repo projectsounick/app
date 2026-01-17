@@ -1,9 +1,8 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   View,
   Text,
   TouchableOpacity,
-  Dimensions,
   ScrollView,
   StyleSheet,
   Animated,
@@ -14,23 +13,17 @@ import CustomSnackbar from "@/app/modules/Snackbar";
 import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
 import { UserData } from "@/app/interfaces/UserInterface";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
-import theme from "@/app/Theme/globalTheme";
-
-const { width: screenWidth, height: screenHeight } = Dimensions.get("window");
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
 const genderOptions = [
   {
     value: "Male",
     icon: "gender-male",
-    color: "#4A90D9",
-    bgColor: "#E8F4FD",
     description: "I identify as male",
   },
   {
     value: "Female",
     icon: "gender-female",
-    color: "#E91E8C",
-    bgColor: "#FCE4F0",
     description: "I identify as female",
   },
 ];
@@ -42,6 +35,7 @@ const OnboardingSex = ({
   onNext: () => void;
   onBack: () => void;
 }) => {
+  const theme = useGlobalTheme();
   const [sex, setSex] = useState<string>("");
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
@@ -64,13 +58,14 @@ const OnboardingSex = ({
     }
   };
 
+  const styles = getStyles(theme);
+
   return (
     <View style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
         <OnboardingHeading
           icon="gender-male-female"
           subtitle="This helps us personalize your workout and nutrition plans"
@@ -78,7 +73,6 @@ const OnboardingSex = ({
           What is your{"\n"}gender?
         </OnboardingHeading>
 
-        {/* Gender Cards */}
         <View style={styles.cardsContainer}>
           {genderOptions.map((option, index) => (
             <GenderCard
@@ -87,16 +81,16 @@ const OnboardingSex = ({
               isSelected={sex === option.value}
               onSelect={() => setSex(option.value)}
               index={index}
+              theme={theme}
             />
           ))}
         </View>
 
-        {/* Info Box */}
         <View style={styles.infoBox}>
           <MaterialCommunityIcons
             name="shield-check"
             size={18}
-            color="#67C694"
+            color={theme.colors.success}
           />
           <Text style={styles.infoText}>
             Your information is private and secure. We use this to calculate
@@ -105,27 +99,23 @@ const OnboardingSex = ({
         </View>
       </ScrollView>
 
-      {/* Bottom Button */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity
           onPress={handleNext}
           disabled={!sex}
           style={[
             styles.nextButton,
-            {
-              backgroundColor: sex ? "#67C694" : "#E0E0E0",
-            },
+            { backgroundColor: sex ? theme.colors.success : theme.colors.lightGrey },
           ]}
+          activeOpacity={0.8}
         >
-          <Text
-            style={[styles.nextButtonText, { color: sex ? "#FFFFFF" : "#999" }]}
-          >
+          <Text style={[styles.nextButtonText, { color: sex ? "#FFFFFF" : theme.colors.textMuted }]}>
             Continue
           </Text>
           <MaterialCommunityIcons
             name="arrow-right"
             size={20}
-            color={sex ? "#FFFFFF" : "#999"}
+            color={sex ? "#FFFFFF" : theme.colors.textMuted}
             style={{ marginLeft: 8 }}
           />
         </TouchableOpacity>
@@ -133,7 +123,7 @@ const OnboardingSex = ({
 
       <CustomSnackbar
         visible={snackbarVisible}
-        bgColor="#FF6B6B"
+        bgColor={theme.colors.error}
         message={snackbarMessage}
         onDismiss={() => setSnackbarVisible(false)}
       />
@@ -141,19 +131,20 @@ const OnboardingSex = ({
   );
 };
 
-// Gender Card Component
 const GenderCard = ({
   option,
   isSelected,
   onSelect,
   index,
+  theme,
 }: {
   option: (typeof genderOptions)[0];
   isSelected: boolean;
   onSelect: () => void;
   index: number;
+  theme: any;
 }) => {
-  const translateY = useRef(new Animated.Value(50)).current;
+  const translateY = useRef(new Animated.Value(30)).current;
   const opacity = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -161,14 +152,14 @@ const GenderCard = ({
     Animated.parallel([
       Animated.timing(translateY, {
         toValue: 0,
-        duration: 500,
-        delay: index * 150,
+        duration: 400,
+        delay: index * 100,
         useNativeDriver: true,
       }),
       Animated.timing(opacity, {
         toValue: 1,
-        duration: 500,
-        delay: index * 150,
+        duration: 400,
+        delay: index * 100,
         useNativeDriver: true,
       }),
     ]).start();
@@ -176,7 +167,7 @@ const GenderCard = ({
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
-      toValue: 0.96,
+      toValue: 0.98,
       useNativeDriver: true,
     }).start();
   };
@@ -189,12 +180,14 @@ const GenderCard = ({
     }).start();
   };
 
+  const cardStyles = getCardStyles(theme, isSelected);
+
   return (
     <Animated.View
       style={{
         transform: [{ translateY }, { scale: scaleAnim }],
         opacity,
-        marginBottom: 16,
+        marginBottom: 12,
       }}
     >
       <TouchableOpacity
@@ -202,58 +195,24 @@ const GenderCard = ({
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         activeOpacity={1}
-        style={[
-          styles.genderCard,
-          {
-            borderColor: isSelected ? option.color : "#F0F0F0",
-            borderWidth: isSelected ? 2 : 1,
-            backgroundColor: isSelected ? option.bgColor : "#FFFFFF",
-          },
-        ]}
+        style={cardStyles.card}
       >
-        {/* Icon */}
-        <View
-          style={[
-            styles.genderIconContainer,
-            {
-              backgroundColor: isSelected ? option.color + "20" : "#F8F8F8",
-            },
-          ]}
-        >
+        <View style={cardStyles.iconContainer}>
           <MaterialCommunityIcons
             name={option.icon}
-            size={Math.min(screenWidth * 0.08, 30)} // Responsive icon size, max 30px
-            color={isSelected ? option.color : "#888"}
+            size={24}
+            color={isSelected ? theme.colors.success : theme.colors.textSecondary}
           />
         </View>
 
-        {/* Text */}
-        <Text
-          style={[
-            styles.genderLabel,
-            { color: isSelected ? option.color : "#333" },
-          ]}
-        >
-          {option.value}
-        </Text>
-        <Text style={styles.genderDescription}>{option.description}</Text>
+        <View style={cardStyles.textContainer}>
+          <Text style={cardStyles.label}>{option.value}</Text>
+          <Text style={cardStyles.description}>{option.description}</Text>
+        </View>
 
-        {/* Selection Circle */}
-        <View
-          style={[
-            styles.selectionCircle,
-            {
-              backgroundColor: isSelected ? option.color : "transparent",
-              borderColor: isSelected ? option.color : "#DDD",
-            },
-          ]}
-        >
+        <View style={cardStyles.checkContainer}>
           {isSelected && (
-            <MaterialCommunityIcons 
-              name="check" 
-              size={Math.min(screenWidth * 0.035, 12)} 
-              color="#FFFFFF" 
-            />
+            <MaterialCommunityIcons name="check" size={14} color="#FFFFFF" />
           )}
         </View>
       </TouchableOpacity>
@@ -261,63 +220,22 @@ const GenderCard = ({
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "space-between",
   },
   scrollContent: {
     paddingHorizontal: 24,
-    paddingTop: 20,
+    paddingTop: 24,
     paddingBottom: 20,
   },
   cardsContainer: {
-    marginTop: 6,
-  },
-  genderCard: {
-    borderRadius: 14,
-    padding: Math.min(screenWidth * 0.04, 14), // Responsive padding, max 14px
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.04,
-    shadowRadius: 6,
-    elevation: 2,
-  },
-  genderIconContainer: {
-    width: Math.min(screenWidth * 0.14, 52), // Slightly smaller, max 52px
-    height: Math.min(screenWidth * 0.14, 52),
-    borderRadius: Math.min(screenWidth * 0.07, 26),
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: Math.min(screenWidth * 0.025, 10),
-  },
-  genderLabel: {
-    fontSize: Math.max(screenWidth * 0.04, 15), // Slightly smaller, min 15px
-    fontWeight: "700",
-    fontFamily: theme.fonts.bold,
-    marginBottom: 3,
-  },
-  genderDescription: {
-    fontSize: Math.max(screenWidth * 0.028, 12), // Slightly smaller
-    color: "#888",
-    fontFamily: theme.fonts.regular,
-  },
-  selectionCircle: {
-    position: "absolute",
-    top: Math.min(screenWidth * 0.028, 10),
-    right: Math.min(screenWidth * 0.028, 10),
-    width: Math.min(screenWidth * 0.055, 20),
-    height: Math.min(screenWidth * 0.055, 20),
-    borderRadius: Math.min(screenWidth * 0.0275, 10),
-    borderWidth: 2,
-    alignItems: "center",
-    justifyContent: "center",
+    marginTop: 8,
   },
   infoBox: {
     flexDirection: "row",
     alignItems: "flex-start",
-    backgroundColor: "#E8F5E9",
+    backgroundColor: theme.colors.greenLight,
     borderRadius: 16,
     padding: 16,
     marginTop: 20,
@@ -325,32 +243,74 @@ const styles = StyleSheet.create({
   infoText: {
     flex: 1,
     fontSize: 13,
-    color: "#555",
-    marginLeft: 10,
+    color: theme.colors.textSecondary,
+    marginLeft: 12,
     lineHeight: 20,
     fontFamily: theme.fonts.regular,
   },
   bottomContainer: {
     paddingHorizontal: 24,
-    paddingBottom: 30,
+    paddingBottom: 34,
     paddingTop: 16,
   },
   nextButton: {
-    borderRadius: 30,
+    borderRadius: 16,
     paddingVertical: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#67C694",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
   },
   nextButtonText: {
     fontSize: 17,
-    fontWeight: "700",
+    fontWeight: "600",
     fontFamily: theme.fonts.bold,
+  },
+});
+
+const getCardStyles = (theme: any, isSelected: boolean) => StyleSheet.create({
+  card: {
+    borderRadius: 16,
+    padding: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: isSelected ? theme.colors.greenLight : theme.colors.background,
+    borderWidth: 2,
+    borderColor: isSelected ? theme.colors.success : theme.colors.border,
+  },
+  iconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+    backgroundColor: isSelected ? `${theme.colors.success}20` : theme.colors.backgroundSecondary,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  label: {
+    fontSize: 17,
+    fontWeight: "600",
+    fontFamily: theme.fonts.bold,
+    color: theme.colors.text,
+    marginBottom: 2,
+  },
+  description: {
+    fontSize: 13,
+    color: theme.colors.textSecondary,
+    fontFamily: theme.fonts.regular,
+  },
+  checkContainer: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    marginLeft: 12,
+    backgroundColor: isSelected ? theme.colors.success : "transparent",
+    borderColor: isSelected ? theme.colors.success : theme.colors.border,
   },
 });
 

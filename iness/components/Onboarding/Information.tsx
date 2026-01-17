@@ -11,33 +11,48 @@ import {
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
-const { height, width } = Dimensions.get("window");
+const { height } = Dimensions.get("window");
 
 interface Props {
   showIntroModal: boolean;
   setShowIntroModal: (value: boolean) => void;
 }
 
-export default function OnboardingMetricsModal({
+const infoItems = [
+  {
+    icon: "human-male-height",
+    text: "Height, weight, and age help us calculate your BMI, track progress, and tailor safe workout intensities.",
+  },
+  {
+    icon: "target",
+    text: "Your goals and current activity level allow us to design programs that match your lifestyle.",
+  },
+  {
+    icon: "shield-check",
+    text: "Medical history helps avoid risky exercises and keeps your plan safe and effective.",
+  },
+  {
+    icon: "food-apple",
+    text: "Dietary preferences help us identify your eating habits and provide personalized nutrition guidance.",
+  },
+];
+
+export default function OnboardingInfoModal({
   showIntroModal,
   setShowIntroModal,
 }: Props) {
+  const theme = useGlobalTheme();
   const slideAnim = useRef(new Animated.Value(height)).current;
-  const scaleAnim = useRef(new Animated.Value(0)).current; // for Proceed button
   const router = useRouter();
 
   useEffect(() => {
     if (showIntroModal) {
-      Animated.timing(slideAnim, {
+      Animated.spring(slideAnim, {
         toValue: 0,
-        duration: 350,
-        useNativeDriver: true,
-      }).start();
-
-      Animated.timing(scaleAnim, {
-        toValue: 1,
-        duration: 700,
+        friction: 8,
+        tension: 50,
         useNativeDriver: true,
       }).start();
     } else {
@@ -51,187 +66,76 @@ export default function OnboardingMetricsModal({
 
   const handleProceed = () => {
     setShowIntroModal(false);
-    // add any additional logic for Proceed here
   };
 
   const handleSkip = () => {
     setShowIntroModal(false);
-    router.push("/secondsplashscreen"); // ✅ skip to main app flow
+    router.push("/secondsplashscreen");
   };
+
+  const styles = getStyles(theme);
 
   return (
     <Modal transparent visible={showIntroModal} animationType="fade">
-      {/* Background overlay */}
       <TouchableOpacity
         style={styles.overlay}
         activeOpacity={1}
         onPress={() => setShowIntroModal(false)}
       />
 
-      {/* Bottom sheet */}
       <Animated.View
-        style={[
-          styles.modalContainer,
-          { transform: [{ translateY: slideAnim }] },
-        ]}
+        style={[styles.modalContainer, { transform: [{ translateY: slideAnim }] }]}
       >
         <View style={styles.handle} />
 
         <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-          <View
-            style={{
-              width: "100%",
-              display: "flex",
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 20,
-            }}
-          >
-            <Text style={styles.heading}>Why We Ask These Details</Text>
-            {/* Close icon at top-right */}
+          <View style={styles.headerRow}>
+            <Text style={styles.heading}>Why We Ask{"\n"}These Details</Text>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => setShowIntroModal(false)}
             >
-              <Ionicons name="close" size={20} color="#000" />
+              <Ionicons name="close" size={20} color={theme.colors.text} />
             </TouchableOpacity>
           </View>
 
-          {/* Group 1 */}
-          <View style={styles.pointCard}>
-            <View
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 24,
-                backgroundColor: "#E3F2FD",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 16,
-              }}
-            >
-              <MaterialCommunityIcons
-                name="human-male-height"
-                size={24}
-                color="#9747FF"
-              />
+          {infoItems.map((item, index) => (
+            <View key={index} style={styles.infoCard}>
+              <View style={styles.iconContainer}>
+                <MaterialCommunityIcons
+                  name={item.icon as any}
+                  size={22}
+                  color={theme.colors.secondPrimary}
+                />
+              </View>
+              <Text style={styles.infoText}>{item.text}</Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.pointText}>
-                Height, weight, and age help us calculate your BMI, track
-                progress, and tailor safe workout intensities.
-              </Text>
-            </View>
-          </View>
+          ))}
 
-          {/* Group 2 */}
-          <View style={styles.pointCard}>
-            <View
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 24,
-                backgroundColor: "#E8F5E9",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 16,
-              }}
-            >
-              <Ionicons name="fitness" size={24} color="#67C694" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.pointText}>
-                Your goals and current activity level allow us to design programs
-                that match your lifestyle and progress pace.
-              </Text>
-            </View>
-          </View>
-
-          {/* Group 3 */}
-          <View style={styles.pointCard}>
-            <View
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 24,
-                backgroundColor: "#FFEBEE",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 16,
-              }}
-            >
-              <Ionicons name="medkit" size={24} color="#FF6B6B" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.pointText}>
-                Medical history helps avoid risky exercises and keeps your plan
-                safe and effective.
-              </Text>
-            </View>
-          </View>
-
-          {/* Group 4 */}
-          <View style={styles.pointCard}>
-            <View
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: 24,
-                backgroundColor: "#FFF3E0",
-                alignItems: "center",
-                justifyContent: "center",
-                marginRight: 16,
-              }}
-            >
-              <Ionicons name="restaurant" size={24} color="#FF9800" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.pointText}>
-                Dietary preferences ensure that when you upload your daily images,
-                we can identify your eating habits and inform you about what's
-                good or needs improvement.
-              </Text>
-            </View>
-          </View>
-
-          {/* Disclaimer */}
-          <View
-            style={{
-              backgroundColor: "#F8F8F8",
-              borderRadius: 12,
-              padding: 16,
-              marginTop: 16,
-              borderWidth: 1,
-              borderColor: "#F5F5F5",
-            }}
-          >
-            <Text style={styles.disclaimer}>
-              * Any other information you provide will also be used solely to
-              optimize your personalized fitness regime.
+          <View style={styles.disclaimer}>
+            <MaterialCommunityIcons
+              name="lock-outline"
+              size={16}
+              color={theme.colors.textMuted}
+            />
+            <Text style={styles.disclaimerText}>
+              Your information is private and secure
             </Text>
           </View>
         </ScrollView>
 
-        {/* Buttons: Proceed & Skip */}
         <View style={styles.buttonRow}>
-          {/* Proceed Button */}
-          <Animated.View
-            style={{ transform: [{ scale: scaleAnim }], flex: 1, marginRight: 8 }}
-          >
-            <TouchableOpacity
-              style={styles.proceedButton}
-              onPress={handleProceed}
-            >
-              <Text style={styles.proceedButtonText}>Proceed</Text>
-            </TouchableOpacity>
-          </Animated.View>
+          <TouchableOpacity style={styles.proceedButton} onPress={handleProceed}>
+            <Text style={styles.proceedButtonText}>Let's Begin</Text>
+            <MaterialCommunityIcons
+              name="arrow-right"
+              size={20}
+              color="#FFFFFF"
+              style={{ marginLeft: 8 }}
+            />
+          </TouchableOpacity>
 
-          {/* Skip Button */}
-          <TouchableOpacity
-            style={styles.skipButton}
-            onPress={handleSkip}
-          >
+          <TouchableOpacity style={styles.skipButton} onPress={handleSkip}>
             <Text style={styles.skipButtonText}>Skip</Text>
           </TouchableOpacity>
         </View>
@@ -240,7 +144,7 @@ export default function OnboardingMetricsModal({
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.5)",
@@ -249,98 +153,121 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: 0,
     width: "100%",
-    height: height * 0.7,
-    backgroundColor: "#FFFFFF",
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    overflow: "hidden",
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-  },
-  closeButton: {
-    backgroundColor: "#F0F0F0",
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    justifyContent: "center",
-    alignItems: "center",
+    maxHeight: height * 0.75,
+    backgroundColor: theme.colors.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    paddingHorizontal: 24,
+    paddingBottom: 34,
   },
   handle: {
-    width: 50,
-    height: 5,
-    backgroundColor: "#ccc",
-    borderRadius: 3,
+    width: 40,
+    height: 4,
+    backgroundColor: theme.colors.lightGrey,
+    borderRadius: 2,
     alignSelf: "center",
-    marginTop: 10,
-    marginBottom: 10,
+    marginTop: 12,
+    marginBottom: 16,
   },
   content: {
     flex: 1,
   },
-  heading: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#000",
-    flex: 1,
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 24,
   },
-  pointCard: {
+  heading: {
+    fontSize: 26,
+    fontWeight: "700",
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bold,
+    lineHeight: 32,
+  },
+  closeButton: {
+    backgroundColor: theme.colors.backgroundSecondary,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  infoCard: {
     flexDirection: "row",
     alignItems: "flex-start",
-    marginBottom: 16,
-    backgroundColor: "#FFFFFF",
+    backgroundColor: theme.colors.background,
     borderRadius: 16,
     padding: 16,
+    marginBottom: 12,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
-  pointText: {
+  iconContainer: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+    backgroundColor: theme.colors.backgroundCardLight, // Purple tint background
+  },
+  infoText: {
     flex: 1,
-    fontSize: 15,
-    lineHeight: 22,
-    color: "#333",
-    fontWeight: "400",
+    fontSize: 14,
+    lineHeight: 21,
+    color: theme.colors.textSecondary,
+    fontFamily: theme.fonts.regular,
   },
   disclaimer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    marginTop: 8,
+  },
+  disclaimerText: {
     fontSize: 13,
-    fontStyle: "italic",
-    color: "#666",
-    textAlign: "center",
-    lineHeight: 18,
+    color: theme.colors.textMuted,
+    marginLeft: 8,
+    fontFamily: theme.fonts.regular,
   },
   buttonRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    marginTop: 20,
-    paddingTop: 20,
+    gap: 12,
+    paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: "#F5F5F5",
+    borderTopColor: theme.colors.border,
   },
   proceedButton: {
-    backgroundColor: "#67C694",
-    borderRadius: 30,
-    height: 50,
+    flex: 2,
+    backgroundColor: theme.colors.success,
+    borderRadius: 16,
+    height: 52,
+    flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    flex: 1,
-    marginRight: 8,
   },
   proceedButtonText: {
     color: "#FFFFFF",
-    fontWeight: "700",
+    fontWeight: "600",
     fontSize: 16,
+    fontFamily: theme.fonts.bold,
   },
   skipButton: {
-    backgroundColor: "#F0F0F0",
-    borderRadius: 30,
-    height: 50,
+    flex: 1,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: 16,
+    height: 52,
     justifyContent: "center",
     alignItems: "center",
-    flex: 1,
-    marginLeft: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
   skipButtonText: {
-    color: "#666",
-    fontWeight: "700",
+    color: theme.colors.textSecondary,
+    fontWeight: "600",
     fontSize: 16,
+    fontFamily: theme.fonts.medium,
   },
 });

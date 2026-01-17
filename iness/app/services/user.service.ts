@@ -62,7 +62,9 @@ async function verifyLoginOtp(data: {
 //// Funciton for updating the user in using backend then storing in AsyncStorage----/
 async function updateUser(userData: any): Promise<any> {
   try {
+    console.log("updateUser: Sending request to update-user endpoint");
     const response = await fetchWrapper.put(`${baseUrl}/update-user`, { data: userData });
+    console.log("updateUser: Response received:", JSON.stringify(response));
     
     // If update is successful and response contains user data, update AsyncStorage
     if (response.success && response.user) {
@@ -75,7 +77,10 @@ async function updateUser(userData: any): Promise<any> {
     
     return response;
   } catch (error: any) {
-    throw new Error("Error updating user: " + error.message);
+    // fetchWrapper rejects with string error, not Error object
+    const errorMessage = typeof error === 'string' ? error : (error?.message || 'Unknown error');
+    console.log("updateUser: Error:", errorMessage);
+    throw new Error("Error updating user: " + errorMessage);
   }
 }
 

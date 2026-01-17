@@ -11,26 +11,25 @@ import {
   TouchableOpacity,
   StyleSheet,
 } from "react-native";
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
-// Main functional component
 const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
+  const theme = useGlobalTheme();
   const [phoneNumber, setphoneNumber] = useState("");
   const [phoneNumberError, setPhoneNumberError] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
 
   useEffect(() => {
     const loadUserData = async () => {
-      const user: any =
-        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-
-      if (user.exists && user?.phoneNumber) {
-        const raw = user.phoneNumber.replace("+", "");
-        setphoneNumber(raw.slice(2)); // Remove +91
+      const user: any = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+      if (user.exists && user?.data?.phoneNumber) {
+        const raw = user.data.phoneNumber.replace("+", "");
+        setphoneNumber(raw.slice(2));
       }
     };
-
     loadUserData();
   }, []);
 
@@ -44,13 +43,12 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
       setPhoneNumberError("Phone number must be exactly 10 digits");
       return false;
     }
-
-    setPhoneNumberError(""); // Clear error if valid
+    setPhoneNumberError("");
     return true;
   };
 
   const handleNext = () => {
-    if (phoneNumber != "" && validatePhoneNumber()) {
+    if (phoneNumber !== "" && validatePhoneNumber()) {
       const formattedPhoneNumber = `+91${phoneNumber}`;
       asyncStorageUtils.updateUserDataInAsyncStorage({
         phoneNumber: formattedPhoneNumber,
@@ -59,60 +57,82 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
     onNext();
   };
 
+  const isValid = phoneNumber.length === 10;
+  const styles = getStyles(theme, isFocused, !!phoneNumberError);
+
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1 }}
+      style={styles.keyboardView}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={60}
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={{ flex: 1 }}>
+        <View style={styles.container}>
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <View style={styles.inner}>
-              <OnboardingHeading
-                icon="phone"
-                subtitle="We'll use this for login and updates"
-              >
-                Your contact number
-              </OnboardingHeading>
+            <OnboardingHeading
+              icon="phone"
+              subtitle="We'll use this for login and updates"
+            >
+              Your contact number
+            </OnboardingHeading>
 
-              <View style={styles.card}>
-                <View
-                  style={[
-                    styles.inputWrapper,
-                    phoneNumberError && styles.inputWrapperError,
-                  ]}
-                >
-                  <View style={styles.countryBadge}>
-                    <Text style={styles.countryText}>+91</Text>
-                  </View>
-                  <TextInput
-                    value={phoneNumber}
-                    onChangeText={(text) => {
-                      setphoneNumber(text);
-                      if (phoneNumberError) validatePhoneNumber();
-                    }}
-                    placeholder="Enter 10-digit number"
-                    placeholderTextColor="#9A8CB8"
-                    style={styles.input}
-                    returnKeyType="done"
-                    keyboardType="number-pad"
-                    maxLength={10}
-                  />
+            <View style={styles.inputCard}>
+              <View style={styles.inputWrapper}>
+                <View style={styles.countryBadge}>
+                  <Text style={styles.countryText}>+91</Text>
                 </View>
-
-                {phoneNumberError ? (
-                  <Text style={styles.errorText}>{phoneNumberError}</Text>
-                ) : (
-                  <Text style={styles.helperText}>
-                    You can skip for now and add it later.
-                  </Text>
+                <TextInput
+                  value={phoneNumber}
+                  onChangeText={(text) => {
+                    setphoneNumber(text);
+                    if (phoneNumberError) setPhoneNumberError("");
+                  }}
+                  onFocus={() => setIsFocused(true)}
+                  onBlur={() => {
+                    setIsFocused(false);
+                    if (phoneNumber) validatePhoneNumber();
+                  }}
+                  placeholder="Enter 10-digit number"
+                  placeholderTextColor={theme.colors.textMuted}
+                  style={styles.input}
+                  returnKeyType="done"
+                  keyboardType="number-pad"
+                  maxLength={10}
+                />
+                {isValid && (
+                  <MaterialCommunityIcons
+                    name="check-circle"
+                    size={22}
+                    color={theme.colors.success}
+                  />
                 )}
               </View>
+
+              {phoneNumberError ? (
+                <View style={styles.errorContainer}>
+                  <MaterialCommunityIcons
+                    name="alert-circle"
+                    size={14}
+                    color={theme.colors.error}
+                  />
+                  <Text style={styles.errorText}>{phoneNumberError}</Text>
+                </View>
+              ) : (
+                <View style={styles.helperContainer}>
+                  <MaterialCommunityIcons
+                    name="information-outline"
+                    size={14}
+                    color={theme.colors.textMuted}
+                  />
+                  <Text style={styles.helperText}>
+                    You can skip for now and add it later
+                  </Text>
+                </View>
+              )}
             </View>
           </ScrollView>
 
@@ -120,11 +140,17 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
             <TouchableOpacity
               onPress={handleNext}
               style={styles.nextButton}
-              activeOpacity={0.9}
+              activeOpacity={0.8}
             >
               <Text style={styles.nextText}>
-                {phoneNumber === "" ? "Skip for now" : "Next"}
+                {phoneNumber === "" ? "Skip for now" : "Continue"}
               </Text>
+              <MaterialCommunityIcons
+                name="arrow-right"
+                size={20}
+                color="#FFFFFF"
+                style={{ marginLeft: 8 }}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -133,92 +159,104 @@ const OnboardingphoneNumber = ({ onNext }: { onNext: () => void }) => {
   );
 };
 
-export default OnboardingphoneNumber;
-
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isFocused: boolean, hasError: boolean) => StyleSheet.create({
+  keyboardView: {
+    flex: 1,
+  },
+  container: {
+    flex: 1,
+  },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 20,
-    paddingTop: 10,
+    paddingHorizontal: 24,
+    paddingTop: 24,
   },
-  inner: {
-    flex: 1,
-    paddingBottom: 10,
-  },
-  card: {
-    backgroundColor: "#FFFFFF",
+  inputCard: {
+    backgroundColor: theme.colors.background,
     borderRadius: 20,
     padding: 20,
     borderWidth: 1,
-    borderColor: "#EFEFEF",
+    borderColor: theme.colors.border,
   },
   inputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    height: 56,
     borderRadius: 16,
     paddingHorizontal: 14,
-    height: 60,
-    borderWidth: 1.5,
-    borderColor: "#E6E6E6",
-  },
-  inputWrapperError: {
-    borderColor: "#FF8A8A",
+    borderWidth: 2,
+    borderColor: hasError 
+      ? theme.colors.error 
+      : isFocused 
+        ? theme.colors.success 
+        : theme.colors.border,
+    backgroundColor: isFocused ? theme.colors.greenLight : theme.colors.backgroundSecondary,
   },
   countryBadge: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    backgroundColor: "#F7F2FF",
-    borderRadius: 12,
-    marginRight: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: 10,
+    marginRight: 12,
     borderWidth: 1,
-    borderColor: "#D6C6FF",
+    borderColor: theme.colors.border,
   },
   countryText: {
-    color: "#5B2EC2",
+    color: theme.colors.text,
     fontFamily: theme.fonts.medium,
-    fontSize: 14,
+    fontSize: 15,
+    fontWeight: "600",
   },
   input: {
     flex: 1,
     fontSize: 16,
-    color: "#1A1A1A",
+    color: theme.colors.text,
     fontFamily: theme.fonts.medium,
     paddingVertical: 0,
   },
+  helperContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 14,
+    paddingHorizontal: 4,
+  },
   helperText: {
-    marginTop: 12,
-    color: "#7A6B99",
+    marginLeft: 6,
+    color: theme.colors.textMuted,
     fontSize: 13,
     fontFamily: theme.fonts.regular,
   },
+  errorContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 14,
+    paddingHorizontal: 4,
+  },
   errorText: {
-    marginTop: 12,
-    color: "#FF6B6B",
+    marginLeft: 6,
+    color: theme.colors.error,
     fontSize: 13,
     fontFamily: theme.fonts.medium,
   },
   bottomContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 30,
+    paddingHorizontal: 24,
+    paddingBottom: 34,
     paddingTop: 16,
-    backgroundColor: "transparent",
   },
   nextButton: {
-    backgroundColor: "#67C694",
-    borderRadius: 30,
+    backgroundColor: theme.colors.success,
+    borderRadius: 16,
     paddingVertical: 16,
+    flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#67C694",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 5,
   },
   nextText: {
     color: "#FFFFFF",
-    fontSize: 16,
+    fontSize: 17,
+    fontWeight: "600",
     fontFamily: theme.fonts.bold,
   },
 });
+
+export default OnboardingphoneNumber;

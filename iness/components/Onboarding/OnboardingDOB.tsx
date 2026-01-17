@@ -11,16 +11,16 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import CustomSnackbar from "@/app/modules/Snackbar";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import OnboardingHeading from "@/app/modules/OnboardingHeading";
-import theme from "@/app/Theme/globalTheme";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
 const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
+  const theme = useGlobalTheme();
   const [dob, setDob] = useState(new Date(1990, 0, 1));
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [loading, setLoading] = useState(false);
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  // Load saved DOB from AsyncStorage
   useEffect(() => {
     const loadSavedDOB = async () => {
       try {
@@ -59,7 +59,6 @@ const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
     }
   };
 
-  // Calculate age
   const calculateAge = () => {
     const today = new Date();
     let age = today.getFullYear() - dob.getFullYear();
@@ -77,16 +76,15 @@ const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
     year: "numeric",
   });
 
+  const styles = getStyles(theme);
+
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
       <ScrollView
-        style={{ flex: 1 }}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        bounces={true}
-        >
-        {/* Header */}
+      >
         <OnboardingHeading
           icon="calendar-heart"
           subtitle="We use your age to customize workout intensity and nutrition plans"
@@ -96,13 +94,11 @@ const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
 
         {/* Age Display Card */}
         <View style={styles.displayCard}>
-          <View style={styles.displayIconContainer}>
-            <MaterialCommunityIcons
-              name="cake-variant"
-              size={20}
-              color="#9747FF"
-            />
-          </View>
+          <MaterialCommunityIcons
+            name="cake-variant"
+            size={20}
+            color={theme.colors.success}
+          />
           <Text style={styles.displayAge}>{age}</Text>
           <Text style={styles.displayLabel}>Years Old</Text>
         </View>
@@ -110,15 +106,12 @@ const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
         {/* Date Picker Card */}
         <View style={styles.dateCard}>
           <Text style={styles.dateLabel}>Date of Birth</Text>
-          <TouchableOpacity
-            onPress={showDatePicker}
-            style={styles.dateButton}
-          >
+          <TouchableOpacity onPress={showDatePicker} style={styles.dateButton}>
             <View style={styles.dateIconContainer}>
               <MaterialCommunityIcons
                 name="calendar"
                 size={20}
-                color="#9747FF"
+                color={theme.colors.success}
               />
             </View>
             <View style={styles.dateTextContainer}>
@@ -128,44 +121,37 @@ const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
             <MaterialCommunityIcons
               name="chevron-right"
               size={22}
-              color="#9747FF"
+              color={theme.colors.success}
             />
           </TouchableOpacity>
         </View>
 
         {/* Age-based tip */}
         <View style={styles.tipCard}>
-          <View style={styles.tipHeader}>
-            <MaterialCommunityIcons
-              name="lightbulb-outline"
-              size={20}
-              color="#67C694"
-            />
-            <Text style={styles.tipTitle}>Did you know?</Text>
-          </View>
+          <MaterialCommunityIcons
+            name="lightbulb-outline"
+            size={18}
+            color={theme.colors.success}
+          />
           <Text style={styles.tipText}>
             {age < 25
               ? "At your age, your metabolism is at its peak! Great time to build healthy habits."
               : age < 35
                 ? "Your body recovers well from workouts. Focus on building strength and endurance."
                 : age < 45
-                  ? "Consistency is key! Regular exercise helps maintain muscle mass and bone density."
-                  : "It's never too late to start! Exercise helps maintain mobility and energy levels."}
+                  ? "Consistency is key! Regular exercise helps maintain muscle mass."
+                  : "It's never too late! Exercise helps maintain mobility and energy."}
           </Text>
         </View>
       </ScrollView>
 
-      {/* Bottom Button - Fixed at bottom */}
+      {/* Bottom Button */}
       <View style={styles.bottomContainer}>
         <TouchableOpacity
           onPress={handleNext}
           disabled={loading}
-          style={[
-            styles.nextButton,
-            {
-              backgroundColor: "#67C694",
-            },
-          ]}
+          style={styles.nextButton}
+          activeOpacity={0.8}
         >
           <Text style={styles.nextButtonText}>
             {loading ? "Saving..." : "Continue"}
@@ -181,7 +167,6 @@ const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
         </TouchableOpacity>
       </View>
 
-      {/* Modal Picker */}
       <DateTimePickerModal
         isVisible={isDatePickerVisible}
         mode="date"
@@ -193,7 +178,7 @@ const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
 
       <CustomSnackbar
         visible={snackbarVisible}
-        bgColor="#FF6B6B"
+        bgColor={theme.colors.error}
         message={snackbarMessage}
         onDismiss={() => setSnackbarVisible(false)}
       />
@@ -201,86 +186,69 @@ const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
   );
 };
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any) => StyleSheet.create({
+  container: {
+    flex: 1,
+  },
   scrollContent: {
     paddingHorizontal: 24,
-    paddingTop: 10,
+    paddingTop: 24,
     paddingBottom: 30,
   },
   displayCard: {
-    backgroundColor: "#F3EDFF",
+    backgroundColor: theme.colors.greenLight,
     borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    alignItems: "center",
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: "#E8E0F5",
+    paddingVertical: 14,
+    paddingHorizontal: 20,
     flexDirection: "row",
-    justifyContent: "center",
-  },
-  displayIconContainer: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
-    shadowColor: "#9747FF",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
+    marginBottom: 16,
   },
   displayAge: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: "700",
-    color: "#1A1A1A",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
+    marginLeft: 12,
   },
   displayLabel: {
-    fontSize: 14,
-    color: "#666",
-    marginLeft: 6,
+    fontSize: 15,
+    color: theme.colors.textSecondary,
+    marginLeft: 8,
     fontFamily: theme.fonts.regular,
   },
   dateCard: {
-    backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
+    backgroundColor: theme.colors.background,
+    borderRadius: 20,
+    padding: 20,
     borderWidth: 1,
-    borderColor: "#F5F5F5",
+    borderColor: theme.colors.border,
   },
   dateLabel: {
-    fontSize: 12,
-    color: "#666",
-    marginBottom: 10,
+    fontSize: 13,
+    color: theme.colors.textSecondary,
+    marginBottom: 12,
     fontFamily: theme.fonts.medium,
     marginLeft: 4,
   },
   dateButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8F9FA",
+    backgroundColor: theme.colors.greenLight,
     borderRadius: 14,
     padding: 14,
     borderWidth: 2,
-    borderColor: "#9747FF",
+    borderColor: theme.colors.success,
   },
   dateIconContainer: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    backgroundColor: "#F3EDFF",
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: `${theme.colors.success}20`,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: 12,
+    marginRight: 14,
   },
   dateTextContainer: {
     flex: 1,
@@ -288,62 +256,47 @@ const styles = StyleSheet.create({
   dateText: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#1A1A1A",
+    color: theme.colors.text,
     fontFamily: theme.fonts.bold,
   },
   dateHint: {
     fontSize: 12,
-    color: "#888",
+    color: theme.colors.textMuted,
     marginTop: 2,
     fontFamily: theme.fonts.regular,
   },
   tipCard: {
-    backgroundColor: "#E8F5E9",
+    flexDirection: "row",
+    alignItems: "flex-start",
+    backgroundColor: theme.colors.greenLight,
     borderRadius: 16,
     padding: 16,
     marginTop: 20,
-    borderWidth: 1,
-    borderColor: "#D4EDE0",
-  },
-  tipHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-  },
-  tipTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#333",
-    marginLeft: 8,
-    fontFamily: theme.fonts.bold,
   },
   tipText: {
+    flex: 1,
     fontSize: 13,
-    color: "#666",
+    color: theme.colors.textSecondary,
     lineHeight: 20,
     fontFamily: theme.fonts.regular,
+    marginLeft: 12,
   },
   bottomContainer: {
-    paddingHorizontal: 20,
-    paddingBottom: 30,
-    paddingTop: 20,
-    backgroundColor: "transparent",
+    paddingHorizontal: 24,
+    paddingBottom: 34,
+    paddingTop: 16,
   },
   nextButton: {
-    borderRadius: 30,
+    backgroundColor: theme.colors.success,
+    borderRadius: 16,
     paddingVertical: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#67C694",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 4,
   },
   nextButtonText: {
     fontSize: 17,
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#FFFFFF",
     fontFamily: theme.fonts.bold,
   },

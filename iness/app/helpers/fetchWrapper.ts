@@ -64,8 +64,13 @@ async function getAuthHeader(): Promise<{ [key: string]: string }> {
       user = response.data;
     }
 
-    return user?.jwtToken ? { Authorization: `Bearer ${user.jwtToken}` } : {};
+    const token = user?.jwtToken || user?.accessToken;
+    console.log("getAuthHeader: jwtToken present:", !!user?.jwtToken);
+    console.log("getAuthHeader: accessToken present:", !!user?.accessToken);
+    
+    return token ? { Authorization: `Bearer ${token}` } : {};
   } catch (error) {
+    console.log("getAuthHeader: Error:", error);
     return {};
   }
 }
@@ -119,6 +124,8 @@ async function post<T extends object>(url: string, body: T) {
 
 async function put<T extends object>(url: string, body: T) {
   const authHeader = await getAuthHeader();
+  console.log("fetchWrapper.put: URL:", url);
+  console.log("fetchWrapper.put: Auth header present:", Object.keys(authHeader).length > 0);
 
   const requestOptions: RequestInit = {
     method: "PUT",
