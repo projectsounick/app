@@ -22,6 +22,7 @@ import { router } from "expo-router";
 import HealthReportUploader from "@/app/modules/UploadReportPdf";
 import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { useAppleHealthSync } from "@/hooks/useAppleHealthSync";
+import { useAndroidHealthSync } from "@/hooks/useAndroidHealthSync";
 import { HealthKit } from "@/services/healthSync";
 import { trackService } from "@/app/services/track.service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -449,16 +450,21 @@ const HealthSyncGuideModal: React.FC<HealthSyncGuideModalProps> = ({
   const isEnable = action === "enable";
   const permissionName = isSteps ? "Steps" : "Sleep Analysis";
   
+  const healthAppName = Platform.OS === "ios" ? "Apple Health" : "Health Connect";
   const steps = isEnable
     ? [
-        "Tap 'Open Settings' below to go to Apple Health",
-        `Find 'iness' under Data Access & Devices`,
+        `Tap 'Open Settings' below to go to ${healthAppName}`,
+        Platform.OS === "ios" 
+          ? `Find 'iness' under Data Access & Devices`
+          : `Find 'iness' in the list of apps`,
         `Turn ON the "${permissionName}" toggle`,
         "Return here and tap 'Continue'",
       ]
     : [
-        "Tap 'Open Settings' below to go to Apple Health",
-        `Find 'iness' under Data Access & Devices`,
+        `Tap 'Open Settings' below to go to ${healthAppName}`,
+        Platform.OS === "ios" 
+          ? `Find 'iness' under Data Access & Devices`
+          : `Find 'iness' in the list of apps`,
         `Turn OFF the "${permissionName}" toggle`,
         "Return here and tap 'Continue'",
       ];
@@ -587,8 +593,12 @@ export default function AppSettingsScreen() {
     useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   
-  // Health Sync
-  const { syncStatus, isAvailable, refreshSyncStatus, syncData } = useAppleHealthSync();
+  // Health Sync - Platform-aware hook selection
+  const iosHealthSync = useAppleHealthSync();
+  const androidHealthSync = useAndroidHealthSync();
+  const { syncStatus, isAvailable, refreshSyncStatus, syncData } = Platform.OS === "ios" 
+    ? iosHealthSync 
+    : androidHealthSync;
   const [stepsSyncEnabled, setStepsSyncEnabled] = useState(false);
   const [sleepSyncEnabled, setSleepSyncEnabled] = useState(false);
   const [syncingSteps, setSyncingSteps] = useState(false);
@@ -618,10 +628,11 @@ export default function AppSettingsScreen() {
       "Set your session preferences including date, time slot, and location. You can update your preferences or request changes to your existing preferences. Preferences help us schedule your sessions according to your convenience.",
   };
 
+  const healthAppName = Platform.OS === "ios" ? "Apple Health" : "Health Connect";
   const healthSyncInfo = {
     title: "Health Data Sync",
     content:
-      "Sync your steps and sleep data from Apple Health. When enabled, your health data will automatically sync with the app. You can turn off sync at any time. If you turn off sync, you'll need to grant permissions again when you turn it back on.",
+      `Sync your steps and sleep data from ${healthAppName}. When enabled, your health data will automatically sync with the app. You can turn off sync at any time. If you turn off sync, you'll need to grant permissions again when you turn it back on.`,
   };
 
   const darkModeInfo = {
@@ -636,7 +647,8 @@ export default function AppSettingsScreen() {
 
   const handleStepsSyncToggle = async (value: boolean) => {
     if (!isAvailable) {
-      setSnackbarMessage("Apple Health is only available on iOS devices");
+      const platformName = Platform.OS === "ios" ? "Apple Health" : "Health Connect";
+      setSnackbarMessage(`${platformName} is not available on this device`);
       setSnackbarOpen(true);
       return;
     }
@@ -656,7 +668,8 @@ export default function AppSettingsScreen() {
 
   const handleSleepSyncToggle = async (value: boolean) => {
     if (!isAvailable) {
-      setSnackbarMessage("Apple Health is only available on iOS devices");
+      const platformName = Platform.OS === "ios" ? "Apple Health" : "Health Connect";
+      setSnackbarMessage(`${platformName} is not available on this device`);
       setSnackbarOpen(true);
       return;
     }
@@ -1062,8 +1075,8 @@ export default function AppSettingsScreen() {
                         <Text style={styles.settingTitle}>Steps Sync</Text>
                         <Text style={styles.settingSubtitle}>
                           {stepsSyncEnabled
-                            ? "Your steps data is syncing from Apple Health"
-                            : "Sync your daily steps from Apple Health"}
+                            ? `Your steps data is syncing from ${Platform.OS === "ios" ? "Apple Health" : "Health Connect"}`
+                            : `Sync your daily steps from ${Platform.OS === "ios" ? "Apple Health" : "Health Connect"}`}
                         </Text>
                       </View>
                       {syncingSteps ? (
@@ -1085,8 +1098,8 @@ export default function AppSettingsScreen() {
                         <Text style={styles.settingTitle}>Sleep Sync</Text>
                         <Text style={styles.settingSubtitle}>
                           {sleepSyncEnabled
-                            ? "Your sleep data is syncing from Apple Health"
-                            : "Sync your sleep duration from Apple Health"}
+                            ? `Your sleep data is syncing from ${Platform.OS === "ios" ? "Apple Health" : "Health Connect"}`
+                            : `Sync your sleep duration from ${Platform.OS === "ios" ? "Apple Health" : "Health Connect"}`}
                         </Text>
                       </View>
                       {syncingSleep ? (

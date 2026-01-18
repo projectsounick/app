@@ -37,6 +37,7 @@ export {
   showPermissionDeniedAlert as showHealthConnectPermissionDeniedAlert,
   showNoDataOrPermissionAlert as showHealthConnectNoDataOrPermissionAlert,
   showManualHealthConnectGuide,
+  showHealthConnectNotInstalledModal,
   openHealthConnectSettings,
   wasPermissionDenied as wasHealthConnectPermissionDenied,
   resetInitialization as resetHealthConnectInitialization,

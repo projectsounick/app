@@ -27,11 +27,12 @@ import { updateTrackingField } from "@/Slices/trackSlice";
 import { createStreak } from "../services/streaks.service";
 import { setStreakData } from "@/Slices/streakSlice";
 import { useAppleHealthSync } from "@/hooks/useAppleHealthSync";
-// import { useAndroidHealthSync } from "@/hooks/useAndroidHealthSync";
+import { useAndroidHealthSync } from "@/hooks/useAndroidHealthSync";
 import { HealthKit } from "@/services/healthSync";
-// import { HealthConnect } from "@/services/healthSync";
-// import * as HealthConnectService from "@/services/healthSync/healthConnectService";
+import { HealthConnect } from "@/services/healthSync";
+import * as HealthConnectService from "@/services/healthSync/healthConnectService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import HealthConnectSetupModal from "@/app/Modals/HealthConnectSetupModal";
 
 // ============================================
 // Android Health Connect Sync Modal Component
@@ -64,22 +65,20 @@ function HealthDashboard() {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMsg, setSnackbarMsg] = useState("");
 
-  // Android Health Connect Sync Modal state - COMMENTED OUT
-  // const [healthConnectModalVisible, setHealthConnectModalVisible] = useState(false);
-  // const [healthConnectModalType, setHealthConnectModalType] = useState<"steps" | "sleep">("steps");
-  // const [healthConnectModalLoading, setHealthConnectModalLoading] = useState(false);
-  // const [healthConnectInstalled, setHealthConnectInstalled] = useState(true);
+  // Android Health Connect Sync Modal state
+  const [healthConnectModalVisible, setHealthConnectModalVisible] = useState(false);
+  const [healthConnectModalType, setHealthConnectModalType] = useState<"steps" | "sleep">("steps");
+  const [healthConnectModalLoading, setHealthConnectModalLoading] = useState(false);
+  const [healthConnectInstalled, setHealthConnectInstalled] = useState(true);
 
   // Platform-specific health sync hooks
   const iosHealthSync = useAppleHealthSync();
-  // const androidHealthSync = useAndroidHealthSync();
+  const androidHealthSync = useAndroidHealthSync();
   
   // Use platform-specific hook based on OS
-  // COMMENTED OUT - Android Health Connect disabled
-  const { isAvailable, syncData, canSync, syncStatus, refreshSyncStatus } = iosHealthSync;
-  // const { isAvailable, syncData, canSync, syncStatus, refreshSyncStatus } = Platform.OS === "ios" 
-  //   ? iosHealthSync 
-  //   : androidHealthSync;
+  const { isAvailable, syncData, canSync, syncStatus, refreshSyncStatus } = Platform.OS === "ios" 
+    ? iosHealthSync 
+    : androidHealthSync;
   
   // Use ref to check canSync without causing re-renders
   const canSyncRef = useRef(canSync);
@@ -185,7 +184,7 @@ function HealthDashboard() {
     }
   }, [syncStatus]);
   
-  // Only show "Sync with Apple Health" when syncModalShown is false (first time state)
+  // Only show "Sync with Health" when syncModalShown is false (first time state)
   // Once syncModalShown becomes true (iOS modal was shown), we don't show sync UI on cards anymore
   // User can manage sync from App Settings instead
   const canSyncSteps = useMemo(() => {
@@ -297,7 +296,8 @@ function HealthDashboard() {
    */
   const handleSyncSteps = async (forceManual: boolean = false) => {
     if (!isAvailable) {
-      setSnackbarMsg("Apple Health is only available on iOS");
+      const platformName = Platform.OS === "ios" ? "Apple Health" : "Health Connect";
+      setSnackbarMsg(`${platformName} is not available on this device`);
       setSnackbarVisible(true);
       return;
     }
@@ -310,16 +310,12 @@ function HealthDashboard() {
       return;
     }
 
-    // COMMENTED OUT - Android Health Connect code
-    // For Android, show the Health Connect sync modal first
-    // if (Platform.OS === "android") {
-    //   // Check if Health Connect is installed
-    //   const installed = await HealthConnectService.isHealthConnectInstalled();
-    //   setHealthConnectInstalled(installed);
-    //   setHealthConnectModalType("steps");
-    //   setHealthConnectModalVisible(true);
-    //   return;
-    // }
+    // For Android, show setup modal first (don't redirect)
+    if (Platform.OS === "android") {
+      setHealthConnectModalType("steps");
+      setHealthConnectModalVisible(true);
+      return;
+    }
 
     // For iOS, redirect to splash screen and sync in background
     // Store sync in progress flag
@@ -339,11 +335,41 @@ function HealthDashboard() {
   };
 
   /**
+   * Handle continue from Health Connect setup modal
+   */
+  const handleHealthConnectContinue = async () => {
+    setHealthConnectModalVisible(false);
+    setHealthConnectModalLoading(true);
+
+    // Store sync in progress flag
+    await AsyncStorage.setItem("healthSyncInProgress", JSON.stringify({ type: healthConnectModalType, platform: Platform.OS }));
+    
+    // Start sync in background (don't await)
+    syncData(healthConnectModalType).then(async (result) => {
+      setHealthConnectModalLoading(false);
+      // Clear sync flag when done
+      await AsyncStorage.removeItem("healthSyncInProgress");
+      
+      if (result.success) {
+        setSnackbarMsg(`${healthConnectModalType === "steps" ? "Steps" : "Sleep"} sync enabled successfully!`);
+        setSnackbarVisible(true);
+      }
+    }).catch(async (error: any) => {
+      setHealthConnectModalLoading(false);
+      // Clear sync flag on error
+      await AsyncStorage.removeItem("healthSyncInProgress");
+      setSnackbarMsg("Failed to sync. Please try again.");
+      setSnackbarVisible(true);
+    });
+  };
+
+  /**
    * Sync sleep from Apple Health / Health Connect
    */
   const handleSyncSleep = async () => {
     if (!isAvailable) {
-      setSnackbarMsg("Apple Health is only available on iOS");
+      const platformName = Platform.OS === "ios" ? "Apple Health" : "Health Connect";
+      setSnackbarMsg(`${platformName} is not available on this device`);
       setSnackbarVisible(true);
       return;
     }
@@ -355,16 +381,12 @@ function HealthDashboard() {
       return;
     }
 
-    // COMMENTED OUT - Android Health Connect code
-    // For Android, show the Health Connect sync modal first
-    // if (Platform.OS === "android") {
-    //   // Check if Health Connect is installed
-    //   const installed = await HealthConnectService.isHealthConnectInstalled();
-    //   setHealthConnectInstalled(installed);
-    //   setHealthConnectModalType("sleep");
-    //   setHealthConnectModalVisible(true);
-    //   return;
-    // }
+    // For Android, show setup modal first (don't redirect)
+    if (Platform.OS === "android") {
+      setHealthConnectModalType("sleep");
+      setHealthConnectModalVisible(true);
+      return;
+    }
 
     // For iOS, redirect to splash screen and sync in background
     // Store sync in progress flag
@@ -528,6 +550,7 @@ function HealthDashboard() {
                   handleSyncSteps();
                 }}
                 activeOpacity={0.7}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
@@ -545,7 +568,7 @@ function HealthDashboard() {
                       flex: 1,
                     }}
                   >
-                    Sync with Apple Health
+                    {Platform.OS === "ios" ? "Sync with Apple Health" : "Sync with Health Connect"}
                   </Text>
                 <Ionicons
                   name="chevron-forward"
@@ -556,7 +579,7 @@ function HealthDashboard() {
               </TouchableOpacity>
             </View>
           )}
-          {/* No "Synced with Apple Health" status shown - user manages sync from App Settings */}
+          {/* No "Synced with Health" status shown - user manages sync from App Settings */}
         </TouchableOpacity>
 
         {/* Sleep Card */}
@@ -692,6 +715,7 @@ function HealthDashboard() {
                   handleSyncSleep();
                 }}
                 activeOpacity={0.7}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 style={{
                   flexDirection: "row",
                   alignItems: "center",
@@ -709,7 +733,7 @@ function HealthDashboard() {
                     flex: 1,
                   }}
                 >
-                  Sync with Apple Health
+                  {Platform.OS === "ios" ? "Sync with Apple Health" : "Sync with Health Connect"}
                 </Text>
                 <Ionicons
                   name="chevron-forward"
@@ -720,7 +744,7 @@ function HealthDashboard() {
               </TouchableOpacity>
             </View>
           )}
-          {/* No "Synced with Apple Health" status shown - user manages sync from App Settings */}
+          {/* No "Synced with Health" status shown - user manages sync from App Settings */}
         </TouchableOpacity>
       </View>
 
@@ -842,47 +866,18 @@ function HealthDashboard() {
         />
       ) : null}
 
-      {/* Android Health Connect Sync Modal - COMMENTED OUT */}
-      {/* {Platform.OS === "android" && (
-        <HealthConnectSyncModal
+      {/* Android Health Connect Setup Modal */}
+      {Platform.OS === "android" && (
+        <HealthConnectSetupModal
           visible={healthConnectModalVisible}
           onClose={() => {
             setHealthConnectModalVisible(false);
             setHealthConnectModalLoading(false);
           }}
           type={healthConnectModalType}
-          isInstalled={healthConnectInstalled}
-          loading={healthConnectModalLoading}
-          onContinue={async () => {
-            setHealthConnectModalLoading(true);
-            
-            // Close modal first
-            setHealthConnectModalVisible(false);
-            
-            // Store sync in progress flag
-            await AsyncStorage.setItem("healthSyncInProgress", JSON.stringify({ type: healthConnectModalType, platform: Platform.OS }));
-            
-            // Redirect to splash screen
-            router.push("/secondsplashscreen");
-            
-            // Wait a bit for navigation
-            setTimeout(async () => {
-              try {
-                // Proceed with sync in background
-                const result = await syncData(healthConnectModalType);
-                
-                // Clear sync flag when done
-                await AsyncStorage.removeItem("healthSyncInProgress");
-              } catch (error: any) {
-                // Clear sync flag on error
-                await AsyncStorage.removeItem("healthSyncInProgress");
-              } finally {
-                setHealthConnectModalLoading(false);
-              }
-            }, 300);
-          }}
+          onContinue={handleHealthConnectContinue}
         />
-      )} */}
+      )}
     </View>
   );
 }

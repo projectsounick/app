@@ -4,7 +4,7 @@
  * Handles all direct interactions with react-native-health for Android
  */
 
-import { Platform, Alert, Linking } from "react-native";
+import { Platform, Alert, Linking, NativeModules } from "react-native";
 import { HealthDataType, HealthDataEntry } from "./types";
 import { LOG_PREFIX } from "./constants";
 
@@ -96,6 +96,13 @@ export async function isHealthConnectInstalled(): Promise<boolean> {
 export async function openHealthConnectPlayStore(): Promise<void> {
   try {
     const playStoreUrl = "https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata";
+    // Try to open directly - don't check if it can open first
+    try {
+      await Linking.openURL(playStoreUrl);
+      return;
+    } catch (e) {
+      // If direct open fails, try alternative
+    }
     const canOpen = await Linking.canOpenURL(playStoreUrl);
     
     if (canOpen) {
@@ -104,8 +111,8 @@ export async function openHealthConnectPlayStore(): Promise<void> {
       // Fallback to browser
       await Linking.openURL(playStoreUrl);
     }
-  } catch (error) {
-    console.error(`${LOG_PREFIX.HEALTHKIT} Error opening Health Connect Play Store:`, error);
+  } catch (error: any) {
+    // Silently handle - don't log error objects
   }
 }
 
@@ -120,11 +127,32 @@ function getHealthConnectModule(): HealthConnectModule | null {
 
   if (!HealthConnect) {
     try {
-      // Try to load the module
-      const healthModule = require("react-native-health");
+      // react-native-health exports via NativeModules.AppleHealthKit
+      // The module's index.js does: const { AppleHealthKit } = require('react-native').NativeModules
       
-      // The module might export differently
-      HealthConnect = healthModule?.default || healthModule;
+      // Method 1: Try NativeModules directly (primary method)
+      if (NativeModules?.AppleHealthKit) {
+        HealthConnect = NativeModules.AppleHealthKit as HealthConnectModule;
+        console.log(`${LOG_PREFIX.HEALTHKIT} Found module via NativeModules.AppleHealthKit`);
+      } else {
+        // Method 2: Try requiring the module (it will use NativeModules internally)
+        const healthModule = require("react-native-health");
+        
+        // The module exports HealthKit which wraps AppleHealthKit
+        // Check if it has the methods we need
+        if (healthModule && typeof healthModule === 'object') {
+          // The module might export HealthKit directly or wrap it
+          HealthConnect = healthModule as HealthConnectModule;
+          console.log(`${LOG_PREFIX.HEALTHKIT} Found module via require`);
+        }
+      }
+      
+      // Verify the module has the required methods
+      if (HealthConnect && (!HealthConnect.initHealthKit || typeof HealthConnect.initHealthKit !== 'function')) {
+        console.warn(`${LOG_PREFIX.HEALTHKIT} Module loaded but initHealthKit method not found`);
+        console.log(`${LOG_PREFIX.HEALTHKIT} Available keys:`, Object.keys(HealthConnect || {}));
+        // Don't set to null yet - might still work for other methods
+      }
     } catch (error) {
       console.error(`${LOG_PREFIX.HEALTHKIT} Failed to load Health Connect module:`, error);
       return null;
@@ -151,6 +179,19 @@ export async function initializeHealthConnect(showSettingsAlert: boolean = true)
     return false;
   }
 
+  // Debug: Log what methods are available
+  console.log(`${LOG_PREFIX.HEALTHKIT} Health Connect module keys:`, Object.keys(healthConnect));
+  console.log(`${LOG_PREFIX.HEALTHKIT} Has initHealthKit:`, 'initHealthKit' in healthConnect);
+  console.log(`${LOG_PREFIX.HEALTHKIT} Type of initHealthKit:`, typeof healthConnect.initHealthKit);
+
+  // Check if initHealthKit method exists
+  if (!healthConnect.initHealthKit || typeof healthConnect.initHealthKit !== 'function') {
+    console.error(`${LOG_PREFIX.HEALTHKIT} initHealthKit method not available on Health Connect module`);
+    console.error(`${LOG_PREFIX.HEALTHKIT} Available methods:`, Object.keys(healthConnect).filter(key => typeof (healthConnect as any)[key] === 'function'));
+    // Return false - user will need to grant permissions manually in Health Connect
+    return false;
+  }
+
   // If already initialized, check if permissions are actually granted
   if (isInitialized) {
     const hasPermissions = await checkPermissionsGranted();
@@ -169,6 +210,15 @@ export async function initializeHealthConnect(showSettingsAlert: boolean = true)
   try {
     console.log(`${LOG_PREFIX.HEALTHKIT} Requesting Health Connect permissions...`);
     
+    // Check if Constants exist
+    if (!healthConnect.Constants || !healthConnect.Constants.Permissions) {
+      console.error(`${LOG_PREFIX.HEALTHKIT} Health Connect Constants not available`);
+      if (showSettingsAlert) {
+        showHealthConnectNotInstalledModal();
+      }
+      return false;
+    }
+    
     const permissions = {
       permissions: {
         read: [
@@ -180,16 +230,21 @@ export async function initializeHealthConnect(showSettingsAlert: boolean = true)
     };
 
     const initSuccess = await new Promise<boolean>((resolve) => {
-      healthConnect.initHealthKit(permissions, (error: string) => {
-        if (error) {
-          console.error(`${LOG_PREFIX.HEALTHKIT} Health Connect init error:`, error);
-          resolve(false);
-        } else {
-          console.log(`${LOG_PREFIX.HEALTHKIT} initHealthKit completed for Health Connect`);
-          isInitialized = true;
-          resolve(true);
-        }
-      });
+      try {
+        healthConnect.initHealthKit(permissions, (error: string) => {
+          if (error) {
+            console.error(`${LOG_PREFIX.HEALTHKIT} Health Connect init error:`, error);
+            resolve(false);
+          } else {
+            console.log(`${LOG_PREFIX.HEALTHKIT} initHealthKit completed for Health Connect`);
+            isInitialized = true;
+            resolve(true);
+          }
+        });
+      } catch (initError) {
+        console.error(`${LOG_PREFIX.HEALTHKIT} Health Connect init exception in callback:`, initError);
+        resolve(false);
+      }
     });
 
     if (!initSuccess) {
@@ -216,8 +271,43 @@ export async function initializeHealthConnect(showSettingsAlert: boolean = true)
     
   } catch (error) {
     console.error(`${LOG_PREFIX.HEALTHKIT} Health Connect init exception:`, error);
+    // Don't show alert here - let the calling component handle it with modal
     return false;
   }
+}
+
+/**
+ * Show modal when Health Connect is not installed or module is not available
+ */
+export function showHealthConnectNotInstalledModal(): void {
+  Alert.alert(
+    "Health Connect Required",
+    "Health Connect is required to sync your health data on Android.\n\n" +
+    "Please follow these steps:\n\n" +
+    "1. Install Health Connect from Play Store (if not installed)\n" +
+    "2. Open Health Connect app\n" +
+    "3. Grant permissions to 'iness' app\n" +
+    "4. Return here and try again\n\n" +
+    "Would you like to open Health Connect now?",
+    [
+      { 
+        text: "Cancel", 
+        style: "cancel" 
+      },
+      {
+        text: "Open Play Store",
+        onPress: async () => {
+          await openHealthConnectPlayStore();
+        }
+      },
+      {
+        text: "Open Health Connect",
+        onPress: async () => {
+          await openHealthConnectSettings();
+        }
+      }
+    ]
+  );
 }
 
 /**
@@ -468,65 +558,63 @@ export function showNoDataOrPermissionAlert(type: string): void {
  */
 export async function openHealthConnectSettings(): Promise<boolean> {
   try {
-    // Try multiple methods to open Health Connect settings
-    
-    // Method 1: Try Health Connect deep link
-    const healthConnectIntent = "androidx.health.ACTION_SHOW_PERMISSIONS_RATIONALE";
-    
-    // Method 2: Try Health Connect package intent
     const healthConnectPackage = "com.google.android.apps.healthdata";
     const packageIntent = `package:${healthConnectPackage}`;
-    
-    // Method 3: Try opening Health Connect app directly
     const healthConnectUrl = "content://com.google.android.apps.healthdata";
+    const appIntent = `intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=${healthConnectPackage};end`;
     
-    // Try package intent first (most reliable)
+    // Method 1: Try package intent (opens app info/settings)
     try {
       const canOpenPackage = await Linking.canOpenURL(packageIntent);
       if (canOpenPackage) {
         await Linking.openURL(packageIntent);
         return true;
       }
-    } catch (e) {
-      console.log(`${LOG_PREFIX.HEALTHKIT} Package intent failed, trying alternatives`);
+    } catch (e: any) {
+      // Continue to next method
     }
     
-    // Try content URI
+    // Method 2: Try content URI
     try {
       const canOpen = await Linking.canOpenURL(healthConnectUrl);
       if (canOpen) {
         await Linking.openURL(healthConnectUrl);
         return true;
       }
-    } catch (e) {
-      console.log(`${LOG_PREFIX.HEALTHKIT} Content URI failed, trying app settings`);
+    } catch (e: any) {
+      // Continue to next method
     }
     
-    // Try opening Health Connect app directly via package name
+    // Method 3: Try direct app intent
     try {
-      const appIntent = `intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=com.google.android.apps.healthdata;end`;
       await Linking.openURL(appIntent);
       return true;
-    } catch (e) {
-      console.log(`${LOG_PREFIX.HEALTHKIT} Direct app intent failed`);
+    } catch (e: any) {
+      // Continue to next method
     }
     
-    // Fallback to app settings
+    // Method 4: Try opening app via package name directly
+    try {
+      const packageUrl = `market://details?id=${healthConnectPackage}`;
+      await Linking.openURL(packageUrl);
+      return true;
+    } catch (e: any) {
+      // Continue to fallback
+    }
+    
+    // Fallback to general settings
     try {
       await Linking.openSettings();
       return false; // Settings opened but not Health Connect directly
-    } catch (error) {
-      console.error(`${LOG_PREFIX.HEALTHKIT} Error opening settings:`, error);
+    } catch (error: any) {
       return false;
     }
-  } catch (error) {
-    console.error(`${LOG_PREFIX.HEALTHKIT} Error opening Health Connect settings:`, error);
+  } catch (error: any) {
     // Final fallback to general settings
     try {
       await Linking.openSettings();
       return false;
-    } catch (settingsError) {
-      console.error(`${LOG_PREFIX.HEALTHKIT} Failed to open settings:`, settingsError);
+    } catch (settingsError: any) {
       return false;
     }
   }
