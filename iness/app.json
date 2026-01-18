@@ -34,7 +34,7 @@
       },
       "edgeToEdgeEnabled": true,
       "versionCode": 35,
-      "googleServicesFile": "./android/app/google-services.json",
+      "googleServicesFile": "./google-services.json",
       "permissions": [
         "NOTIFICATIONS",
         "CAMERA",
