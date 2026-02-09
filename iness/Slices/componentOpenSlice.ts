@@ -1,12 +1,14 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { act } from "react";
 
 interface ComponentOpenSlice {
   calendarSheetOpen: boolean;
+  /** When opening calendar from a session card, pass date (YYYY-MM-DD) to open directly to that day's sessions */
+  calendarInitialDate: string | null;
 }
 
 const initialState: ComponentOpenSlice = {
   calendarSheetOpen: false,
+  calendarInitialDate: null,
 };
 
 const componentOpenSlice = createSlice({
@@ -14,11 +16,14 @@ const componentOpenSlice = createSlice({
   initialState,
   reducers: {
     setCalendarSheetOpen: (state, action: PayloadAction<boolean>) => {
-      /// when diet plan price is null it means it is related to main plan not to show individually--/
       state.calendarSheetOpen = action.payload;
+      if (!action.payload) state.calendarInitialDate = null;
+    },
+    setCalendarInitialDate: (state, action: PayloadAction<string | null>) => {
+      state.calendarInitialDate = action.payload;
     },
   },
 });
 
-export const { setCalendarSheetOpen } = componentOpenSlice.actions;
+export const { setCalendarSheetOpen, setCalendarInitialDate } = componentOpenSlice.actions;
 export default componentOpenSlice.reducer;

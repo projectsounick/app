@@ -1,12 +1,14 @@
-import React, { memo, useRef, useState } from "react";
+import React, { memo, useRef, useState, useMemo } from "react";
 import {
   View,
   TouchableOpacity,
   Animated,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   Platform,
+  Text,
+  Modal,
+  Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
@@ -23,11 +25,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { createStreak } from "../services/streaks.service";
 import { setStreakData } from "@/Slices/streakSlice";
-import theme from "../Theme/globalTheme";
+import { useTheme } from "../Theme/ThemeContext";
 
 interface FloatingCameraButtonProps {}
 
 const ImagePickerButton: React.FC<FloatingCameraButtonProps> = () => {
+  const { theme, isDark } = useTheme();
+  const styles = useMemo(() => getStyles(theme, isDark), [theme, isDark]);
   const calendarSheetOpen = useSelector(
     (state: RootState) => state.componentOpen.calendarSheetOpen
   );
@@ -35,6 +39,9 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = () => {
   const animation = useRef(new Animated.Value(0)).current;
   const [menuOpen, setMenuOpen] = useState(false);
   const [imageUploadLoader, setImageUploadLoader] = useState(false);
+  const [captureTypeVisible, setCaptureTypeVisible] = useState(false);
+  const captureTypeResolveRef = useRef<((value: "image" | "video") => void) | null>(null);
+  const captureTypeRejectRef = useRef<((reason?: any) => void) | null>(null);
 
   const [visible, setVisible] = useState(false);
   const onClose = () => setVisible(false);
@@ -113,19 +120,11 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = () => {
   const pickImage = async (mode: "camera" | "gallery") => {
     setImageUploadLoader(true);
     try {
-      const mediaType = await new Promise<"image" | "video">(
-        (resolve, reject) => {
-          Alert.alert("Capture Type", "Choose what you want to capture", [
-            { text: "Photo", onPress: () => resolve("image") },
-            { text: "Video", onPress: () => resolve("video") },
-            {
-              text: "Cancel",
-              style: "cancel",
-              onPress: () => reject("cancel"),
-            },
-          ]);
-        }
-      );
+      const mediaType = await new Promise<"image" | "video">((resolve, reject) => {
+        captureTypeResolveRef.current = resolve;
+        captureTypeRejectRef.current = reject;
+        setCaptureTypeVisible(true);
+      });
 
       if (Platform.OS === "android") {
         if (mode === "camera") {
@@ -237,13 +236,76 @@ const ImagePickerButton: React.FC<FloatingCameraButtonProps> = () => {
       </TouchableOpacity>
 
       {visible && <DietPlanBottomSheet visible={visible} onClose={onClose} />}
+
+      <Modal visible={captureTypeVisible} transparent animationType="slide">
+        <TouchableOpacity
+          activeOpacity={1}
+          style={styles.captureBackdrop}
+          onPress={() => {
+            setCaptureTypeVisible(false);
+            captureTypeRejectRef.current?.("cancel");
+          }}
+        >
+          <View style={styles.captureSheet} onStartShouldSetResponder={() => true}>
+            <View style={styles.captureAccent} />
+            <View style={styles.captureHeader}>
+              <Ionicons name="camera" size={18} color={theme.colors.text} />
+              <Text style={styles.captureHeaderTitle}>Capture Type</Text>
+            </View>
+            <Text style={styles.captureSubtitle}>
+              Choose what you want to capture
+            </Text>
+
+            <View style={styles.captureButtons}>
+              <TouchableOpacity
+                style={styles.capturePrimary}
+                activeOpacity={0.85}
+                onPress={() => {
+                  setCaptureTypeVisible(false);
+                  captureTypeResolveRef.current?.("image");
+                }}
+              >
+                <Ionicons name="image" size={18} color={theme.colors.textWhite} />
+                <Text style={styles.capturePrimaryText}>Photo</Text>
+                <View style={styles.capturePrimaryLabel}>
+                  <Ionicons name="sparkles" size={14} color={theme.colors.textWhite} />
+                </View>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.captureSecondary}
+                activeOpacity={0.85}
+                onPress={() => {
+                  setCaptureTypeVisible(false);
+                  captureTypeResolveRef.current?.("video");
+                }}
+              >
+                <Ionicons name="videocam" size={18} color={theme.colors.text} />
+                <Text style={styles.captureSecondaryText}>Video</Text>
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={styles.captureCancel}
+              activeOpacity={0.85}
+              onPress={() => {
+                setCaptureTypeVisible(false);
+                captureTypeRejectRef.current?.("cancel");
+              }}
+            >
+              <Ionicons name="close" size={16} color={theme.colors.textSecondary} />
+              <Text style={styles.captureCancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
 
 export default memo(ImagePickerButton);
 
-const styles = StyleSheet.create({
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   container: {
     justifyContent: "flex-end", // bottom center
     alignItems: "center",
@@ -279,5 +341,115 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.4,
     shadowRadius: 6,
     elevation: 6,
+  },
+  captureBackdrop: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  captureSheet: {
+    width: "100%",
+    maxWidth: 360,
+    backgroundColor: theme.colors.background,
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 18,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...(isDark
+      ? {}
+      : {
+          shadowColor: theme.colors.black,
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.2,
+          shadowRadius: 16,
+          elevation: 12,
+        }),
+  },
+  captureAccent: {
+    height: 6,
+    borderRadius: 6,
+    backgroundColor: theme.colors.secondPrimary,
+    marginBottom: 14,
+  },
+  captureHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+    gap: 8 as any,
+  },
+  captureHeaderTitle: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
+  },
+  captureSubtitle: {
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
+    marginBottom: 16,
+  },
+  captureButtons: {
+    gap: 10 as any,
+  },
+  capturePrimary: {
+    backgroundColor: theme.colors.success,
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.08)",
+  },
+  capturePrimaryText: {
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.bold as "700",
+    marginLeft: 8,
+    flex: 1,
+  },
+  capturePrimaryLabel: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.2)",
+  },
+  captureSecondary: {
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  captureSecondaryText: {
+    color: theme.colors.text,
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    marginLeft: 8,
+  },
+  captureCancel: {
+    marginTop: 12,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    backgroundColor: theme.colors.backgroundSecondary,
+  },
+  captureCancelText: {
+    color: theme.colors.textSecondary,
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
+    marginLeft: 6,
   },
 });

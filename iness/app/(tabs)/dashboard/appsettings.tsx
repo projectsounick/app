@@ -23,7 +23,7 @@ import HealthReportUploader from "@/app/modules/UploadReportPdf";
 import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { useAppleHealthSync } from "@/hooks/useAppleHealthSync";
 import { useAndroidHealthSync } from "@/hooks/useAndroidHealthSync";
-import { HealthKit } from "@/services/healthSync";
+import { HealthKit, HealthConnect } from "@/services/healthSync";
 import { trackService } from "@/app/services/track.service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -653,16 +653,64 @@ export default function AppSettingsScreen() {
       return;
     }
 
-    if (value && !stepsSyncEnabled) {
-      // Turning ON - show guidance modal
-      setSyncGuideModalType("steps");
-      setSyncGuideModalAction("enable");
-      setSyncGuideModalVisible(true);
-    } else if (!value && stepsSyncEnabled) {
-      // Turning OFF - show guidance modal
-      setSyncGuideModalType("steps");
-      setSyncGuideModalAction("disable");
-      setSyncGuideModalVisible(true);
+    if (Platform.OS === "android") {
+      // Android: Open Health Connect and trigger sync
+      if (value && !stepsSyncEnabled) {
+        // Turning ON - open Health Connect settings, then trigger sync
+        await HealthConnect.openHealthConnectSettings();
+        // Trigger sync (will request permissions if not granted)
+        setSyncingSteps(true);
+        setTimeout(async () => {
+          const result = await syncData("steps");
+          setSyncingSteps(false);
+          if (result.success) {
+            await refreshSyncStatus();
+            setSnackbarMessage("Steps sync enabled successfully");
+            setSnackbarOpen(true);
+          } else {
+            setSnackbarMessage(result.error || "Please grant Steps permission in Health Connect and try again");
+            setSnackbarOpen(true);
+          }
+        }, 500); // Small delay to let Health Connect open
+      } else if (!value && stepsSyncEnabled) {
+        // Turning OFF - disable sync
+        const response = await trackService.disableHealthSync("steps", "android");
+        if (response.success) {
+          try {
+            const userDataStr = await AsyncStorage.getItem("user");
+            if (userDataStr) {
+              const userData = JSON.parse(userDataStr);
+              if (!userData.androidHealth) userData.androidHealth = {};
+              userData.androidHealth.stepSync = false;
+              userData.androidHealth.lastSyncedStepsDate = null;
+              userData.androidHealth.lastSyncedStepsValue = null;
+              await AsyncStorage.setItem("user", JSON.stringify(userData));
+            }
+          } catch (e) {
+            console.error("[AppSettings] AsyncStorage error:", e);
+          }
+          setStepsSyncEnabled(false);
+          await refreshSyncStatus();
+          setSnackbarMessage("Steps sync turned off");
+          setSnackbarOpen(true);
+        } else {
+          setSnackbarMessage(response.message || "Failed to turn off sync");
+          setSnackbarOpen(true);
+        }
+      }
+    } else {
+      // iOS: Show guidance modal
+      if (value && !stepsSyncEnabled) {
+        // Turning ON - show guidance modal
+        setSyncGuideModalType("steps");
+        setSyncGuideModalAction("enable");
+        setSyncGuideModalVisible(true);
+      } else if (!value && stepsSyncEnabled) {
+        // Turning OFF - show guidance modal
+        setSyncGuideModalType("steps");
+        setSyncGuideModalAction("disable");
+        setSyncGuideModalVisible(true);
+      }
     }
   };
 
@@ -674,16 +722,64 @@ export default function AppSettingsScreen() {
       return;
     }
 
-    if (value && !sleepSyncEnabled) {
-      // Turning ON - show guidance modal
-      setSyncGuideModalType("sleep");
-      setSyncGuideModalAction("enable");
-      setSyncGuideModalVisible(true);
-    } else if (!value && sleepSyncEnabled) {
-      // Turning OFF - show guidance modal
-      setSyncGuideModalType("sleep");
-      setSyncGuideModalAction("disable");
-      setSyncGuideModalVisible(true);
+    if (Platform.OS === "android") {
+      // Android: Open Health Connect and trigger sync
+      if (value && !sleepSyncEnabled) {
+        // Turning ON - open Health Connect settings, then trigger sync
+        await HealthConnect.openHealthConnectSettings();
+        // Trigger sync (will request permissions if not granted)
+        setSyncingSleep(true);
+        setTimeout(async () => {
+          const result = await syncData("sleep");
+          setSyncingSleep(false);
+          if (result.success) {
+            await refreshSyncStatus();
+            setSnackbarMessage("Sleep sync enabled successfully");
+            setSnackbarOpen(true);
+          } else {
+            setSnackbarMessage(result.error || "Please grant Sleep permission in Health Connect and try again");
+            setSnackbarOpen(true);
+          }
+        }, 500); // Small delay to let Health Connect open
+      } else if (!value && sleepSyncEnabled) {
+        // Turning OFF - disable sync
+        const response = await trackService.disableHealthSync("sleep", "android");
+        if (response.success) {
+          try {
+            const userDataStr = await AsyncStorage.getItem("user");
+            if (userDataStr) {
+              const userData = JSON.parse(userDataStr);
+              if (!userData.androidHealth) userData.androidHealth = {};
+              userData.androidHealth.sleepSync = false;
+              userData.androidHealth.lastSyncedSleepDate = null;
+              userData.androidHealth.lastSyncedSleepValue = null;
+              await AsyncStorage.setItem("user", JSON.stringify(userData));
+            }
+          } catch (e) {
+            console.error("[AppSettings] AsyncStorage error:", e);
+          }
+          setSleepSyncEnabled(false);
+          await refreshSyncStatus();
+          setSnackbarMessage("Sleep sync turned off");
+          setSnackbarOpen(true);
+        } else {
+          setSnackbarMessage(response.message || "Failed to turn off sync");
+          setSnackbarOpen(true);
+        }
+      }
+    } else {
+      // iOS: Show guidance modal
+      if (value && !sleepSyncEnabled) {
+        // Turning ON - show guidance modal
+        setSyncGuideModalType("sleep");
+        setSyncGuideModalAction("enable");
+        setSyncGuideModalVisible(true);
+      } else if (!value && sleepSyncEnabled) {
+        // Turning OFF - show guidance modal
+        setSyncGuideModalType("sleep");
+        setSyncGuideModalAction("disable");
+        setSyncGuideModalVisible(true);
+      }
     }
   };
 
@@ -732,25 +828,29 @@ export default function AppSettingsScreen() {
         }
       } else {
         // Disabling sync
-        // Check if permissions are actually OFF
-        HealthKit.resetInitialization();
-        const hasPermissions = await HealthKit.checkPermissionsStatus(type);
-        
-        if (!hasPermissions) {
-          // Permissions are OFF - update backend (iOS platform)
-          const response = await trackService.disableHealthSync(type, "ios");
+        if (Platform.OS === "android") {
+          // Android: Disable Health Connect sync
+          // For Android, we can disable sync even if permissions are still granted
+          // (user can revoke permissions in Health Connect separately)
+          const response = await trackService.disableHealthSync(type, "android");
           
           if (response.success) {
-            // Update AsyncStorage
+            // Update AsyncStorage - androidHealth field
             try {
               const userDataStr = await AsyncStorage.getItem("user");
               if (userDataStr) {
                 const userData = JSON.parse(userDataStr);
-                if (!userData.healthSync) userData.healthSync = {};
+                if (!userData.androidHealth) userData.androidHealth = {};
                 if (type === "steps") {
-                  userData.healthSync.stepSync = false;
+                  userData.androidHealth.stepSync = false;
+                  // Clear last sync date
+                  userData.androidHealth.lastSyncedStepsDate = null;
+                  userData.androidHealth.lastSyncedStepsValue = null;
                 } else {
-                  userData.healthSync.sleepSync = false;
+                  userData.androidHealth.sleepSync = false;
+                  // Clear last sync date
+                  userData.androidHealth.lastSyncedSleepDate = null;
+                  userData.androidHealth.lastSyncedSleepValue = null;
                 }
                 await AsyncStorage.setItem("user", JSON.stringify(userData));
               }
@@ -772,9 +872,50 @@ export default function AppSettingsScreen() {
             setSnackbarOpen(true);
           }
         } else {
-          // Permissions still ON
-          setSnackbarMessage(`${type === "steps" ? "Steps" : "Sleep"} permission is still enabled in Health. Please disable it first.`);
-          setSnackbarOpen(true);
+          // iOS: Disable Apple Health sync
+          HealthKit.resetInitialization();
+          const hasPermissions = await HealthKit.checkPermissionsStatus(type);
+          
+          if (!hasPermissions) {
+            // Permissions are OFF - update backend (iOS platform)
+            const response = await trackService.disableHealthSync(type, "ios");
+            
+            if (response.success) {
+              // Update AsyncStorage
+              try {
+                const userDataStr = await AsyncStorage.getItem("user");
+                if (userDataStr) {
+                  const userData = JSON.parse(userDataStr);
+                  if (!userData.healthSync) userData.healthSync = {};
+                  if (type === "steps") {
+                    userData.healthSync.stepSync = false;
+                  } else {
+                    userData.healthSync.sleepSync = false;
+                  }
+                  await AsyncStorage.setItem("user", JSON.stringify(userData));
+                }
+              } catch (e) {
+                console.error("[AppSettings] AsyncStorage error:", e);
+              }
+              
+              if (type === "steps") {
+                setStepsSyncEnabled(false);
+              } else {
+                setSleepSyncEnabled(false);
+              }
+              await refreshSyncStatus();
+              setSnackbarMessage(`${type === "steps" ? "Steps" : "Sleep"} sync turned off`);
+              setSnackbarOpen(true);
+              setSyncGuideModalVisible(false);
+            } else {
+              setSnackbarMessage(response.message || "Failed to turn off sync");
+              setSnackbarOpen(true);
+            }
+          } else {
+            // Permissions still ON
+            setSnackbarMessage(`${type === "steps" ? "Steps" : "Sleep"} permission is still enabled in Health. Please disable it first.`);
+            setSnackbarOpen(true);
+          }
         }
       }
     } catch (error: any) {
@@ -826,8 +967,11 @@ export default function AppSettingsScreen() {
   // Update local state when syncStatus changes
   useEffect(() => {
     if (syncStatus) {
-      setStepsSyncEnabled(syncStatus.stepSync);
-      setSleepSyncEnabled(syncStatus.sleepSync);
+      const stepsEnabled = syncStatus.stepSync || false;
+      const sleepEnabled = syncStatus.sleepSync || false;
+      setStepsSyncEnabled(stepsEnabled);
+      setSleepSyncEnabled(sleepEnabled);
+      console.log(`[AppSettings] Sync status updated - Steps: ${stepsEnabled}, Sleep: ${sleepEnabled}`);
     }
   }, [syncStatus]);
 
@@ -835,14 +979,26 @@ export default function AppSettingsScreen() {
 
   const loadHealthSyncStatus = async () => {
     try {
-      // Load iOS health sync status (this screen uses iOS-specific hooks)
-      const response = await trackService.getHealthSyncStatus("ios");
+      // Load platform-specific health sync status
+      const platform = Platform.OS === "ios" ? "ios" : "android";
+      const response = await trackService.getHealthSyncStatus(platform);
       if (response.success && response.data) {
         setStepsSyncEnabled(response.data.stepSync || false);
         setSleepSyncEnabled(response.data.sleepSync || false);
+      } else {
+        // Fallback: use syncStatus from hook
+        if (syncStatus) {
+          setStepsSyncEnabled(syncStatus.stepSync || false);
+          setSleepSyncEnabled(syncStatus.sleepSync || false);
+        }
       }
     } catch (error) {
       console.error("Error loading health sync status:", error);
+      // Fallback: use syncStatus from hook
+      if (syncStatus) {
+        setStepsSyncEnabled(syncStatus.stepSync || false);
+        setSleepSyncEnabled(syncStatus.sleepSync || false);
+      }
     }
   };
 
@@ -1044,7 +1200,7 @@ export default function AppSettingsScreen() {
                 </View>
               </View>
 
-              {/* Health Data Sync - iOS Only */}
+              {/* Health Data Sync - iOS Only (with guide modal) */}
               {Platform.OS === "ios" && isAvailable && (
                 <View style={styles.card}>
                   <View style={styles.cardHeader}>
@@ -1075,8 +1231,8 @@ export default function AppSettingsScreen() {
                         <Text style={styles.settingTitle}>Steps Sync</Text>
                         <Text style={styles.settingSubtitle}>
                           {stepsSyncEnabled
-                            ? `Your steps data is syncing from ${Platform.OS === "ios" ? "Apple Health" : "Health Connect"}`
-                            : `Sync your daily steps from ${Platform.OS === "ios" ? "Apple Health" : "Health Connect"}`}
+                            ? `Your steps data is syncing from Apple Health`
+                            : `Sync your daily steps from Apple Health`}
                         </Text>
                       </View>
                       {syncingSteps ? (
@@ -1098,8 +1254,82 @@ export default function AppSettingsScreen() {
                         <Text style={styles.settingTitle}>Sleep Sync</Text>
                         <Text style={styles.settingSubtitle}>
                           {sleepSyncEnabled
-                            ? `Your sleep data is syncing from ${Platform.OS === "ios" ? "Apple Health" : "Health Connect"}`
-                            : `Sync your sleep duration from ${Platform.OS === "ios" ? "Apple Health" : "Health Connect"}`}
+                            ? `Your sleep data is syncing from Apple Health`
+                            : `Sync your sleep duration from Apple Health`}
+                        </Text>
+                      </View>
+                      {syncingSleep ? (
+                        <ActivityIndicator color={theme.colors.success} size="small" />
+                      ) : (
+                        <Switch
+                          value={sleepSyncEnabled}
+                          onValueChange={handleSleepSyncToggle}
+                          trackColor={{ false: theme.colors.border, true: theme.colors.success }}
+                          thumbColor={sleepSyncEnabled ? theme.colors.textWhite : "#F4F3F4"}
+                          ios_backgroundColor={theme.colors.border}
+                        />
+                      )}
+                    </View>
+                  </View>
+                </View>
+              )}
+
+              {/* Health Connect Sync - Android Only (opens Health Connect directly) */}
+              {Platform.OS === "android" && isAvailable && (
+                <View style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <View style={styles.iconContainer}>
+                      <Ionicons
+                        name="fitness-outline"
+                        size={18}
+                        color={theme.colors.secondPrimary}
+                      />
+                    </View>
+                    <Text style={styles.cardTitle}>Health Connect Sync</Text>
+                    <TouchableOpacity
+                      onPress={() => handleInfoClick(healthSyncInfo)}
+                      style={styles.infoBtn}
+                    >
+                      <Ionicons
+                        name="information-circle-outline"
+                        size={18}
+                        color={theme.colors.secondPrimary}
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  <View style={styles.cardContent}>
+                    {/* Steps Sync Toggle */}
+                    <View style={[styles.settingRow, { marginBottom: 16 }]}>
+                      <View style={{ flex: 1, marginRight: 12 }}>
+                        <Text style={styles.settingTitle}>Steps Sync</Text>
+                        <Text style={styles.settingSubtitle}>
+                          {stepsSyncEnabled
+                            ? `Your steps data is automatically syncing from Health Connect. This allows the app to display your daily step count without manual entry.`
+                            : `Enable automatic syncing of your daily steps from Health Connect. The app will read your step count to display it in your fitness dashboard.`}
+                        </Text>
+                      </View>
+                      {syncingSteps ? (
+                        <ActivityIndicator color={theme.colors.success} size="small" />
+                      ) : (
+                        <Switch
+                          value={stepsSyncEnabled}
+                          onValueChange={handleStepsSyncToggle}
+                          trackColor={{ false: theme.colors.border, true: theme.colors.success }}
+                          thumbColor={stepsSyncEnabled ? theme.colors.textWhite : "#F4F3F4"}
+                          ios_backgroundColor={theme.colors.border}
+                        />
+                      )}
+                    </View>
+
+                    {/* Sleep Sync Toggle */}
+                    <View style={styles.settingRow}>
+                      <View style={{ flex: 1, marginRight: 12 }}>
+                        <Text style={styles.settingTitle}>Sleep Sync</Text>
+                        <Text style={styles.settingSubtitle}>
+                          {sleepSyncEnabled
+                            ? `Your sleep data is automatically syncing from Health Connect. This allows the app to display your sleep duration without manual entry.`
+                            : `Enable automatic syncing of your sleep duration from Health Connect. The app will read your sleep data to display it in your fitness tracking.`}
                         </Text>
                       </View>
                       {syncingSleep ? (

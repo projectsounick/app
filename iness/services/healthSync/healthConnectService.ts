@@ -1,30 +1,21 @@
 /**
  * Health Connect Service
  * Low-level wrapper for Android Health Connect API
- * Handles all direct interactions with react-native-health for Android
+ * Uses react-native-health-connect for Android Health Connect
  */
 
-import { Platform, Alert, Linking, NativeModules } from "react-native";
+import { Platform, Alert, Linking } from "react-native";
 import { HealthDataType, HealthDataEntry } from "./types";
 import { LOG_PREFIX } from "./constants";
 
-// ============================================
-// Types
-// ============================================
-
-interface HealthConnectModule {
-  initHealthKit: (permissions: any, callback: (error: string) => void) => void;
-  getStepCount: (options: any, callback: (error: any, results: any) => void) => void;
-  getDailyStepCountSamples: (options: any, callback: (error: any, results: any[]) => void) => void;
-  getSleepSamples: (options: any, callback: (error: any, results: any[]) => void) => void;
-  getAuthStatus: (permissions: any, callback: (error: any, results: any) => void) => void;
-  isAvailable: (callback: (error: any, available: boolean) => void) => void;
-  Constants: {
-    Permissions: {
-      StepCount: string;
-      SleepAnalysis: string;
-    };
-  };
+// Import react-native-health-connect (Android only)
+let HealthConnect: any = null;
+if (Platform.OS === "android") {
+  try {
+    HealthConnect = require("react-native-health-connect");
+  } catch (error) {
+    console.error(`${LOG_PREFIX.HEALTHKIT} Failed to load react-native-health-connect:`, error);
+  }
 }
 
 // ============================================
@@ -33,7 +24,6 @@ interface HealthConnectModule {
 
 let isInitialized = false;
 let permissionDenied = false;
-let HealthConnect: HealthConnectModule | null = null;
 
 // ============================================
 // Initialization
@@ -43,7 +33,7 @@ let HealthConnect: HealthConnectModule | null = null;
  * Check if Health Connect is available on this device
  */
 export function isHealthConnectAvailable(): boolean {
-  return Platform.OS === "android";
+  return Platform.OS === "android" && HealthConnect !== null;
 }
 
 /**
@@ -55,35 +45,9 @@ export async function isHealthConnectInstalled(): Promise<boolean> {
   }
 
   try {
-    // First, try to get the Health Connect module
-    // If the module can be loaded, Health Connect is likely installed
-    const module = getHealthConnectModule();
-    if (!module) {
-      console.log(`${LOG_PREFIX.HEALTHKIT} Health Connect module not available`);
-      return false;
-    }
-
-    // Try to check if Health Connect is installed by attempting to open it
-    // Health Connect uses a specific content URI scheme
-    const healthConnectUrl = "content://com.google.android.apps.healthdata";
-    
-    try {
-      const canOpen = await Linking.canOpenURL(healthConnectUrl);
-      if (canOpen) {
-        console.log(`${LOG_PREFIX.HEALTHKIT} Health Connect appears to be installed (can open content URI)`);
-        return true;
-      }
-    } catch (uriError) {
-      // URI check failed, try alternative method
-      console.log(`${LOG_PREFIX.HEALTHKIT} Content URI check failed, trying alternative method`);
-    }
-
-    // Alternative: Try to check if we can initialize (this will fail gracefully if not installed)
-    // But we don't want to actually initialize, so we'll just check if the module exists
-    // If the module loaded successfully, assume Health Connect is available
-    // The actual initialization will handle the case where it's not properly installed
-    console.log(`${LOG_PREFIX.HEALTHKIT} Health Connect module loaded, assuming installed`);
-    return true;
+    // Try to initialize - this will fail if Health Connect is not installed
+    const initialized = await HealthConnect.initialize();
+    return initialized;
   } catch (error) {
     console.error(`${LOG_PREFIX.HEALTHKIT} Error checking Health Connect installation:`, error);
     return false;
@@ -96,182 +60,158 @@ export async function isHealthConnectInstalled(): Promise<boolean> {
 export async function openHealthConnectPlayStore(): Promise<void> {
   try {
     const playStoreUrl = "https://play.google.com/store/apps/details?id=com.google.android.apps.healthdata";
-    // Try to open directly - don't check if it can open first
-    try {
-      await Linking.openURL(playStoreUrl);
-      return;
-    } catch (e) {
-      // If direct open fails, try alternative
-    }
-    const canOpen = await Linking.canOpenURL(playStoreUrl);
-    
-    if (canOpen) {
-      await Linking.openURL(playStoreUrl);
-    } else {
-      // Fallback to browser
-      await Linking.openURL(playStoreUrl);
-    }
+    await Linking.openURL(playStoreUrl);
   } catch (error: any) {
-    // Silently handle - don't log error objects
+    // Silently handle
   }
-}
-
-/**
- * Get Health Connect module (lazy load to avoid errors on iOS)
- */
-function getHealthConnectModule(): HealthConnectModule | null {
-  if (!isHealthConnectAvailable()) {
-    console.log(`${LOG_PREFIX.HEALTHKIT} Not available (not Android)`);
-    return null;
-  }
-
-  if (!HealthConnect) {
-    try {
-      // react-native-health exports via NativeModules.AppleHealthKit
-      // The module's index.js does: const { AppleHealthKit } = require('react-native').NativeModules
-      
-      // Method 1: Try NativeModules directly (primary method)
-      if (NativeModules?.AppleHealthKit) {
-        HealthConnect = NativeModules.AppleHealthKit as HealthConnectModule;
-        console.log(`${LOG_PREFIX.HEALTHKIT} Found module via NativeModules.AppleHealthKit`);
-      } else {
-        // Method 2: Try requiring the module (it will use NativeModules internally)
-        const healthModule = require("react-native-health");
-        
-        // The module exports HealthKit which wraps AppleHealthKit
-        // Check if it has the methods we need
-        if (healthModule && typeof healthModule === 'object') {
-          // The module might export HealthKit directly or wrap it
-          HealthConnect = healthModule as HealthConnectModule;
-          console.log(`${LOG_PREFIX.HEALTHKIT} Found module via require`);
-        }
-      }
-      
-      // Verify the module has the required methods
-      if (HealthConnect && (!HealthConnect.initHealthKit || typeof HealthConnect.initHealthKit !== 'function')) {
-        console.warn(`${LOG_PREFIX.HEALTHKIT} Module loaded but initHealthKit method not found`);
-        console.log(`${LOG_PREFIX.HEALTHKIT} Available keys:`, Object.keys(HealthConnect || {}));
-        // Don't set to null yet - might still work for other methods
-      }
-    } catch (error) {
-      console.error(`${LOG_PREFIX.HEALTHKIT} Failed to load Health Connect module:`, error);
-      return null;
-    }
-  }
-
-  return HealthConnect;
 }
 
 /**
  * Initialize Health Connect with required permissions
  * This will show the Android permission modal on first call
+ * @param type - Optional: "steps" or "sleep" to request only that permission. If not provided, requests both.
  */
-export async function initializeHealthConnect(showSettingsAlert: boolean = true): Promise<boolean> {
-  console.log(`${LOG_PREFIX.HEALTHKIT} initializeHealthConnect called, isInitialized: ${isInitialized}`);
+export async function initializeHealthConnect(showSettingsAlert: boolean = true, type?: "steps" | "sleep"): Promise<boolean> {
+  console.log(`${LOG_PREFIX.HEALTHKIT} initializeHealthConnect called, isInitialized: ${isInitialized}, type: ${type || 'both'}`);
   
   if (!isHealthConnectAvailable()) {
     return false;
   }
 
-  const healthConnect = getHealthConnectModule();
-  if (!healthConnect) {
-    console.error(`${LOG_PREFIX.HEALTHKIT} Failed to get Health Connect module`);
-    return false;
-  }
-
-  // Debug: Log what methods are available
-  console.log(`${LOG_PREFIX.HEALTHKIT} Health Connect module keys:`, Object.keys(healthConnect));
-  console.log(`${LOG_PREFIX.HEALTHKIT} Has initHealthKit:`, 'initHealthKit' in healthConnect);
-  console.log(`${LOG_PREFIX.HEALTHKIT} Type of initHealthKit:`, typeof healthConnect.initHealthKit);
-
-  // Check if initHealthKit method exists
-  if (!healthConnect.initHealthKit || typeof healthConnect.initHealthKit !== 'function') {
-    console.error(`${LOG_PREFIX.HEALTHKIT} initHealthKit method not available on Health Connect module`);
-    console.error(`${LOG_PREFIX.HEALTHKIT} Available methods:`, Object.keys(healthConnect).filter(key => typeof (healthConnect as any)[key] === 'function'));
-    // Return false - user will need to grant permissions manually in Health Connect
-    return false;
-  }
-
-  // If already initialized, check if permissions are actually granted
+  // If already initialized, check if permissions are actually granted for the requested type
   if (isInitialized) {
-    const hasPermissions = await checkPermissionsGranted();
-    
-    if (!hasPermissions) {
-      permissionDenied = true;
-      if (showSettingsAlert) {
-        showPermissionDeniedAlert();
+    if (type) {
+      // Check specific type permission
+      const hasPermission = await checkPermissionsStatus(type);
+      if (!hasPermission) {
+        permissionDenied = true;
+        if (showSettingsAlert) {
+          showPermissionDeniedAlert();
+        }
+        return false;
       }
-      return false;
+      return true;
+    } else {
+      // Check all permissions
+      const hasPermissions = await checkPermissionsGranted();
+      if (!hasPermissions) {
+        permissionDenied = true;
+        if (showSettingsAlert) {
+          showPermissionDeniedAlert();
+        }
+        return false;
+      }
+      return true;
     }
-    
-    return true;
   }
 
   try {
-    console.log(`${LOG_PREFIX.HEALTHKIT} Requesting Health Connect permissions...`);
+    console.log(`${LOG_PREFIX.HEALTHKIT} Initializing Health Connect...`);
     
-    // Check if Constants exist
-    if (!healthConnect.Constants || !healthConnect.Constants.Permissions) {
-      console.error(`${LOG_PREFIX.HEALTHKIT} Health Connect Constants not available`);
+    // Step 1: Initialize Health Connect
+    const initialized = await HealthConnect.initialize();
+    
+    if (!initialized) {
+      console.error(`${LOG_PREFIX.HEALTHKIT} Health Connect initialization failed`);
       if (showSettingsAlert) {
         showHealthConnectNotInstalledModal();
       }
       return false;
     }
+
+    console.log(`${LOG_PREFIX.HEALTHKIT} Health Connect initialized, requesting permissions...`);
+
+    // Step 2: Request permissions - only request the specific type if provided
+    const permissions: Array<{ accessType: 'read'; recordType: string }> = [];
     
-    const permissions = {
-      permissions: {
-        read: [
-          healthConnect.Constants.Permissions.StepCount,
-          healthConnect.Constants.Permissions.SleepAnalysis,
-        ],
-        write: [],
-      },
-    };
-
-    const initSuccess = await new Promise<boolean>((resolve) => {
-      try {
-        healthConnect.initHealthKit(permissions, (error: string) => {
-          if (error) {
-            console.error(`${LOG_PREFIX.HEALTHKIT} Health Connect init error:`, error);
-            resolve(false);
-          } else {
-            console.log(`${LOG_PREFIX.HEALTHKIT} initHealthKit completed for Health Connect`);
-            isInitialized = true;
-            resolve(true);
-          }
-        });
-      } catch (initError) {
-        console.error(`${LOG_PREFIX.HEALTHKIT} Health Connect init exception in callback:`, initError);
-        resolve(false);
-      }
-    });
-
-    if (!initSuccess) {
-      permissionDenied = true;
-      if (showSettingsAlert) {
-        showPermissionDeniedAlert();
-      }
-      return false;
+    if (type === "steps") {
+      permissions.push({ accessType: 'read' as const, recordType: 'Steps' });
+    } else if (type === "sleep") {
+      permissions.push({ accessType: 'read' as const, recordType: 'SleepSession' });
+    } else {
+      // Request both if no type specified
+      permissions.push(
+        { accessType: 'read' as const, recordType: 'Steps' },
+        { accessType: 'read' as const, recordType: 'SleepSession' }
+      );
     }
 
-    // Check if permissions were actually granted
-    const hasPermissions = await checkPermissionsGranted();
+    const grantedPermissions = await HealthConnect.requestPermission(permissions);
     
-    if (!hasPermissions) {
-      permissionDenied = true;
-      if (showSettingsAlert) {
-        showPermissionDeniedAlert();
+    console.log(`${LOG_PREFIX.HEALTHKIT} Permission request result:`, grantedPermissions);
+
+    // Check if we got the required permissions
+    if (type === "steps") {
+      const hasStepsPermission = grantedPermissions.some(
+        (p: any) => p.recordType === 'Steps' && p.accessType === 'read'
+      );
+      if (!hasStepsPermission) {
+        permissionDenied = true;
+        if (showSettingsAlert) {
+          showPermissionDeniedAlert();
+        }
+        return false;
       }
-      return false;
+    } else if (type === "sleep") {
+      const hasSleepPermission = grantedPermissions.some(
+        (p: any) => p.recordType === 'SleepSession' && p.accessType === 'read'
+      );
+      if (!hasSleepPermission) {
+        permissionDenied = true;
+        if (showSettingsAlert) {
+          showPermissionDeniedAlert();
+        }
+        return false;
+      }
+    } else {
+      // Check both permissions
+      const hasStepsPermission = grantedPermissions.some(
+        (p: any) => p.recordType === 'Steps' && p.accessType === 'read'
+      );
+      const hasSleepPermission = grantedPermissions.some(
+        (p: any) => p.recordType === 'SleepSession' && p.accessType === 'read'
+      );
+      if (!hasStepsPermission && !hasSleepPermission) {
+        permissionDenied = true;
+        if (showSettingsAlert) {
+          showPermissionDeniedAlert();
+        }
+        return false;
+      }
     }
 
+    // Verify permissions by checking if we can access data
+    if (type) {
+      const hasPermission = await checkPermissionsStatus(type);
+      if (!hasPermission) {
+        permissionDenied = true;
+        if (showSettingsAlert) {
+          showPermissionDeniedAlert();
+        }
+        return false;
+      }
+    } else {
+      const hasPermissions = await checkPermissionsGranted();
+      if (!hasPermissions) {
+        permissionDenied = true;
+        if (showSettingsAlert) {
+          showPermissionDeniedAlert();
+        }
+        return false;
+      }
+    }
+
+    isInitialized = true;
     permissionDenied = false;
+    console.log(`${LOG_PREFIX.HEALTHKIT} Health Connect initialized and permissions granted`);
     return true;
     
   } catch (error) {
     console.error(`${LOG_PREFIX.HEALTHKIT} Health Connect init exception:`, error);
-    // Don't show alert here - let the calling component handle it with modal
+    permissionDenied = true;
+    if (showSettingsAlert) {
+      showPermissionDeniedAlert();
+    }
     return false;
   }
 }
@@ -314,77 +254,68 @@ export function showHealthConnectNotInstalledModal(): void {
  * Check if read permissions are actually granted
  */
 async function checkPermissionsGranted(): Promise<boolean> {
-  const healthConnect = getHealthConnectModule();
-  if (!healthConnect) return false;
+  if (!isHealthConnectAvailable()) return false;
 
   try {
-    // Try to get auth status for StepCount
-    return new Promise((resolve) => {
-      healthConnect.getAuthStatus(
-        { permissions: { read: [healthConnect.Constants.Permissions.StepCount] } },
-        (error: any, result: any) => {
-          if (error) {
-            console.log(`${LOG_PREFIX.HEALTHKIT} getAuthStatus error:`, error);
-            // If getAuthStatus fails, try to fetch data as a test
-            testDataAccess().then(resolve);
-            return;
-          }
-          
-          // Result should indicate if we have read access
-          if (result && (result.permissions?.read?.length > 0 || result === 2)) {
-            resolve(true);
-          } else {
-            // Fallback: try to fetch data
-            testDataAccess().then(resolve);
-          }
-        }
-      );
-    });
+    // Try to read today's steps AND sleep as a test
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    
+    let canReadSteps = false;
+    let canReadSleep = false;
+    
+    // Test Steps permission
+    try {
+      const { records: stepRecords } = await HealthConnect.readRecords('Steps', {
+        timeRangeFilter: {
+          operator: 'between',
+          startTime: startOfDay.toISOString(),
+          endTime: now.toISOString(),
+        },
+      });
+      canReadSteps = true;
+      console.log(`${LOG_PREFIX.HEALTHKIT} Steps permission verified (${stepRecords?.length || 0} records)`);
+    } catch (error: any) {
+      const errorStr = String(error).toLowerCase();
+      if (errorStr.includes('denied') || errorStr.includes('authorization') || errorStr.includes('permission')) {
+        console.log(`${LOG_PREFIX.HEALTHKIT} Steps permission denied`);
+      } else {
+        // Other error - might still have permission, just no data
+        canReadSteps = true;
+        console.log(`${LOG_PREFIX.HEALTHKIT} Steps access error (might be ok):`, error);
+      }
+    }
+    
+    // Test Sleep permission
+    try {
+      const { records: sleepRecords } = await HealthConnect.readRecords('SleepSession', {
+        timeRangeFilter: {
+          operator: 'between',
+          startTime: startOfDay.toISOString(),
+          endTime: now.toISOString(),
+        },
+      });
+      canReadSleep = true;
+      console.log(`${LOG_PREFIX.HEALTHKIT} Sleep permission verified (${sleepRecords?.length || 0} records)`);
+    } catch (error: any) {
+      const errorStr = String(error).toLowerCase();
+      if (errorStr.includes('denied') || errorStr.includes('authorization') || errorStr.includes('permission')) {
+        console.log(`${LOG_PREFIX.HEALTHKIT} Sleep permission denied:`, error);
+      } else {
+        // Other error - might still have permission, just no data
+        canReadSleep = true;
+        console.log(`${LOG_PREFIX.HEALTHKIT} Sleep access error (might be ok):`, error);
+      }
+    }
+    
+    // Return true if we can read at least one type
+    const hasPermissions = canReadSteps || canReadSleep;
+    console.log(`${LOG_PREFIX.HEALTHKIT} Health Connect permissions check: Steps=${canReadSteps}, Sleep=${canReadSleep}, Overall=${hasPermissions}`);
+    return hasPermissions;
   } catch (error) {
     console.error(`${LOG_PREFIX.HEALTHKIT} Error checking Health Connect permissions:`, error);
-    return testDataAccess();
+    return false;
   }
-}
-
-/**
- * Test if we can actually access data (fallback permission check)
- */
-async function testDataAccess(): Promise<boolean> {
-  const healthConnect = getHealthConnectModule();
-  if (!healthConnect) return false;
-
-  console.log(`${LOG_PREFIX.HEALTHKIT} Testing Health Connect data access as permission check...`);
-
-  const now = new Date();
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
-
-  return new Promise((resolve) => {
-    // Try to get today's step count
-    healthConnect.getStepCount(
-      {
-        startDate: startOfDay.toISOString(),
-        endDate: now.toISOString(),
-      },
-      (error: any, result: any) => {
-        if (error) {
-          // Check if the error indicates permission denied
-          const errorStr = String(error).toLowerCase();
-          if (errorStr.includes('denied') || errorStr.includes('authorization') || errorStr.includes('permission')) {
-            console.log(`${LOG_PREFIX.HEALTHKIT} Health Connect data access denied`);
-            resolve(false);
-          } else {
-            // Other error - might still have permission, just no data
-            console.log(`${LOG_PREFIX.HEALTHKIT} Health Connect data access error (might be ok):`, error);
-            resolve(true);
-          }
-        } else {
-          // Successfully accessed data (even if value is 0)
-          console.log(`${LOG_PREFIX.HEALTHKIT} Health Connect data access successful, value:`, result?.value);
-          resolve(true);
-        }
-      }
-    );
-  });
 }
 
 /**
@@ -398,67 +329,36 @@ export function wasPermissionDenied(): boolean {
  * Check if permissions are currently granted for a specific type
  */
 export async function checkPermissionsStatus(type: "steps" | "sleep"): Promise<boolean> {
-  const healthConnect = getHealthConnectModule();
-  if (!healthConnect) return false;
-
-  console.log(`${LOG_PREFIX.HEALTHKIT} Checking Health Connect permissions status for ${type}...`);
-
-  const permissionType = type === "steps" 
-    ? healthConnect.Constants.Permissions.StepCount 
-    : healthConnect.Constants.Permissions.SleepAnalysis;
+  if (!isHealthConnectAvailable()) return false;
 
   try {
-    return new Promise((resolve) => {
-      healthConnect.getAuthStatus(
-        { 
-          permissions: { 
-            read: [permissionType],
-            write: []
-          } 
+    // Try to read data for the specific type
+    const now = new Date();
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0);
+    
+    const recordType = type === "steps" ? "Steps" : "SleepSession";
+    
+    try {
+      const { records } = await HealthConnect.readRecords(recordType, {
+        timeRangeFilter: {
+          operator: 'between',
+          startTime: startOfDay.toISOString(),
+          endTime: now.toISOString(),
         },
-        (error: any, result: any) => {
-          if (error) {
-            console.log(`${LOG_PREFIX.HEALTHKIT} getAuthStatus error for ${type}:`, error);
-            // If getAuthStatus fails, try data access test for steps
-            if (type === "steps") {
-              testDataAccess().then(resolve);
-            } else {
-              resolve(false);
-            }
-            return;
-          }
-
-          console.log(`${LOG_PREFIX.HEALTHKIT} ${type} Health Connect auth status result:`, JSON.stringify(result));
-          
-          if (result?.permissions?.read && Array.isArray(result.permissions.read)) {
-            const statusArray = result.permissions.read;
-            console.log(`${LOG_PREFIX.HEALTHKIT} ${type} Health Connect status array:`, statusArray);
-            
-            // Status codes: 0 = not determined, 1 = denied, 2 = authorized
-            const hasAccess = statusArray.some((status: number) => status === 2);
-            console.log(`${LOG_PREFIX.HEALTHKIT} ${type} Health Connect has access:`, hasAccess);
-            
-            if (!hasAccess) {
-              console.log(`${LOG_PREFIX.HEALTHKIT} ${type} Health Connect permissions are OFF (status not 2)`);
-              resolve(false);
-            } else {
-              // Status is 2 (authorized), verify with data access for steps
-              if (type === "steps") {
-                testDataAccess().then(canAccess => {
-                  console.log(`${LOG_PREFIX.HEALTHKIT} Steps Health Connect data access verification:`, canAccess);
-                  resolve(canAccess);
-                });
-              } else {
-                resolve(true);
-              }
-            }
-          } else {
-            console.log(`${LOG_PREFIX.HEALTHKIT} No valid Health Connect status array, assuming no access`);
-            resolve(false);
-          }
-        }
-      );
-    });
+      });
+      console.log(`${LOG_PREFIX.HEALTHKIT} ${type} permission verified, found ${records?.length || 0} records`);
+      return true;
+    } catch (error: any) {
+      const errorStr = String(error).toLowerCase();
+      console.log(`${LOG_PREFIX.HEALTHKIT} ${type} permission check error:`, error);
+      if (errorStr.includes('denied') || errorStr.includes('authorization') || errorStr.includes('permission')) {
+        console.log(`${LOG_PREFIX.HEALTHKIT} ${type} permission is denied`);
+        return false;
+      }
+      // Other error - assume permission is granted (might just be no data)
+      console.log(`${LOG_PREFIX.HEALTHKIT} ${type} access error (assuming permission granted):`, error);
+      return true;
+    }
   } catch (error) {
     console.error(`${LOG_PREFIX.HEALTHKIT} Error checking ${type} Health Connect permissions:`, error);
     return false;
@@ -476,7 +376,7 @@ export function showPermissionDeniedAlert(): void {
     "2. Go to Apps → Health Connect\n" +
     "3. Tap on Permissions\n" +
     "4. Find 'iness' app\n" +
-    "5. Turn ON 'Steps' and 'Sleep Analysis' permissions\n" +
+    "5. Turn ON 'Steps' and 'Sleep' permissions\n" +
     "6. Return to this app and try again",
     [
       { text: "Cancel", style: "cancel" },
@@ -508,25 +408,23 @@ export function showManualHealthConnectGuide(): void {
     "• Find 'iness' in the list of apps\n" +
     "• Tap on 'iness'\n" +
     "• Turn ON 'Steps' permission\n" +
-    "• Turn ON 'Sleep Analysis' permission\n\n" +
+    "• Turn ON 'Sleep' permission\n\n" +
     "STEP 3: Return to App\n" +
     "• Come back to iness app\n" +
     "• Tap 'Continue' to sync your data\n\n" +
     "Alternative: Settings App\n" +
     "• Open Settings → Apps → Health Connect\n" +
     "• Tap Permissions → Find 'iness'\n" +
-    "• Enable Steps and Sleep Analysis",
+    "• Enable Steps and Sleep",
     [
       { text: "Got it", style: "default" },
       {
         text: "Open Health Connect App",
         onPress: async () => {
           try {
-            // Try to open Health Connect app directly
             const healthConnectPackage = "com.google.android.apps.healthdata";
             await Linking.openURL(`package:${healthConnectPackage}`);
           } catch (error) {
-            // Fallback to settings
             await Linking.openSettings();
           }
         }
@@ -560,10 +458,7 @@ export async function openHealthConnectSettings(): Promise<boolean> {
   try {
     const healthConnectPackage = "com.google.android.apps.healthdata";
     const packageIntent = `package:${healthConnectPackage}`;
-    const healthConnectUrl = "content://com.google.android.apps.healthdata";
-    const appIntent = `intent://#Intent;action=android.intent.action.MAIN;category=android.intent.category.LAUNCHER;package=${healthConnectPackage};end`;
     
-    // Method 1: Try package intent (opens app info/settings)
     try {
       const canOpenPackage = await Linking.canOpenURL(packageIntent);
       if (canOpenPackage) {
@@ -574,43 +469,14 @@ export async function openHealthConnectSettings(): Promise<boolean> {
       // Continue to next method
     }
     
-    // Method 2: Try content URI
-    try {
-      const canOpen = await Linking.canOpenURL(healthConnectUrl);
-      if (canOpen) {
-        await Linking.openURL(healthConnectUrl);
-        return true;
-      }
-    } catch (e: any) {
-      // Continue to next method
-    }
-    
-    // Method 3: Try direct app intent
-    try {
-      await Linking.openURL(appIntent);
-      return true;
-    } catch (e: any) {
-      // Continue to next method
-    }
-    
-    // Method 4: Try opening app via package name directly
-    try {
-      const packageUrl = `market://details?id=${healthConnectPackage}`;
-      await Linking.openURL(packageUrl);
-      return true;
-    } catch (e: any) {
-      // Continue to fallback
-    }
-    
     // Fallback to general settings
     try {
       await Linking.openSettings();
-      return false; // Settings opened but not Health Connect directly
+      return false;
     } catch (error: any) {
       return false;
     }
   } catch (error: any) {
-    // Final fallback to general settings
     try {
       await Linking.openSettings();
       return false;
@@ -636,60 +502,74 @@ export function resetInitialization(): void {
  * Get today's step count
  */
 export async function getTodaySteps(): Promise<number> {
-  const healthConnect = getHealthConnectModule();
-  if (!healthConnect) return 0;
+  if (!isHealthConnectAvailable()) return 0;
 
   const initialized = await initializeHealthConnect();
   if (!initialized) return 0;
 
   const { startOfDay, endOfDay } = getTodayDateRange();
 
-  return new Promise((resolve) => {
-    healthConnect.getStepCount(
-      {
-        startDate: startOfDay.toISOString(),
-        endDate: endOfDay.toISOString(),
+  try {
+    const { records } = await HealthConnect.readRecords('Steps', {
+      timeRangeFilter: {
+        operator: 'between',
+        startTime: startOfDay.toISOString(),
+        endTime: endOfDay.toISOString(),
       },
-      (error, results) => {
-        if (error) {
-          console.error(`${LOG_PREFIX.HEALTHKIT} Error getting Health Connect steps:`, error);
-          resolve(0);
-          return;
-        }
-        resolve(results?.value || 0);
-      }
-    );
-  });
+    });
+
+    // Sum all step counts for today
+    const totalSteps = records.reduce((sum: number, record: any) => {
+      return sum + (record.count || 0);
+    }, 0);
+
+    return Math.round(totalSteps);
+  } catch (error) {
+    console.error(`${LOG_PREFIX.HEALTHKIT} Error getting Health Connect steps:`, error);
+    return 0;
+  }
 }
 
 /**
  * Get today's sleep duration in hours
  */
 export async function getTodaySleep(): Promise<number> {
-  const healthConnect = getHealthConnectModule();
-  if (!healthConnect) return 0;
+  if (!isHealthConnectAvailable()) return 0;
 
   const initialized = await initializeHealthConnect();
   if (!initialized) return 0;
 
   const { startOfDay, endOfDay } = getTodayDateRange();
 
-  return new Promise((resolve) => {
-    healthConnect.getSleepSamples(
-      {
-        startDate: startOfDay.toISOString(),
-        endDate: endOfDay.toISOString(),
+  try {
+    console.log(`${LOG_PREFIX.HEALTHKIT} Fetching sleep data from ${startOfDay.toISOString()} to ${endOfDay.toISOString()}`);
+    
+    const { records } = await HealthConnect.readRecords('SleepSession', {
+      timeRangeFilter: {
+        operator: 'between',
+        startTime: startOfDay.toISOString(),
+        endTime: endOfDay.toISOString(),
       },
-      (error, results) => {
-        if (error) {
-          console.error(`${LOG_PREFIX.HEALTHKIT} Error getting Health Connect sleep:`, error);
-          resolve(0);
-          return;
-        }
-        resolve(calculateTotalSleepHours(results || []));
-      }
-    );
-  });
+    });
+
+    console.log(`${LOG_PREFIX.HEALTHKIT} Health Connect returned ${(records || []).length} sleep sessions`);
+    
+    if (records && records.length > 0) {
+      console.log(`${LOG_PREFIX.HEALTHKIT} Sample sleep record:`, JSON.stringify(records[0], null, 2));
+    }
+
+    const totalHours = calculateTotalSleepHours(records || []);
+    console.log(`${LOG_PREFIX.HEALTHKIT} Calculated total sleep hours: ${totalHours}`);
+    
+    return totalHours;
+  } catch (error) {
+    console.error(`${LOG_PREFIX.HEALTHKIT} Error getting Health Connect sleep:`, error);
+    // Log the full error for debugging
+    if (error instanceof Error) {
+      console.error(`${LOG_PREFIX.HEALTHKIT} Sleep error details:`, error.message, error.stack);
+    }
+    return 0;
+  }
 }
 
 /**
@@ -699,38 +579,34 @@ export async function getHistoricalSteps(
   startDate: Date,
   endDate: Date
 ): Promise<HealthDataEntry[]> {
-  const healthConnect = getHealthConnectModule();
-  if (!healthConnect) return [];
+  if (!isHealthConnectAvailable()) return [];
 
   const initialized = await initializeHealthConnect();
   if (!initialized) return [];
 
-  return new Promise((resolve) => {
+  try {
     console.log(`[DEBUG] Fetching Health Connect steps for sync - Date range: ${startDate.toISOString()} to ${endDate.toISOString()}`);
     
-    healthConnect.getDailyStepCountSamples(
-      {
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
+    const { records } = await HealthConnect.readRecords('Steps', {
+      timeRangeFilter: {
+        operator: 'between',
+        startTime: startDate.toISOString(),
+        endTime: endDate.toISOString(),
       },
-      (error, results) => {
-        if (error) {
-          console.error(`${LOG_PREFIX.HEALTHKIT} Error getting historical Health Connect steps:`, error);
-          resolve([]);
-          return;
-        }
+    });
 
-        console.log(`[DEBUG] Health Connect returned ${(results || []).length} raw samples for sync date range`);
+    console.log(`[DEBUG] Health Connect returned ${(records || []).length} raw samples for sync date range`);
 
-        // Aggregate by date to get daily totals
-        const data = aggregateStepsByDate(results || []);
-        
-        console.log(`[DEBUG] After aggregation: ${data.length} Health Connect entries`);
-        
-        resolve(data);
-      }
-    );
-  });
+    // Aggregate by date to get daily totals
+    const data = aggregateStepsByDate(records || []);
+    
+    console.log(`[DEBUG] After aggregation: ${data.length} Health Connect entries`);
+    
+    return data;
+  } catch (error) {
+    console.error(`${LOG_PREFIX.HEALTHKIT} Error getting historical Health Connect steps:`, error);
+    return [];
+  }
 }
 
 /**
@@ -740,32 +616,44 @@ export async function getHistoricalSleep(
   startDate: Date,
   endDate: Date
 ): Promise<HealthDataEntry[]> {
-  const healthConnect = getHealthConnectModule();
-  if (!healthConnect) return [];
+  if (!isHealthConnectAvailable()) return [];
 
   const initialized = await initializeHealthConnect();
   if (!initialized) return [];
 
-  return new Promise((resolve) => {
-    healthConnect.getSleepSamples(
-      {
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
+  try {
+    console.log(`${LOG_PREFIX.HEALTHKIT} Fetching historical sleep from ${startDate.toISOString()} to ${endDate.toISOString()}`);
+    
+    const { records } = await HealthConnect.readRecords('SleepSession', {
+      timeRangeFilter: {
+        operator: 'between',
+        startTime: startDate.toISOString(),
+        endTime: endDate.toISOString(),
       },
-      (error, results) => {
-        if (error) {
-          console.error(`${LOG_PREFIX.HEALTHKIT} Error getting historical Health Connect sleep:`, error);
-          resolve([]);
-          return;
-        }
+    });
 
-        // Aggregate sleep by date
-        const data = aggregateSleepByDate(results || [], startDate);
-        
-        resolve(data);
-      }
-    );
-  });
+    console.log(`${LOG_PREFIX.HEALTHKIT} Health Connect returned ${(records || []).length} sleep sessions for historical data`);
+    
+    if (records && records.length > 0) {
+      console.log(`${LOG_PREFIX.HEALTHKIT} Sample historical sleep record:`, JSON.stringify(records[0], null, 2));
+    } else {
+      console.warn(`${LOG_PREFIX.HEALTHKIT} No sleep records found in Health Connect for the specified date range`);
+    }
+
+    // Aggregate sleep by date
+    const data = aggregateSleepByDate(records || [], startDate);
+    
+    console.log(`${LOG_PREFIX.HEALTHKIT} Aggregated ${data.length} sleep entries`);
+    
+    return data;
+  } catch (error) {
+    console.error(`${LOG_PREFIX.HEALTHKIT} Error getting historical Health Connect sleep:`, error);
+    // Log full error details
+    if (error instanceof Error) {
+      console.error(`${LOG_PREFIX.HEALTHKIT} Historical sleep error details:`, error.message, error.stack);
+    }
+    return [];
+  }
 }
 
 /**
@@ -808,47 +696,108 @@ function getTodayDateRange(): { startOfDay: Date; endOfDay: Date } {
   };
 }
 
-function calculateTotalSleepHours(samples: any[]): number {
+function calculateTotalSleepHours(sessions: any[]): number {
   let totalHours = 0;
 
-  samples.forEach((entry) => {
-    if (entry.startDate && entry.endDate) {
-      const start = new Date(entry.startDate);
-      const end = new Date(entry.endDate);
-      const duration = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
-      totalHours += duration;
+  if (!sessions || sessions.length === 0) {
+    console.log(`${LOG_PREFIX.HEALTHKIT} No sleep sessions provided`);
+    return 0;
+  }
+
+  sessions.forEach((session, index) => {
+    // Health Connect SleepSession can have different field names
+    // Try multiple possible field names
+    const startTime = session.startTime || session.startDate || session.time;
+    const endTime = session.endTime || session.endDate;
+    
+    if (startTime && endTime) {
+      try {
+        const start = new Date(startTime);
+        const end = new Date(endTime);
+        
+        // Validate dates
+        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+          console.warn(`${LOG_PREFIX.HEALTHKIT} Invalid date in sleep session ${index}:`, session);
+          return;
+        }
+        
+        const duration = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+        
+        if (duration > 0 && duration < 24) { // Reasonable sleep duration check
+          totalHours += duration;
+          console.log(`${LOG_PREFIX.HEALTHKIT} Sleep session ${index}: ${duration.toFixed(2)} hours (${start.toISOString()} to ${end.toISOString()})`);
+        } else {
+          console.warn(`${LOG_PREFIX.HEALTHKIT} Suspicious sleep duration ${duration} hours in session ${index}`);
+        }
+      } catch (dateError) {
+        console.error(`${LOG_PREFIX.HEALTHKIT} Error parsing sleep session ${index}:`, dateError, session);
+      }
+    } else {
+      console.warn(`${LOG_PREFIX.HEALTHKIT} Sleep session ${index} missing time fields:`, Object.keys(session));
     }
   });
 
-  return Math.round(totalHours * 10) / 10; // Round to 1 decimal
+  const rounded = Math.round(totalHours * 10) / 10;
+  console.log(`${LOG_PREFIX.HEALTHKIT} Total sleep hours calculated: ${rounded} (from ${sessions.length} sessions)`);
+  return rounded;
 }
 
 /**
- * Aggregate sleep samples by date (sum all sleep for each day)
+ * Aggregate sleep sessions by date (sum all sleep for each day)
  */
-function aggregateSleepByDate(samples: any[], minDate?: Date): HealthDataEntry[] {
+function aggregateSleepByDate(sessions: any[], minDate?: Date): HealthDataEntry[] {
   const sleepByDate: Record<string, number> = {};
 
-  samples.forEach((entry) => {
-    if (entry.startDate && entry.endDate) {
-      const start = new Date(entry.startDate);
-      
-      // If minDate is provided, only include samples that start after that time
-      if (minDate && start < minDate) {
-        return; // Skip this sample
+  if (!sessions || sessions.length === 0) {
+    console.log(`${LOG_PREFIX.HEALTHKIT} No sleep sessions to aggregate`);
+    return [];
+  }
+
+  sessions.forEach((session, index) => {
+    // Health Connect SleepSession can have different field names
+    const startTime = session.startTime || session.startDate || session.time;
+    const endTime = session.endTime || session.endDate;
+    
+    if (startTime && endTime) {
+      try {
+        const start = new Date(startTime);
+        
+        // Validate date
+        if (isNaN(start.getTime())) {
+          console.warn(`${LOG_PREFIX.HEALTHKIT} Invalid start date in sleep session ${index}`);
+          return;
+        }
+        
+        // If minDate is provided, only include sessions that start after that time
+        if (minDate && start < minDate) {
+          return; // Skip this session
+        }
+        
+        const end = new Date(endTime);
+        if (isNaN(end.getTime())) {
+          console.warn(`${LOG_PREFIX.HEALTHKIT} Invalid end date in sleep session ${index}`);
+          return;
+        }
+        
+        // Use local date (YYYY-MM-DD) to match backend normalization
+        const year = start.getFullYear();
+        const month = String(start.getMonth() + 1).padStart(2, '0');
+        const day = String(start.getDate()).padStart(2, '0');
+        const dateKey = `${year}-${month}-${day}`;
+        const duration = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+        
+        if (duration > 0 && duration < 24) { // Reasonable sleep duration
+          sleepByDate[dateKey] = (sleepByDate[dateKey] || 0) + duration;
+        }
+      } catch (error) {
+        console.error(`${LOG_PREFIX.HEALTHKIT} Error processing sleep session ${index}:`, error);
       }
-      
-      // Use local date (YYYY-MM-DD) to match backend normalization
-      const year = start.getFullYear();
-      const month = String(start.getMonth() + 1).padStart(2, '0');
-      const day = String(start.getDate()).padStart(2, '0');
-      const dateKey = `${year}-${month}-${day}`;
-      const duration = (new Date(entry.endDate).getTime() - start.getTime()) / (1000 * 60 * 60);
-      sleepByDate[dateKey] = (sleepByDate[dateKey] || 0) + duration;
+    } else {
+      console.warn(`${LOG_PREFIX.HEALTHKIT} Sleep session ${index} missing time fields. Available keys:`, Object.keys(session));
     }
   });
 
-  return Object.entries(sleepByDate).map(([date, hours]) => {
+  const result = Object.entries(sleepByDate).map(([date, hours]) => {
     const [year, month, day] = date.split('-').map(Number);
     const localDate = new Date(year, month - 1, day, 0, 0, 0, 0);
     const totalValue = Math.round(hours * 10) / 10;
@@ -858,22 +807,26 @@ function aggregateSleepByDate(samples: any[], minDate?: Date): HealthDataEntry[]
       totalHealthKitValue: totalValue, // For Health Connect, same as value
     };
   });
+
+  console.log(`${LOG_PREFIX.HEALTHKIT} Aggregated ${result.length} sleep entries from ${sessions.length} sessions`);
+  return result;
 }
 
 /**
- * Aggregate step samples by date (sum all steps for each day)
+ * Aggregate step records by date (sum all steps for each day)
  */
-function aggregateStepsByDate(samples: any[], minDate?: Date): HealthDataEntry[] {
+function aggregateStepsByDate(records: any[], minDate?: Date): HealthDataEntry[] {
   const stepsByDate: Record<string, number> = {};
 
-  samples.forEach((entry) => {
-    const dateStr = entry.startDate || entry.date || entry.endDate;
-    if (dateStr && entry.value) {
-      const date = new Date(dateStr);
+  records.forEach((record) => {
+    // Health Connect Steps records have startTime, endTime, and count
+    const timeStr = record.startTime || record.time || record.endTime;
+    if (timeStr && record.count !== undefined) {
+      const date = new Date(timeStr);
       
-      // If minDate is provided, only include samples after that time
+      // If minDate is provided, only include records after that time
       if (minDate && date < minDate) {
-        return; // Skip this sample
+        return; // Skip this record
       }
       
       // Use local date (YYYY-MM-DD) to match backend normalization
@@ -881,7 +834,7 @@ function aggregateStepsByDate(samples: any[], minDate?: Date): HealthDataEntry[]
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       const dateKey = `${year}-${month}-${day}`;
-      stepsByDate[dateKey] = (stepsByDate[dateKey] || 0) + (entry.value || 0);
+      stepsByDate[dateKey] = (stepsByDate[dateKey] || 0) + (record.count || 0);
     }
   });
 
@@ -900,4 +853,3 @@ function aggregateStepsByDate(samples: any[], minDate?: Date): HealthDataEntry[]
 
   return result;
 }
-

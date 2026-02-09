@@ -77,4 +77,7 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# Generated iOS folder (EAS generates this from app.json automatically)
+ios/
+
 # @end expo-cli

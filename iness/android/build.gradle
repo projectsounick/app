@@ -4,8 +4,12 @@ buildscript {
   repositories {
     google()
     mavenCentral()
+    maven { 
+      url "https://phonepe.mycloudrepo.io/public/repositories/phonepe-intentsdk-android" 
+    }
   }
   dependencies {
+        classpath 'com.google.gms:google-services:4.4.1'
     classpath('com.android.tools.build:gradle')
     classpath('com.facebook.react:react-native-gradle-plugin')
     classpath('org.jetbrains.kotlin:kotlin-gradle-plugin')
@@ -30,6 +34,9 @@ allprojects {
     google()
     mavenCentral()
     maven { url 'https://www.jitpack.io' }
+    maven { 
+      url "https://phonepe.mycloudrepo.io/public/repositories/phonepe-intentsdk-android" 
+    }
   }
 }
 

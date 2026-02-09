@@ -3,7 +3,7 @@
     "name": "iness",
     "slug": "iness",
     "jsEngine": "hermes",
-    "version": "1.0.49",
+    "version": "1.0.55",
     "orientation": "default",
     "notification": {
       "icon": "./assets/images/logonew.png",
@@ -11,14 +11,17 @@
     },
     "icon": "./assets/images/androidlogo.png",
     "scheme": "myapp",
-    "platforms": ["ios", "android"],
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "userInterfaceStyle": "light",
     "newArchEnabled": false,
     "ios": {
       "icon": "./assets/images/logonew.png",
       "supportsTablet": false,
       "bundleIdentifier": "com.iness.fitness",
-      "buildNumber": "62",
+      "buildNumber": "72",
       "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
@@ -33,7 +36,7 @@
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "versionCode": 35,
+      "versionCode": 37,
       "googleServicesFile": "./google-services.json",
       "permissions": [
         "NOTIFICATIONS",
@@ -41,13 +44,20 @@
         "RECORD_AUDIO",
         "READ_MEDIA_IMAGES",
         "READ_MEDIA_VIDEO",
-        "READ_MEDIA_AUDIO"
+        "READ_MEDIA_AUDIO",
+        "android.permission.health.READ_STEPS",
+        "android.permission.health.READ_SLEEP"
       ],
       "intentFilters": [
         {
           "action": "VIEW",
-          "data": { "scheme": "myapp" },
-          "category": ["BROWSABLE", "DEFAULT"]
+          "data": {
+            "scheme": "myapp"
+          },
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
         }
       ],
       "useNextNotificationsApi": true,
@@ -91,17 +101,33 @@
           "healthUpdatePermission": "We need access to update your health data with tracking information."
         }
       ],
+      [
+        "expo-health-connect",
+        {
+          "healthConnectPermissions": [
+            {
+              "read": [
+                "Steps",
+                "SleepSession"
+              ],
+              "description": "We need access to your steps and sleep data to automatically sync your daily activity and sleep duration with your fitness tracking in the app. This allows you to see a complete picture of your health metrics without manually entering data."
+            }
+          ]
+        }
+      ],
       "@react-native-google-signin/google-signin"
     ],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
-      "router": { "origin": false },
+      "router": {
+        "origin": false
+      },
       "eas": {
-        "projectId": "87dfba75-ecf1-4c1c-9b9a-74df81667288"
+        "projectId": "d80cbfa4-17b7-44ae-9955-a47743e5be15"
       }
     },
-    "owner": "sounick_project"
+    "owner": "surjayan"
   }
 }

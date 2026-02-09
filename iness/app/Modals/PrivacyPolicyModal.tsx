@@ -106,7 +106,7 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                   fontFamily: theme.fonts.regular,
                 }}
               >
-                Last updated: 11-06-2025
+                Last updated: January 21, 2025
               </Text>
             </View>
             <TouchableOpacity
@@ -136,7 +136,9 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
               <PolicySection theme={theme}
                 icon="account-circle"
                 title="1. Information We Collect"
-                content="We collect personal data including your name, email, phone number, gender, age, address, fitness goals, health-related data, and payment information. We may also collect data about your usage of the app and device-related information to improve your experience."
+                content="We collect personal data including your name, email, phone number, gender, age, address, fitness goals, health-related data, and payment information. We may also collect data about your usage of the app and device-related information to improve your experience.
+
+Health Data (Optional): If you choose to enable Health Connect (Android) or Apple Health (iOS) integration, we may collect your daily step count and sleep duration data. This data is only collected if you explicitly grant permission and enable the sync feature in the app settings. You have full control over this data and can disable the sync feature at any time."
               />
 
               {/* Section 2 */}
@@ -144,7 +146,8 @@ const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({
                 icon="key-variant"
                 title="2. Permissions We Request"
                 content="• Camera Access: Used to upload profile pictures.
-• Notifications: For workout reminders and updates."
+• Notifications: For workout reminders and updates.
+• Health Connect (Android) / Apple Health (iOS): If you choose to enable health data sync, we request read-only access to your steps and sleep data. This feature is completely optional and only activated if you explicitly grant permission. We use this data solely to automatically sync your daily step count and sleep duration into the app, eliminating the need for manual entry. The app only reads this data and never writes to your health data. You can disable this feature at any time through the app settings or by revoking permissions in your device's Health Connect/Apple Health settings."
               />
 
               {/* Section 3 */}

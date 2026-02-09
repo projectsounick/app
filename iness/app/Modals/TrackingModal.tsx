@@ -78,7 +78,7 @@ const TrackerModal = ({
               justifyContent: "center",
             }}
           >
-            <Ionicons name="moon-outline" size={40} color={theme.colors.success} /> 
+            <Ionicons name="moon-outline" size={40} color={theme.colors.success} />
           </View>
         );
       case "steps":
@@ -93,7 +93,7 @@ const TrackerModal = ({
               justifyContent: "center",
             }}
           >
-            <Ionicons name="walk-outline" size={40} color={theme.colors.secondPrimary} /> 
+            <Ionicons name="walk-outline" size={40} color={theme.colors.secondPrimary} />
           </View>
         );
       case "water":
@@ -108,7 +108,7 @@ const TrackerModal = ({
               justifyContent: "center",
             }}
           >
-            <Ionicons name="water-outline" size={40} color={isDark ? theme.colors.text : "#4FC3F7"} /> 
+            <Ionicons name="water-outline" size={40} color={isDark ? theme.colors.text : "#4FC3F7"} />
           </View>
         );
       default:
@@ -151,9 +151,9 @@ const TrackerModal = ({
   }, [visible]);
 
   return (
-    <Modal 
-      visible={visible} 
-      transparent 
+    <Modal
+      visible={visible}
+      transparent
       animationType="fade"
       presentationStyle="overFullScreen"
       statusBarTranslucent={true}

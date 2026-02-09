@@ -1,17 +1,18 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Animated, Dimensions, View, Text, Image, StyleSheet, Easing } from "react-native";
+import { Animated, Dimensions, View, Text, Image, StyleSheet, Easing, LogBox } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
-import { useTheme } from "./Theme/ThemeContext";
+import theme from "./Theme/globalTheme";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { trackService } from "./services/track.service";
-import { useDispatch } from "react-redux";
+import { store } from "@/store";
 import { updateTrackingField } from "@/Slices/trackSlice";
 import { userService } from "./services/user.service";
 import { router } from "expo-router";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+LogBox.ignoreLogs(["useInsertionEffect must not schedule updates."]);
 
 // Animated letter component for individual letter animations
 const AnimatedLetter = ({ 
@@ -139,8 +140,9 @@ const FloatingParticle = ({
 };
 
 const SecondSplashScreen = () => {
-  const dispatch = useDispatch();
-  const { theme, isDark } = useTheme();
+  const dispatch = store.dispatch;
+  const isDark = false;
+  const themedColors = theme.colors;
   const [progress] = useState(() => new Animated.Value(0));
   const [logoOpacity] = useState(() => new Animated.Value(0));
   const [logoScale] = useState(() => new Animated.Value(0.8));
@@ -335,11 +337,11 @@ const SecondSplashScreen = () => {
     y: SCREEN_HEIGHT * 0.4 + Math.random() * (SCREEN_HEIGHT * 0.4),
     delay: Math.random() * 2000,
     size: 4 + Math.random() * 6,
-    color: i % 2 === 0 ? theme.colors.primary : theme.colors.secondPrimary,
+    color: i % 2 === 0 ? themedColors.primary : themedColors.secondPrimary,
   }));
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: themedColors.background }]}>
       {/* Gradient overlay for depth */}
       <Animated.View
         style={[
@@ -380,8 +382,8 @@ const SecondSplashScreen = () => {
             style={[
               styles.glowCircle,
               {
-                backgroundColor: theme.colors.primary,
-                shadowColor: theme.colors.primary,
+                backgroundColor: themedColors.primary,
+                shadowColor: themedColors.primary,
               },
             ]}
           />
@@ -397,9 +399,9 @@ const SecondSplashScreen = () => {
         >
           <Defs>
             <LinearGradient id="circleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <Stop offset="0%" stopColor={theme.colors.primary} stopOpacity="1" />
-              <Stop offset="50%" stopColor={theme.colors.secondPrimary} stopOpacity="0.8" />
-              <Stop offset="100%" stopColor={theme.colors.primary} stopOpacity="1" />
+              <Stop offset="0%" stopColor={themedColors.primary} stopOpacity="1" />
+              <Stop offset="50%" stopColor={themedColors.secondPrimary} stopOpacity="0.8" />
+              <Stop offset="100%" stopColor={themedColors.primary} stopOpacity="1" />
             </LinearGradient>
           </Defs>
           {/* Background circle track */}
@@ -447,8 +449,8 @@ const SecondSplashScreen = () => {
             style={[
               styles.logoGlow,
               {
-                backgroundColor: theme.colors.primary,
-                shadowColor: theme.colors.primary,
+                backgroundColor: themedColors.primary,
+                shadowColor: themedColors.primary,
               },
             ]}
           />
@@ -461,7 +463,7 @@ const SecondSplashScreen = () => {
               <AnimatedLetter
                 key={index}
                 letter={letter}
-                color={theme.colors.secondPrimary}
+                color={themedColors.secondPrimary}
                 fontSize={theme.fontSizes.xl}
               />
             ))}
@@ -474,7 +476,7 @@ const SecondSplashScreen = () => {
         style={[
           styles.tagline,
           {
-            color: theme.colors.textMuted,
+            color: themedColors.textMuted,
             opacity: logoOpacity,
           },
         ]}

@@ -10,7 +10,7 @@ import {
 import { useEffect } from "react";
 
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, LogBox } from "react-native";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 import eventBus from "@/event";
@@ -28,6 +28,7 @@ import { ThemeProvider } from "@/app/Theme/ThemeContext";
 
 // Fonts
 SplashScreen.preventAutoHideAsync();
+LogBox.ignoreLogs(["useInsertionEffect must not schedule updates."]);
 
 // Notification handler config
 Notifications.setNotificationHandler({
@@ -41,11 +42,16 @@ Notifications.setNotificationHandler({
 });
 
 export default function RootLayout() {
+  const [layoutReady, setLayoutReady] = React.useState(false);
   const [fontsLoaded] = useFonts({
     SatoshiRegular: require("../assets/fonts/Satoshi-Regular.otf"),
     SatoshiMedium: require("../assets/fonts/Satoshi-Medium.otf"),
     SatoshiBold: require("../assets/fonts/Satoshi-Bold.otf"),
   });
+  useEffect(() => {
+    setLayoutReady(true);
+  }, []);
+
   useEffect(() => {
     if (fontsLoaded) {
       SplashScreen.hideAsync();
@@ -69,8 +75,10 @@ export default function RootLayout() {
         console.error("Error checking user:", error);
       }
     };
-    checkUser();
-  }, [fontsLoaded]);
+    if (layoutReady) {
+      checkUser();
+    }
+  }, [fontsLoaded, layoutReady]);
 
   // Check if app was opened from a notification (when app was closed)
   // Only store the notification data, don't navigate yet - navigation will happen after app is ready
@@ -82,16 +90,16 @@ export default function RootLayout() {
 
         // Check if app was opened from a notification
         const lastResponse = await Notifications.getLastNotificationResponseAsync();
-        
+
         if (lastResponse) {
           const notification = lastResponse.notification;
           const data = notification.request.content.data;
-          
-      
-          
+
+
+
           // Extract navigation data from notification
           let notificationData: NotificationData | null = null;
-          
+
           if (data) {
             // Check if navigationData is nested and has screen
             if (data.navigationData && typeof data.navigationData === 'object' && 'screen' in data.navigationData) {
@@ -99,37 +107,37 @@ export default function RootLayout() {
                 type: (data.type as any) || undefined,
                 navigationData: data.navigationData as NotificationNavigationData,
               };
-          } else if (data.type) {
-            // Data has type but no navigationData, construct it
-            let screen = "/dashboard/tabs";
-            let params: Record<string, any> = (data.params as Record<string, any>) || {};
-            
-            if (data.type === "support_message") {
-              screen = "/dashboard/supportchat";
-            } else if (data.type === "post_like" || data.type === "comment") {
-              screen = "/dashboard/tabs/feed";
-            } else if (data.type === "session") {
-              screen = "/dashboard/tabs";
-            } else if (data.type === "trainer_chat") {
-              screen = "/dashboard/trainerchat";
-              // Include trainer chat params if available
-              if (data.chatId && data.trainerId) {
-                params = {
-                  chatId: data.chatId,
-                  trainerId: data.trainerId,
-                  trainerName: data.trainerName || "Trainer",
-                };
+            } else if (data.type) {
+              // Data has type but no navigationData, construct it
+              let screen = "/dashboard/tabs";
+              let params: Record<string, any> = (data.params as Record<string, any>) || {};
+
+              if (data.type === "support_message") {
+                screen = "/dashboard/supportchat";
+              } else if (data.type === "post_like" || data.type === "comment") {
+                screen = "/dashboard/tabs/feed";
+              } else if (data.type === "session") {
+                screen = "/dashboard/tabs";
+              } else if (data.type === "trainer_chat") {
+                screen = "/dashboard/trainerchat";
+                // Include trainer chat params if available
+                if (data.chatId && data.trainerId) {
+                  params = {
+                    chatId: data.chatId,
+                    trainerId: data.trainerId,
+                    trainerName: data.trainerName || "Trainer",
+                  };
+                }
               }
-            }
-              
-            notificationData = {
-              type: data.type as any,
-              navigationData: {
-                screen: screen,
-                params: params,
-              },
-            };
-          } else if (data.screen) {
+
+              notificationData = {
+                type: data.type as any,
+                navigationData: {
+                  screen: screen,
+                  params: params,
+                },
+              };
+            } else if (data.screen) {
               // Has screen directly
               notificationData = {
                 type: (data.type as any) || undefined,
@@ -147,7 +155,7 @@ export default function RootLayout() {
           if (notificationData) {
             // Store for later navigation (after app is fully ready)
             await storePendingNavigation(notificationData);
-           
+
           }
         }
       } catch (error) {
@@ -181,11 +189,11 @@ export default function RootLayout() {
       async (response) => {
         const notification = response.notification;
         const data = notification.request.content.data;
-        
+
         // Extract navigation data from notification
         // The data might be nested in navigationData or directly in data
         let notificationData: NotificationData | null = null;
-        
+
         if (data) {
           // Check if navigationData is nested and has screen
           if (data.navigationData && typeof data.navigationData === 'object' && 'screen' in data.navigationData) {
@@ -197,7 +205,7 @@ export default function RootLayout() {
             // Data has type but no navigationData, construct it
             let screen = "/dashboard/tabs";
             let params: Record<string, any> = data.params || {};
-            
+
             if (data.type === "support_message") {
               screen = "/dashboard/supportchat";
             } else if (data.type === "post_like" || data.type === "comment") {
@@ -215,7 +223,7 @@ export default function RootLayout() {
                 };
               }
             }
-            
+
             notificationData = {
               type: data.type as any,
               navigationData: {
@@ -234,7 +242,7 @@ export default function RootLayout() {
             };
           }
         }
-        
+
         if (!notificationData) {
           return; // No valid notification data
         }
@@ -243,11 +251,11 @@ export default function RootLayout() {
         // Also store it in case navigation fails
         try {
           await storePendingNavigation(notificationData);
-          
+
           // Navigate immediately when app is running
           setTimeout(() => {
             try {
-      
+
               handleNotificationNavigation(router, notificationData);
             } catch (error) {
               console.error("Error handling notification navigation:", error);
@@ -275,8 +283,6 @@ export default function RootLayout() {
       responseSubscription.remove();
     };
   }, []);
-  // Do not render anything until font is loaded
-  if (!fontsLoaded) return null;
   return (
     <GestureHandlerRootView style={styles.container}>
       <ThemeProvider>

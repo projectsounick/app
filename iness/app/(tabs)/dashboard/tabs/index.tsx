@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { View, Animated, ScrollView } from "react-native";
+import { View, Animated, ScrollView, Modal } from "react-native";
 import { usePathname, useRouter } from "expo-router";
 import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
@@ -38,6 +38,7 @@ import HealthDashboard from "@/app/modules/HealthCards";
 import SessionCarousel from "@/app/Components/Home/SessionCards";
 import TestimonialsCarousel from "@/app/Components/Home/TestimonialsCarousel";
 import EmailPromptCard from "@/app/Components/Home/EmailPromptCard";
+import FeatureBanner from "@/app/modules/FeatureBanner";
 
 import PodcastMediaCard from "@/app/Components/Home/PodcastSection";
 import { podCastService } from "@/app/services/podcast.service";
@@ -45,6 +46,7 @@ import { RootState } from "@/store";
 import SessionCalendarSheet from "@/app/Modals/SessionCalendarSheet";
 import FeedbackModal from "@/app/Modals/SessionFeedbackModal";
 import { setCalendarSheetOpen } from "@/Slices/componentOpenSlice";
+import { setStreakModalShow } from "@/Slices/streakSlice";
 import { sessionService } from "@/app/services/sessionService";
 
 import LoginJsxWrapper from "@/app/Hoc/LoginJsxWrapper";
@@ -54,12 +56,16 @@ import WeightTrackerBottomSheet from "@/app/Modals/WeightTrackModal";
 import eventBus from "@/event";
 import { usePendingNavigation } from "@/app/hooks/usePendingNavigation";
 import { useAppleHealthBackgroundSync } from "@/hooks/useAppleHealthBackgroundSync";
+import StreaksBottomSheet from "@/app/Modals/StreakBottomSheet";
 
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
   const theme = useGlobalTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [loggedUser, setLoggedUser] = useState(null);
+  const streakModalShow = useSelector(
+    (state: RootState) => state?.streak?.streakModalShow
+  );
   const calendarSheetOpen = useSelector(
     (state: RootState) => state.componentOpen.calendarSheetOpen
   );
@@ -236,6 +242,9 @@ const YourComponent = () => {
               />
             )}
             
+            {/* Feature Banner - Swiggy/Zomato style */}
+            <FeatureBanner />
+            
             <OffersCards />
             <FloatingOptions />
             <LoginJsxWrapper loginButton={false} backButton={false}>
@@ -268,6 +277,19 @@ const YourComponent = () => {
         <VideoPromotionModal />
       </ScrollView>
 
+      {streakModalShow ? (
+        <Modal
+          visible={streakModalShow}
+          transparent
+          animationType="slide"
+          onRequestClose={() => dispatch(setStreakModalShow(false))}
+        >
+          <StreaksBottomSheet
+            onClose={() => dispatch(setStreakModalShow(false))}
+          />
+        </Modal>
+      ) : null}
+
       <AppUpdateBottomSheet />
       {/* //// Calendar sheet component ---------------------------/ */}
       {calendarSheetOpen && (
@@ -299,4 +321,3 @@ const YourComponent = () => {
 };
 
 export default YourComponent;
-

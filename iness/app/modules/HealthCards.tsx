@@ -74,17 +74,17 @@ function HealthDashboard() {
   // Platform-specific health sync hooks
   const iosHealthSync = useAppleHealthSync();
   const androidHealthSync = useAndroidHealthSync();
-  
+
   // Use platform-specific hook based on OS
-  const { isAvailable, syncData, canSync, syncStatus, refreshSyncStatus } = Platform.OS === "ios" 
-    ? iosHealthSync 
+  const { isAvailable, syncData, canSync, syncStatus, refreshSyncStatus } = Platform.OS === "ios"
+    ? iosHealthSync
     : androidHealthSync;
-  
+
   // Use ref to check canSync without causing re-renders
   const canSyncRef = useRef(canSync);
   const syncStatusRef = useRef(syncStatus);
   const previousSyncStatusRef = useRef<{ stepSync: boolean; sleepSync: boolean } | null>(null);
-  
+
   useEffect(() => {
     canSyncRef.current = canSync;
     syncStatusRef.current = syncStatus;
@@ -120,7 +120,7 @@ function HealthDashboard() {
             console.error(`[HealthCards] Error refreshing data:`, error);
           }
         }, 1500);
-        
+
         setTimeout(() => {
           setSnackbarMsg(`Auto sync enabled`);
           setSnackbarVisible(true);
@@ -136,16 +136,16 @@ function HealthDashboard() {
   useFocusEffect(
     useCallback(() => {
       // Store current status BEFORE refresh (to compare after)
-      const statusBeforeRefresh = syncStatusRef.current 
+      const statusBeforeRefresh = syncStatusRef.current
         ? { stepSync: syncStatusRef.current.stepSync, sleepSync: syncStatusRef.current.sleepSync }
         : null;
-      
+
       // Refresh status
       refreshSyncStatus().then(() => {
         // After refresh completes, check if sync was reactivated
         setTimeout(() => {
           const currentStatus = syncStatusRef.current;
-          
+
           if (statusBeforeRefresh && currentStatus) {
             // Check if steps sync was reactivated (false -> true)
             if (!statusBeforeRefresh.stepSync && currentStatus.stepSync) {
@@ -153,7 +153,7 @@ function HealthDashboard() {
                 triggerAutoSync("steps");
               }, 300);
             }
-            
+
             // Check if sleep sync was reactivated (false -> true)
             if (!statusBeforeRefresh.sleepSync && currentStatus.sleepSync) {
               setTimeout(() => {
@@ -161,7 +161,7 @@ function HealthDashboard() {
               }, 300);
             }
           }
-          
+
           // Update previous status for next time
           if (currentStatus) {
             previousSyncStatusRef.current = {
@@ -173,7 +173,7 @@ function HealthDashboard() {
       });
     }, [refreshSyncStatus, triggerAutoSync])
   );
-  
+
   // Initialize previous status on mount
   useEffect(() => {
     if (syncStatus && !previousSyncStatusRef.current) {
@@ -183,21 +183,26 @@ function HealthDashboard() {
       };
     }
   }, [syncStatus]);
-  
-  // Only show "Sync with Health" when syncModalShown is false (first time state)
-  // Once syncModalShown becomes true (iOS modal was shown), we don't show sync UI on cards anymore
-  // User can manage sync from App Settings instead
+
+  // Only show "Sync with Health" when:
+  // 1. Status is loaded
+  // 2. The specific sync type is NOT already enabled (stepSync/sleepSync is false)
+  // 3. syncModalShown is false (first time state) OR sync is not enabled
   const canSyncSteps = useMemo(() => {
     if (!syncStatus) return false; // Don't show if status not loaded yet
-    // Only show if syncModalShown is false (first time)
-    return syncStatus.syncModalShown === false;
-  }, [syncStatus?.syncModalShown]);
-  
+    // Hide if steps sync is already enabled
+    if (syncStatus.stepSync === true) return false;
+    // Show if syncModalShown is false (first time) OR if stepSync is false
+    return syncStatus.syncModalShown === false || syncStatus.stepSync === false;
+  }, [syncStatus?.syncModalShown, syncStatus?.stepSync]);
+
   const canSyncSleep = useMemo(() => {
     if (!syncStatus) return false; // Don't show if status not loaded yet
-    // Only show if syncModalShown is false (first time)
-    return syncStatus.syncModalShown === false;
-  }, [syncStatus?.syncModalShown]);
+    // Hide if sleep sync is already enabled
+    if (syncStatus.sleepSync === true) return false;
+    // Show if syncModalShown is false (first time) OR if sleepSync is false
+    return syncStatus.syncModalShown === false || syncStatus.sleepSync === false;
+  }, [syncStatus?.syncModalShown, syncStatus?.sleepSync]);
 
   const onClose = () => {
     // Close modal immediately - don't wait for anything
@@ -215,18 +220,18 @@ function HealthDashboard() {
   ) {
     // CRITICAL: This function must return IMMEDIATELY - no async, no blocking
     // All work happens in background - UI stays completely responsive
-    
+
     // Store values in closure to avoid accessing state during execution
     // Use try-catch to prevent any selector errors from blocking
-    let existingData:any;
+    let existingData: any;
     try {
       existingData = currentDayTrackData[type];
     } catch (error) {
       existingData = null;
     }
-    
+
     const apiType = type === "steps" ? "walk" : type;
-    
+
     // Calculate new value immediately (synchronous, fast)
     let newValue = value;
     if (existingData) {
@@ -260,7 +265,7 @@ function HealthDashboard() {
                 })
               );
             }, 300); // Fixed delay to ensure modal is closed and UI is responsive
-            
+
             // Update streak in background (fire and forget) - defer significantly
             setTimeout(() => {
               createStreak()
@@ -320,7 +325,7 @@ function HealthDashboard() {
     // For iOS, redirect to splash screen and sync in background
     // Store sync in progress flag
     await AsyncStorage.setItem("healthSyncInProgress", JSON.stringify({ type: "steps", platform: Platform.OS }));
-    
+
     // Start sync in background (don't await)
     syncData("steps").then(async (result) => {
       // Clear sync flag when done
@@ -329,7 +334,7 @@ function HealthDashboard() {
       // Clear sync flag on error
       await AsyncStorage.removeItem("healthSyncInProgress");
     });
-    
+
     // Redirect to splash screen (sync is running in background)
     router.push("/secondsplashscreen");
   };
@@ -343,24 +348,18 @@ function HealthDashboard() {
 
     // Store sync in progress flag
     await AsyncStorage.setItem("healthSyncInProgress", JSON.stringify({ type: healthConnectModalType, platform: Platform.OS }));
-    
+
     // Start sync in background (don't await)
     syncData(healthConnectModalType).then(async (result) => {
-      setHealthConnectModalLoading(false);
       // Clear sync flag when done
       await AsyncStorage.removeItem("healthSyncInProgress");
-      
-      if (result.success) {
-        setSnackbarMsg(`${healthConnectModalType === "steps" ? "Steps" : "Sleep"} sync enabled successfully!`);
-        setSnackbarVisible(true);
-      }
     }).catch(async (error: any) => {
-      setHealthConnectModalLoading(false);
       // Clear sync flag on error
       await AsyncStorage.removeItem("healthSyncInProgress");
-      setSnackbarMsg("Failed to sync. Please try again.");
-      setSnackbarVisible(true);
     });
+
+    // Redirect to splash screen (sync is running in background) - same as iOS
+    router.push("/secondsplashscreen");
   };
 
   /**
@@ -391,7 +390,7 @@ function HealthDashboard() {
     // For iOS, redirect to splash screen and sync in background
     // Store sync in progress flag
     await AsyncStorage.setItem("healthSyncInProgress", JSON.stringify({ type: "sleep", platform: Platform.OS }));
-    
+
     // Start sync in background (don't await)
     syncData("sleep").then(async (result) => {
       // Clear sync flag when done
@@ -400,7 +399,7 @@ function HealthDashboard() {
       // Clear sync flag on error
       await AsyncStorage.removeItem("healthSyncInProgress");
     });
-    
+
     // Redirect to splash screen (sync is running in background)
     router.push("/secondsplashscreen");
   };
@@ -557,19 +556,19 @@ function HealthDashboard() {
                   justifyContent: "space-between",
                 }}
               >
-                  <Text
-                    numberOfLines={1}
-                    style={{
-                      color: theme.colors.secondPrimary,
-                      fontFamily: theme.fonts.medium,
-                      fontWeight: theme.fontWeights.medium as "500",
-                      fontSize: theme.fontSizes.small,
-                      flexShrink: 1,
-                      flex: 1,
-                    }}
-                  >
-                    {Platform.OS === "ios" ? "Sync with Apple Health" : "Sync with Health Connect"}
-                  </Text>
+                <Text
+                  numberOfLines={1}
+                  style={{
+                    color: theme.colors.secondPrimary,
+                    fontFamily: theme.fonts.medium,
+                    fontWeight: theme.fontWeights.medium as "500",
+                    fontSize: theme.fontSizes.small,
+                    flexShrink: 1,
+                    flex: 1,
+                  }}
+                >
+                  {Platform.OS === "ios" ? "Sync with Apple Health" : "Sync with Health Connect"}
+                </Text>
                 <Ionicons
                   name="chevron-forward"
                   size={16}
@@ -827,16 +826,16 @@ function HealthDashboard() {
             marginTop: 6,
           }}
         >
-            <Text
-              style={{
-                fontWeight: theme.fontWeights.medium as "500",
-                fontFamily: theme.fonts.regular,
-                fontSize: theme.fontSizes.regularSmall,
-                color: theme.colors.textSecondary,
-              }}
-            >
-              {waterIntake}/{waterGoal} Glasses
-            </Text>
+          <Text
+            style={{
+              fontWeight: theme.fontWeights.medium as "500",
+              fontFamily: theme.fonts.regular,
+              fontSize: theme.fontSizes.regularSmall,
+              color: theme.colors.textSecondary,
+            }}
+          >
+            {waterIntake}/{waterGoal} Glasses
+          </Text>
           <TouchableOpacity
             onPress={() => router.push("/(tabs)/dashboard/track")}
             style={{ padding: 8, marginRight: -8, marginVertical: -8 }}

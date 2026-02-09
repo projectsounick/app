@@ -46,6 +46,30 @@ export default function AddActivityModal({
     onClose();
   };
 
+  // Hide navigation bar when modal opens - keep it hidden continuously
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      if (visible) {
+        // When modal is visible, aggressively hide navigation bar
+        NavigationBar.setVisibilityAsync("hidden");
+        NavigationBar.setBehaviorAsync("overlay-swipe");
+        SystemNavigationBar.stickyImmersive();
+
+        // Set up interval to continuously hide it (Android sometimes shows it automatically)
+        const interval = setInterval(() => {
+          NavigationBar.setVisibilityAsync("hidden");
+          SystemNavigationBar.stickyImmersive();
+        }, 100);
+
+        return () => clearInterval(interval);
+      } else {
+        // When modal closes, ensure it stays hidden
+        NavigationBar.setVisibilityAsync("hidden");
+        SystemNavigationBar.stickyImmersive();
+      }
+    }
+  }, [visible]);
+
   return (
     <Modal visible={visible} transparent animationType="slide">
       <View

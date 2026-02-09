@@ -126,7 +126,8 @@ export async function syncDataType(
     }
 
     // Initialize Health Connect - this shows the permission modal
-    const initialized = await HealthConnect.initializeHealthConnect();
+    // Pass the specific type to only request that permission
+    const initialized = await HealthConnect.initializeHealthConnect(true, type);
     
     if (!initialized) {
       return { success: false, value: 0, error: "Health Connect permissions not granted. Please enable in Settings." };
@@ -174,6 +175,69 @@ export async function syncDataType(
           }
           
           console.log(`${LOG_PREFIX.SYNC} No historical ${type} data found`);
+          
+          // Even if no data, we should still update sync status if permissions are granted
+          // This allows the UI to show sync is enabled even if there's no data yet
+          if (isFirstSync) {
+            // For first sync with no data, still mark as synced (permissions granted)
+            // This way UI will show sync is enabled
+            const emptyPayload: SyncPayload = {};
+            if (type === "steps") {
+              emptyPayload.steps = [];
+            } else if (type === "sleep") {
+              emptyPayload.sleep = [];
+            }
+            // Update AsyncStorage to mark sync as enabled (even with no data)
+            try {
+              const userDataStr = await AsyncStorage.getItem("user");
+              if (userDataStr) {
+                const userData = JSON.parse(userDataStr);
+                if (!userData.androidHealth) {
+                  userData.androidHealth = {};
+                }
+                const now = new Date();
+                if (type === "steps") {
+                  userData.androidHealth.stepSync = true;
+                  userData.androidHealth.syncModalShown = true;
+                  userData.androidHealth.lastSyncedStepsDate = now.toISOString();
+                  
+                  // Check if Sleep permission is also granted (user might have granted both)
+                  try {
+                    const hasSleepPermission = await HealthConnect.checkPermissionsStatus("sleep");
+                    if (hasSleepPermission && !userData.androidHealth.sleepSync) {
+                      // Sleep permission is also granted, mark it as synced too
+                      userData.androidHealth.sleepSync = true;
+                      userData.androidHealth.lastSyncedSleepDate = now.toISOString();
+                      console.log(`${LOG_PREFIX.SYNC} Sleep permission also granted, marking sleepSync=true`);
+                    }
+                  } catch (permError) {
+                    console.log(`${LOG_PREFIX.SYNC} Could not check sleep permission:`, permError);
+                  }
+                } else if (type === "sleep") {
+                  userData.androidHealth.sleepSync = true;
+                  userData.androidHealth.syncModalShown = true;
+                  userData.androidHealth.lastSyncedSleepDate = now.toISOString();
+                  
+                  // Check if Steps permission is also granted (user might have granted both)
+                  try {
+                    const hasStepsPermission = await HealthConnect.checkPermissionsStatus("steps");
+                    if (hasStepsPermission && !userData.androidHealth.stepSync) {
+                      // Steps permission is also granted, mark it as synced too
+                      userData.androidHealth.stepSync = true;
+                      userData.androidHealth.lastSyncedStepsDate = now.toISOString();
+                      console.log(`${LOG_PREFIX.SYNC} Steps permission also granted, marking stepSync=true`);
+                    }
+                  } catch (permError) {
+                    console.log(`${LOG_PREFIX.SYNC} Could not check steps permission:`, permError);
+                  }
+                }
+                await AsyncStorage.setItem("user", JSON.stringify(userData));
+                console.log(`${LOG_PREFIX.SYNC} Marked ${type} sync as enabled (no data but permissions granted)`);
+              }
+            } catch (updateError) {
+              console.error(`${LOG_PREFIX.SYNC} Error updating sync status:`, updateError);
+            }
+          }
           return;
         }
 
@@ -199,11 +263,15 @@ export async function syncDataType(
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
+    // IMPORTANT: Even if todayValue is 0, we should still mark sync as successful
+    // if permissions are granted. This ensures UI shows sync is enabled.
+    // The background sync will handle historical data and update AsyncStorage.
+    
     // Return immediately with today's value - UI is now unblocked
     return {
       success: true,
       value: todayValue,
-      syncedCount: 1,
+      syncedCount: todayValue > 0 ? 1 : 0,
       allData: todayValue > 0 ? [{
         date: today.toISOString(),
         value: todayValue,
@@ -257,6 +325,20 @@ function syncToBackendInBackground(
               if (todaySteps) {
                 userData.androidHealth.lastSyncedStepsValue = todaySteps.value;
               }
+              console.log(`${LOG_PREFIX.BACKGROUND} Updated Android steps sync status: stepSync=true`);
+              
+              // Check if Sleep permission is also granted (user might have granted both)
+              try {
+                const hasSleepPermission = await HealthConnect.checkPermissionsStatus("sleep");
+                if (hasSleepPermission && !userData.androidHealth.sleepSync) {
+                  // Sleep permission is also granted, mark it as synced too
+                  userData.androidHealth.sleepSync = true;
+                  userData.androidHealth.lastSyncedSleepDate = now.toISOString();
+                  console.log(`${LOG_PREFIX.BACKGROUND} Sleep permission also granted, marking sleepSync=true`);
+                }
+              } catch (permError) {
+                console.log(`${LOG_PREFIX.BACKGROUND} Could not check sleep permission:`, permError);
+              }
             }
             if (payload.sleep) {
               userData.androidHealth.sleepSync = true;
@@ -270,6 +352,25 @@ function syncToBackendInBackground(
               if (todaySleep) {
                 userData.androidHealth.lastSyncedSleepValue = todaySleep.value;
               }
+              console.log(`${LOG_PREFIX.BACKGROUND} Updated Android sleep sync status: sleepSync=true`);
+              
+              // Check if Steps permission is also granted (user might have granted both)
+              try {
+                const hasStepsPermission = await HealthConnect.checkPermissionsStatus("steps");
+                if (hasStepsPermission && !userData.androidHealth.stepSync) {
+                  // Steps permission is also granted, mark it as synced too
+                  userData.androidHealth.stepSync = true;
+                  userData.androidHealth.lastSyncedStepsDate = now.toISOString();
+                  console.log(`${LOG_PREFIX.BACKGROUND} Steps permission also granted, marking stepSync=true`);
+                }
+              } catch (permError) {
+                console.log(`${LOG_PREFIX.BACKGROUND} Could not check steps permission:`, permError);
+              }
+            }
+            
+            // If both steps and sleep are in payload, ensure both are marked as synced
+            if (payload.steps && payload.sleep) {
+              console.log(`${LOG_PREFIX.BACKGROUND} Both steps and sleep synced together`);
             }
             
             await AsyncStorage.setItem("user", JSON.stringify(userData));

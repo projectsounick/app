@@ -91,7 +91,7 @@ const Login = () => {
       webClientId: Constants.expoConfig?.extra?.googleWebClientId,
     },
   });
-  
+
   const [request, response, promptAsync] = Google.useAuthRequest(googleAuthConfig!);
 
   // Handle Google Auth response (iOS - expo-auth-session)
@@ -112,27 +112,27 @@ const Login = () => {
     try {
       setGoogleLoading(true);
       console.log("[Android Google Sign-In] Starting...");
-      
+
       // Check if Play Services are available
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       console.log("[Android Google Sign-In] Play Services available");
-      
+
       // Sign out first to always show account picker
       try {
         await GoogleSignin.signOut();
       } catch (e) {
         // Ignore sign out errors (user might not be signed in)
       }
-      
+
       // Sign in - will now show account picker
       const userInfo = await GoogleSignin.signIn();
       console.log("[Android Google Sign-In] Sign-in successful, userInfo:", userInfo.user?.email);
-      
+
       // Get the ID token
       const tokens = await GoogleSignin.getTokens();
       const idToken = tokens.idToken;
       console.log("[Android Google Sign-In] Got tokens, idToken present:", !!idToken);
-      
+
       if (idToken) {
         console.log("[Android Google Sign-In] Calling handleGoogleSignIn with idToken");
         await handleGoogleSignIn(idToken);
@@ -145,7 +145,7 @@ const Login = () => {
     } catch (error: any) {
       setGoogleLoading(false);
       console.error("[Android Google Sign-In] Error:", error);
-      
+
       if (error.code === statusCodes.SIGN_IN_CANCELLED) {
         console.log("Google sign-in cancelled");
         // Don't show error for cancellation
@@ -195,7 +195,7 @@ const Login = () => {
   // Handle Google Sign-In
   const handleGoogleSignIn = async (idToken: string | undefined) => {
     console.log("[handleGoogleSignIn] Called with idToken:", !!idToken);
-    
+
     if (!idToken) {
       console.error("[handleGoogleSignIn] No idToken provided");
       setGoogleLoading(false);
@@ -220,7 +220,7 @@ const Login = () => {
       if (response?.success) {
         console.log("[handleGoogleSignIn] Success! Storing user data...");
         await asyncStorageUtils.storeUserInAsyncStorage(response.data);
-        
+
         // Check if user needs onboarding
         if (response.data.onboarding) {
           console.log("[handleGoogleSignIn] User has completed onboarding, redirecting to splash");
@@ -264,16 +264,16 @@ const Login = () => {
         email: credential.email || undefined,
         fullName: credential.fullName
           ? {
-              givenName: credential.fullName.givenName || undefined,
-              familyName: credential.fullName.familyName || undefined,
-            }
+            givenName: credential.fullName.givenName || undefined,
+            familyName: credential.fullName.familyName || undefined,
+          }
           : undefined,
         expoPushToken,
       });
 
       if (response?.success) {
         await asyncStorageUtils.storeUserInAsyncStorage(response.data);
-        
+
         // Check if user needs onboarding
         if (response.data.onboarding) {
           // Go through splash screen for data sync
@@ -459,7 +459,7 @@ const Login = () => {
                 setSnackbarVisible(true);
                 return;
               }
-              
+
               if (Platform.OS === "android") {
                 // Use native Google Sign-In for Android
                 handleAndroidGoogleSignIn();

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "267278468101",
+    "project_id": "iness-dd6db",
+    "storage_bucket": "iness-dd6db.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:267278468101:android:41798cefc639784156486c",
+        "android_client_info": {
+          "package_name": "com.iness.fitness"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGrAZQ64baY0rGmiJA_KRy0Vp5DVK6rBI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

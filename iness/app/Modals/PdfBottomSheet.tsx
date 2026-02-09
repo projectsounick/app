@@ -52,6 +52,30 @@ export default function DietPlanBottomSheet({
     fetchPlans();
   }, [visible]);
 
+  // Hide navigation bar when modal opens - keep it hidden continuously
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      if (visible) {
+        // When modal is visible, aggressively hide navigation bar
+        NavigationBar.setVisibilityAsync("hidden");
+        NavigationBar.setBehaviorAsync("overlay-swipe");
+        SystemNavigationBar.stickyImmersive();
+
+        // Set up interval to continuously hide it (Android sometimes shows it automatically)
+        const interval = setInterval(() => {
+          NavigationBar.setVisibilityAsync("hidden");
+          SystemNavigationBar.stickyImmersive();
+        }, 100);
+
+        return () => clearInterval(interval);
+      } else {
+        // When modal closes, ensure it stays hidden
+        NavigationBar.setVisibilityAsync("hidden");
+        SystemNavigationBar.stickyImmersive();
+      }
+    }
+  }, [visible]);
+
   const handleDownload = async () => {
     if (!selectedPlan) {
       Alert.alert("No Plan Selected", "Please select a diet plan to download.");
@@ -67,7 +91,7 @@ export default function DietPlanBottomSheet({
 
       if (downloadResult.status === 200) {
         const isAvailable = await Sharing.isAvailableAsync();
-        
+
         if (isAvailable) {
           await Sharing.shareAsync(downloadResult.uri, {
             mimeType: "application/pdf",

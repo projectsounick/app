@@ -96,7 +96,7 @@ export default function VideoCallScreen({
     if (isHost) {
       await engine.setClientRole(ClientRoleType.ClientRoleBroadcaster);
       await engine.startPreview();
-      engine.setLocalRenderMode(1, 0);
+      engine.setLocalRenderMode(2, 0); // 2 = FIT: show full person, no zoom/crop
     } else {
       await engine.setClientRole(ClientRoleType.ClientRoleAudience);
     }
@@ -198,7 +198,7 @@ export default function VideoCallScreen({
         <View style={styles.singleRemoteContainer}>
           <RtcSurfaceView
             key={remoteUids[0]}
-            canvas={{ uid: remoteUids[0], renderMode: 1 }}
+            canvas={{ uid: remoteUids[0], renderMode: 2 }}
             style={styles.singleRemoteView}
           />
         </View>
@@ -211,7 +211,7 @@ export default function VideoCallScreen({
           {remoteUids.map((uid) => (
             <View key={uid} style={styles.twoRemoteItem}>
               <RtcSurfaceView
-                canvas={{ uid, renderMode: 1 }}
+                canvas={{ uid, renderMode: 2 }}
                 style={styles.twoRemoteView}
               />
             </View>
@@ -226,7 +226,7 @@ export default function VideoCallScreen({
         {remoteUids.map((uid) => (
           <View key={uid} style={styles.gridItem}>
             <RtcSurfaceView
-              canvas={{ uid, renderMode: 1 }}
+              canvas={{ uid, renderMode: 2 }}
               style={styles.gridView}
             />
           </View>
@@ -260,7 +260,7 @@ export default function VideoCallScreen({
         <View style={styles.localViewContainer}>
           <View style={styles.localViewWrapper}>
             <RtcSurfaceView
-              canvas={{ uid: 0, renderMode: 1 }}
+              canvas={{ uid: 0, renderMode: 2 }}
               style={styles.localView}
             />
             {!cameraOn && (
@@ -535,9 +535,9 @@ const styles = StyleSheet.create({
     zIndex: 50,
   },
   localViewWrapper: {
-    width: 140,
-    height: 180,
-    borderRadius: 16,
+    width: 100,
+    height: 135,
+    borderRadius: 12,
     overflow: "hidden",
     borderWidth: 3,
     borderColor: "#67C694",

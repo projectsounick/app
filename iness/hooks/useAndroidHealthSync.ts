@@ -244,21 +244,22 @@ export function useAndroidHealthSync(): UseHealthSyncReturn {
             });
           });
           
+          // Refresh status from AsyncStorage to get the latest sync state
           setTimeout(() => {
             AndroidSyncManager.fetchAndroidSyncStatus().then((status) => {
               if (mountedRef.current && status) {
                 setSyncStatus((prev) => {
-                  if (prev && (prev.stepSync || prev.sleepSync)) {
-                    return prev;
-                  }
-                  syncStatusRef.current = status;
-                  return status;
+                  // Always update with the latest status from AsyncStorage
+                  // This ensures UI reflects the actual sync state
+                  const updatedStatus = status;
+                  syncStatusRef.current = updatedStatus;
+                  return updatedStatus;
                 });
               }
             }).catch((err) => {
               console.error("[useAndroidHealthSync] fetchAndroidSyncStatus error:", err);
             });
-          }, 100);
+          }, 500); // Increased delay to ensure AsyncStorage is updated
         }
 
         return result;

@@ -128,7 +128,7 @@ export default function HealthConnectSetupModal({
 
           {/* Description */}
           <Text style={styles.description}>
-            Health Connect is required to sync your {type} data on Android. Follow the steps below to get started.
+            To automatically track your {type === "steps" ? "daily steps" : "sleep duration"}, we need permission to read your {type === "steps" ? "steps" : "sleep"} data from Health Connect. This allows the app to sync your health data automatically, so you don't have to manually enter it every day.
           </Text>
 
           {/* Steps */}

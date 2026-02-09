@@ -12,7 +12,7 @@ import {
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 import { useDispatch, useSelector } from "react-redux";
-import { setCalendarSheetOpen } from "@/Slices/componentOpenSlice";
+import { setCalendarSheetOpen, setCalendarInitialDate } from "@/Slices/componentOpenSlice";
 import { RootState } from "@/store";
 import { useRouter } from "expo-router";
 
@@ -174,7 +174,10 @@ const UpcomingSessionsCard = () => {
         {latestSessions.length > 0 && (
           <TouchableOpacity
             style={{ flexDirection: "row", alignItems: "center" }}
-            onPress={() => dispatch(setCalendarSheetOpen(true))}
+            onPress={() => {
+              dispatch(setCalendarInitialDate(null));
+              dispatch(setCalendarSheetOpen(true));
+            }}
           >
             <Text
               style={{
@@ -308,6 +311,18 @@ const UpcomingSessionsCard = () => {
                 extrapolate: "clamp",
               });
 
+              const openCalendarWithSessionDate = () => {
+                try {
+                  const dateStr = new Date(session.sessionDate).toLocaleDateString("en-CA", {
+                    timeZone: "Asia/Kolkata",
+                  });
+                  dispatch(setCalendarInitialDate(dateStr));
+                  dispatch(setCalendarSheetOpen(true));
+                } catch (_) {
+                  dispatch(setCalendarSheetOpen(true));
+                }
+              };
+
               return (
                 <Animated.View
                   key={session._id}
@@ -317,8 +332,7 @@ const UpcomingSessionsCard = () => {
                     transform: [{ scale }, { translateY }],
                   }}
                 >
-                  <TouchableOpacity
-                    onPress={() => dispatch(setCalendarSheetOpen(true))}
+                  <View
                     style={{
                       backgroundColor: session.sessionStatus === "completed" ? theme.colors.backgroundSecondary : theme.colors.backgroundCard,
                       borderRadius: responsiveSpacing(20),
@@ -502,7 +516,8 @@ const UpcomingSessionsCard = () => {
                         elevation: 3,
                         minWidth: responsiveWidth(60),
                       }}
-                      onPress={() => dispatch(setCalendarSheetOpen(true))}
+                      onPress={openCalendarWithSessionDate}
+                      activeOpacity={0.8}
                     >
                       <Text
                         style={{
@@ -515,7 +530,7 @@ const UpcomingSessionsCard = () => {
                         View
                       </Text>
                     </TouchableOpacity>
-                  </TouchableOpacity>
+                  </View>
                 </Animated.View>
               );
             })}

@@ -1,12 +1,15 @@
 {
   "cli": {
-    "version": ">= 3.0.0"
+    "version": ">= 3.0.0",
+    "appVersionSource": "local"
   },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "ios": {},
+      "ios": {
+        "node": "20.18.0"
+      },
       "android": {
         "buildType": "apk"
       },
@@ -16,7 +19,9 @@
     },
     "preview": {
       "distribution": "internal",
-      "ios": {},
+      "ios": {
+        "node": "20.18.0"
+      },
       "android": {
         "buildType": "app-bundle"
       },
@@ -26,7 +31,9 @@
     },
     "production": {
       "distribution": "store",
-      "ios": {},
+      "ios": {
+        "node": "20.18.0"
+      },
       "android": {
         "buildType": "app-bundle"
       },
