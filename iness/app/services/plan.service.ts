@@ -14,6 +14,7 @@ export const planService = {
   updatePlan,
   updatePlanItem,
   getActivePlans,
+  getUserDietPlan,
 };
 
 ///// Function for getting all the prodcuts based on category--------/
@@ -43,8 +44,19 @@ async function getActivePlans(): Promise<{
   success: boolean;
 }> {
   let respone = await fetchWrapper.get(`${config.apiUrl}/api/get-active-plans`);
-  
+
   return respone;
+}
+
+//// Funciton for getting user's diet plan ---------------------------/
+async function getUserDietPlan(): Promise<{
+  message: String;
+  data: any[];
+  success: boolean;
+}> {
+  let response = await fetchWrapper.get(`${config.apiUrl}/api/get-user-dietplan`);
+
+  return response;
 }
 ///// Function for getting all the prodcuts based on category--------/
 

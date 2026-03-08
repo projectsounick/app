@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -18,6 +18,7 @@ import { WebView } from "react-native-webview";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import { planService } from "../services/plan.service";
 
 interface DietPlanDetailsModalProps {
   visible: boolean;
@@ -42,7 +43,53 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
   const [downloading, setDownloading] = useState(false);
   const [showAllDescItems, setShowAllDescItems] = useState(false);
 
-  if (!dietPlan) return null;
+  // State for API-fetched data
+  const [fetchedDietPlanData, setFetchedDietPlanData] = useState<any[]>([]);
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  // Fetch diet plan data when modal opens
+  useEffect(() => {
+    if (visible) {
+      fetchDietPlanData();
+    }
+  }, [visible]);
+
+  const fetchDietPlanData = async () => {
+    try {
+      setFetchLoading(true);
+      setFetchError(null);
+      console.log("Fetching diet plan data from modal...");
+      const response = await planService.getUserDietPlan();
+      console.log("Diet plan API response in modal:", response);
+      if (response.success) {
+        setFetchedDietPlanData(response.data);
+        console.log("Diet plan data set in modal:", response.data);
+      } else {
+        setFetchError("Failed to load diet plan");
+      }
+    } catch (err: any) {
+      console.error("Error fetching diet plan in modal:", err);
+      setFetchError(err.message || "An error occurred");
+    } finally {
+      setFetchLoading(false);
+    }
+  };
+
+  // Use fetched data if available, otherwise use prop data
+  const activeDietPlan = fetchedDietPlanData.length > 0
+    ? (fetchedDietPlanData[0]?.dietPlanId || fetchedDietPlanData[0]?.plan?.planId?.dietPlanId)
+    : dietPlan;
+
+  const activeDietPlanUrl = fetchedDietPlanData.length > 0
+    ? fetchedDietPlanData[0]?.dietPlanUrl
+    : dietPlanUrl;
+
+  const activeAssignDate = fetchedDietPlanData.length > 0
+    ? fetchedDietPlanData[0]?.createdAt
+    : dietPlanAssignDate;
+
+  if (!activeDietPlan && !fetchLoading) return null;
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return null;
@@ -59,21 +106,21 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
   };
 
   const handleViewDietPlan = () => {
-    if (dietPlanUrl) {
+    if (activeDietPlanUrl) {
       setShowPdfViewer(true);
     }
   };
 
   const handleDownload = async () => {
-    if (!dietPlanUrl) return;
+    if (!activeDietPlanUrl) return;
 
     try {
       setDownloading(true);
-      const urlParts = dietPlanUrl.split("/");
+      const urlParts = activeDietPlanUrl.split("/");
       const fileName = urlParts[urlParts.length - 1] || `diet-plan-${Date.now()}.pdf`;
       const fileUri = FileSystem.documentDirectory + fileName;
 
-      const downloadResult = await FileSystem.downloadAsync(dietPlanUrl, fileUri);
+      const downloadResult = await FileSystem.downloadAsync(activeDietPlanUrl, fileUri);
 
       if (downloadResult.status === 200) {
         const isAvailable = await Sharing.isAvailableAsync();
@@ -128,137 +175,150 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            {/* Image Header */}
-            {dietPlan.imgUrl && (
-              <View style={styles.imageContainer}>
-                <Image
-                  source={{ uri: dietPlan.imgUrl }}
-                  style={styles.headerImage}
-                  resizeMode="contain"
-                />
+            {fetchLoading ? (
+              <View style={{ alignItems: "center", justifyContent: "center", paddingVertical: 60 }}>
+                <ActivityIndicator size="large" color={theme.colors.success} />
+                <Text style={{ marginTop: 12, color: theme.colors.textSecondary }}>Loading diet plan...</Text>
               </View>
-            )}
-
-            {/* Title */}
-            <Text style={styles.title}>{dietPlan.title}</Text>
-
-            {/* Duration and Assigned Date - Side by Side Cards */}
-            <View style={styles.durationRowContainer}>
-              {/* Duration Card */}
-              <View style={styles.durationCard}>
-                <Ionicons name="time-outline" size={16} color={theme.colors.secondPrimary} />
-                <Text style={styles.durationText}>
-                  Duration: {dietPlan.duration} {dietPlan.durationType}
-                  {dietPlan.duration > 1 ? "s" : ""}
-                </Text>
+            ) : !activeDietPlan ? (
+              <View style={{ alignItems: "center", justifyContent: "center", paddingVertical: 60 }}>
+                <Ionicons name="nutrition-outline" size={48} color={theme.colors.textSecondary} />
+                <Text style={{ marginTop: 12, color: theme.colors.textSecondary, textAlign: "center" }}>No diet plan available</Text>
               </View>
-              
-              {/* Assigned Date Card */}
-              {dietPlanAssignDate && (
-                <View style={styles.assignedCard}>
-                  <Ionicons name="calendar-outline" size={16} color={theme.colors.secondPrimary} />
-                  <Text style={styles.assignedText}>
-                    Assigned: {formatDate(dietPlanAssignDate)}
-                  </Text>
-                </View>
-              )}
-            </View>
-
-            {/* Description */}
-            {dietPlan.desc && (
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View style={styles.iconContainer}>
-                    <Ionicons name="document-text-outline" size={20} color={theme.colors.secondPrimary} />
-                  </View>
-                  <Text style={styles.sectionTitle}>Description</Text>
-                </View>
-                <Text style={styles.descriptionText}>{dietPlan.desc}</Text>
-              </View>
-            )}
-
-            {/* Description Items */}
-            {dietPlan.descItems && dietPlan.descItems.length > 0 && (
-              <View style={styles.section}>
-                <View style={styles.sectionHeader}>
-                  <View style={styles.iconContainer}>
-                    <Ionicons name="leaf" size={20} color={theme.colors.success} />
-                  </View>
-                  <Text style={styles.sectionTitle}>Plan Highlights</Text>
-                </View>
-
-                {(showAllDescItems ? dietPlan.descItems : dietPlan.descItems.slice(0, 3)).map((item, idx) => (
-                  <View key={idx} style={styles.descItem}>
-                    <View style={styles.bulletPoint} />
-                    <Text style={styles.descText}>{item}</Text>
-                  </View>
-                ))}
-
-                {dietPlan.descItems.length > 3 && (
-                  <TouchableOpacity
-                    onPress={() => setShowAllDescItems(!showAllDescItems)}
-                    style={styles.showMoreButton}
-                  >
-                    <Text style={styles.showMoreText}>
-                      {showAllDescItems ? "Show Less" : "Show More"}
-                    </Text>
-                    <Ionicons
-                      name={showAllDescItems ? "chevron-up" : "chevron-down"}
-                      size={18}
-                      color={theme.colors.success}
+            ) : (
+              <>
+                {/* Image Header */}
+                {activeDietPlan.imgUrl && (
+                  <View style={styles.imageContainer}>
+                    <Image
+                      source={{ uri: activeDietPlan.imgUrl }}
+                      style={styles.headerImage}
+                      resizeMode="contain"
                     />
+                  </View>
+                )}
+
+                {/* Title */}
+                <Text style={styles.title}>{activeDietPlan.title}</Text>
+
+                {/* Duration and Assigned Date - Side by Side Cards */}
+                <View style={styles.durationRowContainer}>
+                  {/* Duration Card */}
+                  <View style={styles.durationCard}>
+                    <Ionicons name="time-outline" size={16} color={theme.colors.secondPrimary} />
+                    <Text style={styles.durationText}>
+                      Duration: {activeDietPlan.duration} {activeDietPlan.durationType}
+                      {activeDietPlan.duration > 1 ? "s" : ""}
+                    </Text>
+                  </View>
+
+                  {/* Assigned Date Card */}
+                  {activeAssignDate && (
+                    <View style={styles.assignedCard}>
+                      <Ionicons name="calendar-outline" size={16} color={theme.colors.secondPrimary} />
+                      <Text style={styles.assignedText}>
+                        Assigned: {formatDate(activeAssignDate)}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Description */}
+                {(activeDietPlan as any).desc && (
+                  <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                      <View style={styles.iconContainer}>
+                        <Ionicons name="document-text-outline" size={20} color={theme.colors.secondPrimary} />
+                      </View>
+                      <Text style={styles.sectionTitle}>Description</Text>
+                    </View>
+                    <Text style={styles.descriptionText}>{(activeDietPlan as any).desc}</Text>
+                  </View>
+                )}
+
+                {/* Description Items */}
+                {activeDietPlan.descItems && activeDietPlan.descItems.length > 0 && (
+                  <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                      <View style={styles.iconContainer}>
+                        <Ionicons name="leaf" size={20} color={theme.colors.success} />
+                      </View>
+                      <Text style={styles.sectionTitle}>Plan Highlights</Text>
+                    </View>
+
+                    {(showAllDescItems ? activeDietPlan.descItems : activeDietPlan.descItems.slice(0, 3)).map((item: string, idx: number) => (
+                      <View key={idx} style={styles.descItem}>
+                        <View style={styles.bulletPoint} />
+                        <Text style={styles.descText}>{item}</Text>
+                      </View>
+                    ))}
+
+                    {activeDietPlan.descItems.length > 3 && (
+                      <TouchableOpacity
+                        onPress={() => setShowAllDescItems(!showAllDescItems)}
+                        style={styles.showMoreButton}
+                      >
+                        <Text style={styles.showMoreText}>
+                          {showAllDescItems ? "Show Less" : "Show More"}
+                        </Text>
+                        <Ionicons
+                          name={showAllDescItems ? "chevron-up" : "chevron-down"}
+                          size={18}
+                          color={theme.colors.success}
+                        />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+
+                {/* Price if available */}
+                {activeDietPlan.price && (
+                  <View style={styles.priceContainer}>
+                    <Text style={styles.priceLabel}>Price:</Text>
+                    <Text style={styles.priceValue}>₹{activeDietPlan.price}</Text>
+                  </View>
+                )}
+
+                {/* View Diet Plan Button (Main Green Button) */}
+                {activeDietPlanUrl && (
+                  <TouchableOpacity
+                    onPress={handleViewDietPlan}
+                    activeOpacity={0.8}
+                    style={styles.viewDietPlanButton}
+                  >
+                    <Text style={styles.viewDietPlanButtonText}>
+                      View Diet Plan
+                    </Text>
                   </TouchableOpacity>
                 )}
-              </View>
-            )}
 
-            {/* Price if available */}
-            {dietPlan.price && (
-              <View style={styles.priceContainer}>
-                <Text style={styles.priceLabel}>Price:</Text>
-                <Text style={styles.priceValue}>₹{dietPlan.price}</Text>
-              </View>
-            )}
-
-
-            {/* View Diet Plan Button (Main Green Button) */}
-            {dietPlanUrl && (
-              <TouchableOpacity
-                onPress={handleViewDietPlan}
-                activeOpacity={0.8}
-                style={styles.viewDietPlanButton}
-              >
-                <Text style={styles.viewDietPlanButtonText}>
-                  View Diet Plan
-                </Text>
-              </TouchableOpacity>
-            )}
-
-            {/* Download Icon Button (Icon Only) */}
-            {dietPlanUrl && (
-              <TouchableOpacity
-                onPress={handleDownload}
-                activeOpacity={0.8}
-                style={styles.downloadIconButton}
-                disabled={downloading}
-              >
-                {downloading ? (
-                  <ActivityIndicator size="small" color={theme.colors.textMuted} />
-                ) : (
-                  <Ionicons
-                    name="cloud-download-outline"
-                    size={24}
-                    color={theme.colors.textMuted}
-                  />
+                {/* Download Icon Button (Icon Only) */}
+                {activeDietPlanUrl && (
+                  <TouchableOpacity
+                    onPress={handleDownload}
+                    activeOpacity={0.8}
+                    style={styles.downloadIconButton}
+                    disabled={downloading}
+                  >
+                    {downloading ? (
+                      <ActivityIndicator size="small" color={theme.colors.textMuted} />
+                    ) : (
+                      <Ionicons
+                        name="cloud-download-outline"
+                        size={24}
+                        color={theme.colors.textMuted}
+                      />
+                    )}
+                  </TouchableOpacity>
                 )}
-              </TouchableOpacity>
+              </>
             )}
           </ScrollView>
         </View>
       </View>
 
       {/* PDF Viewer Modal */}
-      {showPdfViewer && dietPlanUrl && (
+      {showPdfViewer && activeDietPlanUrl && (
         <Modal
           animationType="slide"
           transparent={false}
@@ -278,7 +338,7 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
             {/* WebView */}
             <View style={styles.webViewContainer}>
               <WebView
-                source={{ uri: dietPlanUrl }}
+                source={{ uri: activeDietPlanUrl }}
                 style={styles.webView}
                 onLoadStart={() => setPdfLoading(true)}
                 onLoadEnd={() => setPdfLoading(false)}

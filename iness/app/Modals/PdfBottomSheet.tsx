@@ -11,13 +11,13 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Ionicons } from "@expo/vector-icons";
 import { WebView } from "react-native-webview";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import { LinearGradient } from "expo-linear-gradient";
 import { useGlobalTheme, useTheme } from "../Theme/ThemeContext";
+import { planService } from "../services/plan.service";
 
 const { height } = Dimensions.get("window");
 
@@ -37,44 +37,55 @@ export default function DietPlanBottomSheet({
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [fullScreenPdf, setFullScreenPdf] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
-    const fetchPlans = async () => {
-      const stored = await AsyncStorage.getItem("dietplans");
-      if (stored) {
-        const plans = JSON.parse(stored);
-        setDietPlans(plans);
-        if (!selectedPlan && plans.length > 0) setSelectedPlan(plans[0]);
-      }
-      setLoading(false);
-    };
-    fetchPlans();
-  }, [visible]);
-
-  // Hide navigation bar when modal opens - keep it hidden continuously
-  useEffect(() => {
-    if (Platform.OS === "android") {
-      if (visible) {
-        // When modal is visible, aggressively hide navigation bar
-        NavigationBar.setVisibilityAsync("hidden");
-        NavigationBar.setBehaviorAsync("overlay-swipe");
-        SystemNavigationBar.stickyImmersive();
-
-        // Set up interval to continuously hide it (Android sometimes shows it automatically)
-        const interval = setInterval(() => {
-          NavigationBar.setVisibilityAsync("hidden");
-          SystemNavigationBar.stickyImmersive();
-        }, 100);
-
-        return () => clearInterval(interval);
-      } else {
-        // When modal closes, ensure it stays hidden
-        NavigationBar.setVisibilityAsync("hidden");
-        SystemNavigationBar.stickyImmersive();
-      }
+    if (visible) {
+      fetchPlans();
     }
   }, [visible]);
+
+  const fetchPlans = async () => {
+    setLoading(true);
+    try {
+      console.log("Fetching diet plans from API in PdfBottomSheet...");
+      const response = await planService.getUserDietPlan();
+      console.log("Diet plan API response in PdfBottomSheet:", response);
+
+      if (response.success && response.data && response.data.length > 0) {
+        // Extract diet plan URLs from the response
+        const planUrls = response.data
+          .map((item: any) => item.dietPlanUrl)
+          .filter((url: string) => url && url.trim() !== "");
+
+        console.log("Extracted plan URLs:", planUrls);
+        setDietPlans(planUrls);
+        if (!selectedPlan && planUrls.length > 0) {
+          setSelectedPlan(planUrls[0]);
+        }
+      } else {
+        console.log("No diet plans found in API response");
+        setDietPlans([]);
+      }
+    } catch (error) {
+      console.error("Error fetching diet plans:", error);
+      Alert.alert("Error", "Failed to load diet plans. Please try again.");
+      setDietPlans([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Note: Navigation bar hiding is commented out for now
+  // Uncomment and import the proper modules if needed
+  // useEffect(() => {
+  //   if (Platform.OS === "android") {
+  //     if (visible) {
+  //       // When modal is visible, hide navigation bar
+  //     }
+  //   }
+  // }, [visible]);
 
   const handleDownload = async () => {
     if (!selectedPlan) {
@@ -141,14 +152,23 @@ export default function DietPlanBottomSheet({
               </View>
               <View style={styles.headerRight}>
                 {selectedPlan && (
-                  <TouchableOpacity
-                    style={styles.downloadButton}
-                    onPress={handleDownload}
-                    disabled={loading}
-                    activeOpacity={0.7}
-                  >
-                    <Ionicons name="download-outline" size={20} color="#FFFFFF" />
-                  </TouchableOpacity>
+                  <>
+                    <TouchableOpacity
+                      style={styles.expandButton}
+                      onPress={() => setFullScreenPdf(true)}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="expand-outline" size={20} color="#FFFFFF" />
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={styles.downloadButton}
+                      onPress={handleDownload}
+                      disabled={loading}
+                      activeOpacity={0.7}
+                    >
+                      <Ionicons name="download-outline" size={20} color="#FFFFFF" />
+                    </TouchableOpacity>
+                  </>
                 )}
                 <TouchableOpacity
                   style={styles.menuButton}
@@ -253,6 +273,54 @@ export default function DietPlanBottomSheet({
           </View>
         </View>
       </View>
+
+      {/* Full Screen PDF Viewer Modal */}
+      {fullScreenPdf && selectedPlan && (
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={fullScreenPdf}
+          onRequestClose={() => setFullScreenPdf(false)}
+        >
+          <View style={styles.fullScreenContainer}>
+            {/* Header */}
+            <View style={styles.fullScreenHeader}>
+              <TouchableOpacity
+                onPress={() => setFullScreenPdf(false)}
+                style={styles.fullScreenCloseButton}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
+              </TouchableOpacity>
+              <Text style={styles.fullScreenTitle}>Diet Plan</Text>
+              <TouchableOpacity
+                style={styles.fullScreenDownloadButton}
+                onPress={handleDownload}
+                disabled={loading}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="download-outline" size={24} color={theme.colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            {/* WebView */}
+            <View style={styles.fullScreenWebViewContainer}>
+              <WebView
+                source={{ uri: selectedPlan }}
+                style={styles.webView}
+                onLoadStart={() => setPdfLoading(true)}
+                onLoadEnd={() => setPdfLoading(false)}
+              />
+              {pdfLoading && (
+                <View style={styles.loadingOverlay}>
+                  <ActivityIndicator size="large" color={theme.colors.secondPrimary} />
+                  <Text style={styles.loadingText}>Loading diet plan...</Text>
+                </View>
+              )}
+            </View>
+          </View>
+        </Modal>
+      )}
     </Modal>
   );
 }
@@ -353,6 +421,16 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     borderColor: "rgba(255, 255, 255, 0.3)",
   },
   downloadButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+  },
+  expandButton: {
     width: 36,
     height: 36,
     borderRadius: 18,
@@ -491,5 +569,51 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     textAlign: "center",
     lineHeight: 20,
     fontFamily: theme.fonts.regular,
+  },
+  fullScreenContainer: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  fullScreenHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingTop: 50,
+    backgroundColor: theme.colors.background,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    shadowColor: theme.colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  fullScreenCloseButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.backgroundSecondary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  fullScreenTitle: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bold,
+  },
+  fullScreenDownloadButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.backgroundSecondary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  fullScreenWebViewContainer: {
+    flex: 1,
+    position: "relative",
   },
 });
