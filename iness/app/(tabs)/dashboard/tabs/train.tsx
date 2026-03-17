@@ -40,38 +40,50 @@ export default function TrainScreen() {
         sliceKey: "activePlans" as SliceKey,
         fetchFunction: planService.getActivePlans,
         priority: "high" as const,
+        enableCache: true,
+        cacheTTL: 5 * 60 * 1000, // 5 minutes - active plans change frequently
       },
       {
         sliceKey: "activeManualPlan" as SliceKey,
         fetchFunction: manualWorkoutPlanService.getUserActiveManualPlan,
         priority: "high" as const,
+        enableCache: true,
+        cacheTTL: 5 * 60 * 1000, // 5 minutes - manual plans change frequently
       },
       {
         sliceKey: "activeServices" as SliceKey,
         fetchFunction: sessionService.getServices,
         priority: "high" as const,
+        enableCache: true,
+        cacheTTL: 10 * 60 * 1000, // 10 minutes - services relatively stable
       },
       // Lower priority - needed for "Available Plans" tab
       {
         sliceKey: "dietPlan" as SliceKey,
         fetchFunction: planService.getDietPlans,
         priority: "low" as const,
+        enableCache: true,
+        cacheTTL: 30 * 60 * 1000, // 30 minutes - diet plans rarely change
       },
       {
         sliceKey: "plan" as SliceKey,
         fetchFunction: planService.getAllPlans,
         priority: "low" as const,
+        enableCache: true,
+        cacheTTL: 30 * 60 * 1000, // 30 minutes - available plans rarely change
       },
       {
         sliceKey: "availableSessions" as SliceKey,
         fetchFunction: otherService.getAvailableServices,
         priority: "low" as const,
+        enableCache: true,
+        cacheTTL: 30 * 60 * 1000, // 30 minutes - available services rarely change
       },
     ],
     []
   );
 
-  const { loading } = useFetchMultipleStoreDataHook(configs);
+  const { loading } = useFetchMultipleStoreDataHook(configs, true, true); // Enable priority loading
   const translateX = useRef(
     new Animated.Value(activeTab === "current" ? 0 : 1)
   ).current;

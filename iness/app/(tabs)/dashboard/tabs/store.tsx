@@ -29,16 +29,22 @@ export default function EquipScreen() {
       {
         sliceKey: "categories" as SliceKey,
         fetchFunction: ecommerceService.getCategories,
+        priority: "high" as const,
+        enableCache: true,
+        cacheTTL: 60 * 60 * 1000, // 1 hour - categories rarely change
       },
       {
         sliceKey: "products" as SliceKey,
         fetchFunction: ecommerceService.getProducts,
+        priority: "high" as const,
+        enableCache: true,
+        cacheTTL: 30 * 60 * 1000, // 30 minutes - products change occasionally
       },
     ],
     []
   );
   const { loading, setSnackbarMessage, setSnackbarVisible } =
-    useFetchMultipleStoreDataHook(configs);
+    useFetchMultipleStoreDataHook(configs, true, true); // Enable priority loading with cache
   const components = [
     { key: "CategoryList", component: <CategoryList /> },
     { key: "GroupedProductDisplay", component: <GroupedProductDisplay /> },
