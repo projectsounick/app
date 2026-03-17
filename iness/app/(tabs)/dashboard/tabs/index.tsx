@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { View, Animated, ScrollView, Modal } from "react-native";
-import { usePathname, useRouter } from "expo-router";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import { ScrollView, Modal } from "react-native";
+import { usePathname } from "expo-router";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
 
 import { useDispatch, useSelector } from "react-redux";
@@ -30,7 +30,6 @@ import HomeShimmer from "@/app/modules/Shimmer/HomeShimmer";
 import HealthReportUploader from "@/app/modules/UploadReportPdf";
 import OffersCards from "@/app/modules/OfferCard";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import SmallHeader from "@/app/modules/SmallHeader";
 import FloatingOptions from "@/app/modules/ButtonSection";
 import HealthDashboard from "@/app/modules/HealthCards";
@@ -116,35 +115,55 @@ const YourComponent = () => {
 
   const configs = useMemo(
     () => [
-      {
-        sliceKey: "cart" as SliceKey,
-        fetchFunction: cartService.getCartItems,
-      },
-      {
-        sliceKey: "blogs" as SliceKey,
-        fetchFunction: blogService.getBlogOverallData,
-      },
+      // High priority - critical for first paint
       {
         sliceKey: "track" as SliceKey,
         fetchFunction: trackService.getCurrentDayTrackData,
-      },
-      {
-        sliceKey: "podcast" as SliceKey,
-        fetchFunction: podCastService.getPodcasts,
+        priority: "high" as const,
+        enableCache: true,
+        cacheTTL: 5 * 60 * 1000, // 5 minutes - track data changes frequently
       },
       {
         sliceKey: "session" as SliceKey,
         fetchFunction: sessionService.getSessions,
+        priority: "high" as const,
+        enableCache: true,
+        cacheTTL: 10 * 60 * 1000, // 10 minutes - session data is relatively stable
       },
       {
         sliceKey: "streak" as SliceKey,
         fetchFunction: fetchStreak,
+        priority: "high" as const,
+        enableCache: true,
+        cacheTTL: 5 * 60 * 1000, // 5 minutes - streak updates daily
+      },
+      // Low priority - can load after initial render
+      {
+        sliceKey: "cart" as SliceKey,
+        fetchFunction: cartService.getCartItems,
+        priority: "low" as const,
+        enableCache: true,
+        cacheTTL: 2 * 60 * 1000, // 2 minutes - cart changes frequently
+      },
+      {
+        sliceKey: "blogs" as SliceKey,
+        fetchFunction: blogService.getBlogOverallData,
+        priority: "low" as const,
+        enableCache: true,
+        cacheTTL: 30 * 60 * 1000, // 30 minutes - blogs rarely change
+      },
+      {
+        sliceKey: "podcast" as SliceKey,
+        fetchFunction: podCastService.getPodcasts,
+        priority: "low" as const,
+        enableCache: true,
+        cacheTTL: 30 * 60 * 1000, // 30 minutes - podcasts rarely change
       },
     ],
     []
   );
   const { loading, setSnackbarMessage, setSnackbarVisible } =
-    useFetchMultipleStoreDataHook(configs);
+    useFetchMultipleStoreDataHook(configs, true, true); // Enable priority loading
   const [currentSession, setCurrentSession] = useState<any>(null);
 
   // Background Apple Health sync
