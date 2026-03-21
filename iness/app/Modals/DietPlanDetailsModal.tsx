@@ -92,16 +92,17 @@ const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
   if (!activeDietPlan && !fetchLoading) return null;
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return null;
+    if (!dateString) return "N/A";
     try {
       const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "N/A";
       return date.toLocaleDateString("en-US", {
         year: "numeric",
         month: "long",
         day: "numeric",
       });
     } catch {
-      return dateString;
+      return "N/A";
     }
   };
 

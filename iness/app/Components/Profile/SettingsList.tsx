@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { router } from "expo-router";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 
 const handleCoupons = () => router.push("/dashboard/coupon");
 const handleCalculator = () => router.push("/dashboard/calculator");
@@ -13,12 +14,35 @@ const handleAppSettings = () => router.push("/dashboard/appsettings");
 const handleAdditionalInfo = () => router.push("/dashboard/additionalinfo");
 const handleMeditation = () => router.push("/dashboard/meditation");
 const handleTrainers = () => router.push("/dashboard/trainers");
+const handleDashboard = () => router.push("/dashboard/trainerDashboard" as any);
 
 export default function SettingsList() {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
   const styles = getStyles(theme, isDark);
+  const [userRole, setUserRole] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getUserRole = async () => {
+      const userData = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+      if (userData.exists && userData.data?.role) {
+        setUserRole(userData.data.role);
+      }
+    };
+    getUserRole();
+  }, []);
+
   const settings = [
+    // Dashboard option for trainers and admins
+    ...(userRole === "trainer" || userRole === "admin"
+      ? [
+          {
+            icon: "grid-outline",
+            label: "Dashboard",
+            onPress: handleDashboard,
+          },
+        ]
+      : []),
     {
       icon: "people-outline",
       label: "Trainers",

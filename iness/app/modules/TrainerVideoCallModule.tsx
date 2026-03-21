@@ -23,25 +23,23 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { SafeAreaView } from "react-native-safe-area-context";
 import theme from "@/app/Theme/globalTheme";
 
-interface VideoCallScreenProps {
+interface TrainerVideoCallScreenProps {
   appId: string;
   channelName: string;
   token: string;
-  isHost?: boolean;
   uid: number;
   onCallEnd: () => void;
 }
 
 const { width, height } = Dimensions.get("window");
 
-export default function VideoCallScreen({
+export default function TrainerVideoCallScreen({
   appId,
   channelName,
   token,
-  isHost = false,
   uid,
   onCallEnd,
-}: VideoCallScreenProps) {
+}: TrainerVideoCallScreenProps) {
   const agoraEngineRef = useRef<IRtcEngine | null>(null);
   const [joined, setJoined] = useState(false);
   const [remoteUids, setRemoteUids] = useState<number[]>([]);
@@ -84,7 +82,6 @@ export default function VideoCallScreen({
         return false;
       }
     } else {
-      // iOS permissions are handled by the system via Info.plist
       console.log('iOS permissions handled by system');
     }
     return true;
@@ -113,30 +110,26 @@ export default function VideoCallScreen({
       engine.setEnableSpeakerphone(true);
     }
 
-    // Set client role BEFORE registering event handlers
-    if (isHost) {
-      engine.setClientRole(ClientRoleType.ClientRoleBroadcaster);
-      console.log('Client role set to broadcaster');
+    // Set client role as broadcaster (host)
+    engine.setClientRole(ClientRoleType.ClientRoleBroadcaster);
+    console.log('Client role set to broadcaster');
 
-      // Enable video module for host
-      console.log('Enabling video module...');
-      engine.enableVideo();
+    // Enable video module
+    console.log('Enabling video module...');
+    engine.enableVideo();
 
-      // Configure video encoder
-      engine.setVideoEncoderConfiguration({
-        dimensions: { width: 640, height: 480 },
-        frameRate: 15,
-        bitrate: 0,
-        minBitrate: -1,
-        orientationMode: 0,
-        degradationPreference: 0,
-        mirrorMode: 0,
-      });
+    // Configure video encoder
+    engine.setVideoEncoderConfiguration({
+      dimensions: { width: 640, height: 480 },
+      frameRate: 15,
+      bitrate: 0,
+      minBitrate: -1,
+      orientationMode: 0,
+      degradationPreference: 0,
+      mirrorMode: 0,
+    });
 
-      engine.setLocalRenderMode(2, 0);
-    } else {
-      engine.setClientRole(ClientRoleType.ClientRoleAudience);
-    }
+    engine.setLocalRenderMode(2, 0);
 
     engine.registerEventHandler({
       onJoinChannelSuccess: (_, localUid) => {
@@ -154,12 +147,11 @@ export default function VideoCallScreen({
       },
       onLocalVideoStateChanged: (source, state, error) => {
         console.log('Local video state changed:', { source, state, error });
-        if (state === 2) { // VideoLocalStateEncoding = 2 means encoding
+        if (state === 2) {
           console.log('Local video is now encoding');
-        } else if (state === 3) { // Failed
+        } else if (state === 3) {
           console.error('Local video failed with error:', error);
 
-          // Error 7 = Camera start failure (usually permission denied or camera in use)
           if (error === 7 && Platform.OS === 'ios') {
             console.error('Camera error 7 on iOS - permission likely denied previously');
             Alert.alert(
@@ -176,49 +168,41 @@ export default function VideoCallScreen({
           } else if (error === 7) {
             console.error('Camera error 7 - camera may be in use or permission denied');
           }
-        } else if (state === 0) { // Stopped
+        } else if (state === 0) {
           console.log('Local video stopped');
-        } else if (state === 1) { // Capturing
+        } else if (state === 1) {
           console.log('Local video is capturing');
         }
       },
     });
 
-    // For host: Start preview BEFORE joining channel
-    if (isHost) {
-      console.log('Starting local video preview BEFORE joining...');
-      setTimeout(() => {
-        try {
-          // Enable local video
-          const enableLocalResult = engine.enableLocalVideo(true);
-          console.log('enableLocalVideo result:', enableLocalResult);
+    // Start preview BEFORE joining channel
+    console.log('Starting local video preview BEFORE joining...');
+    setTimeout(() => {
+      try {
+        // Enable local video
+        const enableLocalResult = engine.enableLocalVideo(true);
+        console.log('enableLocalVideo result:', enableLocalResult);
 
-          // Start preview
-          const previewResult = engine.startPreview();
-          console.log('startPreview result:', previewResult);
+        // Start preview
+        const previewResult = engine.startPreview();
+        console.log('startPreview result:', previewResult);
 
-          // Wait a moment for camera to initialize, then join
-          setTimeout(() => {
-            console.log('Camera ready, joining channel...');
-            engine.joinChannel(token, channelName, uid, {
-              clientRoleType: ClientRoleType.ClientRoleBroadcaster,
-            });
-          }, 500);
-        } catch (err) {
-          console.error('Error starting preview:', err);
-          // Join anyway even if preview fails
+        // Wait a moment for camera to initialize, then join
+        setTimeout(() => {
+          console.log('Camera ready, joining channel...');
           engine.joinChannel(token, channelName, uid, {
             clientRoleType: ClientRoleType.ClientRoleBroadcaster,
           });
-        }
-      }, 500);
-    } else {
-      // For audience: Join immediately
-      console.log('Joining channel as audience...');
-      engine.joinChannel(token, channelName, uid, {
-        clientRoleType: ClientRoleType.ClientRoleAudience,
-      });
-    }
+        }, 500);
+      } catch (err) {
+        console.error('Error starting preview:', err);
+        // Join anyway even if preview fails
+        engine.joinChannel(token, channelName, uid, {
+          clientRoleType: ClientRoleType.ClientRoleBroadcaster,
+        });
+      }
+    }, 500);
   };
 
   const endCall = () => {
@@ -274,13 +258,11 @@ export default function VideoCallScreen({
     setCameraOn(camOn);
 
     if (camOn) {
-      // Turning camera on
       console.log('Enabling local video...');
       agoraEngineRef.current?.enableLocalVideo(true);
       agoraEngineRef.current?.muteLocalVideoStream(false);
       agoraEngineRef.current?.startPreview();
     } else {
-      // Turning camera off
       console.log('Disabling local video...');
       agoraEngineRef.current?.muteLocalVideoStream(true);
     }
@@ -291,43 +273,16 @@ export default function VideoCallScreen({
     agoraEngineRef.current?.switchCamera();
   };
 
-  // 📌 Remote Layout Logic - Equal size grid for all participants
-  const renderRemoteLayout = () => {
-    // Include host in the count if they're in the call
-    const allParticipants = isHost ? [0, ...remoteUids] : remoteUids;
+  // Render video grid including trainer's own video
+  const renderVideoGrid = () => {
+    // Always include trainer (uid 0) in the grid
+    const allParticipants = [0, ...remoteUids];
     const count = allParticipants.length;
 
-    if (count === 0 || (count === 1 && isHost)) {
-      return (
-        <View style={styles.emptyStateContainer}>
-          <LinearGradient
-            colors={["#9747FF", "#7B2CBF"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.emptyStateGradient}
-          >
-            <View style={styles.emptyStateContent}>
-              <MaterialCommunityIcons
-                name="video-off"
-                size={64}
-                color="#fff"
-                style={{ marginBottom: 16 }}
-              />
-              <Text style={styles.emptyStateTitle}>Waiting for participants</Text>
-              <Text style={styles.emptyStateSubtitle}>
-                The call will start when others join
-              </Text>
-            </View>
-          </LinearGradient>
-        </View>
-      );
-    }
-
-    // Calculate grid layout based on participant count
-    // All tiles should be EXACTLY the same size (equal width AND height)
+    // Calculate grid layout
     const getGridDimensions = (participantCount: number) => {
       if (participantCount === 1) return { cols: 1, rows: 1 };
-      if (participantCount === 2) return { cols: 1, rows: 2 }; // Stacked vertically for equal tiles
+      if (participantCount === 2) return { cols: 1, rows: 2 };
       if (participantCount <= 4) return { cols: 2, rows: 2 };
       if (participantCount <= 6) return { cols: 3, rows: 2 };
       if (participantCount <= 9) return { cols: 3, rows: 3 };
@@ -336,18 +291,16 @@ export default function VideoCallScreen({
     };
 
     const { cols, rows } = getGridDimensions(count);
-    // Calculate tile size - all tiles exactly equal
-    // Each tile gets EXACTLY the same width and height
     const itemWidth = Math.floor(width / cols);
     const itemHeight = Math.floor(height / rows);
 
-    console.log(`📐 Grid: ${count} people, ${cols}x${rows}, tile: ${itemWidth}x${itemHeight}px (equal tiles)`);
+    console.log(`📐 Grid: ${count} people, ${cols}x${rows}, tile: ${itemWidth}x${itemHeight}px`);
 
     return (
       <View style={styles.gridContainer}>
-        {allParticipants.map((uid) => (
+        {allParticipants.map((participantUid) => (
           <View
-            key={uid}
+            key={participantUid}
             style={[
               styles.gridItem,
               {
@@ -356,21 +309,19 @@ export default function VideoCallScreen({
               },
             ]}
           >
-            {uid === 0 && !cameraOn ? (
-              // Host with camera off - show placeholder
+            {participantUid === 0 && !cameraOn ? (
               <View style={styles.gridCameraOff}>
                 <Ionicons name="videocam-off" size={32} color="#fff" />
                 <Text style={styles.gridCameraOffText}>Camera Off</Text>
               </View>
             ) : (
-              // Normal video view
               <RtcSurfaceView
-                canvas={{ uid, renderMode: 2 }}
+                canvas={{ uid: participantUid, renderMode: 2 }}
                 style={styles.gridView}
               />
             )}
-            {/* Show badge for host */}
-            {uid === 0 && (
+
+            {participantUid === 0 && (
               <View style={styles.gridHostBadge}>
                 <LinearGradient
                   colors={["#9747FF", "#7B2CBF"]}
@@ -383,12 +334,23 @@ export default function VideoCallScreen({
                 </LinearGradient>
               </View>
             )}
-            {/* Show muted indicator */}
-            {uid === 0 && isMuted && (
+
+            {participantUid === 0 && isMuted && (
               <View style={styles.gridMutedBadge}>
                 <View style={styles.gridMutedBadgeContent}>
                   <Ionicons name="mic-off" size={12} color="#fff" />
                 </View>
+              </View>
+            )}
+
+            {remoteUids.length === 0 && participantUid === 0 && (
+              <View style={styles.waitingOverlay}>
+                <MaterialCommunityIcons
+                  name="account-clock"
+                  size={40}
+                  color="rgba(255, 255, 255, 0.6)"
+                />
+                <Text style={styles.waitingText}>Waiting for participants...</Text>
               </View>
             )}
           </View>
@@ -411,11 +373,25 @@ export default function VideoCallScreen({
             <Ionicons name="time-outline" size={18} color="#fff" />
             <Text style={styles.timerText}>{callDuration}</Text>
           </LinearGradient>
+
+          {remoteUids.length > 0 && (
+            <View style={styles.participantBadge}>
+              <LinearGradient
+                colors={["rgba(103, 198, 148, 0.9)", "rgba(76, 175, 80, 0.9)"]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.participantBadgeGradient}
+              >
+                <Ionicons name="people" size={16} color="#fff" />
+                <Text style={styles.participantText}>{remoteUids.length + 1}</Text>
+              </LinearGradient>
+            </View>
+          )}
         </View>
       )}
 
-      {/* All Participants Grid (including host) */}
-      <View style={styles.remoteContainer}>{renderRemoteLayout()}</View>
+      {/* Video Grid */}
+      <View style={styles.remoteContainer}>{renderVideoGrid()}</View>
 
       {/* Controls Bar */}
       <View style={styles.controlsContainer}>
@@ -480,7 +456,7 @@ export default function VideoCallScreen({
               </LinearGradient>
             </TouchableOpacity>
 
-            {/* Switch Camera (only if camera is on) */}
+            {/* Switch Camera */}
             {cameraOn && (
               <TouchableOpacity
                 style={styles.controlButton}
@@ -559,91 +535,30 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     fontFamily: theme.fonts.bold,
   },
-  hostBadge: {
-    position: "absolute",
-    top: 8,
-    right: 8,
-    zIndex: 10,
+  participantBadge: {
+    shadowColor: "#67C694",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  hostBadgeGradient: {
+  participantBadgeGradient: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 4,
-    shadowColor: "#9747FF",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.4,
-    shadowRadius: 4,
-    elevation: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    gap: 6,
   },
-  hostBadgeText: {
+  participantText: {
     color: theme.colors.textWhite,
-    fontSize: theme.fontSizes.small,
+    fontSize: theme.fontSizes.regular,
     fontWeight: "700",
     fontFamily: theme.fonts.bold,
   },
   remoteContainer: {
     flex: 1,
     backgroundColor: theme.colors.black,
-  },
-  emptyStateContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyStateGradient: {
-    width: width * 0.8,
-    borderRadius: 24,
-    padding: 40,
-    alignItems: "center",
-    shadowColor: "#9747FF",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 10,
-  },
-  emptyStateContent: {
-    alignItems: "center",
-  },
-  emptyStateTitle: {
-    color: theme.colors.textWhite,
-    fontSize: theme.fontSizes.large,
-    fontWeight: "700",
-    marginBottom: 8,
-    fontFamily: theme.fonts.bold,
-    textAlign: "center",
-  },
-  emptyStateSubtitle: {
-    color: "rgba(255, 255, 255, 0.8)",
-    fontSize: theme.fontSizes.regularSmall,
-    fontFamily: theme.fonts.regular,
-    textAlign: "center",
-  },
-  singleRemoteContainer: {
-    flex: 1,
-    backgroundColor: theme.colors.black,
-  },
-  singleRemoteView: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-    backgroundColor: theme.colors.text,
-  },
-  twoRemoteContainer: {
-    flex: 1,
-    flexDirection: "column",
-    gap: 2,
-  },
-  twoRemoteItem: {
-    flex: 1,
-    overflow: "hidden",
-  },
-  twoRemoteView: {
-    width: "100%",
-    height: "100%",
-    backgroundColor: theme.colors.text,
   },
   gridContainer: {
     flex: 1,
@@ -679,39 +594,48 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontFamily: theme.fonts.regular,
   },
-  localViewContainer: {
+  gridHostBadge: {
     position: "absolute",
-    top: Platform.OS === "ios" ? 100 : 70,
-    right: 20,
-    zIndex: 50,
+    top: 8,
+    left: 8,
+    zIndex: 10,
   },
-  localViewWrapper: {
-    width: 100,
-    height: 135,
-    borderRadius: 12,
-    overflow: "hidden",
-    borderWidth: 3,
-    borderColor: "#67C694",
-    shadowColor: "#67C694",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.5,
-    shadowRadius: 12,
-    elevation: 8,
-    backgroundColor: theme.colors.black,
-  },
-  localView: {
-    width: "100%",
-    height: "100%",
-  },
-  cameraOffOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-    justifyContent: "center",
+  gridHostBadgeGradient: {
+    flexDirection: "row",
     alignItems: "center",
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+    borderRadius: 8,
+    gap: 3,
+  },
+  gridHostBadgeText: {
+    color: theme.colors.textWhite,
+    fontSize: 9,
+    fontWeight: "700",
+    fontFamily: theme.fonts.bold,
+  },
+  gridMutedBadge: {
+    position: "absolute",
+    bottom: 8,
+    left: 8,
+    zIndex: 10,
+  },
+  gridMutedBadgeContent: {
+    backgroundColor: "rgba(229, 57, 53, 0.9)",
+    borderRadius: 12,
+    padding: 6,
+  },
+  waitingOverlay: {
+    position: "absolute",
+    bottom: 12,
+    right: 12,
+    alignItems: "center",
+    gap: 6,
+  },
+  waitingText: {
+    color: "rgba(255, 255, 255, 0.6)",
+    fontSize: 11,
+    fontFamily: theme.fonts.regular,
   },
   controlsContainer: {
     position: "absolute",
@@ -768,36 +692,5 @@ const styles = StyleSheet.create({
     height: "100%",
     justifyContent: "center",
     alignItems: "center",
-  },
-  gridHostBadge: {
-    position: "absolute",
-    top: 8,
-    left: 8,
-    zIndex: 10,
-  },
-  gridHostBadgeGradient: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 8,
-    gap: 3,
-  },
-  gridHostBadgeText: {
-    color: theme.colors.textWhite,
-    fontSize: 9,
-    fontWeight: "700",
-    fontFamily: theme.fonts.bold,
-  },
-  gridMutedBadge: {
-    position: "absolute",
-    bottom: 8,
-    left: 8,
-    zIndex: 10,
-  },
-  gridMutedBadgeContent: {
-    backgroundColor: "rgba(229, 57, 53, 0.9)",
-    borderRadius: 12,
-    padding: 6,
   },
 });

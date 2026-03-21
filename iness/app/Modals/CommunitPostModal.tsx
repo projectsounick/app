@@ -54,6 +54,8 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
   const [media, setMedia] = useState<string[]>([]);
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [isUploading, setIsUploading] = useState(false);
 
   const { loading, callService, setLoading } = useServiceWithSnackbar(
     communityService.createPost
@@ -142,27 +144,36 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
       let uploadedUrls: string[] = [];
 
       if (postType !== "text" && media.length > 0) {
-        uploadedUrls = await Promise.all(
-          media.map(async (fileUri) => {
-            const type = fileUri.endsWith(".mp4") ? "video" : "image";
-            const ext =
-              fileUri.split(".").pop() || (type === "video" ? "mp4" : "jpg");
-            const originalFileName =
-              fileUri.split("/").pop() || `file-${Date.now()}.${ext}`;
-            const fileName = `${userId}_${originalFileName}`;
+        setIsUploading(true);
+        setUploadProgress(0);
 
-            const uploadedUrl = await uploadToAzureFromExpo(
-              fileUri,
-              fileName,
-              sasToken,
-              storageAccountName,
-              "admin-data",
-              "community"
-            );
+        // Upload files sequentially with progress tracking
+        for (let i = 0; i < media.length; i++) {
+          const fileUri = media[i];
+          const type = fileUri.endsWith(".mp4") ? "video" : "image";
+          const ext =
+            fileUri.split(".").pop() || (type === "video" ? "mp4" : "jpg");
+          const originalFileName =
+            fileUri.split("/").pop() || `file-${Date.now()}.${ext}`;
+          const fileName = `${userId}_${originalFileName}`;
 
-            return uploadedUrl;
-          })
-        );
+          console.log(`📤 Uploading ${i + 1}/${media.length}: ${type}`);
+
+          const uploadedUrl = await uploadToAzureFromExpo(
+            fileUri,
+            fileName,
+            sasToken,
+            storageAccountName,
+            "admin-data",
+            "community"
+          );
+
+          uploadedUrls.push(uploadedUrl);
+          setUploadProgress(Math.round(((i + 1) / media.length) * 100));
+          console.log(`✅ Upload ${i + 1}/${media.length} complete`);
+        }
+
+        setIsUploading(false);
       }
 
       const post: Post = {
@@ -370,11 +381,25 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                       </View>
                     )}
 
+                  {/* Upload Progress */}
+                  {isUploading && (
+                    <View style={styles.uploadProgressContainer}>
+                      <View style={styles.progressBarBackground}>
+                        <View style={[styles.progressBarFill, { width: `${uploadProgress}%` }]} />
+                      </View>
+                      <Text style={styles.uploadProgressText}>
+                        Uploading... {uploadProgress}%
+                        {postType === "video" && " (Large videos may take time)"}
+                      </Text>
+                    </View>
+                  )}
+
                   {/* Upload Button */}
-                  {(postType === "image" || postType === "video") && (
+                  {(postType === "image" || postType === "video") && !isUploading && (
                     <TouchableOpacity
                       style={styles.uploadButton}
                       onPress={handleUploadMedia}
+                      disabled={loading}
                     >
                       <Ionicons
                         name="cloud-upload-outline"
@@ -630,6 +655,28 @@ const getStyles = (theme: any) => StyleSheet.create({
     fontWeight: theme.fontWeights.bold as "700",
     marginLeft: 8,
     fontSize: theme.fontSizes.regular,
+  },
+  uploadProgressContainer: {
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  progressBarBackground: {
+    height: 6,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: 3,
+    overflow: "hidden",
+  },
+  progressBarFill: {
+    height: "100%",
+    backgroundColor: theme.colors.success,
+    borderRadius: 3,
+  },
+  uploadProgressText: {
+    marginTop: 8,
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textSecondary,
+    textAlign: "center",
+    fontFamily: theme.fonts.medium,
   },
   actionRow: {
     flexDirection: "row",

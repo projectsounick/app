@@ -70,5 +70,8 @@ jobs:
           APPLE_API_ISSUER_ID: ${{ secrets.APPLE_API_ISSUER_ID }}
         run: |
           cd iness
-          eas submit --platform ios --profile preview --non-interactive --latest
+          # Temporarily disabled auto-submit to prevent duplicate submissions
+          # Uncomment below when ready to re-enable
+          # eas submit --platform ios --profile preview --non-interactive --latest
+          echo "Auto-submit disabled. Submit manually with: eas submit --platform ios --profile production --id <BUILD_ID>"
 

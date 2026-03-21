@@ -90,10 +90,22 @@ const VideoCard = ({
   }
 
   const player = useVideoPlayer(podcast.podcastLink, (player) => {
-    if (showVideo) {
+    player.loop = false;
+    player.muted = false;
+  });
+
+  useEffect(() => {
+    if (showVideo && player) {
       player.play();
     }
-  });
+
+    // Cleanup when component unmounts or video stops showing
+    return () => {
+      if (player) {
+        player.pause();
+      }
+    };
+  }, [showVideo, player]);
 
   //// Function for the user to handel the like of the video -----------/
   const handleLike = (podcast: PodcastInterface) => {

@@ -73,13 +73,15 @@ const CommunityPosts = ({
     url: string;
     type: "image" | "video";
   } | null>(null);
-  const videoRef: any = useRef(null);
+  const videoRefs = useRef<Record<string, any>>({});
   const [showMyPosts, setShowMyPosts] = useState(false);
   const [commentsMap, setCommentsMap] = useState<Record<string, any[]>>({});
   const [newComments, setNewComments] = useState<Record<string, string>>({});
   const [activeMediaIndex, setActiveMediaIndex] = useState<
     Record<string, number>
   >({});
+  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
+  const [videoStatus, setVideoStatus] = useState<Record<string, any>>({});
   const [showMenuForPost, setShowMenuForPost] = useState<string | null>(null);
   const [showTooltipForPost, setShowTooltipForPost] = useState<string | null>(
     null
@@ -163,10 +165,13 @@ const CommunityPosts = ({
       setIsLoading(true);
       fetchPosts(1, false);
       return () => {
-        // Screen is unfocused (navigated away)
-        if (videoRef.current) {
-          videoRef.current.stopAsync?.();
-        }
+        // Screen is unfocused (navigated away) - stop all videos
+        Object.values(videoRefs.current).forEach((ref) => {
+          if (ref) {
+            ref.pauseAsync?.().catch(() => {});
+          }
+        });
+        setPlayingVideoId(null);
       };
     }, [showMyPosts])
   );
@@ -421,6 +426,28 @@ const CommunityPosts = ({
   };
 
 
+  const handleVideoPlayPause = async (postId: string) => {
+    const videoRef = videoRefs.current[postId];
+
+    if (playingVideoId === postId) {
+      // Pause current video
+      if (videoRef) {
+        await videoRef.pauseAsync?.().catch(() => {});
+      }
+      setPlayingVideoId(null);
+    } else {
+      // Pause any other playing video first
+      if (playingVideoId && videoRefs.current[playingVideoId]) {
+        await videoRefs.current[playingVideoId].pauseAsync?.().catch(() => {});
+      }
+      // Play this video
+      if (videoRef) {
+        await videoRef.playAsync?.().catch(() => {});
+      }
+      setPlayingVideoId(postId);
+    }
+  };
+
   const renderMedia = (postId: string, media: string[], type: string) => {
     if (!media?.length) return null;
 
@@ -441,23 +468,60 @@ const CommunityPosts = ({
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
           scrollEventThrottle={16}
-          renderItem={({ item: mediaUrl }) => {
+          renderItem={({ item: mediaUrl, index }) => {
             const isVideo =
               mediaUrl.endsWith(".mp4") ||
               mediaUrl.includes("video") ||
               type === "video";
+            const videoKey = `${postId}-${index}`;
 
             return (
               <View style={styles.mediaItemWrapper}>
                 {isVideo ? (
-                  <Video
-                    ref={videoRef}
-                    source={{ uri: mediaUrl }}
-                    style={styles.mediaImage}
-                    resizeMode={ResizeMode.COVER}
-                    useNativeControls
-                    shouldPlay
-                  />
+                  <View style={{ position: 'relative', width: '100%', height: '100%' }}>
+                    <Video
+                      ref={(ref) => {
+                        if (ref) {
+                          videoRefs.current[videoKey] = ref;
+                        }
+                      }}
+                      source={{
+                        uri: mediaUrl,
+                        overrideFileExtensionAndroid: "mp4",
+                      }}
+                      style={styles.mediaImage}
+                      resizeMode={ResizeMode.CONTAIN}
+                      useNativeControls={true}
+                      shouldPlay={false}
+                      isLooping={false}
+                      progressUpdateIntervalMillis={500}
+                      onPlaybackStatusUpdate={(status) => {
+                        if (status.isLoaded) {
+                          setVideoStatus((prev) => ({
+                            ...prev,
+                            [videoKey]: status,
+                          }));
+                        }
+                      }}
+                    />
+                    {/* Show buffering loader when video is loading/buffering */}
+                    {videoStatus[videoKey]?.isBuffering && (
+                      <View style={styles.videoBufferingOverlay}>
+                        <View style={styles.bufferingContainer}>
+                          <ActivityIndicator size="large" color="#FFFFFF" />
+                          <Text style={styles.bufferingText}>Loading video...</Text>
+                        </View>
+                      </View>
+                    )}
+                    {/* Show play button only when video hasn't started yet */}
+                    {(!videoStatus[videoKey] || (!videoStatus[videoKey].isPlaying && !videoStatus[videoKey].isBuffering)) && (
+                      <View style={styles.videoPlayOverlay}>
+                        <View style={styles.playButtonCircle}>
+                          <Ionicons name="play" size={48} color="#FFFFFF" />
+                        </View>
+                      </View>
+                    )}
+                  </View>
                 ) : (
                   <Pressable onPress={() => openModal(mediaUrl, "image")}>
                     <Image
@@ -965,6 +1029,56 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   media: {
     width: "100%",
     height: "100%",
+  },
+  videoPlayOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.3)",
+    pointerEvents: "none",
+  },
+  playButtonCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 3,
+    borderColor: "#FFFFFF",
+  },
+  videoBufferingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.75)",
+    pointerEvents: "none",
+    zIndex: 100,
+  },
+  bufferingContainer: {
+    backgroundColor: "rgba(0, 0, 0, 0.85)",
+    borderRadius: 16,
+    paddingVertical: 24,
+    paddingHorizontal: 32,
+    alignItems: "center",
+    justifyContent: "center",
+    minWidth: 180,
+  },
+  bufferingText: {
+    color: "#FFFFFF",
+    fontSize: theme.fontSizes.regularLarge,
+    marginTop: 16,
+    fontWeight: "700",
+    fontFamily: theme.fonts.bold,
+    textAlign: "center",
   },
   dotsContainer: {
     position: "absolute",

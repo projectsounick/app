@@ -13,12 +13,26 @@ export const uploadToAzureFromExpo = async (
   const file = await fetch(fileUri);
   const fileBlob = await file.blob();
 
+  // Determine if this is a video file
+  const isVideo = fileBlob.type.startsWith('video/') || fileName.endsWith('.mp4');
+
+  const headers: Record<string, string> = {
+    "x-ms-blob-type": "BlockBlob",
+    "Content-Type": fileBlob.type || "application/octet-stream",
+    // Enable caching for faster loads (24 hours)
+    "x-ms-blob-cache-control": "public, max-age=86400",
+    // Force inline viewing for smooth streaming (critical!)
+    "x-ms-blob-content-disposition": "inline",
+  };
+
+  // Use Hot tier for videos for better performance
+  if (isVideo) {
+    headers["x-ms-access-tier"] = "Hot";
+  }
+
   const response = await fetch(blobUrl, {
     method: "PUT",
-    headers: {
-      "x-ms-blob-type": "BlockBlob",
-      "Content-Type": fileBlob.type,
-    },
+    headers,
     body: fileBlob,
   });
 

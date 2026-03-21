@@ -5,6 +5,7 @@ import { fetchWrapper } from "../helpers/fetchWrapper";
 //// Exporting the functions of accountService------------------------------------------------------------/
 export const notificationService = {
   createNotification,
+  addUserNotification,
   getNotification,
   deleteNotification,
 };
@@ -17,6 +18,17 @@ async function createNotification(data: any): Promise<{
 }> {
   return fetchWrapper.post(`${config.apiUrl}/api/send-panel-notification`, {
     ...data,
+  });
+}
+
+///// Function for adding user notifications (video calls, etc) -------------------------------/
+async function addUserNotification(data: any): Promise<{
+  message: String;
+
+  success: boolean;
+}> {
+  return fetchWrapper.post(`${config.apiUrl}/api/add-notification`, {
+    data,
   });
 }
 ///// Function for fetching the notifications -------------------------------/
