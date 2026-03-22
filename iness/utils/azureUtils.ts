@@ -1,5 +1,3 @@
-import * as mime from "mime";
-
 export const uploadToAzureFromExpo = async (
   fileUri: string,
   fileName: string,
@@ -37,7 +35,15 @@ export const uploadToAzureFromExpo = async (
   });
 
   if (!response.ok) {
-    throw new Error("Upload failed");
+    const errorText = await response.text();
+    console.error('Azure upload failed:', {
+      status: response.status,
+      statusText: response.statusText,
+      error: errorText,
+      fileName,
+      fileType: fileBlob.type
+    });
+    throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
   }
 
   return blobUrl.split("?")[0]; // Return public blob URL without token

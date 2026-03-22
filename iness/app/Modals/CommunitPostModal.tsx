@@ -10,7 +10,6 @@ import {
   Dimensions,
   TouchableWithoutFeedback,
   Keyboard,
-  Pressable,
   FlatList,
   Alert,
   Platform,
@@ -28,7 +27,7 @@ import { userService } from "../services/user.service";
 import { Post } from "../interfaces/communityService";
 import useServiceWithSnackbar from "@/hooks/usePostDataHook";
 import { communityService } from "../services/community.service";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -40,7 +39,6 @@ interface CustomPostModalProps {
 const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostModalProps>(
   ({ setPosts, communityId }, ref) => {
   const theme = useGlobalTheme();
-  const { isDark } = useTheme();
   const styles = getStyles(theme);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -100,10 +98,7 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes:
-        postType === "video"
-          ? ImagePicker.MediaTypeOptions.Videos
-          : ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: postType === "video" ? ["videos"] : ["images"],
       allowsMultipleSelection: true,
       quality: 1,
     });
@@ -159,18 +154,28 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
 
           console.log(`📤 Uploading ${i + 1}/${media.length}: ${type}`);
 
-          const uploadedUrl = await uploadToAzureFromExpo(
-            fileUri,
-            fileName,
-            sasToken,
-            storageAccountName,
-            "admin-data",
-            "community"
-          );
+          try {
+            const uploadedUrl = await uploadToAzureFromExpo(
+              fileUri,
+              fileName,
+              sasToken,
+              storageAccountName,
+              "admin-data",
+              "community"
+            );
 
-          uploadedUrls.push(uploadedUrl);
-          setUploadProgress(Math.round(((i + 1) / media.length) * 100));
-          console.log(`✅ Upload ${i + 1}/${media.length} complete`);
+            uploadedUrls.push(uploadedUrl);
+            setUploadProgress(Math.round(((i + 1) / media.length) * 100));
+            console.log(`✅ Upload ${i + 1}/${media.length} complete`);
+          } catch (uploadError: any) {
+            console.error(`Failed to upload ${type}:`, uploadError);
+            setIsUploading(false);
+            Alert.alert(
+              "Upload Failed",
+              `Failed to upload ${type} ${i + 1}/${media.length}. ${uploadError.message || 'Please try again.'}`
+            );
+            throw uploadError; // Re-throw to stop the process
+          }
         }
 
         setIsUploading(false);
