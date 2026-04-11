@@ -15,6 +15,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { fetchWrapper } from "@/app/helpers/fetchWrapper";
 import { config } from "@/app/shared/config";
+import SessionHealthOverview from "@/app/modules/SessionHealthOverview";
 
 const baseUrl = `${config.apiUrl}/api`;
 
@@ -256,6 +257,11 @@ function SessionDetails() {
             </View>
           )}
         </View>
+
+        <SessionHealthOverview
+          userId={session.userDetails?._id || session.userId}
+          userDetails={session.userDetails}
+        />
 
         {/* Workouts */}
         {session.workouts && session.workouts.length > 0 && (

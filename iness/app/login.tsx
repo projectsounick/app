@@ -126,7 +126,10 @@ const Login = () => {
 
       // Sign in - will now show account picker
       const userInfo = await GoogleSignin.signIn();
-      console.log("[Android Google Sign-In] Sign-in successful, userInfo:", userInfo.user?.email);
+      console.log(
+        "[Android Google Sign-In] Sign-in successful, userInfo:",
+        userInfo.type === "success" ? userInfo.data.user.email : "cancelled"
+      );
 
       // Get the ID token
       const tokens = await GoogleSignin.getTokens();

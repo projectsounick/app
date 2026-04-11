@@ -39,6 +39,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 dayjs.extend(relativeTime);
 
 const screenWidth = Dimensions.get("window").width;
+const COMMENTS_PAGE_SIZE = 10;
 
 const CommunityPosts = ({
   communityId,
@@ -66,7 +67,7 @@ const CommunityPosts = ({
   ] = useState(false);
   const [deleteloading, setDeleteLoading] = useState<any>({
     _id: null,
-    loading: true,
+    loading: false,
   });
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState<{
@@ -76,7 +77,16 @@ const CommunityPosts = ({
   const videoRefs = useRef<Record<string, any>>({});
   const [showMyPosts, setShowMyPosts] = useState(false);
   const [commentsMap, setCommentsMap] = useState<Record<string, any[]>>({});
+  const [commentsPagination, setCommentsPagination] = useState<
+    Record<string, { page: number; hasMore: boolean; loading: boolean }>
+  >({});
   const [newComments, setNewComments] = useState<Record<string, string>>({});
+  const [likeLoadingMap, setLikeLoadingMap] = useState<Record<string, boolean>>(
+    {}
+  );
+  const [commentSubmittingMap, setCommentSubmittingMap] = useState<
+    Record<string, boolean>
+  >({});
   const [activeMediaIndex, setActiveMediaIndex] = useState<
     Record<string, number>
   >({});
@@ -86,11 +96,15 @@ const CommunityPosts = ({
   const [showTooltipForPost, setShowTooltipForPost] = useState<string | null>(
     null
   );
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [selected, setSelected] = useState("All Posts"); // default
   const [open, setOpen] = useState(false);
   const [sharePreviewVisible, setSharePreviewVisible] = useState(false);
   const [shareImageUrl, setShareImageUrl] = useState<string | null>(null);
   const [sharePostText, setSharePostText] = useState<string>("");
+  const [deleteConfirmPostId, setDeleteConfirmPostId] = useState<string | null>(
+    null
+  );
   const sharePreviewRef = useRef<View>(null);
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
@@ -106,6 +120,8 @@ const CommunityPosts = ({
   const [blockLoading, setBlockLoading] = useState(false);
   async function handleDelete(_id: any) {
     try {
+      setShowMenuForPost(null);
+      setDeleteConfirmPostId(null);
       setDeleteLoading({ _id: _id, loading: true });
       const response = await communityService.deletePost(_id);
 
@@ -126,6 +142,13 @@ const CommunityPosts = ({
   const fetchPosts = useCallback(
     async (pageToFetch: number = 1, append: boolean = false) => {
       try {
+        if (!communityId) {
+          setPosts([]);
+          setHasMore(false);
+          setPage(1);
+          return;
+        }
+
         if (append) {
           setLoadingMore(true);
         } else {
@@ -142,7 +165,13 @@ const CommunityPosts = ({
 
         if (response.success) {
           if (append) {
-            setPosts((prev: any[]) => [...prev, ...response.data]);
+            setPosts((prev: any[]) => {
+              const merged = [...prev, ...response.data];
+              return merged.filter(
+                (post, index, self) =>
+                  index === self.findIndex((item) => item._id === post._id)
+              );
+            });
           } else {
             setPosts(response.data);
           }
@@ -157,11 +186,43 @@ const CommunityPosts = ({
         setLoadingMore(false);
       }
     },
-    [communityId, showMyPosts]
+    [communityId, showMyPosts, setPosts]
   );
+
+  useEffect(() => {
+    setCommentsMap({});
+    setCommentsPagination({});
+    setVisibleComments({});
+    setNewComments({});
+    setPage(1);
+    setHasMore(true);
+  }, [communityId]);
+
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      const userResponse =
+        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+      setCurrentUserId(userResponse.exists ? userResponse.data?._id ?? null : null);
+    };
+
+    loadCurrentUser();
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
+      if (!communityId) {
+        setPosts([]);
+        setIsLoading(false);
+        return () => {
+          Object.values(videoRefs.current).forEach((ref) => {
+            if (ref) {
+              ref.pauseAsync?.().catch(() => {});
+            }
+          });
+          setPlayingVideoId(null);
+        };
+      }
+
       setIsLoading(true);
       fetchPosts(1, false);
       return () => {
@@ -173,7 +234,7 @@ const CommunityPosts = ({
         });
         setPlayingVideoId(null);
       };
-    }, [showMyPosts])
+    }, [communityId, showMyPosts, fetchPosts, setPosts])
   );
 
   const loadMorePosts = useCallback(() => {
@@ -250,17 +311,69 @@ const CommunityPosts = ({
     }
   }
 
-  const fetchComments = async (postId: string) => {
+  const fetchComments = async (
+    postId: string,
+    pageToFetch: number = 1,
+    append: boolean = false
+  ) => {
     try {
-      const response = await communityService.getPostComment(postId);
+      setCommentsPagination((prev) => ({
+        ...prev,
+        [postId]: {
+          page: prev[postId]?.page || 0,
+          hasMore: prev[postId]?.hasMore ?? false,
+          loading: true,
+        },
+      }));
+
+      const response = await communityService.getPostComment(
+        postId,
+        pageToFetch,
+        COMMENTS_PAGE_SIZE
+      );
       if (response.success) {
-        setCommentsMap((prev) => ({
+        setCommentsMap((prev) => {
+          const previousComments = append ? prev[postId] || [] : [];
+          const merged = [...previousComments, ...response.data];
+
+          return {
+            ...prev,
+            [postId]: merged.filter(
+              (comment, index, self) =>
+                index === self.findIndex((item) => item._id === comment._id)
+            ),
+          };
+        });
+
+        const totalPages = response.pagination?.totalPages || 0;
+        setCommentsPagination((prev) => ({
           ...prev,
-          [postId]: response.data,
+          [postId]: {
+            page: pageToFetch,
+            hasMore: pageToFetch < totalPages,
+            loading: false,
+          },
+        }));
+      } else {
+        setCommentsPagination((prev) => ({
+          ...prev,
+          [postId]: {
+            page: prev[postId]?.page || 0,
+            hasMore: prev[postId]?.hasMore ?? false,
+            loading: false,
+          },
         }));
       }
     } catch (error) {
       console.error("Error fetching comments:", error);
+      setCommentsPagination((prev) => ({
+        ...prev,
+        [postId]: {
+          page: prev[postId]?.page || 0,
+          hasMore: prev[postId]?.hasMore ?? false,
+          loading: false,
+        },
+      }));
     }
   };
 
@@ -269,23 +382,36 @@ const CommunityPosts = ({
     setModalVisible(true);
   };
   const toggleCommentSection = async (postId: string) => {
+    const isOpening = !visibleComments[postId];
     setVisibleComments((prev) => ({
       ...prev,
-      [postId]: !prev[postId],
+      [postId]: isOpening,
     }));
-    if (!commentsMap[postId]) await fetchComments(postId);
+    if (isOpening && !commentsMap[postId]) {
+      await fetchComments(postId, 1, false);
+    }
+  };
+
+  const handleLoadMoreComments = async (postId: string) => {
+    const currentPagination = commentsPagination[postId];
+    if (!currentPagination || currentPagination.loading || !currentPagination.hasMore) {
+      return;
+    }
+
+    await fetchComments(postId, currentPagination.page + 1, true);
   };
 
   const handleCommentAdd = async (postId: string) => {
     let text = newComments[postId];
-    if (!text?.trim()) return;
+    if (!text?.trim() || commentSubmittingMap[postId]) return;
 
     text = filter.clean(text); // 👈 Censoring bad words
 
     try {
+      setCommentSubmittingMap((prev) => ({ ...prev, [postId]: true }));
       const response = await communityService.createPostComment(postId, text);
       if (response.success) {
-        await fetchComments(postId);
+        await fetchComments(postId, 1, false);
         setPosts((prevPosts: any) =>
           prevPosts.map((post: any) =>
             post._id === postId
@@ -297,6 +423,8 @@ const CommunityPosts = ({
       }
     } catch (error) {
       console.error("Failed to add comment:", error);
+    } finally {
+      setCommentSubmittingMap((prev) => ({ ...prev, [postId]: false }));
     }
   };
 
@@ -397,12 +525,18 @@ const CommunityPosts = ({
       alert("Some error has happened");
       return;
     }
+
+    if (likeLoadingMap[postId]) {
+      return;
+    }
     const loggedUser =
       await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
     const notificationData = {
       reciverId: createdBy._id || null,
       senderId: loggedUser.exists ? loggedUser.data._id : null,
     };
+
+    setLikeLoadingMap((prev) => ({ ...prev, [postId]: true }));
 
     communityService
       .togglePostLike(postId, notificationData)
@@ -422,6 +556,9 @@ const CommunityPosts = ({
       .catch((error) => {
         console.error("Error toggling like:", error);
         alert("Failed to toggle like. Please try again.");
+      })
+      .finally(() => {
+        setLikeLoadingMap((prev) => ({ ...prev, [postId]: false }));
       });
   };
 
@@ -552,7 +689,10 @@ const CommunityPosts = ({
     );
   };
 
-  const renderPost = ({ item }: { item: any }) => (
+  const renderPost = ({ item }: { item: any }) => {
+    const isOwnPost = !!currentUserId && item.createdBy?._id === currentUserId;
+
+    return (
     <View style={styles.card}>
       {/* Header - Instagram style */}
       <View style={styles.header}>
@@ -591,6 +731,18 @@ const CommunityPosts = ({
         </TouchableOpacity>
       </View>
 
+      {/* Caption */}
+      {item.text && (
+        <View style={styles.captionContainer}>
+          <Text style={styles.caption}>
+            <Text style={styles.captionUsername}>
+              {item.createdBy?.name || "Anonymous"}{" "}
+            </Text>
+            {item.text}
+          </Text>
+        </View>
+      )}
+
       {/* Media - Full width Instagram style */}
       {renderMedia(item._id, item.media, item.type)}
 
@@ -600,6 +752,7 @@ const CommunityPosts = ({
           <TouchableOpacity 
             onPress={() => handleToggleLike(item)}
             style={styles.actionButton}
+            disabled={!!likeLoadingMap[item._id]}
           >
             <Ionicons
               name={item.likedByUser ? "heart" : "heart-outline"}
@@ -634,18 +787,6 @@ const CommunityPosts = ({
         </Text>
       )}
 
-      {/* Caption */}
-      {item.text && (
-        <View style={styles.captionContainer}>
-          <Text style={styles.caption}>
-            <Text style={styles.captionUsername}>
-              {item.createdBy?.name || "Anonymous"}{" "}
-            </Text>
-            {item.text}
-          </Text>
-        </View>
-      )}
-
       {/* View Comments */}
       {item.commentCount > 0 && (
         <TouchableOpacity 
@@ -660,7 +801,7 @@ const CommunityPosts = ({
 
       {visibleComments[item._id] && (
         <View style={styles.commentSection}>
-          {commentsMap[item._id]?.slice(0, 2).map((comment, idx) => (
+          {commentsMap[item._id]?.map((comment, idx) => (
             <View key={idx} style={styles.commentItem}>
               <Text style={styles.commentText}>
                 <Text style={styles.commentUser}>
@@ -670,13 +811,16 @@ const CommunityPosts = ({
               </Text>
             </View>
           ))}
-          {commentsMap[item._id]?.length > 2 && (
+          {commentsPagination[item._id]?.hasMore && (
             <TouchableOpacity 
-              onPress={() => toggleCommentSection(item._id)}
+              onPress={() => handleLoadMoreComments(item._id)}
               style={styles.viewAllComments}
+              disabled={commentsPagination[item._id]?.loading}
             >
               <Text style={styles.viewAllCommentsText}>
-                View all {commentsMap[item._id].length} comments
+                {commentsPagination[item._id]?.loading
+                  ? "Loading comments..."
+                  : "Load more comments"}
               </Text>
             </TouchableOpacity>
           )}
@@ -693,12 +837,19 @@ const CommunityPosts = ({
             />
             <TouchableOpacity 
               onPress={() => handleCommentAdd(item._id)}
-              disabled={!newComments[item._id]?.trim()}
+              disabled={
+                !newComments[item._id]?.trim() ||
+                !!commentSubmittingMap[item._id]
+              }
             >
               <Ionicons 
                 name="send" 
                 size={20} 
-                color={newComments[item._id]?.trim() ? "#67C694" : "#999"} 
+                color={
+                  newComments[item._id]?.trim() && !commentSubmittingMap[item._id]
+                    ? "#67C694"
+                    : "#999"
+                } 
               />
             </TouchableOpacity>
           </View>
@@ -726,102 +877,121 @@ const CommunityPosts = ({
             borderColor: theme.colors.border,
           }}
         >
-          {showTooltipForPost === item._id ? (
-            <ActivityIndicator style={{ paddingVertical: 12 }} color={isDark ? theme.colors.textWhite : theme.colors.secondPrimary} />
-          ) : (
+          {isOwnPost ? (
             <TouchableOpacity
-              onPress={() => toolTipAction(item, "complain")}
+              onPress={() => {
+                setShowMenuForPost(null);
+                setDeleteConfirmPostId(item._id);
+              }}
               style={{
                 flexDirection: "row",
                 alignItems: "center",
                 paddingVertical: 12,
                 paddingHorizontal: 16,
               }}
+              disabled={deleteloading.loading && deleteloading._id === item._id}
             >
-              <Ionicons name="alert-circle-outline" size={20} color="#FF9800" />
-              <Text
-                style={{
-                  marginLeft: 10,
-                  fontSize: theme.fontSizes.regular,
-                  color: isDark ? theme.colors.textWhite : theme.colors.text,
-                  fontWeight: "500",
-                }}
-              >
-                Complain
-              </Text>
+              {deleteloading.loading && deleteloading._id === item._id ? (
+                <ActivityIndicator color="red" />
+              ) : (
+                <>
+                  <Ionicons name="trash-outline" size={20} color="red" />
+                  <Text
+                    style={{
+                      marginLeft: 10,
+                      fontSize: theme.fontSizes.regular,
+                      color: "red",
+                      fontWeight: "600",
+                    }}
+                  >
+                    Delete
+                  </Text>
+                </>
+              )}
             </TouchableOpacity>
-          )}
-
-          {/* Divider */}
-          <View
-            style={{
-              height: 1,
-              backgroundColor: theme.colors.border,
-              marginHorizontal: 10,
-            }}
-          />
-
-          <TouchableOpacity
-            onPress={() => {
-              Alert.alert(
-                "Block User",
-                "Are you sure you want to block this user? You won't be able to see their content from now on.",
-                [
-                  { text: "Cancel", style: "cancel" },
-                  {
-                    text: "Yes, Block",
-                    onPress: async () => {
-                      let loggedUser =
-                        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
-                          "user"
-                        );
-                      let currentUser = loggedUser.exists
-                        ? loggedUser.data._id
-                        : null;
-
-                      if (item.createdBy._id === currentUser) {
-                        Alert.alert(
-                          "Action not allowed",
-                          "You can't block yourself"
-                        );
-                      } else {
-                        toolTipAction(item, "block");
-                      }
-                    },
-                  },
-                ]
-              );
-            }}
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-              paddingVertical: 12,
-              paddingHorizontal: 16,
-            }}
-          >
-            {blockLoading ? (
-              <ActivityIndicator color={isDark ? theme.colors.textWhite : "red"} />
-            ) : (
-              <>
-                <Ionicons name="close-circle-outline" size={20} color="red" />
-                <Text
+          ) : (
+            <>
+              {showTooltipForPost === item._id ? (
+                <ActivityIndicator style={{ paddingVertical: 12 }} color={isDark ? theme.colors.textWhite : theme.colors.secondPrimary} />
+              ) : (
+                <TouchableOpacity
+                  onPress={() => toolTipAction(item, "complain")}
                   style={{
-                    marginLeft: 10,
-                    fontSize: theme.fontSizes.regular,
-                    color: "red",
-                    fontWeight: "600",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    paddingVertical: 12,
+                    paddingHorizontal: 16,
                   }}
                 >
-                  Block User
-                </Text>
-              </>
-            )}
-          </TouchableOpacity>
+                  <Ionicons name="alert-circle-outline" size={20} color="#FF9800" />
+                  <Text
+                    style={{
+                      marginLeft: 10,
+                      fontSize: theme.fontSizes.regular,
+                      color: isDark ? theme.colors.textWhite : theme.colors.text,
+                      fontWeight: "500",
+                    }}
+                  >
+                    Complain
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              <View
+                style={{
+                  height: 1,
+                  backgroundColor: theme.colors.border,
+                  marginHorizontal: 10,
+                }}
+              />
+
+              <TouchableOpacity
+                onPress={() => {
+                  Alert.alert(
+                    "Block User",
+                    "Are you sure you want to block this user? You won't be able to see their content from now on.",
+                    [
+                      { text: "Cancel", style: "cancel" },
+                      {
+                        text: "Yes, Block",
+                        onPress: () => toolTipAction(item, "block"),
+                      },
+                    ]
+                  );
+                }}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  paddingVertical: 12,
+                  paddingHorizontal: 16,
+                }}
+              >
+                {blockLoading ? (
+                  <ActivityIndicator color={isDark ? theme.colors.textWhite : "red"} />
+                ) : (
+                  <>
+                    <Ionicons name="close-circle-outline" size={20} color="red" />
+                    <Text
+                      style={{
+                        marginLeft: 10,
+                        fontSize: theme.fontSizes.regular,
+                        color: "red",
+                        fontWeight: "600",
+                      }}
+                    >
+                      Block User
+                    </Text>
+                  </>
+                )}
+              </TouchableOpacity>
+            </>
+          )}
         </View>
       )}
 
     </View>
   );
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -862,6 +1032,58 @@ const CommunityPosts = ({
           imageUrl={selectedMedia.url}
         />
       )}
+
+      <Modal
+        visible={!!deleteConfirmPostId}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setDeleteConfirmPostId(null)}
+      >
+        <View style={styles.deleteModalOverlay}>
+          <View style={styles.deleteModalContainer}>
+            <View style={styles.deleteModalIconWrap}>
+              <Ionicons
+                name="trash-outline"
+                size={24}
+                color={theme.colors.error}
+              />
+            </View>
+            <Text style={styles.deleteModalTitle}>Delete Post?</Text>
+            <Text style={styles.deleteModalText}>
+              Are you sure you want to delete this post? This action cannot be
+              undone.
+            </Text>
+
+            <View style={styles.deleteModalActions}>
+              <TouchableOpacity
+                style={styles.deleteCancelButton}
+                onPress={() => setDeleteConfirmPostId(null)}
+                disabled={
+                  deleteloading.loading &&
+                  deleteloading._id === deleteConfirmPostId
+                }
+              >
+                <Text style={styles.deleteCancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.deleteConfirmButton}
+                onPress={() => handleDelete(deleteConfirmPostId)}
+                disabled={
+                  deleteloading.loading &&
+                  deleteloading._id === deleteConfirmPostId
+                }
+              >
+                {deleteloading.loading &&
+                deleteloading._id === deleteConfirmPostId ? (
+                  <ActivityIndicator color={theme.colors.textWhite} />
+                ) : (
+                  <Text style={styles.deleteConfirmButtonText}>Delete</Text>
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
 
       {/* Share Preview Modal with Logo and Instagram Handle Overlay */}
       <Modal
@@ -1242,6 +1464,88 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   tooltipText: {
     color: theme.colors.textWhite,
     fontSize: theme.fontSizes.small,
+  },
+  deleteModalOverlay: {
+    flex: 1,
+    backgroundColor: theme.colors.overlay,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 24,
+  },
+  deleteModalContainer: {
+    width: "100%",
+    maxWidth: 360,
+    backgroundColor: theme.colors.background,
+    borderRadius: 20,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    ...(isDark
+      ? {}
+      : {
+          shadowColor: "#000",
+          shadowOpacity: 0.16,
+          shadowOffset: { width: 0, height: 8 },
+          shadowRadius: 18,
+          elevation: 10,
+        }),
+  },
+  deleteModalIconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: isDark ? theme.colors.errorLight : "#FFF1F1",
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginBottom: 14,
+  },
+  deleteModalTitle: {
+    fontSize: theme.fontSizes.medium,
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bold,
+    textAlign: "center",
+    marginBottom: 10,
+  },
+  deleteModalText: {
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
+    fontFamily: theme.fonts.regular,
+    textAlign: "center",
+    lineHeight: 20,
+    marginBottom: 20,
+  },
+  deleteModalActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  deleteCancelButton: {
+    flex: 1,
+    padding: 14,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: 12,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  deleteCancelButtonText: {
+    color: theme.colors.text,
+    fontSize: theme.fontSizes.regular,
+    fontWeight: "600",
+    fontFamily: theme.fonts.medium,
+  },
+  deleteConfirmButton: {
+    flex: 1,
+    padding: 14,
+    backgroundColor: theme.colors.error,
+    borderRadius: 12,
+    alignItems: "center",
+  },
+  deleteConfirmButtonText: {
+    color: theme.colors.textWhite,
+    fontSize: theme.fontSizes.regular,
+    fontWeight: "700",
+    fontFamily: theme.fonts.bold,
   },
   shareModalOverlay: {
     flex: 1,

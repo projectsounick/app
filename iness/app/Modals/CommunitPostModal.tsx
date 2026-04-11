@@ -54,6 +54,9 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
   const [keyboardHeight, setKeyboardHeight] = useState(0);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
+  const [videoPreviewLoading, setVideoPreviewLoading] = useState<
+    Record<string, boolean>
+  >({});
 
   const { loading, callService, setLoading } = useServiceWithSnackbar(
     communityService.createPost
@@ -78,6 +81,20 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
       keyboardWillHide.remove();
     };
   }, []);
+
+  useEffect(() => {
+    if (postType !== "video") {
+      setVideoPreviewLoading({});
+      return;
+    }
+
+    setVideoPreviewLoading(
+      media.reduce<Record<string, boolean>>((acc, uri) => {
+        acc[uri] = true;
+        return acc;
+      }, {})
+    );
+  }, [media, postType]);
 
   const handleScroll = (event: any) => {
     const itemWidth = screenWidth - 40 + 12; // width + gap
@@ -115,6 +132,14 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
 
   const handlePost = async () => {
     if (!postType || (!caption && media.length === 0)) return;
+
+    if (!communityId) {
+      Alert.alert(
+        "Community unavailable",
+        "Unable to create a post because no community is selected."
+      );
+      return;
+    }
 
     setLoading(true);
     try {
@@ -161,7 +186,11 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
               sasToken,
               storageAccountName,
               "admin-data",
-              "community"
+              "community",
+              (fileProgress) => {
+                const overallProgress = ((i + fileProgress / 100) / media.length) * 100;
+                setUploadProgress(Math.max(1, Math.round(overallProgress)));
+              }
             );
 
             uploadedUrls.push(uploadedUrl);
@@ -182,7 +211,7 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
       }
 
       const post: Post = {
-        communityId: communityId || "68866c50cf2f2ea93541e6f5",
+        communityId: communityId,
         type: postType,
         media: uploadedUrls,
         text: caption,
@@ -347,12 +376,38 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                               ]}
                             >
                               {postType === "video" ? (
-                                <Video
-                                  source={{ uri: item }}
-                                  style={styles.media}
-                                  useNativeControls
-                                  resizeMode={ResizeMode.CONTAIN}
-                                />
+                                <>
+                                  <Video
+                                    source={{ uri: item }}
+                                    style={styles.media}
+                                    useNativeControls
+                                    resizeMode={ResizeMode.CONTAIN}
+                                    onLoadStart={() =>
+                                      setVideoPreviewLoading((prev) => ({
+                                        ...prev,
+                                        [item]: true,
+                                      }))
+                                    }
+                                    onLoad={() =>
+                                      setVideoPreviewLoading((prev) => ({
+                                        ...prev,
+                                        [item]: false,
+                                      }))
+                                    }
+                                    onReadyForDisplay={() =>
+                                      setVideoPreviewLoading((prev) => ({
+                                        ...prev,
+                                        [item]: false,
+                                      }))
+                                    }
+                                    onError={() =>
+                                      setVideoPreviewLoading((prev) => ({
+                                        ...prev,
+                                        [item]: false,
+                                      }))
+                                    }
+                                  />
+                                </>
                               ) : (
                                 <Image
                                   source={{ uri: item }}
@@ -383,6 +438,19 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                             ))}
                           </View>
                         )}
+
+                        {postType === "video" &&
+                          Object.values(videoPreviewLoading).some(Boolean) && (
+                            <View style={styles.videoPreviewStatus}>
+                              <ActivityIndicator
+                                size="small"
+                                color={theme.colors.secondPrimary}
+                              />
+                              <Text style={styles.videoPreviewStatusText}>
+                                Preparing video preview...
+                              </Text>
+                            </View>
+                          )}
                       </View>
                     )}
 
@@ -640,6 +708,25 @@ const getStyles = (theme: any) => StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
+  },
+  videoPreviewStatus: {
+    marginTop: 12,
+    marginHorizontal: 20,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  videoPreviewStatusText: {
+    color: theme.colors.textSecondary,
+    fontSize: theme.fontSizes.small,
+    fontFamily: theme.fonts.medium,
   },
   uploadButton: {
     flexDirection: "row",

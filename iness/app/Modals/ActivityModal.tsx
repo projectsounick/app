@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,9 +7,12 @@ import {
   TextInput,
   ScrollView,
   Dimensions,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import * as NavigationBar from "expo-navigation-bar";
+import SystemNavigationBar from "react-native-system-navigation-bar";
 import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const { height } = Dimensions.get("window");

@@ -102,7 +102,7 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
                     accessibilityRole="button"
                     accessibilityState={isFocused ? { selected: true } : {}}
                     accessibilityLabel={options.tabBarAccessibilityLabel}
-                    testID={options.tabBarTestID}
+                    testID={options.tabBarButtonTestID}
                     onPress={onPress}
                     onLongPress={onLongPress}
                     style={styles.tabButton}
@@ -163,7 +163,7 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
                     accessibilityRole="button"
                     accessibilityState={isFocused ? { selected: true } : {}}
                     accessibilityLabel={options.tabBarAccessibilityLabel}
-                    testID={options.tabBarTestID}
+                    testID={options.tabBarButtonTestID}
                     onPress={onPress}
                     onLongPress={onLongPress}
                     style={styles.tabButton}
@@ -222,7 +222,7 @@ export default function CustomTabBar({ state, descriptors, navigation }: BottomT
                   accessibilityRole="button"
                   accessibilityState={isFocused ? { selected: true } : {}}
                   accessibilityLabel={options.tabBarAccessibilityLabel}
-                  testID={options.tabBarTestID}
+                    testID={options.tabBarButtonTestID}
                   onPress={onPress}
                   onLongPress={onLongPress}
                   style={styles.tabButton}
@@ -283,4 +283,3 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 });
-

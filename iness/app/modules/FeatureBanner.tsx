@@ -43,7 +43,7 @@ const FeatureBanner = () => {
   const styles = getStyles(theme, isDark);
 
   // Gradient colors - only for dark mode
-  const gradientColors = isDark
+  const gradientColors: readonly [string, string, ...string[]] = isDark
     ? ["#9747FF", "#7A2ECC", "#6B2AB8"]
     : ["#FFFFFF", "#FFFFFF"]; // White for light mode
 

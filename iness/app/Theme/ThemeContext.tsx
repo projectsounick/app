@@ -26,6 +26,7 @@ interface Theme {
   fontWeights: {
     regular: string;
     medium: string;
+    semiBold: string;
     bold: string;
   };
   spacing: {
@@ -42,6 +43,7 @@ interface Theme {
     body: string;
     regular: string;
     medium: string;
+    semiBold: string;
     bold: string;
   };
 }
@@ -51,6 +53,8 @@ interface ThemeContextType {
   setThemeMode: (mode: ThemeMode) => Promise<void>;
   isDark: boolean;
   reloadThemeFromUserData: (showModal?: boolean) => Promise<void>;
+  showDarkModeModal: boolean;
+  setShowDarkModeModal: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -86,6 +90,7 @@ export function ThemeProvider({ children, initialMode = 'light' }: ThemeProvider
   const systemColorScheme = useRNColorScheme();
   const [mode, setMode] = useState<ThemeMode>(initialMode);
   const [isLoading, setIsLoading] = useState(true);
+  const [showDarkModeModal, setShowDarkModeModal] = useState(false);
   
   // Load theme preference from user data on mount - CRITICAL: Load synchronously if possible
   useEffect(() => {
@@ -143,6 +148,7 @@ export function ThemeProvider({ children, initialMode = 'light' }: ThemeProvider
     fontWeights: {
       regular: "400",
       medium: "500",
+      semiBold: "600",
       bold: "700",
     },
     spacing: createSpacing(),
@@ -152,6 +158,7 @@ export function ThemeProvider({ children, initialMode = 'light' }: ThemeProvider
       body: "SatoshiRegular",
       regular: "SatoshiRegular",
       medium: "SatoshiMedium",
+      semiBold: "SatoshiBold",
       bold: "SatoshiBold",
     },
   };
@@ -216,7 +223,16 @@ export function ThemeProvider({ children, initialMode = 'light' }: ThemeProvider
   };
 
   return (
-    <ThemeContext.Provider value={{ theme, setThemeMode, isDark, reloadThemeFromUserData }}>
+    <ThemeContext.Provider
+      value={{
+        theme,
+        setThemeMode,
+        isDark,
+        reloadThemeFromUserData,
+        showDarkModeModal,
+        setShowDarkModeModal,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );
@@ -251,4 +267,3 @@ export function useGlobalTheme() {
     fonts: theme.fonts,
   };
 }
-

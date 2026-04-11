@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, ScrollView, TouchableOpacity, Text, Modal } from "react-native";
+import { View, ScrollView, TouchableOpacity, Text, Modal, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -20,6 +20,14 @@ function YourComponent() {
   const [showCommunitySelector, setShowCommunitySelector] = useState(false);
   const [loading, setLoading] = useState(true);
   const createPostModalRef = useRef<{ openModal: () => void } | null>(null);
+
+  const openCreatePost = () => {
+    if (!communityId) {
+      Alert.alert("Community unavailable", "You can't create a post right now.");
+      return;
+    }
+    createPostModalRef.current?.openModal();
+  };
 
   useEffect(() => {
     const fetchCommunity = async () => {
@@ -63,7 +71,7 @@ function YourComponent() {
       <SmallHeader
         weightShow={false}
         title={communitName || "Fitness Hub"}
-        onCreatePost={() => createPostModalRef.current?.openModal()}
+        onCreatePost={openCreatePost}
         showCart={false}
         showBell={false}
       />
@@ -112,7 +120,7 @@ function YourComponent() {
               style={{
                 fontSize: 14,
                 color: theme.colors.text,
-                fontFamily: theme.fonts.semiBold,
+                fontFamily: theme.fonts.medium,
               }}
             >
               {communitName}
@@ -131,7 +139,7 @@ function YourComponent() {
             posts={posts}
             communityName={communitName}
             setPosts={setPosts}
-            onCreatePost={() => createPostModalRef.current?.openModal()}
+            onCreatePost={openCreatePost}
           />
           <ImageSelectorModal
             ref={createPostModalRef}
@@ -217,7 +225,7 @@ function YourComponent() {
                     <Text
                       style={{
                         fontSize: 16,
-                        fontFamily: theme.fonts.semiBold,
+                        fontFamily: theme.fonts.medium,
                         color: theme.colors.text,
                         marginBottom: 4,
                       }}

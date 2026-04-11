@@ -48,6 +48,7 @@ interface User {
 interface UserPlan {
   _id: string;
   plan?: {
+    title?: string;
     planName?: string;
     planItem?: {
       planName?: string;
@@ -65,6 +66,9 @@ interface UserPlan {
   createdAt?: string;
   updatedAt?: string;
   trainerId?: string;
+  dietPlanDetails?: {
+    title?: string;
+  };
 }
 
 interface UserSession {

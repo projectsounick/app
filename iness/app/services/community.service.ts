@@ -73,9 +73,18 @@ async function createPostComment(postId: string, comment: string) {
     throw new Error("Error updating user: " + error.message);
   }
 }
-async function getPostComment(postId: string) {
+async function getPostComment(postId: string, page?: number, limit?: number) {
   try {
-    return fetchWrapper.get(`${baseUrl}/get-post-comments/${postId}`);
+    const query = new URLSearchParams();
+    if (page) {
+      query.set("page", String(page));
+    }
+    if (limit) {
+      query.set("limit", String(limit));
+    }
+
+    const suffix = query.toString() ? `?${query.toString()}` : "";
+    return fetchWrapper.get(`${baseUrl}/get-post-comments/${postId}${suffix}`);
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }

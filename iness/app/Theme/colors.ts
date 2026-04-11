@@ -7,6 +7,7 @@ export const lightColors = {
   // Primary colors
   primary: "#BDFF84",
   secondPrimary: "#9747FF",
+  second: "#9747FF",
   iconBackground: "#411D6E", // Dark purple for cart/bell icon backgrounds
   
   // Text colors
@@ -15,6 +16,7 @@ export const lightColors = {
   textMuted: "#888888", // Common #888
   textLight: "#CCCCCC",
   textWhite: "#FFFFFF",
+  medium: "#888888",
   
   // Background colors
   background: "#FFFFFF",
@@ -33,6 +35,7 @@ export const lightColors = {
   // Status colors
   success: "#67C694", // Common green used in app
   error: "#F44336",
+  red: "#F44336",
   warning: "#FF9800",
   info: "#2196F3",
   
@@ -65,6 +68,7 @@ export const darkColors = {
   // Primary colors
   primary: "#BDFF84",
   secondPrimary: "#9747FF",
+  second: "#9747FF",
   iconBackground: "#411D6E", // Dark purple for cart/bell icon backgrounds
   
   // Text colors
@@ -73,6 +77,7 @@ export const darkColors = {
   textMuted: "#9BA1A6", // Lighter for dark mode
   textLight: "#687076",
   textWhite: "#FFFFFF",
+  medium: "#9BA1A6",
   
   // Background colors
   background: "#151718",
@@ -91,6 +96,7 @@ export const darkColors = {
   // Status colors
   success: "#67C694", // Same green
   error: "#F44336",
+  red: "#F44336",
   warning: "#FF9800",
   info: "#2196F3",
   
@@ -120,4 +126,3 @@ export const darkColors = {
 };
 
 export type ColorTheme = typeof lightColors;
-

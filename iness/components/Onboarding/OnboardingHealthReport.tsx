@@ -110,7 +110,7 @@ const OnboardingHealthReport = ({ onNext }: { onNext: () => void }) => {
               marginBottom: 20,
             }}
           >
-            <ActivityIndicator size="large" color={theme.primary} />
+            <ActivityIndicator size="large" color={theme.colors.primary} />
             <Text style={{ marginTop: 10, color: "#333" }}>
               Uploading {fileName}...
             </Text>
@@ -119,7 +119,7 @@ const OnboardingHealthReport = ({ onNext }: { onNext: () => void }) => {
           <TouchableOpacity
             onPress={pickAndUploadPDF}
             style={{
-              backgroundColor: theme.primary,
+              backgroundColor: theme.colors.primary,
               paddingVertical: 14,
               paddingHorizontal: 25,
               borderRadius: 30,
@@ -151,7 +151,7 @@ const OnboardingHealthReport = ({ onNext }: { onNext: () => void }) => {
       <TouchableOpacity
         onPress={onNext}
         style={{
-          backgroundColor: uploadedUrl ? theme.primary : "#aaa",
+          backgroundColor: uploadedUrl ? theme.colors.primary : "#aaa",
           paddingVertical: 14,
           borderRadius: 30,
           alignItems: "center",
@@ -165,7 +165,7 @@ const OnboardingHealthReport = ({ onNext }: { onNext: () => void }) => {
       {/* Snackbar */}
       <CustomSnackbar
         visible={snackbarVisible}
-        bgColor={theme.colors.red}
+        bgColor={theme.colors.error}
         message={snackbarMessage}
         onDismiss={() => setSnackbarVisible(false)}
       />

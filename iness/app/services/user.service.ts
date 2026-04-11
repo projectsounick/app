@@ -243,6 +243,8 @@ async function initDbConnection(): Promise<ApiResponseInterface> {
     return {
       success: false,
       message: error?.message || "Failed to initialize database connection",
+      statusCode: 500,
+      data: null,
     };
   }
 }

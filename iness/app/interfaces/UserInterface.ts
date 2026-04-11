@@ -21,6 +21,7 @@ interface UserData {
     lastSyncedSleepDate?: Date | null;
   };
   phoneNumber: string;
+  email?: string;
   assignedCoupons: string[];
   _id: string;
   healthReport?: string;

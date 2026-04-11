@@ -1,4 +1,3 @@
-import { BottomSheetModal } from "@gorhom/bottom-sheet";
 import { RefObject } from "react";
 
 // interfaces/categoryInterface.ts
@@ -63,6 +62,6 @@ export interface ProductFormValues {
 export interface ProductBottomSheetProps {
   selectedProduct: Product;
   bgColor: string;
-  bottomSheetRef: RefObject<BottomSheetModal>; // Replace with appropriate type if using another sheet
+  bottomSheetRef: RefObject<unknown>;
   onClose: () => void;
 }

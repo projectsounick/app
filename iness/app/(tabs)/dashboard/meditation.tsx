@@ -35,6 +35,7 @@ const responsiveHeight = (size: number) => size * verticalScale;
 const responsiveSpacing = (size: number) => size * Math.min(scale, 1.1);
 
 type MeditationType = "timer" | "breathing" | "guided";
+type GradientColors = readonly [string, string, ...string[]];
 
 interface MeditationSession {
   id: string;
@@ -42,8 +43,22 @@ interface MeditationSession {
   duration: number; // in minutes
   description: string;
   icon: string;
-  color: string[];
+  color: GradientColors;
   info?: string;
+}
+
+interface BreathingPattern {
+  id: string;
+  name: string;
+  pattern: string;
+  description: string;
+  inhale: number;
+  hold?: number;
+  exhale: number;
+  pause?: number;
+  color: GradientColors;
+  info: string;
+  link: string;
 }
 
 const meditationSessions: MeditationSession[] = [
@@ -85,7 +100,7 @@ const meditationSessions: MeditationSession[] = [
   },
 ];
 
-const breathingPatterns = [
+const breathingPatterns: BreathingPattern[] = [
   {
     id: "1",
     name: "4-7-8 Breathing",
@@ -140,8 +155,8 @@ export default function MeditationScreen() {
 
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const breathingScale = useRef(new Animated.Value(1)).current;
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const breathingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const breathingIntervalRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (isActive && selectedType === "timer") {

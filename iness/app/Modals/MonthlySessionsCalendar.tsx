@@ -15,6 +15,7 @@ import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 import { Calendar } from "react-native-calendars";
 import { fetchWrapper } from "@/app/helpers/fetchWrapper";
 import { config } from "@/app/shared/config";
+import SessionHealthOverview from "@/app/modules/SessionHealthOverview";
 
 const baseUrl = `${config.apiUrl}/api`;
 const { height } = Dimensions.get("window");
@@ -348,7 +349,7 @@ export default function MonthlySessionsCalendar({
                   textSectionTitleColor: theme.colors.textMuted,
                   textMonthFontFamily: theme.fonts.bold,
                   textDayFontFamily: theme.fonts.regular,
-                  textDayHeaderFontFamily: theme.fonts.semiBold,
+                  textDayHeaderFontFamily: theme.fonts.medium,
                   'stylesheet.calendar.header': {
                     header: {
                       flexDirection: 'row',
@@ -361,7 +362,7 @@ export default function MonthlySessionsCalendar({
                       opacity: 0,
                     },
                   },
-                }}
+                } as any}
               />
 
               {/* Sessions for selected date */}
@@ -426,6 +427,11 @@ export default function MonthlySessionsCalendar({
                         {sessionDetails.userDetails?.email || ""}
                       </Text>
                     </View>
+
+                    <SessionHealthOverview
+                      userId={sessionDetails.userDetails?._id || sessionDetails.userId}
+                      userDetails={sessionDetails.userDetails}
+                    />
 
                     {/* Session Info */}
                     <View style={styles.detailsSection}>

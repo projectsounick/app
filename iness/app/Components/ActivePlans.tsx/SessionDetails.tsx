@@ -641,11 +641,13 @@ const TabbedSessionDetails = ({
 
   // Auto-open modal when workout tab is selected
   useEffect(() => {
-    if (activeTab === "workout" && selectedSession?.workouts?.length > 0) {
+    const workouts = selectedSession?.workouts ?? [];
+
+    if (activeTab === "workout" && workouts.length > 0) {
       setWorkoutModalVisible(true);
-      setSelectedWorkout(selectedSession.workouts[0]);
+      setSelectedWorkout(workouts[0]);
     }
-  }, [activeTab, selectedSession?.workouts]);
+  }, [activeTab, selectedSession]);
 
   const renderWorkoutTab = () => {
 

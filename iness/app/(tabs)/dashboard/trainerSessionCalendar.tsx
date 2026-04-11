@@ -184,20 +184,9 @@ function TrainerSessionCalendar() {
 
   const fetchSessions = async () => {
     try {
-      const currentDate = new Date();
-      const startDate = new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1);
-      const endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 2, 0);
-
-      const formatDate = (date: Date) => {
-        const year = date.getFullYear();
-        const month = (date.getMonth() + 1).toString().padStart(2, "0");
-        const day = date.getDate().toString().padStart(2, "0");
-        return `${year}-${month}-${day}T00:00:00.000Z`;
-      };
-
-      const response = await fetchWrapper.get(
-        `${baseUrl}/get-sessions?id=${userId}&startDate=${formatDate(startDate)}&endDate=${formatDate(endDate)}`
-      );
+      // Load the full session history for this user so the header count and
+      // session list do not incorrectly reflect only a rolling date window.
+      const response = await fetchWrapper.get(`${baseUrl}/get-sessions?id=${userId}`);
       if (response.success) {
         console.log("=== Fetched Sessions ===");
         console.log("Total sessions from API:", response.data?.length || 0);
@@ -479,11 +468,16 @@ function TrainerSessionCalendar() {
 
     for (const item of sessionItems) {
       console.log("Checking session for date:", formatDate(item.sessionDate));
+      console.log("- Trainer:", item.trainerId);
       console.log("- Time:", item.sessionTime);
       console.log("- Duration:", item.sessionDuration);
       console.log("- Type:", item.sessionType);
       console.log("- Address:", item.sessionAddress);
 
+      if (!item.trainerId) {
+        Alert.alert("Error", "Please select a trainer for all selected dates");
+        return;
+      }
       if (!item.sessionTime) {
         Alert.alert("Error", "Please select session time for all selected dates");
         return;
@@ -1947,42 +1941,6 @@ const getStyles = (theme: any, isDark: boolean) =>
       fontSize: theme.fontSizes.regular,
       fontWeight: theme.fontWeights.medium as "500",
       color: theme.colors.text,
-    },
-    sessionFormCard: {
-      backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.background,
-      borderRadius: 16,
-      padding: 16,
-      marginTop: 16,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
-    },
-    sessionFormTitle: {
-      fontSize: theme.fontSizes.medium,
-      fontWeight: theme.fontWeights.bold as "700",
-      color: theme.colors.text,
-      marginBottom: 8,
-    },
-    workoutHeader: {
-      flexDirection: "row",
-      alignItems: "center",
-      justifyContent: "space-between",
-      marginTop: 8,
-    },
-    addWorkoutButton: {
-      width: 32,
-      height: 32,
-      borderRadius: 16,
-      backgroundColor: theme.colors.text,
-      alignItems: "center",
-      justifyContent: "center",
-    },
-    workoutItem: {
-      backgroundColor: isDark ? theme.colors.background : theme.colors.backgroundCardLight,
-      borderRadius: 12,
-      padding: 12,
-      marginTop: 12,
-      borderWidth: 1,
-      borderColor: theme.colors.border,
     },
     workoutItemHeader: {
       flexDirection: "row",

@@ -1,15 +1,33 @@
+type UploadProgressCallback = (progressPercent: number) => void;
+
 export const uploadToAzureFromExpo = async (
   fileUri: string,
   fileName: string,
   sasToken: string,
   storageAccountName: string,
   containerName: string,
-  folderName: string
+  folderName: string,
+  onProgress?: UploadProgressCallback
 ): Promise<string> => {
   const blobUrl = `https://${storageAccountName}.blob.core.windows.net/${containerName}/${folderName}/${fileName}?${sasToken}`;
+  let reportedProgress = 0;
+  const reportProgress = (progress: number) => {
+    if (!onProgress) return;
+    const safeProgress = Math.max(0, Math.min(100, progress));
+    if (safeProgress < reportedProgress) {
+      return;
+    }
 
+    reportedProgress = safeProgress;
+    onProgress(Math.round(safeProgress));
+  };
+
+  // Surface immediate feedback while the local asset is being prepared.
+  reportProgress(2);
   const file = await fetch(fileUri);
+  reportProgress(8);
   const fileBlob = await file.blob();
+  reportProgress(12);
 
   // Determine if this is a video file
   const isVideo = fileBlob.type.startsWith('video/') || fileName.endsWith('.mp4');
@@ -28,14 +46,70 @@ export const uploadToAzureFromExpo = async (
     headers["x-ms-access-tier"] = "Hot";
   }
 
-  const response = await fetch(blobUrl, {
-    method: "PUT",
-    headers,
-    body: fileBlob,
+  const response = await new Promise<XMLHttpRequest>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    let fallbackProgress = 12;
+    let fallbackTimer: ReturnType<typeof setInterval> | null = null;
+    xhr.open("PUT", blobUrl);
+
+    Object.entries(headers).forEach(([key, value]) => {
+      xhr.setRequestHeader(key, value);
+    });
+
+    const clearFallbackTimer = () => {
+      if (fallbackTimer) {
+        clearInterval(fallbackTimer);
+        fallbackTimer = null;
+      }
+    };
+
+    fallbackTimer = setInterval(() => {
+      if (fallbackProgress >= 92) {
+        clearFallbackTimer();
+        return;
+      }
+
+      if (fallbackProgress < 45) {
+        fallbackProgress += 1.4;
+      } else if (fallbackProgress < 75) {
+        fallbackProgress += 0.9;
+      } else {
+        fallbackProgress += 0.35;
+      }
+
+      reportProgress(Math.min(fallbackProgress, 92));
+    }, 450);
+
+    xhr.upload.onprogress = (event) => {
+      if (!event.lengthComputable || event.total <= 0) {
+        return;
+      }
+
+      // Reserve the first 12% for local file preparation so the UI doesn't
+      // sit at 0 while Expo reads the asset into a blob.
+      const uploadProgress = event.loaded / event.total;
+      const actualProgress = 12 + uploadProgress * 88;
+      fallbackProgress = Math.max(fallbackProgress, actualProgress);
+      reportProgress(actualProgress);
+    };
+
+    xhr.onload = () => {
+      clearFallbackTimer();
+      resolve(xhr);
+    };
+    xhr.onerror = () => {
+      clearFallbackTimer();
+      reject(new Error("Network error during Azure upload"));
+    };
+    xhr.onabort = () => {
+      clearFallbackTimer();
+      reject(new Error("Azure upload was aborted"));
+    };
+    xhr.send(fileBlob);
   });
 
-  if (!response.ok) {
-    const errorText = await response.text();
+  if (response.status < 200 || response.status >= 300) {
+    const errorText = response.responseText;
     console.error('Azure upload failed:', {
       status: response.status,
       statusText: response.statusText,
@@ -46,5 +120,6 @@ export const uploadToAzureFromExpo = async (
     throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
   }
 
+  reportProgress(100);
   return blobUrl.split("?")[0]; // Return public blob URL without token
 };

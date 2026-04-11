@@ -10,10 +10,13 @@ import {
   Pressable,
   TouchableWithoutFeedback,
   StyleSheet,
+  Platform,
 } from "react-native";
 import { Product } from "@/app/interfaces/ecommerceInterface";
 import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import * as NavigationBar from "expo-navigation-bar";
+import SystemNavigationBar from "react-native-system-navigation-bar";
 import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
 import { cartService } from "@/app/services/cart.service";
 import { addToCart } from "@/Slices/cartSlice";
