@@ -22,6 +22,7 @@ const WorkoutPlanScreen = () => {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
   const currentPlan = useSelector((state: RootState) => state.plan.currentPlan);
+  const plans = useSelector((state: RootState) => state.plan.plans);
   const cartItems = useSelector((state: RootState) => state.cart.cartItems);
   const [cartLoading, setCardLoading] = useState(false);
   const [bottomSectionHeight, setBottomSectionHeight] = React.useState(0);
@@ -32,6 +33,15 @@ const WorkoutPlanScreen = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const dispatch = useDispatch();
+
+  const resolvedCurrentPlan = React.useMemo(() => {
+    if (!currentPlan?.planType || !currentPlan?._id) {
+      return currentPlan;
+    }
+
+    const latestPlan = plans.find((plan) => plan._id === currentPlan._id);
+    return latestPlan || currentPlan;
+  }, [currentPlan, plans]);
 
   //// Funciton for adding to the cart ---------------------------------/
   const addingIntoToCart = async (type: string) => {
@@ -47,7 +57,7 @@ const WorkoutPlanScreen = () => {
       const alreadyExistsInCart = isProductAddableToCart(
         cartItems,
         selectedPlanItem,
-        currentPlan?._id
+        resolvedCurrentPlan?._id
       );
       if (alreadyExistsInCart) {
         setSnackbarOpen(true);
@@ -56,7 +66,7 @@ const WorkoutPlanScreen = () => {
       }
 
       const updatedCartItem = convertToCartItem(
-        currentPlan,
+        resolvedCurrentPlan,
         type,
         selectedPlanItem
       );
@@ -113,16 +123,16 @@ const WorkoutPlanScreen = () => {
           title="Overview"
           bottomComponent={
             <HeaderContent
-              title={currentPlan ? currentPlan?.planType?.title : "Diet Plan"}
-              subtitle={currentPlan?.title ? currentPlan.title : ""}
+                  title={resolvedCurrentPlan ? resolvedCurrentPlan?.planType?.title : "Diet Plan"}
+              subtitle={resolvedCurrentPlan?.title ? resolvedCurrentPlan.title : ""}
             />
           }
         />
-        {currentPlan?.planType ? (
+        {resolvedCurrentPlan?.planType ? (
           <PlansInfo
             screenWidth={screenWidth}
             cartLoading={cartLoading}
-            currentPlan={currentPlan}
+            currentPlan={resolvedCurrentPlan}
             selectedPlanItem={selectedPlanItem}
             setSelectedPlanItem={setSelectedPlanItem}
             setBottomSectionHeight={setBottomSectionHeight}
@@ -135,7 +145,7 @@ const WorkoutPlanScreen = () => {
             screenWidth={screenWidth}
             showBottomBar={true}
             cartLoading={cartLoading}
-            currentPlan={currentPlan}
+            currentPlan={resolvedCurrentPlan}
             selectedPlanItem={selectedPlanItem}
             setSelectedPlanItem={setSelectedPlanItem}
             setBottomSectionHeight={setBottomSectionHeight}
@@ -166,16 +176,16 @@ const WorkoutPlanScreen = () => {
               title="Overview"
               bottomComponent={
                 <HeaderContent
-                  title={currentPlan ? currentPlan?.planType?.title : "Diet Plan"}
-                  subtitle={currentPlan?.title ? currentPlan.title : ""}
+                  title={resolvedCurrentPlan ? resolvedCurrentPlan?.planType?.title : "Diet Plan"}
+                  subtitle={resolvedCurrentPlan?.title ? resolvedCurrentPlan.title : ""}
                 />
               }
             />
-            {currentPlan?.planType ? (
+            {resolvedCurrentPlan?.planType ? (
               <PlansInfo
                 screenWidth={screenWidth}
                 cartLoading={cartLoading}
-                currentPlan={currentPlan}
+                currentPlan={resolvedCurrentPlan}
                 selectedPlanItem={selectedPlanItem}
                 setSelectedPlanItem={setSelectedPlanItem}
                 setBottomSectionHeight={setBottomSectionHeight}
@@ -188,7 +198,7 @@ const WorkoutPlanScreen = () => {
                 screenWidth={screenWidth}
                 showBottomBar={true}
                 cartLoading={cartLoading}
-                currentPlan={currentPlan}
+                currentPlan={resolvedCurrentPlan}
                 selectedPlanItem={selectedPlanItem}
                 setSelectedPlanItem={setSelectedPlanItem}
                 setBottomSectionHeight={setBottomSectionHeight}

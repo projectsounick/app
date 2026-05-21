@@ -21,6 +21,21 @@ export const usePendingNavigation = (loading: boolean) => {
   const navigationHandledRef = useRef(false);
 
   useEffect(() => {
+    const isDashboardHome =
+      pathname === "/dashboard/tabs" ||
+      pathname === "/(tabs)/dashboard/tabs" ||
+      pathname?.endsWith("/tabs/index") ||
+      pathname?.endsWith("/tabs");
+
+    // If the user already switched away from Home, don't let delayed
+    // startup navigation pull them back to the default tab.
+    if (!isDashboardHome) {
+      navigationHandledRef.current = true;
+      clearPendingNavigation();
+      setNavigationProcessing(false);
+      return;
+    }
+
     // Early return checks
     if (loading) return; // Wait for loading
     if (navigationHandledRef.current) return; // Already handled

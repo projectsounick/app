@@ -22,5 +22,6 @@ interface ChatMessageBubbleProps {
   index: any;
   setSelectedImage: (type: string) => void;
   setImageModalVisible: (type: boolean) => void;
+  viewerRole?: string;
 }
 export type { ChatMessage, SupportChat, ChatMessageBubbleProps };

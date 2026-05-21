@@ -69,17 +69,17 @@ const OTPInputScreen = () => {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      let userAsyncStorageResponse =
-        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+      let pendingLoginResponse =
+        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("pendingLogin");
 
-      //// Check if the phone number exists in AsyncStorage
+      //// Check if the pending login data exists in AsyncStorage
       if (
-        !userAsyncStorageResponse ||
-        userAsyncStorageResponse.exists === false
+        !pendingLoginResponse ||
+        pendingLoginResponse.exists === false
       ) {
         setLoading(false);
         setSnackbarVisible(true);
-        setSnackbarMessage("Phone number not found. Please try again.");
+        setSnackbarMessage("Login session expired. Please request OTP again.");
         return;
       }
 
@@ -96,36 +96,33 @@ const OTPInputScreen = () => {
         const pushToken = await registerForPushNotificationsAsync();
 
         let requestBody = {
-          email: userAsyncStorageResponse.data.email,
+          email: pendingLoginResponse.data.email,
           otp: fullOtp,
           expoPushToken: pushToken,
         };
 
-        // Keep loading true throughout the entire process
-        const [response, dietPlanResponse] = await Promise.all([
-          callService(requestBody),
-          userService.getActiveDietPlans(),
-        ]);
+        const response = await callService(requestBody);
 
         // Ensure loading stays true after callService (which sets it to false in its finally block)
         setLoading(true);
 
-        try {
-          if (dietPlanResponse.success && dietPlanResponse.data) {
-            let dietPlanUrls = dietPlanResponse.data
-              .filter((elem: any) => elem.dietPlanUrl) // keeps only truthy values
-              .map((elem: any) => elem.dietPlanUrl);
-            await asyncStorageUtils.storeDataInAsyncStorage(
-              dietPlanUrls,
-              "dietplans"
-            );
-          }
-        } catch (error) {}
-        /// Getting all the active diet plan url of that user --------------------/
-
         if (response?.success) {
           /// Store user data in AsyncStorage
           await asyncStorageUtils.storeUserInAsyncStorage(response.data);
+          await asyncStorageUtils.removeKeyFromAsyncStorage("pendingLogin");
+
+          try {
+            const dietPlanResponse = await userService.getActiveDietPlans();
+            if (dietPlanResponse.success && dietPlanResponse.data) {
+              let dietPlanUrls = dietPlanResponse.data
+                .filter((elem: any) => elem.dietPlanUrl)
+                .map((elem: any) => elem.dietPlanUrl);
+              await asyncStorageUtils.storeDataInAsyncStorage(
+                dietPlanUrls,
+                "dietplans"
+              );
+            }
+          } catch (error) {}
 
           // Reload theme from user data immediately after login to prevent flicker
           // This ensures theme is set correctly before navigation
@@ -164,13 +161,15 @@ const OTPInputScreen = () => {
         } else {
           setLoading(false);
           setSnackbarVisible(true);
-          setSnackbarMessage("Invalid OTP. Please try again.");
+          setSnackbarMessage(response?.message || "Invalid OTP. Please try again.");
         }
-      } catch (error) {
+      } catch (error: any) {
         setLoading(false);
         console.error("Error verifying OTP:", error);
         setSnackbarVisible(true);
-        setSnackbarMessage("Error verifying OTP. Please try again.");
+        setSnackbarMessage(
+          error?.message || "Error verifying OTP. Please try again."
+        );
       }
     } catch (error) {
       setLoading(false);
@@ -182,23 +181,25 @@ const OTPInputScreen = () => {
   const handleResendOtp = async () => {
     try {
       setOtpResendLoading(true);
-      /// Fetching the phone number from AsyncStorage---/
-      const userData =
-        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-      if (!userData || userData.exists === false) {
+      /// Fetching the pending email from AsyncStorage---/
+      const pendingLoginData =
+        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("pendingLogin");
+      if (!pendingLoginData || pendingLoginData.exists === false) {
         setSnackbarVisible(true);
-        setSnackbarMessage("Email not found. Please try again.");
+        setSnackbarMessage("Login session expired. Please request OTP again.");
         return;
       }
-      let response = await callService(userData.data.email);
+      let response = await userService.sendLoginOtp(pendingLoginData.data.email);
 
       if (response?.success) {
         setSnackbarVisible(true);
         setSnackbarMessage("OTP resent successfully!");
       }
-    } catch (error) {
+    } catch (error: any) {
       setSnackbarVisible(true);
-      setSnackbarMessage("Error resending OTP. Please try again.");
+      setSnackbarMessage(
+        error?.message || "Error resending OTP. Please try again."
+      );
     } finally {
       setOtpResendLoading(false);
     }

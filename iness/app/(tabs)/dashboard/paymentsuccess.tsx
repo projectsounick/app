@@ -5,8 +5,6 @@ import {
   Animated,
   TouchableOpacity,
   ImageBackground,
-  Linking,
-  Alert,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -16,7 +14,6 @@ import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import SmallHeader from "@/app/modules/SmallHeader";
 import BackHeader from "@/app/modules/BackHeader";
 import { cartService } from "@/app/services/cart.service";
-import { paymentService } from "@/app/services/payment.service";
 import { planService } from "@/app/services/plan.service";
 import { useDispatch } from "react-redux";
 import { setActivePlans } from "@/Slices/planSlice";
@@ -35,7 +32,6 @@ const PaymentSuccessScreen = () => {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "warning" | "info">("info");
   const [loading, setLoading] = useState(false);
-  const [recEiptLoading, setReceiptLoading] = useState(false);
   useEffect(() => {
     fetchOrderStatus();
     Animated.parallel([
@@ -63,29 +59,17 @@ const PaymentSuccessScreen = () => {
   async function fetchOrderStatus() {
     try {
       setLoading(true);
-      
-      // First check if there's an error message from order placement
-      const paymentError = await AsyncStorage.getItem("paymentError");
-      
-      if (paymentError) {
-        // Show the error message from order placement
-        setMessage(paymentError);
-        setMessageType("error");
-        // Clear the error message after displaying
-        await AsyncStorage.removeItem("paymentError");
-        setLoading(false);
-        return;
-      }
 
-      // Get orderId from AsyncStorage
       const savedOrderId = await AsyncStorage.getItem("currentOrderId");
+      const paymentError = await AsyncStorage.getItem("paymentError");
 
       if (savedOrderId) {
         setOrderId(savedOrderId);
         try {
           const response = await cartService.getOrderStatus(savedOrderId);
+          const resolvedStatus = response?.data?.status || response?.data?.payment?.status;
 
-          if (response.success && response.data.staus === "success") {
+          if (response.success && resolvedStatus === "success") {
             setMessage("Thank you! Payment successful.");
             setMessageType("success");
             const activePlansResp = await planService.getActivePlans();
@@ -94,19 +78,37 @@ const PaymentSuccessScreen = () => {
               dispatch(setActivePlans(activePlansResp.data));
               dispatch(clearCart());
             }
+            await AsyncStorage.removeItem("paymentError");
+          } else if (resolvedStatus === "pending") {
+            setMessage(
+              paymentError ||
+                "Your payment is still pending. If money was debited, please check again in a moment."
+            );
+            setMessageType("warning");
+            await AsyncStorage.removeItem("paymentError");
           } else {
-            // Payment failed / incomplete
-            setMessage("Your payment could not be processed. Please try again.");
+            setMessage(
+              paymentError ||
+                "Your payment could not be processed. Please try again."
+            );
             setMessageType("error");
+            await AsyncStorage.removeItem("paymentError");
           }
         } catch (err) {
-          setMessage("Something went wrong. Please try again later.");
-          setMessageType("error");
+          setMessage(
+            paymentError || "Something went wrong. Please try again later."
+          );
+          setMessageType(paymentError ? "warning" : "error");
+          await AsyncStorage.removeItem("paymentError");
         } finally {
           setLoading(false);
         }
+      } else if (paymentError) {
+        setMessage(paymentError);
+        setMessageType("error");
+        await AsyncStorage.removeItem("paymentError");
+        setLoading(false);
       } else {
-        // No orderId and no error - might be a direct navigation
         setMessage("No payment information found.");
         setMessageType("info");
         setLoading(false);
@@ -115,31 +117,6 @@ const PaymentSuccessScreen = () => {
       setMessage("Unable to process the payment. Please try again.");
       setMessageType("error");
       setLoading(false);
-    }
-  }
-  async function fetchReceipt(orderId: any) {
-    try {
-      setReceiptLoading(true);
-
-      const response = await paymentService.getReciptData(orderId);
-
-      if (response.success && response.receipt) {
-        const supported = await Linking.canOpenURL(response.receipt);
-        if (supported) {
-          await Linking.openURL(response.receipt);
-        } else {
-          Alert.alert("Can't open the receipt link.");
-        }
-      } else {
-        setMessage("Receipt not available.");
-        setMessageType("warning");
-      }
-    } catch (error) {
-      console.error(error);
-      setMessage("Unable to open receipt.");
-      setMessageType("error");
-    } finally {
-      setReceiptLoading(false);
     }
   }
   return (
@@ -273,59 +250,58 @@ const PaymentSuccessScreen = () => {
             {/* Receipt Download Card */}
             {reciptShow ? (
               <TouchableOpacity
-                onPress={() => {
-                  // TODO: Implement actual receipt download
-                  fetchReceipt(orderId);
-                }}
+                onPress={() => router.replace("/(tabs)/dashboard/purchases")}
                 activeOpacity={0.8}
                 style={{
-                  width: "90%",
-                  borderRadius: 20,
+                  width: "100%",
+                  borderRadius: 22,
                   backgroundColor: theme.colors.background,
-                  padding: 20,
+                  paddingVertical: 18,
+                  paddingHorizontal: 18,
                   flexDirection: "row",
                   alignItems: "center",
-                  elevation: 5,
+                  borderWidth: 1,
+                  borderColor: theme.colors.border,
+                  elevation: 4,
                   shadowColor: "#000",
                   shadowOffset: { width: 0, height: 2 },
-                  shadowOpacity: 0.1,
+                  shadowOpacity: 0.08,
                   shadowRadius: 6,
                 }}
               >
-                {recEiptLoading ? (
-                  <View
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                  >
-                    <ActivityIndicator color="#9747FF" />
-                  </View>
-                ) : (
-                  <View
-                    style={{
-                      backgroundColor: theme.colors.greenLight,
-                      borderRadius: 50,
-                      padding: 12,
-                      marginRight: 16,
-                    }}
-                  >
-                    <Text style={{ fontSize: theme.fontSizes.large }}>📄</Text>
-                  </View>
-                )}
+                <View
+                  style={{
+                    width: 52,
+                    height: 52,
+                    backgroundColor: theme.colors.greenLight,
+                    borderRadius: 26,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginRight: 16,
+                  }}
+                >
+                  <Ionicons
+                    name="receipt-outline"
+                    size={24}
+                    color={theme.colors.success}
+                  />
+                </View>
 
-                <View>
+                <View style={{ flex: 1 }}>
                   <Text
                     style={{ fontSize: theme.fontSizes.regular, fontWeight: theme.fontWeights.medium as "500", color: theme.colors.text }}
                   >
-                    Download your receipt
+                    Purchase History
                   </Text>
                   <Text style={{ fontSize: theme.fontSizes.small, color: theme.colors.textSecondary }}>
-                    Tap to get your payment receipt
+                    Open your orders and download the receipt PDF there
                   </Text>
                 </View>
+                <Ionicons
+                  name="chevron-forward"
+                  size={20}
+                  color={theme.colors.textSecondary}
+                />
               </TouchableOpacity>
             ) : null}
           </View>

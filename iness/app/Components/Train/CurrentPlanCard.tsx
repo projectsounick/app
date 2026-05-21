@@ -3,8 +3,8 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Image,
   ImageBackground,
+  ImageSourcePropType,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -16,7 +16,7 @@ interface PlanCardProps {
   id?: string;
   title?: string;
   descItems?: string[];
-  imgUrl?: string | null;
+  imgUrl?: string | ImageSourcePropType | null;
   isActive: boolean;
   type?: "plan" | "diet" | "manual" | "service";
   manualDescription?: string;
@@ -40,6 +40,15 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
   const theme = useGlobalTheme();
   const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
+  const resolvedDescriptionItems =
+    type === "manual" && manualDescription
+      ? [manualDescription, ...descItems].filter(Boolean).slice(0, 2)
+      : descItems.slice(0, 2);
+
+  const resolvedImageSource =
+    typeof imgUrl === "string"
+      ? { uri: imgUrl }
+      : imgUrl || require("../../../assets/images/track.png");
 
   const handlePress = () => {
     if (type === "manual") {
@@ -68,7 +77,9 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
   };
 
   return (
-    <View
+    <TouchableOpacity
+      activeOpacity={0.92}
+      onPress={handlePress}
       style={{
         borderRadius: 16,
         marginVertical: 8,
@@ -83,106 +94,137 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
         borderColor: theme.colors.border,
       }}
     >
-      {/* For manual, show static image on right. For normal, use background */}
-      {type !== "manual" ? (
-        <View style={{ flexDirection: "row" }}>
-          {/* Image Section */}
-          <ImageBackground
-            source={
-              imgUrl
-                ? { uri: imgUrl }
-                : require("../../../assets/images/track.png")
-            }
-            style={{
-              width: 140,
-              height: 200,
-            }}
-            resizeMode="cover"
-          >
-            <LinearGradient
-              colors={["rgba(0,0,0,0.3)", "rgba(0,0,0,0.1)"]}
-              style={{
-                flex: 1,
-              }}
-            />
-          </ImageBackground>
-
-          {/* Content Section */}
-          <View
+      <View style={{ flexDirection: "row" }}>
+        <ImageBackground
+          source={resolvedImageSource}
+          style={{
+            width: 140,
+            height: 200,
+          }}
+          resizeMode="cover"
+        >
+          <LinearGradient
+            colors={["rgba(0,0,0,0.2)", "rgba(0,0,0,0.45)"]}
             style={{
               flex: 1,
-              padding: 16,
+              justifyContent: "space-between",
+              padding: 14,
+            }}
+          >
+            {type === "manual" ? (
+              <>
+                <View
+                  style={{
+                    alignSelf: "flex-start",
+                    backgroundColor: "rgba(255,255,255,0.18)",
+                    paddingHorizontal: 10,
+                    paddingVertical: 6,
+                    borderRadius: 999,
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: theme.colors.textWhite,
+                      fontSize: theme.fontSizes.small,
+                      fontWeight: theme.fontWeights.bold as "700",
+                    }}
+                  >
+                    Workout Plan
+                  </Text>
+                </View>
+                <Text
+                  style={{
+                    color: theme.colors.textWhite,
+                    fontSize: theme.fontSizes.small,
+                    fontWeight: theme.fontWeights.medium as "500",
+                  }}
+                >
+                  Full daily details
+                </Text>
+              </>
+            ) : null}
+          </LinearGradient>
+        </ImageBackground>
+
+        <View
+          style={{
+            flex: 1,
+            padding: 16,
+            justifyContent: "space-between",
+          }}
+        >
+          <View>
+            <Text
+              style={{
+                fontSize: theme.fontSizes.regular,
+                marginBottom: 10,
+                color: theme.colors.text,
+                fontWeight: theme.fontWeights.bold as "700",
+              }}
+              numberOfLines={2}
+              ellipsizeMode="tail"
+            >
+              {title || "Untitled Plan"}
+            </Text>
+
+            <View>
+              {resolvedDescriptionItems.length > 0 ? (
+                resolvedDescriptionItems.map((item, idx) => (
+                  <View
+                    key={idx}
+                    style={{
+                      flexDirection: "row",
+                      alignItems: "flex-start",
+                      marginBottom: 6,
+                    }}
+                  >
+                    <View
+                      style={{
+                        width: 6,
+                        height: 6,
+                        borderRadius: 3,
+                        backgroundColor: theme.colors.success,
+                        marginRight: 8,
+                        marginTop: 5,
+                      }}
+                    />
+                    <Text
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
+                      style={{
+                        fontSize: theme.fontSizes.small,
+                        color: theme.colors.textSecondary,
+                        flex: 1,
+                        fontWeight: "400",
+                        lineHeight: 16,
+                      }}
+                    >
+                      {item}
+                    </Text>
+                  </View>
+                ))
+              ) : (
+                <Text
+                  style={{
+                    fontSize: theme.fontSizes.small,
+                    color: theme.colors.textMuted,
+                    lineHeight: 16,
+                    fontWeight: "400",
+                  }}
+                >
+                  No description available.
+                </Text>
+              )}
+            </View>
+          </View>
+
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
               justifyContent: "space-between",
             }}
           >
-            <View>
-              {/* Title */}
-              <Text
-                style={{
-                  fontSize: theme.fontSizes.regular,
-                  marginBottom: 10,
-                  color: theme.colors.text,
-                  fontWeight: theme.fontWeights.bold as "700",
-                }}
-                numberOfLines={2}
-                ellipsizeMode="tail"
-              >
-                {title || "Untitled Plan"}
-              </Text>
-
-              {/* Description - Show only 2 items */}
-              <View>
-                {descItems.length > 0 ? (
-                  descItems.slice(0, 2).map((item, idx) => (
-                    <View
-                      key={idx}
-                      style={{
-                        flexDirection: "row",
-                        alignItems: "flex-start",
-                        marginBottom: 6,
-                      }}
-                    >
-                      <View
-                        style={{
-                          width: 6,
-                          height: 6,
-                          borderRadius: 3,
-                          backgroundColor: theme.colors.secondPrimary,
-                          marginRight: 8,
-                          marginTop: 5,
-                        }}
-                      />
-                      <Text
-                        numberOfLines={2}
-                        ellipsizeMode="tail"
-                        style={{
-                          fontSize: theme.fontSizes.small,
-                          color: theme.colors.textSecondary,
-                          flex: 1,
-                          fontWeight: "400",
-                          lineHeight: 16,
-                        }}
-                      >
-                        {item}
-                      </Text>
-                    </View>
-                  ))
-                ) : (
-                  <Text
-                    style={{
-                      fontSize: theme.fontSizes.small,
-                      color: theme.colors.textMuted,
-                      lineHeight: 16,
-                      fontWeight: "400",
-                    }}
-                  >
-                    No description available.
-                  </Text>
-                )}
-              </View>
-            </View>
-
-            {/* Button */}
             <TouchableOpacity
               style={{
                 backgroundColor: theme.colors.success,
@@ -205,78 +247,27 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
                   fontSize: theme.fontSizes.regularSmall,
                 }}
               >
-                {isActive ? "Continue" : "Check"}
+                {type === "manual"
+                  ? "View details"
+                  : isActive
+                    ? "Continue"
+                    : "Check"}
               </Text>
             </TouchableOpacity>
-          </View>
-        </View>
-      ) : (
-        <View
-          style={{
-            flexDirection: "row",
-            padding: 16,
-            alignItems: "center",
-          }}
-        >
-          <View style={{ flex: 1 }}>
-            <Text
-              style={{
-                fontSize: theme.fontSizes.regular,
-                fontWeight: theme.fontWeights.bold as "700",
-                marginBottom: 6,
-                color: theme.colors.text,
-              }}
-              numberOfLines={1}
-            >
-              {title || "Custom Plan"}
-            </Text>
 
-            <Text
-              style={{
-                fontSize: theme.fontSizes.regularSmall,
-                color: theme.colors.textSecondary,
-                lineHeight: 18,
-              }}
-              numberOfLines={2}
-              ellipsizeMode="tail"
-            >
-              {manualDescription || "No description"}
-            </Text>
-
-            <TouchableOpacity
-              style={{
-                backgroundColor: theme.colors.success,
-                paddingVertical: 8,
-                paddingHorizontal: 20,
-                borderRadius: 30,
-                alignSelf: "flex-start",
-                marginTop: 10,
-                shadowColor: theme.colors.success,
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: 0.3,
-                shadowRadius: 4,
-                elevation: 3,
-              }}
-              onPress={handlePress}
-            >
-              <Text style={{ color: theme.colors.textWhite, fontWeight: theme.fontWeights.bold as "700", fontSize: theme.fontSizes.regularSmall }}>
-                Continue
+            {type === "manual" ? (
+              <Text
+                style={{
+                  color: theme.colors.textMuted,
+                  fontSize: theme.fontSizes.small,
+                }}
+              >
+                Tap card
               </Text>
-            </TouchableOpacity>
+            ) : null}
           </View>
-
-          <Image
-            source={require("../../../assets/images/track.png")}
-            style={{
-              width: 90,
-              height: 110,
-              resizeMode: "cover",
-              marginLeft: 12,
-              borderRadius: 12,
-            }}
-          />
         </View>
-      )}
+      </View>
 
       {/* Diet Plan Modal */}
       {type === "diet" && (
@@ -288,7 +279,7 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
           dietPlanAssignDate={dietPlanAssignDate}
         />
       )}
-    </View>
+    </TouchableOpacity>
   );
 };
 

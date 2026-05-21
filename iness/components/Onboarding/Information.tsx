@@ -10,7 +10,6 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import { useGlobalTheme } from "@/app/Theme/ThemeContext";
 
 const { height } = Dimensions.get("window");
@@ -45,7 +44,6 @@ export default function OnboardingInfoModal({
 }: Props) {
   const theme = useGlobalTheme();
   const slideAnim = useRef(new Animated.Value(height)).current;
-  const router = useRouter();
 
   useEffect(() => {
     if (showIntroModal) {
@@ -70,7 +68,6 @@ export default function OnboardingInfoModal({
 
   const handleSkip = () => {
     setShowIntroModal(false);
-    router.push("/secondsplashscreen");
   };
 
   const styles = getStyles(theme);

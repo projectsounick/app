@@ -33,9 +33,13 @@ export default function TrainerChatScreen() {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
   const params = useLocalSearchParams();
-  const userId = params.userId as string;
-  const userName = params.userName as string;
+  const userId = params.userId as string | undefined;
+  const userName = params.userName as string | undefined;
+  const trainerId = params.trainerId as string | undefined;
+  const trainerName = params.trainerName as string | undefined;
+  const routeChatId = params.chatId as string | undefined;
   const [chatId, setChatId] = useState<string>("");
+  const [chatTitle, setChatTitle] = useState<string>("User");
   const [currentUserRole, setCurrentUserRole] = useState<string>("trainer");
   const [inputText, setInputText] = useState("");
   const [remountKey, setRemountKey] = useState(0);
@@ -50,29 +54,54 @@ export default function TrainerChatScreen() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const headerOpacity = useRef(new Animated.Value(0)).current;
 
-  // Initialize chat for trainer/admin
+  // Initialize chat for both trainer/admin and user entry points
   useEffect(() => {
     const initChat = async () => {
       try {
         setLoading(true);
         const userCheck = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
         if (userCheck.exists && userCheck.data) {
-          setCurrentUserRole(userCheck.data.role || "trainer");
+          const loggedInRole = userCheck.data.role || "trainer";
+          const loggedInUserId = userCheck.data._id;
+          setCurrentUserRole(loggedInRole);
 
-          // Create chatId as userId-trainerId
-          const generatedChatId = `${userId}-${userCheck.data._id}`;
+          let generatedChatId = "";
+          let resolvedTitle = "User";
+
+          if (loggedInRole === "user") {
+            generatedChatId =
+              routeChatId ||
+              (trainerId ? `${loggedInUserId}-${trainerId}` : "");
+            resolvedTitle = trainerName || userName || "Trainer";
+          } else {
+            const resolvedTrainerId =
+              loggedInRole === "admin" && trainerId ? trainerId : loggedInUserId;
+            generatedChatId =
+              routeChatId ||
+              (userId ? `${userId}-${resolvedTrainerId}` : "");
+            resolvedTitle = userName || trainerName || "User";
+          }
+
+          if (!generatedChatId) {
+            throw new Error("Chat could not be initialized");
+          }
+
           console.log("=== INIT CHAT ===");
           console.log("Generated ChatId:", generatedChatId);
           console.log("User Id from params:", userId);
+          console.log("Trainer Id from params:", trainerId);
           console.log("Trainer Id from storage:", userCheck.data._id);
-          console.log("User role:", userCheck.data.role);
+          console.log("User role:", loggedInRole);
           setChatId(generatedChatId);
+          setChatTitle(resolvedTitle);
 
           // Get chat messages (will return empty array if chat doesn't exist yet)
           const response = await chatService.getTrainerChat(generatedChatId);
           console.log("Get Chat Response:", response);
           if (response.success) {
             setData(response.data || []);
+          } else {
+            setData([]);
           }
         }
       } catch (error) {
@@ -90,10 +119,14 @@ export default function TrainerChatScreen() {
       }
     };
 
-    if (userId) {
+    if (userId || trainerId || routeChatId) {
       initChat();
+    } else {
+      setLoading(false);
+      setSnackbarMessage("Chat details are missing");
+      setSnackbarVisible(true);
     }
-  }, [userId]);
+  }, [routeChatId, trainerId, trainerName, userId, userName]);
 
   //// Function for sending the message to the trainer ------------------------/
   const handleSend = async () => {
@@ -260,7 +293,7 @@ export default function TrainerChatScreen() {
               <Ionicons name="person" size={20} color={theme.colors.textWhite} />
             </View>
             <View style={styles.headerTextContainer}>
-              <Text style={styles.headerTitle}>{userName || "User"}</Text>
+              <Text style={styles.headerTitle}>{chatTitle || "User"}</Text>
               <Text style={styles.headerSubtitle}>Chat Conversation</Text>
             </View>
           </View>
@@ -310,7 +343,7 @@ export default function TrainerChatScreen() {
                 </View>
                 <Text style={styles.emptyTitle}>No messages yet</Text>
                 <Text style={styles.emptySubtitle}>
-                  Start a conversation with {userName || "this user"}
+                  Start a conversation with {chatTitle || "this user"}
                 </Text>
               </View>
             }

@@ -313,7 +313,22 @@ const SecondSplashScreen = () => {
 
             // Navigate after all animations
             const totalAnimationTime = FULL_TEXT.length * LETTER_DELAY + 800;
-            setTimeout(() => {
+            setTimeout(async () => {
+              const hasSession =
+                await asyncStorageUtils.hasAuthenticatedUserSession();
+              const userResponse =
+                await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+
+              if (!hasSession || !userResponse.exists) {
+                router.replace("/");
+                return;
+              }
+
+              if (userResponse.exists && userResponse.data?.onboarding === false) {
+                router.replace("/Onboarding");
+                return;
+              }
+
               router.replace("/(tabs)/dashboard/tabs");
             }, totalAnimationTime);
           }, 400); // Small delay before letters start

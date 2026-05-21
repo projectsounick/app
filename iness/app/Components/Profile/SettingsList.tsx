@@ -32,17 +32,21 @@ export default function SettingsList() {
     getUserRole();
   }, []);
 
+  const dashboardCard =
+    userRole === "trainer" || userRole === "admin"
+      ? {
+          icon: userRole === "admin" ? "shield-checkmark-outline" : "barbell-outline",
+          label: userRole === "admin" ? "Admin Dashboard" : "Trainer Dashboard",
+          helper:
+            userRole === "admin"
+              ? "Review operations, track activity, and move into your management workspace quickly."
+              : "Open your workspace to manage members, sessions, and follow-ups without digging through tabs.",
+          badge: userRole === "admin" ? "Admin Access" : "Trainer Access",
+          onPress: handleDashboard,
+        }
+      : null;
+
   const settings = [
-    // Dashboard option for trainers and admins
-    ...(userRole === "trainer" || userRole === "admin"
-      ? [
-          {
-            icon: "grid-outline",
-            label: "Dashboard",
-            onPress: handleDashboard,
-          },
-        ]
-      : []),
     {
       icon: "people-outline",
       label: "Trainers",
@@ -93,9 +97,49 @@ export default function SettingsList() {
 
   return (
     <View>
-      {settings.map((item: any, index) => (
+      {dashboardCard ? (
+        <View style={styles.dashboardSection}>
+          <View style={styles.dashboardSectionHeader}>
+            <Text style={styles.dashboardSectionTitle}>Workspace</Text>
+            <View style={styles.dashboardBadge}>
+              <Text style={styles.dashboardBadgeText}>{dashboardCard.badge}</Text>
+            </View>
+          </View>
+
+          <TouchableOpacity
+            onPress={dashboardCard.onPress}
+            style={styles.dashboardCard}
+            activeOpacity={0.85}
+          >
+            <View style={styles.dashboardCardTopRow}>
+              <View style={styles.dashboardIconShell}>
+                <Ionicons
+                  name={dashboardCard.icon as any}
+                  size={20}
+                  color={theme.colors.secondPrimary}
+                />
+              </View>
+
+              <View style={styles.dashboardTextBlock}>
+                <Text style={styles.dashboardTitle}>{dashboardCard.label}</Text>
+                <Text style={styles.dashboardHelper}>{dashboardCard.helper}</Text>
+              </View>
+
+              <View style={styles.dashboardArrowShell}>
+                <Ionicons
+                  name="arrow-forward"
+                  size={18}
+                  color={theme.colors.secondPrimary}
+                />
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
+      {settings.map((item: any) => (
         <TouchableOpacity
-          key={index}
+          key={item.label}
           onPress={item.onPress}
           style={styles.settingItem}
           activeOpacity={0.7}
@@ -117,6 +161,94 @@ export default function SettingsList() {
 }
 
 const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
+  dashboardSection: {
+    marginBottom: 14,
+  },
+  dashboardSectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 10,
+    paddingHorizontal: 4,
+  },
+  dashboardSectionTitle: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.medium,
+    fontWeight: theme.fontWeights.medium as "500",
+    textTransform: "uppercase",
+    letterSpacing: 0.8,
+  },
+  dashboardBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    backgroundColor: theme.colors.backgroundCardLight,
+    borderWidth: 1,
+    borderColor: isDark ? theme.colors.border : "rgba(151, 71, 255, 0.12)",
+  },
+  dashboardBadgeText: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.secondPrimary,
+    fontFamily: theme.fonts.medium,
+    fontWeight: theme.fontWeights.medium as "500",
+  },
+  dashboardCard: {
+    borderRadius: 20,
+    padding: 16,
+    marginBottom: 2,
+    backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCardLight,
+    borderWidth: 1,
+    borderColor: isDark ? theme.colors.border : "rgba(151, 71, 255, 0.12)",
+    ...(isDark
+      ? {}
+      : {
+          shadowColor: theme.colors.secondPrimary,
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.08,
+          shadowRadius: 18,
+          elevation: 2,
+        }),
+  },
+  dashboardCardTopRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  dashboardIconShell: {
+    width: 46,
+    height: 46,
+    borderRadius: 14,
+    backgroundColor: isDark ? "rgba(255,255,255,0.06)" : theme.colors.background,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+  dashboardTextBlock: {
+    flex: 1,
+    paddingRight: 10,
+  },
+  dashboardTitle: {
+    fontSize: theme.fontSizes.regular,
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bold,
+    fontWeight: theme.fontWeights.bold as "700",
+    marginBottom: 4,
+  },
+  dashboardHelper: {
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
+    lineHeight: 20,
+    fontFamily: theme.fonts.regular,
+  },
+  dashboardArrowShell: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: isDark ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.75)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 2,
+  },
   settingItem: {
     backgroundColor: theme.colors.background,
     borderRadius: 16,

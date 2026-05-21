@@ -41,13 +41,19 @@ const topPadding = height * 0.05; // 2% of screen height
 export default function SupportScreen() {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
-  const { planTitle, requestType } = useLocalSearchParams<{
+  const { planTitle, requestType, userId: routeUserId, userName } = useLocalSearchParams<{
     planTitle?: string;
     requestType?: string;
+    userId?: string;
+    userName?: string;
   }>();
   const [inputText, setInputText] = useState("");
   const [showTemplateCard, setShowTemplateCard] = useState(!!planTitle);
   const [remountKey, setRemountKey] = useState(0);
+  const [currentUserRole, setCurrentUserRole] = useState("user");
+  const targetUserId = routeUserId;
+  const headerTitle =
+    currentUserRole === "admin" && userName ? `${userName}` : "Support";
   
   // Get template based on request type
   const template: SupportChatTemplate | undefined = requestType === "session" 
@@ -66,10 +72,28 @@ export default function SupportScreen() {
     setSnackbarVisible,
     snackbarVisible,
     snackbarMessage,
-  } = useGetDataHook(chatService.getSupportConversation);
+  } = useGetDataHook(chatService.getSupportConversation, targetUserId);
   const [messageSendingLoader, setMessageSendingLoader] = useState(false);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadCurrentUser = async () => {
+      const loggedUser =
+        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+
+      if (loggedUser.exists && loggedUser.data?.role) {
+        setCurrentUserRole(loggedUser.data.role);
+      }
+    };
+
+    loadCurrentUser();
+  }, []);
+
+  useEffect(() => {
+    fetchData(targetUserId);
+  }, [targetUserId]);
+
   //// Function for sending the message to the support ------------------------/
   const handleSend = async () => {
     try {
@@ -120,16 +144,22 @@ export default function SupportScreen() {
       }
 
       const data = {
-        role: "user",
+        role: currentUserRole === "admin" ? "support" : "user",
         content: inputText,
         attachments: uploadedUrls,
         date: new Date().toDateString(),
       };
       let loggedUser =
         await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-      let userId;
+      let userId = targetUserId;
       if (loggedUser.exists) {
-        userId = loggedUser.data._id;
+        userId = targetUserId || loggedUser.data._id;
+      }
+
+      if (!userId) {
+        setSnackbarVisible(true);
+        setSnackbarMessage("Unable to find this conversation right now.");
+        return;
       }
 
       //// Uploading the message to the backend ----------------------------/
@@ -210,7 +240,7 @@ export default function SupportScreen() {
                 marginTop: Platform.OS === "ios" ? topPadding : "4%",
               }}
             >
-              <NormalHeader screenName="Support" />
+              <NormalHeader screenName={headerTitle} />
             </View>
 
             {loading ? (
@@ -233,6 +263,7 @@ export default function SupportScreen() {
                     key={`${item._id || item.date || index}-${isDark ? 'dark' : 'light'}`}
                     index={index}
                     item={item}
+                    viewerRole={currentUserRole}
                     setSelectedImage={setSelectedImage}
                     setImageModalVisible={setImageModalVisible}
                   />

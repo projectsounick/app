@@ -382,11 +382,14 @@ const PlansInfo: React.FC<Props> = ({
           {/* Pricing Cards */}
           <View
             style={{
-              flexDirection: currentPlan?.planItems.length === 1 ? "row" : "row",
+              flexDirection: "row",
+              flexWrap: "wrap",
               justifyContent:
                 currentPlan?.planItems.length === 1
                   ? "center"
-                  : "space-between",
+                  : currentPlan?.planItems.length === 2
+                    ? "space-between"
+                    : "flex-start",
               gap: 10,
               marginBottom: 12,
             }}
@@ -394,126 +397,138 @@ const PlansInfo: React.FC<Props> = ({
             {currentPlan?.planItems.map((plan, idx) => {
               const isSelected = selectedPlanItem === plan._id;
               const isSingle = currentPlan.planItems.length === 1;
+              const isMultiRow = currentPlan.planItems.length > 2;
+              const isOddCount = currentPlan.planItems.length % 2 === 1;
+              const isLastOddCard =
+                isMultiRow && isOddCount && idx === currentPlan.planItems.length - 1;
               const cardWidth = isSingle 
                 ? Math.min(180, screenWidth * 0.45)
                 : (screenWidth - Math.min(40, screenWidth * 0.1) * 2 - 10) / 2;
 
               return (
-                <TouchableOpacity
+                <View
                   key={idx}
-                  onPress={() => setSelectedPlanItem(plan._id)}
-                  activeOpacity={0.7}
                   style={{
-                    width: isSingle ? cardWidth : undefined,
-                    flex: isSingle ? 0 : 1,
-                    backgroundColor: isSelected ? theme.colors.backgroundCardLight : theme.colors.background,
-                    borderWidth: isSelected ? 2 : 1.5,
-                    borderColor: isSelected ? theme.colors.secondPrimary : theme.colors.divider,
-                    borderRadius: 14,
-                    padding: 10,
-                    paddingVertical: 12,
-                    shadowColor: isSelected ? theme.colors.secondPrimary : theme.colors.dark,
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: isSelected ? 0.15 : 0.08,
-                    shadowRadius: isSelected ? 6 : 4,
-                    elevation: isSelected ? 4 : 2,
-                    transform: [{ scale: isSelected ? 1.02 : 1 }],
+                    width: isLastOddCard ? "100%" : cardWidth,
+                    alignItems: isLastOddCard ? "center" : "stretch",
+                    marginBottom: isMultiRow ? 2 : 0,
                   }}
                 >
-                  <View
+                  <TouchableOpacity
+                    onPress={() => setSelectedPlanItem(plan._id)}
+                    activeOpacity={0.7}
                     style={{
-                      flexDirection: "row",
-                      justifyContent: "space-between",
-                      alignItems: "flex-start",
-                      marginBottom: 6,
+                      width: cardWidth,
+                      flex: 0,
+                      backgroundColor: isSelected ? theme.colors.backgroundCardLight : theme.colors.background,
+                      borderWidth: isSelected ? 2 : 1.5,
+                      borderColor: isSelected ? theme.colors.secondPrimary : theme.colors.divider,
+                      borderRadius: 14,
+                      padding: 10,
+                      paddingVertical: 12,
+                      shadowColor: isSelected ? theme.colors.secondPrimary : theme.colors.dark,
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: isSelected ? 0.15 : 0.08,
+                      shadowRadius: isSelected ? 6 : 4,
+                      elevation: isSelected ? 4 : 2,
+                      transform: [{ scale: isSelected ? 1.02 : 1 }],
                     }}
                   >
-                    <View style={{ flex: 1 }}>
-                      <Text
-                        style={{
-                          fontSize: theme.fontSizes.small,
-                          fontWeight: theme.fontWeights.bold as "700",
-                          color: isDark ? theme.colors.textWhite : theme.colors.dark,
-                          marginBottom: 1,
-                        }}
-                      >
-                        {plan.duration} {plan.durationType}
-                      </Text>
-                      {plan.sessionCount != null && (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        marginBottom: 6,
+                      }}
+                    >
+                      <View style={{ flex: 1 }}>
                         <Text
                           style={{
                             fontSize: theme.fontSizes.small,
-                            color: theme.colors.textSecondary,
-                            fontWeight: theme.fontWeights.regular as "400",
+                            fontWeight: theme.fontWeights.bold as "700",
+                            color: isDark ? theme.colors.textWhite : theme.colors.dark,
+                            marginBottom: 1,
                           }}
                         >
-                          {plan.sessionCount} sessions
+                          {plan.duration} {plan.durationType}
                         </Text>
-                      )}
+                        {plan.sessionCount != null && (
+                          <Text
+                            style={{
+                              fontSize: theme.fontSizes.small,
+                              color: theme.colors.textSecondary,
+                              fontWeight: theme.fontWeights.regular as "400",
+                            }}
+                          >
+                            {plan.sessionCount} sessions
+                          </Text>
+                        )}
+                      </View>
+                      <View
+                        style={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: 10,
+                          backgroundColor: isSelected ? theme.colors.secondPrimary : theme.colors.background,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderWidth: 2,
+                          borderColor: theme.colors.secondPrimary,
+                        }}
+                      >
+                        {isSelected && (
+                          <Ionicons name="checkmark" size={12} color={theme.colors.textWhite} />
+                        )}
+                      </View>
                     </View>
                     <View
                       style={{
-                        width: 20,
-                        height: 20,
-                        borderRadius: 10,
-                        backgroundColor: isSelected ? theme.colors.secondPrimary : theme.colors.background,
-                        alignItems: "center",
-                        justifyContent: "center",
-                        borderWidth: 2,
-                        borderColor: theme.colors.secondPrimary,
+                        flexDirection: "row",
+                        alignItems: "baseline",
+                        marginBottom: 6,
                       }}
                     >
-                      {isSelected && (
-                        <Ionicons name="checkmark" size={12} color={theme.colors.textWhite} />
-                      )}
+                      <Text
+                        style={{
+                          fontSize: theme.fontSizes.regularSmall,
+                          fontWeight: theme.fontWeights.bold as "700",
+                          color: isDark ? theme.colors.textWhite : theme.colors.secondPrimary,
+                          marginRight: 4,
+                        }}
+                      >
+                        ₹{plan.price}
+                      </Text>
                     </View>
-                  </View>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "baseline",
-                      marginBottom: 6,
-                    }}
-                  >
-                    <Text
+                    <View
                       style={{
-                        fontSize: theme.fontSizes.regularSmall,
-                        fontWeight: theme.fontWeights.bold as "700",
-                        color: isDark ? theme.colors.textWhite : theme.colors.secondPrimary,
-                        marginRight: 4,
+                        flexDirection: "row",
+                        alignItems: "center",
+                        backgroundColor: isSelected ? theme.colors.background : theme.colors.backgroundSecondary,
+                        paddingHorizontal: 6,
+                        paddingVertical: 3,
+                        borderRadius: 6,
+                        alignSelf: "flex-start",
                       }}
                     >
-                      ₹{plan.price}
-                    </Text>
-                  </View>
-                  <View
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      backgroundColor: isSelected ? theme.colors.background : theme.colors.backgroundSecondary,
-                      paddingHorizontal: 6,
-                      paddingVertical: 3,
-                      borderRadius: 6,
-                      alignSelf: "flex-start",
-                    }}
-                  >
-                    <Ionicons
-                      name={plan.isOnline ? "videocam" : "location"}
-                      size={15}
-                      color={isSelected ? theme.colors.secondPrimary : theme.colors.textSecondary}
-                      style={{ marginRight: 3 }}
-                    />
-                    <Text
-                      style={{
-                        fontSize: theme.fontSizes.small,
-                        color: isSelected ? theme.colors.secondPrimary : theme.colors.textSecondary,
-                        fontWeight: theme.fontWeights.medium as "500",
-                      }}
-                    >
-                      {plan.isOnline ? "Online" : "Offline"}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
+                      <Ionicons
+                        name={plan.isOnline ? "videocam" : "location"}
+                        size={15}
+                        color={isSelected ? theme.colors.secondPrimary : theme.colors.textSecondary}
+                        style={{ marginRight: 3 }}
+                      />
+                      <Text
+                        style={{
+                          fontSize: theme.fontSizes.small,
+                          color: isSelected ? theme.colors.secondPrimary : theme.colors.textSecondary,
+                          fontWeight: theme.fontWeights.medium as "500",
+                        }}
+                      >
+                        {plan.isOnline ? "Online" : "Offline"}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
               );
             })}
           </View>

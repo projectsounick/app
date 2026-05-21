@@ -52,55 +52,68 @@ const OnboardingScreen = () => {
     setSnackbarMessage,
   } = useServiceWithSnackbar(userService.updateUser);
 
+  const finalizeOnboarding = async () => {
+    try {
+      setLoading(true);
+      const userData =
+        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+
+      if (userData && userData.exists) {
+        const data = {
+          ...(userData.data || {}),
+          onboarding: true,
+        };
+        const {
+          _id,
+          role,
+          __v,
+          jwtToken,
+          accessToken,
+          createdAt,
+          updatedAt,
+          appleId,
+          googleId,
+          otp,
+          phoneNumber,
+          ...cleanData
+        } = data;
+
+        if (phoneNumber && phoneNumber.length >= 10) {
+          (cleanData as any).phoneNumber = phoneNumber;
+        }
+
+        console.log(
+          "Sending onboarding data:",
+          JSON.stringify(cleanData, null, 2)
+        );
+
+        const response = await userService.updateUser(cleanData);
+        if (response.success) {
+          navigation.navigate("secondsplashscreen");
+        } else {
+          setSnackbarMessage(response.message || "Failed to save. Please try again.");
+          setSnackbarVisible(true);
+        }
+      } else {
+        setSnackbarMessage("Please complete the onboarding process first.");
+        setSnackbarVisible(true);
+      }
+    } catch (error: any) {
+      console.log("Onboarding error:", error);
+      Alert.alert(
+        "Error",
+        error?.message || "Something went wrong. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleNext = async () => {
     if (currentStep < onboardingSteps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
-      try {
-        setLoading(true);
-        const userData = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-        if (userData && userData.exists) {
-          let data = userData.data;
-          data.onboarding = true;
-          const { 
-            _id, 
-            role, 
-            __v, 
-            jwtToken, 
-            accessToken,
-            createdAt,
-            updatedAt,
-            appleId,
-            googleId,
-            otp,
-            phoneNumber,
-            ...cleanData 
-          } = data;
-          
-          // Only include phoneNumber if it's a valid 10+ digit number
-          if (phoneNumber && phoneNumber.length >= 10) {
-            (cleanData as any).phoneNumber = phoneNumber;
-          }
-          
-          console.log("Sending onboarding data:", JSON.stringify(cleanData, null, 2));
-          
-          let response = await userService.updateUser(cleanData);
-          if (response.success) {
-            navigation.navigate("secondsplashscreen");
-          } else {
-            setSnackbarMessage(response.message || "Failed to save. Please try again.");
-            setSnackbarVisible(true);
-          }
-        } else {
-          setSnackbarMessage("Please complete the onboarding process first.");
-          setSnackbarVisible(true);
-        }
-      } catch (error: any) {
-        console.log("Onboarding error:", error);
-        Alert.alert("Error", error?.message || "Something went wrong. Please try again.");
-      } finally {
-        setLoading(false);
-      }
+      await finalizeOnboarding();
     }
   };
 
@@ -110,6 +123,23 @@ const OnboardingScreen = () => {
     } else {
       navigation.goBack();
     }
+  };
+
+  const handleSkip = () => {
+    Alert.alert(
+      "Skip onboarding?",
+      "You can skip for now and complete your profile later from the app.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Skip",
+          style: "destructive",
+          onPress: () => {
+            finalizeOnboarding();
+          },
+        },
+      ]
+    );
   };
 
   const renderStepComponent = (loading: boolean) => {
@@ -196,8 +226,13 @@ const OnboardingScreen = () => {
               </View>
             </View>
 
-            {/* Spacer for balance */}
-            <View style={styles.headerSpacer} />
+            <TouchableOpacity
+              onPress={handleSkip}
+              style={styles.skipButton}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.skipText}>Skip</Text>
+            </TouchableOpacity>
           </Animated.View>
 
           {/* Step Content */}
@@ -273,8 +308,17 @@ const getStyles = (theme: any, insets: any) => StyleSheet.create({
     backgroundColor: theme.colors.success,
     borderRadius: 3,
   },
-  headerSpacer: {
-    width: 44,
+  skipButton: {
+    minWidth: 44,
+    height: 44,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 8,
+  },
+  skipText: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.textSecondary,
+    fontFamily: theme.fonts.medium,
   },
   content: {
     flex: 1,

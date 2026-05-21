@@ -1,22 +1,14 @@
 import React from "react";
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Image,
-  ScrollView,
-  ImageBackground,
-  StyleSheet,
-} from "react-native";
+import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { useSelector } from "react-redux";
-import { LinearGradient } from "expo-linear-gradient";
 import { RootState } from "@/store";
 import { ActivePlans } from "@/app/interfaces/planInterface";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import { ActiveManualWorkoutPlanInterface } from "@/app/interfaces/activeManualPlan";
 import CurrentPlanCard from "./CurrentPlanCard";
 import { useGlobalTheme } from "@/app/Theme/ThemeContext";
+
+const manualPlanDayKeys = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"] as const;
 
 interface CurrentPlansProps {
   isActive: boolean;
@@ -40,6 +32,20 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
   const activeServices: any[] = useSelector((state: RootState) =>
     isActive ? state.plan.activeServices : []
   );
+  const manualWorkoutDays =
+    activeManualPlan?.workoutPlanId
+      ? manualPlanDayKeys.filter(
+          (day) => (activeManualPlan.workoutPlanId?.[day] || []).length > 0
+        ).length
+      : 0;
+  const manualExerciseCount =
+    activeManualPlan?.workoutPlanId
+      ? manualPlanDayKeys.reduce(
+          (total, day) =>
+            total + (activeManualPlan.workoutPlanId?.[day] || []).length,
+          0
+        )
+      : 0;
 
   return (
     <ScrollView
@@ -183,10 +189,13 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
             title={activeManualPlan.workoutPlanId?.planName}
             descItems={[
               activeManualPlan.workoutPlanId?.description || "No description",
+              `${manualWorkoutDays} active day${manualWorkoutDays === 1 ? "" : "s"}`,
+              `${manualExerciseCount} exercise${manualExerciseCount === 1 ? "" : "s"}`,
             ]}
             imgUrl={require("../../../assets/images/track.png")}
             isActive={isActive}
             type="manual"
+            manualDescription={activeManualPlan.workoutPlanId?.description}
           />
         </View>
       )}

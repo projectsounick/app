@@ -131,6 +131,10 @@ export function formateFetchedCartItems(cartItems: RawCartItem[]): CartItem[] {
   for (let i = 0; i < cartItems.length; i++) {
     const item = cartItems[i];
 
+    if (item?.isDeleted) {
+      continue;
+    }
+
     const plan = item.plan;
     const dietPlanDetails = item.dietPlanDetails;
     const product: any = item.product;

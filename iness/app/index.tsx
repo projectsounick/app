@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  ImageBackground,
-  Dimensions,
-  Image,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, ImageBackground, Dimensions, Image } from "react-native";
 import { lightColors } from "./Theme/colors";
 import { responsiveFontSize, responsiveSpacing } from "./Theme/responsiveFontSize";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -68,11 +61,14 @@ const HomeScreen = () => {
 
   useEffect(() => {
     const timer = setTimeout(async () => {
+      const hasSession = await asyncStorageUtils.hasAuthenticatedUserSession();
       const userData =
         await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
 
-      if (userData?.exists && userData.data?.onboarding === true) {
+      if (hasSession && userData?.exists && userData.data?.onboarding === true) {
         router.push("/secondsplashscreen");
+      } else if (hasSession && userData?.exists) {
+        router.push("/Onboarding");
       } else {
         setShowSplash(false);
       }
@@ -111,10 +107,6 @@ const HomeScreen = () => {
     navigation.navigate("login");
   };
 
-  const handleSkip = () => {
-    router.push("/secondsplashscreen"); // ✅ skip to main app flow
-  };
-
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       {/* Always use light mode: Use image background */}
@@ -126,32 +118,6 @@ const HomeScreen = () => {
           justifyContent: "space-between",
         }}
       >
-          {/* ✅ Skip Button (Top Right) - Smaller and less prominent */}
-          <TouchableOpacity
-            onPress={handleSkip}
-            style={{
-              position: "absolute",
-              top: 50,
-              right: 20,
-              backgroundColor: "rgba(0,0,0,0.2)",
-              paddingVertical: 4,
-              paddingHorizontal: 10,
-              borderRadius: 16,
-              zIndex: 10,
-            }}
-          >
-            <Text
-              style={{
-                color: "rgba(255,255,255,0.7)",
-                fontWeight: "500",
-                fontSize: theme.fontSizes.small,
-                letterSpacing: 0.2,
-              }}
-            >
-              Skip Now
-            </Text>
-          </TouchableOpacity>
-
           {/* Logo section */}
           <View
             style={{

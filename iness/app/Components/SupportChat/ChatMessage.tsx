@@ -11,11 +11,13 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
   index,
   setSelectedImage,
   setImageModalVisible,
+  viewerRole = "user",
 }) => {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
   const styles = getStyles(theme, isDark);
-  const isUser = item.role === "user";
+  const isOwnMessage =
+    viewerRole === "user" ? item.role === "user" : item.role !== "user";
 
   // Format date - handle both ISO strings and Date strings
   const formatDate = (dateString: string) => {
@@ -56,7 +58,7 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
         <Text
           key={`link-${match.index}`}
           style={{
-            color: isUser ? "#FFD700" : theme.colors.secondPrimary,
+            color: isOwnMessage ? "#FFD700" : theme.colors.secondPrimary,
             textDecorationLine: "underline",
             fontWeight: "600" as "600",
           }}
@@ -90,15 +92,15 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
       style={[
         styles.container,
         {
-          alignSelf: isUser ? "flex-end" : "flex-start",
-          alignItems: isUser ? "flex-end" : "flex-start",
+          alignSelf: isOwnMessage ? "flex-end" : "flex-start",
+          alignItems: isOwnMessage ? "flex-end" : "flex-start",
         },
       ]}
     >
       <View
         style={[
           styles.bubble,
-          isUser ? styles.userBubble : styles.supportBubble,
+          isOwnMessage ? styles.userBubble : styles.supportBubble,
         ]}
       >
         {/* Text Content */}
@@ -106,7 +108,7 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
           <Text
             style={[
               styles.messageText,
-              { color: isUser ? theme.colors.textWhite : theme.colors.text },
+              { color: isOwnMessage ? theme.colors.textWhite : theme.colors.text },
             ]}
           >
             {renderTextWithLinks(item.content.replace(/\\n/g, "\n"))}
@@ -125,7 +127,7 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
                 styles.attachmentContainer,
                 {
                   marginTop: item.content ? 10 : 0,
-                  backgroundColor: isUser
+                  backgroundColor: isOwnMessage
                     ? "rgba(255,255,255,0.15)"
                     : (isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary),
                 },
@@ -142,12 +144,12 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
                   <Ionicons
                     name="document-attach"
                     size={18}
-                    color={isUser ? theme.colors.textWhite : theme.colors.secondPrimary}
+                    color={isOwnMessage ? theme.colors.textWhite : theme.colors.secondPrimary}
                   />
                   <Text
                     style={[
                       styles.fileText,
-                      { color: isUser ? theme.colors.textWhite : theme.colors.text },
+                      { color: isOwnMessage ? theme.colors.textWhite : theme.colors.text },
                     ]}
                     numberOfLines={1}
                   >
@@ -160,7 +162,7 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
         })}
 
         {/* "Go to Plans" Button inside chat bubble */}
-        {index === 0 && !isUser && (
+        {viewerRole === "user" && index === 0 && !isOwnMessage && (
           <TouchableOpacity
             style={styles.goToPlansBtn}
             onPress={() => {
@@ -176,7 +178,7 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
         <Text
           style={[
             styles.dateText,
-            { color: isUser ? "rgba(255,255,255,0.8)" : theme.colors.textMuted },
+            { color: isOwnMessage ? "rgba(255,255,255,0.8)" : theme.colors.textMuted },
           ]}
         >
           {formatDate(item.date)}

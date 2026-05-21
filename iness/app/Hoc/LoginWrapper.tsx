@@ -35,9 +35,9 @@ export function LoginWrapper<P extends object>(
     useEffect(() => {
       const checkUser = async () => {
         try {
-          const response =
-            await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-          setIsLoggedIn(response.exists);
+          const hasSession =
+            await asyncStorageUtils.hasAuthenticatedUserSession();
+          setIsLoggedIn(hasSession);
         } catch (error) {
           console.error("Error checking AsyncStorage:", error);
           setIsLoggedIn(false);

@@ -12,7 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Calendar, DateData } from "react-native-calendars";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
@@ -30,12 +30,12 @@ interface SessionItem {
   sessionType: "online" | "offline";
   sessionDuration: string;
   sessionAddress: string;
-  workoutItems: Array<{
+  workoutItems: {
     exercise: string;
     sets: string;
     reps: string;
     timer: string;
-  }>;
+  }[];
 }
 
 const normalizeDateToNoon = (date: Date): Date => {
@@ -62,15 +62,40 @@ const formatDate = (dateValue: any): string => {
       month: "short",
       year: "numeric",
     });
-  } catch (error) {
+  } catch {
     return "N/A";
   }
 };
+
+const sortSessionsForDisplay = (items: any[]) =>
+  [...items].sort((a, b) => {
+    const priority = (status?: string) => {
+      if (status === "scheduled") return 0;
+      if (status === "completed") return 1;
+      if (status === "cancelled") return 2;
+      return 3;
+    };
+
+    const statusDiff = priority(a.sessionStatus) - priority(b.sessionStatus);
+    if (statusDiff !== 0) {
+      return statusDiff;
+    }
+
+    const aTime = new Date(`${a.sessionDate} ${a.sessionTime || "00:00"}`).getTime();
+    const bTime = new Date(`${b.sessionDate} ${b.sessionTime || "00:00"}`).getTime();
+
+    if (a.sessionStatus === "scheduled") {
+      return aTime - bTime;
+    }
+
+    return bTime - aTime;
+  });
 
 function TrainerSessionCalendar() {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
   const styles = getStyles(theme, isDark);
+  const insets = useSafeAreaInsets();
   const params = useLocalSearchParams();
   const userId = params.userId as string;
   const userName = params.userName as string;
@@ -129,7 +154,7 @@ function TrainerSessionCalendar() {
     try {
       const response = await fetchWrapper.get(`${baseUrl}/get-active-plans?userId=${userId}&isActive=true`);
       if (response.success) {
-        const filteredPlans = response.data.filter((item: any) => item.plan != undefined);
+        const filteredPlans = response.data.filter((item: any) => item.plan !== undefined);
         console.log("=== Fetched Plans ===");
         console.log("Total plans:", filteredPlans.length);
         filteredPlans.forEach((plan: any, index: number) => {
@@ -197,7 +222,7 @@ function TrainerSessionCalendar() {
           planId: s.activePlanId,
           serviceId: s.activeServiceId
         })));
-        setSessions(response.data || []);
+        setSessions(sortSessionsForDisplay(response.data || []));
       }
     } catch (error) {
       console.error("Error fetching sessions:", error);
@@ -543,7 +568,7 @@ function TrainerSessionCalendar() {
   if (loading) {
     return (
       <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
-        <View style={styles.header}>
+        <View style={[styles.header, { paddingTop: Math.max(insets.top, 8) + 8 }]}>
           <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
           </TouchableOpacity>
@@ -561,15 +586,18 @@ function TrainerSessionCalendar() {
   const totalRemaining = [...plans, ...services].reduce((sum, item) => {
     return sum + (item.remainingSessions || 0);
   }, 0);
+  const scheduledCount = sessions.filter((session) => session.sessionStatus === "scheduled").length;
+  const completedCount = sessions.filter((session) => session.sessionStatus === "completed").length;
+  const cancelledCount = sessions.filter((session) => session.sessionStatus === "cancelled").length;
 
   return (
     <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
-      <View style={styles.header}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 8) + 8 }]}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
-          <Text style={styles.headerTitle}>{userName}'s Sessions</Text>
+          <Text style={styles.headerTitle}>{userName}{`'s`} Sessions</Text>
           <Text style={styles.headerSubtitle}>
             {sessions.length} total • {totalRemaining} remaining
           </Text>
@@ -586,30 +614,72 @@ function TrainerSessionCalendar() {
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Calendar
-          current={new Date().toISOString().slice(0, 10)}
-          markedDates={markedDates}
-          onDayPress={showCreateModal ? handleDayPress : undefined}
-          theme={{
-            todayTextColor: theme.colors.secondPrimary,
-            arrowColor: theme.colors.text,
-            monthTextColor: theme.colors.text,
-            textDayFontWeight: "500",
-            textMonthFontWeight: "700",
-            textDayHeaderFontWeight: "600",
-            selectedDayBackgroundColor: theme.colors.text,
-            selectedDayTextColor: theme.colors.background,
-            textDisabledColor: theme.colors.textMuted,
-            textSectionTitleColor: theme.colors.text,
-            backgroundColor: theme.colors.background,
-            calendarBackground: theme.colors.background,
-            dayTextColor: theme.colors.text,
-          }}
-        />
+        <View style={styles.summaryRow}>
+          <View style={styles.summaryCard}>
+            <Text style={styles.summaryValue}>{scheduledCount}</Text>
+            <Text style={styles.summaryLabel}>Scheduled</Text>
+          </View>
+          <View style={styles.summaryCard}>
+            <Text style={[styles.summaryValue, { color: theme.colors.success }]}>{completedCount}</Text>
+            <Text style={styles.summaryLabel}>Completed</Text>
+          </View>
+          <View style={styles.summaryCard}>
+            <Text style={[styles.summaryValue, { color: theme.colors.error }]}>{cancelledCount}</Text>
+            <Text style={styles.summaryLabel}>Cancelled</Text>
+          </View>
+        </View>
 
-        {sessions.length > 0 && (
-          <View style={styles.sessionsSection}>
-            {sessions.map((session: any) => {
+        <View style={styles.calendarShell}>
+          <View style={styles.calendarShellHeader}>
+            <View>
+              <Text style={styles.calendarShellTitle}>Calendar View</Text>
+              <Text style={styles.calendarShellSubtitle}>
+                Marked dates already have sessions assigned.
+              </Text>
+            </View>
+          </View>
+
+          <Calendar
+            current={new Date().toISOString().slice(0, 10)}
+            markedDates={markedDates}
+            style={styles.calendar}
+            hideExtraDays
+            enableSwipeMonths
+            firstDay={1}
+            onDayPress={showCreateModal ? handleDayPress : undefined}
+            theme={{
+              todayTextColor: theme.colors.secondPrimary,
+              arrowColor: theme.colors.text,
+              monthTextColor: theme.colors.text,
+              textMonthFontSize: theme.fontSizes.regular,
+              textDayFontSize: theme.fontSizes.regularSmall,
+              textDayHeaderFontSize: theme.fontSizes.small,
+              textDayFontWeight: "500",
+              textMonthFontWeight: "700",
+              textDayHeaderFontWeight: "600",
+              selectedDayBackgroundColor: theme.colors.text,
+              selectedDayTextColor: theme.colors.background,
+              textDisabledColor: theme.colors.textMuted,
+              textSectionTitleColor: theme.colors.text,
+              backgroundColor: theme.colors.background,
+              calendarBackground: theme.colors.background,
+              dayTextColor: theme.colors.text,
+            }}
+          />
+        </View>
+
+        <View style={styles.sessionsSection}>
+          <View style={styles.sessionsSectionHeader}>
+            <View>
+              <Text style={styles.sessionsSectionTitle}>Session Timeline</Text>
+              <Text style={styles.sessionsSectionSubtitle}>
+                Expand a session to manage notes, feedback, and status.
+              </Text>
+            </View>
+          </View>
+
+          {sessions.length > 0 ? (
+            sessions.map((session: any) => {
               // Get plan or service name
               const planName = session.activePlanDetails?.plan?.planItem?.planName ||
                               session.activePlanDetails?.plan?.planName ||
@@ -617,6 +687,13 @@ function TrainerSessionCalendar() {
               const serviceName = session.activeServiceDetails?.service?.serviceName ||
                                  session.activeServiceDetails?.service?.title ||
                                  null;
+              const sessionDate = new Date(session.sessionDate);
+              const dayLabel = !isNaN(sessionDate.getTime())
+                ? sessionDate.toLocaleDateString("en-US", { day: "2-digit" })
+                : "--";
+              const monthLabel = !isNaN(sessionDate.getTime())
+                ? sessionDate.toLocaleDateString("en-US", { month: "short" }).toUpperCase()
+                : "---";
 
               const isExpanded = expandedSessionId === session._id;
               const canComplete = session.sessionStatus === "scheduled";
@@ -640,10 +717,10 @@ function TrainerSessionCalendar() {
                   >
                     <View style={styles.sessionMainContent}>
                       <View style={styles.sessionLeft}>
-                        <View style={[
-                          styles.sessionColorBar,
-                          { backgroundColor: statusBarColor }
-                        ]} />
+                        <View style={styles.sessionDateBadge}>
+                          <Text style={styles.sessionDateDay}>{dayLabel}</Text>
+                          <Text style={styles.sessionDateMonth}>{monthLabel}</Text>
+                        </View>
                         <View style={styles.sessionMainInfo}>
                           <View style={styles.sessionTitleRow}>
                             <Text style={styles.sessionTitle}>
@@ -680,6 +757,27 @@ function TrainerSessionCalendar() {
                               <Ionicons name="hourglass-outline" size={14} color={theme.colors.textMuted} />
                               <Text style={styles.quickInfoText}>{session.sessionDuration}m</Text>
                             </View>
+                            <View style={styles.quickInfoItem}>
+                              <Ionicons
+                                name={session.sessionType === "online" ? "videocam-outline" : "location-outline"}
+                                size={14}
+                                color={theme.colors.textMuted}
+                              />
+                              <Text style={styles.quickInfoText}>
+                                {session.sessionType === "online" ? "Online" : "Offline"}
+                              </Text>
+                            </View>
+                          </View>
+                          <View style={styles.sessionFooterRow}>
+                            <View style={[styles.sessionTypePill, { borderColor: statusBarColor + "35" }]}>
+                              <View style={[styles.sessionTypeDot, { backgroundColor: statusBarColor }]} />
+                              <Text style={styles.sessionTypePillText}>
+                                {session.sessionStatus === "scheduled" ? "Needs action" : "View details"}
+                              </Text>
+                            </View>
+                            <Text style={styles.expandHintText}>
+                              {isExpanded ? "Tap to collapse" : "Tap to expand"}
+                            </Text>
                           </View>
                         </View>
                       </View>
@@ -811,7 +909,10 @@ function TrainerSessionCalendar() {
                               {updatingSessionId === session._id ? (
                                 <ActivityIndicator size="small" color={theme.colors.text} />
                               ) : (
-                                <Text style={styles.actionBtnText}>Mark Session as Completed</Text>
+                                <>
+                                  <Ionicons name="checkmark-circle-outline" size={16} color={theme.colors.textWhite} />
+                                  <Text style={styles.actionBtnText}>Complete</Text>
+                                </>
                               )}
                             </TouchableOpacity>
                           )}
@@ -825,7 +926,10 @@ function TrainerSessionCalendar() {
                               {updatingSessionId === session._id ? (
                                 <ActivityIndicator size="small" color={theme.colors.error} />
                               ) : (
-                                <Text style={[styles.actionBtnText, styles.cancelBtnText]}>Cancel Session</Text>
+                                <>
+                                  <Ionicons name="close-circle-outline" size={16} color={theme.colors.error} />
+                                  <Text style={[styles.actionBtnText, styles.cancelBtnText]}>Cancel</Text>
+                                </>
                               )}
                             </TouchableOpacity>
                           )}
@@ -835,9 +939,17 @@ function TrainerSessionCalendar() {
                   )}
                 </View>
               );
-            })}
-          </View>
-        )}
+            })
+          ) : (
+            <View style={styles.sessionEmptyCard}>
+              <Ionicons name="calendar-clear-outline" size={44} color={theme.colors.textMuted} />
+              <Text style={styles.sessionEmptyTitle}>No sessions assigned yet</Text>
+              <Text style={styles.sessionEmptySubtitle}>
+                Use the add button above to create the first session for this client.
+              </Text>
+            </View>
+          )}
+        </View>
       </ScrollView>
 
       {/* Create Session Modal */}
@@ -1189,7 +1301,6 @@ function TrainerSessionCalendar() {
                 )}
 
                 {sessionItems.map((item, index) => {
-                  const sessionItem = sessionItems.find((s) => areDatesSame(s.sessionDate, item.sessionDate));
                   return (
                     <View key={index} style={styles.modernSessionCard}>
                       <View style={styles.sessionCardHeader}>
@@ -1491,7 +1602,6 @@ const getStyles = (theme: any, isDark: boolean) =>
       flexDirection: "row",
       alignItems: "center",
       paddingHorizontal: 16,
-      paddingTop: Platform.OS === "ios" ? 60 : 20,
       paddingBottom: 12,
       borderBottomWidth: 1,
       borderBottomColor: theme.colors.border,
@@ -1541,12 +1651,103 @@ const getStyles = (theme: any, isDark: boolean) =>
       flex: 1,
       padding: 16,
     },
+    summaryRow: {
+      flexDirection: "row",
+      gap: 10,
+      marginBottom: 16,
+    },
+    summaryCard: {
+      flex: 1,
+      backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCardLight,
+      borderRadius: 16,
+      paddingVertical: 14,
+      paddingHorizontal: 12,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    summaryValue: {
+      fontSize: theme.fontSizes.large,
+      fontWeight: theme.fontWeights.bold as "700",
+      color: theme.colors.text,
+      marginBottom: 4,
+    },
+    summaryLabel: {
+      fontSize: theme.fontSizes.small,
+      color: theme.colors.textMuted,
+      textTransform: "uppercase",
+    },
+    calendarShell: {
+      backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCardLight,
+      borderRadius: 20,
+      padding: 14,
+      marginBottom: 20,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    calendar: {
+      borderRadius: 16,
+      overflow: "hidden",
+    },
+    calendarShellHeader: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      justifyContent: "space-between",
+      gap: 12,
+      marginBottom: 12,
+    },
+    calendarShellTitle: {
+      fontSize: theme.fontSizes.medium,
+      fontWeight: theme.fontWeights.bold as "700",
+      color: theme.colors.text,
+      marginBottom: 4,
+    },
+    calendarShellSubtitle: {
+      fontSize: theme.fontSizes.small,
+      color: theme.colors.textMuted,
+      lineHeight: 18,
+    },
+    legendPill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      paddingHorizontal: 10,
+      paddingVertical: 7,
+      borderRadius: 999,
+      backgroundColor: isDark ? theme.colors.background : theme.colors.background,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+    },
+    legendDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+      backgroundColor: theme.colors.secondPrimary,
+    },
+    legendText: {
+      fontSize: theme.fontSizes.small,
+      color: theme.colors.textSecondary,
+    },
     sessionsSection: {
-      marginTop: 24,
+      marginTop: 4,
+      marginBottom: 20,
+    },
+    sessionsSectionHeader: {
+      marginBottom: 14,
+    },
+    sessionsSectionTitle: {
+      fontSize: theme.fontSizes.medium,
+      fontWeight: theme.fontWeights.bold as "700",
+      color: theme.colors.text,
+      marginBottom: 4,
+    },
+    sessionsSectionSubtitle: {
+      fontSize: theme.fontSizes.small,
+      color: theme.colors.textMuted,
+      lineHeight: 18,
     },
     sessionCard: {
       backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCardLight,
-      borderRadius: 16,
+      borderRadius: 18,
       marginBottom: 16,
       borderWidth: 1,
       borderColor: theme.colors.border,
@@ -1565,14 +1766,35 @@ const getStyles = (theme: any, isDark: boolean) =>
     sessionLeft: {
       flexDirection: "row",
       flex: 1,
+      alignItems: "flex-start",
     },
-    sessionColorBar: {
-      width: 4,
-      borderRadius: 2,
+    sessionDateBadge: {
+      width: 56,
+      minHeight: 66,
+      borderRadius: 16,
+      backgroundColor: isDark ? theme.colors.background : theme.colors.background,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      alignItems: "center",
+      justifyContent: "center",
       marginRight: 12,
+      paddingVertical: 8,
+    },
+    sessionDateDay: {
+      fontSize: 20,
+      fontWeight: theme.fontWeights.bold as "700",
+      color: theme.colors.text,
+      lineHeight: 22,
+    },
+    sessionDateMonth: {
+      fontSize: 11,
+      fontWeight: theme.fontWeights.medium as "500",
+      color: theme.colors.textMuted,
+      marginTop: 2,
     },
     sessionMainInfo: {
       flex: 1,
+      minWidth: 0,
     },
     sessionTitleRow: {
       flexDirection: "row",
@@ -1585,6 +1807,7 @@ const getStyles = (theme: any, isDark: boolean) =>
       fontWeight: theme.fontWeights.bold as "700",
       color: theme.colors.text,
       flex: 1,
+      minWidth: 0,
     },
     sessionStatusPill: {
       paddingHorizontal: 10,
@@ -1612,20 +1835,64 @@ const getStyles = (theme: any, isDark: boolean) =>
       fontWeight: theme.fontWeights.medium as "500",
       color: theme.colors.secondPrimary,
       marginBottom: 8,
+      flexShrink: 1,
     },
     sessionQuickInfo: {
       flexDirection: "row",
       flexWrap: "wrap",
       gap: 12,
+      marginBottom: 10,
+      width: "100%",
     },
     quickInfoItem: {
       flexDirection: "row",
       alignItems: "center",
       gap: 4,
+      paddingHorizontal: 9,
+      paddingVertical: 6,
+      borderRadius: 999,
+      backgroundColor: isDark ? theme.colors.background : theme.colors.background,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      maxWidth: "100%",
+      flexShrink: 1,
     },
     quickInfoText: {
       fontSize: theme.fontSizes.small,
       color: theme.colors.textMuted,
+      flexShrink: 1,
+    },
+    sessionFooterRow: {
+      flexDirection: "row",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 8,
+      flexWrap: "wrap",
+    },
+    sessionTypePill: {
+      flexDirection: "row",
+      alignItems: "center",
+      gap: 6,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 999,
+      backgroundColor: isDark ? theme.colors.background : theme.colors.background,
+      borderWidth: 1,
+    },
+    sessionTypeDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+    },
+    sessionTypePillText: {
+      fontSize: theme.fontSizes.small,
+      color: theme.colors.textSecondary,
+      fontWeight: theme.fontWeights.medium as "500",
+    },
+    expandHintText: {
+      fontSize: theme.fontSizes.small,
+      color: theme.colors.textMuted,
+      flexShrink: 1,
     },
     sessionExpandedContent: {
       borderTopWidth: 1,
@@ -1759,16 +2026,46 @@ const getStyles = (theme: any, isDark: boolean) =>
       borderLeftColor: theme.colors.secondPrimary,
     },
     actionButtons: {
-      gap: 8,
+      flexDirection: "row",
+      gap: 10,
       marginTop: 8,
     },
+    sessionEmptyCard: {
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 34,
+      paddingHorizontal: 24,
+      borderRadius: 18,
+      backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundCardLight,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      borderStyle: "dashed",
+    },
+    sessionEmptyTitle: {
+      fontSize: theme.fontSizes.medium,
+      fontWeight: theme.fontWeights.bold as "700",
+      color: theme.colors.text,
+      marginTop: 12,
+      marginBottom: 6,
+      textAlign: "center",
+    },
+    sessionEmptySubtitle: {
+      fontSize: theme.fontSizes.regularSmall,
+      color: theme.colors.textMuted,
+      textAlign: "center",
+      lineHeight: 20,
+    },
     actionBtn: {
-      width: "100%",
-      borderRadius: 10,
-      padding: 14,
+      flex: 1,
+      minHeight: 46,
+      borderRadius: 12,
+      paddingVertical: 12,
+      paddingHorizontal: 14,
       backgroundColor: theme.colors.text,
       alignItems: "center",
       justifyContent: "center",
+      flexDirection: "row",
+      gap: 6,
     },
     cancelBtn: {
       backgroundColor: "transparent",
@@ -1776,7 +2073,7 @@ const getStyles = (theme: any, isDark: boolean) =>
       borderColor: theme.colors.error + "60",
     },
     actionBtnText: {
-      fontSize: theme.fontSizes.regular,
+      fontSize: theme.fontSizes.regularSmall,
       fontWeight: theme.fontWeights.bold as "600",
       color: theme.colors.textWhite,
     },

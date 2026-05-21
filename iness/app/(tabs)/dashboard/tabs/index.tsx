@@ -142,7 +142,7 @@ const YourComponent = () => {
         sliceKey: "cart" as SliceKey,
         fetchFunction: cartService.getCartItems,
         priority: "low" as const,
-        enableCache: true,
+        enableCache: false,
         cacheTTL: 2 * 60 * 1000, // 2 minutes - cart changes frequently
       },
       {

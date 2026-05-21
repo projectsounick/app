@@ -10,6 +10,7 @@ import { RootState } from "@/store";
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import { View, Text, Animated, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import TrainerShimmer from "@/app/modules/Shimmer/TrainerShimmer";
 import SmallHeader from "@/app/modules/SmallHeader";
@@ -47,8 +48,7 @@ export default function TrainScreen() {
         sliceKey: "activeManualPlan" as SliceKey,
         fetchFunction: manualWorkoutPlanService.getUserActiveManualPlan,
         priority: "high" as const,
-        enableCache: true,
-        cacheTTL: 5 * 60 * 1000, // 5 minutes - manual plans change frequently
+        enableCache: false,
       },
       {
         sliceKey: "activeServices" as SliceKey,
@@ -69,7 +69,7 @@ export default function TrainScreen() {
         sliceKey: "plan" as SliceKey,
         fetchFunction: planService.getAllPlans,
         priority: "low" as const,
-        enableCache: true,
+        enableCache: false,
         cacheTTL: 30 * 60 * 1000, // 30 minutes - available plans rarely change
       },
       {
@@ -83,10 +83,16 @@ export default function TrainScreen() {
     []
   );
 
-  const { loading } = useFetchMultipleStoreDataHook(configs, true, true); // Enable priority loading
+  const { loading, fetchAll } = useFetchMultipleStoreDataHook(configs, true, true); // Enable priority loading
   const translateX = useRef(
     new Animated.Value(activeTab === "current" ? 0 : 1)
   ).current;
+
+  useFocusEffect(
+    React.useCallback(() => {
+      fetchAll();
+    }, [fetchAll])
+  );
 
   const handlePress = (tab: "current" | "available") => {
     setActiveTab(tab);

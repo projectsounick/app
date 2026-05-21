@@ -10,13 +10,21 @@ import { communityService } from "@/app/services/community.service";
 import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
 import FeedShimmer from "@/app/modules/Shimmer/FeedShimmer";
 import { useGlobalTheme } from "@/app/Theme/ThemeContext";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+
+const FEED_COMMUNITY_STORAGE_KEY = "selectedFeedCommunityId";
+
+type FeedCommunity = {
+  _id: string;
+  name: string;
+};
 
 function YourComponent() {
   const theme = useGlobalTheme();
   const [posts, setPosts] = useState<any[]>([]);
   const [communityId, setCommunityId] = useState<any>(null);
   const [communitName, setCommunityName] = useState("");
-  const [communities, setCommunities] = useState<any[]>([]);
+  const [communities, setCommunities] = useState<FeedCommunity[]>([]);
   const [showCommunitySelector, setShowCommunitySelector] = useState(false);
   const [loading, setLoading] = useState(true);
   const createPostModalRef = useRef<{ openModal: () => void } | null>(null);
@@ -35,12 +43,42 @@ function YourComponent() {
         const res = await communityService.getUserCommunityById();
 
         if (res.success && res.communityId) {
-          setCommunityId(res.communityId);
-          setCommunityName(res.communityName);
+          const availableCommunities: FeedCommunity[] = Array.isArray(
+            res.communities
+          )
+            ? (res.communities as FeedCommunity[])
+            : [];
+          const savedCommunity =
+            await asyncStorageUtils.checkIfKeyExistsInAsyncStorage<string>(
+              FEED_COMMUNITY_STORAGE_KEY
+            );
+          const savedCommunityId = savedCommunity.exists
+            ? savedCommunity.data
+            : null;
+          const selectedCommunity =
+            availableCommunities.find(
+              (community) => community._id === savedCommunityId
+            ) ||
+            availableCommunities.find(
+              (community) => community._id === res.communityId
+            ) ||
+            availableCommunities[0] ||
+            null;
 
-          // Store all communities if user has access to multiple
-          if (res.communities && res.communities.length > 0) {
-            setCommunities(res.communities);
+          if (selectedCommunity) {
+            setCommunityId(selectedCommunity._id);
+            setCommunityName(selectedCommunity.name);
+            await asyncStorageUtils.storeDataInAsyncStorage(
+              selectedCommunity._id,
+              FEED_COMMUNITY_STORAGE_KEY
+            );
+          } else {
+            setCommunityId(res.communityId);
+            setCommunityName(res.communityName);
+          }
+
+          if (availableCommunities.length > 0) {
+            setCommunities(availableCommunities);
           }
         } else {
           setCommunityId(null);
@@ -56,11 +94,15 @@ function YourComponent() {
     fetchCommunity();
   }, []);
 
-  const handleCommunityChange = (community: any) => {
+  const handleCommunityChange = async (community: FeedCommunity) => {
     setCommunityId(community._id);
     setCommunityName(community.name);
     setPosts([]); // Clear posts when switching communities
     setShowCommunitySelector(false);
+    await asyncStorageUtils.storeDataInAsyncStorage(
+      community._id,
+      FEED_COMMUNITY_STORAGE_KEY
+    );
   };
 
   return (

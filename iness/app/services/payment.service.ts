@@ -12,11 +12,13 @@ export const paymentService = {
 
 ///// Function for getting all the prodcuts based on category--------/
 
-async function getReciptData({ orderId }: any): Promise<{
+async function getReciptData(params: { orderId: string } | string): Promise<{
   message: String;
   receipt: string;
   success: boolean;
 }> {
+  const orderId = typeof params === "string" ? params : params?.orderId;
+
   return fetchWrapper.get(
     `${config.apiUrl}/api/get-payment-recipt?orderId=${orderId}`
   );
@@ -28,6 +30,7 @@ async function getMerchentId() {
 }
 
 ///// Funtion for getting all the order made by the user -------------------/.
-async function getTotalPurchaseHistory() {
-  return fetchWrapper.get(`${config.apiUrl}/api/get-orders`);
+async function getTotalPurchaseHistory(userId?: string) {
+  const query = userId ? `?userId=${encodeURIComponent(userId)}` : "";
+  return fetchWrapper.get(`${config.apiUrl}/api/get-orders${query}`);
 }

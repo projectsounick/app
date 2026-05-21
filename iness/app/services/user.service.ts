@@ -9,6 +9,14 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { store } from "@/store";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 const baseUrl = `${config.apiUrl}/api`;
+
+function getServiceErrorMessage(error: any, fallbackMessage: string) {
+  if (typeof error === "string") {
+    return error;
+  }
+
+  return error?.message || fallbackMessage;
+}
 ///// Exporting userservice functions --------------------------------------/
 export const userService = {
   sendLoginOtp,
@@ -36,7 +44,10 @@ async function sendLoginOtp(email: string): Promise<ApiResponseInterface> {
 
     return response;
   } catch (error: any) {
-    throw new Error("Error sending OTP: " + error.message);
+    throw new Error(
+      "Error sending OTP: " +
+        getServiceErrorMessage(error, "Unable to send OTP")
+    );
   }
 }
 
@@ -55,7 +66,9 @@ async function verifyLoginOtp(data: {
 
     return response;
   } catch (error: any) {
-    throw new Error("Error sending OTP: " + error.message);
+    throw new Error(
+      getServiceErrorMessage(error, "Unable to verify OTP")
+    );
   }
 }
 
@@ -78,7 +91,7 @@ async function updateUser(userData: any): Promise<any> {
     return response;
   } catch (error: any) {
     // fetchWrapper rejects with string error, not Error object
-    const errorMessage = typeof error === 'string' ? error : (error?.message || 'Unknown error');
+    const errorMessage = getServiceErrorMessage(error, "Unknown error");
     console.log("updateUser: Error:", errorMessage);
     throw new Error("Error updating user: " + errorMessage);
   }
@@ -123,7 +136,10 @@ async function getStorageAccountDetails(folderName: string) {
       `${baseUrl}/get-storageaccount-details?container=${folderName}`
     );
   } catch (error: any) {
-    throw new Error("Error updating user: " + error.message);
+    throw new Error(
+      "Error updating user: " +
+        getServiceErrorMessage(error, "Unable to fetch storage details")
+    );
   }
 }
 async function updateAccessTokenInStorage(newAccessToken: string) {
@@ -156,7 +172,10 @@ async function generateRefreshToken(userId: string) {
 
     return response;
   } catch (error: any) {
-    throw new Error("Error updating user: " + error.message);
+    throw new Error(
+      "Error updating user: " +
+        getServiceErrorMessage(error, "Unable to refresh session")
+    );
   }
 }
 //// Funciton for Complaining ----/
@@ -164,7 +183,10 @@ async function addUserComplain(data: ComplaintInterface): Promise<any> {
   try {
     return fetchWrapper.post(`${baseUrl}/add-user-complain`, { ...data });
   } catch (error: any) {
-    throw new Error("Error updating user: " + error.message);
+    throw new Error(
+      "Error updating user: " +
+        getServiceErrorMessage(error, "Unable to submit complaint")
+    );
   }
 }
 //// Funciton for userblocking ----/
@@ -172,7 +194,10 @@ async function blockUser(data: any): Promise<any> {
   try {
     return fetchWrapper.post(`${baseUrl}/block-user`, { ...data });
   } catch (error: any) {
-    throw new Error("Error updating user: " + error.message);
+    throw new Error(
+      "Error updating user: " +
+        getServiceErrorMessage(error, "Unable to block user")
+    );
   }
 }
 
@@ -181,7 +206,10 @@ async function getActiveDietPlans() {
   try {
     return fetchWrapper.get(`${baseUrl}/get-active-diets`);
   } catch (error: any) {
-    throw new Error("Error updating user: " + error.message);
+    throw new Error(
+      "Error updating user: " +
+        getServiceErrorMessage(error, "Unable to fetch active diets")
+    );
   }
 }
 
@@ -190,7 +218,10 @@ async function getUserTrainers(): Promise<ApiResponseInterface> {
   try {
     return fetchWrapper.get(`${baseUrl}/get-user-trainers`);
   } catch (error: any) {
-    throw new Error("Error fetching trainers: " + error.message);
+    throw new Error(
+      "Error fetching trainers: " +
+        getServiceErrorMessage(error, "Unable to fetch trainers")
+    );
   }
 }
 
@@ -206,7 +237,10 @@ async function googleSignIn(data: {
     });
     return response;
   } catch (error: any) {
-    throw new Error("Error with Google sign-in: " + error.message);
+    throw new Error(
+      "Error with Google sign-in: " +
+        getServiceErrorMessage(error, "Google sign-in failed")
+    );
   }
 }
 
@@ -228,7 +262,10 @@ async function appleSignIn(data: {
     });
     return response;
   } catch (error: any) {
-    throw new Error("Error with Apple sign-in: " + error.message);
+    throw new Error(
+      "Error with Apple sign-in: " +
+        getServiceErrorMessage(error, "Apple sign-in failed")
+    );
   }
 }
 

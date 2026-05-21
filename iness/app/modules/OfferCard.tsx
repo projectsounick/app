@@ -90,7 +90,7 @@ const OffersCards = () => {
             activeOpacity={0.9}
             style={{
               width: screenWidth * 0.9,
-              height: 160,
+              height: 172,
               marginRight: index === offers.length - 1 ? 0 : 10,
             }}
             onPress={() => openRedirect(item.redirectUrl)}

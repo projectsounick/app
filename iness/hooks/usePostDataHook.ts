@@ -18,17 +18,17 @@ function useServiceWithSnackbar(serviceFunction: any) {
         return response; // Return the useful data
       } else {
         setSnackbarVisible(true);
-        setSnackbarMessage("Operation failed"); // Optional: handle when success is false
-        return {
-          message: "Some error has happened",
-          success: false,
-          data: null,
-        }; // Return a default value or null
+        setSnackbarMessage(response.message || "Operation failed");
+        return response;
       }
     } catch (error: any) {
+      const message =
+        typeof error === "string"
+          ? error
+          : error?.message || "Something went wrong";
       setSnackbarVisible(true);
-      setSnackbarMessage(error?.message || "Something went wrong");
-      return { message: "Some error has happened", success: false, data: null };
+      setSnackbarMessage(message);
+      return { message, success: false, data: null };
     } finally {
       setLoading(false);
     }

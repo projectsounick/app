@@ -32,9 +32,9 @@ const LoginJsxWrapper: React.FC<LoginJsxWrapperProps> = ({
   useEffect(() => {
     const checkUser = async () => {
       try {
-        const response =
-          await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-        setUserExists(response.exists);
+        const hasSession =
+          await asyncStorageUtils.hasAuthenticatedUserSession();
+        setUserExists(hasSession);
       } catch (error) {
         console.error("Error checking user:", error);
         setUserExists(false);

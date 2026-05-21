@@ -4,6 +4,7 @@ import { fetchWrapper } from "../helpers/fetchWrapper";
 import { ChatMessage } from "../interfaces/chatInterface";
 import { AddCartItemsApiCallInterface } from "../interfaces/cartInterface";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import { apiCache } from "@/utils/apiCache";
 const baseUrl = `${config.apiUrl}/api`;
 ///// Exporting cartService functions --------------------------------------/
 export const cartService = {
@@ -12,6 +13,8 @@ export const cartService = {
   deleteCartItems,
   updateCartItems,
   getPhonePeUrl,
+  createRazorpayOrder,
+  verifyRazorpayPayment,
   getOrderStatus,
   applyDiscountCoupon,
 };
@@ -41,7 +44,11 @@ async function deleteCartItems(
   cartItemId: string
 ): Promise<ApiResponseInterface> {
   try {
-    return fetchWrapper.delete(`${baseUrl}/delete-cart/${cartItemId}`);
+    const response = await fetchWrapper.delete(`${baseUrl}/delete-cart/${cartItemId}`);
+    if (response?.success) {
+      await apiCache.clear("cart");
+    }
+    return response;
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }
@@ -49,7 +56,11 @@ async function deleteCartItems(
 
 async function addCartItems(data: any): Promise<ApiResponseInterface> {
   try {
-    return fetchWrapper.post(`${baseUrl}/add-cart`, { ...data });
+    const response = await fetchWrapper.post(`${baseUrl}/add-cart`, { ...data });
+    if (response?.success) {
+      await apiCache.clear("cart");
+    }
+    return response;
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }
@@ -58,9 +69,13 @@ async function addCartItems(data: any): Promise<ApiResponseInterface> {
 async function updateCartItems(data: any): Promise<ApiResponseInterface> {
   try {
     let action = data.action;
-    return fetchWrapper.put(`${baseUrl}/update-cart/${data.cartItemId}`, {
+    const response = await fetchWrapper.put(`${baseUrl}/update-cart/${data.cartItemId}`, {
       action,
     });
+    if (response?.success) {
+      await apiCache.clear("cart");
+    }
+    return response;
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }
@@ -69,6 +84,19 @@ async function updateCartItems(data: any): Promise<ApiResponseInterface> {
 //// Funciton for checking out the user cart details and getting the phonepe url ---------------/
 async function getPhonePeUrl(data: any) {
   return fetchWrapper.post(`${baseUrl}/checkout-cart`, { ...data });
+}
+
+async function createRazorpayOrder(data: any) {
+  return fetchWrapper.post(`${baseUrl}/checkout-cart-razorpay`, { ...data });
+}
+
+async function verifyRazorpayPayment(data: {
+  orderId: string;
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}) {
+  return fetchWrapper.post(`${baseUrl}/verify-razorpay-payment`, data);
 }
 
 //// funciton for getting the order status -----------------------------------/

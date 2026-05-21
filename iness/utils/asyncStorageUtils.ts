@@ -10,6 +10,8 @@ export const asyncStorageUtils = {
   updateUserDataInAsyncStorage,
   updateUserAccessToken,
   storeDataInAsyncStorage,
+  removeKeyFromAsyncStorage,
+  hasAuthenticatedUserSession,
 };
 
 async function storeUserInAsyncStorage(userData: any) {
@@ -27,6 +29,14 @@ async function storeDataInAsyncStorage(data: any, key: string) {
     await AsyncStorage.setItem(key, jsonValue);
   } catch (e) {
     console.error("Error saving user data to AsyncStorage:", e);
+  }
+}
+
+async function removeKeyFromAsyncStorage(key: string) {
+  try {
+    await AsyncStorage.removeItem(key);
+  } catch (e) {
+    console.error(`Error removing key "${key}" from AsyncStorage:`, e);
   }
 }
 async function updateUserAccessToken(newAccessToken: string) {
@@ -60,6 +70,25 @@ async function checkIfKeyExistsInAsyncStorage<T = any>(
   } catch (error) {
     console.error(`Error reading key "${key}" from AsyncStorage:`, error);
     return { data: null, exists: false };
+  }
+}
+
+async function hasAuthenticatedUserSession(): Promise<boolean> {
+  try {
+    const userResponse =
+      await checkIfKeyExistsInAsyncStorage<Record<string, any>>("user");
+
+    if (!userResponse.exists || !userResponse.data) {
+      return false;
+    }
+
+    const token =
+      userResponse.data.jwtToken || userResponse.data.accessToken;
+
+    return Boolean(token);
+  } catch (error) {
+    console.error("Error checking authenticated session:", error);
+    return false;
   }
 }
 

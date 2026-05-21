@@ -105,7 +105,7 @@ const CartCheckoutCard: React.FC<CartCheckoutSummaryProps> = ({
         >
           <Text style={{ color: theme.colors.secondPrimary, fontSize: theme.fontSizes.small, fontWeight: theme.fontWeights.medium as "500" }}>Pay Using</Text>
           <Text style={{ color: theme.colors.secondPrimary, fontWeight: theme.fontWeights.bold as "700", fontSize: theme.fontSizes.regularSmall }}>
-            PhonePe
+            Razorpay
           </Text>
         </View>
 

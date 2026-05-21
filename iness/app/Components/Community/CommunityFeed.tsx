@@ -734,12 +734,7 @@ const CommunityPosts = ({
       {/* Caption */}
       {item.text && (
         <View style={styles.captionContainer}>
-          <Text style={styles.caption}>
-            <Text style={styles.captionUsername}>
-              {item.createdBy?.name || "Anonymous"}{" "}
-            </Text>
-            {item.text}
-          </Text>
+          <Text style={styles.caption}>{item.text}</Text>
         </View>
       )}
 
@@ -1350,17 +1345,13 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
   captionContainer: {
     paddingHorizontal: 12,
     marginTop: 6,
+    marginBottom: 12,
   },
   caption: {
     fontSize: theme.fontSizes.regularSmall,
-    lineHeight: 18,
+    lineHeight: 20,
     color: theme.colors.text,
     fontFamily: theme.fonts.regular,
-  },
-  captionUsername: {
-    fontWeight: "600",
-    fontFamily: theme.fonts.bold,
-    color: theme.colors.text,
   },
   viewCommentsButton: {
     paddingHorizontal: 12,

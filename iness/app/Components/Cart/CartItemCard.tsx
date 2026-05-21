@@ -222,10 +222,18 @@ export default function CartItemList({
             </View>
           ) : (
             <>
-              {items.map((item: CartItem) => {
+              {items.map((item: CartItem, index: number) => {
+                const itemKey =
+                  item._id ||
+                  item.product?.productId ||
+                  item.plan?.planItemId ||
+                  item.dietPlanId ||
+                  item.serviceId ||
+                  item.productId ||
+                  `${item.type}-${index}`;
                 return (
                   <View
-                    key={item.productId}
+                    key={itemKey}
                     style={{
                       flexDirection: "row",
                       alignItems: "flex-start",

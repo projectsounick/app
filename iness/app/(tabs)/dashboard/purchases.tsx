@@ -233,19 +233,24 @@ export default function PaymentScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
       <Portal>
-        <Modal visible={paymentLoading} dismissable={false}>
-          <View style={styles.modalContainer}>
-            <LinearGradient
-              colors={isDark ? [theme.colors.backgroundCard, theme.colors.backgroundSecondary] : ["#9747FF", "#844ACF"]}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.modalGradient}
-            >
-              <ActivityIndicator size="large" color="#FFFFFF" />
-              <Text style={styles.modalText}>
-                Generating Receipt...
-              </Text>
-            </LinearGradient>
+        <Modal
+          visible={paymentLoading}
+          dismissable={false}
+          contentContainerStyle={styles.portalModalContainer}
+        >
+          <View style={styles.modalCard}>
+            <View style={styles.modalIconWrap}>
+              <Ionicons
+                name="receipt-outline"
+                size={24}
+                color={theme.colors.secondPrimary}
+              />
+            </View>
+            <ActivityIndicator size="large" color={theme.colors.success} />
+            <Text style={styles.modalTitle}>Generating Receipt</Text>
+            <Text style={styles.modalSubtitle}>
+              Please wait while we prepare your PDF.
+            </Text>
           </View>
         </Modal>
       </Portal>
@@ -498,30 +503,48 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     paddingBottom: 80,
     paddingTop: 10,
   },
-  modalContainer: {
-    backgroundColor: "transparent",
+  portalModalContainer: {
+    marginHorizontal: 24,
+  },
+  modalCard: {
+    backgroundColor: theme.colors.background,
+    borderRadius: 24,
+    paddingVertical: 28,
+    paddingHorizontal: 24,
     justifyContent: "center",
     alignItems: "center",
-    borderRadius: 20,
-    padding: 30,
-  },
-  modalGradient: {
-    borderRadius: 20,
-    padding: 32,
-    alignItems: "center",
+    borderWidth: 1,
+    borderColor: theme.colors.border,
     ...(isDark ? {} : {
-      shadowColor: theme.colors.secondPrimary,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.4,
-      shadowRadius: 12,
+      shadowColor: theme.colors.black,
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.12,
+      shadowRadius: 18,
       elevation: 10,
     }),
   },
-  modalText: {
+  modalIconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: theme.colors.backgroundCardLight,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 14,
+  },
+  modalTitle: {
     marginTop: 16,
-    color: theme.colors.textWhite,
+    color: theme.colors.text,
     fontSize: theme.fontSizes.regular,
     fontFamily: theme.fonts.bold,
     fontWeight: "700",
+  },
+  modalSubtitle: {
+    marginTop: 8,
+    color: theme.colors.textSecondary,
+    fontSize: theme.fontSizes.regularSmall,
+    fontFamily: theme.fonts.regular,
+    textAlign: "center",
+    lineHeight: 20,
   },
 });

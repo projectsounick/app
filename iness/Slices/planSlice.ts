@@ -68,19 +68,22 @@ const planSlice = createSlice({
       state,
       action: PayloadAction<ActiveManualWorkoutPlanInterface[]>
     ) => {
-      if (action.payload && action.payload.length > 0) {
-        const { endDate } = action.payload[0];
+      if (!action.payload || action.payload.length === 0) {
+        state.activeManualPlan = null;
+        return;
+      }
 
-        const today = new Date();
-        const end = new Date(endDate);
+      const { endDate } = action.payload[0];
 
-        // Check if the end date is today or in the future
-        if (end >= today) {
-          state.activeManualPlan = action.payload[0];
-        } else {
-          console.warn("⚠️ Skipped setting plan — End date has passed.");
-          state.activeManualPlan = null;
-        }
+      const today = new Date();
+      const end = new Date(endDate);
+
+      // Check if the end date is today or in the future
+      if (end >= today) {
+        state.activeManualPlan = action.payload[0];
+      } else {
+        console.warn("⚠️ Skipped setting plan — End date has passed.");
+        state.activeManualPlan = null;
       }
     },
     setServices: (state, action: PayloadAction<any[]>) => {

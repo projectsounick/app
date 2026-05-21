@@ -76,9 +76,17 @@ const getVisibleMeasurements = (entry: MeasurementEntry) =>
 export default function SessionHealthOverview({
   userId,
   userDetails,
+  showHero = true,
+  showQuickFacts = true,
+  showReport = true,
+  showMeasurements = true,
 }: {
   userId?: string;
   userDetails?: SessionHealthUser | null;
+  showHero?: boolean;
+  showQuickFacts?: boolean;
+  showReport?: boolean;
+  showMeasurements?: boolean;
 }) {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
@@ -92,9 +100,10 @@ export default function SessionHealthOverview({
     let isMounted = true;
 
     const loadMeasurements = async () => {
-      if (!userId) {
+      if (!userId || !showMeasurements) {
         if (isMounted) {
           setMeasurementHistory([]);
+          setLoading(false);
         }
         return;
       }
@@ -135,7 +144,7 @@ export default function SessionHealthOverview({
     return () => {
       isMounted = false;
     };
-  }, [userId]);
+  }, [userId, showMeasurements]);
 
   const latestMeasurementDate = measurementHistory[0]?.date;
   const reportUrl = userDetails?.healthReport?.trim();
@@ -166,41 +175,43 @@ export default function SessionHealthOverview({
 
   return (
     <View style={styles.wrapper}>
-      <LinearGradient
-        colors={isDark ? ["#0F172A", "#1D4ED8"] : ["#E0F2FE", "#DCFCE7"]}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={styles.heroCard}
-      >
-        <View style={styles.heroTopRow}>
-          <View style={styles.heroIconWrap}>
-            <Ionicons name="pulse-outline" size={22} color="#FFFFFF" />
+      {showHero && (
+        <LinearGradient
+          colors={isDark ? ["#0F172A", "#1D4ED8"] : ["#E0F2FE", "#DCFCE7"]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.heroCard}
+        >
+          <View style={styles.heroTopRow}>
+            <View style={styles.heroIconWrap}>
+              <Ionicons name="pulse-outline" size={22} color="#FFFFFF" />
+            </View>
+            <View style={styles.heroBadge}>
+              <Text style={styles.heroBadgeText}>
+                {measurementHistory.length} {measurementHistory.length === 1 ? "entry" : "entries"}
+              </Text>
+            </View>
           </View>
-          <View style={styles.heroBadge}>
-            <Text style={styles.heroBadgeText}>
-              {measurementHistory.length} {measurementHistory.length === 1 ? "entry" : "entries"}
-            </Text>
-          </View>
-        </View>
 
-        <Text style={styles.heroTitle}>Health Snapshot</Text>
-        <Text style={styles.heroSubtitle}>
-          Review uploaded PDF reports and dated body measurements for this client in one place.
-        </Text>
+          <Text style={styles.heroTitle}>Health Snapshot</Text>
+          <Text style={styles.heroSubtitle}>
+            Review uploaded PDF reports and dated body measurements for this client in one place.
+          </Text>
 
-        <View style={styles.heroStatsRow}>
-          <View style={styles.heroStatCard}>
-            <Text style={styles.heroStatLabel}>Latest Measurement</Text>
-            <Text style={styles.heroStatValue}>{formatDate(latestMeasurementDate)}</Text>
+          <View style={styles.heroStatsRow}>
+            <View style={styles.heroStatCard}>
+              <Text style={styles.heroStatLabel}>Latest Measurement</Text>
+              <Text style={styles.heroStatValue}>{formatDate(latestMeasurementDate)}</Text>
+            </View>
+            <View style={styles.heroStatCard}>
+              <Text style={styles.heroStatLabel}>PDF Report</Text>
+              <Text style={styles.heroStatValue}>{reportUrl ? "Available" : "Pending"}</Text>
+            </View>
           </View>
-          <View style={styles.heroStatCard}>
-            <Text style={styles.heroStatLabel}>PDF Report</Text>
-            <Text style={styles.heroStatValue}>{reportUrl ? "Available" : "Pending"}</Text>
-          </View>
-        </View>
-      </LinearGradient>
+        </LinearGradient>
+      )}
 
-      {profileFacts.length > 0 && (
+      {showQuickFacts && profileFacts.length > 0 && (
         <View style={styles.quickFactsRow}>
           {profileFacts.map((item) => (
             <View key={item.label} style={styles.quickFactChip}>
@@ -211,130 +222,134 @@ export default function SessionHealthOverview({
         </View>
       )}
 
-      <View style={styles.surfaceCard}>
-        <View style={styles.surfaceHeader}>
-          <View style={styles.surfaceTitleWrap}>
-            <View style={[styles.surfaceIconBox, styles.reportIconBox]}>
-              <Ionicons name="document-text-outline" size={18} color="#FFFFFF" />
+      {showReport && (
+        <View style={styles.surfaceCard}>
+          <View style={styles.surfaceHeader}>
+            <View style={styles.surfaceTitleWrap}>
+              <View style={[styles.surfaceIconBox, styles.reportIconBox]}>
+                <Ionicons name="document-text-outline" size={18} color="#FFFFFF" />
+              </View>
+              <View style={styles.surfaceHeadingCopy}>
+                <Text style={styles.surfaceTitle}>PDF Health Report</Text>
+                <Text style={styles.surfaceSubtitle}>
+                  {reportUrl ? "Latest uploaded report is ready to view." : "No PDF report has been uploaded yet."}
+                </Text>
+              </View>
             </View>
-            <View style={styles.surfaceHeadingCopy}>
-              <Text style={styles.surfaceTitle}>PDF Health Report</Text>
-              <Text style={styles.surfaceSubtitle}>
-                {reportUrl ? "Latest uploaded report is ready to view." : "No PDF report has been uploaded yet."}
+          </View>
+
+          <View style={styles.reportCard}>
+            <View style={styles.reportTextWrap}>
+              <Text numberOfLines={1} style={styles.reportName}>
+                {getReportName(reportUrl)}
               </Text>
+              <Text style={styles.reportMeta}>{reportUrl ? "PDF document" : "Awaiting upload"}</Text>
             </View>
-          </View>
-        </View>
 
-        <View style={styles.reportCard}>
-          <View style={styles.reportTextWrap}>
-            <Text numberOfLines={1} style={styles.reportName}>
-              {getReportName(reportUrl)}
-            </Text>
-            <Text style={styles.reportMeta}>{reportUrl ? "PDF document" : "Awaiting upload"}</Text>
-          </View>
-
-          <TouchableOpacity
-            style={[styles.reportActionButton, !reportUrl && styles.reportActionButtonDisabled]}
-            onPress={openReport}
-            disabled={!reportUrl}
-            activeOpacity={0.85}
-          >
-            <Ionicons
-              name={reportUrl ? "open-outline" : "cloud-upload-outline"}
-              size={16}
-              color={reportUrl ? "#FFFFFF" : theme.colors.textMuted}
-            />
-            <Text
-              style={[
-                styles.reportActionText,
-                !reportUrl && styles.reportActionTextDisabled,
-              ]}
+            <TouchableOpacity
+              style={[styles.reportActionButton, !reportUrl && styles.reportActionButtonDisabled]}
+              onPress={openReport}
+              disabled={!reportUrl}
+              activeOpacity={0.85}
             >
-              {reportUrl ? "Open PDF" : "No File"}
-            </Text>
-          </TouchableOpacity>
+              <Ionicons
+                name={reportUrl ? "open-outline" : "cloud-upload-outline"}
+                size={16}
+                color={reportUrl ? "#FFFFFF" : theme.colors.textMuted}
+              />
+              <Text
+                style={[
+                  styles.reportActionText,
+                  !reportUrl && styles.reportActionTextDisabled,
+                ]}
+              >
+                {reportUrl ? "Open PDF" : "No File"}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
+      )}
 
-      <View style={styles.surfaceCard}>
-        <View style={styles.surfaceHeader}>
-          <View style={styles.surfaceTitleWrap}>
-            <View style={[styles.surfaceIconBox, styles.measurementIconBox]}>
-              <Ionicons name="analytics-outline" size={18} color="#FFFFFF" />
+      {showMeasurements && (
+        <View style={styles.surfaceCard}>
+          <View style={styles.surfaceHeader}>
+            <View style={styles.surfaceTitleWrap}>
+              <View style={[styles.surfaceIconBox, styles.measurementIconBox]}>
+                <Ionicons name="analytics-outline" size={18} color="#FFFFFF" />
+              </View>
+              <View style={styles.surfaceHeadingCopy}>
+                <Text style={styles.surfaceTitle}>Measurement Timeline</Text>
+                <Text style={styles.surfaceSubtitle}>
+                  Every recorded measurement appears with its tracking date.
+                </Text>
+              </View>
             </View>
-            <View style={styles.surfaceHeadingCopy}>
-              <Text style={styles.surfaceTitle}>Measurement Timeline</Text>
-              <Text style={styles.surfaceSubtitle}>
-                Every recorded measurement appears with its tracking date.
+          </View>
+
+          {loading ? (
+            <View style={styles.stateCard}>
+              <ActivityIndicator size="small" color={theme.colors.info} />
+              <Text style={styles.stateText}>Loading measurements...</Text>
+            </View>
+          ) : measurementHistory.length > 0 ? (
+            <View style={styles.historyList}>
+              {measurementHistory.map((entry, index) => {
+                const visibleMeasurements = getVisibleMeasurements(entry);
+
+                return (
+                  <View key={`${entry.date}-${index}`} style={styles.historyCard}>
+                    <View style={styles.historyHeader}>
+                      <View>
+                        <Text style={styles.historyTitle}>Measurement #{measurementHistory.length - index}</Text>
+                        <Text style={styles.historyDate}>{formatDate(entry.date)}</Text>
+                      </View>
+                      <View style={styles.historyBadge}>
+                        <Ionicons name="calendar-outline" size={14} color={theme.colors.info} />
+                        <Text style={styles.historyBadgeText}>Tracked</Text>
+                      </View>
+                    </View>
+
+                    {visibleMeasurements.length > 0 ? (
+                      <View style={styles.measurementGrid}>
+                        {visibleMeasurements.map(({ key, label, icon, accent }) => (
+                          <View key={String(key)} style={styles.measurementTile}>
+                            <View style={styles.measurementTileHeader}>
+                              <LinearGradient
+                                colors={accent}
+                                start={{ x: 0, y: 0 }}
+                                end={{ x: 1, y: 1 }}
+                                style={styles.measurementIconWrap}
+                              >
+                                <Ionicons name={icon} size={14} color="#FFFFFF" />
+                              </LinearGradient>
+                              <Text style={styles.measurementLabel}>{label}</Text>
+                            </View>
+                            <View style={styles.measurementValueRow}>
+                              <Text style={styles.measurementValue}>{String(entry[key])}</Text>
+                              <Text style={styles.measurementUnit}>cm</Text>
+                            </View>
+                          </View>
+                        ))}
+                      </View>
+                    ) : (
+                      <View style={styles.stateCard}>
+                        <Text style={styles.stateText}>Measurement values are unavailable for this entry.</Text>
+                      </View>
+                    )}
+                  </View>
+                );
+              })}
+            </View>
+          ) : (
+            <View style={styles.stateCard}>
+              <Ionicons name="stats-chart-outline" size={18} color={theme.colors.textMuted} />
+              <Text style={styles.stateText}>
+                {error || "No measurement history has been recorded yet."}
               </Text>
             </View>
-          </View>
+          )}
         </View>
-
-        {loading ? (
-          <View style={styles.stateCard}>
-            <ActivityIndicator size="small" color={theme.colors.info} />
-            <Text style={styles.stateText}>Loading measurements...</Text>
-          </View>
-        ) : measurementHistory.length > 0 ? (
-          <View style={styles.historyList}>
-            {measurementHistory.map((entry, index) => {
-              const visibleMeasurements = getVisibleMeasurements(entry);
-
-              return (
-                <View key={`${entry.date}-${index}`} style={styles.historyCard}>
-                  <View style={styles.historyHeader}>
-                    <View>
-                      <Text style={styles.historyTitle}>Measurement #{measurementHistory.length - index}</Text>
-                      <Text style={styles.historyDate}>{formatDate(entry.date)}</Text>
-                    </View>
-                    <View style={styles.historyBadge}>
-                      <Ionicons name="calendar-outline" size={14} color={theme.colors.info} />
-                      <Text style={styles.historyBadgeText}>Tracked</Text>
-                    </View>
-                  </View>
-
-                  {visibleMeasurements.length > 0 ? (
-                    <View style={styles.measurementGrid}>
-                      {visibleMeasurements.map(({ key, label, icon, accent }) => (
-                        <View key={String(key)} style={styles.measurementTile}>
-                          <View style={styles.measurementTileHeader}>
-                            <LinearGradient
-                              colors={accent}
-                              start={{ x: 0, y: 0 }}
-                              end={{ x: 1, y: 1 }}
-                              style={styles.measurementIconWrap}
-                            >
-                              <Ionicons name={icon} size={14} color="#FFFFFF" />
-                            </LinearGradient>
-                            <Text style={styles.measurementLabel}>{label}</Text>
-                          </View>
-                          <View style={styles.measurementValueRow}>
-                            <Text style={styles.measurementValue}>{String(entry[key])}</Text>
-                            <Text style={styles.measurementUnit}>cm</Text>
-                          </View>
-                        </View>
-                      ))}
-                    </View>
-                  ) : (
-                    <View style={styles.stateCard}>
-                      <Text style={styles.stateText}>Measurement values are unavailable for this entry.</Text>
-                    </View>
-                  )}
-                </View>
-              );
-            })}
-          </View>
-        ) : (
-          <View style={styles.stateCard}>
-            <Ionicons name="stats-chart-outline" size={18} color={theme.colors.textMuted} />
-            <Text style={styles.stateText}>
-              {error || "No measurement history has been recorded yet."}
-            </Text>
-          </View>
-        )}
-      </View>
+      )}
     </View>
   );
 }

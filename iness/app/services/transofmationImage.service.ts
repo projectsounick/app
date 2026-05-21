@@ -9,9 +9,12 @@ export const transformatiomImageService = {
 };
 
 //// Funciton for updating the user in using backend then storing in AsyncStorage----/
-async function getTransformationImages(): Promise<ApiResponseInterface> {
+async function getTransformationImages(
+  userId?: string
+): Promise<ApiResponseInterface> {
   try {
-    return fetchWrapper.get(`${baseUrl}/get-transformationImages`);
+    const query = userId ? `?userId=${encodeURIComponent(userId)}` : "";
+    return fetchWrapper.get(`${baseUrl}/get-transformationImages${query}`);
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }

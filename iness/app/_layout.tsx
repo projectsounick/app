@@ -17,8 +17,8 @@ import eventBus from "@/event";
 import * as NavigationBar from "expo-navigation-bar";
 
 import SystemNavigationBar from "react-native-system-navigation-bar";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import React from "react";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import {
   handleNotificationNavigation,
   NotificationData,
@@ -67,8 +67,17 @@ export default function RootLayout() {
     // ✅ Only check user once after fonts are loaded
     const checkUser = async () => {
       try {
-        const user = await AsyncStorage.getItem("user");
-        if (user) {
+        const hasSession = await asyncStorageUtils.hasAuthenticatedUserSession();
+        const userResponse =
+          await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+
+        if (hasSession && userResponse.exists) {
+          if (userResponse.data?.onboarding) {
+            router.replace("/secondsplashscreen");
+          } else {
+            router.replace("/Onboarding");
+          }
+        } else if (hasSession) {
           router.replace("/secondsplashscreen");
         }
       } catch (error) {
@@ -155,7 +164,12 @@ export default function RootLayout() {
           if (notificationData) {
             // Store for later navigation (after app is fully ready)
             await storePendingNavigation(notificationData);
+          }
 
+          // Clear the consumed response so stale notification taps
+          // don't get replayed on the next cold app launch.
+          if (typeof Notifications.clearLastNotificationResponseAsync === "function") {
+            await Notifications.clearLastNotificationResponseAsync();
           }
         }
       } catch (error) {

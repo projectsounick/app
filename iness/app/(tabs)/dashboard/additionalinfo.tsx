@@ -81,25 +81,25 @@ const policies = [
     title: "Payment Terms & Conditions",
     icon: "credit-card-outline",
     content:
-      "All payments are processed securely through PhonePe Payment Gateway, an RBI authorized Payment Aggregator. By making a payment, you agree to our payment terms. All transactions are subject to verification and may be declined at our discretion. You are responsible for ensuring sufficient funds are available for transactions.",
+      "All payments are processed securely through Razorpay Payment Gateway. By making a payment, you agree to our payment terms. All transactions are subject to verification and may be declined at our discretion. You are responsible for ensuring sufficient funds are available for transactions.",
   },
   {
-    title: "Payment Gateway - PhonePe",
+    title: "Payment Gateway - Razorpay",
     icon: "bank-outline",
     content:
-      "We use PhonePe Payment Gateway (PhonePe Limited, RBI authorized Payment Aggregator) to process all payments. PhonePe supports multiple payment methods including UPI, Credit/Debit Cards, and Net Banking. All payment data is encrypted and processed securely. PhonePe complies with PCI DSS standards for secure payment processing.",
+      "We use Razorpay Payment Gateway to process all payments. Razorpay supports multiple payment methods including UPI, Credit/Debit Cards, Net Banking, wallets, and other supported payment options. All payment data is encrypted and processed securely. Razorpay follows industry-standard security and PCI DSS practices for payment processing.",
   },
   {
     title: "Transaction Security",
     icon: "lock-outline",
     content:
-      "All payment transactions are secured using industry-standard encryption protocols. Your payment information is processed securely through PhonePe's secure payment infrastructure. We do not store your complete payment card details or UPI PIN on our servers. All sensitive payment data is handled by PhonePe in compliance with RBI guidelines.",
+      "All payment transactions are secured using industry-standard encryption protocols. Your payment information is processed securely through Razorpay's payment infrastructure. We do not store your complete payment card details or UPI PIN on our servers. All sensitive payment data is handled by Razorpay in line with applicable payment security requirements.",
   },
   {
     title: "Payment Processing",
     icon: "cash-multiple",
     content:
-      "Payments are processed in real-time. Upon successful payment, you will receive a confirmation. Failed transactions will be automatically reversed to your original payment method within 5-7 business days. Transaction limits may apply as per PhonePe and your bank's policies. All amounts are displayed in Indian Rupees (INR).",
+      "Payments are processed in real-time. Upon successful payment, you will receive a confirmation. Failed transactions will be automatically reversed to your original payment method within 5-7 business days depending on the issuing bank and payment method. Transaction limits may apply as per Razorpay and your bank's policies. All amounts are displayed in Indian Rupees (INR).",
   },
   {
     title: "Refund & Cancellation",
@@ -111,7 +111,7 @@ const policies = [
     title: "Payment Disputes & Grievances",
     icon: "alert-circle-outline",
     content:
-      "For any payment-related issues, disputes, or unauthorized transactions, please contact our Grievance Officer at support@iness.fitness immediately with transaction details. We will investigate and resolve disputes in accordance with RBI guidelines. You may also contact PhonePe support for payment gateway related issues.",
+      "For any payment-related issues, disputes, or unauthorized transactions, please contact our Grievance Officer at support@iness.fitness immediately with transaction details. We will investigate and resolve disputes in accordance with applicable guidelines. You may also contact Razorpay support for payment gateway related issues.",
   },
 ];
 

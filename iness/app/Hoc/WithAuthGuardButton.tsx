@@ -13,10 +13,10 @@ export function withAuthGuard<P extends { onPress?: () => void }>(
 
     const handlePress = async () => {
       try {
-        const response =
-          await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+        const hasSession =
+          await asyncStorageUtils.hasAuthenticatedUserSession();
 
-        if (response.exists) {
+        if (hasSession) {
           // ✅ User is logged in
           props.onPress?.();
         } else {

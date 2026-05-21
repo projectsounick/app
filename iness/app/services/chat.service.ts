@@ -9,11 +9,14 @@ export const chatService = {
   getSupportConversation,
   addSupportMessage,
   getTrainerChat,
+  getTrainerChats,
   addTrainerMessage,
 };
 
 //// Funciton for updating the user in using backend then storing in AsyncStorage----/
-async function getSupportConversation(): Promise<ApiResponseInterface> {
+async function getSupportConversation(
+  targetUserId?: string
+): Promise<ApiResponseInterface> {
   try {
     const loggedUser = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage(
       "user"
@@ -22,7 +25,9 @@ async function getSupportConversation(): Promise<ApiResponseInterface> {
     if (loggedUser.exists) {
       userId = loggedUser.data._id;
     }
-    return fetchWrapper.get(`${baseUrl}/get-supportchat/${userId}`);
+    return fetchWrapper.get(
+      `${baseUrl}/get-supportchat/${targetUserId || userId}`
+    );
   } catch (error: any) {
     throw new Error("Error updating user: " + error.message);
   }
@@ -46,6 +51,20 @@ async function getTrainerChat(chatId: string): Promise<ApiResponseInterface> {
     return fetchWrapper.get(`${baseUrl}/trainerchat/${chatId}`);
   } catch (error: any) {
     throw new Error("Error getting trainer chat: " + error.message);
+  }
+}
+
+async function getTrainerChats(
+  trainerId?: string
+): Promise<ApiResponseInterface> {
+  try {
+    const endpoint = trainerId
+      ? `${baseUrl}/get-trainerchats/${trainerId}`
+      : `${baseUrl}/get-trainerchats`;
+
+    return fetchWrapper.get(endpoint);
+  } catch (error: any) {
+    throw new Error("Error getting trainer chats: " + error.message);
   }
 }
 

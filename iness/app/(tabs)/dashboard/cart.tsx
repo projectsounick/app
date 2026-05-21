@@ -1,19 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { View, Linking, TouchableOpacity, Text } from "react-native";
+import { View } from "react-native";
 import { useRouter } from "expo-router";
 
 import SmallHeader from "@/app/modules/SmallHeader";
-// Base64 encode it before using with startTransaction
 
 import CartItemList from "@/app/Components/Cart/CartItemCard";
 import CartCheckoutCard from "@/app/Components/Cart/CartCheckoutCard";
-import PhonePePayment from "react-native-phonepe-pg";
+import RazorpayCheckout from "react-native-razorpay";
 import BackHeader from "@/app/modules/BackHeader";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { cartService } from "@/app/services/cart.service";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { paymentService } from "@/app/services/payment.service";
 import { ActivityIndicator } from "react-native-paper";
 
 import CustomSnackbar from "@/app/modules/Snackbar";
@@ -23,6 +21,7 @@ import AddressModal from "@/app/Modals/AddressModal";
 import CouponModal from "@/app/Modals/CouponModal";
 import { DiscountCoupon } from "@/app/interfaces/otherInterfaces";
 import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 
 export interface PhonePeTransactionResponse {
   success: boolean;
@@ -30,6 +29,26 @@ export interface PhonePeTransactionResponse {
   checksum: string;
   orderId: string;
   merchantId: string;
+}
+
+function extractRazorpayErrorMessage(error: any) {
+  if (typeof error === "string" && error.trim()) {
+    return error;
+  }
+
+  if (error?.description) {
+    return error.description;
+  }
+
+  if (error?.error?.description) {
+    return error.error.description;
+  }
+
+  if (error?.message) {
+    return error.message;
+  }
+
+  return "Payment was not completed. Please try again.";
 }
 
 ///// Main functional component for the cart screen -------------------------/
@@ -55,62 +74,86 @@ function CartScreen() {
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const [dataFetchLogin, setDataFetchLogin] = useState(false);
-  // const merchantId = "M23WC6W062GQI"; // your PhonePe merchantId
-  // const flowId = "cart_flow_" + Date.now(); // unique identifier for this flow
-
-  // useEffect(() => {
-  //   const initPhonePe = async () => {
-  //     try {
-  //       const result = await PhonePePayment.init(
-  //         "PRODUCTION",
-  //         merchantId,
-  //         flowId,
-  //         true // enable logging, set false in prod
-  //       );
-  //       console.log("PhonePe SDK initialized:", result);
-  //     } catch (error) {
-  //       console.log("PhonePe init error:", error);
-  //     }
-  //   };
-
-  //   initPhonePe();
-  // }, []);
-  // Function for placing the order ----------------------------.
   async function onplaceOrder(
     address: string,
     couponDetails: DiscountCoupon | null
   ) {
+    let createdOrderId: string | null = null;
+
     try {
       setLoading(true);
-      let data = {
+      const data = {
         couponCode: couponDetails ? couponDetails.code : null,
         address: address,
       };
-    
-      
-      const response: any = await cartService.getPhonePeUrl(data);
-      const orderId = response?.data?.orderId;
 
-      if (orderId) {
-        // Save redirect flag for later detection
-        await AsyncStorage.setItem("currentOrderId", orderId);
-        // Clear any previous error messages
-        await AsyncStorage.removeItem("paymentError");
+      const response: any = await cartService.createRazorpayOrder(data);
+      const orderId = response?.orderId;
+      const razorpayOrderId = response?.razorpayOrderId;
+      const razorpayKey = response?.key;
+      const amount = response?.amount;
+      const currency = response?.currency || "INR";
 
-        // Now redirect to web page that handles PhonePe payment
-        const websiteRedirectUrl = `http://iness.fitness/pay/${orderId}`;
-        Linking.openURL(websiteRedirectUrl); // Opens in external browser
-      } else {
-        throw new Error("Missing orderId or redirect URL");
+      if (!orderId || !razorpayOrderId || !razorpayKey || !amount) {
+        throw new Error("Missing Razorpay checkout details");
       }
+
+      createdOrderId = orderId;
+      await AsyncStorage.setItem("currentOrderId", orderId);
+      await AsyncStorage.removeItem("paymentError");
+
+      const userResponse =
+        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+      const user = userResponse?.data;
+
+      const razorpayResponse = await RazorpayCheckout.open({
+        key: razorpayKey,
+        amount: String(amount),
+        currency,
+        name: "Iness Fitness",
+        description: "Complete your order",
+        order_id: razorpayOrderId,
+        prefill: {
+          name: user?.name || "",
+          email: user?.email || "",
+          contact: user?.phoneNumber || "",
+        },
+        notes: {
+          internalOrderId: orderId,
+        },
+        theme: {
+          color: theme.colors.success,
+        },
+      });
+
+      const verificationResponse: any = await cartService.verifyRazorpayPayment({
+        orderId,
+        razorpay_order_id: razorpayResponse.razorpay_order_id,
+        razorpay_payment_id: razorpayResponse.razorpay_payment_id,
+        razorpay_signature: razorpayResponse.razorpay_signature,
+      });
+
+      if (!verificationResponse?.success) {
+        await AsyncStorage.setItem(
+          "paymentError",
+          verificationResponse?.message ||
+            "Payment captured, but confirmation is still pending."
+        );
+      } else {
+        await AsyncStorage.removeItem("paymentError");
+      }
+
+      router.push("/(tabs)/dashboard/paymentsuccess");
     } catch (error: any) {
-      // Store error message in AsyncStorage
-      const errorMessage = error?.message || "Something went wrong. Please try again.";
+      const errorMessage = extractRazorpayErrorMessage(error);
+
+      if (createdOrderId) {
+        await AsyncStorage.setItem("currentOrderId", createdOrderId);
+      } else {
+        await AsyncStorage.removeItem("currentOrderId");
+      }
+
       await AsyncStorage.setItem("paymentError", errorMessage);
-      // Clear orderId if it exists
-      await AsyncStorage.removeItem("currentOrderId");
-      
-      // Redirect to payment success page to show error
       router.push("/(tabs)/dashboard/paymentsuccess");
     } finally {
       setLoading(false);
@@ -122,63 +165,6 @@ function CartScreen() {
       });
     }
   }
-  // async function onplaceOrder(
-  //   address: string,
-  //   couponDetails: DiscountCoupon | null
-  // ) {
-  //   try {
-  //     setLoading(true);
-
-  //     const data = {
-  //       couponCode: couponDetails ? couponDetails.code : null,
-  //       address: address,
-  //     };
-
-  //     const response: any = await cartService.getPhonePeUrl(data);
-
-  //     if (response.success) {
-  //       const { orderId, orderToken } = response;
-  //       const merchantId = "M23WC6W062GQI";
-
-  //       // Construct request JSON as per SDK docs
-  //       const requestBody = {
-  //         orderId: orderId,
-  //         merchantId: merchantId,
-  //         token: orderToken,
-  //         paymentMode: {
-  //           type: "PAY_PAGE", // required for standard checkout
-  //         },
-  //       };
-
-  //       // Convert to string for startTransaction
-  //       const requestString = JSON.stringify(requestBody);
-
-  //       // Use SDK call
-  //       const txnResponse = await PhonePePayment.startTransaction(
-  //         requestString,
-  //         "myapp" // your app scheme from app.json
-  //       );
-
-  //       console.log("PhonePe txn response:", txnResponse);
-
-  //       if (txnResponse?.status === "SUCCESS") {
-  //         router.push(`/dashboard/paymentsuccess?orderId=${orderId}`);
-  //       } else if (txnResponse?.status === "FAILURE") {
-  //         alert("Transaction failed");
-  //       } else if (txnResponse?.status === "INTERRUPTED") {
-  //         alert("Transaction interrupted");
-  //       }
-  //     } else {
-  //       alert("Some error happened");
-  //     }
-  //   } catch (error: any) {
-  //     console.log("PhonePe error:", error);
-  //     setSnackBarOpen(true);
-  //     setSnackbarMessage(error.message);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // }
   return (
     <>
       {/* Header + Content */}

@@ -308,7 +308,10 @@ const Login = () => {
       let response = await callService(email);
 
       if (response?.success) {
-        await asyncStorageUtils.storeUserInAsyncStorage(response.data);
+        await asyncStorageUtils.storeDataInAsyncStorage(
+          { email: response.data?.email || email },
+          "pendingLogin"
+        );
         router.push("/OtpVerify");
         resetForm({
           values: { email: "" },
