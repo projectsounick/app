@@ -11,6 +11,7 @@ interface ServiceCallConfig {
   priority?: "high" | "low"; // Optional priority for loading order
   cacheTTL?: number; // Cache time-to-live in milliseconds
   enableCache?: boolean; // Whether to enable caching for this call
+  staleWhileRevalidate?: boolean; // Whether expired cache can be shown before refresh
 }
 
 function useFetchMultipleStoreDataHook(
@@ -38,7 +39,14 @@ function useFetchMultipleStoreDataHook(
 
       // Helper to create timed promise with immediate dispatch and caching
       const createTimedPromise = (cfg: ServiceCallConfig) => {
-        const { sliceKey, fetchFunction, params, cacheTTL = CacheTTL.FIVE_MINUTES, enableCache = true } = cfg;
+        const {
+          sliceKey,
+          fetchFunction,
+          params,
+          cacheTTL = CacheTTL.FIVE_MINUTES,
+          enableCache = true,
+          staleWhileRevalidate = false,
+        } = cfg;
         const startTime = Date.now();
         const setAction = sliceConfig[sliceKey].setAction;
         const cacheKey = `${sliceKey}${params ? JSON.stringify(params) : ''}`;
@@ -50,7 +58,7 @@ function useFetchMultipleStoreDataHook(
               ? await apiCache.get(
                   cacheKey,
                   () => fetchFunction(params),
-                  { ttl: cacheTTL, staleWhileRevalidate: true, key: sliceKey }
+                  { ttl: cacheTTL, staleWhileRevalidate, key: sliceKey }
                 )
               : await fetchFunction(params);
 

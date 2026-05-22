@@ -121,21 +121,20 @@ const YourComponent = () => {
         fetchFunction: trackService.getCurrentDayTrackData,
         priority: "high" as const,
         enableCache: true,
-        cacheTTL: 5 * 60 * 1000, // 5 minutes - track data changes frequently
+        cacheTTL: 2 * 60 * 1000,
       },
       {
         sliceKey: "session" as SliceKey,
         fetchFunction: sessionService.getSessions,
         priority: "high" as const,
-        enableCache: true,
-        cacheTTL: 10 * 60 * 1000, // 10 minutes - session data is relatively stable
+        enableCache: false,
       },
       {
         sliceKey: "streak" as SliceKey,
         fetchFunction: fetchStreak,
         priority: "high" as const,
         enableCache: true,
-        cacheTTL: 5 * 60 * 1000, // 5 minutes - streak updates daily
+        cacheTTL: 2 * 60 * 1000,
       },
       // Low priority - can load after initial render
       {

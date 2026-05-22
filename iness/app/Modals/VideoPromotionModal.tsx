@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import {
   View,
   TouchableOpacity,
@@ -7,11 +7,14 @@ import {
   Dimensions,
   Modal,
   ActivityIndicator,
-  Platform,
   Pressable,
+  AppState,
+  AppStateStatus,
+  Platform,
 } from "react-native";
 import { Video, ResizeMode } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
+import { useIsFocused } from "@react-navigation/native";
 import {
   promotionalVideoService,
   PromotionalVideoItem,
@@ -30,9 +33,26 @@ const PromoVideoModal = () => {
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const videoRef = useRef<Video | null>(null);
+  const checkTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const isFocused = useIsFocused();
 
-  const screenWidth = Dimensions.get("window").width;
-  const screenHeight = Dimensions.get("window").height;
+  const stopPlayback = useCallback(async (shouldUnload: boolean = false) => {
+    if (!videoRef.current) return;
+
+    try {
+      await videoRef.current.pauseAsync();
+    } catch (err) {
+      console.error("Error pausing video:", err);
+    }
+
+    if (shouldUnload) {
+      try {
+        await videoRef.current.unloadAsync();
+      } catch (err) {
+        console.error("Error unloading video:", err);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     const checkForNewVideo = async () => {
@@ -56,22 +76,43 @@ const PromoVideoModal = () => {
     };
 
     // Check for new video after a delay
-    setTimeout(() => {
+    checkTimerRef.current = setTimeout(() => {
       checkForNewVideo();
     }, 5000);
-  }, []);
+
+    return () => {
+      if (checkTimerRef.current) {
+        clearTimeout(checkTimerRef.current);
+      }
+      stopPlayback(true);
+    };
+  }, [stopPlayback]);
+
+  useEffect(() => {
+    if (!isFocused || !showModal) {
+      setIsPlaying(false);
+      stopPlayback(false);
+    }
+  }, [isFocused, showModal, stopPlayback]);
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextState: AppStateStatus) => {
+      if (nextState !== "active") {
+        setIsPlaying(false);
+        stopPlayback(false);
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [stopPlayback]);
 
   const handleClose = async () => {
     try {
-      // Stop video playback immediately
-      if (videoRef.current) {
-        try {
-          await videoRef.current.pauseAsync();
-          await videoRef.current.unloadAsync();
-        } catch (err) {
-          console.error("Error stopping video:", err);
-        }
-      }
+      setIsPlaying(false);
+      setIsFullscreen(false);
+      await stopPlayback(true);
       
       // Close modal immediately to prevent UI freeze
       setShowModal(false);

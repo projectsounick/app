@@ -24,7 +24,7 @@ class APICache {
     fetchFn: () => Promise<T>,
     config: CacheConfig
   ): Promise<T> {
-    const { ttl, staleWhileRevalidate = true } = config;
+    const { ttl, staleWhileRevalidate = false } = config;
     const now = Date.now();
 
     try {

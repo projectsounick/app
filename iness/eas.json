@@ -8,7 +8,8 @@
       "developmentClient": true,
       "distribution": "internal",
       "ios": {
-        "node": "20.18.0"
+        "node": "20.18.0",
+        "image": "latest"
       },
       "android": {
         "buildType": "apk"
@@ -20,7 +21,8 @@
     "preview": {
       "distribution": "internal",
       "ios": {
-        "node": "20.18.0"
+        "node": "20.18.0",
+        "image": "latest"
       },
       "android": {
         "buildType": "app-bundle"
@@ -32,7 +34,8 @@
     "production": {
       "distribution": "store",
       "ios": {
-        "node": "20.18.0"
+        "node": "20.18.0",
+        "image": "latest"
       },
       "android": {
         "buildType": "app-bundle"
@@ -44,7 +47,8 @@
     "adhoc": {
       "distribution": "internal",
       "ios": {
-        "simulator": false
+        "simulator": false,
+        "image": "latest"
       },
       "env": {
         "NPM_CONFIG_LEGACY_PEER_DEPS": "true"

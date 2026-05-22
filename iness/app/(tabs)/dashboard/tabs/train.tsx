@@ -10,7 +10,6 @@ import { RootState } from "@/store";
 import React, { useMemo, useRef, useState, useEffect } from "react";
 import { View, Text, Animated, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useFocusEffect } from "@react-navigation/native";
 import { useSelector } from "react-redux";
 import TrainerShimmer from "@/app/modules/Shimmer/TrainerShimmer";
 import SmallHeader from "@/app/modules/SmallHeader";
@@ -41,8 +40,7 @@ export default function TrainScreen() {
         sliceKey: "activePlans" as SliceKey,
         fetchFunction: planService.getActivePlans,
         priority: "high" as const,
-        enableCache: true,
-        cacheTTL: 5 * 60 * 1000, // 5 minutes - active plans change frequently
+        enableCache: false,
       },
       {
         sliceKey: "activeManualPlan" as SliceKey,
@@ -54,8 +52,7 @@ export default function TrainScreen() {
         sliceKey: "activeServices" as SliceKey,
         fetchFunction: sessionService.getServices,
         priority: "high" as const,
-        enableCache: true,
-        cacheTTL: 10 * 60 * 1000, // 10 minutes - services relatively stable
+        enableCache: false,
       },
       // Lower priority - needed for "Available Plans" tab
       {
@@ -63,7 +60,7 @@ export default function TrainScreen() {
         fetchFunction: planService.getDietPlans,
         priority: "low" as const,
         enableCache: true,
-        cacheTTL: 30 * 60 * 1000, // 30 minutes - diet plans rarely change
+        cacheTTL: 10 * 60 * 1000,
       },
       {
         sliceKey: "plan" as SliceKey,
@@ -77,22 +74,16 @@ export default function TrainScreen() {
         fetchFunction: otherService.getAvailableServices,
         priority: "low" as const,
         enableCache: true,
-        cacheTTL: 30 * 60 * 1000, // 30 minutes - available services rarely change
+        cacheTTL: 10 * 60 * 1000,
       },
     ],
     []
   );
 
-  const { loading, fetchAll } = useFetchMultipleStoreDataHook(configs, true, true); // Enable priority loading
+  const { loading } = useFetchMultipleStoreDataHook(configs, true, true); // Enable priority loading
   const translateX = useRef(
     new Animated.Value(activeTab === "current" ? 0 : 1)
   ).current;
-
-  useFocusEffect(
-    React.useCallback(() => {
-      fetchAll();
-    }, [fetchAll])
-  );
 
   const handlePress = (tab: "current" | "available") => {
     setActiveTab(tab);
