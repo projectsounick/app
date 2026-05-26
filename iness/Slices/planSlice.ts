@@ -24,6 +24,37 @@ interface planState {
   availableServices: any[];
 }
 
+function hasManualPlanExpired(endDate?: string) {
+  if (!endDate) {
+    return false;
+  }
+
+  const parsedEndDate = new Date(endDate);
+  if (Number.isNaN(parsedEndDate.getTime())) {
+    return true;
+  }
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  parsedEndDate.setHours(0, 0, 0, 0);
+
+  return parsedEndDate < today;
+}
+
+function isEligibleManualPlan(
+  plan?: ActiveManualWorkoutPlanInterface | null
+) {
+  if (!plan || plan.isActive !== true) {
+    return false;
+  }
+
+  if (!plan.workoutPlanId || plan.workoutPlanId.isActive !== true) {
+    return false;
+  }
+
+  return !hasManualPlanExpired(plan.endDate);
+}
+
 const initialState: planState = {
   plans: [],
   currentPlan: null,
@@ -73,16 +104,15 @@ const planSlice = createSlice({
         return;
       }
 
-      const { endDate } = action.payload[0];
+      const nextActiveManualPlan =
+        action.payload.find((plan) => isEligibleManualPlan(plan)) || null;
 
-      const today = new Date();
-      const end = new Date(endDate);
-
-      // Check if the end date is today or in the future
-      if (end >= today) {
-        state.activeManualPlan = action.payload[0];
+      if (nextActiveManualPlan) {
+        state.activeManualPlan = nextActiveManualPlan;
       } else {
-        console.warn("⚠️ Skipped setting plan — End date has passed.");
+        console.warn(
+          "⚠️ Skipped setting manual plan — assignment is inactive, expired, or linked workout plan is inactive."
+        );
         state.activeManualPlan = null;
       }
     },
