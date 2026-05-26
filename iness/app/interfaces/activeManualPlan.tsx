@@ -26,6 +26,10 @@ export interface WorkoutPlanInterface {
   importantNotes?: string[];
   weekendRecommendations?: string[];
   sourceText?: string;
+  sourceDocumentUrl?: string;
+  sourceDocumentName?: string;
+  sourceDocumentMimeType?: string;
+  sourceDocumentOriginalName?: string;
   sun: EachexerciseItem[];
   mon: EachexerciseItem[];
   tue: EachexerciseItem[];

@@ -10,11 +10,15 @@ import {
   UIManager,
   StyleSheet,
   Dimensions,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { useSelector } from "react-redux";
 import { ResizeMode, Video } from "expo-av";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 import { RootState } from "@/store";
 import {
   WorkoutPlanInterface,
@@ -63,6 +67,20 @@ const normalizeStringList = (values?: string[]) =>
     ? values.map((value) => String(value || "").trim()).filter(Boolean)
     : [];
 
+const buildDownloadFileName = (
+  fileName?: string,
+  planName?: string
+) => {
+  const baseName =
+    String(fileName || "").trim() ||
+    `${String(planName || "manual-workout-plan")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "") || "manual-workout-plan"}.pdf`;
+
+  return baseName.endsWith(".pdf") ? baseName : `${baseName}.pdf`;
+};
+
 export default function ManualPlanViewer() {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
@@ -80,6 +98,7 @@ export default function ManualPlanViewer() {
   const [videoModalVisible, setVideoModalVisible] = useState(false);
   const [selectedVideoUrl, setSelectedVideoUrl] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [documentDownloading, setDocumentDownloading] = useState(false);
 
   useEffect(() => {
     if (plan) {
@@ -153,6 +172,54 @@ export default function ManualPlanViewer() {
     return sections.filter((section) => section.items.length > 0);
   }, [plan]);
 
+  const downloadPlanDocument = async () => {
+    if (!plan?.sourceDocumentUrl) {
+      return;
+    }
+
+    try {
+      setDocumentDownloading(true);
+
+      const targetDirectory =
+        FileSystem.cacheDirectory || FileSystem.documentDirectory;
+
+      if (!targetDirectory) {
+        throw new Error("No writable directory available.");
+      }
+
+      const fileName = buildDownloadFileName(
+        plan.sourceDocumentName,
+        plan.planName
+      );
+      const fileUri = `${targetDirectory}${fileName}`;
+      const downloadResult = await FileSystem.downloadAsync(
+        plan.sourceDocumentUrl,
+        fileUri
+      );
+
+      if (downloadResult.status !== 200) {
+        throw new Error("Download failed.");
+      }
+
+      const canShare = await Sharing.isAvailableAsync();
+      if (canShare) {
+        await Sharing.shareAsync(downloadResult.uri, {
+          mimeType: plan.sourceDocumentMimeType || "application/pdf",
+          dialogTitle: "Workout plan PDF",
+        });
+      } else {
+        Alert.alert("Downloaded", "Workout plan saved successfully.");
+      }
+    } catch (error) {
+      Alert.alert(
+        "Download failed",
+        "Unable to download the workout plan right now. Please try again."
+      );
+    } finally {
+      setDocumentDownloading(false);
+    }
+  };
+
   if (!plan) {
     return (
       <SafeAreaView style={styles.screen} edges={["left", "right"]}>
@@ -195,13 +262,35 @@ export default function ManualPlanViewer() {
         </View>
 
         <View style={styles.heroCard}>
-          <View style={styles.heroBadge}>
-            <MaterialCommunityIcons
-              name="dumbbell"
-              size={16}
-              color={theme.colors.success}
-            />
-            <Text style={styles.heroBadgeText}>Manual Plan</Text>
+          <View style={styles.heroTopRow}>
+            <View style={styles.heroBadge}>
+              <MaterialCommunityIcons
+                name="dumbbell"
+                size={16}
+                color={theme.colors.success}
+              />
+              <Text style={styles.heroBadgeText}>Manual Plan</Text>
+            </View>
+
+            {plan.sourceDocumentUrl ? (
+              <TouchableOpacity
+                onPress={downloadPlanDocument}
+                disabled={documentDownloading}
+                accessibilityRole="button"
+                accessibilityLabel="Download workout plan PDF"
+                style={styles.downloadIconButton}
+              >
+                {documentDownloading ? (
+                  <ActivityIndicator size="small" color={theme.colors.success} />
+                ) : (
+                  <Ionicons
+                    name="download-outline"
+                    size={20}
+                    color={theme.colors.success}
+                  />
+                )}
+              </TouchableOpacity>
+            ) : null}
           </View>
 
           <Text style={styles.heroTitle}>{plan.planName}</Text>
@@ -663,10 +752,28 @@ const getStyles = (theme: ReturnType<typeof useGlobalTheme>, isDark: boolean) =>
       backgroundColor: theme.colors.greenLight,
       marginBottom: 14,
     },
+    heroTopRow: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+    },
     heroBadgeText: {
       color: theme.colors.success,
       fontSize: theme.fontSizes.small,
       fontFamily: theme.fonts.bold,
+    },
+    downloadIconButton: {
+      width: 42,
+      height: 42,
+      borderRadius: 21,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: isDark
+        ? theme.colors.backgroundCard
+        : theme.colors.backgroundSecondary,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      marginBottom: 14,
     },
     heroTitle: {
       color: theme.colors.text,
