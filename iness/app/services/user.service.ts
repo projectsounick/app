@@ -56,12 +56,14 @@ async function verifyLoginOtp(data: {
   email: string;
   otp: string;
   expoPushToken: string;
+  appPlatform?: "ios" | "android";
 }): Promise<ApiResponseInterface> {
   try {
     let response = await fetchWrapper.post(`${baseUrl}/user-otp-verify`, {
       email: data.email,
       otp: data.otp,
       expoPushToken: data.expoPushToken,
+      appPlatform: data.appPlatform,
     });
 
     return response;
@@ -229,11 +231,13 @@ async function getUserTrainers(): Promise<ApiResponseInterface> {
 async function googleSignIn(data: {
   idToken: string;
   expoPushToken?: string;
+  appPlatform?: "ios" | "android";
 }): Promise<ApiResponseInterface> {
   try {
     let response = await fetchWrapper.post(`${baseUrl}/google-signin`, {
       idToken: data.idToken,
       expoPushToken: data.expoPushToken,
+      appPlatform: data.appPlatform,
     });
     return response;
   } catch (error: any) {
@@ -251,6 +255,7 @@ async function appleSignIn(data: {
   email?: string;
   fullName?: { givenName?: string; familyName?: string };
   expoPushToken?: string;
+  appPlatform?: "ios" | "android";
 }): Promise<ApiResponseInterface> {
   try {
     let response = await fetchWrapper.post(`${baseUrl}/apple-signin`, {
@@ -259,6 +264,7 @@ async function appleSignIn(data: {
       email: data.email,
       fullName: data.fullName,
       expoPushToken: data.expoPushToken,
+      appPlatform: data.appPlatform,
     });
     return response;
   } catch (error: any) {

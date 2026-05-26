@@ -149,7 +149,10 @@ export default function NotificationPermissionBottomSheet() {
       });
     }
 
-    const response = await userService.updateUser({ expoPushToken: token });
+    const response = await userService.updateUser({
+      expoPushToken: token,
+      appPlatform: Platform.OS === "ios" ? "ios" : "android",
+    });
 
     if (response.success) {
       setModalFlag();

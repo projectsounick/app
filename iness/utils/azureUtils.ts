@@ -1,5 +1,27 @@
 type UploadProgressCallback = (progressPercent: number) => void;
 
+const EXTENSION_MIME_MAP: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+  pdf: "application/pdf",
+  mp4: "video/mp4",
+  mov: "video/quicktime",
+  m4v: "video/x-m4v",
+  webm: "video/webm",
+  "3gp": "video/3gpp",
+};
+
+const getFileExtension = (value?: string | null) => {
+  if (!value) return null;
+
+  const cleanValue = value.split("?")[0]?.split("#")[0] ?? "";
+  const match = cleanValue.match(/\.([a-z0-9]+)$/i);
+  return match ? match[1].toLowerCase() : null;
+};
+
 export const uploadToAzureFromExpo = async (
   fileUri: string,
   fileName: string,
@@ -7,7 +29,8 @@ export const uploadToAzureFromExpo = async (
   storageAccountName: string,
   containerName: string,
   folderName: string,
-  onProgress?: UploadProgressCallback
+  onProgress?: UploadProgressCallback,
+  mimeTypeHint?: string | null
 ): Promise<string> => {
   const blobUrl = `https://${storageAccountName}.blob.core.windows.net/${containerName}/${folderName}/${fileName}?${sasToken}`;
   let reportedProgress = 0;
@@ -28,13 +51,22 @@ export const uploadToAzureFromExpo = async (
   reportProgress(8);
   const fileBlob = await file.blob();
   reportProgress(12);
+  const inferredMimeType =
+    mimeTypeHint ||
+    fileBlob.type ||
+    EXTENSION_MIME_MAP[getFileExtension(fileName) || ""] ||
+    "application/octet-stream";
 
   // Determine if this is a video file
-  const isVideo = fileBlob.type.startsWith('video/') || fileName.endsWith('.mp4');
+  const isVideo =
+    inferredMimeType.startsWith("video/") ||
+    ["mp4", "mov", "m4v", "webm", "3gp"].includes(
+      getFileExtension(fileName) || ""
+    );
 
   const headers: Record<string, string> = {
     "x-ms-blob-type": "BlockBlob",
-    "Content-Type": fileBlob.type || "application/octet-stream",
+    "Content-Type": inferredMimeType,
     // Enable caching for faster loads (24 hours)
     "x-ms-blob-cache-control": "public, max-age=86400",
     // Force inline viewing for smooth streaming (critical!)
@@ -115,7 +147,7 @@ export const uploadToAzureFromExpo = async (
       statusText: response.statusText,
       error: errorText,
       fileName,
-      fileType: fileBlob.type
+      fileType: inferredMimeType
     });
     throw new Error(`Upload failed: ${response.status} ${response.statusText}`);
   }

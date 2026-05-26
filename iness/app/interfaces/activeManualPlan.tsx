@@ -22,6 +22,10 @@ export interface WorkoutPlanInterface {
   _id?: string;
   planName: string;
   description?: string;
+  goals?: string[];
+  importantNotes?: string[];
+  weekendRecommendations?: string[];
+  sourceText?: string;
   sun: EachexerciseItem[];
   mon: EachexerciseItem[];
   tue: EachexerciseItem[];

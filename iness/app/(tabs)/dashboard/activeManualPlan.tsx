@@ -58,6 +58,11 @@ const formatDate = (value?: string) => {
   });
 };
 
+const normalizeStringList = (values?: string[]) =>
+  Array.isArray(values)
+    ? values.map((value) => String(value || "").trim()).filter(Boolean)
+    : [];
+
 export default function ManualPlanViewer() {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
@@ -114,6 +119,38 @@ export default function ManualPlanViewer() {
       },
       { totalExercises: 0, totalSets: 0, activeDays: 0 }
     );
+  }, [plan]);
+
+  const planInfoSections = useMemo(() => {
+    if (!plan) {
+      return [];
+    }
+
+    const sections = [
+      {
+        key: "goals",
+        title: "Goals",
+        caption: "What this plan is designed to improve.",
+        icon: "flag-outline" as const,
+        items: normalizeStringList(plan.goals),
+      },
+      {
+        key: "importantNotes",
+        title: "Important notes",
+        caption: "Guidance to follow while doing the workouts.",
+        icon: "alert-circle-outline" as const,
+        items: normalizeStringList(plan.importantNotes),
+      },
+      {
+        key: "weekendRecommendations",
+        title: "Weekend recommendations",
+        caption: "Suggested activities outside the main training days.",
+        icon: "sunny-outline" as const,
+        items: normalizeStringList(plan.weekendRecommendations),
+      },
+    ];
+
+    return sections.filter((section) => section.items.length > 0);
   }, [plan]);
 
   if (!plan) {
@@ -203,6 +240,54 @@ export default function ManualPlanViewer() {
             </View>
           </View>
         </View>
+
+        {planInfoSections.length > 0 ? (
+          <View style={styles.planInfoSection}>
+            <View style={styles.planInfoSectionHeader}>
+              <Text style={styles.planInfoSectionTitle}>Plan details</Text>
+              <Text style={styles.planInfoSectionCaption}>
+                Extra guidance imported with this workout plan.
+              </Text>
+            </View>
+
+            {planInfoSections.map((section) => (
+              <View key={section.key} style={styles.planInfoCard}>
+                <View style={styles.planInfoCardHeader}>
+                  <View style={styles.planInfoIconWrap}>
+                    <Ionicons
+                      name={section.icon}
+                      size={18}
+                      color={theme.colors.success}
+                    />
+                  </View>
+                  <View style={styles.planInfoHeaderText}>
+                    <Text style={styles.planInfoCardTitle}>{section.title}</Text>
+                    <Text style={styles.planInfoCardCaption}>
+                      {section.caption}
+                    </Text>
+                  </View>
+                  <View style={styles.planInfoCountBadge}>
+                    <Text style={styles.planInfoCountText}>
+                      {section.items.length}
+                    </Text>
+                  </View>
+                </View>
+
+                <View style={styles.planInfoList}>
+                  {section.items.map((item, index) => (
+                    <View
+                      key={`${section.key}-${index}`}
+                      style={styles.planInfoListItem}
+                    >
+                      <View style={styles.planInfoBullet} />
+                      <Text style={styles.planInfoListText}>{item}</Text>
+                    </View>
+                  ))}
+                </View>
+              </View>
+            ))}
+          </View>
+        ) : null}
 
         <View style={styles.daySection}>
           <View style={styles.sectionHeader}>
@@ -649,6 +734,99 @@ const getStyles = (theme: ReturnType<typeof useGlobalTheme>, isDark: boolean) =>
       height: 1,
       backgroundColor: theme.colors.border,
       marginVertical: 12,
+    },
+    planInfoSection: {
+      marginTop: 22,
+      paddingHorizontal: 16,
+      gap: 12,
+    },
+    planInfoSectionHeader: {
+      paddingHorizontal: 4,
+    },
+    planInfoSectionTitle: {
+      color: theme.colors.text,
+      fontSize: theme.fontSizes.medium,
+      fontFamily: theme.fonts.bold,
+    },
+    planInfoSectionCaption: {
+      color: theme.colors.textSecondary,
+      fontSize: theme.fontSizes.small,
+      fontFamily: theme.fonts.regular,
+      marginTop: 4,
+      lineHeight: 18,
+    },
+    planInfoCard: {
+      backgroundColor: theme.colors.background,
+      borderRadius: 20,
+      borderWidth: 1,
+      borderColor: theme.colors.border,
+      padding: 16,
+      gap: 14,
+    },
+    planInfoCardHeader: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    planInfoIconWrap: {
+      width: 38,
+      height: 38,
+      borderRadius: 19,
+      backgroundColor: theme.colors.greenLight,
+      alignItems: "center",
+      justifyContent: "center",
+      marginRight: 12,
+    },
+    planInfoHeaderText: {
+      flex: 1,
+      paddingRight: 10,
+    },
+    planInfoCardTitle: {
+      color: theme.colors.text,
+      fontSize: theme.fontSizes.regular,
+      fontFamily: theme.fonts.bold,
+    },
+    planInfoCardCaption: {
+      color: theme.colors.textSecondary,
+      fontSize: theme.fontSizes.small,
+      fontFamily: theme.fonts.regular,
+      lineHeight: 18,
+      marginTop: 2,
+    },
+    planInfoCountBadge: {
+      minWidth: 32,
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: 999,
+      backgroundColor: theme.colors.backgroundSecondary,
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    planInfoCountText: {
+      color: theme.colors.text,
+      fontSize: theme.fontSizes.small,
+      fontFamily: theme.fonts.bold,
+    },
+    planInfoList: {
+      gap: 10,
+    },
+    planInfoListItem: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+    },
+    planInfoBullet: {
+      width: 7,
+      height: 7,
+      borderRadius: 999,
+      backgroundColor: theme.colors.success,
+      marginRight: 10,
+      marginTop: 7,
+    },
+    planInfoListText: {
+      flex: 1,
+      color: theme.colors.text,
+      fontSize: theme.fontSizes.regularSmall,
+      fontFamily: theme.fonts.regular,
+      lineHeight: 21,
     },
     daySection: {
       marginTop: 22,

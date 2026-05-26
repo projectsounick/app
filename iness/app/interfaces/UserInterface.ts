@@ -36,6 +36,10 @@ interface UserData {
     lastSync: Date;
   };
   expoPushToken: string | null;
+  appPlatform?: "ios" | "android";
+  versionModalClicked?: string;
+  iosVersionModalClicked?: string;
+  androidVersionModalClicked?: string;
   darkMode?: boolean;
   darkModeModalShown?: boolean;
 }

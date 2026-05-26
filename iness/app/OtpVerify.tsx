@@ -99,6 +99,7 @@ const OTPInputScreen = () => {
           email: pendingLoginResponse.data.email,
           otp: fullOtp,
           expoPushToken: pushToken,
+          appPlatform: Platform.OS === "ios" ? "ios" : "android",
         };
 
         const response = await callService(requestBody);

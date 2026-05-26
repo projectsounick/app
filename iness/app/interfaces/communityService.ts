@@ -3,6 +3,10 @@ interface Post {
   communityId: string;
   type: string;
   media?: string[];
+  previewImage?: string | null;
+  processingStatus?: "pending" | "processing" | "ready" | "failed";
+  processingError?: string | null;
+  streamUrl?: string | null;
   text?: string;
   isApproved: boolean;
 

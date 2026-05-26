@@ -1060,6 +1060,7 @@ export default function AppSettingsScreen() {
       if (!enabled) {
         const response = await userService.updateUser({
           expoPushToken: null,
+          appPlatform: Platform.OS === "ios" ? "ios" : "android",
         });
         if (response.success) {
           await asyncStorageUtils.updateUserDataInAsyncStorage({

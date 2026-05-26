@@ -40,6 +40,228 @@ dayjs.extend(relativeTime);
 
 const screenWidth = Dimensions.get("window").width;
 const COMMENTS_PAGE_SIZE = 10;
+const VIDEO_KEY_SEPARATOR = "::";
+const VIDEO_EXTENSIONS = new Set([
+  "mp4",
+  "mov",
+  "m4v",
+  "webm",
+  "3gp",
+  "mkv",
+  "m3u8",
+]);
+const defaultFeedVideoState = {
+  isPreparing: false,
+  isBuffering: false,
+  isPlaying: false,
+};
+
+const getMediaFileExtension = (value?: string | null) => {
+  if (!value) return null;
+
+  const cleanValue = value.split("?")[0]?.split("#")[0] ?? "";
+  const match = cleanValue.match(/\.([a-z0-9]+)$/i);
+  return match ? match[1].toLowerCase() : null;
+};
+
+const isLikelyVideoSource = (value?: string | null) => {
+  const extension = getMediaFileExtension(value);
+  return (
+    !!extension && VIDEO_EXTENSIONS.has(extension)
+  ) || /\/video\//i.test(value ?? "") || /video/i.test(value ?? "");
+};
+
+const buildVideoKey = (postId: string, index: number) =>
+  `${postId}${VIDEO_KEY_SEPARATOR}${index}`;
+
+const getPostIdFromVideoKey = (videoKey: string) =>
+  videoKey.split(VIDEO_KEY_SEPARATOR)[0] || null;
+
+type FeedVideoPlayerProps = {
+  videoKey: string;
+  playbackUrl: string;
+  posterUri?: string | null;
+  isActive: boolean;
+  showPreview: boolean;
+  onActivate: (videoKey: string) => void;
+  onDeactivate: (videoKey: string) => void;
+  styles: any;
+};
+
+const FeedVideoPlayer = ({
+  videoKey,
+  playbackUrl,
+  posterUri,
+  isActive,
+  showPreview,
+  onActivate,
+  onDeactivate,
+  styles,
+}: FeedVideoPlayerProps) => {
+  const videoRef = useRef<Video | null>(null);
+  const [playbackState, setPlaybackState] = useState(defaultFeedVideoState);
+  const [hasReadyFrame, setHasReadyFrame] = useState(false);
+  const shouldMountPlayer = isActive || showPreview;
+  const videoFileExtension = getMediaFileExtension(playbackUrl);
+  const previewResizeMode = isActive ? ResizeMode.CONTAIN : ResizeMode.COVER;
+
+  const updatePlaybackState = useCallback(
+    (updates: Partial<typeof defaultFeedVideoState>) => {
+      setPlaybackState((prev) => {
+        const next = { ...prev, ...updates };
+
+        if (
+          prev.isPreparing === next.isPreparing &&
+          prev.isBuffering === next.isBuffering &&
+          prev.isPlaying === next.isPlaying
+        ) {
+          return prev;
+        }
+
+        return next;
+      });
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (!shouldMountPlayer) {
+      setPlaybackState(defaultFeedVideoState);
+      setHasReadyFrame(false);
+    }
+  }, [shouldMountPlayer, playbackUrl, posterUri]);
+
+  if (!shouldMountPlayer) {
+    return (
+      <Pressable
+        style={styles.videoPlaceholder}
+        onPress={() => onActivate(videoKey)}
+      >
+        {posterUri ? (
+          <>
+            <Image
+              source={{ uri: posterUri }}
+              style={[styles.videoPosterImage, styles.videoPosterImageCover]}
+              resizeMode="cover"
+            />
+            <View style={styles.videoPosterScrim} />
+          </>
+        ) : null}
+        <View style={styles.playButtonCircle}>
+          <Ionicons name="play" size={48} color="#FFFFFF" />
+        </View>
+        <Text style={styles.videoPlaceholderText}>Tap to play video</Text>
+      </Pressable>
+    );
+  }
+
+  return (
+    <View style={styles.activeVideoWrapper}>
+      <Video
+        ref={videoRef}
+        source={{
+          uri: playbackUrl,
+          ...(videoFileExtension
+            ? { overrideFileExtensionAndroid: videoFileExtension }
+            : {}),
+        }}
+        style={styles.mediaImage}
+        resizeMode={previewResizeMode}
+        usePoster={!!posterUri && !hasReadyFrame}
+        posterSource={posterUri ? { uri: posterUri } : undefined}
+        posterStyle={styles.videoPosterImageCover}
+        useNativeControls={isActive}
+        shouldPlay={isActive}
+        isLooping={false}
+        progressUpdateIntervalMillis={750}
+        onLoadStart={() => {
+          if (!hasReadyFrame) {
+            updatePlaybackState({
+              isPreparing: true,
+              isBuffering: true,
+              isPlaying: false,
+            });
+          }
+        }}
+        onLoad={() => {
+          setHasReadyFrame(true);
+          updatePlaybackState({
+            isPreparing: false,
+            isBuffering: false,
+          });
+        }}
+        onReadyForDisplay={() => {
+          setHasReadyFrame(true);
+          updatePlaybackState({
+            isPreparing: false,
+            isBuffering: false,
+          });
+        }}
+        onPlaybackStatusUpdate={(status) => {
+          if (!status.isLoaded) {
+            return;
+          }
+
+          if (status.positionMillis >= 0) {
+            setHasReadyFrame(true);
+          }
+
+          updatePlaybackState({
+            isPreparing: false,
+            isBuffering: status.isBuffering,
+            isPlaying: status.isPlaying,
+          });
+
+          if (status.didJustFinish) {
+            onDeactivate(videoKey);
+          }
+        }}
+        onError={(error) => {
+          console.error("Feed video error:", error);
+          updatePlaybackState({
+            isPreparing: false,
+            isBuffering: false,
+            isPlaying: false,
+          });
+          onDeactivate(videoKey);
+        }}
+      />
+      {!isActive && (
+        <Pressable
+          style={styles.videoPreviewTapTarget}
+          onPress={() => onActivate(videoKey)}
+        >
+          {!hasReadyFrame && (
+            <View style={styles.videoPreviewLoadingOverlay}>
+              <ActivityIndicator size="small" color="#FFFFFF" />
+              <Text style={styles.videoPreviewLoadingText}>
+                Preparing preview...
+              </Text>
+            </View>
+          )}
+          <View style={styles.videoPlayOverlay}>
+            <View style={styles.playButtonCircle}>
+              <Ionicons name="play" size={48} color="#FFFFFF" />
+            </View>
+          </View>
+        </Pressable>
+      )}
+      {isActive && !hasReadyFrame && (playbackState.isPreparing || playbackState.isBuffering) && (
+        <View style={styles.videoBufferingOverlay}>
+          <View style={styles.bufferingContainer}>
+            <ActivityIndicator size="large" color="#FFFFFF" />
+            <Text style={styles.bufferingText}>Loading video...</Text>
+          </View>
+        </View>
+      )}
+      {isActive && hasReadyFrame && playbackState.isBuffering && (
+        <View style={styles.videoPlaybackBufferIndicator}>
+          <ActivityIndicator size="small" color="#FFFFFF" />
+        </View>
+      )}
+    </View>
+  );
+};
 
 const CommunityPosts = ({
   communityId,
@@ -74,7 +296,6 @@ const CommunityPosts = ({
     url: string;
     type: "image" | "video";
   } | null>(null);
-  const videoRefs = useRef<Record<string, any>>({});
   const [showMyPosts, setShowMyPosts] = useState(false);
   const [commentsMap, setCommentsMap] = useState<Record<string, any[]>>({});
   const [commentsPagination, setCommentsPagination] = useState<
@@ -90,8 +311,10 @@ const CommunityPosts = ({
   const [activeMediaIndex, setActiveMediaIndex] = useState<
     Record<string, number>
   >({});
-  const [playingVideoId, setPlayingVideoId] = useState<string | null>(null);
-  const [videoStatus, setVideoStatus] = useState<Record<string, any>>({});
+  const [activeVideoKey, setActiveVideoKey] = useState<string | null>(null);
+  const [visiblePostIds, setVisiblePostIds] = useState<Record<string, boolean>>(
+    {}
+  );
   const [showMenuForPost, setShowMenuForPost] = useState<string | null>(null);
   const [showTooltipForPost, setShowTooltipForPost] = useState<string | null>(
     null
@@ -109,6 +332,28 @@ const CommunityPosts = ({
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
   const styles = getStyles(theme, isDark);
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 65,
+  });
+  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+    const nextVisiblePostIds: Record<string, boolean> = {};
+
+    viewableItems.forEach(({ item }: any) => {
+      if (item?._id) {
+        nextVisiblePostIds[item._id] = true;
+      }
+    });
+
+    setVisiblePostIds(nextVisiblePostIds);
+    setActiveVideoKey((currentVideoKey) => {
+      if (!currentVideoKey) {
+        return currentVideoKey;
+      }
+
+      const postId = getPostIdFromVideoKey(currentVideoKey);
+      return postId && nextVisiblePostIds[postId] ? currentVideoKey : null;
+    });
+  });
 
   const options = ["All Posts", "My Posts"];
 
@@ -194,6 +439,8 @@ const CommunityPosts = ({
     setCommentsPagination({});
     setVisibleComments({});
     setNewComments({});
+    setActiveVideoKey(null);
+    setVisiblePostIds({});
     setPage(1);
     setHasMore(true);
   }, [communityId]);
@@ -214,25 +461,14 @@ const CommunityPosts = ({
         setPosts([]);
         setIsLoading(false);
         return () => {
-          Object.values(videoRefs.current).forEach((ref) => {
-            if (ref) {
-              ref.pauseAsync?.().catch(() => {});
-            }
-          });
-          setPlayingVideoId(null);
+          setActiveVideoKey(null);
         };
       }
 
       setIsLoading(true);
       fetchPosts(1, false);
       return () => {
-        // Screen is unfocused (navigated away) - stop all videos
-        Object.values(videoRefs.current).forEach((ref) => {
-          if (ref) {
-            ref.pauseAsync?.().catch(() => {});
-          }
-        });
-        setPlayingVideoId(null);
+        setActiveVideoKey(null);
       };
     }, [communityId, showMyPosts, fetchPosts, setPosts])
   );
@@ -484,7 +720,7 @@ const CommunityPosts = ({
       // If post has media (image/video), show preview with overlay
       if (post.media && post.media.length > 0) {
         const mediaUrl = post.media[0];
-        const isVideo = post.type === "video" || mediaUrl.includes("video") || mediaUrl.endsWith(".mp4");
+        const isVideo = post.type === "video" || isLikelyVideoSource(mediaUrl);
 
         if (!isVideo) {
           // For images: show preview modal with logo and Instagram handle overlay
@@ -563,34 +799,74 @@ const CommunityPosts = ({
   };
 
 
-  const handleVideoPlayPause = async (postId: string) => {
-    const videoRef = videoRefs.current[postId];
+  const renderVideoStatusCard = (post: Post) => {
+    const status = post.processingStatus || "pending";
+    const title =
+      status === "failed"
+        ? "Video processing failed"
+        : status === "processing"
+          ? "Optimizing video..."
+          : "Video queued";
+    const description =
+      status === "failed"
+        ? post.processingError ||
+          "The optimized video could not be prepared yet. Please try uploading again."
+        : status === "processing"
+          ? "We are creating the faster playback version in the background."
+          : "Upload finished. The optimized video will appear here shortly.";
 
-    if (playingVideoId === postId) {
-      // Pause current video
-      if (videoRef) {
-        await videoRef.pauseAsync?.().catch(() => {});
-      }
-      setPlayingVideoId(null);
-    } else {
-      // Pause any other playing video first
-      if (playingVideoId && videoRefs.current[playingVideoId]) {
-        await videoRefs.current[playingVideoId].pauseAsync?.().catch(() => {});
-      }
-      // Play this video
-      if (videoRef) {
-        await videoRef.playAsync?.().catch(() => {});
-      }
-      setPlayingVideoId(postId);
-    }
+    return (
+      <View style={styles.videoPlaceholder}>
+        {post.previewImage ? (
+          <>
+            <Image
+              source={{ uri: post.previewImage }}
+              style={[styles.videoPosterImage, styles.videoPosterImageCover]}
+              resizeMode="cover"
+            />
+            <View style={styles.videoPosterScrim} />
+          </>
+        ) : null}
+        {status === "failed" ? (
+          <Ionicons name="alert-circle-outline" size={52} color="#FFFFFF" />
+        ) : (
+          <ActivityIndicator size="large" color="#FFFFFF" />
+        )}
+        <Text style={styles.videoPlaceholderText}>{title}</Text>
+        <Text style={styles.videoStatusText}>{description}</Text>
+      </View>
+    );
   };
 
-  const renderMedia = (postId: string, media: string[], type: string) => {
-    if (!media?.length) return null;
+  const renderMedia = (post: Post) => {
+    const postId = post._id || "";
+    const media = post.media || [];
+    const type = post.type;
+
+    if (!postId) {
+      return null;
+    }
+
+    if (!media.length) {
+      if (type === "video" && post.processingStatus !== "ready") {
+        return renderVideoStatusCard(post);
+      }
+
+      return null;
+    }
 
     const handleScroll = (event: any) => {
       const index = Math.round(event.nativeEvent.contentOffset.x / screenWidth);
       setActiveMediaIndex((prev) => ({ ...prev, [postId]: index }));
+
+      const nextVideoKey = buildVideoKey(postId, index);
+      if (
+        activeVideoKey &&
+        getPostIdFromVideoKey(activeVideoKey) === postId &&
+        activeVideoKey !== nextVideoKey
+      ) {
+        setActiveVideoKey(null);
+      }
     };
 
     return (
@@ -605,60 +881,34 @@ const CommunityPosts = ({
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
           scrollEventThrottle={16}
+          initialNumToRender={1}
+          maxToRenderPerBatch={1}
+          windowSize={3}
+          removeClippedSubviews={true}
           renderItem={({ item: mediaUrl, index }) => {
-            const isVideo =
-              mediaUrl.endsWith(".mp4") ||
-              mediaUrl.includes("video") ||
-              type === "video";
-            const videoKey = `${postId}-${index}`;
+            const isVideo = type === "video" || isLikelyVideoSource(mediaUrl);
+            const videoKey = buildVideoKey(postId, index);
+            const currentMediaIndex = activeMediaIndex[postId] || 0;
+            const shouldShowPreview =
+              !!visiblePostIds[postId] && currentMediaIndex === index;
 
             return (
               <View style={styles.mediaItemWrapper}>
                 {isVideo ? (
-                  <View style={{ position: 'relative', width: '100%', height: '100%' }}>
-                    <Video
-                      ref={(ref) => {
-                        if (ref) {
-                          videoRefs.current[videoKey] = ref;
-                        }
-                      }}
-                      source={{
-                        uri: mediaUrl,
-                        overrideFileExtensionAndroid: "mp4",
-                      }}
-                      style={styles.mediaImage}
-                      resizeMode={ResizeMode.CONTAIN}
-                      useNativeControls={true}
-                      shouldPlay={false}
-                      isLooping={false}
-                      progressUpdateIntervalMillis={500}
-                      onPlaybackStatusUpdate={(status) => {
-                        if (status.isLoaded) {
-                          setVideoStatus((prev) => ({
-                            ...prev,
-                            [videoKey]: status,
-                          }));
-                        }
-                      }}
-                    />
-                    {/* Show buffering loader when video is loading/buffering */}
-                    {videoStatus[videoKey]?.isBuffering && (
-                      <View style={styles.videoBufferingOverlay}>
-                        <View style={styles.bufferingContainer}>
-                          <ActivityIndicator size="large" color="#FFFFFF" />
-                          <Text style={styles.bufferingText}>Loading video...</Text>
-                        </View>
-                      </View>
-                    )}
-                    {/* Show play button only when video hasn't started yet */}
-                    {(!videoStatus[videoKey] || (!videoStatus[videoKey].isPlaying && !videoStatus[videoKey].isBuffering)) && (
-                      <View style={styles.videoPlayOverlay}>
-                        <View style={styles.playButtonCircle}>
-                          <Ionicons name="play" size={48} color="#FFFFFF" />
-                        </View>
-                      </View>
-                    )}
-                  </View>
+                  <FeedVideoPlayer
+                    videoKey={videoKey}
+                    playbackUrl={post.streamUrl || mediaUrl}
+                    posterUri={post.previewImage}
+                    isActive={activeVideoKey === videoKey}
+                    showPreview={shouldShowPreview}
+                    onActivate={setActiveVideoKey}
+                    onDeactivate={(finishedVideoKey) => {
+                      setActiveVideoKey((currentKey) =>
+                        currentKey === finishedVideoKey ? null : currentKey
+                      );
+                    }}
+                    styles={styles}
+                  />
                 ) : (
                   <Pressable onPress={() => openModal(mediaUrl, "image")}>
                     <Image
@@ -739,7 +989,7 @@ const CommunityPosts = ({
       )}
 
       {/* Media - Full width Instagram style */}
-      {renderMedia(item._id, item.media, item.type)}
+      {renderMedia(item)}
 
       {/* Actions Row */}
       <View style={styles.actions}>
@@ -1007,6 +1257,12 @@ const CommunityPosts = ({
             onEndReached={handleEndReached}
             onEndReachedThreshold={0.5}
             onMomentumScrollBegin={() => setOnEndReachedCalledDuringMomentum(false)}
+            onViewableItemsChanged={onViewableItemsChanged.current}
+            viewabilityConfig={viewabilityConfig.current}
+            initialNumToRender={4}
+            maxToRenderPerBatch={4}
+            windowSize={5}
+            removeClippedSubviews={true}
             ListFooterComponent={
               loadingMore ? (
                 <View style={styles.loadingFooter}>
@@ -1247,6 +1503,81 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     width: "100%",
     height: "100%",
   },
+  activeVideoWrapper: {
+    position: "relative",
+    width: "100%",
+    height: "100%",
+  },
+  videoPreviewTapTarget: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  videoPlaceholder: {
+    width: screenWidth,
+    height: screenWidth,
+    backgroundColor: theme.colors.black,
+    position: "relative",
+    overflow: "hidden",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
+    paddingHorizontal: 24,
+  },
+  videoPosterImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: "100%",
+    height: "100%",
+  },
+  videoPosterImageCover: {
+    resizeMode: "cover",
+  },
+  videoPosterScrim: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
+  },
+  videoPlaceholderText: {
+    color: "#FFFFFF",
+    fontSize: theme.fontSizes.regular,
+    fontFamily: theme.fonts.medium,
+    textAlign: "center",
+    zIndex: 1,
+  },
+  videoStatusText: {
+    color: "rgba(255,255,255,0.92)",
+    fontSize: theme.fontSizes.regularSmall,
+    fontFamily: theme.fonts.regular,
+    textAlign: "center",
+    zIndex: 1,
+    lineHeight: 20,
+  },
+  videoPreviewLoadingOverlay: {
+    position: "absolute",
+    top: 16,
+    left: 16,
+    right: 16,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+  },
+  videoPreviewLoadingText: {
+    color: "#FFFFFF",
+    fontSize: theme.fontSizes.regularSmall,
+    fontFamily: theme.fonts.medium,
+  },
   videoPlayOverlay: {
     position: "absolute",
     top: 0,
@@ -1267,6 +1598,7 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     alignItems: "center",
     borderWidth: 3,
     borderColor: "#FFFFFF",
+    zIndex: 1,
   },
   videoBufferingOverlay: {
     position: "absolute",
@@ -1296,6 +1628,17 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     fontWeight: "700",
     fontFamily: theme.fonts.bold,
     textAlign: "center",
+  },
+  videoPlaybackBufferIndicator: {
+    position: "absolute",
+    right: 14,
+    bottom: 14,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(0, 0, 0, 0.78)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   dotsContainer: {
     position: "absolute",

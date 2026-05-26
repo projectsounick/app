@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
+  Alert,
   Modal,
+  NativeEventEmitter,
+  NativeModules,
   View,
   Text,
   TouchableOpacity,
@@ -11,7 +15,6 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   FlatList,
-  Alert,
   Platform,
   KeyboardAvoidingView,
   ScrollView,
@@ -19,27 +22,82 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { ResizeMode, Video } from "expo-av";
-import { ActivityIndicator } from "react-native-paper";
+import { isValidFile, showEditor } from "react-native-video-trim";
 
-import { uploadToAzureFromExpo } from "@/utils/azureUtils";
-import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import { userService } from "../services/user.service";
-import { Post } from "../interfaces/communityService";
-import useServiceWithSnackbar from "@/hooks/usePostDataHook";
-import { communityService } from "../services/community.service";
-import { useGlobalTheme } from "@/app/Theme/ThemeContext";
+import {
+  CommunityDraftMediaItem,
+  CommunityPostDraftPayload,
+} from "../interfaces/communityComposer";
+import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
 
 const screenWidth = Dimensions.get("window").width;
 
+type SelectedMediaMeta = {
+  kind: "image" | "video";
+  fileName?: string | null;
+  mimeType?: string | null;
+  previewUri?: string | null;
+};
+
+const EXTENSION_MIME_MAP: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  gif: "image/gif",
+  mp4: "video/mp4",
+  mov: "video/quicktime",
+  m4v: "video/x-m4v",
+  webm: "video/webm",
+  "3gp": "video/3gpp",
+};
+
+const getFileExtension = (value?: string | null) => {
+  if (!value) return null;
+
+  const cleanValue = value.split("?")[0]?.split("#")[0] ?? "";
+  const match = cleanValue.match(/\.([a-z0-9]+)$/i);
+  return match ? match[1].toLowerCase() : null;
+};
+
+const normalizeLocalFileUri = (value: string) => {
+  if (!value) return value;
+  if (value.startsWith("file://") || value.startsWith("content://")) {
+    return value;
+  }
+
+  return `file://${value}`;
+};
+
+const loadVideoThumbnailsModule = () => {
+  try {
+    return require("expo-video-thumbnails") as {
+      getThumbnailAsync: (
+        uri: string,
+        options: { quality?: number; time?: number }
+      ) => Promise<{ uri: string }>;
+    };
+  } catch {
+    return null;
+  }
+};
+
 interface CustomPostModalProps {
-  setPosts: any;
   communityId: any;
+  onSubmitDraft: (draft: CommunityPostDraftPayload) => void;
 }
 
 const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostModalProps>(
-  ({ setPosts, communityId }, ref) => {
+  ({ communityId, onSubmitDraft }, ref) => {
   const theme = useGlobalTheme();
+  const { isDark } = useTheme();
   const styles = getStyles(theme);
+  const mediaRef = useRef<string[]>([]);
+  const editingSourceUriRef = useRef<string | null>(null);
+  const videoThumbnailsModuleRef = useRef(loadVideoThumbnailsModule());
+  const videoTrimEmitterRef = useRef<NativeEventEmitter | null>(
+    NativeModules.VideoTrim ? new NativeEventEmitter(NativeModules.VideoTrim) : null
+  );
   const [modalVisible, setModalVisible] = useState(false);
 
   React.useImperativeHandle(ref, () => ({
@@ -50,17 +108,18 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
   );
   const [caption, setCaption] = useState("");
   const [media, setMedia] = useState<string[]>([]);
+  const [mediaMetadata, setMediaMetadata] = useState<
+    Record<string, SelectedMediaMeta>
+  >({});
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
   const [keyboardHeight, setKeyboardHeight] = useState(0);
-  const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
+  const [isEditingVideo, setIsEditingVideo] = useState(false);
+  const [isPickingMedia, setIsPickingMedia] = useState(false);
   const [videoPreviewLoading, setVideoPreviewLoading] = useState<
     Record<string, boolean>
   >({});
-
-  const { loading, callService, setLoading } = useServiceWithSnackbar(
-    communityService.createPost
-  );
+  const canGenerateVideoThumbnails =
+    !!videoThumbnailsModuleRef.current?.getThumbnailAsync;
 
   useEffect(() => {
     const keyboardWillShow = Keyboard.addListener(
@@ -83,18 +142,175 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
   }, []);
 
   useEffect(() => {
-    if (postType !== "video") {
-      setVideoPreviewLoading({});
+    mediaRef.current = media;
+  }, [media]);
+
+  const resetComposer = useCallback(() => {
+    setModalVisible(false);
+    setPostType(null);
+    setMedia([]);
+    setMediaMetadata({});
+    setCaption("");
+    setCurrentMediaIndex(0);
+    setIsEditingVideo(false);
+    setIsPickingMedia(false);
+    setVideoPreviewLoading({});
+    editingSourceUriRef.current = null;
+  }, []);
+
+  const generateVideoPreview = useCallback(async (videoUri: string) => {
+    const normalizedUri = normalizeLocalFileUri(videoUri);
+    const videoThumbnailsModule = videoThumbnailsModuleRef.current;
+
+    if (!videoThumbnailsModule?.getThumbnailAsync) {
+      setVideoPreviewLoading((prev) => ({
+        ...prev,
+        [normalizedUri]: false,
+      }));
       return;
     }
 
-    setVideoPreviewLoading(
-      media.reduce<Record<string, boolean>>((acc, uri) => {
-        acc[uri] = true;
-        return acc;
-      }, {})
-    );
-  }, [media, postType]);
+    setVideoPreviewLoading((prev) => ({
+      ...prev,
+      [normalizedUri]: true,
+    }));
+
+    try {
+      let previewUri: string | null = null;
+      let lastError: unknown = null;
+
+      for (const time of [500, 0]) {
+        try {
+          const { uri } = await videoThumbnailsModule.getThumbnailAsync(
+            normalizedUri,
+            {
+              quality: 0.7,
+              time,
+            }
+          );
+          previewUri = uri;
+          break;
+        } catch (error) {
+          lastError = error;
+        }
+      }
+
+      if (!previewUri) {
+        throw lastError || new Error("Unable to build preview thumbnail.");
+      }
+
+      setMediaMetadata((prev) => {
+        const existing = prev[normalizedUri];
+
+        if (!existing || existing.kind !== "video") {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          [normalizedUri]: {
+            ...existing,
+            previewUri,
+          },
+        };
+      });
+    } catch (error) {
+      console.warn("Failed to generate community video preview", error);
+      setMediaMetadata((prev) => {
+        const existing = prev[normalizedUri];
+
+        if (!existing || existing.kind !== "video") {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          [normalizedUri]: {
+            ...existing,
+            previewUri: null,
+          },
+        };
+      });
+    } finally {
+      setVideoPreviewLoading((prev) => ({
+        ...prev,
+        [normalizedUri]: false,
+      }));
+    }
+  }, []);
+
+  const replaceSingleVideoUri = useCallback((nextUri: string) => {
+    const normalizedUri = normalizeLocalFileUri(nextUri);
+    const previousUri =
+      editingSourceUriRef.current || mediaRef.current[0] || null;
+
+    setMedia([normalizedUri]);
+    setCurrentMediaIndex(0);
+    setVideoPreviewLoading({ [normalizedUri]: true });
+    setMediaMetadata((prev) => {
+      const next = { ...prev };
+
+      if (previousUri && previousUri !== normalizedUri) {
+        delete next[previousUri];
+      }
+
+      next[normalizedUri] = {
+        kind: "video",
+        fileName:
+          normalizedUri.split("/").pop()?.split("?")[0] ||
+          `edited-video-${Date.now()}.mp4`,
+        mimeType:
+          EXTENSION_MIME_MAP[getFileExtension(normalizedUri) || ""] ||
+          "video/mp4",
+        previewUri: null,
+      };
+
+      return next;
+    });
+    void generateVideoPreview(normalizedUri);
+  }, [generateVideoPreview]);
+
+  useEffect(() => {
+    const emitter = videoTrimEmitterRef.current;
+    if (!emitter) {
+      return;
+    }
+
+    const subscription = emitter.addListener("VideoTrim", (event: any) => {
+      if (!event?.name) {
+        return;
+      }
+
+      switch (event.name) {
+        case "onFinishTrimming":
+          if (event.outputPath) {
+            replaceSingleVideoUri(event.outputPath);
+          }
+          setIsEditingVideo(false);
+          editingSourceUriRef.current = null;
+          break;
+        case "onCancel":
+        case "onHide":
+          setIsEditingVideo(false);
+          editingSourceUriRef.current = null;
+          break;
+        case "onError":
+          setIsEditingVideo(false);
+          editingSourceUriRef.current = null;
+          Alert.alert(
+            "Video edit failed",
+            event.message || "Unable to edit this video right now."
+          );
+          break;
+        default:
+          break;
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
+  }, [replaceSingleVideoUri]);
 
   const handleScroll = (event: any) => {
     const itemWidth = screenWidth - 40 + 12; // width + gap
@@ -104,34 +320,178 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
   };
 
   const handleUploadMedia = async () => {
-    // ✅ Only ask for permission on Android
-    if (Platform.OS === "android") {
-      const { status } =
-        await ImagePicker.requestMediaLibraryPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission Required", "We need access to your gallery.");
+    setIsPickingMedia(true);
+
+    try {
+      // ✅ Only ask for permission on Android
+      if (Platform.OS === "android") {
+        const { status } =
+          await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== "granted") {
+          Alert.alert("Permission Required", "We need access to your gallery.");
+          return;
+        }
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: postType === "video" ? ["videos"] : ["images"],
+        allowsMultipleSelection: postType !== "video",
+        quality: 1,
+        ...(Platform.OS === "ios" && postType === "video"
+          ? {
+              preferredAssetRepresentationMode:
+                ImagePicker.UIImagePickerPreferredAssetRepresentationMode.Compatible,
+              videoExportPreset: ImagePicker.VideoExportPreset.H264_1280x720,
+            }
+          : {}),
+      });
+
+      if (result.canceled) {
         return;
       }
+
+      const selectedAssets =
+        postType === "video" ? result.assets.slice(0, 1) : result.assets;
+      const normalizedAssets = selectedAssets.map((asset) => {
+        const normalizedUri =
+          asset.type === "video"
+            ? normalizeLocalFileUri(asset.uri)
+            : asset.uri;
+
+        return {
+          ...asset,
+          normalizedUri,
+        };
+      });
+      const selectedUris = normalizedAssets.map((asset) => asset.normalizedUri);
+      setCurrentMediaIndex(0);
+      setMedia((prev) =>
+        postType === "video" ? selectedUris : [...prev, ...selectedUris]
+      );
+      if (postType === "video" && canGenerateVideoThumbnails) {
+        setVideoPreviewLoading(
+          selectedUris.reduce<Record<string, boolean>>((acc, uri) => {
+            acc[uri] = true;
+            return acc;
+          }, {})
+        );
+      }
+      setMediaMetadata((prev) => {
+        const next = { ...prev };
+
+        if (postType === "video") {
+          mediaRef.current.forEach((uri) => {
+            delete next[uri];
+          });
+        }
+
+        normalizedAssets.forEach((asset) => {
+          next[asset.normalizedUri] = {
+            kind: asset.type === "video" ? "video" : "image",
+            fileName: asset.fileName,
+            mimeType: asset.mimeType ?? null,
+            previewUri: asset.type === "video" ? null : asset.normalizedUri,
+          };
+        });
+
+        return next;
+      });
+
+      const previewTasks = normalizedAssets
+        .filter((asset) => asset.type === "video" && canGenerateVideoThumbnails)
+        .map((asset) => generateVideoPreview(asset.normalizedUri));
+
+      if (previewTasks.length > 0) {
+        await Promise.all(previewTasks);
+      }
+    } finally {
+      setIsPickingMedia(false);
+    }
+  };
+
+  const handleEditVideo = async () => {
+    const currentVideoUri = media[0];
+
+    if (!currentVideoUri) {
+      Alert.alert("Video missing", "Pick a video before opening the editor.");
+      return;
     }
 
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: postType === "video" ? ["videos"] : ["images"],
-      allowsMultipleSelection: true,
-      quality: 1,
-    });
+    if (!NativeModules.VideoTrim) {
+      Alert.alert(
+        "Rebuild required",
+        "Video editing needs the new native package. Rebuild your development app once and then it will work here."
+      );
+      return;
+    }
 
-    if (!result.canceled) {
-      const selectedUris = result.assets.map((asset) => asset.uri);
-      setMedia((prev) => [...prev, ...selectedUris]);
+    try {
+      const validation = await isValidFile(currentVideoUri);
+      if (!validation?.isValid || validation.fileType !== "video") {
+        Alert.alert(
+          "Unsupported video",
+          "This file could not be opened in the video editor."
+        );
+        return;
+      }
+
+      editingSourceUriRef.current = currentVideoUri;
+      setIsEditingVideo(true);
+      showEditor(currentVideoUri, {
+        saveToPhoto: false,
+        openDocumentsOnFinish: false,
+        openShareSheetOnFinish: false,
+        closeWhenFinish: true,
+        enableCancelDialog: true,
+        headerText: "Edit your clip",
+        saveButtonText: "Done",
+        cancelButtonText: "Cancel",
+        trimmingText: "Applying your video changes...",
+        enableCancelTrimming: true,
+        cancelTrimmingButtonText: "Stop",
+        theme: isDark ? "dark" : "light",
+      });
+    } catch (error: any) {
+      setIsEditingVideo(false);
+      editingSourceUriRef.current = null;
+      Alert.alert(
+        "Video editor unavailable",
+        error?.message || "Unable to open the editor right now."
+      );
     }
   };
 
   const handleRemoveMedia = (index: number) => {
+    const removedUri = media[index];
+    const nextMediaLength = Math.max(0, media.length - 1);
+    if (nextMediaLength === 0) {
+      setCurrentMediaIndex(0);
+    } else if (currentMediaIndex >= nextMediaLength) {
+      setCurrentMediaIndex(nextMediaLength - 1);
+    }
     setMedia((prev) => prev.filter((_, i) => i !== index));
+    setVideoPreviewLoading((prev) => {
+      if (!removedUri) {
+        return prev;
+      }
+
+      const next = { ...prev };
+      delete next[removedUri];
+      return next;
+    });
+    setMediaMetadata((prev) => {
+      if (!removedUri) {
+        return prev;
+      }
+
+      const next = { ...prev };
+      delete next[removedUri];
+      return next;
+    });
   };
 
-  const handlePost = async () => {
-    if (!postType || (!caption && media.length === 0)) return;
+  const handlePost = () => {
+    if (!postType || (!trimmedCaption && media.length === 0)) return;
 
     if (!communityId) {
       Alert.alert(
@@ -141,114 +501,44 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
       return;
     }
 
-    setLoading(true);
-    try {
-      const storageDetails =
-        await userService.getStorageAccountDetails("community");
-      if (!storageDetails.success) {
-        alert("Server error, try again.");
-        return;
-      }
+    const draftMedia: CommunityDraftMediaItem[] = media.map((uri) => {
+      const metadata = mediaMetadata[uri];
 
-      const { storageAccountName, sasToken } = storageDetails.data;
-      const userData =
-        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-
-      if (!userData.exists) {
-        alert("User not found.");
-        return;
-      }
-
-      const userId = userData.data._id;
-
-      let uploadedUrls: string[] = [];
-
-      if (postType !== "text" && media.length > 0) {
-        setIsUploading(true);
-        setUploadProgress(0);
-
-        // Upload files sequentially with progress tracking
-        for (let i = 0; i < media.length; i++) {
-          const fileUri = media[i];
-          const type = fileUri.endsWith(".mp4") ? "video" : "image";
-          const ext =
-            fileUri.split(".").pop() || (type === "video" ? "mp4" : "jpg");
-          const originalFileName =
-            fileUri.split("/").pop() || `file-${Date.now()}.${ext}`;
-          const fileName = `${userId}_${originalFileName}`;
-
-          console.log(`📤 Uploading ${i + 1}/${media.length}: ${type}`);
-
-          try {
-            const uploadedUrl = await uploadToAzureFromExpo(
-              fileUri,
-              fileName,
-              sasToken,
-              storageAccountName,
-              "admin-data",
-              "community",
-              (fileProgress) => {
-                const overallProgress = ((i + fileProgress / 100) / media.length) * 100;
-                setUploadProgress(Math.max(1, Math.round(overallProgress)));
-              }
-            );
-
-            uploadedUrls.push(uploadedUrl);
-            setUploadProgress(Math.round(((i + 1) / media.length) * 100));
-            console.log(`✅ Upload ${i + 1}/${media.length} complete`);
-          } catch (uploadError: any) {
-            console.error(`Failed to upload ${type}:`, uploadError);
-            setIsUploading(false);
-            Alert.alert(
-              "Upload Failed",
-              `Failed to upload ${type} ${i + 1}/${media.length}. ${uploadError.message || 'Please try again.'}`
-            );
-            throw uploadError; // Re-throw to stop the process
-          }
-        }
-
-        setIsUploading(false);
-      }
-
-      const post: Post = {
-        communityId: communityId,
-        type: postType,
-        media: uploadedUrls,
-        text: caption,
-        isActive: true,
-        isApproved: true,
-        createdBy: userId,
+      return {
+        uri,
+        kind:
+          metadata?.kind || (postType === "video" ? "video" : "image"),
+        fileName:
+          metadata?.fileName ||
+          uri.split("/").pop()?.split("?")[0] ||
+          null,
+        mimeType:
+          metadata?.mimeType ||
+          EXTENSION_MIME_MAP[getFileExtension(uri) || ""] ||
+          null,
+        previewUri: metadata?.previewUri || null,
       };
+    });
 
-      let response = await callService(post);
-
-      if (response.success) {
-        const newPost = {
-          ...response.data,
-          likeCount: 0,
-          likedByUser: false,
-          commentCount: 0,
-        };
-
-        setPosts((prev: any) => [newPost, ...prev]);
-      }
-    } catch (err) {
-      console.error("Post error:", err);
-    } finally {
-      setLoading(false);
-      setModalVisible(false);
-      setMedia([]);
-      setCaption("");
-      setPostType(null);
-    }
+    onSubmitDraft({
+      communityId: String(communityId),
+      type: postType,
+      text: trimmedCaption,
+      media: draftMedia,
+    });
+    resetComposer();
   };
 
   const handleClose = () => {
-    setModalVisible(false);
-    setPostType(null);
-    setMedia([]);
-    setCaption("");
+    resetComposer();
   };
+
+  const trimmedCaption = caption.trim();
+  const canSubmit =
+    !!postType &&
+    (trimmedCaption.length > 0 || media.length > 0) &&
+    !isEditingVideo &&
+    !isPickingMedia;
 
   return (
     <>
@@ -310,6 +600,10 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                         onPress={() => {
                           setPostType(type as any);
                           setMedia([]);
+                          setMediaMetadata({});
+                          setCurrentMediaIndex(0);
+                          setVideoPreviewLoading({});
+                          setIsEditingVideo(false);
                         }}
                       >
                         <View
@@ -347,6 +641,13 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                         value={caption}
                         onChangeText={setCaption}
                       />
+                      {(postType === "image" || postType === "video") && (
+                        <Text style={styles.uploadHintText}>
+                          Nothing uploads yet. We only start uploading after you
+                          tap Post, and the feed will keep showing progress while
+                          you browse.
+                        </Text>
+                      )}
                     </View>
                   )}
 
@@ -369,45 +670,64 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                           nestedScrollEnabled={true}
                           directionalLockEnabled={true}
                           renderItem={({ item, index }) => (
-                            <View 
+                            <View
                               style={[
                                 styles.mediaItem,
                                 { marginRight: index === media.length - 1 ? 0 : 12 }
                               ]}
                             >
                               {postType === "video" ? (
-                                <>
-                                  <Video
-                                    source={{ uri: item }}
-                                    style={styles.media}
-                                    useNativeControls
-                                    resizeMode={ResizeMode.CONTAIN}
-                                    onLoadStart={() =>
-                                      setVideoPreviewLoading((prev) => ({
-                                        ...prev,
-                                        [item]: true,
-                                      }))
-                                    }
-                                    onLoad={() =>
-                                      setVideoPreviewLoading((prev) => ({
-                                        ...prev,
-                                        [item]: false,
-                                      }))
-                                    }
-                                    onReadyForDisplay={() =>
-                                      setVideoPreviewLoading((prev) => ({
-                                        ...prev,
-                                        [item]: false,
-                                      }))
-                                    }
-                                    onError={() =>
-                                      setVideoPreviewLoading((prev) => ({
-                                        ...prev,
-                                        [item]: false,
-                                      }))
-                                    }
-                                  />
-                                </>
+                                <View style={styles.videoPreviewFrame}>
+                                  {mediaMetadata[item]?.previewUri ? (
+                                    <Image
+                                      source={{
+                                        uri: mediaMetadata[item]?.previewUri || item,
+                                      }}
+                                      style={styles.media}
+                                      resizeMode="contain"
+                                    />
+                                  ) : (
+                                    <View
+                                      style={[
+                                        styles.media,
+                                        styles.videoPreviewPlaceholder,
+                                      ]}
+                                    >
+                                      <Ionicons
+                                        name="videocam-outline"
+                                        size={36}
+                                        color={theme.colors.textMuted}
+                                      />
+                                      <Text style={styles.videoPreviewPlaceholderText}>
+                                        {videoPreviewLoading[item]
+                                          ? "Preparing preview..."
+                                          : "Preview will appear here"}
+                                      </Text>
+                                    </View>
+                                  )}
+
+                                  {!mediaMetadata[item]?.previewUri &&
+                                  !videoPreviewLoading[item] &&
+                                  !canGenerateVideoThumbnails ? (
+                                    <Video
+                                      source={{ uri: item }}
+                                      style={styles.media}
+                                      useNativeControls
+                                      resizeMode={ResizeMode.CONTAIN}
+                                      shouldPlay={false}
+                                      isLooping={false}
+                                      isMuted
+                                    />
+                                  ) : null}
+
+                                  <View style={styles.videoPreviewBadge}>
+                                    <Ionicons
+                                      name="play"
+                                      size={18}
+                                      color={theme.colors.textWhite}
+                                    />
+                                  </View>
+                                </View>
                               ) : (
                                 <Image
                                   source={{ uri: item }}
@@ -454,35 +774,115 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                       </View>
                     )}
 
-                  {/* Upload Progress */}
-                  {isUploading && (
-                    <View style={styles.uploadProgressContainer}>
-                      <View style={styles.progressBarBackground}>
-                        <View style={[styles.progressBarFill, { width: `${uploadProgress}%` }]} />
-                      </View>
-                      <Text style={styles.uploadProgressText}>
-                        Uploading... {uploadProgress}%
-                        {postType === "video" && " (Large videos may take time)"}
-                      </Text>
-                    </View>
-                  )}
-
-                  {/* Upload Button */}
-                  {(postType === "image" || postType === "video") && !isUploading && (
-                    <TouchableOpacity
-                      style={styles.uploadButton}
-                      onPress={handleUploadMedia}
-                      disabled={loading}
+                  {/* Media Actions */}
+                  {(postType === "image" || postType === "video") && (
+                    <View
+                      style={[
+                        styles.mediaActionGroup,
+                        postType === "video" &&
+                          media.length > 0 &&
+                          styles.mediaActionGroupSplit,
+                      ]}
                     >
-                      <Ionicons
-                        name="cloud-upload-outline"
-                        size={22}
-                        color={theme.colors.textWhite}
-                      />
-                      <Text style={styles.uploadButtonText}>
-                        {media.length > 0 ? "Add More" : `Upload ${postType}`}
-                      </Text>
-                    </TouchableOpacity>
+                      {postType === "video" && media.length > 0 ? (
+                        <View style={styles.videoActionIconRow}>
+                          <TouchableOpacity
+                            style={[
+                              styles.videoToolButton,
+                              styles.videoToolButtonPrimary,
+                              (isEditingVideo || isPickingMedia) &&
+                                styles.editVideoButtonDisabled,
+                            ]}
+                            onPress={handleUploadMedia}
+                            disabled={isEditingVideo || isPickingMedia}
+                            accessibilityRole="button"
+                            accessibilityLabel="Replace clip"
+                          >
+                            {isPickingMedia ? (
+                              <ActivityIndicator
+                                size="small"
+                                color={theme.colors.textWhite}
+                              />
+                            ) : (
+                              <Ionicons
+                                name="swap-horizontal"
+                                size={20}
+                                color={theme.colors.textWhite}
+                              />
+                            )}
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            style={[
+                              styles.videoToolButton,
+                              styles.videoToolButtonSecondary,
+                              (isEditingVideo || isPickingMedia) &&
+                                styles.editVideoButtonDisabled,
+                            ]}
+                            onPress={handleEditVideo}
+                            disabled={isEditingVideo || isPickingMedia}
+                            accessibilityRole="button"
+                            accessibilityLabel={
+                              isEditingVideo ? "Opening clip editor" : "Edit clip"
+                            }
+                          >
+                            {isEditingVideo ? (
+                              <ActivityIndicator
+                                size="small"
+                                color={theme.colors.secondPrimary}
+                              />
+                            ) : (
+                              <Ionicons
+                                name="cut-outline"
+                                size={20}
+                                color={theme.colors.secondPrimary}
+                              />
+                            )}
+                          </TouchableOpacity>
+                        </View>
+                      ) : (
+                        <TouchableOpacity
+                          style={[
+                            styles.uploadButton,
+                            postType === "video" &&
+                              media.length > 0 &&
+                              styles.secondaryUploadButton,
+                          ]}
+                          onPress={handleUploadMedia}
+                          disabled={isEditingVideo || isPickingMedia}
+                        >
+                          {isPickingMedia ? (
+                            <ActivityIndicator
+                              size="small"
+                              color={theme.colors.textWhite}
+                            />
+                          ) : (
+                            <Ionicons
+                              name={
+                                postType === "video" && media.length > 0
+                                  ? "swap-horizontal-outline"
+                                  : "cloud-upload-outline"
+                              }
+                              size={22}
+                              color={theme.colors.textWhite}
+                            />
+                          )}
+                          <Text style={styles.uploadButtonText}>
+                            {isPickingMedia
+                              ? postType === "video"
+                                ? "Preparing video..."
+                                : "Opening gallery..."
+                              : postType === "video"
+                                ? media.length > 0
+                                  ? "Replace clip"
+                                  : "Pick video"
+                                : media.length > 0
+                                  ? "Add more photos"
+                                  : "Pick images"}
+                          </Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
                   )}
                 </ScrollView>
 
@@ -495,28 +895,26 @@ const CustomPostModal = React.forwardRef<{ openModal: () => void }, CustomPostMo
                     <Text style={styles.cancelButtonText}>Cancel</Text>
                   </TouchableOpacity>
 
-                  {loading ? (
-                    <View style={styles.postButton}>
-                      <ActivityIndicator color={theme.colors.textWhite} />
-                    </View>
-                  ) : (
-                    <TouchableOpacity
-                      style={[
-                        styles.postButton,
-                        (!postType || (!caption && media.length === 0)) && styles.postButtonDisabled,
-                      ]}
-                      onPress={handlePost}
-                      disabled={!postType || (!caption && media.length === 0)}
-                    >
-                      <Ionicons
-                        name="send-outline"
-                        size={20}
-                        color={theme.colors.textWhite}
-                        style={{ marginRight: 6 }}
-                      />
-                      <Text style={styles.postButtonText}>Post</Text>
-                    </TouchableOpacity>
-                  )}
+                  <TouchableOpacity
+                    style={[
+                      styles.postButton,
+                      !canSubmit && styles.postButtonDisabled,
+                    ]}
+                    onPress={handlePost}
+                    disabled={!canSubmit}
+                  >
+                    <Ionicons
+                      name="send-outline"
+                      size={20}
+                      color={theme.colors.textWhite}
+                      style={{ marginRight: 6 }}
+                    />
+                    <Text style={styles.postButtonText}>
+                      {postType === "video" || postType === "image"
+                        ? "Post & upload"
+                        : "Post"}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
               </View>
             </View>
@@ -643,6 +1041,13 @@ const getStyles = (theme: any) => StyleSheet.create({
   inputContainer: {
     marginBottom: 16,
   },
+  uploadHintText: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.medium,
+    fontSize: theme.fontSizes.small,
+    lineHeight: 18,
+    marginTop: 10,
+  },
   captionInput: {
     backgroundColor: theme.colors.background,
     borderRadius: 16,
@@ -686,6 +1091,36 @@ const getStyles = (theme: any) => StyleSheet.create({
     height: "100%",
     backgroundColor: theme.colors.backgroundSecondary,
   },
+  videoPreviewFrame: {
+    width: "100%",
+    height: "100%",
+    position: "relative",
+  },
+  videoPreviewPlaceholder: {
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    paddingHorizontal: 20,
+  },
+  videoPreviewPlaceholderText: {
+    color: theme.colors.textMuted,
+    fontFamily: theme.fonts.medium,
+    fontSize: theme.fontSizes.small,
+    textAlign: "center",
+  },
+  videoPreviewBadge: {
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    borderRadius: 999,
+    height: 44,
+    justifyContent: "center",
+    left: "50%",
+    marginLeft: -22,
+    marginTop: -22,
+    position: "absolute",
+    top: "50%",
+    width: 44,
+  },
   removeMediaButton: {
     position: "absolute",
     top: 10,
@@ -728,6 +1163,15 @@ const getStyles = (theme: any) => StyleSheet.create({
     fontSize: theme.fontSizes.small,
     fontFamily: theme.fonts.medium,
   },
+  mediaActionGroup: {
+    gap: 10,
+    marginTop: 8,
+  },
+  mediaActionGroupSplit: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
   uploadButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -742,11 +1186,62 @@ const getStyles = (theme: any) => StyleSheet.create({
     shadowRadius: 6,
     elevation: 6,
   },
+  secondaryUploadButton: {
+    flex: 1,
+  },
   uploadButtonText: {
     color: theme.colors.textWhite,
     fontWeight: theme.fontWeights.bold as "700",
     marginLeft: 8,
     fontSize: theme.fontSizes.regular,
+  },
+  videoActionIconRow: {
+    flexDirection: "row",
+    gap: 10,
+    justifyContent: "center",
+    width: "100%",
+  },
+  videoToolButton: {
+    alignItems: "center",
+    borderRadius: 22,
+    borderWidth: 1,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
+  },
+  videoToolButtonPrimary: {
+    backgroundColor: theme.colors.success,
+    borderColor: theme.colors.success,
+    shadowColor: theme.colors.success,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.22,
+    shadowRadius: 6,
+    elevation: 4,
+  },
+  videoToolButtonSecondary: {
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderColor: theme.colors.secondPrimary,
+  },
+  editVideoButton: {
+    alignItems: "center",
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderColor: theme.colors.secondPrimary,
+    borderRadius: 30,
+    borderWidth: 1,
+    flex: 1,
+    flexDirection: "row",
+    gap: 8,
+    justifyContent: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+  },
+  editVideoButtonDisabled: {
+    opacity: 0.7,
+  },
+  editVideoButtonText: {
+    color: theme.colors.secondPrimary,
+    fontFamily: theme.fonts.bold,
+    fontSize: theme.fontSizes.regularSmall,
   },
   uploadProgressContainer: {
     marginTop: 16,

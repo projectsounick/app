@@ -21,6 +21,11 @@ import { useGlobalTheme, useTheme } from "../Theme/ThemeContext";
 const { height } = Dimensions.get("window");
 
 const CURRENT_VERSION = Constants.expoConfig?.version || "1.0.0";
+const CURRENT_PLATFORM = Platform.OS === "ios" ? "ios" : "android";
+const VERSION_MODAL_FIELD =
+  CURRENT_PLATFORM === "ios"
+    ? "iosVersionModalClicked"
+    : "androidVersionModalClicked";
 
 // Utility to compare versions (semver-safe)
 const isNewerVersion = (latest: string, current: string) => {
@@ -97,8 +102,23 @@ const AppUpdateBottomSheet = () => {
         if (userStr) {
           try {
             const user = JSON.parse(userStr);
-            if (user.versionModalClicked) {
+            if (user[VERSION_MODAL_FIELD]) {
+              versionModalClicked = String(user[VERSION_MODAL_FIELD]);
+            } else if (user.versionModalClicked) {
+              // Fallback for users from the old shared-field format.
               versionModalClicked = String(user.versionModalClicked);
+            }
+
+            if (user.appPlatform !== CURRENT_PLATFORM) {
+              userService
+                .updateUser({ appPlatform: CURRENT_PLATFORM })
+                .then(async (syncResponse) => {
+                  if (syncResponse?.success) {
+                    user.appPlatform = CURRENT_PLATFORM;
+                    await AsyncStorage.setItem("user", JSON.stringify(user));
+                  }
+                })
+                .catch(() => {});
             }
           } catch (err) {
             versionModalClicked = null;
@@ -146,13 +166,15 @@ const AppUpdateBottomSheet = () => {
     if (!mandatoryUpdate && latestVersion) {
       try {
         await userService.updateUser({
-          versionModalClicked: latestVersion,
+          [VERSION_MODAL_FIELD]: latestVersion,
+          appPlatform: CURRENT_PLATFORM,
         });
 
         const userStr = await AsyncStorage.getItem("user");
         if (userStr) {
           const user = JSON.parse(userStr);
-          user.versionModalClicked = latestVersion;
+          user[VERSION_MODAL_FIELD] = latestVersion;
+          user.appPlatform = CURRENT_PLATFORM;
           await AsyncStorage.setItem("user", JSON.stringify(user));
         }
 
@@ -200,14 +222,16 @@ const AppUpdateBottomSheet = () => {
     try {
       // Update in backend user details
       await userService.updateUser({
-        versionModalClicked: latestVersion,
+        [VERSION_MODAL_FIELD]: latestVersion,
+        appPlatform: CURRENT_PLATFORM,
       });
 
       // Also update locally cached user for future sessions
       const userStr = await AsyncStorage.getItem("user");
       if (userStr) {
         const user = JSON.parse(userStr);
-        user.versionModalClicked = latestVersion;
+        user[VERSION_MODAL_FIELD] = latestVersion;
+        user.appPlatform = CURRENT_PLATFORM;
         await AsyncStorage.setItem("user", JSON.stringify(user));
       }
     } catch (err) {

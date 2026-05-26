@@ -216,6 +216,7 @@ const Login = () => {
       const response = await userService.googleSignIn({
         idToken,
         expoPushToken,
+        appPlatform: Platform.OS === "ios" ? "ios" : "android",
       });
 
       console.log("[handleGoogleSignIn] Response received:", response?.success);
@@ -272,6 +273,7 @@ const Login = () => {
           }
           : undefined,
         expoPushToken,
+        appPlatform: "ios",
       });
 
       if (response?.success) {

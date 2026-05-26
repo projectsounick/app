@@ -40,9 +40,12 @@ const CurrentPlanCard: React.FC<PlanCardProps> = ({
   const theme = useGlobalTheme();
   const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
+  const manualSummaryItems = descItems.filter(
+    (item) => item && item !== manualDescription
+  );
   const resolvedDescriptionItems =
     type === "manual" && manualDescription
-      ? [manualDescription, ...descItems].filter(Boolean).slice(0, 2)
+      ? [manualDescription, ...manualSummaryItems].filter(Boolean).slice(0, 2)
       : descItems.slice(0, 2);
 
   const resolvedImageSource =

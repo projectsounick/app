@@ -14,6 +14,10 @@ interface CurrentPlansProps {
   isActive: boolean;
 }
 
+function formatCountLabel(count: number, singular: string, plural = `${singular}s`) {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
 const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
   const theme = useGlobalTheme();
   const styles = getStyles(theme);
@@ -46,6 +50,26 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
           0
         )
       : 0;
+  const manualGoalsCount = activeManualPlan?.workoutPlanId?.goals?.length || 0;
+  const manualNotesCount =
+    activeManualPlan?.workoutPlanId?.importantNotes?.length || 0;
+  const manualWeekendTipsCount =
+    activeManualPlan?.workoutPlanId?.weekendRecommendations?.length || 0;
+  const manualPlanSummary = [
+    formatCountLabel(manualWorkoutDays, "active day"),
+    formatCountLabel(manualExerciseCount, "exercise"),
+    manualGoalsCount > 0 ? formatCountLabel(manualGoalsCount, "goal") : null,
+    manualGoalsCount === 0 && manualNotesCount > 0
+      ? formatCountLabel(manualNotesCount, "note")
+      : null,
+    manualGoalsCount === 0 &&
+    manualNotesCount === 0 &&
+    manualWeekendTipsCount > 0
+      ? formatCountLabel(manualWeekendTipsCount, "weekend tip")
+      : null,
+  ]
+    .filter(Boolean)
+    .join(" • ");
 
   return (
     <ScrollView
@@ -187,11 +211,7 @@ const CurrentPlans: React.FC<CurrentPlansProps> = ({ isActive }) => {
           {/* Manual Plan Card */}
           <CurrentPlanCard
             title={activeManualPlan.workoutPlanId?.planName}
-            descItems={[
-              activeManualPlan.workoutPlanId?.description || "No description",
-              `${manualWorkoutDays} active day${manualWorkoutDays === 1 ? "" : "s"}`,
-              `${manualExerciseCount} exercise${manualExerciseCount === 1 ? "" : "s"}`,
-            ]}
+            descItems={manualPlanSummary ? [manualPlanSummary] : []}
             imgUrl={require("../../../assets/images/track.png")}
             isActive={isActive}
             type="manual"
