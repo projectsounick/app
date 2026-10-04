@@ -1,5 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { NavigationProp } from "@react-navigation/native";
+
+type NavigationLike<T extends Record<string, undefined>> = {
+  navigate(screenName: keyof T & string): void;
+};
 
 /**
  * Type-safe generic utility to check and navigate to a stored screen name.
@@ -7,7 +10,7 @@ import { NavigationProp } from "@react-navigation/native";
 export const checkAndNavigateToStoredScreen = async <
   T extends Record<string, undefined>
 >(
-  navigation: NavigationProp<T>,
+  navigation: NavigationLike<T>,
   storageKey: string = "screenName"
 ): Promise<void> => {
   try {
@@ -16,8 +19,8 @@ export const checkAndNavigateToStoredScreen = async <
     if (storedValue) {
       const screenName = JSON.parse(storedValue);
 
-      if (typeof screenName === "string" && screenName in navigation) {
-        navigation.navigate(screenName as any);
+      if (typeof screenName === "string") {
+        navigation.navigate(screenName as keyof T & string);
       }
     }
   } catch (error) {

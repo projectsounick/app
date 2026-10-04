@@ -14,8 +14,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import NormalHeader from "@/app/modules/NormalHeader";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import NormalHeader from "@/src/modules/NormalHeader";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 
 const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -648,55 +648,6 @@ export default function MeditationScreen() {
               );
             })}
           </View>
-
-            {/* Fixed Type Selector - Like Track Section */}
-            <View style={styles.fixedTabsContainer}>
-              {[
-                { type: "breathing" as MeditationType, label: "Breathing", icon: "leaf-outline" },
-                { type: "timer" as MeditationType, label: "Timer", icon: "timer-outline" },
-                { type: "guided" as MeditationType, label: "Guided", icon: "headset-outline" },
-              ].map((item) => {
-                const isSelected = selectedType === item.type;
-                return (
-                  <TouchableOpacity
-                    key={item.type}
-                    onPress={() => {
-                      setSelectedType(item.type);
-                      setIsActive(false);
-                      setSelectedSession(null);
-                    }}
-                    style={[
-                      styles.tabButton,
-                      {
-                        backgroundColor: isSelected ? "#67C694" : "transparent",
-                        shadowColor: isSelected ? "#67C694" : "transparent",
-                        shadowOffset: { width: 0, height: isSelected ? 2 : 0 },
-                        shadowOpacity: isSelected ? 0.3 : 0,
-                        shadowRadius: isSelected ? 4 : 0,
-                        elevation: isSelected ? 3 : 0,
-                      },
-                    ]}
-                  >
-                    <Ionicons
-                      name={item.icon as any}
-                      size={responsiveFontSize(18)}
-                      color={isSelected ? "#FFFFFF" : "#999"}
-                      style={{ marginRight: responsiveSpacing(6) }}
-                    />
-                    <Text
-                      style={[
-                        styles.tabButtonText,
-                        {
-                          color: isSelected ? "#FFFFFF" : "#666",
-                        },
-                      ]}
-                    >
-                      {item.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
 
             {/* Scrollable Content */}
             <ScrollView

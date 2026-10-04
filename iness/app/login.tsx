@@ -1,3 +1,4 @@
+import { safeRouter } from "@/src/utils/safeRouter";
 import React, { useEffect, useState } from "react";
 
 import {
@@ -16,18 +17,18 @@ import {
 } from "react-native";
 import { Formik } from "formik";
 import { useRouter } from "expo-router";
-import theme from "./Theme/globalTheme";
+import theme from "@/src/Theme/globalTheme";
 
 import useServiceWithSnackbar from "@/hooks/usePostDataHook";
-import { userService } from "./services/user.service";
-import AnimatedSubmitButton from "./modules/AnimatedSubmitButton";
-import CustomSnackbar from "./modules/Snackbar";
-import PrivacyPolicyModal from "@/app/Modals/PrivacyPolicyModal";
+import { userService } from "@/src/services/user.service";
+import AnimatedSubmitButton from "@/src/modules/AnimatedSubmitButton";
+import CustomSnackbar from "@/src/modules/Snackbar";
+import PrivacyPolicyModal from "@/src/Modals/PrivacyPolicyModal";
 
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import NormalHeader from "./modules/NormalHeader";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import Ionicons from "react-native-vector-icons/Ionicons";
+import NormalHeader from "@/src/modules/NormalHeader";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 import Checkbox from "expo-checkbox";
 import * as AppleAuthentication from "expo-apple-authentication";
@@ -40,14 +41,19 @@ import {
   GoogleSignin,
   statusCodes,
 } from "@react-native-google-signin/google-signin";
+import { runSingleAction } from "@/src/utils/safeAction";
 
 // Complete auth session for web browser (iOS)
 WebBrowser.maybeCompleteAuthSession();
 
+const GOOGLE_WEB_CLIENT_ID =
+  Constants.expoConfig?.extra?.googleWebClientId ||
+  "340636011235-mbdr1fc9p1260jaeh0ud7rik8qi340gu.apps.googleusercontent.com";
+
 // Configure Google Sign-In for Android
 if (Platform.OS === "android") {
   GoogleSignin.configure({
-    webClientId: Constants.expoConfig?.extra?.googleWebClientId,
+    webClientId: GOOGLE_WEB_CLIENT_ID,
     offlineAccess: true,
   });
 }
@@ -108,63 +114,87 @@ const Login = () => {
   }, [response]);
 
   // Handle Google Sign-In for Android (native)
-  const handleAndroidGoogleSignIn = async () => {
-    try {
-      setGoogleLoading(true);
-      console.log("[Android Google Sign-In] Starting...");
-
-      // Check if Play Services are available
-      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      console.log("[Android Google Sign-In] Play Services available");
-
-      // Sign out first to always show account picker
+  const handleAndroidGoogleSignIn = () =>
+    runSingleAction("login-google-android", async () => {
       try {
-        await GoogleSignin.signOut();
-      } catch (e) {
-        // Ignore sign out errors (user might not be signed in)
-      }
+        setGoogleLoading(true);
+        console.log("[Android Google Sign-In] Starting...");
 
-      // Sign in - will now show account picker
-      const userInfo = await GoogleSignin.signIn();
-      console.log(
-        "[Android Google Sign-In] Sign-in successful, userInfo:",
-        userInfo.type === "success" ? userInfo.data.user.email : "cancelled"
-      );
+        // Ensure configuration is applied with valid webClientId
+        GoogleSignin.configure({
+          webClientId: GOOGLE_WEB_CLIENT_ID,
+          offlineAccess: true,
+        });
 
-      // Get the ID token
-      const tokens = await GoogleSignin.getTokens();
-      const idToken = tokens.idToken;
-      console.log("[Android Google Sign-In] Got tokens, idToken present:", !!idToken);
+        // Check if Play Services are available
+        await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+        console.log("[Android Google Sign-In] Play Services available");
 
-      if (idToken) {
-        console.log("[Android Google Sign-In] Calling handleGoogleSignIn with idToken");
-        await handleGoogleSignIn(idToken);
-      } else {
-        console.error("[Android Google Sign-In] No idToken received");
-        setSnackbarMessage("Failed to get Google credentials");
-        setSnackbarVisible(true);
+        // Sign out first to always show account picker
+        try {
+          await GoogleSignin.signOut();
+        } catch (e) {
+          // Ignore sign out errors (user might not be signed in)
+        }
+
+        // Sign in - will now show account picker
+        const userInfo = await GoogleSignin.signIn();
+        if (userInfo.type !== "success") {
+          console.log("Google sign-in cancelled");
+          setGoogleLoading(false);
+          return;
+        }
+        console.log(
+          "[Android Google Sign-In] Sign-in successful, userInfo:",
+          userInfo.data.user.email
+        );
+
+        // Get the ID token only after a successful account selection.
+        const tokens = await GoogleSignin.getTokens();
+        const idToken = tokens.idToken;
+        console.log("[Android Google Sign-In] Got tokens, idToken present:", !!idToken);
+
+        if (idToken) {
+          console.log("[Android Google Sign-In] Calling handleGoogleSignIn with idToken");
+          await handleGoogleSignIn(idToken);
+        } else {
+          console.error("[Android Google Sign-In] No idToken received");
+          setSnackbarMessage("Failed to get Google credentials");
+          setSnackbarVisible(true);
+          setGoogleLoading(false);
+        }
+      } catch (error: any) {
         setGoogleLoading(false);
-      }
-    } catch (error: any) {
-      setGoogleLoading(false);
-      console.error("[Android Google Sign-In] Error:", error);
+        console.error("[Android Google Sign-In] Error:", error);
 
-      if (error.code === statusCodes.SIGN_IN_CANCELLED) {
-        console.log("Google sign-in cancelled");
-        // Don't show error for cancellation
-      } else if (error.code === statusCodes.IN_PROGRESS) {
-        setSnackbarMessage("Sign-in already in progress");
-        setSnackbarVisible(true);
-      } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        setSnackbarMessage("Google Play Services not available");
-        setSnackbarVisible(true);
-      } else {
-        console.error("Google sign-in error:", error);
-        setSnackbarMessage(error?.message || "Google sign-in failed. Please try again.");
-        setSnackbarVisible(true);
+        if (error.code === statusCodes.SIGN_IN_CANCELLED) {
+          console.log("Google sign-in cancelled");
+          // Don't show error for cancellation
+        } else if (error.code === statusCodes.IN_PROGRESS) {
+          setSnackbarMessage("Sign-in already in progress");
+          setSnackbarVisible(true);
+        } else if (error.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+          setSnackbarMessage("Google Play Services not available");
+          setSnackbarVisible(true);
+        } else if (
+          String(error.code) === "10" ||
+          error.code === (statusCodes as any).DEVELOPER_ERROR ||
+          error?.message?.includes("DEVELOPER_ERROR")
+        ) {
+          console.error(
+            "[Android Google Sign-In] Developer Error (Code 10): SHA-1 fingerprint mismatch or OAuth configuration issue."
+          );
+          setSnackbarMessage(
+            "Google Sign-In configuration error. Please update the SHA-1 fingerprint in Google Cloud Console."
+          );
+          setSnackbarVisible(true);
+        } else {
+          console.error("Google sign-in error:", error);
+          setSnackbarMessage(error?.message || "Google sign-in failed. Please try again.");
+          setSnackbarVisible(true);
+        }
       }
-    }
-  };
+    });
 
   /// Custom hook to handle the service call and snackbar visibility---/
   const {
@@ -304,27 +334,30 @@ const Login = () => {
   };
 
   /// Function to handle the submission of the login data---/
-  async function submitLoginData(email: string, resetForm: any) {
-    setLoading(true);
-    if (email !== "") {
-      let response = await callService(email);
+  function submitLoginData(email: string, resetForm: any) {
+    runSingleAction("login-send-otp", async () => {
+      setLoading(true);
+      if (email !== "") {
+        let response = await callService(email);
 
-      if (response?.success) {
-        await asyncStorageUtils.storeDataInAsyncStorage(
-          { email: response.data?.email || email },
-          "pendingLogin"
-        );
-        router.push("/OtpVerify");
-        resetForm({
-          values: { email: "" },
-          errors: {},
-          touched: {},
-        });
-        setErrorMessage(null);
+        if (response?.success) {
+          await asyncStorageUtils.storeDataInAsyncStorage(
+            { email: response.data?.email || email },
+            "pendingLogin"
+          );
+          safeRouter.navigate("/OtpVerify");
+          resetForm({
+            values: { email: "" },
+            errors: {},
+            touched: {},
+          });
+          setErrorMessage(null);
+        }
+      } else {
+        setErrorMessage("Email is required");
+        setLoading(false);
       }
-    } else {
-      setErrorMessage("Email is required");
-    }
+    });
   }
 
   // Divider Component
@@ -473,8 +506,10 @@ const Login = () => {
                 handleAndroidGoogleSignIn();
               } else {
                 // Use expo-auth-session for iOS
-                setGoogleLoading(true);
-                promptAsync();
+                runSingleAction("login-google-ios", async () => {
+                  setGoogleLoading(true);
+                  await promptAsync();
+                });
               }
             }}
             disabled={Platform.OS === "ios" ? (!request || googleLoading) : googleLoading}
@@ -497,7 +532,7 @@ const Login = () => {
                   setSnackbarVisible(true);
                   return;
                 }
-                handleAppleSignIn();
+                runSingleAction("login-apple", handleAppleSignIn);
               }}
               disabled={appleLoading}
               style={[styles.appleButton, appleLoading && styles.socialButtonDisabled]}

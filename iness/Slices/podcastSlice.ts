@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
   PodcastInterface,
   PodcastUpdateCallArgumentsInterface,
-} from "@/app/interfaces/podcastsInterface";
+} from "@/src/interfaces/podcastsInterface";
 
 // State shape
 interface PodcastState {

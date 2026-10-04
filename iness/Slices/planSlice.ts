@@ -1,13 +1,13 @@
 import {
   ActiveManualWorkoutPlanInterface,
   WorkoutPlanInterface,
-} from "@/app/interfaces/activeManualPlan";
-import { PlanInterface } from "@/app/interfaces/planInterface";
-import { PodcastInterface } from "@/app/interfaces/podcastsInterface";
+} from "@/src/interfaces/activeManualPlan";
+import { PlanInterface } from "@/src/interfaces/planInterface";
+import { PodcastInterface } from "@/src/interfaces/podcastsInterface";
 import {
   ServiceDetails,
   UserActiveServiceWithDetails,
-} from "@/app/interfaces/serviceInterface";
+} from "@/src/interfaces/serviceInterface";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface planState {

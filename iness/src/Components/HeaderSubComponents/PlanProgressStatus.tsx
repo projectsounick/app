@@ -1,0 +1,95 @@
+import theme from "@/src/Theme/globalTheme";
+import { setPlanTab } from "@/Slices/planSlice";
+import { RootState } from "@/store";
+import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+
+const PlansStatusCard = () => {
+  const dispatch = useDispatch();
+
+  // Plans
+  const currentPlansCount = useSelector(
+    (state: RootState) => state.plan.activePlans.length
+  );
+  const hasActiveManualPlan = useSelector(
+    (state: RootState) => !!state.plan.activeManualPlan
+  );
+  const completedPlansCount = useSelector(
+    (state: RootState) => state.plan.completedPlans.length
+  );
+
+  // Services
+  const currentServicesCount = useSelector(
+    (state: RootState) => state.plan.activeServices.length
+  );
+
+  const completedServicesCount = useSelector(
+    (state: RootState) => state.plan.completedServices.length
+  );
+
+  // Merge plans and services counts
+  const current =
+    currentPlansCount + (hasActiveManualPlan ? 1 : 0) + currentServicesCount;
+  const completed = completedPlansCount + completedServicesCount;
+
+  const planTab = useSelector((state: RootState) => state.plan.planTab);
+
+  const renderCard = (
+    type: "current" | "completed",
+    label: string,
+    count: number
+  ) => {
+    const isSelected = planTab === type;
+    return (
+      <TouchableOpacity
+        onPress={() => dispatch(setPlanTab(type))}
+        style={{
+          flex: 1,
+          backgroundColor: isSelected ? "#7B61FF" : "#ECE9FD",
+          paddingVertical: 10,
+          borderRadius: 10,
+          marginHorizontal: 6,
+          justifyContent: "center",
+          alignItems: "center",
+          shadowColor: "#000",
+          shadowOffset: { width: 0, height: 1 },
+          shadowOpacity: 0.1,
+          shadowRadius: 2,
+          elevation: 2,
+        }}
+      >
+        <Text
+          style={{
+            color: isSelected ? "#fff" : "#7B61FF",
+            fontSize: theme.fontSizes.regularSmall,
+            fontWeight: "600",
+            fontFamily: theme.fonts.bold,
+            marginBottom: 2,
+          }}
+        >
+          {label}
+        </Text>
+        <Text
+          style={{
+            fontSize: theme.fontSizes.large,
+            fontWeight: "bold",
+            fontFamily: theme.fonts.bold,
+            color: isSelected ? "#fff" : "#7B61FF",
+          }}
+        >
+          {count}
+        </Text>
+      </TouchableOpacity>
+    );
+  };
+
+  return (
+    <View style={{ flexDirection: "row", marginTop: 16, height: 64 }}>
+      {renderCard("current", "Current Plans", current)}
+      {renderCard("completed", "Plans Completed", completed)}
+    </View>
+  );
+};
+
+export default PlansStatusCard;

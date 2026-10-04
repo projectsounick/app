@@ -1,25 +1,26 @@
 import React, { useEffect, useState } from "react";
 import { View, ScrollView, ImageBackground } from "react-native";
 
-import ChooseDateSection from "@/app/Components/PurchaseDetails.tsx/DateSelection";
-import SlotSelectionSection from "@/app/Components/PurchaseDetails.tsx/SlotSelection";
-import PlaceSelectionSection from "@/app/Components/PurchaseDetails.tsx/PlaceSelection";
+import ChooseDateSection from "@/src/Components/PurchaseDetails.tsx/DateSelection";
+import SlotSelectionSection from "@/src/Components/PurchaseDetails.tsx/SlotSelection";
+import PlaceSelectionSection from "@/src/Components/PurchaseDetails.tsx/PlaceSelection";
 
-import CustomSnackbar from "@/app/modules/Snackbar";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
-import NormalHeader from "@/app/modules/NormalHeader";
+import CustomSnackbar from "@/src/modules/Snackbar";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
+import NormalHeader from "@/src/modules/NormalHeader";
 import { ActivityIndicator } from "react-native-paper";
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
-import { userService } from "@/app/services/user.service";
+import AnimatedSubmitButton from "@/src/modules/AnimatedSubmitButton";
+import { userService } from "@/src/services/user.service";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import { notificationService } from "@/app/services/notification.service";
+import { fetchJsonWithTimeout } from "@/utils/fetchJsonWithTimeout";
+import { notificationService } from "@/src/services/notification.service";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 ///// Main functional component for the Book session details screen --------------/
 const BookSessionDetailsScreen = () => {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
-  const [slots, setSlots] = useState([]);
+  const [slots, setSlots] = useState<any[]>([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
   const [place, setPlace] = useState<"Home" | "Gym">("Home");
@@ -113,14 +114,10 @@ const BookSessionDetailsScreen = () => {
   async function getSlotsFromCloud() {
     try {
       setSlotsLoading(true);
-      const response = await fetch(
+      const data = await fetchJsonWithTimeout<{ slots?: any[] }>(
         "https://inessstorage.blob.core.windows.net/admin-data/Jsons/slotsJson"
       );
-      if (!response.ok) {
-        throw new Error("Some error has happened");
-      }
-      let data = await response.json();
-      setSlots(data.slots);
+      setSlots(data.slots || []);
       /// getting data from the asyncstorage -----------------/
       const userResponse =
         await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");

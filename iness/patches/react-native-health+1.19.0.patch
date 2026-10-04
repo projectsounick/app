@@ -1,0 +1,52 @@
+diff --git a/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit.m b/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit.m
+index e8ddce1..a8da53e 100644
+--- a/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit.m
++++ b/node_modules/react-native-health/RCTAppleHealthKit/RCTAppleHealthKit.m
+@@ -840,8 +840,6 @@ RCT_EXPORT_METHOD(getClinicalRecords:(NSDictionary *)input callback:(RCTResponse
+ 
+ - (void)emitEventInternal:(NSNotification *)notification {
+   if (self.hasListeners) {
+-    self.callableJSModules = [RCTAppleHealthKit sharedJsModule];
+-    [self.callableJSModules setBridge:self.bridge];
+     [self sendEventWithName:notification.name
+                    body:notification.userInfo];
+   }
+diff --git a/node_modules/react-native-health/index.js b/node_modules/react-native-health/index.js
+index 06e5105..de8c429 100644
+--- a/node_modules/react-native-health/index.js
++++ b/node_modules/react-native-health/index.js
+@@ -1,14 +1,31 @@
+ import { Activities, Observers, Permissions, Units } from './src/constants'
+ 
+-const { AppleHealthKit } = require('react-native').NativeModules
++const { NativeModules } = require('react-native')
+ 
+-export const HealthKit = Object.assign({}, AppleHealthKit, {
++const callHealthKit = (method, args) => {
++  const healthKit = NativeModules.AppleHealthKit
++  if (!healthKit || typeof healthKit[method] !== 'function') {
++    throw new Error(`AppleHealthKit.${method} is unavailable`)
++  }
++  return healthKit[method](...args)
++}
++
++// RN 0.76+ lazily exposes legacy native modules. Object.assign snapshots an
++// empty module, so bind the methods used by the app at call time instead.
++export const HealthKit = {
++  initHealthKit: (...args) => callHealthKit('initHealthKit', args),
++  isAvailable: (...args) => callHealthKit('isAvailable', args),
++  getStepCount: (...args) => callHealthKit('getStepCount', args),
++  getDailyStepCountSamples: (...args) =>
++    callHealthKit('getDailyStepCountSamples', args),
++  getSleepSamples: (...args) => callHealthKit('getSleepSamples', args),
++  getAuthStatus: (...args) => callHealthKit('getAuthStatus', args),
+   Constants: {
+     Activities,
+     Observers,
+     Permissions,
+     Units,
+   },
+-})
++}
+ 
+ module.exports = HealthKit

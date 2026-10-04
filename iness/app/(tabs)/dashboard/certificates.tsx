@@ -13,9 +13,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import NormalHeader from "@/app/modules/NormalHeader";
-import theme from "@/app/Theme/globalTheme";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import NormalHeader from "@/src/modules/NormalHeader";
+import theme from "@/src/Theme/globalTheme";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 

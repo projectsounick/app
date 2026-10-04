@@ -1,5 +1,5 @@
-import { AsyncStorageCheckResult } from "@/app/interfaces/otherInterfaces";
-import { UserData } from "@/app/interfaces/UserInterface";
+import { AsyncStorageCheckResult } from "@/src/interfaces/otherInterfaces";
+import { UserData } from "@/src/interfaces/UserInterface";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 /// Exporting the Utility functions for AsyncStorage --------------------------------------/
@@ -18,8 +18,8 @@ async function storeUserInAsyncStorage(userData: any) {
   try {
     const jsonValue = JSON.stringify(userData);
     await AsyncStorage.setItem("user", jsonValue);
-  } catch (e) {
-    console.error("Error saving user data to AsyncStorage:", e);
+  } catch {
+    console.error("Failed to save user data to AsyncStorage");
   }
 }
 //// Store data in async storage ------------------------------------------/
@@ -27,19 +27,23 @@ async function storeDataInAsyncStorage(data: any, key: string) {
   try {
     const jsonValue = JSON.stringify(data);
     await AsyncStorage.setItem(key, jsonValue);
-  } catch (e) {
-    console.error("Error saving user data to AsyncStorage:", e);
+  } catch {
+    console.error("Failed to save data to AsyncStorage");
   }
 }
 
 async function removeKeyFromAsyncStorage(key: string) {
   try {
     await AsyncStorage.removeItem(key);
-  } catch (e) {
-    console.error(`Error removing key "${key}" from AsyncStorage:`, e);
+  } catch {
+    console.error("Failed to remove data from AsyncStorage");
   }
 }
-async function updateUserAccessToken(newAccessToken: string) {
+async function updateUserAccessToken(
+  newAccessToken: string,
+  refreshToken?: string,
+  refreshTokenExpiresAt?: string
+) {
   try {
     const storedUser = await AsyncStorage.getItem("user");
     if (!storedUser) return;
@@ -48,11 +52,18 @@ async function updateUserAccessToken(newAccessToken: string) {
 
     // Update the token in the user object
     userObj.jwtToken = newAccessToken;
+    userObj.accessToken = newAccessToken;
+    if (refreshToken) {
+      userObj.refreshToken = refreshToken;
+    }
+    if (refreshTokenExpiresAt) {
+      userObj.refreshTokenExpiresAt = refreshTokenExpiresAt;
+    }
 
     // Save the updated object back to AsyncStorage
     await AsyncStorage.setItem("user", JSON.stringify(userObj));
-  } catch (error) {
-    console.error("Error updating access token:", error);
+  } catch {
+    console.error("Failed to update access token");
   }
 }
 /// Function to check if a key exists in AsyncStorage and return its value
@@ -67,8 +78,8 @@ async function checkIfKeyExistsInAsyncStorage<T = any>(
     } else {
       return { data: null, exists: false };
     }
-  } catch (error) {
-    console.error(`Error reading key "${key}" from AsyncStorage:`, error);
+  } catch {
+    console.error("Failed to read data from AsyncStorage");
     return { data: null, exists: false };
   }
 }
@@ -86,8 +97,8 @@ async function hasAuthenticatedUserSession(): Promise<boolean> {
       userResponse.data.jwtToken || userResponse.data.accessToken;
 
     return Boolean(token);
-  } catch (error) {
-    console.error("Error checking authenticated session:", error);
+  } catch {
+    console.error("Failed to check authenticated session");
     return false;
   }
 }

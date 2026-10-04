@@ -3,7 +3,7 @@
  * Business logic for syncing health data from Android Health Connect to backend
  */
 
-import { trackService } from "@/app/services/track.service";
+import { trackService } from "@/src/services/track.service";
 import {
   HealthDataType,
   SyncPayload,

@@ -2,7 +2,7 @@ import {
   CartItem,
   CartState,
   RawCartItem,
-} from "@/app/interfaces/cartInterface";
+} from "@/src/interfaces/cartInterface";
 import { formateFetchedCartItems } from "@/utils/cartUtils";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { act } from "react";

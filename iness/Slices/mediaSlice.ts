@@ -1,7 +1,7 @@
 import {
   MediaState,
   PodcastInterface,
-} from "@/app/interfaces/podcastsInterface";
+} from "@/src/interfaces/podcastsInterface";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: MediaState = {

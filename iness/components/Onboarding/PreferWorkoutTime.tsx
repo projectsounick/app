@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import OnboardingCard from "@/app/modules/OnboardingCard";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import OnboardingCard from "@/src/modules/OnboardingCard";
 import { onboardingPreferredWorkoutTimeOptions } from "@/utils/onboardingStaticValues";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import { UserData } from "@/app/interfaces/UserInterface";
+import { UserData } from "@/src/interfaces/UserInterface";
 import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
-import OnboardingHeading from "@/app/modules/OnboardingHeading";
-import { useGlobalTheme } from "@/app/Theme/ThemeContext";
+import OnboardingHeading from "@/src/modules/OnboardingHeading";
+import { useGlobalTheme } from "@/src/Theme/ThemeContext";
 
 const PreferredWorkoutTime = ({
   onNext,

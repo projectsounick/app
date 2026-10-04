@@ -13,8 +13,8 @@ import {
 } from "react-native";
 
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { UserData } from "@/app/interfaces/UserInterface";
-import NormalHeader from "@/app/modules/NormalHeader";
+import { UserData } from "@/src/interfaces/UserInterface";
+import NormalHeader from "@/src/modules/NormalHeader";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { SafeAreaView } from "react-native-safe-area-context";
 const { height } = Dimensions.get("window");
@@ -31,9 +31,9 @@ import {
   activityLevelOptions,
 } from "../../../utils/onboardingStaticValues";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import { userService } from "@/app/services/user.service";
-import CustomSnackbar from "@/app/modules/Snackbar";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import { userService } from "@/src/services/user.service";
+import CustomSnackbar from "@/src/modules/Snackbar";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 
 // Custom dropdown modal
 const DropdownModal = ({
@@ -49,7 +49,12 @@ const DropdownModal = ({
 }) => {
   const theme = useGlobalTheme();
   return (
-    <Modal transparent visible={visible} animationType="slide">
+    <Modal
+      transparent
+      visible={visible}
+      animationType="slide"
+      onRequestClose={onClose}
+    >
       <TouchableOpacity
         onPress={onClose}
         style={{

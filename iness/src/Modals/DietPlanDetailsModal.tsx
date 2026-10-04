@@ -1,0 +1,655 @@
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  Modal,
+  Pressable,
+  ScrollView,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { DietPlanDetails, DietPlan } from "../interfaces/planInterface";
+import { LinearGradient } from "expo-linear-gradient";
+import { WebView } from "react-native-webview";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
+import { planService } from "../services/plan.service";
+
+interface DietPlanDetailsModalProps {
+  visible: boolean;
+  onClose: () => void;
+  dietPlan: DietPlanDetails | DietPlan | null;
+  dietPlanUrl?: string;
+  dietPlanAssignDate?: string;
+}
+
+const DietPlanDetailsModal: React.FC<DietPlanDetailsModalProps> = ({
+  visible,
+  onClose,
+  dietPlan,
+  dietPlanUrl,
+  dietPlanAssignDate,
+}) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const styles = getStyles(theme, isDark);
+  const [showPdfViewer, setShowPdfViewer] = useState(false);
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [showAllDescItems, setShowAllDescItems] = useState(false);
+
+  // State for API-fetched data
+  const [fetchedDietPlanData, setFetchedDietPlanData] = useState<any[]>([]);
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
+  // Fetch diet plan data when modal opens
+  useEffect(() => {
+    if (visible) {
+      fetchDietPlanData();
+    }
+  }, [visible]);
+
+  const fetchDietPlanData = async () => {
+    try {
+      setFetchLoading(true);
+      setFetchError(null);
+      const response = await planService.getUserDietPlan();
+      if (response.success) {
+        setFetchedDietPlanData(response.data);
+      } else {
+        setFetchError("Failed to load diet plan");
+      }
+    } catch (err: any) {
+      console.error("Failed to fetch diet plan in modal");
+      setFetchError(err.message || "An error occurred");
+    } finally {
+      setFetchLoading(false);
+    }
+  };
+
+  // Use fetched data if available, otherwise use prop data
+  const activeDietPlan = fetchedDietPlanData.length > 0
+    ? (fetchedDietPlanData[0]?.dietPlanId || fetchedDietPlanData[0]?.plan?.planId?.dietPlanId)
+    : dietPlan;
+
+  const activeDietPlanUrl = fetchedDietPlanData.length > 0
+    ? fetchedDietPlanData[0]?.dietPlanUrl
+    : dietPlanUrl;
+
+  const activeAssignDate = fetchedDietPlanData.length > 0
+    ? fetchedDietPlanData[0]?.createdAt
+    : dietPlanAssignDate;
+
+  if (!activeDietPlan && !fetchLoading) return null;
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return "N/A";
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "N/A";
+      return date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+      });
+    } catch {
+      return "N/A";
+    }
+  };
+
+  const handleViewDietPlan = () => {
+    if (activeDietPlanUrl) {
+      setShowPdfViewer(true);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!activeDietPlanUrl) return;
+
+    try {
+      setDownloading(true);
+      const urlParts = activeDietPlanUrl.split("/");
+      const fileName = urlParts[urlParts.length - 1] || `diet-plan-${Date.now()}.pdf`;
+      const fileUri = FileSystem.documentDirectory + fileName;
+
+      const downloadResult = await FileSystem.downloadAsync(activeDietPlanUrl, fileUri);
+
+      if (downloadResult.status === 200) {
+        const isAvailable = await Sharing.isAvailableAsync();
+        
+        if (isAvailable) {
+          await Sharing.shareAsync(downloadResult.uri, {
+            mimeType: "application/pdf",
+            dialogTitle: "Your Diet Plan",
+          });
+        } else {
+          Alert.alert("Success", "Diet plan downloaded successfully!");
+        }
+      } else {
+        throw new Error("Download failed");
+      }
+    } catch (error: any) {
+      Alert.alert("Error", "Failed to download diet plan. Please try again.");
+      console.error("Download error:", error);
+    } finally {
+      setDownloading(false);
+    }
+  };
+
+  const handleClosePdfViewer = () => {
+    setShowPdfViewer(false);
+    setPdfLoading(false);
+  };
+
+  const handleClose = () => {
+    setShowPdfViewer(false);
+    setPdfLoading(false);
+    onClose();
+  };
+
+  return (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={visible}
+      onRequestClose={handleClose}
+    >
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContainer}>
+          {/* Close Button */}
+          <Pressable onPress={handleClose} style={[styles.closeButton, {
+            backgroundColor: isDark ? theme.colors.backgroundCard : theme.colors.backgroundSecondary,
+          }]}>
+            <Ionicons name="close" size={24} color={theme.colors.text} />
+          </Pressable>
+
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {fetchLoading ? (
+              <View style={{ alignItems: "center", justifyContent: "center", paddingVertical: 60 }}>
+                <ActivityIndicator size="large" color={theme.colors.success} />
+                <Text style={{ marginTop: 12, color: theme.colors.textSecondary }}>Loading diet plan...</Text>
+              </View>
+            ) : !activeDietPlan ? (
+              <View style={{ alignItems: "center", justifyContent: "center", paddingVertical: 60 }}>
+                <Ionicons name="nutrition-outline" size={48} color={theme.colors.textSecondary} />
+                <Text style={{ marginTop: 12, color: theme.colors.textSecondary, textAlign: "center" }}>No diet plan available</Text>
+              </View>
+            ) : (
+              <>
+                {/* Image Header */}
+                {activeDietPlan.imgUrl && (
+                  <View style={styles.imageContainer}>
+                    <Image
+                      source={{ uri: activeDietPlan.imgUrl }}
+                      style={styles.headerImage}
+                      resizeMode="contain"
+                    />
+                  </View>
+                )}
+
+                {/* Title */}
+                <Text style={styles.title}>{activeDietPlan.title}</Text>
+
+                {/* Duration and Assigned Date - Side by Side Cards */}
+                <View style={styles.durationRowContainer}>
+                  {/* Duration Card */}
+                  <View style={styles.durationCard}>
+                    <Ionicons name="time-outline" size={16} color={theme.colors.secondPrimary} />
+                    <Text style={styles.durationText}>
+                      Duration: {activeDietPlan.duration} {activeDietPlan.durationType}
+                      {activeDietPlan.duration > 1 ? "s" : ""}
+                    </Text>
+                  </View>
+
+                  {/* Assigned Date Card */}
+                  {activeAssignDate && (
+                    <View style={styles.assignedCard}>
+                      <Ionicons name="calendar-outline" size={16} color={theme.colors.secondPrimary} />
+                      <Text style={styles.assignedText}>
+                        Assigned: {formatDate(activeAssignDate)}
+                      </Text>
+                    </View>
+                  )}
+                </View>
+
+                {/* Description */}
+                {(activeDietPlan as any).desc && (
+                  <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                      <View style={styles.iconContainer}>
+                        <Ionicons name="document-text-outline" size={20} color={theme.colors.secondPrimary} />
+                      </View>
+                      <Text style={styles.sectionTitle}>Description</Text>
+                    </View>
+                    <Text style={styles.descriptionText}>{(activeDietPlan as any).desc}</Text>
+                  </View>
+                )}
+
+                {/* Description Items */}
+                {activeDietPlan.descItems && activeDietPlan.descItems.length > 0 && (
+                  <View style={styles.section}>
+                    <View style={styles.sectionHeader}>
+                      <View style={styles.iconContainer}>
+                        <Ionicons name="leaf" size={20} color={theme.colors.success} />
+                      </View>
+                      <Text style={styles.sectionTitle}>Plan Highlights</Text>
+                    </View>
+
+                    {(showAllDescItems ? activeDietPlan.descItems : activeDietPlan.descItems.slice(0, 3)).map((item: string, idx: number) => (
+                      <View key={idx} style={styles.descItem}>
+                        <View style={styles.bulletPoint} />
+                        <Text style={styles.descText}>{item}</Text>
+                      </View>
+                    ))}
+
+                    {activeDietPlan.descItems.length > 3 && (
+                      <TouchableOpacity
+                        onPress={() => setShowAllDescItems(!showAllDescItems)}
+                        style={styles.showMoreButton}
+                      >
+                        <Text style={styles.showMoreText}>
+                          {showAllDescItems ? "Show Less" : "Show More"}
+                        </Text>
+                        <Ionicons
+                          name={showAllDescItems ? "chevron-up" : "chevron-down"}
+                          size={18}
+                          color={theme.colors.success}
+                        />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+
+                {/* Price if available */}
+                {activeDietPlan.price && (
+                  <View style={styles.priceContainer}>
+                    <Text style={styles.priceLabel}>Price:</Text>
+                    <Text style={styles.priceValue}>₹{activeDietPlan.price}</Text>
+                  </View>
+                )}
+
+                {/* View Diet Plan Button (Main Green Button) */}
+                {activeDietPlanUrl && (
+                  <TouchableOpacity
+                    onPress={handleViewDietPlan}
+                    activeOpacity={0.8}
+                    style={styles.viewDietPlanButton}
+                  >
+                    <Text style={styles.viewDietPlanButtonText}>
+                      View Diet Plan
+                    </Text>
+                  </TouchableOpacity>
+                )}
+
+                {/* Download Icon Button (Icon Only) */}
+                {activeDietPlanUrl && (
+                  <TouchableOpacity
+                    onPress={handleDownload}
+                    activeOpacity={0.8}
+                    style={styles.downloadIconButton}
+                    disabled={downloading}
+                  >
+                    {downloading ? (
+                      <ActivityIndicator size="small" color={theme.colors.textMuted} />
+                    ) : (
+                      <Ionicons
+                        name="cloud-download-outline"
+                        size={24}
+                        color={theme.colors.textMuted}
+                      />
+                    )}
+                  </TouchableOpacity>
+                )}
+              </>
+            )}
+          </ScrollView>
+        </View>
+      </View>
+
+      {/* PDF Viewer Modal */}
+      {showPdfViewer && activeDietPlanUrl && (
+        <Modal
+          animationType="slide"
+          transparent={false}
+          visible={showPdfViewer}
+          onRequestClose={handleClosePdfViewer}
+        >
+          <View style={styles.pdfViewerContainer}>
+            {/* Header */}
+            <View style={styles.pdfViewerHeader}>
+              <Pressable onPress={handleClosePdfViewer} style={styles.pdfCloseButton}>
+                <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
+              </Pressable>
+              <Text style={styles.pdfViewerTitle}>Diet Plan</Text>
+              <View style={{ width: 40 }} />
+            </View>
+
+            {/* WebView */}
+            <View style={styles.webViewContainer}>
+              <WebView
+                source={{ uri: activeDietPlanUrl }}
+                style={styles.webView}
+                onLoadStart={() => setPdfLoading(true)}
+                onLoadEnd={() => setPdfLoading(false)}
+              />
+              {pdfLoading && (
+                <View style={styles.loadingOverlay}>
+                  <ActivityIndicator size="large" color={theme.colors.success} />
+                  <Text style={styles.loadingText}>Loading diet plan...</Text>
+                </View>
+              )}
+            </View>
+          </View>
+        </Modal>
+      )}
+    </Modal>
+  );
+};
+
+const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: theme.colors.overlay,
+    justifyContent: "flex-end",
+  },
+  modalContainer: {
+    backgroundColor: theme.colors.background,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    maxHeight: "90%",
+    paddingTop: 20,
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+  },
+  scrollContent: {
+    paddingBottom: 20,
+  },
+  imageContainer: {
+    width: "100%",
+    minHeight: 200,
+    maxHeight: 300,
+    borderRadius: 16,
+    overflow: "hidden",
+    marginBottom: 20,
+    backgroundColor: theme.colors.mediumGrey,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  headerImage: {
+    width: "100%",
+    height: "100%",
+  },
+  title: {
+    fontSize: theme.fontSizes.large,
+    fontWeight: theme.fontWeights.bold,
+    color: theme.colors.text,
+    marginBottom: 12,
+    textAlign: "center",
+    fontFamily: theme.fonts.bold,
+  },
+  durationRowContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 24,
+    gap: 12,
+    flexWrap: "wrap",
+  },
+  durationCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: theme.colors.cardLight,
+    borderRadius: 20,
+    flex: 1,
+    minWidth: "45%",
+  },
+  durationText: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.secondPrimary,
+    fontWeight: theme.fontWeights.medium,
+    marginLeft: 8,
+    fontFamily: theme.fonts.medium,
+    flex: 1,
+  },
+  assignedCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: theme.colors.cardLight,
+    borderRadius: 20,
+    flex: 1,
+    minWidth: "45%",
+  },
+  assignedText: {
+    fontSize: theme.fontSizes.small,
+    color: theme.colors.secondPrimary,
+    fontWeight: theme.fontWeights.medium,
+    marginLeft: 8,
+    fontFamily: theme.fonts.medium,
+    flex: 1,
+  },
+  section: {
+    marginBottom: 24,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 16,
+  },
+  iconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: theme.colors.greenLight,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 12,
+  },
+  sectionTitle: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold,
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bold,
+  },
+  descItem: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 12,
+    paddingLeft: 4,
+  },
+  bulletPoint: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: theme.colors.secondPrimary,
+    marginRight: 12,
+    marginTop: 6,
+  },
+  descText: {
+    flex: 1,
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
+    lineHeight: 20,
+    fontWeight: theme.fontWeights.regular,
+    fontFamily: theme.fonts.regular,
+  },
+  descriptionText: {
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
+    lineHeight: 22,
+    fontWeight: theme.fontWeights.regular,
+    fontFamily: theme.fonts.regular,
+  },
+  priceContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderRadius: 12,
+    marginTop: 8,
+  },
+  priceLabel: {
+    fontSize: theme.fontSizes.regular,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.textSecondary,
+  },
+  priceValue: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold,
+    color: theme.colors.secondPrimary,
+    fontFamily: theme.fonts.bold,
+  },
+  infoContainer: {
+    marginTop: 16,
+    marginBottom: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    backgroundColor: theme.colors.cardLight,
+    borderRadius: 12,
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  infoLabel: {
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
+    fontWeight: theme.fontWeights.medium,
+    marginLeft: 8,
+    fontFamily: theme.fonts.medium,
+  },
+  infoValue: {
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.text,
+    fontWeight: theme.fontWeights.semiBold,
+    fontFamily: theme.fonts.semiBold,
+  },
+  viewDietPlanButton: {
+    marginTop: 20,
+    marginBottom: 12,
+    backgroundColor: theme.colors.success,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    shadowColor: theme.colors.success,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  viewDietPlanButtonText: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold,
+    color: theme.colors.textWhite,
+    fontFamily: theme.fonts.bold,
+  },
+  downloadIconButton: {
+    alignSelf: "center",
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: theme.colors.mediumGrey,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  pdfViewerContainer: {
+    flex: 1,
+    backgroundColor: theme.colors.background,
+  },
+  pdfViewerHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingTop: 50,
+    backgroundColor: theme.colors.background,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+    shadowColor: theme.colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  pdfCloseButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: theme.colors.mediumGrey,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  pdfViewerTitle: {
+    fontSize: theme.fontSizes.medium,
+    fontWeight: theme.fontWeights.bold as "700",
+    color: theme.colors.text,
+  },
+  webViewContainer: {
+    flex: 1,
+    position: "relative",
+  },
+  webView: {
+    flex: 1,
+  },
+  loadingOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: theme.colors.background + "E6",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: theme.fontSizes.regularSmall,
+    color: theme.colors.textSecondary,
+  },
+  showMoreButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 12,
+    paddingVertical: 8,
+  },
+  showMoreText: {
+    fontSize: theme.fontSizes.regularSmall,
+    fontWeight: theme.fontWeights.medium as "500",
+    color: theme.colors.success,
+    marginRight: 4,
+  },
+});
+
+export default DietPlanDetailsModal;

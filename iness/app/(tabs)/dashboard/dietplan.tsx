@@ -1,7 +1,7 @@
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
-import HeaderContent from "@/app/modules/HeaderContent";
-import SmallHeader from "@/app/modules/SmallHeader";
-import theme from "@/app/Theme/globalTheme";
+import AnimatedSubmitButton from "@/src/modules/AnimatedSubmitButton";
+import HeaderContent from "@/src/modules/HeaderContent";
+import SmallHeader from "@/src/modules/SmallHeader";
+import theme from "@/src/Theme/globalTheme";
 import { RootState } from "@/store";
 import { convertToCartItem, isProductAddableToCart } from "@/utils/cartUtils";
 
@@ -9,14 +9,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Dimensions, Animated } from "react-native";
 import { addToCart } from "@/Slices/cartSlice";
 import { useDispatch, useSelector } from "react-redux";
-import CustomSnackbar from "@/app/modules/Snackbar";
-import { cartService } from "@/app/services/cart.service";
+import CustomSnackbar from "@/src/modules/Snackbar";
+import { cartService } from "@/src/services/cart.service";
 
-import PlansInfo from "@/app/Components/Plans/PlansInfo";
+import PlansInfo from "@/src/Components/Plans/PlansInfo";
 
-import DietPlanInfo from "@/app/Components/Plans/DietPlanInfo";
+import DietPlanInfo from "@/src/Components/Plans/DietPlanInfo";
 import { useLocalSearchParams } from "expo-router";
-import { ActivePlans } from "@/app/interfaces/planInterface";
+import { ActivePlans } from "@/src/interfaces/planInterface";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const WorkoutPlanScreen = () => {

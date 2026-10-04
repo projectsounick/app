@@ -1,3 +1,4 @@
+import { safeRouter } from "@/src/utils/safeRouter";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -16,10 +17,11 @@ import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context"
 import { Calendar, DateData } from "react-native-calendars";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams, useFocusEffect } from "expo-router";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
-import { fetchWrapper } from "@/app/helpers/fetchWrapper";
-import { config } from "@/app/shared/config";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
+import { fetchWrapper } from "@/src/helpers/fetchWrapper";
+import { config } from "@/src/shared/config";
 import { Picker } from "@react-native-picker/picker";
+import { LoginWrapper } from "@/src/Hoc/LoginWrapper";
 
 const baseUrl = `${config.apiUrl}/api`;
 
@@ -153,22 +155,11 @@ function TrainerSessionCalendar() {
   const fetchActivePlans = async () => {
     try {
       const response = await fetchWrapper.get(`${baseUrl}/get-active-plans?userId=${userId}&isActive=true`);
-      if (response.success) {
+      if (response.success && Array.isArray(response.data)) {
         const filteredPlans = response.data.filter((item: any) => item.plan !== undefined);
-        console.log("=== Fetched Plans ===");
-        console.log("Total plans:", filteredPlans.length);
-        filteredPlans.forEach((plan: any, index: number) => {
-          console.log(`Plan ${index + 1}:`, {
-            id: plan._id,
-            planTitle: plan.plan?.title,
-            planName: plan.plan?.planName,
-            planItemName: plan.plan?.planItem?.planName,
-            dietPlanTitle: plan.dietPlanDetails?.title,
-            totalSessions: plan.totalSessions,
-            remainingSessions: plan.remainingSessions,
-          });
-        });
         setPlans(filteredPlans);
+      } else {
+        setPlans([]);
       }
     } catch (error) {
       console.error("Error fetching plans:", error);
@@ -178,18 +169,10 @@ function TrainerSessionCalendar() {
   const fetchActiveServices = async () => {
     try {
       const response = await fetchWrapper.get(`${baseUrl}/get-active-services?userId=${userId}&isActive=true`);
-      if (response.success) {
-        console.log("=== Fetched Services ===");
-        console.log("Total services:", response.data.length);
-        response.data.forEach((service: any, index: number) => {
-          console.log(`Service ${index + 1}:`, {
-            id: service._id,
-            serviceDetailsTitle: service.serviceDetails?.title,
-            totalSessions: service.totalSessions,
-            remainingSessions: service.remainingSessions,
-          });
-        });
+      if (response.success && Array.isArray(response.data)) {
         setServices(response.data);
+      } else {
+        setServices([]);
       }
     } catch (error) {
       console.error("Error fetching services:", error);
@@ -199,8 +182,10 @@ function TrainerSessionCalendar() {
   const fetchTrainers = async () => {
     try {
       const response = await fetchWrapper.get(`${baseUrl}/get-trainers?isActive=true`);
-      if (response.success) {
+      if (response.success && Array.isArray(response.data)) {
         setTrainers(response.data);
+      } else {
+        setTrainers([]);
       }
     } catch (error) {
       console.error("Error fetching trainers:", error);
@@ -212,17 +197,10 @@ function TrainerSessionCalendar() {
       // Load the full session history for this user so the header count and
       // session list do not incorrectly reflect only a rolling date window.
       const response = await fetchWrapper.get(`${baseUrl}/get-sessions?id=${userId}`);
-      if (response.success) {
-        console.log("=== Fetched Sessions ===");
-        console.log("Total sessions from API:", response.data?.length || 0);
-        console.log("Session details:", response.data?.map((s: any) => ({
-          id: s._id,
-          date: new Date(s.sessionDate).toLocaleDateString(),
-          status: s.sessionStatus,
-          planId: s.activePlanId,
-          serviceId: s.activeServiceId
-        })));
-        setSessions(sortSessionsForDisplay(response.data || []));
+      if (response.success && Array.isArray(response.data)) {
+        setSessions(sortSessionsForDisplay(response.data));
+      } else {
+        setSessions([]);
       }
     } catch (error) {
       console.error("Error fetching sessions:", error);
@@ -393,7 +371,6 @@ function TrainerSessionCalendar() {
   };
 
   const updateSessionItem = (date: Date, field: string, value: any) => {
-    console.log(`Updating session item - Field: ${field}, Value:`, value);
     setSessionItems((prev) =>
       prev.map((item) =>
         areDatesSame(item.sessionDate, date) ? { ...item, [field]: value } : item
@@ -402,10 +379,8 @@ function TrainerSessionCalendar() {
   };
 
   const openTimePicker = (date: Date) => {
-    console.log("Opening time picker for date:", formatDate(date));
     setCurrentEditingDate(date);
     const sessionItem = sessionItems.find((item) => areDatesSame(item.sessionDate, date));
-    console.log("Current session time:", sessionItem?.sessionTime);
 
     if (sessionItem?.sessionTime) {
       const [time, period] = sessionItem.sessionTime.split(" ");
@@ -488,17 +463,7 @@ function TrainerSessionCalendar() {
       return;
     }
 
-    console.log("=== Validating Session Items ===");
-    console.log("Total items:", sessionItems.length);
-
     for (const item of sessionItems) {
-      console.log("Checking session for date:", formatDate(item.sessionDate));
-      console.log("- Trainer:", item.trainerId);
-      console.log("- Time:", item.sessionTime);
-      console.log("- Duration:", item.sessionDuration);
-      console.log("- Type:", item.sessionType);
-      console.log("- Address:", item.sessionAddress);
-
       if (!item.trainerId) {
         Alert.alert("Error", "Please select a trainer for all selected dates");
         return;
@@ -569,7 +534,7 @@ function TrainerSessionCalendar() {
     return (
       <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
         <View style={[styles.header, { paddingTop: Math.max(insets.top, 8) + 8 }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => safeRouter.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Session Calendar</Text>
@@ -593,7 +558,7 @@ function TrainerSessionCalendar() {
   return (
     <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
       <View style={[styles.header, { paddingTop: Math.max(insets.top, 8) + 8 }]}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => safeRouter.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
@@ -603,7 +568,7 @@ function TrainerSessionCalendar() {
           </Text>
         </View>
         <TouchableOpacity
-          onPress={() => router.push({
+          onPress={() => safeRouter.navigate({
             pathname: "/(tabs)/dashboard/createSession",
             params: { userId, userName }
           })}
@@ -958,6 +923,13 @@ function TrainerSessionCalendar() {
         animationType="slide"
         transparent={false}
         presentationStyle="fullScreen"
+        onRequestClose={() => {
+          setShowCreateModal(false);
+          setSelectedDates([]);
+          setSessionItems([]);
+          setActivePlanId("");
+          setActiveServiceId("");
+        }}
       >
         <SafeAreaView style={styles.modalContainer} edges={["left", "right", "bottom"]}>
           <View style={styles.modalHeader}>
@@ -1076,7 +1048,6 @@ function TrainerSessionCalendar() {
                               isSelected && styles.simpleCardSelected
                             ]}
                             onPress={() => {
-                              console.log("Plan selected:", plan._id);
                               setActivePlanId(plan._id);
                               setSelectedDates([]);
                               setSessionItems([]);
@@ -2717,4 +2688,4 @@ const getStyles = (theme: any, isDark: boolean) =>
     },
   });
 
-export default TrainerSessionCalendar;
+export default LoginWrapper(TrainerSessionCalendar, { allowedRoles: ["admin", "trainer"] });

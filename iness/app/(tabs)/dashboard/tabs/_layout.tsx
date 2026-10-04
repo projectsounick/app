@@ -4,10 +4,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import React from "react";
 import { View, Dimensions } from "react-native";
-import CustomTabBar from "@/app/modules/CustomTabBar";
-import theme from "@/app/Theme/globalTheme";
-import Imagepicker from "@/app/modules/Imagepicker";
+import CustomTabBar from "@/src/modules/CustomTabBar";
+import theme from "@/src/Theme/globalTheme";
+import Imagepicker from "@/src/modules/Imagepicker";
 import { Portal } from "react-native-paper";
+import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+
+const STAFF_ROLES = ["admin", "trainer", "hr"];
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const TAB_BAR_HEIGHT = 60;
@@ -16,15 +19,38 @@ const FLOAT_BUTTON_SIZE = 60;
 export default function DashboardLayout() {
   const insets = useSafeAreaInsets();
   const pathname = usePathname();
+  const [isStaff, setIsStaff] = React.useState(false);
+
+  React.useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const u = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage<any>("user");
+        if (active && u.exists && STAFF_ROLES.includes(u.data?.role)) {
+          setIsStaff(true);
+        }
+      } catch {
+        // ignore; default to non-staff
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  // Staff use the equal-width bar with the Manage tab (no center float button).
   const showFloatingButton =
-    pathname === "/dashboard/tabs" ||
-    pathname === "/dashboard/tabs/" ||
-    pathname.endsWith("/dashboard/tabs/index");
+    !isStaff &&
+    (pathname === "/dashboard/tabs" ||
+      pathname === "/dashboard/tabs/" ||
+      pathname.endsWith("/dashboard/tabs/index"));
 
   return (
     <View style={{ flex: 1, flexDirection: "row" }}>
       <Tabs
-        tabBar={(props:any) => <CustomTabBar {...props} />}
+        tabBar={(props: any) => (
+          <CustomTabBar {...props} showManage={isStaff} />
+        )}
         screenOptions={{
           tabBarLabelStyle: { fontSize: theme.fontSizes.small, fontWeight: theme.fontWeights.medium as "500" },
           tabBarActiveTintColor: "#fff",
@@ -73,6 +99,17 @@ export default function DashboardLayout() {
             tabBarLabel: "Store",
             tabBarIcon: ({ color }: any) => (
               <MaterialCommunityIcons name="store" size={28} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="manage"
+          options={{
+            // Hidden from the tab bar unless the logged-in user is staff.
+            href: isStaff ? undefined : null,
+            tabBarLabel: "Manage",
+            tabBarIcon: ({ color }: any) => (
+              <MaterialCommunityIcons name="shield-account" size={28} color={color} />
             ),
           }}
         />

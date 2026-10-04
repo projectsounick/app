@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useGlobalTheme } from "@/app/Theme/ThemeContext";
+import { useGlobalTheme } from "@/src/Theme/ThemeContext";
 
 const { height } = Dimensions.get("window");
 

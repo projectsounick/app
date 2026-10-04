@@ -13,28 +13,28 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import NormalHeader from "@/app/modules/NormalHeader";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
-import ChatMessage from "@/app/Components/SupportChat/ChatMessage";
+import NormalHeader from "@/src/modules/NormalHeader";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
+import ChatMessage from "@/src/Components/SupportChat/ChatMessage";
 import useGetDataHook from "@/hooks/useFetchHook";
-import { chatService } from "@/app/services/chat.service";
+import { chatService } from "@/src/services/chat.service";
 import { ActivityIndicator } from "react-native-paper";
-import SupportChatShimmer from "@/app/modules/Shimmer/SupportChatShimmer";
+import SupportChatShimmer from "@/src/modules/Shimmer/SupportChatShimmer";
 import { uploadToAzureFromExpo } from "@/utils/azureUtils"; // make sure this util exists and works
-import { userService } from "@/app/services/user.service";
-import ImageViewerModal from "@/app/Modals/ImageViewerModal";
+import { userService } from "@/src/services/user.service";
+import ImageViewerModal from "@/src/Modals/ImageViewerModal";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import CustomSnackbar from "@/app/modules/Snackbar";
+import CustomSnackbar from "@/src/modules/Snackbar";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { useLocalSearchParams } from "expo-router";
 import {
   getTemplateByType,
   getTemplateMessage,
   SupportChatTemplate,
-} from "@/app/utils/supportChatTemplates";
+} from "@/src/utils/supportChatTemplates";
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.05; // 2% of screen height
 
@@ -72,7 +72,7 @@ export default function SupportScreen() {
     setSnackbarVisible,
     snackbarVisible,
     snackbarMessage,
-  } = useGetDataHook(chatService.getSupportConversation, targetUserId);
+  } = useGetDataHook(chatService.getSupportConversation, targetUserId, false);
   const [messageSendingLoader, setMessageSendingLoader] = useState(false);
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -109,20 +109,26 @@ export default function SupportScreen() {
       //// if attachment exists then upload them to azure then generate link and store it --/
       if (selectedAttachments.length > 0) {
         try {
-          const storageAccountDetailsResponse =
-            await userService.getStorageAccountDetails("chatMedia");
-
-          if (!storageAccountDetailsResponse.success) {
-            setSnackbarVisible(true);
-            setSnackbarMessage("Server error, try again.");
-            return;
+          const userCheck =
+            await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+          if (!userCheck.exists || !userCheck.data?._id) {
+            throw new Error("User not found");
           }
-
-          const { storageAccountName, sasToken } =
-            storageAccountDetailsResponse.data;
-          const uploadPromises = selectedAttachments.map(async (fileUri) => {
-            const fileName =
+          const uploadPromises = selectedAttachments.map(async (fileUri, index) => {
+            const originalFileName =
               fileUri.split("/").pop() || `image-${Date.now()}.jpg`;
+            const safeFileName = originalFileName.replace(
+              /[^a-zA-Z0-9._-]/g,
+              "-"
+            );
+            const fileName = `${userCheck.data._id}_${Date.now()}_${index}_${safeFileName}`;
+            const storageAccountDetailsResponse =
+              await userService.getStorageAccountDetails("chatMedia", fileName);
+            if (!storageAccountDetailsResponse.success) {
+              throw new Error("Unable to prepare attachment upload");
+            }
+            const { storageAccountName, sasToken } =
+              storageAccountDetailsResponse.data;
 
             const uploadedUrl = await uploadToAzureFromExpo(
               fileUri,

@@ -9,22 +9,22 @@ import {
 } from "react-native";
 import { useRouter } from "expo-router";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 import { ActivityIndicator } from "react-native-paper";
-import NotificationShimmer from "@/app/modules/Shimmer/NotificationShimmer";
+import NotificationShimmer from "@/src/modules/Shimmer/NotificationShimmer";
 import { SafeAreaView } from "react-native-safe-area-context";
-import VideoCallChecker from "@/app/Modals/VideoCallJoinModal";
+import VideoCallChecker from "@/src/Modals/VideoCallJoinModal";
 import eventBus from "@/event";
-import { notificationService } from "@/app/services/notification.service";
-import CustomSnackbar from "@/app/modules/Snackbar";
-import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
-import NormalHeader from "@/app/modules/NormalHeader";
+import { notificationService } from "@/src/services/notification.service";
+import CustomSnackbar from "@/src/modules/Snackbar";
+import { LoginWrapper } from "@/src/Hoc/LoginWrapper";
+import NormalHeader from "@/src/modules/NormalHeader";
 import dayjs from "dayjs";
 import {
   handleNotificationNavigation,
   getNotificationIcon,
   NotificationData,
-} from "@/app/utils/notificationRouter";
+} from "@/src/utils/notificationRouter";
 
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.05;

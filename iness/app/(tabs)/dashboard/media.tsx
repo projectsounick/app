@@ -1,20 +1,20 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { View, Text, FlatList, Image, ImageBackground, Dimensions, Platform, ActivityIndicator, TouchableOpacity, StyleSheet } from "react-native";
-import VideoCard from "@/app/modules/VideoCard";
-import NormalHeader from "@/app/modules/NormalHeader";
-import { PodcastInterface } from "@/app/interfaces/podcastsInterface";
-import { podCastService } from "@/app/services/podcast.service";
+import { View, Text, FlatList, Image, ImageBackground, Dimensions, Platform, ActivityIndicator, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import VideoCard from "@/src/modules/VideoCard";
+import NormalHeader from "@/src/modules/NormalHeader";
+import { PodcastInterface } from "@/src/interfaces/podcastsInterface";
+import { podCastService } from "@/src/services/podcast.service";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
-import { UserData } from "@/app/interfaces/UserInterface";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
+import { UserData } from "@/src/interfaces/UserInterface";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import FullScreenLoader from "@/app/modules/FullScreenLoader";
+import FullScreenLoader from "@/src/modules/FullScreenLoader";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
-import { appendPodcasts } from "@/Slices/podcastSlice";
-import { PAGINATION_LIMITS } from "@/app/shared/paginationLimits";
+import { appendPodcasts, setPodcasts } from "@/Slices/podcastSlice";
+import { PAGINATION_LIMITS } from "@/src/shared/paginationLimits";
 
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.05;
@@ -55,7 +55,7 @@ export default function MediaScreen() {
       // If we have the initial limit, there might be more
       setHasMore(podcasts.length >= PAGINATION_LIMITS.PODCAST_INITIAL);
     }
-  }, []); // Only run once on mount
+  }, [podcasts]);
 
   // Fetch more podcasts when scrolling
   const fetchMorePodcasts = useCallback(async () => {
@@ -116,7 +116,48 @@ export default function MediaScreen() {
 
   // Function for updating the podcast
   async function updatePodcastData(updateData: any) {
-    // Implementation can be added later if needed
+    if (!loggedUser?._id) {
+      Alert.alert("Login required", "Please sign in to interact with media.");
+      return;
+    }
+
+    try {
+      setUpdateLoader(true);
+      const response = await podCastService.updatePodcasts({
+        podcastId: updateData?.podcastId,
+        userName: loggedUser.name || "User",
+        comment:
+          typeof updateData?.comment === "string"
+            ? updateData.comment.trim()
+            : null,
+      });
+
+      if (!response?.success || !response?.data) {
+        throw new Error(response?.message || "Unable to update this podcast");
+      }
+
+      const updatedPodcast = {
+        ...response.data,
+        likes: Array.isArray(response.data.likes) ? response.data.likes : [],
+        interactions: Array.isArray(response.data.interactions)
+          ? response.data.interactions
+          : [],
+      };
+      dispatch(
+        setPodcasts(
+          podcasts.map((podcast) =>
+            podcast._id === updatedPodcast._id ? updatedPodcast : podcast
+          )
+        )
+      );
+    } catch (error: any) {
+      Alert.alert(
+        "Unable to update media",
+        error?.message || "Please try again."
+      );
+    } finally {
+      setUpdateLoader(false);
+    }
   }
 
   // Create unique key extractor to prevent duplicate key warnings

@@ -1,32 +1,27 @@
-import PlanProgressStatus from "@/app/Components/HeaderSubComponents/PlanProgressStatus";
-import CurrentPlans from "@/app/Components/Train/CurrentPlans";
-import withAnimatedHeader from "@/app/Hoc/MainHeader";
-import { manualWorkoutPlanService } from "@/app/services/manualWorkoutPlan";
-import { planService } from "@/app/services/plan.service";
+import { safeRouter } from "@/src/utils/safeRouter";
+import CurrentPlans from "@/src/Components/Train/CurrentPlans";
+import { manualWorkoutPlanService } from "@/src/services/manualWorkoutPlan";
+import { planService } from "@/src/services/plan.service";
 import { SliceKey } from "@/sliceRegistery";
 
 import useFetchMultipleStoreDataHook from "@/hooks/useMultipleDataStoreHook";
 import { RootState } from "@/store";
-import React, { useMemo, useRef, useState, useEffect } from "react";
-import { View, Text, Animated, TouchableOpacity } from "react-native";
+import React, { useCallback, useMemo, useState, useEffect } from "react";
+import { View, Text, Animated, TouchableOpacity, ScrollView } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
-import TrainerShimmer from "@/app/modules/Shimmer/TrainerShimmer";
-import SmallHeader from "@/app/modules/SmallHeader";
-import { sessionService } from "@/app/services/sessionService";
-import AvailablePlans from "@/app/Components/Train/AvaialblePlan";
-import { otherService } from "@/app/services/singleService.service";
+import TrainerShimmer from "@/src/modules/Shimmer/TrainerShimmer";
+import SmallHeader from "@/src/modules/SmallHeader";
+import { sessionService } from "@/src/services/sessionService";
+import AvailablePlans from "@/src/Components/Train/AvaialblePlan";
+import { otherService } from "@/src/services/singleService.service";
 import eventBus from "@/event";
 import { router } from "expo-router";
-import { useGlobalTheme } from "@/app/Theme/ThemeContext";
-
-const MainHeader = withAnimatedHeader(
-  PlanProgressStatus as unknown as React.FC
-);
+import { useGlobalTheme } from "@/src/Theme/ThemeContext";
+import CustomSnackbar from "@/src/modules/Snackbar";
 
 export default function TrainScreen() {
   const theme = useGlobalTheme();
-  const scrollY = useRef(new Animated.Value(0)).current;
 
 
   const [activeTab, setActiveTab] = useState<"available" | "current">(
@@ -80,65 +75,47 @@ export default function TrainScreen() {
     []
   );
 
-  const { loading } = useFetchMultipleStoreDataHook(configs, true, true); // Enable priority loading
-  const translateX = useRef(
-    new Animated.Value(activeTab === "current" ? 0 : 1)
-  ).current;
+  const {
+    loading,
+    snackbarVisible,
+    snackbarMessage,
+    setSnackbarVisible,
+  } = useFetchMultipleStoreDataHook(configs, true, true); // Enable priority loading
+  const [translateX] = useState(
+    () => new Animated.Value(activeTab === "current" ? 0 : 1)
+  );
 
-  const handlePress = (tab: "current" | "available") => {
+  const handlePress = useCallback((tab: "current" | "available") => {
     setActiveTab(tab);
     Animated.timing(translateX, {
       toValue: tab === "current" ? 0 : 1,
       duration: 250, // toggle animation
-      useNativeDriver: false,
+      useNativeDriver: true,
     }).start();
-  };
+  }, [translateX]);
 
   // Get current plans and services from Redux to check
   const activePlans = useSelector((state: RootState) => state.plan.activePlans);
   const activeServices = useSelector((state: RootState) => state.plan.activeServices);
 
-  // Helper function to find current plan by type
-  const findCurrentPlan = (planType: string) => {
-    return activePlans.find(
-      (plan) => plan.plan?.planType?.title?.toLowerCase() === planType.toLowerCase()
-    );
-  };
-
-  // Helper function to find current service by type keyword
-  const findCurrentServiceByType = (type: string) => {
-    const keyword = type.toLowerCase();
-    const keywords = [keyword];
-    if (keyword === "yoga") {
-      keywords.push("yoga");
-    } else if (keyword === "weight training") {
-      keywords.push("weight", "training", "workout", "fitness");
-    }
-    
-    return activeServices.find(
-      (service) => {
-        const title = service.serviceDetails?.title?.toLowerCase() || "";
-        return keywords.some(kw => title.includes(kw));
-      }
-    );
-  };
-
-  // Helper function to find current service by online/offline
-  const findCurrentService = (isOnline: boolean) => {
-    return activeServices.find(
-      (service) => service.serviceDetails?.isOnline === isOnline
-    );
-  };
-
   // Listen for events from ButtonSection
   useEffect(() => {
+    const timers = new Set<ReturnType<typeof setTimeout>>();
+    const schedule = (callback: () => void, delay: number) => {
+      const timer = setTimeout(() => {
+        timers.delete(timer);
+        callback();
+      }, delay);
+      timers.add(timer);
+    };
+
     const handleSwitchTab = (data: { tab: "available" | "current"; planType?: string; serviceType?: string }) => {
       if (data.tab === "available" && activeTab !== "available") {
         handlePress("available");
       }
       // Emit event to AvailablePlans to scroll to specific type
       if (data.planType || data.serviceType) {
-        setTimeout(() => {
+        schedule(() => {
           eventBus.emit("scroll-to-type", {
             planType: data.planType,
             serviceType: data.serviceType,
@@ -154,9 +131,9 @@ export default function TrainScreen() {
       }
       // Navigate to appropriate details page after a short delay
       // Use the same navigation as CurrentPlanCard for consistency
-      setTimeout(() => {
+      schedule(() => {
         if (data.type === "service" || data.type === "plan") {
-          router.push({
+          safeRouter.navigate({
             pathname: "/dashboard/fullPlanDetails",
             params: { id: data.planId, type: data.type },
           });
@@ -181,7 +158,7 @@ export default function TrainScreen() {
         // If still loading, wait a bit more
         if (loading) {
           if (attempts < maxAttempts) {
-            setTimeout(checkAfterLoad, 200);
+            schedule(checkAfterLoad, 200);
           } else {
             // Timeout - proceed anyway (might be an error, will go to available tab)
             proceedWithNavigation();
@@ -204,7 +181,7 @@ export default function TrainScreen() {
           // Weight Training always goes to available plans
           if (data.planType.toLowerCase() === "weight training") {
             handlePress("available");
-            setTimeout(() => {
+            schedule(() => {
               eventBus.emit("scroll-to-type", {
                 planType: data.planType,
               });
@@ -227,8 +204,8 @@ export default function TrainScreen() {
               if (activeTab !== "current") {
                 handlePress("current");
               }
-              setTimeout(() => {
-                router.push({
+              schedule(() => {
+                safeRouter.navigate({
                   pathname: "/dashboard/fullPlanDetails",
                   params: { id: currentPlan._id, type: "plan" },
                 });
@@ -246,7 +223,7 @@ export default function TrainScreen() {
 
             if (currentService) {
               // Navigate directly to service details
-              router.push({
+              safeRouter.navigate({
                 pathname: "/dashboard/fullPlanDetails",
                 params: { id: currentService._id, type: "service" },
               });
@@ -255,7 +232,7 @@ export default function TrainScreen() {
 
             // No current plan or service, go to available tab
             handlePress("available");
-            setTimeout(() => {
+            schedule(() => {
               eventBus.emit("scroll-to-type", {
                 planType: data.planType,
               });
@@ -265,7 +242,7 @@ export default function TrainScreen() {
 
           // For other plan types, go to available tab
           handlePress("available");
-          setTimeout(() => {
+          schedule(() => {
             eventBus.emit("scroll-to-type", {
               planType: data.planType,
             });
@@ -281,8 +258,8 @@ export default function TrainScreen() {
             if (activeTab !== "current") {
               handlePress("current");
             }
-            setTimeout(() => {
-              router.push({
+            schedule(() => {
+              safeRouter.navigate({
                 pathname: "/dashboard/fullPlanDetails",
                 params: { id: firstPlan._id, type: "plan" },
               });
@@ -297,7 +274,7 @@ export default function TrainScreen() {
 
           if (currentService) {
             // Navigate directly to service details
-            router.push({
+            safeRouter.navigate({
               pathname: "/dashboard/fullPlanDetails",
               params: { id: currentService._id, type: "service" },
             });
@@ -306,7 +283,7 @@ export default function TrainScreen() {
 
           // No current plan or service, go to available tab
           handlePress("available");
-          setTimeout(() => {
+          schedule(() => {
             eventBus.emit("scroll-to-type", {
               serviceType: data.serviceType,
             });
@@ -315,7 +292,7 @@ export default function TrainScreen() {
       };
 
       // Start checking - wait a bit first to ensure component is mounted and data fetch has started
-      setTimeout(() => {
+      schedule(() => {
         checkAfterLoad();
       }, 100);
     };
@@ -328,13 +305,16 @@ export default function TrainScreen() {
       eventBus.off("switch-train-tab", handleSwitchTab);
       eventBus.off("open-plan", handleOpenPlan);
       eventBus.off("check-and-navigate", handleCheckAndNavigate);
+      timers.forEach(clearTimeout);
+      timers.clear();
     };
   }, [activeTab, loading, activePlans, activeServices, handlePress]);
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}
-      edges={["left", "right"]}
-    >
+    <>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: theme.colors.backgroundSecondary }}
+        edges={["left", "right"]}
+      >
       {loading ? (
         <View
           style={{
@@ -456,29 +436,30 @@ export default function TrainScreen() {
           </View>
 
           {/* Scrollable Content */}
-          <Animated.ScrollView
+          <ScrollView
             style={{ flex: 1 }}
             contentContainerStyle={{
               paddingTop: 10,
               paddingBottom: 100,
               paddingHorizontal: 16,
             }}
-            onScroll={Animated.event(
-              [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-              { useNativeDriver: false }
-            )}
-            scrollEventThrottle={16}
             showsVerticalScrollIndicator={true}
-            nestedScrollEnabled={true}
           >
             {activeTab === "current" ? (
               <CurrentPlans isActive={true} />
             ) : (
               <AvailablePlans />
             )}
-          </Animated.ScrollView>
+          </ScrollView>
         </>
       )}
-    </SafeAreaView>
+      </SafeAreaView>
+      <CustomSnackbar
+        visible={snackbarVisible}
+        message={snackbarMessage}
+        onDismiss={() => setSnackbarVisible(false)}
+        bgColor={theme.colors.backgroundCard}
+      />
+    </>
   );
 }

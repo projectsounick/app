@@ -11,7 +11,7 @@ def projectRoot = rootDir.getAbsoluteFile().getParentFile().getAbsolutePath()
 react {
     entryFile = file(["node", "-e", "require('expo/scripts/resolveAppEntry')", projectRoot, "android", "absolute"].execute(null, rootDir).text.trim())
     reactNativeDir = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
-    hermesCommand = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim()).getParentFile().getAbsolutePath() + "/sdks/hermesc/%OS-BIN%/hermesc"
+    hermesCommand = new File(["node", "--print", "require.resolve('hermes-compiler/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsolutePath() + "/hermesc/%OS-BIN%/hermesc"
     codegenDir = new File(["node", "--print", "require.resolve('@react-native/codegen/package.json', { paths: [require.resolve('react-native/package.json')] })"].execute(null, rootDir).text.trim()).getParentFile().getAbsoluteFile()
 
     enableBundleCompression = (findProperty('android.enableBundleCompression') ?: false).toBoolean()
@@ -66,7 +66,7 @@ react {
 /**
  * Set this to true to Run Proguard on Release builds to minify the Java bytecode.
  */
-def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInReleaseBuilds') ?: false).toBoolean()
+def enableMinifyInReleaseBuilds = (findProperty('android.enableMinifyInReleaseBuilds') ?: false).toBoolean()
 
 /**
  * The preferred build flavor of JavaScriptCore (JSC)
@@ -81,6 +81,20 @@ def enableProguardInReleaseBuilds = (findProperty('android.enableProguardInRelea
  */
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
+def releaseStoreFileValue = System.getenv('INESS_ANDROID_KEYSTORE_PATH') ?: findProperty('MYAPP_RELEASE_STORE_FILE')
+def releaseStorePasswordValue = System.getenv('INESS_ANDROID_KEYSTORE_PASSWORD') ?: findProperty('MYAPP_RELEASE_STORE_PASSWORD')
+def releaseKeyAliasValue = System.getenv('INESS_ANDROID_KEY_ALIAS') ?: findProperty('MYAPP_RELEASE_KEY_ALIAS')
+def releaseKeyPasswordValue = System.getenv('INESS_ANDROID_KEY_PASSWORD') ?: findProperty('MYAPP_RELEASE_KEY_PASSWORD')
+def hasLocalReleaseSigning = [
+    releaseStoreFileValue,
+    releaseStorePasswordValue,
+    releaseKeyAliasValue,
+    releaseKeyPasswordValue,
+].every { value -> value != null && value.toString().trim() }
+def localReleaseTaskRequested = gradle.startParameter.taskNames.any { taskName ->
+    taskName.toLowerCase().contains('release')
+}
+
 android {
     ndkVersion rootProject.ext.ndkVersion
 
@@ -92,8 +106,10 @@ android {
         applicationId 'com.iness.fitness'
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 46
-        versionName "1.1.7"
+        versionCode 54
+        versionName "1.2.0"
+
+        buildConfigField "String", "REACT_NATIVE_RELEASE_LEVEL", "\"${findProperty('reactNativeReleaseLevel') ?: 'stable'}\""
     }
     signingConfigs {
         debug {
@@ -103,11 +119,11 @@ android {
             keyPassword 'android'
         }
         release {
-            if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
-                storeFile file(MYAPP_RELEASE_STORE_FILE)
-                storePassword MYAPP_RELEASE_STORE_PASSWORD
-                keyAlias MYAPP_RELEASE_KEY_ALIAS
-                keyPassword MYAPP_RELEASE_KEY_PASSWORD
+            if (hasLocalReleaseSigning) {
+                storeFile file(releaseStoreFileValue)
+                storePassword releaseStorePasswordValue
+                keyAlias releaseKeyAliasValue
+                keyPassword releaseKeyPasswordValue
             }
         }
     }
@@ -116,15 +132,16 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            // Use release signing config if keystore properties are set, otherwise fall back to debug
-            if (project.hasProperty('MYAPP_RELEASE_STORE_FILE')) {
+            if (hasLocalReleaseSigning) {
                 signingConfig signingConfigs.release
-            } else {
-                signingConfig signingConfigs.debug
+            } else if (localReleaseTaskRequested && !System.getenv('EAS_BUILD')) {
+                throw new GradleException(
+                    'Release signing credentials are missing. Use EAS remote credentials or configure MYAPP_RELEASE_* in ~/.gradle/gradle.properties.'
+                )
             }
             shrinkResources (findProperty('android.enableShrinkResourcesInReleaseBuilds')?.toBoolean() ?: false)
-            minifyEnabled enableProguardInReleaseBuilds
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            minifyEnabled enableMinifyInReleaseBuilds
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
             crunchPngs (findProperty('android.enablePngCrunchInReleaseBuilds')?.toBoolean() ?: true)
         }
     }

@@ -1,13 +1,13 @@
 import React from "react";
 import { View, Text, ScrollView, ImageBackground } from "react-native";
-import SmallHeader from "@/app/modules/SmallHeader";
+import SmallHeader from "@/src/modules/SmallHeader";
 import { Ionicons } from "@expo/vector-icons";
-import BackHeader from "@/app/modules/BackHeader";
-import theme from "@/app/Theme/globalTheme";
+import BackHeader from "@/src/modules/BackHeader";
+import theme from "@/src/Theme/globalTheme";
 import { useSelector } from "react-redux";
 import { useLocalSearchParams } from "expo-router";
 import { RootState } from "@/store";
-import { ActivePlans } from "@/app/interfaces/planInterface";
+import { ActivePlans } from "@/src/interfaces/planInterface";
 import dayjs from "dayjs";
 import { SafeAreaView } from "react-native-safe-area-context";
 

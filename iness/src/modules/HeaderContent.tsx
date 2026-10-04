@@ -1,0 +1,85 @@
+import { safeRouter } from "@/src/utils/safeRouter";
+import React from "react";
+import { View, Text, TouchableOpacity } from "react-native";
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+  MaterialIcons,
+} from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
+import { Divider } from "react-native-paper";
+
+type BackTitleInfoProps = {
+  title?: string;
+  subtitle?: string;
+  children?: React.ReactNode;
+};
+
+export default function HeaderContent({
+  title = "Back",
+  subtitle,
+  children,
+}: BackTitleInfoProps) {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const router = useRouter();
+
+  return (
+    <View
+      style={{
+        width: "100%",
+        paddingTop: 4,
+        paddingBottom: 4,
+      }}
+    >
+      {/* Top row: Back arrow */}
+      <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
+        <TouchableOpacity onPress={() => safeRouter.back()}>
+          <MaterialCommunityIcons
+            name="chevron-left"
+            size={34}
+            color={theme.colors.textWhite}
+          />
+        </TouchableOpacity>
+
+        {/* Subtitle below / next to arrow */}
+        {subtitle && (
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text
+              numberOfLines={3}
+              ellipsizeMode="tail"
+              style={{
+                color: theme.colors.textWhite,
+
+                fontSize: theme.fontSizes.large,
+                fontFamily: theme.fonts.bold,
+                textAlign: "left",
+                flexShrink: 1, // ✅ allows wrapping instead of overflowing
+              }}
+            >
+              {subtitle}
+            </Text>
+          </View>
+        )}
+      </View>
+
+      {/* Divider if children exist */}
+      {children ? (
+        <View
+          style={{
+            width: "100%",
+            flexDirection: "row",
+            justifyContent: "center",
+            marginTop: 10,
+          }}
+        >
+          <Divider style={{ width: "90%" }} />
+        </View>
+      ) : null}
+
+      {/* Optional children */}
+      {children && <View style={{ marginTop: 12 }}>{children}</View>}
+    </View>
+  );
+}

@@ -8,16 +8,17 @@ import {
   ImageBackground,
   Animated,
   Platform,
+  InteractionManager,
 } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 import dayjs from "dayjs";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
-import NormalHeader from "@/app/modules/NormalHeader";
+import NormalHeader from "@/src/modules/NormalHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { trackService } from "@/app/services/track.service";
+import { trackService } from "@/src/services/track.service";
 import {
   setCurrentDateTrackData,
   setTotalTrackData,
@@ -25,8 +26,8 @@ import {
 import { ActivityIndicator } from "react-native-paper";
 import { useAppleHealthSync } from "@/hooks/useAppleHealthSync";
 import { useAndroidHealthSync } from "@/hooks/useAndroidHealthSync";
-import CustomSnackbar from "@/app/modules/Snackbar";
-import TrackShimmer from "@/app/modules/Shimmer/TrackShimmer";
+import CustomSnackbar from "@/src/modules/Snackbar";
+import TrackShimmer from "@/src/modules/Shimmer/TrackShimmer";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -314,22 +315,26 @@ export default function TrackingGraphPage() {
     dispatch(setTotalTrackData(allData));
   }, [monthDataMap, dispatch]);
 
-  // ✅ Fetch data when month changes OR on initial mount
+  // ✅ Fetch data when month changes OR on initial mount (runs after navigation animation finishes)
   useEffect(() => {
-    const monthKey = currentMonth.format("YYYY-MM");
-    
-    // Show shimmer when month changes
-    setLoading(true);
-    
-    // Use refs to check without causing dependency issues
-    if (!loadedMonthsRef.current.has(monthKey) && !loadingMonthsRef.current.has(monthKey)) {
-      fetchDataForMonth(currentMonth);
-    } else {
-      // Data already loaded, hide shimmer after brief delay for smooth transition
-      setTimeout(() => {
-        setLoading(false);
-      }, 200);
-    }
+    const task = InteractionManager.runAfterInteractions(() => {
+      const monthKey = currentMonth.format("YYYY-MM");
+      
+      // Show shimmer when month changes
+      setLoading(true);
+      
+      // Use refs to check without causing dependency issues
+      if (!loadedMonthsRef.current.has(monthKey) && !loadingMonthsRef.current.has(monthKey)) {
+        fetchDataForMonth(currentMonth);
+      } else {
+        // Data already loaded, hide shimmer after brief delay for smooth transition
+        setTimeout(() => {
+          setLoading(false);
+        }, 150);
+      }
+    });
+
+    return () => task.cancel();
   }, [monthOffset, fetchDataForMonth]);
 
   const { sleepData, stepsData, waterData } = useMemo(() => {

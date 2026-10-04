@@ -3,22 +3,22 @@ import { Alert, Modal, ScrollView, Text, TouchableOpacity, View } from "react-na
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 
-import SmallHeader from "@/app/modules/SmallHeader";
-import CommunityPostModal from "@/app/Modals/CommunitPostModal";
-import PostFeed from "@/app/Components/Community/CommunityFeed";
-import { communityService } from "@/app/services/community.service";
-import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
-import FeedShimmer from "@/app/modules/Shimmer/FeedShimmer";
-import { useGlobalTheme } from "@/app/Theme/ThemeContext";
+import SmallHeader from "@/src/modules/SmallHeader";
+import CommunityPostModal from "@/src/Modals/CommunitPostModal";
+import PostFeed from "@/src/Components/Community/CommunityFeed";
+import { communityService } from "@/src/services/community.service";
+import { LoginWrapper } from "@/src/Hoc/LoginWrapper";
+import FeedShimmer from "@/src/modules/Shimmer/FeedShimmer";
+import { useGlobalTheme } from "@/src/Theme/ThemeContext";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { uploadToAzureFromExpo } from "@/utils/azureUtils";
-import { userService } from "@/app/services/user.service";
-import CommunityUploadOverlay from "@/app/modules/CommunityUploadOverlay";
+import { userService } from "@/src/services/user.service";
+import CommunityUploadOverlay from "@/src/modules/CommunityUploadOverlay";
 import {
   CommunityPostDraft,
   CommunityPostDraftPayload,
   CommunityUploadJob,
-} from "@/app/interfaces/communityComposer";
+} from "@/src/interfaces/communityComposer";
 
 const FEED_COMMUNITY_STORAGE_KEY = "selectedFeedCommunityId";
 
@@ -66,6 +66,7 @@ function YourComponent() {
   const [communitName, setCommunityName] = useState("");
   const [communities, setCommunities] = useState<FeedCommunity[]>([]);
   const [showCommunitySelector, setShowCommunitySelector] = useState(false);
+  const [companyName, setCompanyName] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [uploadQueue, setUploadQueue] = useState<CommunityUploadJob[]>([]);
   const createPostModalRef = useRef<{ openModal: () => void } | null>(null);
@@ -79,6 +80,25 @@ function YourComponent() {
   useEffect(() => {
     uploadQueueRef.current = uploadQueue;
   }, [uploadQueue]);
+
+  // Load the corporate company name (if any) for the badge.
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const userResponse =
+          await asyncStorageUtils.checkIfKeyExistsInAsyncStorage<any>("user");
+        if (mounted && userResponse.exists && userResponse.data?.companyName) {
+          setCompanyName(userResponse.data.companyName);
+        }
+      } catch {
+        // best-effort badge; ignore failures
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     communityIdRef.current = communityId;
@@ -176,17 +196,6 @@ function YourComponent() {
         let uploadedUrls = currentJob.uploadedUrls || [];
 
         if (!uploadedUrls.length && draft.media.length > 0) {
-          const storageDetails = await userService.getStorageAccountDetails(
-            draft.type === "video" ? "community/raw" : "community"
-          );
-
-          if (!storageDetails.success) {
-            throw new Error(
-              storageDetails.message || "Unable to prepare the upload right now."
-            );
-          }
-
-          const { storageAccountName, sasToken } = storageDetails.data;
           uploadedUrls = [];
 
           updateUploadJob(jobId, (job) => ({
@@ -212,6 +221,21 @@ function YourComponent() {
               `file-${Date.now()}.${extension}`;
             const safeFileName = originalFileName.replace(/\s+/g, "-");
             const fileName = `${userId}_${Date.now()}_${index}_${safeFileName}`;
+            const uploadFolder =
+              draft.type === "video" ? "community/raw" : "community";
+            const storageDetails = await userService.getStorageAccountDetails(
+              uploadFolder,
+              fileName
+            );
+
+            if (!storageDetails.success) {
+              throw new Error(
+                storageDetails.message ||
+                  "Unable to prepare the upload right now."
+              );
+            }
+
+            const { storageAccountName, sasToken } = storageDetails.data;
 
             const uploadedUrl = await uploadToAzureFromExpo(
               mediaItem.uri,
@@ -219,7 +243,7 @@ function YourComponent() {
               sasToken,
               storageAccountName,
               "admin-data",
-              draft.type === "video" ? "community/raw" : "community",
+              uploadFolder,
               (fileProgress) => {
                 const overallProgress =
                   ((index + fileProgress / 100) / draft.media.length) * 100;
@@ -253,7 +277,11 @@ function YourComponent() {
           progress: 100,
           uploadedUrls,
           message:
-            draft.type === "video"
+            draft.publishingStatus === "draft"
+              ? "Saving draft..."
+              : draft.publishingStatus === "scheduled"
+                ? "Scheduling post..."
+                : draft.type === "video"
               ? "Publishing post and starting optimization..."
               : "Publishing your post...",
           error: null,
@@ -267,20 +295,46 @@ function YourComponent() {
           isActive: true,
           isApproved: true,
           createdBy: userId,
+          contentType: draft.contentType,
+          audience: draft.audience,
+          publishingStatus: draft.publishingStatus,
+          scheduledAt: draft.scheduledAt,
+          hashtags: draft.hashtags,
+          commentsEnabled: draft.commentsEnabled,
+          sharingEnabled: draft.sharingEnabled,
+          isSensitive: draft.isSensitive,
+          metadata: draft.metadata,
         });
 
         if (!response.success) {
           throw new Error(response.message || "Unable to create the post.");
         }
 
+        const localPreview =
+          draft.media.find((item) => item.previewUri)?.previewUri ||
+          draft.media[0]?.previewUri ||
+          draft.media[0]?.uri;
+        const localMediaUris = draft.media.map((item) => item.uri);
+
         const createdPost = {
           ...response.data,
           likeCount: response.data?.likeCount || 0,
           likedByUser: response.data?.likedByUser || false,
           commentCount: response.data?.commentCount || 0,
+          media:
+            Array.isArray(response.data?.media) && response.data.media.length > 0
+              ? response.data.media
+              : localMediaUris,
+          previewImage:
+            response.data?.previewImage || localPreview || undefined,
+          localMediaUri: draft.media[0]?.uri || undefined,
         };
 
-        if (String(communityIdRef.current || "") === draft.communityId) {
+        if (
+          draft.publishingStatus !== "draft" &&
+          draft.publishingStatus !== "scheduled" &&
+          String(communityIdRef.current || "") === draft.communityId
+        ) {
           setPosts((prevPosts: any[]) => [
             createdPost,
             ...prevPosts.filter((post) => post._id !== createdPost._id),
@@ -292,7 +346,11 @@ function YourComponent() {
           status: "completed",
           progress: 100,
           message:
-            draft.type === "video"
+            draft.publishingStatus === "draft"
+              ? "Draft saved"
+              : draft.publishingStatus === "scheduled"
+                ? "Post scheduled"
+                : draft.type === "video"
               ? "Video post published"
               : "Post published",
           error: null,
@@ -433,6 +491,40 @@ function YourComponent() {
         showCart={false}
         showBell={false}
       />
+
+      {companyName ? (
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            alignSelf: "flex-start",
+            marginHorizontal: 16,
+            marginTop: 10,
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            borderRadius: 999,
+            backgroundColor: theme.colors.backgroundCard,
+            borderWidth: 1,
+            borderColor: theme.colors.border,
+          }}
+        >
+          <Ionicons
+            name="business-outline"
+            size={14}
+            color={theme.colors.textMuted}
+          />
+          <Text
+            style={{
+              marginLeft: 6,
+              fontSize: 12,
+              color: theme.colors.text,
+              fontFamily: theme.fonts.medium,
+            }}
+          >
+            {companyName} · corporate plan
+          </Text>
+        </View>
+      ) : null}
 
       {communities.length > 1 && (
         <View

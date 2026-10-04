@@ -11,10 +11,10 @@ import {
   StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import NormalHeader from "@/app/modules/NormalHeader";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import NormalHeader from "@/src/modules/NormalHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
-import theme from "@/app/Theme/globalTheme";
+import theme from "@/src/Theme/globalTheme";
 
 const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const { height } = Dimensions.get("window");

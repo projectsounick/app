@@ -1,3 +1,4 @@
+import { safeRouter } from "@/src/utils/safeRouter";
 import React, { useRef, useState } from "react";
 import {
   View,
@@ -11,18 +12,18 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import theme from "./Theme/globalTheme";
-import AnimatedSubmitButton from "./modules/AnimatedSubmitButton";
+import theme from "@/src/Theme/globalTheme";
+import AnimatedSubmitButton from "@/src/modules/AnimatedSubmitButton";
 import useServiceWithSnackbar from "@/hooks/usePostDataHook";
-import { userService } from "./services/user.service";
-import CustomSnackbar from "./modules/Snackbar";
-import { useNavigation } from "@react-navigation/native";
+import { userService } from "@/src/services/user.service";
+import CustomSnackbar from "@/src/modules/Snackbar";
+import { useNavigation } from "expo-router";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { ActivityIndicator } from "react-native-paper";
 import { registerForPushNotificationsAsync } from "@/utils/notificationUtils";
-import NormalHeader from "./modules/NormalHeader";
+import NormalHeader from "@/src/modules/NormalHeader";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useTheme } from "./Theme/ThemeContext";
+import { useTheme } from "@/src/Theme/ThemeContext";
 /// Main functional component for the OTP input screen ///// -----------------------------------/
 const OTPInputScreen = () => {
   const { reloadThemeFromUserData } = useTheme();
@@ -140,7 +141,7 @@ const OTPInputScreen = () => {
             await AsyncStorage.removeItem("wasRedirectedFromCart");
 
             // Navigate and keep loading visible until navigation transition starts
-            navigation.navigate("secondsplashscreen");
+            safeRouter.navigate("/secondsplashscreen");
             
             // Set loading to false after a brief delay to ensure navigation transition has started
             setTimeout(() => {
@@ -152,7 +153,7 @@ const OTPInputScreen = () => {
           } else {
             setOtp(["", "", "", "", "", ""]);
             //// when onboarding is false we will redirect him to onboarding screen
-            navigation.navigate("Onboarding");
+            safeRouter.navigate("/Onboarding");
             
             // Set loading to false after a brief delay to ensure navigation transition has started
             setTimeout(() => {

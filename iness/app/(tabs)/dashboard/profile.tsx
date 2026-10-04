@@ -8,16 +8,16 @@ import {
   Platform,
 } from "react-native";
 
-import TransformationCard from "@/app/Components/Profile/Tranformation";
-import SettingsList from "@/app/Components/Profile/SettingsList";
-import ProfileCard from "@/app/Components/Profile/DescriptionCard";
+import TransformationCard from "@/src/Components/Profile/Tranformation";
+import SettingsList from "@/src/Components/Profile/SettingsList";
+import ProfileCard from "@/src/Components/Profile/DescriptionCard";
 
-import NormalHeader from "@/app/modules/NormalHeader";
+import NormalHeader from "@/src/modules/NormalHeader";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome } from "@expo/vector-icons"; // You can also use Entypo, Ionicons etc.
-import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import { LoginWrapper } from "@/src/Hoc/LoginWrapper";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.05; // 2% of screen height
 

@@ -12,11 +12,11 @@ import {
   Modal,
   FlatList,
 } from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import CustomSnackbar from "@/app/modules/Snackbar";
-import OnboardingHeading from "@/app/modules/OnboardingHeading";
-import { useGlobalTheme } from "@/app/Theme/ThemeContext";
+import CustomSnackbar from "@/src/modules/Snackbar";
+import OnboardingHeading from "@/src/modules/OnboardingHeading";
+import { useGlobalTheme } from "@/src/Theme/ThemeContext";
 
 const OnboardingHeight = ({ onNext }: { onNext: () => void }) => {
   const theme = useGlobalTheme();

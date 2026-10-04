@@ -7,9 +7,9 @@ import {
   StyleSheet,
   Dimensions,
 } from "react-native";
-import NormalHeader from "@/app/modules/NormalHeader";
+import NormalHeader from "@/src/modules/NormalHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
-import theme from "@/app/Theme/globalTheme";
+import theme from "@/src/Theme/globalTheme";
 
 const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const { width } = Dimensions.get("window");

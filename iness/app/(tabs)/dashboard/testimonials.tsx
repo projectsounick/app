@@ -15,9 +15,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ImageBackground } from "react-native";
 import { useRouter } from "expo-router";
+import { fetchJsonWithTimeout } from "@/utils/fetchJsonWithTimeout";
 import { AntDesign, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
-import NormalHeader from "@/app/modules/NormalHeader";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
+import NormalHeader from "@/src/modules/NormalHeader";
 
 const { width, height } = Dimensions.get("window");
 const topPadding = height * 0.05;
@@ -57,10 +58,9 @@ export default function TestimonialsScreen() {
   const fetchTestimonials = async () => {
     try {
       const cacheBuster = Date.now();
-      const res = await fetch(
+      const data = await fetchJsonWithTimeout<Testimonial[]>(
         `https://inessstorage.blob.core.windows.net/admin-data/Jsons/testimonial?cb=${cacheBuster}`
       );
-      const data = await res.json();
       setTestimonials(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error("Error fetching testimonials:", error);
@@ -264,9 +264,9 @@ export default function TestimonialsScreen() {
                             {/* Rating */}
                             <View style={styles.ratingContainer}>
                               {Array.from({ length: 5 }).map((_, i) => (
-                                <AntDesign
+                                <Ionicons
                                   key={i}
-                                  name={i < testimonial.rating ? "star" : "staro"}
+                                  name={i < testimonial.rating ? "star" : "star-outline"}
                                   size={12}
                                   color="#FFB800"
                                   style={{ marginRight: 2 }}
@@ -371,9 +371,9 @@ export default function TestimonialsScreen() {
                               {/* Rating */}
                               <View style={styles.modalRatingContainer}>
                                 {Array.from({ length: 5 }).map((_, i) => (
-                                  <AntDesign
+                                  <Ionicons
                                     key={i}
-                                    name={i < testimonial.rating ? "star" : "staro"}
+                                    name={i < testimonial.rating ? "star" : "star-outline"}
                                     size={16}
                                     color="#FFD700"
                                     style={{ marginRight: 2 }}
@@ -528,9 +528,9 @@ export default function TestimonialsScreen() {
                                 {/* Rating */}
                                 <View style={styles.ratingContainer}>
                                   {Array.from({ length: 5 }).map((_, i) => (
-                                    <AntDesign
+                                    <Ionicons
                                       key={i}
-                                      name={i < testimonial.rating ? "star" : "staro"}
+                                      name={i < testimonial.rating ? "star" : "star-outline"}
                                       size={12}
                                       color="#FFB800"
                                       style={{ marginRight: 2 }}
@@ -635,9 +635,9 @@ export default function TestimonialsScreen() {
                                   {/* Rating */}
                                   <View style={styles.modalRatingContainer}>
                                     {Array.from({ length: 5 }).map((_, i) => (
-                                      <AntDesign
+                                      <Ionicons
                                         key={i}
-                                        name={i < testimonial.rating ? "star" : "staro"}
+                                        name={i < testimonial.rating ? "star" : "star-outline"}
                                         size={16}
                                         color="#FFD700"
                                         style={{ marginRight: 2 }}
@@ -873,7 +873,11 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     justifyContent: "flex-end",
   },
   modalBackdrop: {
-    ...StyleSheet.absoluteFillObject,
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
     backgroundColor: "rgba(0,0,0,0.5)",
   },
   modalSheet: {

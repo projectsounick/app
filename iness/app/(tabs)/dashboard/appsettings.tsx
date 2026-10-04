@@ -1,3 +1,4 @@
+import { safeRouter } from "@/src/utils/safeRouter";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -14,17 +15,17 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
-import NormalHeader from "@/app/modules/NormalHeader";
+import NormalHeader from "@/src/modules/NormalHeader";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import { userService } from "@/app/services/user.service";
-import CustomSnackbar from "@/app/modules/Snackbar";
+import { userService } from "@/src/services/user.service";
+import CustomSnackbar from "@/src/modules/Snackbar";
 import { router } from "expo-router";
-import HealthReportUploader from "@/app/modules/UploadReportPdf";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import HealthReportUploader from "@/src/modules/UploadReportPdf";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 import { useAppleHealthSync } from "@/hooks/useAppleHealthSync";
 import { useAndroidHealthSync } from "@/hooks/useAndroidHealthSync";
 import { HealthKit, HealthConnect } from "@/services/healthSync";
-import { trackService } from "@/app/services/track.service";
+import { trackService } from "@/src/services/track.service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const { height } = Dimensions.get("window");
@@ -928,7 +929,7 @@ export default function AppSettingsScreen() {
   };
 
   const handlePreferences = () => {
-    router.push("/dashboard/preferences");
+    safeRouter.navigate("/dashboard/preferences");
   };
 
   const handleLogout = async () => {

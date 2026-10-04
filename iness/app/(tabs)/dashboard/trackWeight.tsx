@@ -11,17 +11,18 @@ import {
   Platform,
   ImageBackground,
   ActivityIndicator,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LineChart } from "react-native-chart-kit";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import ShimmerPlaceHolder from "react-native-shimmer-placeholder";
-import NormalHeader from "@/app/modules/NormalHeader";
-import { weightService } from "@/app/services/weight.service";
-import { createStreak } from "@/app/services/streaks.service";
+import NormalHeader from "@/src/modules/NormalHeader";
+import { weightService } from "@/src/services/weight.service";
+import { createStreak } from "@/src/services/streaks.service";
 import { setStreakData } from "@/Slices/streakSlice";
 import { useDispatch } from "react-redux";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 
 const { height, width } = Dimensions.get("window");
 
@@ -41,7 +42,7 @@ const WeightTrackerScreen = () => {
     try {
       setLoading(true);
       const response = await weightService.getWeights();
-      if (response.success && response.data) {
+      if (response.success && Array.isArray(response.data)) {
         setWeightData(response.data);
       } else {
         setWeightData([]);
@@ -60,11 +61,15 @@ const WeightTrackerScreen = () => {
   }, []);
 
   const handleAddWeight = async () => {
-    if (!newWeight) return;
+    const parsedWeight = Number(newWeight);
+    if (!Number.isFinite(parsedWeight) || parsedWeight <= 0 || parsedWeight > 1000) {
+      Alert.alert("Invalid weight", "Enter a valid weight between 0 and 1000 kg.");
+      return;
+    }
     try {
       setAddingWeight(true);
       const response = await weightService.addWeight({
-        weight: parseFloat(newWeight),
+        weight: parsedWeight,
       });
       if (response.success && response.data) {
         let responseStreak = await createStreak();
@@ -72,25 +77,48 @@ const WeightTrackerScreen = () => {
           dispatch(setStreakData(responseStreak.data));
         }
         setWeightData((prev) => [...(prev || []), response.data]);
+        setNewWeight("");
+        setModalVisible(false);
+      } else {
+        Alert.alert("Unable to save", response?.message || "Please try again.");
       }
-      setNewWeight("");
-      setModalVisible(false);
-      setAddingWeight(false);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error adding weight", error);
+      Alert.alert("Unable to save", error?.message || "Please try again.");
+    } finally {
       setAddingWeight(false);
     }
   };
 
   const handleDeleteWeight = async (weightId: string) => {
+    if (!weightId) {
+      Alert.alert("Unable to delete", "This weight entry is missing its identifier.");
+      return;
+    }
     try {
       const response = await weightService.deleteWeight(weightId);
       if (response.success) {
         setWeightData((prev) => (prev || []).filter((w) => w._id !== weightId));
+      } else {
+        Alert.alert("Unable to delete", response?.message || "Please try again.");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting weight", error);
+      Alert.alert("Unable to delete", error?.message || "Please try again.");
     }
+  };
+
+  const confirmDeleteWeight = (weightId: string) => {
+    Alert.alert("Delete weight entry?", "This action cannot be undone.", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => {
+          void handleDeleteWeight(weightId);
+        },
+      },
+    ]);
   };
 
   // Sort data from oldest to newest for the chart
@@ -424,7 +452,7 @@ const WeightTrackerScreen = () => {
                       </Text>
                     </View>
                     <TouchableOpacity
-                      onPress={() => handleDeleteWeight(entry._id || "")}
+                      onPress={() => confirmDeleteWeight(entry._id || "")}
                       style={{
                         padding: 4,
                       }}

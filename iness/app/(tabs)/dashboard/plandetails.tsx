@@ -1,7 +1,7 @@
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
-import HeaderContent from "@/app/modules/HeaderContent";
-import SmallHeader from "@/app/modules/SmallHeader";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import AnimatedSubmitButton from "@/src/modules/AnimatedSubmitButton";
+import HeaderContent from "@/src/modules/HeaderContent";
+import SmallHeader from "@/src/modules/SmallHeader";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 import { RootState } from "@/store";
 import { convertToCartItem, isProductAddableToCart } from "@/utils/cartUtils";
 
@@ -9,12 +9,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { View, Dimensions, Animated, ImageBackground } from "react-native";
 import { addToCart } from "@/Slices/cartSlice";
 import { useDispatch, useSelector } from "react-redux";
-import CustomSnackbar from "@/app/modules/Snackbar";
-import { cartService } from "@/app/services/cart.service";
+import CustomSnackbar from "@/src/modules/Snackbar";
+import { cartService } from "@/src/services/cart.service";
 
-import PlansInfo from "@/app/Components/Plans/PlansInfo";
+import PlansInfo from "@/src/Components/Plans/PlansInfo";
 
-import DietPlanInfo from "@/app/Components/Plans/DietPlanInfo";
+import DietPlanInfo from "@/src/Components/Plans/DietPlanInfo";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const WorkoutPlanScreen = () => {
@@ -104,7 +104,7 @@ const WorkoutPlanScreen = () => {
         }
       }
     } catch (error: any) {
-      setSnackbarOpen(error.message);
+      setSnackbarMessage(error?.message || "Unable to add this plan to the cart");
       setSnackbarOpen(true);
     } finally {
       setCardLoading(false);

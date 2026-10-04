@@ -1,13 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Animated, Dimensions, View, Text, Image, StyleSheet, Easing, LogBox } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Stop } from "react-native-svg";
-import theme from "./Theme/globalTheme";
+import theme from "@/src/Theme/globalTheme";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { trackService } from "./services/track.service";
+import { trackService } from "@/src/services/track.service";
 import { store } from "@/store";
 import { updateTrackingField } from "@/Slices/trackSlice";
-import { userService } from "./services/user.service";
+import { userService } from "@/src/services/user.service";
 import { router } from "expo-router";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -157,12 +157,12 @@ const SecondSplashScreen = () => {
   
   const CIRCLE_RADIUS = 70;
   const CIRCLE_LENGTH = 2 * Math.PI * CIRCLE_RADIUS;
-  const LETTER_DELAY = 150;
+  const LETTER_DELAY = 70;
   const FULL_TEXT = "INESS";
 
-  // Check if health sync is in progress and wait for it to complete
+  // Check if health sync is in progress and wait for it to complete in the background
   const waitForSyncCompletion = async (): Promise<void> => {
-    const maxWaitTime = 30000; // 30 seconds max wait
+    const maxWaitTime = 10000; // 10 seconds max wait in background
     const checkInterval = 500; // Check every 500ms
     const startTime = Date.now();
 
@@ -171,7 +171,6 @@ const SecondSplashScreen = () => {
       
       if (!syncFlag) {
         // Sync completed, refresh data
-        console.log("[SecondSplash] Health sync completed, refreshing data...");
         try {
           const response = await trackService.getCurrentDayTrackData();
           if (response.success && response.data) {
@@ -188,9 +187,8 @@ const SecondSplashScreen = () => {
                 data: response.data.sleep,
               }));
             }
-            console.log("[SecondSplash] Data refreshed successfully");
           }
-        } catch (error) {
+        } catch {
           // Error refreshing data
         }
         return; // Exit when sync is complete
@@ -200,8 +198,7 @@ const SecondSplashScreen = () => {
       await new Promise(resolve => setTimeout(resolve, checkInterval));
     }
 
-    // Timeout reached, clear flag and proceed anyway
-    console.log("[SecondSplash] Sync wait timeout, proceeding...");
+    // Timeout reached, clear flag
     await AsyncStorage.removeItem("healthSyncInProgress");
   };
 
@@ -228,6 +225,19 @@ const SecondSplashScreen = () => {
   }, []);
 
   useEffect(() => {
+    let isMounted = true;
+    const timers: ReturnType<typeof setTimeout>[] = [];
+
+    const scheduleTimeout = (fn: () => void, delay: number) => {
+      const timer = setTimeout(() => {
+        if (isMounted) {
+          fn();
+        }
+      }, delay);
+      timers.push(timer);
+      return timer;
+    };
+
     const runAnimation = async () => {
       await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
 
@@ -245,17 +255,17 @@ const SecondSplashScreen = () => {
           console.log("[SecondSplash] DB connection init error:", error?.message || error);
         });
 
-      // Check if health sync is in progress
-      const syncFlag = await AsyncStorage.getItem("healthSyncInProgress");
-      if (syncFlag) {
-        console.log("[SecondSplash] Health sync in progress, waiting for completion...");
-        await waitForSyncCompletion();
-      }
+      // Check if health sync is in progress in background without blocking
+      AsyncStorage.getItem("healthSyncInProgress").then((syncFlag) => {
+        if (syncFlag && isMounted) {
+          void waitForSyncCompletion();
+        }
+      });
 
       // Start background gradient fade in
       Animated.timing(bgGradientOpacity, {
         toValue: 1,
-        duration: 1000,
+        duration: 600,
         useNativeDriver: true,
       }).start();
 
@@ -266,20 +276,21 @@ const SecondSplashScreen = () => {
       Animated.parallel([
         Animated.timing(progress, {
           toValue: 1,
-          duration: 2000,
+          duration: 900,
           useNativeDriver: true,
           easing: Easing.out(Easing.cubic),
         }),
         Animated.timing(glowOpacity, {
           toValue: 0.8,
-          duration: 1500,
+          duration: 750,
           useNativeDriver: true,
         }),
       ]).start(() => {
+        if (!isMounted) return;
         // Fade out glow and circle
         Animated.timing(glowOpacity, {
           toValue: 0,
-          duration: 400,
+          duration: 200,
           useNativeDriver: true,
         }).start();
         
@@ -289,35 +300,39 @@ const SecondSplashScreen = () => {
         Animated.parallel([
           Animated.spring(logoOpacity, {
             toValue: 1,
-            tension: 50,
+            tension: 70,
             friction: 7,
             useNativeDriver: true,
           }),
           Animated.spring(logoScale, {
             toValue: 1,
-            tension: 50,
+            tension: 70,
             friction: 7,
             useNativeDriver: true,
           }),
         ]).start(() => {
+          if (!isMounted) return;
           // Show letters one by one after logo appears
-          setTimeout(() => {
+          scheduleTimeout(() => {
             setShowLetters(true);
             
             // Animate letters with stagger
             FULL_TEXT.split("").forEach((letter, index) => {
-              setTimeout(() => {
+              scheduleTimeout(() => {
                 setLetterArray(prev => [...prev, letter]);
               }, index * LETTER_DELAY);
             });
 
             // Navigate after all animations
-            const totalAnimationTime = FULL_TEXT.length * LETTER_DELAY + 800;
-            setTimeout(async () => {
+            const totalAnimationTime = FULL_TEXT.length * LETTER_DELAY + 250;
+            scheduleTimeout(async () => {
+              if (!isMounted) return;
               const hasSession =
                 await asyncStorageUtils.hasAuthenticatedUserSession();
               const userResponse =
                 await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+
+              if (!isMounted) return;
 
               if (!hasSession || !userResponse.exists) {
                 router.replace("/");
@@ -331,12 +346,16 @@ const SecondSplashScreen = () => {
 
               router.replace("/(tabs)/dashboard/tabs");
             }, totalAnimationTime);
-          }, 400); // Small delay before letters start
+          }, 150); // Snappy delay before letters start
         });
       });
     };
 
     runAnimation();
+    return () => {
+      isMounted = false;
+      timers.forEach((t) => clearTimeout(t));
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -510,7 +529,11 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   gradientOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
   },
   glowContainer: {
     position: "absolute",

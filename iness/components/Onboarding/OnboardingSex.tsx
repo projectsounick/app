@@ -7,13 +7,13 @@ import {
   StyleSheet,
   Animated,
 } from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import CustomSnackbar from "@/app/modules/Snackbar";
+import CustomSnackbar from "@/src/modules/Snackbar";
 import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
-import { UserData } from "@/app/interfaces/UserInterface";
-import OnboardingHeading from "@/app/modules/OnboardingHeading";
-import { useGlobalTheme } from "@/app/Theme/ThemeContext";
+import { UserData } from "@/src/interfaces/UserInterface";
+import OnboardingHeading from "@/src/modules/OnboardingHeading";
+import { useGlobalTheme } from "@/src/Theme/ThemeContext";
 
 const genderOptions = [
   {
@@ -199,7 +199,7 @@ const GenderCard = ({
       >
         <View style={cardStyles.iconContainer}>
           <MaterialCommunityIcons
-            name={option.icon}
+            name={option.icon as React.ComponentProps<typeof MaterialCommunityIcons>["name"]}
             size={24}
             color={isSelected ? theme.colors.success : theme.colors.textSecondary}
           />

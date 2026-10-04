@@ -5,16 +5,26 @@ import {
   ScrollView,
   ActivityIndicator,
   SafeAreaView,
+  TouchableOpacity,
 } from "react-native";
-import SmallHeader from "@/app/modules/SmallHeader";
-import BackHeader from "@/app/modules/BackHeader";
-import BannerCard from "@/app/modules/BannerCard";
+import SmallHeader from "@/src/modules/SmallHeader";
+import BackHeader from "@/src/modules/BackHeader";
+import BannerCard from "@/src/modules/BannerCard";
 import useGetDataHook from "@/hooks/useFetchHook";
-import { otherService } from "@/app/services/singleService.service";
-import theme from "@/app/Theme/globalTheme";
+import { otherService } from "@/src/services/singleService.service";
+import theme from "@/src/Theme/globalTheme";
+import CustomSnackbar from "@/src/modules/Snackbar";
 
 const BookSessionScreen = () => {
-  const { data, loading, fetchData } = useGetDataHook(
+  const {
+    data,
+    loading,
+    error,
+    fetchData,
+    snackbarVisible,
+    snackbarMessage,
+    setSnackbarVisible,
+  } = useGetDataHook(
     otherService.getAvailableServices
   );
 
@@ -28,6 +38,18 @@ const BookSessionScreen = () => {
           style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
         >
           <ActivityIndicator size="large" color="#4CAF50" />
+        </View>
+      ) : error ? (
+        <View style={{ flex: 1, justifyContent: "center", alignItems: "center", paddingHorizontal: 28 }}>
+          <Text style={{ fontSize: theme.fontSizes.regular, color: theme.colors.textSecondary, textAlign: "center" }}>
+            {error}
+          </Text>
+          <TouchableOpacity
+            onPress={() => fetchData()}
+            style={{ marginTop: 14, borderRadius: 999, paddingHorizontal: 20, paddingVertical: 10, backgroundColor: theme.colors.primary }}
+          >
+            <Text style={{ color: theme.colors.textWhite, fontWeight: "600" }}>Try again</Text>
+          </TouchableOpacity>
         </View>
       ) : data && data.length > 0 ? (
         <ScrollView
@@ -74,6 +96,12 @@ const BookSessionScreen = () => {
           </Text>
         </View>
       )}
+      <CustomSnackbar
+        visible={snackbarVisible}
+        message={snackbarMessage}
+        onDismiss={() => setSnackbarVisible(false)}
+        bgColor={theme.colors.backgroundCard}
+      />
     </View>
   );
 };

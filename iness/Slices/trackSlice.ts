@@ -2,7 +2,7 @@ import {
   TrackingData,
   UpdateTrackingPayload,
   TrackingState,
-} from "@/app/interfaces/trackInterface";
+} from "@/src/interfaces/trackInterface";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 const initialState: TrackingState = {

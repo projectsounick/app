@@ -12,10 +12,10 @@ import {
   Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import NormalHeader from "@/app/modules/NormalHeader";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import NormalHeader from "@/src/modules/NormalHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const { height } = Dimensions.get("window");
 

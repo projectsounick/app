@@ -1,3 +1,4 @@
+import { safeRouter } from "@/src/utils/safeRouter";
 import React, { useState } from "react";
 import {
   View,
@@ -21,17 +22,17 @@ import { onboardingSteps } from "@/utils/onboardingStaticValues";
 import PreferredWorkoutTime from "@/components/Onboarding/PreferWorkoutTime";
 import WorkoutPreferences from "@/components/Onboarding/WorkoutPreferences";
 import ActivityLevel from "@/components/Onboarding/ActivityLevel";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation } from "expo-router";
 import useServiceWithSnackbar from "@/hooks/usePostDataHook";
-import { userService } from "./services/user.service";
-import CustomSnackbar from "./modules/Snackbar";
+import { userService } from "@/src/services/user.service";
+import CustomSnackbar from "@/src/modules/Snackbar";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import OnboardingWeight from "@/components/Onboarding/OnboardingWeight";
 import OnboardingHeight from "@/components/Onboarding/OnboardingHeight";
 import OnboardingDOB from "@/components/Onboarding/OnboardingDOB";
 import OnboardingphoneNumber from "@/components/Onboarding/OnboardingPhoneNumber";
 import InfoModal from "@/components/Onboarding/Information";
-import { useGlobalTheme } from "./Theme/ThemeContext";
+import { useGlobalTheme } from "@/src/Theme/ThemeContext";
 import { LinearGradient } from "expo-linear-gradient";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -82,14 +83,9 @@ const OnboardingScreen = () => {
           (cleanData as any).phoneNumber = phoneNumber;
         }
 
-        console.log(
-          "Sending onboarding data:",
-          JSON.stringify(cleanData, null, 2)
-        );
-
         const response = await userService.updateUser(cleanData);
         if (response.success) {
-          navigation.navigate("secondsplashscreen");
+          safeRouter.navigate("/secondsplashscreen");
         } else {
           setSnackbarMessage(response.message || "Failed to save. Please try again.");
           setSnackbarVisible(true);
@@ -121,7 +117,7 @@ const OnboardingScreen = () => {
     if (currentStep > 0) {
       setCurrentStep(currentStep - 1);
     } else {
-      navigation.goBack();
+      safeRouter.back();
     }
   };
 

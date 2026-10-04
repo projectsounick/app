@@ -29,7 +29,10 @@ function useGetDataHook(
 
       return response;
     } catch (err: any) {
-      const message = err?.message || "Something went wrong";
+      const rawMessage = String(err?.message || "");
+      const message = /timed out/i.test(rawMessage)
+        ? "The request timed out. Please try again."
+        : "Unable to load data. Please check your connection and try again.";
       setSnackbarVisible(true);
       setSnackbarMessage(message);
       setError(message);

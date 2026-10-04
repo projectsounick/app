@@ -13,13 +13,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
 import { AntDesign } from "@expo/vector-icons";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { Product } from "@/app/interfaces/ecommerceInterface";
-import ProductModal from "@/app/Modals/ProductBottomSheetModal";
-import SmallHeader from "@/app/modules/SmallHeader";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { Product } from "@/src/interfaces/ecommerceInterface";
+import ProductModal from "@/src/Modals/ProductBottomSheetModal";
+import SmallHeader from "@/src/modules/SmallHeader";
 import { useLocalSearchParams } from "expo-router";
-import BackHeader from "@/app/modules/BackHeader";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import BackHeader from "@/src/modules/BackHeader";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 
 const backgroundImg = require("../../../assets/images/basicBackground.jpg");
 const screenWidth = Dimensions.get("window").width;
@@ -90,7 +90,10 @@ const CategoryProductsScreen = () => {
   const renderProductCard = ({ item }: { item: Product; index: number }) => {
     const variation = item.variations?.[0];
     const displayLabel = variation?.label;
-    const displayPrice = variation?.price ?? item.basePrice;
+    const rawDisplayPrice = variation?.price ?? item.basePrice;
+    const displayPrice = Number.isFinite(Number(rawDisplayPrice))
+      ? Number(rawDisplayPrice)
+      : null;
 
     return (
       <TouchableOpacity
@@ -117,7 +120,7 @@ const CategoryProductsScreen = () => {
             style={styles.plusButton}
             onPress={() => handleCheck(item)}
           >
-            <AntDesign name="pluscircle" size={28} color={theme.colors.success} />
+            <AntDesign name="plus-circle" size={28} color={theme.colors.success} />
           </TouchableOpacity>
 
           {/* Variation Label Badge */}
@@ -133,7 +136,9 @@ const CategoryProductsScreen = () => {
           <Text numberOfLines={2} style={styles.productName}>
             {item.name}
           </Text>
-          <Text style={styles.productPrice}>₹{displayPrice}</Text>
+          <Text style={styles.productPrice}>
+            {displayPrice === null ? "Price unavailable" : `₹${displayPrice}`}
+          </Text>
         </View>
       </TouchableOpacity>
     );

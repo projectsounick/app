@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as DocumentPicker from "expo-document-picker";
-import theme from "@/app/Theme/globalTheme";
-import CustomSnackbar from "@/app/modules/Snackbar";
-import { userService } from "@/app/services/user.service";
+import theme from "@/src/Theme/globalTheme";
+import CustomSnackbar from "@/src/modules/Snackbar";
+import { userService } from "@/src/services/user.service";
 import { uploadToAzureFromExpo } from "@/utils/azureUtils";
 const screenHeight = Dimensions.get("window").height;
 
@@ -28,32 +28,41 @@ const OnboardingHealthReport = ({ onNext }: { onNext: () => void }) => {
         type: "application/pdf",
       });
 
-      if (result.type === "success") {
+      if (!result.canceled && result.assets?.length) {
+        const file = result.assets[0];
         setLoading(true);
-        setFileName(result.name);
+        setFileName(file.name);
+
+        const userStr = await AsyncStorage.getItem("user");
+        if (!userStr) {
+          throw new Error("User not found");
+        }
+        const user = JSON.parse(userStr);
+        const safeFileName = String(file.name || `report-${Date.now()}.pdf`).replace(
+          /[^a-zA-Z0-9._-]/g,
+          "-"
+        );
+        const uploadFileName = `${user._id}_${Date.now()}_${safeFileName}`;
 
         const storageDetails = await userService.getStorageAccountDetails(
-          "transformationImages"
+          "healthreport",
+          uploadFileName
         );
         const { storageAccountName, sasToken } = storageDetails.data;
 
         const uploaded = await uploadToAzureFromExpo(
-          result.uri,
-          result.name,
+          file.uri,
+          uploadFileName,
           sasToken,
           storageAccountName,
           "admin-data",
-          "transformationImages"
+          "healthreport"
         );
 
         setUploadedUrl(uploaded);
 
-        const userStr = await AsyncStorage.getItem("user");
-        if (userStr) {
-          const user = JSON.parse(userStr);
-          user.healthReport = uploaded;
-          await AsyncStorage.setItem("user", JSON.stringify(user));
-        }
+        user.healthReport = uploaded;
+        await AsyncStorage.setItem("user", JSON.stringify(user));
 
         setLoading(false);
         Alert.alert("Success", "Health report uploaded successfully!");

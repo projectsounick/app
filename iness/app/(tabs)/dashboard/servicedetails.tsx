@@ -13,21 +13,21 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocalSearchParams } from "expo-router";
 
-import SmallHeader from "@/app/modules/SmallHeader";
-import BackHeader from "@/app/modules/BackHeader";
+import SmallHeader from "@/src/modules/SmallHeader";
+import BackHeader from "@/src/modules/BackHeader";
 import { RootState } from "@/store";
-import { ServiceDetails } from "@/app/interfaces/serviceInterface";
+import { ServiceDetails } from "@/src/interfaces/serviceInterface";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import { userService } from "@/app/services/user.service";
-import { cartService } from "@/app/services/cart.service";
+import { userService } from "@/src/services/user.service";
+import { cartService } from "@/src/services/cart.service";
 import {
   convertToServiceCartItem,
   isServiceAddableToCart,
 } from "@/utils/cartUtils";
 import { addToCart } from "@/Slices/cartSlice";
 import { setCurrentService } from "@/Slices/planSlice";
-import ImageViewerModal from "@/app/Modals/ImageViewerModal";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import ImageViewerModal from "@/src/Modals/ImageViewerModal";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 
 export default function ServiceDetailsScreen() {
   const theme = useGlobalTheme();

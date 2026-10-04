@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Animated } from "react-native";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import OnboardingCard from "@/app/modules/OnboardingCard";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import OnboardingCard from "@/src/modules/OnboardingCard";
 import { activityLevelOptions } from "@/utils/onboardingStaticValues";
 import { useLoadFromAsyncStorage } from "@/hooks/useOnboardingDataLoad";
-import { UserData } from "@/app/interfaces/UserInterface";
+import { UserData } from "@/src/interfaces/UserInterface";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import OnboardingHeading from "@/app/modules/OnboardingHeading";
-import { useGlobalTheme } from "@/app/Theme/ThemeContext";
+import OnboardingHeading from "@/src/modules/OnboardingHeading";
+import { useGlobalTheme } from "@/src/Theme/ThemeContext";
 
 const ActivityLevel = ({
   onNext,

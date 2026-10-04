@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef } from "react";
-import { ScrollView, Modal } from "react-native";
+import { FlatList, Modal, View } from "react-native";
 import { usePathname } from "expo-router";
-import { useGlobalTheme } from "@/app/Theme/ThemeContext";
+import { useGlobalTheme } from "@/src/Theme/ThemeContext";
 
 
 import { useDispatch, useSelector } from "react-redux";
@@ -9,53 +9,53 @@ import { useDispatch, useSelector } from "react-redux";
 import useFetchMultipleStoreDataHook from "@/hooks/useMultipleDataStoreHook";
 import { SliceKey } from "@/sliceRegistery";
 
-import { cartService } from "@/app/services/cart.service";
+import { cartService } from "@/src/services/cart.service";
 
 
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { blogService } from "@/app/services/blog.Service";
-import BlogSliderCard from "@/app/modules/BlogSliderCard";
-import { trackService } from "@/app/services/track.service";
+import { blogService } from "@/src/services/blog.Service";
+import BlogSliderCard from "@/src/modules/BlogSliderCard";
+import { trackService } from "@/src/services/track.service";
 
-import NotificationPermissionModal from "@/app/Modals/NotificationPermissionModal";
-import VideoPromotionModal from "@/app/Modals/VideoPromotionModal";
+import NotificationPermissionModal from "@/src/Modals/NotificationPermissionModal";
+import VideoPromotionModal from "@/src/Modals/VideoPromotionModal";
 
 
 
-import AppUpdateBottomSheet from "@/app/Modals/AndroidVersionUpdateModal";
 
-import InfoCarousel from "@/app/modules/AdvirtisementCarraousel";
+import InfoCarousel from "@/src/modules/AdvirtisementCarraousel";
 
-import HomeShimmer from "@/app/modules/Shimmer/HomeShimmer";
-import HealthReportUploader from "@/app/modules/UploadReportPdf";
-import OffersCards from "@/app/modules/OfferCard";
+import HomeShimmer from "@/src/modules/Shimmer/HomeShimmer";
+import HealthReportUploader from "@/src/modules/UploadReportPdf";
+import OffersCards from "@/src/modules/OfferCard";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import SmallHeader from "@/app/modules/SmallHeader";
-import FloatingOptions from "@/app/modules/ButtonSection";
-import HealthDashboard from "@/app/modules/HealthCards";
+import SmallHeader from "@/src/modules/SmallHeader";
+import FloatingOptions from "@/src/modules/ButtonSection";
+import HealthDashboard from "@/src/modules/HealthCards";
 
-import SessionCarousel from "@/app/Components/Home/SessionCards";
-import TestimonialsCarousel from "@/app/Components/Home/TestimonialsCarousel";
-import EmailPromptCard from "@/app/Components/Home/EmailPromptCard";
-import FeatureBanner from "@/app/modules/FeatureBanner";
+import SessionCarousel from "@/src/Components/Home/SessionCards";
+import TestimonialsCarousel from "@/src/Components/Home/TestimonialsCarousel";
+import EmailPromptCard from "@/src/Components/Home/EmailPromptCard";
+import FeatureBanner from "@/src/modules/FeatureBanner";
 
-import PodcastMediaCard from "@/app/Components/Home/PodcastSection";
-import { podCastService } from "@/app/services/podcast.service";
+import PodcastMediaCard from "@/src/Components/Home/PodcastSection";
+import { podCastService } from "@/src/services/podcast.service";
 import { RootState } from "@/store";
-import SessionCalendarSheet from "@/app/Modals/SessionCalendarSheet";
-import FeedbackModal from "@/app/Modals/SessionFeedbackModal";
+import SessionCalendarSheet from "@/src/Modals/SessionCalendarSheet";
+import FeedbackModal from "@/src/Modals/SessionFeedbackModal";
 import { setCalendarSheetOpen } from "@/Slices/componentOpenSlice";
 import { setStreakModalShow } from "@/Slices/streakSlice";
-import { sessionService } from "@/app/services/sessionService";
+import { sessionService } from "@/src/services/sessionService";
 
-import LoginJsxWrapper from "@/app/Hoc/LoginJsxWrapper";
+import LoginJsxWrapper from "@/src/Hoc/LoginJsxWrapper";
 
-import { fetchStreak } from "@/app/services/streaks.service";
-import WeightTrackerBottomSheet from "@/app/Modals/WeightTrackModal";
+import { fetchStreak } from "@/src/services/streaks.service";
+import WeightTrackerBottomSheet from "@/src/Modals/WeightTrackModal";
 import eventBus from "@/event";
-import { usePendingNavigation } from "@/app/hooks/usePendingNavigation";
+import { usePendingNavigation } from "@/src/hooks/usePendingNavigation";
 import { useAppleHealthBackgroundSync } from "@/hooks/useAppleHealthBackgroundSync";
-import StreaksBottomSheet from "@/app/Modals/StreakBottomSheet";
+import StreaksBottomSheet from "@/src/Modals/StreakBottomSheet";
+import { DashboardActivityProvider } from "@/src/Components/Home/DashboardActivityContext";
 
 //// Main functional component for the Dashboard screen ---------------------------------/
 const YourComponent = () => {
@@ -101,13 +101,11 @@ const YourComponent = () => {
             setModalVisible(true); // show the modal
           }
         }
-      } catch (err) {
+      } catch {
         // Error fetching AsyncStorage data
       }
     };
-    setTimeout(() => {
-      fetchUserData();
-    }, 2000);
+    fetchUserData();
   }, []);
 
   // Dark mode modal logic removed - users will toggle dark mode manually from app settings
@@ -127,7 +125,9 @@ const YourComponent = () => {
         sliceKey: "session" as SliceKey,
         fetchFunction: sessionService.getSessions,
         priority: "high" as const,
-        enableCache: false,
+        enableCache: true,
+        cacheTTL: 5 * 60 * 1000,
+        staleWhileRevalidate: true,
       },
       {
         sliceKey: "streak" as SliceKey,
@@ -161,8 +161,7 @@ const YourComponent = () => {
     ],
     []
   );
-  const { loading, setSnackbarMessage, setSnackbarVisible } =
-    useFetchMultipleStoreDataHook(configs, true, true); // Enable priority loading
+  const { loading } = useFetchMultipleStoreDataHook(configs, true, true);
   const [currentSession, setCurrentSession] = useState<any>(null);
 
   // Background Apple Health sync
@@ -220,11 +219,66 @@ const YourComponent = () => {
 
   //// Video call exists or not checking -----------------------------------------/
 
+  const homeSections = useMemo(() => {
+    const sections: { key: string; content: React.ReactElement }[] = [];
+
+    if (showEmailPrompt) {
+      sections.push({
+        key: "email-prompt",
+        content: (
+          <EmailPromptCard
+            onEmailUpdated={() => setShowEmailPrompt(false)}
+            onDismiss={() => setShowEmailPrompt(false)}
+          />
+        ),
+      });
+    }
+
+    sections.push(
+      { key: "feature-banner", content: <FeatureBanner /> },
+      { key: "offers", content: <OffersCards /> },
+      { key: "actions", content: <FloatingOptions /> },
+      {
+        key: "sessions",
+        content: (
+          <LoginJsxWrapper loginButton={false} backButton={false}>
+            <SessionCarousel />
+          </LoginJsxWrapper>
+        ),
+      },
+      {
+        key: "health",
+        content: (
+          <LoginJsxWrapper loginButton={false} backButton={false}>
+            <HealthDashboard />
+          </LoginJsxWrapper>
+        ),
+      }
+    );
+
+    if (podCasts?.length > 0) {
+      sections.push({
+        key: "podcasts",
+        content: <PodcastMediaCard loggedUser={loggedUser} />,
+      });
+    }
+
+    sections.push(
+      { key: "blogs", content: <BlogSliderCard /> },
+      { key: "testimonials", content: <TestimonialsCarousel /> },
+      { key: "information", content: <InfoCarousel /> }
+    );
+
+    return sections;
+  }, [loggedUser, podCasts, showEmailPrompt]);
+
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: theme.colors.background }}
-      edges={["left", "right"]}
-    >
+    <DashboardActivityProvider>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: theme.colors.background }}
+        edges={["left", "right"]}
+        accessibilityState={{ busy: loading }}
+      >
       {/* Animated Header */}
       <SmallHeader
         weightShow={true}
@@ -232,68 +286,42 @@ const YourComponent = () => {
         setWeightTrackModalShow={setWeightTrackModalShow}
         showStreak={true}
       />
-      {/* Scrollable Content */}
-      <ScrollView
-        style={{ flex: 1 }}
-        contentContainerStyle={{
-          paddingTop: 10,
-          paddingBottom: 80 + Math.max(insets.bottom, 8), // Account for tab bar height + safe area
-          paddingHorizontal: 8, // ✅ Add horizontal spacing here
-        }}
-        // onScroll={Animated.event(
-        //   [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-        //   {
-        //     useNativeDriver: true, // Required for better performance with transform/opacity
-        //   }
-        // )}
-        // scrollEventThrottle={16}
-      >
-        {loading ? (
+      {loading ? (
+        <View
+          style={{ flex: 1 }}
+          accessible
+          accessibilityRole="progressbar"
+          accessibilityLabel="Loading dashboard"
+          accessibilityLiveRegion="polite"
+        >
           <HomeShimmer />
-        ) : (
-          <>
-            {/* Email Prompt Card for users without email */}
-            {showEmailPrompt && (
-              <EmailPromptCard 
-                onEmailUpdated={() => setShowEmailPrompt(false)}
-                onDismiss={() => setShowEmailPrompt(false)}
-              />
-            )}
-            
-            {/* Feature Banner - Swiggy/Zomato style */}
-            <FeatureBanner />
-            
-            <OffersCards />
-            <FloatingOptions />
-            <LoginJsxWrapper loginButton={false} backButton={false}>
-              <SessionCarousel />
-            </LoginJsxWrapper>
-            <LoginJsxWrapper loginButton={false} backButton={false}>
-              <HealthDashboard />
-            </LoginJsxWrapper>
-            {/* <WeeklyActivityCard /> */}
-            {podCasts && podCasts.length > 0 ? (
-              <PodcastMediaCard loggedUser={loggedUser} />
-            ) : null}
+        </View>
+      ) : (
+        <FlatList
+          style={{ flex: 1 }}
+          data={homeSections}
+          keyExtractor={(item) => item.key}
+          renderItem={({ item }) => item.content}
+          initialNumToRender={4}
+          maxToRenderPerBatch={2}
+          windowSize={3}
+          contentContainerStyle={{
+            paddingTop: 10,
+            paddingBottom: 80 + Math.max(insets.bottom, 8),
+            paddingHorizontal: 8,
+          }}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
 
-            <BlogSliderCard />
-            <TestimonialsCarousel />
-
-
-            <InfoCarousel />
-            {modalVisible && (
-              <HealthReportUploader
-                modalVisible={modalVisible}
-                setModalVisible={setModalVisible}
-              />
-            )}
-            {/* <FeatureCarousel /> */}
-          </>
-        )}
-
-        <NotificationPermissionModal />
-        <VideoPromotionModal />
-      </ScrollView>
+      {modalVisible && (
+        <HealthReportUploader
+          modalVisible={modalVisible}
+          setModalVisible={setModalVisible}
+        />
+      )}
+      <NotificationPermissionModal />
+      <VideoPromotionModal />
 
       {streakModalShow ? (
         <Modal
@@ -308,7 +336,6 @@ const YourComponent = () => {
         </Modal>
       ) : null}
 
-      <AppUpdateBottomSheet />
       {/* //// Calendar sheet component ---------------------------/ */}
       {calendarSheetOpen && (
         <SessionCalendarSheet
@@ -334,7 +361,8 @@ const YourComponent = () => {
           onClose={() => setWeightTrackModalShow(!weightTrackModalShow)}
         />
       ) : null}
-    </SafeAreaView>
+      </SafeAreaView>
+    </DashboardActivityProvider>
   );
 };
 

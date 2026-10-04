@@ -11,16 +11,16 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { ActivityIndicator } from "react-native-paper";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 
-import SmallHeader from "@/app/modules/SmallHeader";
-import BackHeader from "@/app/modules/BackHeader";
-import { cartService } from "@/app/services/cart.service";
-import { planService } from "@/app/services/plan.service";
+import SmallHeader from "@/src/modules/SmallHeader";
+import BackHeader from "@/src/modules/BackHeader";
+import { cartService } from "@/src/services/cart.service";
+import { planService } from "@/src/services/plan.service";
 import { useDispatch } from "react-redux";
 import { setActivePlans } from "@/Slices/planSlice";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { clearCart } from "@/Slices/cartSlice";
-import theme from "@/app/Theme/globalTheme";
+import theme from "@/src/Theme/globalTheme";
 
 const PaymentSuccessScreen = () => {
   const router = useRouter();
@@ -46,16 +46,12 @@ const PaymentSuccessScreen = () => {
         useNativeDriver: true,
       }),
     ]).start();
-    return () => {
-      setOrderId(null);
-      // AsyncStorage remove using promise
-      AsyncStorage.removeItem("currentOrderId")
-        .catch((e) => {
-          // Failed to remove
-        });
-    };
   }, []);
   const dispatch = useDispatch();
+
+  const wait = (milliseconds: number) =>
+    new Promise((resolve) => setTimeout(resolve, milliseconds));
+
   async function fetchOrderStatus() {
     try {
       setLoading(true);
@@ -66,26 +62,54 @@ const PaymentSuccessScreen = () => {
       if (savedOrderId) {
         setOrderId(savedOrderId);
         try {
-          const response = await cartService.getOrderStatus(savedOrderId);
-          const resolvedStatus = response?.data?.status || response?.data?.payment?.status;
+          let response: any = null;
+          let resolvedStatus: string | undefined;
+
+          for (let attempt = 0; attempt < 4; attempt += 1) {
+            response = await cartService.getOrderStatus(savedOrderId);
+            resolvedStatus =
+              response?.data?.status || response?.data?.payment?.status;
+
+            if (resolvedStatus !== "pending" || attempt === 3) {
+              break;
+            }
+            await wait(2000);
+          }
 
           if (response.success && resolvedStatus === "success") {
             setMessage("Thank you! Payment successful.");
             setMessageType("success");
-            const activePlansResp = await planService.getActivePlans();
-            if (activePlansResp.success) {
-              setReciptShow(true);
-              dispatch(setActivePlans(activePlansResp.data));
-              dispatch(clearCart());
+            setReciptShow(true);
+            dispatch(clearCart());
+            try {
+              const activePlansResp = await planService.getActivePlans();
+              if (
+                activePlansResp.success &&
+                Array.isArray(activePlansResp.data)
+              ) {
+                dispatch(setActivePlans(activePlansResp.data));
+              }
+            } catch {
+              // Payment is already confirmed. Plans will refresh on the dashboard.
             }
             await AsyncStorage.removeItem("paymentError");
+            await AsyncStorage.removeItem("currentOrderId");
           } else if (resolvedStatus === "pending") {
+            const isCancellation =
+              paymentError &&
+              (paymentError.toLowerCase().includes("cancel") ||
+                paymentError.toLowerCase().includes("stopped") ||
+                paymentError.toLowerCase().includes("closed"));
+
             setMessage(
               paymentError ||
                 "Your payment is still pending. If money was debited, please check again in a moment."
             );
-            setMessageType("warning");
+            setMessageType(isCancellation ? "error" : "warning");
             await AsyncStorage.removeItem("paymentError");
+            if (isCancellation) {
+              await AsyncStorage.removeItem("currentOrderId");
+            }
           } else {
             setMessage(
               paymentError ||
@@ -93,6 +117,7 @@ const PaymentSuccessScreen = () => {
             );
             setMessageType("error");
             await AsyncStorage.removeItem("paymentError");
+            await AsyncStorage.removeItem("currentOrderId");
           }
         } catch (err) {
           setMessage(
@@ -223,9 +248,12 @@ const PaymentSuccessScreen = () => {
                     {messageType === "success"
                       ? "Payment Successful"
                       : messageType === "error"
-                      ? "Payment Failed"
+                      ? message.toLowerCase().includes("cancel") ||
+                        message.toLowerCase().includes("stopped")
+                        ? "Payment Cancelled"
+                        : "Payment Failed"
                       : messageType === "warning"
-                      ? "Warning"
+                      ? "Payment Pending"
                       : "Information"}
                   </Text>
                   <Text
@@ -245,6 +273,28 @@ const PaymentSuccessScreen = () => {
                   </Text>
                 </View>
               </View>
+            )}
+
+            {messageType === "warning" && (
+              <TouchableOpacity
+                onPress={fetchOrderStatus}
+                disabled={loading}
+                style={{
+                  backgroundColor: theme.colors.success,
+                  paddingHorizontal: 24,
+                  paddingVertical: 12,
+                  borderRadius: 24,
+                }}
+              >
+                <Text
+                  style={{
+                    color: theme.colors.textWhite,
+                    fontWeight: "700",
+                  }}
+                >
+                  Check Payment Again
+                </Text>
+              </TouchableOpacity>
             )}
 
             {/* Receipt Download Card */}
@@ -434,7 +484,7 @@ const PaymentSuccessScreen = () => {
                   </Text>
                 </TouchableOpacity>
               </>
-            ) : (
+            ) : messageType === "success" ? (
               <>
                 {/* See my plans Button for Success */}
                 <TouchableOpacity
@@ -491,6 +541,31 @@ const PaymentSuccessScreen = () => {
                   </Text>
                 </TouchableOpacity>
               </>
+            ) : (
+              <TouchableOpacity
+                onPress={() => router.replace("/(tabs)/dashboard/cart")}
+                style={{
+                  backgroundColor: theme.colors.success,
+                  paddingVertical: 14,
+                  borderRadius: 25,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "row",
+                  marginBottom: 20,
+                }}
+              >
+                <Ionicons name="cart-outline" size={20} color="#FFFFFF" />
+                <Text
+                  style={{
+                    color: theme.colors.textWhite,
+                    fontSize: theme.fontSizes.regular,
+                    fontWeight: "600",
+                    marginLeft: 8,
+                  }}
+                >
+                  Return to Cart
+                </Text>
+              </TouchableOpacity>
             )}
           </View>
         </Animated.View>

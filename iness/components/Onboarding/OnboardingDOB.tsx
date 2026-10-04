@@ -7,11 +7,11 @@ import {
   ScrollView,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import CustomSnackbar from "@/app/modules/Snackbar";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import CustomSnackbar from "@/src/modules/Snackbar";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import OnboardingHeading from "@/app/modules/OnboardingHeading";
-import { useGlobalTheme } from "@/app/Theme/ThemeContext";
+import OnboardingHeading from "@/src/modules/OnboardingHeading";
+import { useGlobalTheme } from "@/src/Theme/ThemeContext";
 
 const OnboardingDOB = ({ onNext }: { onNext: () => void }) => {
   const theme = useGlobalTheme();

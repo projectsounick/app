@@ -1,4 +1,4 @@
-import theme from "../app/Theme/globalTheme";
+import theme from "../src/Theme/globalTheme";
 export const bookSessionCardData = {
   title: "Book\nServices",
   subtitle: "Get fit with Yoga, Zumba & more",

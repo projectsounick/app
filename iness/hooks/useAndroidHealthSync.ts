@@ -13,8 +13,23 @@ import {
 } from "@/services/healthSync";
 import * as HealthConnect from "@/services/healthSync/healthConnectService";
 import * as AndroidSyncManager from "@/services/healthSync/androidSyncManager";
-import { trackService } from "@/app/services/track.service";
+import { trackService } from "@/src/services/track.service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+
+let androidStatusRequest: ReturnType<typeof trackService.getHealthSyncStatus> | null =
+  null;
+
+function getAndroidHealthSyncStatus() {
+  if (!androidStatusRequest) {
+    androidStatusRequest = trackService
+      .getHealthSyncStatus("android")
+      .finally(() => {
+        androidStatusRequest = null;
+      });
+  }
+
+  return androidStatusRequest;
+}
 
 export function useAndroidHealthSync(): UseHealthSyncReturn {
   // ============================================
@@ -57,7 +72,7 @@ export function useAndroidHealthSync(): UseHealthSyncReturn {
       
       // Also fetch from backend to ensure we have latest data
       try {
-        const backendResponse = await trackService.getHealthSyncStatus("android");
+        const backendResponse = await getAndroidHealthSyncStatus();
         if (backendResponse.success && backendResponse.data) {
           // Update AsyncStorage with backend data
           const userDataStr = await AsyncStorage.getItem("user");
@@ -125,7 +140,7 @@ export function useAndroidHealthSync(): UseHealthSyncReturn {
   const refreshSyncStatus = useCallback(async (): Promise<void> => {
     try {
       // Fetch from backend with Android platform
-      const backendResponse = await trackService.getHealthSyncStatus("android");
+      const backendResponse = await getAndroidHealthSyncStatus();
       if (backendResponse.success && backendResponse.data) {
         // Update AsyncStorage with backend data
         const userDataStr = await AsyncStorage.getItem("user");
@@ -304,4 +319,3 @@ export function useAndroidHealthSync(): UseHealthSyncReturn {
 
 // Re-export type for convenience
 export type { HealthDataType } from "@/services/healthSync";
-

@@ -1,7 +1,7 @@
-import { CartItem, RawCartItem } from "@/app/interfaces/cartInterface";
-import { Product } from "@/app/interfaces/ecommerceInterface";
-import { Service } from "@/app/interfaces/otherInterfaces";
-import { DietPlan, PlanInterface } from "@/app/interfaces/planInterface";
+import { CartItem, RawCartItem } from "@/src/interfaces/cartInterface";
+import { Product } from "@/src/interfaces/ecommerceInterface";
+import { Service } from "@/src/interfaces/otherInterfaces";
+import { DietPlan, PlanInterface } from "@/src/interfaces/planInterface";
 
 //// function for converting selected plan product to cart item structure -----------/
 export function convertToCartItem(

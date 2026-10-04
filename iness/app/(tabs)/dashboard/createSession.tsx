@@ -1,3 +1,4 @@
+import { safeRouter } from "@/src/utils/safeRouter";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -15,9 +16,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Calendar, DateData } from "react-native-calendars";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
-import { fetchWrapper } from "@/app/helpers/fetchWrapper";
-import { config } from "@/app/shared/config";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
+import { fetchWrapper } from "@/src/helpers/fetchWrapper";
+import { config } from "@/src/shared/config";
 import { Picker } from "@react-native-picker/picker";
 
 const baseUrl = `${config.apiUrl}/api`;
@@ -112,9 +113,11 @@ function CreateSession() {
   const fetchActivePlans = async () => {
     try {
       const response = await fetchWrapper.get(`${baseUrl}/get-active-plans?userId=${userId}&isActive=true`);
-      if (response.success) {
+      if (response.success && Array.isArray(response.data)) {
         const filteredPlans = response.data.filter((item: any) => item.plan != undefined);
         setPlans(filteredPlans);
+      } else {
+        setPlans([]);
       }
     } catch (error) {
       console.error("Error fetching plans:", error);
@@ -124,8 +127,10 @@ function CreateSession() {
   const fetchActiveServices = async () => {
     try {
       const response = await fetchWrapper.get(`${baseUrl}/get-active-services?userId=${userId}&isActive=true`);
-      if (response.success) {
+      if (response.success && Array.isArray(response.data)) {
         setServices(response.data);
+      } else {
+        setServices([]);
       }
     } catch (error) {
       console.error("Error fetching services:", error);
@@ -135,8 +140,10 @@ function CreateSession() {
   const fetchTrainers = async () => {
     try {
       const response = await fetchWrapper.get(`${baseUrl}/get-trainers?isActive=true`);
-      if (response.success) {
+      if (response.success && Array.isArray(response.data)) {
         setTrainers(response.data);
+      } else {
+        setTrainers([]);
       }
     } catch (error) {
       console.error("Error fetching trainers:", error);
@@ -364,7 +371,7 @@ function CreateSession() {
         Alert.alert("Success", "Sessions created successfully", [
           {
             text: "OK",
-            onPress: () => router.back()
+            onPress: () => safeRouter.back()
           }
         ]);
       } else {
@@ -381,7 +388,7 @@ function CreateSession() {
     return (
       <SafeAreaView style={styles.container} edges={["top", "left", "right", "bottom"]}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => safeRouter.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Create Session</Text>
@@ -398,7 +405,7 @@ function CreateSession() {
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right", "bottom"]}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => safeRouter.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Create Session</Text>

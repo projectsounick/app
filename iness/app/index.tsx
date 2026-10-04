@@ -1,23 +1,15 @@
+import { safeRouter } from "@/src/utils/safeRouter";
 import React, { useEffect, useState } from "react";
 import { View, Text, ImageBackground, Dimensions, Image } from "react-native";
-import { lightColors } from "./Theme/colors";
-import { responsiveFontSize, responsiveSpacing } from "./Theme/responsiveFontSize";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { useNavigation } from "@react-navigation/native";
-import AnimatedSubmitButton from "./modules/AnimatedSubmitButton";
+import { lightColors } from "@/src/Theme/colors";
+import { responsiveFontSize, responsiveSpacing } from "@/src/Theme/responsiveFontSize";
+import { useNavigation } from "expo-router";
+import AnimatedSubmitButton from "@/src/modules/AnimatedSubmitButton";
 import LottieView from "lottie-react-native";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { useRouter } from "expo-router";
 
-type RootStackParamList = {
-  Home: undefined;
-  login: undefined;
-  Onboarding: undefined;
-  OtpVerify: undefined;
-};
-
 const { width, height } = Dimensions.get("window");
-type NavigationProp = StackNavigationProp<RootStackParamList, "Home">;
 
 const HomeScreen = () => {
   // Always use light theme for login screen
@@ -55,26 +47,36 @@ const HomeScreen = () => {
       bold: "SatoshiBold",
     },
   };
-  const navigation = useNavigation<NavigationProp>();
+  const navigation = useNavigation<any>();
   const [showSplash, setShowSplash] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const timer = setTimeout(async () => {
-      const hasSession = await asyncStorageUtils.hasAuthenticatedUserSession();
-      const userData =
-        await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+    let isMounted = true;
+    const checkAuth = async () => {
+      try {
+        const hasSession = await asyncStorageUtils.hasAuthenticatedUserSession();
+        const userData =
+          await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
 
-      if (hasSession && userData?.exists && userData.data?.onboarding === true) {
-        router.push("/secondsplashscreen");
-      } else if (hasSession && userData?.exists) {
-        router.push("/Onboarding");
-      } else {
-        setShowSplash(false);
+        if (!isMounted) return;
+
+        if (hasSession && userData?.exists && userData.data?.onboarding === true) {
+          safeRouter.navigate("/secondsplashscreen");
+        } else if (hasSession && userData?.exists) {
+          safeRouter.navigate("/Onboarding");
+        } else {
+          setShowSplash(false);
+        }
+      } catch {
+        if (isMounted) setShowSplash(false);
       }
-    }, 2000);
+    };
 
-    return () => clearTimeout(timer);
+    checkAuth();
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   if (showSplash) {
@@ -104,7 +106,7 @@ const HomeScreen = () => {
   }
 
   const handlePress = () => {
-    navigation.navigate("login");
+    safeRouter.navigate("/login");
   };
 
   return (

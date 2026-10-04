@@ -12,15 +12,15 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import NormalHeader from "@/app/modules/NormalHeader";
+import NormalHeader from "@/src/modules/NormalHeader";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import { paymentService } from "@/app/services/payment.service";
+import { paymentService } from "@/src/services/payment.service";
 import { ActivityIndicator, Dialog, Modal, Portal } from "react-native-paper";
-import CustomSnackbar from "@/app/modules/Snackbar";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import CustomSnackbar from "@/src/modules/Snackbar";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 import useServiceWithSnackbar from "@/hooks/usePostDataHook";
 import { useFocusEffect } from "expo-router";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 export default function PaymentScreen() {
   const theme = useGlobalTheme();
@@ -47,7 +47,7 @@ export default function PaymentScreen() {
      
 
       if (response.success) {
-        setPayment(response.data);
+        setPayment(Array.isArray(response.data) ? response.data : []);
       } else {
         setSnackbarMessage("Failed to fetch payment history");
         setSnackBarOpen(true);
@@ -146,6 +146,12 @@ export default function PaymentScreen() {
 
   const renderItem = ({ item }: { item: any }) => {
     const isSuccess = item.status === "success";
+    const cartItems = Array.isArray(item?.cartItems) ? item.cartItems : [];
+    const thumbnailUrl =
+      cartItems[0]?.plan?.imgUrl ||
+      cartItems[0]?.service?.imgUrl ||
+      cartItems[0]?.product?.imgUrl ||
+      cartItems[0]?.imgUrl;
 
     return (
       <View style={styles.cardContainer}>
@@ -153,10 +159,17 @@ export default function PaymentScreen() {
         <View style={styles.topRow}>
           {/* Thumbnail from first plan */}
           <View style={styles.imageContainer}>
-            <Image
-              source={{ uri: item.cartItems[0]?.plan?.imgUrl }}
-              style={styles.thumbnail}
-            />
+            {typeof thumbnailUrl === "string" && thumbnailUrl ? (
+              <Image source={{ uri: thumbnailUrl }} style={styles.thumbnail} />
+            ) : (
+              <View style={[styles.thumbnail, styles.thumbnailPlaceholder]}>
+                <Ionicons
+                  name="receipt-outline"
+                  size={26}
+                  color={theme.colors.textMuted}
+                />
+              </View>
+            )}
           </View>
 
           {/* Status & Receipt */}
@@ -175,7 +188,7 @@ export default function PaymentScreen() {
                 style={styles.statusIcon}
               />
               <Text style={styles.statusText}>
-                {isSuccess ? "Delivered" : "Pending"}
+                {isSuccess ? "Paid" : "Pending"}
               </Text>
             </LinearGradient>
           </View>
@@ -203,14 +216,16 @@ export default function PaymentScreen() {
 
         {/* All Items List */}
         <View style={styles.itemsContainer}>
-          {item.cartItems.map((c: any, index: number) => (
-            <View key={index} style={styles.itemRow}>
+          {cartItems.length > 0 ? cartItems.map((c: any, index: number) => (
+            <View key={c?._id || `${item?._id || "order"}-${index}`} style={styles.itemRow}>
               <View style={styles.itemBullet} />
               <Text style={styles.itemText}>
-                {c.quantity}x {c.plan?.title || "Item"}
+                {Number(c?.quantity) || 1}x {c?.plan?.title || c?.service?.title || c?.product?.name || c?.name || "Item"}
               </Text>
             </View>
-          ))}
+          )) : (
+            <Text style={styles.itemText}>Item details are unavailable for this order.</Text>
+          )}
         </View>
 
         {/* Footer: Order info and price */}
@@ -223,7 +238,11 @@ export default function PaymentScreen() {
           </View>
           <View style={styles.priceContainer}>
             <Text style={styles.priceLabel}>Total</Text>
-            <Text style={styles.priceValue}>₹{item.amount}</Text>
+            <Text style={styles.priceValue}>
+              {Number.isFinite(Number(item.amount))
+                ? `₹${Number(item.amount).toFixed(2)}`
+                : "Price unavailable"}
+            </Text>
           </View>
         </View>
       </View>
@@ -342,6 +361,11 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
     height: 60,
     borderRadius: 14,
     backgroundColor: theme.colors.border,
+  },
+  thumbnailPlaceholder: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: theme.colors.backgroundSecondary,
   },
   statusContainer: {
     flex: 1,

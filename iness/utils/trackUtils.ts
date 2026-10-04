@@ -3,7 +3,7 @@ import {
   StepsData,
   TrackingData,
   WaterData,
-} from "@/app/interfaces/trackInterface";
+} from "@/src/interfaces/trackInterface";
 
 type TrackingType = keyof TrackingData;
 

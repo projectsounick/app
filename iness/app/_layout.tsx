@@ -23,8 +23,12 @@ import {
   handleNotificationNavigation,
   NotificationData,
   NotificationNavigationData,
-} from "@/app/utils/notificationRouter";
-import { ThemeProvider } from "@/app/Theme/ThemeContext";
+} from "@/src/utils/notificationRouter";
+import { ThemeProvider } from "@/src/Theme/ThemeContext";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { PaperProvider } from "react-native-paper";
+import AppUpdateBottomSheet from "@/src/Modals/AndroidVersionUpdateModal";
+import AppErrorBoundary from "@/src/Components/AppErrorBoundary";
 
 // Fonts
 SplashScreen.preventAutoHideAsync();
@@ -43,6 +47,7 @@ Notifications.setNotificationHandler({
 
 export default function RootLayout() {
   const [layoutReady, setLayoutReady] = React.useState(false);
+  const userCheckedRef = React.useRef(false);
   const [fontsLoaded] = useFonts({
     SatoshiRegular: require("../assets/fonts/Satoshi-Regular.otf"),
     SatoshiMedium: require("../assets/fonts/Satoshi-Medium.otf"),
@@ -64,7 +69,7 @@ export default function RootLayout() {
         },
       };
     }
-    // ✅ Only check user once after fonts are loaded
+    // ✅ Only check user once after fonts are loaded and layout is ready
     const checkUser = async () => {
       try {
         const hasSession = await asyncStorageUtils.hasAuthenticatedUserSession();
@@ -84,7 +89,8 @@ export default function RootLayout() {
         console.error("Error checking user:", error);
       }
     };
-    if (layoutReady) {
+    if (fontsLoaded && layoutReady && !userCheckedRef.current) {
+      userCheckedRef.current = true;
       checkUser();
     }
   }, [fontsLoaded, layoutReady]);
@@ -282,9 +288,6 @@ export default function RootLayout() {
     );
 
     async function hideNavBar() {
-      // For background color
-      await NavigationBar.setBackgroundColorAsync("#000000");
-
       // Hide nav bar (expo-navigation-bar)
       await NavigationBar.setVisibilityAsync("hidden");
 
@@ -299,18 +302,27 @@ export default function RootLayout() {
   }, []);
   return (
     <GestureHandlerRootView style={styles.container}>
-      <ThemeProvider>
-        <Provider store={store}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-            }}
-          >
-            <Stack.Screen name="index" />
-            <Stack.Screen name="login" />
-          </Stack>
-        </Provider>
-      </ThemeProvider>
+      <SafeAreaProvider>
+        <AppErrorBoundary>
+          <ThemeProvider>
+            <Provider store={store}>
+              <PaperProvider>
+                <Stack
+                  screenOptions={{
+                    headerShown: false,
+                    animation: "fade_from_bottom",
+                    animationDuration: 220,
+                  }}
+                >
+                  <Stack.Screen name="index" />
+                  <Stack.Screen name="login" />
+                </Stack>
+                <AppUpdateBottomSheet />
+              </PaperProvider>
+            </Provider>
+          </ThemeProvider>
+        </AppErrorBoundary>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }

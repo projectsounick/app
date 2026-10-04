@@ -1,3 +1,4 @@
+import { safeRouter } from "@/src/utils/safeRouter";
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
@@ -15,23 +16,23 @@ import {
 } from "react-native";
 import * as Clipboard from "expo-clipboard";
 import { Ionicons } from "@expo/vector-icons";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 import { router } from "expo-router";
-import { config } from "@/app/shared/config";
-import { fetchWrapper } from "@/app/helpers/fetchWrapper";
-import { chatService } from "@/app/services/chat.service";
-import TrainerVideoCallScreen from "@/app/modules/TrainerVideoCallModule";
-import { videocallService } from "@/app/services/videocall.service";
-import { notificationService } from "@/app/services/notification.service";
+import { config } from "@/src/shared/config";
+import { fetchWrapper } from "@/src/helpers/fetchWrapper";
+import { chatService } from "@/src/services/chat.service";
+import TrainerVideoCallScreen from "@/src/modules/TrainerVideoCallModule";
+import { videocallService } from "@/src/services/videocall.service";
+import { notificationService } from "@/src/services/notification.service";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
-import MonthlySessionsCalendar from "@/app/Modals/MonthlySessionsCalendar";
+import { LoginWrapper } from "@/src/Hoc/LoginWrapper";
+import MonthlySessionsCalendar from "@/src/Modals/MonthlySessionsCalendar";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { paymentService } from "@/app/services/payment.service";
-import { transformatiomImageService } from "@/app/services/transofmationImage.service";
-import SessionHealthOverview from "@/app/modules/SessionHealthOverview";
-import ImageViewerModal from "@/app/Modals/ImageViewerModal";
-import VideoViewerModal from "@/app/Modals/VideoViewerModal";
+import { paymentService } from "@/src/services/payment.service";
+import { transformatiomImageService } from "@/src/services/transofmationImage.service";
+import SessionHealthOverview from "@/src/modules/SessionHealthOverview";
+import ImageViewerModal from "@/src/Modals/ImageViewerModal";
+import VideoViewerModal from "@/src/Modals/VideoViewerModal";
 
 const baseUrl = `${config.apiUrl}/api`;
 
@@ -304,7 +305,7 @@ function TrainerDashboard() {
       setLoading(true);
       const response = await fetchWrapper.get(`${baseUrl}/get-all-users`);
 
-      if (response.success && response.data) {
+      if (response.success && Array.isArray(response.data)) {
         const regularUsers = sortUsersList(response.data.filter(
           (user: User) => user.role === "user"
         ));
@@ -313,6 +314,9 @@ function TrainerDashboard() {
         setSelectedUser((prev) =>
           prev ? regularUsers.find((user) => user._id === prev._id) || prev : prev
         );
+      } else {
+        setUsers([]);
+        setFilteredUsers([]);
       }
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -442,7 +446,7 @@ function TrainerDashboard() {
       const loggedInUserId = userCheck.data._id;
 
       if (loggedInRole === "admin") {
-        router.push({
+        safeRouter.navigate({
           pathname: "/dashboard/supportchat",
           params: {
             userId: user._id,
@@ -511,7 +515,7 @@ function TrainerDashboard() {
         resolvedChatId = `${user._id}-${resolvedTrainerId}`;
       }
 
-      router.push({
+      safeRouter.navigate({
         pathname: "/dashboard/trainerchat",
         params: {
           userId: user._id,
@@ -599,7 +603,7 @@ function TrainerDashboard() {
 
   const handleViewSessions = () => {
     if (selectedUser) {
-      router.push({
+      safeRouter.navigate({
         pathname: "/dashboard/trainerSessionCalendar",
         params: { userId: selectedUser._id, userName: selectedUser.name },
       } as any);
@@ -609,7 +613,7 @@ function TrainerDashboard() {
 
   const handleAssignDietPlan = () => {
     if (selectedUser) {
-      router.push({
+      safeRouter.navigate({
         pathname: "/dashboard/assignDietPlan",
         params: { userId: selectedUser._id, userName: selectedUser.name },
       } as any);
@@ -1411,7 +1415,7 @@ function TrainerDashboard() {
       {/* Custom Header */}
       <View style={[styles.header, { paddingTop: Math.max(insets.top, 8) + 8 }]}>
         <TouchableOpacity
-          onPress={() => router.back()}
+          onPress={() => safeRouter.back()}
           style={styles.backButton}
         >
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
@@ -2318,4 +2322,4 @@ const getStyles = (theme: any, isDark: boolean) =>
     },
   });
 
-export default LoginWrapper(TrainerDashboard);
+export default LoginWrapper(TrainerDashboard, { allowedRoles: ["admin", "trainer"] });

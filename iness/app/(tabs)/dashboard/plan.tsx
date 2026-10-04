@@ -10,12 +10,12 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/store";
-import theme from "@/app/Theme/globalTheme";
+import theme from "@/src/Theme/globalTheme";
 
-import SmallHeader from "@/app/modules/SmallHeader";
+import SmallHeader from "@/src/modules/SmallHeader";
 
-import PlanCard from "@/app/modules/PlanCard";
-import BackHeader from "@/app/modules/BackHeader";
+import PlanCard from "@/src/modules/PlanCard";
+import BackHeader from "@/src/modules/BackHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 

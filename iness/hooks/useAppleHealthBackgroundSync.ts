@@ -7,7 +7,7 @@ import { useEffect, useRef, useCallback } from "react";
 import { AppState, AppStateStatus } from "react-native";
 import { useDispatch } from "react-redux";
 import { updateTrackingField } from "@/Slices/trackSlice";
-import { trackService } from "@/app/services/track.service";
+import { trackService } from "@/src/services/track.service";
 import { useAppleHealthSync } from "./useAppleHealthSync";
 import {
   HealthKit,

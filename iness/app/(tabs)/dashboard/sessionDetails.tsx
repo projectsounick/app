@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { safeRouter } from "@/src/utils/safeRouter";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -12,10 +13,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
-import { fetchWrapper } from "@/app/helpers/fetchWrapper";
-import { config } from "@/app/shared/config";
-import SessionHealthOverview from "@/app/modules/SessionHealthOverview";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
+import { fetchWrapper } from "@/src/helpers/fetchWrapper";
+import { config } from "@/src/shared/config";
+import SessionHealthOverview from "@/src/modules/SessionHealthOverview";
 
 const baseUrl = `${config.apiUrl}/api`;
 
@@ -47,26 +48,34 @@ function SessionDetails() {
   const [showNotesInput, setShowNotesInput] = useState(false);
   const [sessionNotes, setSessionNotes] = useState("");
 
-  useEffect(() => {
-    fetchSessionDetails();
-  }, []);
-
-  const fetchSessionDetails = async () => {
+  const fetchSessionDetails = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetchWrapper.get(`${baseUrl}/get-session-details?sessionId=${sessionId}`);
-      if (response.success) {
+      if (!sessionId || Array.isArray(sessionId)) {
+        setSession(null);
+        return;
+      }
+      const response = await fetchWrapper.get(
+        `${baseUrl}/get-session-details?sessionId=${encodeURIComponent(sessionId)}`
+      );
+      if (response.success && response.data && typeof response.data === "object") {
         setSession(response.data);
         setSessionNotes(response.data.sessionNotes || "");
       } else {
-        Alert.alert("Error", response.message || "Failed to fetch session details");
+        setSession(null);
+        Alert.alert("Unable to load session", "Please try again in a moment.");
       }
     } catch (error: any) {
-      Alert.alert("Error", error.message || "Failed to fetch session details");
+      setSession(null);
+      Alert.alert("Unable to load session", "Check your connection and try again.");
     } finally {
       setLoading(false);
     }
-  };
+  }, [sessionId]);
+
+  useEffect(() => {
+    void fetchSessionDetails();
+  }, [fetchSessionDetails]);
 
   const updateSessionStatus = async (status: "completed" | "cancelled") => {
     Alert.alert(
@@ -87,7 +96,7 @@ function SessionDetails() {
                 Alert.alert("Success", `Session ${status} successfully`, [
                   {
                     text: "OK",
-                    onPress: () => router.back(),
+                    onPress: () => safeRouter.back(),
                   },
                 ]);
               } else {
@@ -129,7 +138,7 @@ function SessionDetails() {
     return (
       <SafeAreaView style={styles.container} edges={["top", "left", "right", "bottom"]}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => safeRouter.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Session Details</Text>
@@ -147,7 +156,7 @@ function SessionDetails() {
     return (
       <SafeAreaView style={styles.container} edges={["top", "left", "right", "bottom"]}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => safeRouter.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Session Details</Text>
@@ -174,7 +183,7 @@ function SessionDetails() {
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right", "bottom"]}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => safeRouter.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Session Details</Text>
@@ -264,7 +273,7 @@ function SessionDetails() {
         />
 
         {/* Workouts */}
-        {session.workouts && session.workouts.length > 0 && (
+        {Array.isArray(session.workouts) && session.workouts.length > 0 && (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
               <Ionicons name="fitness" size={24} color={theme.colors.text} />

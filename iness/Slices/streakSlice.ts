@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { StreakInterface } from "@/app/interfaces/otherInterfaces";
-import { createStreak } from "@/app/services/streaks.service";
+import { StreakInterface } from "@/src/interfaces/otherInterfaces";
+import { createStreak } from "@/src/services/streaks.service";
 
 interface StreakState {
   streakData: StreakInterface | null;

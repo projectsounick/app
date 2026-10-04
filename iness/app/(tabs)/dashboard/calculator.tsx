@@ -1,3 +1,4 @@
+import { safeRouter } from "@/src/utils/safeRouter";
 import React, { useState } from "react";
 import {
   View,
@@ -13,10 +14,10 @@ import {
   StyleSheet,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import NormalHeader from "@/app/modules/NormalHeader";
+import NormalHeader from "@/src/modules/NormalHeader";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { router } from "expo-router";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 
 const { height } = Dimensions.get("window");
 
@@ -354,7 +355,7 @@ export default function CalculatorScreen() {
                     <TouchableOpacity
                       onPress={() => {
                         closeModal();
-                        router.push({
+                        safeRouter.navigate({
                           pathname: "/dashboard/medicalcitations",
                         } as any);
                       }}

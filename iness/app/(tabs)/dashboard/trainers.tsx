@@ -1,3 +1,4 @@
+import { safeRouter } from "@/src/utils/safeRouter";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -13,9 +14,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import NormalHeader from "@/app/modules/NormalHeader";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
-import { userService } from "@/app/services/user.service";
+import NormalHeader from "@/src/modules/NormalHeader";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
+import { userService } from "@/src/services/user.service";
 import { router } from "expo-router";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 
@@ -189,7 +190,7 @@ export default function TrainersScreen() {
                               if (loggedUser.exists) {
                                 const userId = loggedUser.data._id;
                                 const chatId = `${userId}-${trainer._id}`;
-                                router.push({
+                                safeRouter.navigate({
                                   pathname: "/(tabs)/dashboard/trainerchat",
                                   params: { chatId, trainerName: trainer.name, trainerId: trainer._id },
                                 });
@@ -255,7 +256,7 @@ export default function TrainersScreen() {
                               if (loggedUser.exists) {
                                 const userId = loggedUser.data._id;
                                 const chatId = `${userId}-${trainer._id}`;
-                                router.push({
+                                safeRouter.navigate({
                                   pathname: "/(tabs)/dashboard/trainerchat",
                                   params: { chatId, trainerName: trainer.name, trainerId: trainer._id },
                                 });

@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 const { width, height } = Dimensions.get("window");
 const topPadding = height * 0.05;
 
@@ -25,11 +25,11 @@ const verticalScale = height / 812; // Base height
 const responsiveFontSize = (size: number) => size * Math.min(fontScale, 0.95);
 const responsiveSpacing = (size: number) => size * Math.min(scale, 1.0);
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Blog } from "@/app/interfaces/blogInterface";
-import { blogService } from "@/app/services/blog.Service";
-import CustomSnackbar from "@/app/modules/Snackbar";
+import { Blog } from "@/src/interfaces/blogInterface";
+import { blogService } from "@/src/services/blog.Service";
+import CustomSnackbar from "@/src/modules/Snackbar";
 
-import NormalHeader from "@/app/modules/NormalHeader";
+import NormalHeader from "@/src/modules/NormalHeader";
 
 export default function BlogDetailsScreen() {
   const theme = useGlobalTheme();

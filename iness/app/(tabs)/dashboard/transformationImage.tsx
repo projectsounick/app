@@ -12,21 +12,21 @@ import {
   StyleSheet,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
-import NormalHeader from "@/app/modules/NormalHeader";
-import AnimatedSubmitButton from "@/app/modules/AnimatedSubmitButton";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
+import NormalHeader from "@/src/modules/NormalHeader";
+import AnimatedSubmitButton from "@/src/modules/AnimatedSubmitButton";
 import useGetDataHook from "@/hooks/useFetchHook";
-import { transformatiomImageService } from "@/app/services/transofmationImage.service";
+import { transformatiomImageService } from "@/src/services/transofmationImage.service";
 import { ActivityIndicator } from "react-native-paper";
-import CustomSnackbar from "@/app/modules/Snackbar";
-import { userService } from "@/app/services/user.service";
+import CustomSnackbar from "@/src/modules/Snackbar";
+import { userService } from "@/src/services/user.service";
 import { uploadToAzureFromExpo } from "@/utils/azureUtils";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { SafeAreaView } from "react-native-safe-area-context";
-import ImageViewerModal from "@/app/Modals/ImageViewerModal";
-import VideoViewerModal from "@/app/Modals/VideoViewerModal";
+import ImageViewerModal from "@/src/Modals/ImageViewerModal";
+import VideoViewerModal from "@/src/Modals/VideoViewerModal";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import ProgressShimmer from "@/app/modules/Shimmer/ProgressShimmer";
+import ProgressShimmer from "@/src/modules/Shimmer/ProgressShimmer";
 const { height } = Dimensions.get("window");
 const topPadding = height * 0.05;
 
@@ -68,11 +68,16 @@ export default function TransformationImage() {
     setModalVisible(true);
   };
 
-  const normalizeData = (raw: any[]) => {
-    return raw.map((group) => ({
-      title: group.date,
-      data: group.images,
-    }));
+  const normalizeData = (raw: unknown) => {
+    if (!Array.isArray(raw)) return [];
+    return raw
+      .filter((group) => group && typeof group === "object")
+      .map((group: any) => ({
+        title: group.date || new Date().toISOString(),
+        data: Array.isArray(group.images)
+          ? group.images.filter((item: any) => typeof item?.url === "string")
+          : [],
+      }));
   };
 
   const pickImage = async (mode: "camera" | "gallery") => {
@@ -95,11 +100,13 @@ export default function TransformationImage() {
       if (Platform.OS === "android") {
         if (mode === "camera") {
           const { status } = await ImagePicker.requestCameraPermissionsAsync();
-          if (status !== "granted") return;
-        } else {
-          const { status } =
-            await ImagePicker.requestMediaLibraryPermissionsAsync();
-          if (status !== "granted") return;
+          if (status !== "granted") {
+            Alert.alert(
+              "Camera permission needed",
+              "Allow camera access in Settings to capture progress media."
+            );
+            return;
+          }
         }
       }
 
@@ -114,7 +121,10 @@ export default function TransformationImage() {
               videoMaxDuration: 60,
             })
           : await ImagePicker.launchImageLibraryAsync({
-              mediaTypes: ImagePicker.MediaTypeOptions.All,
+              mediaTypes:
+                mediaType === "image"
+                  ? ImagePicker.MediaTypeOptions.Images
+                  : ImagePicker.MediaTypeOptions.Videos,
               quality: 0.8,
             });
 
@@ -123,20 +133,10 @@ export default function TransformationImage() {
       const asset = result.assets[0];
       const fileUri = asset.uri;
       const type = asset.type ?? "image";
-      const storageDetails = await userService.getStorageAccountDetails(
-        "transformationImages"
-      );
-      if (!storageDetails.success) {
-        setSnackbarVisible(true);
-        setSnackbarMessage("Server error, try again.");
-        return;
-      }
-
-      const { storageAccountName, sasToken } = storageDetails.data;
 
       const userData =
         await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-      if (!userData.exists) {
+      if (!userData.exists || !userData.data?._id) {
         setSnackbarVisible(true);
         setSnackbarMessage("User not found.");
         return;
@@ -147,6 +147,22 @@ export default function TransformationImage() {
       const ext =
         fileUri.split(".").pop() || (type === "video" ? "mp4" : "jpg");
       const fileName = `${userId}_${Date.now()}.${ext}`;
+      const storageDetails = await userService.getStorageAccountDetails(
+        "transformationImages",
+        fileName
+      );
+      if (!storageDetails.success) {
+        setSnackbarVisible(true);
+        setSnackbarMessage("Server error, try again.");
+        return;
+      }
+
+      const { storageAccountName, sasToken } = storageDetails.data || {};
+      if (!storageAccountName || !sasToken) {
+        setSnackbarVisible(true);
+        setSnackbarMessage("Upload could not be prepared. Please try again.");
+        return;
+      }
 
       const uploadedUrl = await uploadToAzureFromExpo(
         fileUri,
@@ -162,7 +178,7 @@ export default function TransformationImage() {
       const uploadRes =
         await transformatiomImageService.addTransformationImages(uploadData);
 
-      if (uploadRes && uploadRes.data) {
+      if (uploadRes?.success && uploadRes.data) {
         setSnackbarVisible(true);
         setSnackbarMessage("Upload successful!");
         fetchData();
@@ -318,7 +334,8 @@ export default function TransformationImage() {
                     contentContainerStyle={styles.mediaScrollContainer}
                   >
                     {section.data.map((item: any, index: number) => {
-                      const isVideo = item.url.endsWith(".mp4");
+                      const cleanUrl = item.url.split("?")[0].toLowerCase();
+                      const isVideo = /\.(mp4|mov|m4v|webm)$/.test(cleanUrl);
                       return (
                         <TouchableOpacity
                           key={`img-${index}`}

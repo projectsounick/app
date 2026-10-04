@@ -4,6 +4,10 @@ import { sliceConfig, SliceKey } from "@/sliceRegistery";
 import { setMainLoader } from "@/Slices/loadingSlice";
 import { apiCache, CacheTTL } from "@/utils/apiCache";
 
+const debugLog = (...args: unknown[]) => {
+  if (__DEV__) console.log(...args);
+};
+
 interface ServiceCallConfig {
   sliceKey: SliceKey;
   fetchFunction: (params?: any) => Promise<any>;
@@ -65,7 +69,7 @@ function useFetchMultipleStoreDataHook(
             const duration = Date.now() - startTime;
             const seconds = (duration / 1000).toFixed(2);
             const status = duration > 3000 ? "⚠️ SLOW" : duration > 1000 ? "⚠️" : "✅";
-            console.log(`⏱️ [API Call] ${sliceKey}: ${seconds}s (${duration}ms) ${status}`);
+            debugLog(`⏱️ [API Call] ${sliceKey}: ${seconds}s (${duration}ms) ${status}`);
 
             // Immediately dispatch data as it arrives (incremental rendering)
             if (res.success) {
@@ -93,7 +97,7 @@ function useFetchMultipleStoreDataHook(
 
       // PRIORITY LOADING: Load high priority first, then low priority
       if (usePriorityLoading && highPriority.length > 0) {
-        console.log("🚀 [Priority Loading] Starting high-priority APIs first...");
+        debugLog("🚀 [Priority Loading] Starting high-priority APIs first...");
 
         // Start high priority calls
         const highPriorityPromises = highPriority.map(createTimedPromise);
@@ -101,14 +105,14 @@ function useFetchMultipleStoreDataHook(
 
         // High priority done, mark as partially loaded
         setLoading(false);
-        console.log("✅ [Priority Loading] High-priority data loaded, UI can render");
+        debugLog("✅ [Priority Loading] High-priority data loaded, UI can render");
 
         // Now load low priority in background
         if (lowPriority.length > 0) {
-          console.log("🔄 [Priority Loading] Loading low-priority APIs in background...");
+          debugLog("🔄 [Priority Loading] Loading low-priority APIs in background...");
           const lowPriorityPromises = lowPriority.map(createTimedPromise);
           await Promise.allSettled(lowPriorityPromises);
-          console.log("✅ [Priority Loading] All data loaded");
+          debugLog("✅ [Priority Loading] All data loaded");
         }
       } else {
         // NO PRIORITY: Load all in parallel (existing behavior)
@@ -118,26 +122,25 @@ function useFetchMultipleStoreDataHook(
 
       // Performance summary
       const sortedByDuration = [...performanceReport].sort((a, b) => b.duration - a.duration);
-      console.log("\n📊 [Dashboard Home] API Performance Summary (slowest first):");
+      debugLog("\n📊 [Dashboard Home] API Performance Summary (slowest first):");
       sortedByDuration.forEach(({ sliceKey, duration, status }) => {
         const seconds = (duration / 1000).toFixed(2);
         const icon = duration > 3000 ? "🐌" : duration > 1000 ? "⚠️" : "✅";
-        console.log(`  ${icon} ${sliceKey}: ${seconds}s (${duration}ms) - ${status}`);
+        debugLog(`  ${icon} ${sliceKey}: ${seconds}s (${duration}ms) - ${status}`);
       });
-      console.log("");
+      debugLog("");
 
       if (hasError) {
         setSnackbarMessage("Some data failed to load");
         setError("Partial fetch failure");
-      } else {
-        setSnackbarMessage("All data fetched successfully");
+        setSnackbarVisible(true);
       }
     } catch (err: any) {
       const msg = err.message || "Something went wrong";
       setError(msg);
       setSnackbarMessage(msg);
-    } finally {
       setSnackbarVisible(true);
+    } finally {
       setLoading(false);
     }
   }, [configs, dispatch, usePriorityLoading]);

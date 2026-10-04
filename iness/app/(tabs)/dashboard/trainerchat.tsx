@@ -1,3 +1,4 @@
+import { safeRouter } from "@/src/utils/safeRouter";
 import React, { useEffect, useRef, useState } from "react";
 import {
   View,
@@ -11,21 +12,22 @@ import {
   Image,
   StyleSheet,
   Animated,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
-import TrainerChatMessage from "@/app/Components/SupportChat/TrainerChatMessage";
-import { chatService } from "@/app/services/chat.service";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
+import TrainerChatMessage from "@/src/Components/SupportChat/TrainerChatMessage";
+import { chatService } from "@/src/services/chat.service";
 import { ActivityIndicator } from "react-native-paper";
 import { uploadToAzureFromExpo } from "@/utils/azureUtils";
-import { userService } from "@/app/services/user.service";
-import ImageViewerModal from "@/app/Modals/ImageViewerModal";
+import { userService } from "@/src/services/user.service";
+import ImageViewerModal from "@/src/Modals/ImageViewerModal";
 import {
   SafeAreaView,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import CustomSnackbar from "@/app/modules/Snackbar";
+import CustomSnackbar from "@/src/modules/Snackbar";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { useLocalSearchParams, router } from "expo-router";
 
@@ -86,18 +88,11 @@ export default function TrainerChatScreen() {
             throw new Error("Chat could not be initialized");
           }
 
-          console.log("=== INIT CHAT ===");
-          console.log("Generated ChatId:", generatedChatId);
-          console.log("User Id from params:", userId);
-          console.log("Trainer Id from params:", trainerId);
-          console.log("Trainer Id from storage:", userCheck.data._id);
-          console.log("User role:", loggedInRole);
           setChatId(generatedChatId);
           setChatTitle(resolvedTitle);
 
           // Get chat messages (will return empty array if chat doesn't exist yet)
           const response = await chatService.getTrainerChat(generatedChatId);
-          console.log("Get Chat Response:", response);
           if (response.success) {
             setData(response.data || []);
           } else {
@@ -132,11 +127,6 @@ export default function TrainerChatScreen() {
   const handleSend = async () => {
     try {
       setMessageSendingLoader(true);
-      console.log("=== SENDING MESSAGE ===");
-      console.log("ChatId:", chatId);
-      console.log("Current User Role:", currentUserRole);
-      console.log("UserId param:", userId);
-
       if (!chatId) {
         console.error("ChatId is empty!");
         setSnackbarMessage("Chat not initialized. Please try again.");
@@ -157,20 +147,26 @@ export default function TrainerChatScreen() {
       //// if attachment exists then upload them to azure then generate link and store it --/
       if (selectedAttachments.length > 0) {
         try {
-          const storageAccountDetailsResponse =
-            await userService.getStorageAccountDetails("chatMedia");
-
-          if (!storageAccountDetailsResponse.success) {
-            setSnackbarVisible(true);
-            setSnackbarMessage("Server error, try again.");
-            return;
+          const userCheck =
+            await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
+          if (!userCheck.exists || !userCheck.data?._id) {
+            throw new Error("User not found");
           }
-
-          const { storageAccountName, sasToken } =
-            storageAccountDetailsResponse.data;
-          const uploadPromises = selectedAttachments.map(async (fileUri) => {
-            const fileName =
+          const uploadPromises = selectedAttachments.map(async (fileUri, index) => {
+            const originalFileName =
               fileUri.split("/").pop() || `image-${Date.now()}.jpg`;
+            const safeFileName = originalFileName.replace(
+              /[^a-zA-Z0-9._-]/g,
+              "-"
+            );
+            const fileName = `${userCheck.data._id}_${Date.now()}_${index}_${safeFileName}`;
+            const storageAccountDetailsResponse =
+              await userService.getStorageAccountDetails("chatMedia", fileName);
+            if (!storageAccountDetailsResponse.success) {
+              throw new Error("Unable to prepare attachment upload");
+            }
+            const { storageAccountName, sasToken } =
+              storageAccountDetailsResponse.data;
 
             const uploadedUrl = await uploadToAzureFromExpo(
               fileUri,
@@ -201,15 +197,11 @@ export default function TrainerChatScreen() {
         date: new Date().toDateString(),
       };
 
-      console.log("Message Data:", messageData);
-
       //// Uploading the message to the backend ----------------------------/
       const uploadMessageResponse = await chatService.addTrainerMessage(
         messageData,
         chatId
       );
-
-      console.log("Upload Response:", uploadMessageResponse);
 
       if (uploadMessageResponse.success) {
         setData((prev: any) => [...prev, messageData]);
@@ -217,12 +209,11 @@ export default function TrainerChatScreen() {
         setSelectedAttachments([]);
         Keyboard.dismiss();
       } else {
-        console.log("Message send failed:", uploadMessageResponse);
         setSnackbarVisible(true);
         setSnackbarMessage("Unable to send the message,try again");
       }
     } catch (error: any) {
-      console.error("Error sending message:", error);
+      console.error("Failed to send trainer message");
       setSnackbarVisible(true);
       setSnackbarMessage(error.message || "Error sending message");
     } finally {
@@ -282,7 +273,7 @@ export default function TrainerChatScreen() {
         {/* Custom Header */}
         <Animated.View style={[styles.header, { opacity: headerOpacity }]}>
           <TouchableOpacity
-            onPress={() => router.back()}
+            onPress={() => safeRouter.back()}
             style={styles.backButton}
           >
             <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
@@ -298,7 +289,15 @@ export default function TrainerChatScreen() {
             </View>
           </View>
 
-          <TouchableOpacity style={styles.headerAction}>
+          <TouchableOpacity
+            style={styles.headerAction}
+            onPress={() =>
+              Alert.alert(
+                "Chat information",
+                `Conversation with ${chatTitle || "this user"}. Messages and attachments are shared only with participants in this trainer chat.`
+              )
+            }
+          >
             <Ionicons name="information-circle-outline" size={24} color={theme.colors.text} />
           </TouchableOpacity>
         </Animated.View>

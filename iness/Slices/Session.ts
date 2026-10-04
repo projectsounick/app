@@ -1,6 +1,6 @@
 // src/app/redux/sessionSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Session, SessionState } from "@/app/interfaces/sessionInterface";
+import { Session, SessionState } from "@/src/interfaces/sessionInterface";
 
 const initialState: SessionState = {
   sessions: [],

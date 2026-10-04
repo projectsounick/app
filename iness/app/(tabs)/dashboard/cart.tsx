@@ -1,27 +1,28 @@
-import React, { useEffect, useState } from "react";
-import { View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { NativeModules, View } from "react-native";
 import { useRouter } from "expo-router";
 
-import SmallHeader from "@/app/modules/SmallHeader";
+import SmallHeader from "@/src/modules/SmallHeader";
 
-import CartItemList from "@/app/Components/Cart/CartItemCard";
-import CartCheckoutCard from "@/app/Components/Cart/CartCheckoutCard";
+import CartItemList from "@/src/Components/Cart/CartItemCard";
+import CartCheckoutCard from "@/src/Components/Cart/CartCheckoutCard";
 import RazorpayCheckout from "react-native-razorpay";
-import BackHeader from "@/app/modules/BackHeader";
+import BackHeader from "@/src/modules/BackHeader";
 import { useSelector } from "react-redux";
 import { RootState } from "@/store";
-import { cartService } from "@/app/services/cart.service";
+import { cartService } from "@/src/services/cart.service";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ActivityIndicator } from "react-native-paper";
 
-import CustomSnackbar from "@/app/modules/Snackbar";
-import { useGlobalTheme } from "@/app/Theme/ThemeContext";
+import CustomSnackbar from "@/src/modules/Snackbar";
+import { useGlobalTheme } from "@/src/Theme/ThemeContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import AddressModal from "@/app/Modals/AddressModal";
-import CouponModal from "@/app/Modals/CouponModal";
-import { DiscountCoupon } from "@/app/interfaces/otherInterfaces";
-import { LoginWrapper } from "@/app/Hoc/LoginWrapper";
+import AddressModal from "@/src/Modals/AddressModal";
+import CouponModal from "@/src/Modals/CouponModal";
+import { DiscountCoupon } from "@/src/interfaces/otherInterfaces";
+import { LoginWrapper } from "@/src/Hoc/LoginWrapper";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
+import * as Crypto from "expo-crypto";
 
 export interface PhonePeTransactionResponse {
   success: boolean;
@@ -72,19 +73,30 @@ function CartScreen() {
   const [snackbarOpen, setSnackBarOpen] = useState(false);
 
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const checkoutInProgressRef = useRef(false);
 
   const [dataFetchLogin, setDataFetchLogin] = useState(false);
   async function onplaceOrder(
     address: string,
     couponDetails: DiscountCoupon | null
   ) {
+    if (checkoutInProgressRef.current) {
+      return;
+    }
+    checkoutInProgressRef.current = true;
     let createdOrderId: string | null = null;
 
     try {
       setLoading(true);
+      if (!NativeModules.RNRazorpayCheckout?.open) {
+        throw new Error(
+          "Payment checkout is unavailable in this app build. Please update the app."
+        );
+      }
       const data = {
         couponCode: couponDetails ? couponDetails.code : null,
         address: address,
+        checkoutRequestId: Crypto.randomUUID(),
       };
 
       const response: any = await cartService.createRazorpayOrder(data);
@@ -93,6 +105,14 @@ function CartScreen() {
       const razorpayKey = response?.key;
       const amount = response?.amount;
       const currency = response?.currency || "INR";
+
+      if (response?.alreadyPaid && orderId) {
+        createdOrderId = orderId;
+        await AsyncStorage.setItem("currentOrderId", orderId);
+        await AsyncStorage.removeItem("paymentError");
+        router.replace("/(tabs)/dashboard/paymentsuccess");
+        return;
+      }
 
       if (!orderId || !razorpayOrderId || !razorpayKey || !amount) {
         throw new Error("Missing Razorpay checkout details");
@@ -106,23 +126,35 @@ function CartScreen() {
         await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
       const user = userResponse?.data;
 
+      // The server step is complete. Do not leave an app loader covering the
+      // native iOS/Android Razorpay checkout while the customer is paying.
+      setLoading(false);
+      const cleanPhone = (user?.phoneNumber || "")
+        .replace(/^\+91/, "")
+        .replace(/\D/g, "")
+        .slice(-10);
+
       const razorpayResponse = await RazorpayCheckout.open({
         key: razorpayKey,
         amount: String(amount),
-        currency,
+        currency: currency || "INR",
         name: "Iness Fitness",
         description: "Complete your order",
         order_id: razorpayOrderId,
         prefill: {
           name: user?.name || "",
           email: user?.email || "",
-          contact: user?.phoneNumber || "",
+          contact: cleanPhone,
         },
         notes: {
           internalOrderId: orderId,
         },
         theme: {
           color: theme.colors.success,
+        },
+        retry: {
+          enabled: true,
+          max_count: 4,
         },
       });
 
@@ -143,26 +175,41 @@ function CartScreen() {
         await AsyncStorage.removeItem("paymentError");
       }
 
-      router.push("/(tabs)/dashboard/paymentsuccess");
+      router.replace("/(tabs)/dashboard/paymentsuccess");
     } catch (error: any) {
       const errorMessage = extractRazorpayErrorMessage(error);
 
+      if (createdOrderId) {
+        try {
+          const statusResponse: any =
+            await cartService.getOrderStatus(createdOrderId);
+          const resolvedStatus =
+            statusResponse?.data?.status ||
+            statusResponse?.data?.payment?.status;
+          if (statusResponse?.success && resolvedStatus === "success") {
+            await AsyncStorage.setItem("currentOrderId", createdOrderId);
+            await AsyncStorage.removeItem("paymentError");
+            router.replace("/(tabs)/dashboard/paymentsuccess");
+            return;
+          }
+        } catch (_statusError) {
+          // The checkout error remains the useful message for the customer.
+        }
+      }
+
+      await AsyncStorage.setItem(
+        "paymentError",
+        errorMessage || "Payment was not completed. Please try again."
+      );
       if (createdOrderId) {
         await AsyncStorage.setItem("currentOrderId", createdOrderId);
       } else {
         await AsyncStorage.removeItem("currentOrderId");
       }
-
-      await AsyncStorage.setItem("paymentError", errorMessage);
-      router.push("/(tabs)/dashboard/paymentsuccess");
+      router.replace("/(tabs)/dashboard/paymentsuccess");
     } finally {
+      checkoutInProgressRef.current = false;
       setLoading(false);
-      setDeliveryAddress({
-        fullAddress: "",
-        city: "",
-        state: "",
-        pincode: "",
-      });
     }
   }
   return (
@@ -210,7 +257,15 @@ function CartScreen() {
         />
         <AddressModal
           visible={showAddressModal}
-          onClose={() => setShowAddressModal(false)}
+          onClose={async () => {
+            setShowAddressModal(false);
+            await AsyncStorage.removeItem("currentOrderId");
+            await AsyncStorage.setItem(
+              "paymentError",
+              "Checkout was stopped. Delivery address was not provided."
+            );
+            router.replace("/(tabs)/dashboard/paymentsuccess");
+          }}
           address={deliveryAddress}
           setAddress={setDeliveryAddress}
           onConfirm={(addr) => {

@@ -11,14 +11,14 @@ import {
   ActivityIndicator,
 } from "react-native";
 import * as Clipboard from "expo-clipboard";
-import NormalHeader from "@/app/modules/NormalHeader";
+import NormalHeader from "@/src/modules/NormalHeader";
 import { MaterialIcons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
-import { CouponInterface } from "@/app/interfaces/otherInterfaces";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
+import { CouponInterface } from "@/src/interfaces/otherInterfaces";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
-import { couponService } from "@/app/services/coupon.service";
-import CustomSnackbar from "@/app/modules/Snackbar";
+import { couponService } from "@/src/services/coupon.service";
+import CustomSnackbar from "@/src/modules/Snackbar";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const { height, width } = Dimensions.get("window");

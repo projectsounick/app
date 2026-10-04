@@ -1,3 +1,4 @@
+import { safeRouter } from "@/src/utils/safeRouter";
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -12,9 +13,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { router, useLocalSearchParams } from "expo-router";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
-import { fetchWrapper } from "@/app/helpers/fetchWrapper";
-import { config } from "@/app/shared/config";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
+import { fetchWrapper } from "@/src/helpers/fetchWrapper";
+import { config } from "@/src/shared/config";
+import { LoginWrapper } from "@/src/Hoc/LoginWrapper";
 
 const baseUrl = `${config.apiUrl}/api`;
 
@@ -88,7 +90,7 @@ function AssignDietPlan() {
                 Alert.alert("Success", "Diet plan assigned successfully", [
                   {
                     text: "OK",
-                    onPress: () => router.back(),
+                    onPress: () => safeRouter.back(),
                   },
                 ]);
               } else {
@@ -113,7 +115,7 @@ function AssignDietPlan() {
     return (
       <SafeAreaView style={styles.container} edges={["top", "left", "right", "bottom"]}>
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity onPress={() => safeRouter.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
           </TouchableOpacity>
           <Text style={styles.headerTitle}>Assign Diet Plan</Text>
@@ -130,7 +132,7 @@ function AssignDietPlan() {
   return (
     <SafeAreaView style={styles.container} edges={["top", "left", "right", "bottom"]}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+        <TouchableOpacity onPress={() => safeRouter.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={theme.colors.text} />
         </TouchableOpacity>
         <View style={styles.headerContent}>
@@ -409,4 +411,4 @@ const getStyles = (theme: any, isDark: boolean) =>
     },
   });
 
-export default AssignDietPlan;
+export default LoginWrapper(AssignDietPlan, { allowedRoles: ["admin", "trainer"] });

@@ -1,5 +1,5 @@
-import { DietPlan } from "@/app/interfaces/planInterface";
-import { PodcastInterface } from "@/app/interfaces/podcastsInterface";
+import { DietPlan } from "@/src/interfaces/planInterface";
+import { PodcastInterface } from "@/src/interfaces/podcastsInterface";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
 interface dietPlanState {

@@ -2,13 +2,8 @@
   "expo": {
     "name": "iness",
     "slug": "iness",
-    "jsEngine": "hermes",
-    "version": "1.1.8",
+    "version": "1.2.0",
     "orientation": "default",
-    "notification": {
-      "icon": "./assets/images/logonew.png",
-      "color": "#FF231F7C"
-    },
     "icon": "./assets/images/androidlogo.png",
     "scheme": "myapp",
     "platforms": [
@@ -16,20 +11,29 @@
       "android"
     ],
     "userInterfaceStyle": "light",
-    "newArchEnabled": false,
     "ios": {
       "icon": "./assets/images/logonew.png",
       "supportsTablet": false,
       "bundleIdentifier": "com.iness.fitness",
-      "buildNumber": "86",
+      "buildNumber": "87",
       "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSMicrophoneUsageDescription": "We need access to your microphone for video calls and video recording.",
         "NSCameraUsageDescription": "We need access to your camera for video calls, taking profile photos, and video recording.",
         "NSPhotoLibraryUsageDescription": "We need access to your photo library so you can choose images and videos for your profile, chats, posts, and transformation updates.",
-        "NSPhotoLibraryAddUsageDescription": "We need permission to save photos and videos from the app to your photo library when you choose to do so."
-      }
+        "NSPhotoLibraryAddUsageDescription": "We need permission to save photos and videos from the app to your photo library when you choose to do so.",
+        "LSApplicationQueriesSchemes": [
+          "upi",
+          "tez",
+          "gpay",
+          "phonepe",
+          "paytmmp",
+          "bhim",
+          "credpay"
+        ]
+      },
+      "appleTeamId": "HU3QS7HT5Z"
     },
     "android": {
       "icon": "./assets/images/androidlogo.png",
@@ -37,18 +41,22 @@
         "foregroundImage": "./assets/images/androidlogo.png",
         "backgroundColor": "#000000"
       },
-      "edgeToEdgeEnabled": true,
-      "versionCode": 46,
+      "versionCode": 54,
       "googleServicesFile": "./google-services.json",
       "permissions": [
         "NOTIFICATIONS",
         "CAMERA",
         "RECORD_AUDIO",
-        "READ_MEDIA_IMAGES",
-        "READ_MEDIA_VIDEO",
-        "READ_MEDIA_AUDIO",
         "android.permission.health.READ_STEPS",
         "android.permission.health.READ_SLEEP"
+      ],
+      "blockedPermissions": [
+        "android.permission.READ_MEDIA_IMAGES",
+        "android.permission.READ_MEDIA_VIDEO",
+        "android.permission.READ_MEDIA_AUDIO",
+        "android.permission.READ_MEDIA_VISUAL_USER_SELECTED",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
       "intentFilters": [
         {
@@ -62,9 +70,7 @@
           ]
         }
       ],
-      "useNextNotificationsApi": true,
-      "package": "com.iness.fitness",
-      "privacy": "https://iness.fitness/policy"
+      "package": "com.iness.fitness"
     },
     "web": {
       "bundler": "metro",
@@ -82,19 +88,31 @@
         }
       ],
       "expo-video",
-      "expo-notifications",
-      "react-native-edge-to-edge",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/logonew.png",
+          "color": "#FF231F7C"
+        }
+      ],
       [
         "expo-build-properties",
         {
           "android": {
-            "compileSdkVersion": 35,
-            "targetSdkVersion": 35,
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36,
             "minSdkVersion": 26,
-            "ndk": "27.1.12297006"
+            "ndk": "27.1.12297006",
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "extraProguardRules": "-keepattributes *Annotation*\n-dontwarn com.razorpay.**\n-keep class com.razorpay.** { *; }\n-optimizations !method/inlining/\n-keepclasseswithmembers class * {\n    public void onPayment*(...);\n}"
+          },
+          "ios": {
+            "deploymentTarget": "16.4"
           }
         }
       ],
+      "./plugins/withAndroidReleaseOptimization",
       [
         "react-native-health",
         {
@@ -103,26 +121,21 @@
           "healthUpdatePermission": "We need access to update your health data with tracking information."
         }
       ],
-      [
-        "expo-health-connect",
-        {
-          "healthConnectPermissions": [
-            {
-              "read": [
-                "Steps",
-                "SleepSession"
-              ],
-              "description": "We need access to your steps and sleep data to automatically sync your daily activity and sleep duration with your fitness tracking in the app. This allows you to see a complete picture of your health metrics without manually entering data."
-            }
-          ]
-        }
-      ],
-      "@react-native-google-signin/google-signin"
+      "react-native-health-connect",
+      "@react-native-google-signin/google-signin",
+      "@react-native-community/datetimepicker",
+      "expo-font",
+      "expo-web-browser",
+      "expo-sharing",
+      "expo-status-bar"
     ],
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
+      "googleWebClientId": "340636011235-mbdr1fc9p1260jaeh0ud7rik8qi340gu.apps.googleusercontent.com",
+      "googleIosClientId": "340636011235-env4nm4jkj7mb81g4dk5qb79hdu1l75o.apps.googleusercontent.com",
+      "googleAndroidClientId": "340636011235-0o6medtg1lb9fkua9mop87kqgp2eil9k.apps.googleusercontent.com",
       "router": {
         "origin": false
       },

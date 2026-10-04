@@ -1,0 +1,579 @@
+// components/PlanPricingSelector.tsx
+
+import React, { useEffect, useRef, useState } from "react";
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  Dimensions,
+  LayoutChangeEvent,
+  ScrollView,
+  Animated,
+  Modal,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import AnimatedSubmitButton from "@/src/modules/AnimatedSubmitButton";
+import { PlanInterface } from "@/src/interfaces/planInterface";
+import DietPlanInfoModal from "@/src/Modals/DietPlanModal";
+import { withAuthGuard } from "@/src/Hoc/WithAuthGuardButton";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
+const ProtectedAnimatedSubmitButton = withAuthGuard(AnimatedSubmitButton);
+interface Props {
+  screenWidth: number;
+
+  cartLoading: boolean;
+  currentPlan: PlanInterface;
+  selectedPlanItem: string | null;
+  setSelectedPlanItem: (id: string) => void;
+  setBottomSectionHeight: (height: number) => void;
+  addingIntoToCart: (type: string) => void;
+  theme: any;
+  bottomSectionHeight: any;
+}
+
+const PlansInfo: React.FC<Props> = ({
+  screenWidth,
+
+  cartLoading,
+  currentPlan,
+  selectedPlanItem,
+  setSelectedPlanItem,
+  setBottomSectionHeight,
+  addingIntoToCart,
+  theme: themeProp,
+  bottomSectionHeight,
+}) => {
+  const theme = useGlobalTheme();
+  const { isDark } = useTheme();
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  const translateY = useRef(new Animated.Value(100)).current;
+  useEffect(() => {
+    Animated.timing(translateY, {
+      toValue: 0,
+      duration: 400,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  if (!currentPlan) return null;
+
+  return (
+    <>
+      {/* Main Scrollable Section */}
+      <View style={{ flex: 1, backgroundColor: "transparent", paddingHorizontal: 16 }}>
+        <ScrollView
+          contentContainerStyle={{
+            paddingTop: 20,
+            paddingBottom: bottomSectionHeight + 20, // 20 for safe spacing
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Overview Card */}
+          <View
+            style={{
+              backgroundColor: isDark ? theme.colors.background : theme.colors.background,
+              borderRadius: 20,
+              padding: 20,
+              marginBottom: 16,
+              ...(isDark ? {} : {
+                shadowColor: theme.colors.dark,
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }),
+              borderWidth: 1,
+              borderColor: theme.colors.border,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 12,
+              }}
+            >
+              <View
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  backgroundColor: theme.colors.backgroundCardLight,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 12,
+                }}
+              >
+                <Ionicons name="information-circle" size={22} color={theme.colors.secondPrimary} />
+              </View>
+              <Text
+                style={{
+                  fontSize: theme.fontSizes.large,
+                  fontWeight: theme.fontWeights.bold as "700",
+                  color: isDark ? theme.colors.textWhite : theme.colors.dark,
+                }}
+              >
+                Overview
+              </Text>
+            </View>
+            <Text
+              style={{
+                fontSize: theme.fontSizes.regularSmall,
+                color: isDark ? theme.colors.textWhite : theme.colors.textSecondary,
+                lineHeight: 22,
+              }}
+            >
+              {currentPlan?.planType.desc}
+            </Text>
+          </View>
+
+          {/* What it provides Card */}
+          <View
+            style={{
+              backgroundColor: isDark ? theme.colors.background : theme.colors.background,
+              borderRadius: 20,
+              padding: 20,
+              marginBottom: 16,
+              ...(isDark ? {} : {
+                shadowColor: theme.colors.dark,
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.05,
+                shadowRadius: 4,
+                elevation: 2,
+              }),
+              borderWidth: 1,
+              borderColor: theme.colors.border,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                marginBottom: 16,
+              }}
+            >
+              <View
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 10,
+                  backgroundColor: theme.colors.backgroundCardLight,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginRight: 12,
+                }}
+              >
+                <Ionicons name="checkmark-circle" size={22} color={theme.colors.secondPrimary} />
+              </View>
+              <Text
+                style={{
+                  fontSize: theme.fontSizes.medium,
+                  fontWeight: theme.fontWeights.bold as "700",
+                  color: isDark ? theme.colors.textWhite : theme.colors.dark,
+                }}
+              >
+                What it provides
+              </Text>
+            </View>
+            {currentPlan?.descItems.map((item, idx) => (
+              <View
+                key={idx}
+                style={{
+                  flexDirection: "row",
+                  alignItems: "flex-start",
+                  marginBottom: 14,
+                  marginLeft: 6,
+                }}
+              >
+                <View
+                  style={{
+                    width: 24,
+                    height: 24,
+                    borderRadius: 8,
+                    backgroundColor: theme.colors.backgroundCardLight,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 12,
+                    marginTop: 1,
+                  }}
+                >
+                  <Ionicons
+                    name="checkmark"
+                    size={18}
+                    color={theme.colors.secondPrimary}
+                  />
+                </View>
+                <Text
+                  style={{
+                    fontSize: theme.fontSizes.small,
+                    color: isDark ? theme.colors.textWhite : theme.colors.text,
+                    flex: 1,
+                    lineHeight: 22,
+                    fontWeight: theme.fontWeights.medium as "500",
+                  }}
+                >
+                  {item}
+                </Text>
+              </View>
+            ))}
+          </View>
+          {currentPlan?.dietPlanDetails ? (
+            <DietPlanInfoModal dietPlan={currentPlan.dietPlanDetails} />
+          ) : null}
+          {currentPlan?.otherImages?.length > 0 && (
+            <View
+              style={{
+                backgroundColor: isDark ? theme.colors.background : theme.colors.background,
+                borderRadius: 20,
+                padding: 20,
+                marginBottom: 16,
+                ...(isDark ? {} : {
+                  shadowColor: theme.colors.dark,
+                  shadowOffset: { width: 0, height: 1 },
+                  shadowOpacity: 0.05,
+                  shadowRadius: 4,
+                  elevation: 2,
+                }),
+                borderWidth: 1,
+                borderColor: theme.colors.border,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginBottom: 16,
+                }}
+              >
+                <View
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 10,
+                    backgroundColor: theme.colors.backgroundCardLight,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 12,
+                  }}
+                >
+                  <Ionicons name="images" size={22} color={theme.colors.secondPrimary} />
+                </View>
+                <Text
+                  style={{
+                    fontSize: theme.fontSizes.medium,
+                    fontWeight: theme.fontWeights.bold as "700",
+                    color: isDark ? theme.colors.textWhite : theme.colors.dark,
+                  }}
+                >
+                  Plan Gallery
+                </Text>
+              </View>
+
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ paddingVertical: 4 }}
+              >
+                {currentPlan.otherImages.map(
+                  (imgUrl: string, index: number) => (
+                    <TouchableOpacity
+                      key={index}
+                      onPress={() => setSelectedImage(imgUrl)}
+                      style={{
+                        marginRight: 12,
+                        borderRadius: 12,
+                        overflow: "hidden",
+                        backgroundColor: theme.colors.backgroundSecondary,
+                        shadowColor: theme.colors.dark,
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.1,
+                        shadowRadius: 4,
+                        elevation: 2,
+                      }}
+                    >
+                      <Image
+                        source={{ uri: imgUrl }}
+                        style={{
+                          width: 140,
+                          height: 100,
+                          borderRadius: 12,
+                        }}
+                        resizeMode="cover"
+                      />
+                    </TouchableOpacity>
+                  )
+                )}
+              </ScrollView>
+            </View>
+          )}
+        </ScrollView>
+      </View>
+
+      {/* Modal to view full image */}
+      <Modal
+        visible={!!selectedImage}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelectedImage(null)}
+      >
+        <View
+          style={{
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.85)",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <TouchableOpacity
+            style={{
+              position: "absolute",
+              top: 40,
+              right: 20,
+              zIndex: 2,
+            }}
+            onPress={() => setSelectedImage(null)}
+          >
+            <Ionicons name="close" size={30} color={theme.colors.textWhite} />
+          </TouchableOpacity>
+          {selectedImage ? (
+            <Image
+              source={{ uri: selectedImage }}
+              style={{
+                width: "90%",
+                height: "70%",
+                resizeMode: "contain",
+                borderRadius: 12,
+              }}
+            />
+          ) : null}
+        </View>
+      </Modal>
+
+      {/* Fixed Bottom Section - Full Width Gradient */}
+      <Animated.View
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          width: screenWidth,
+          transform: [{ translateY }],
+        }}
+        onLayout={(event) => {
+          setBottomSectionHeight(event.nativeEvent.layout.height);
+        }}
+      >
+        <View
+          style={{
+            backgroundColor: theme.colors.background,
+            paddingTop: 12,
+            paddingLeft: Math.min(20, screenWidth * 0.05),
+            paddingRight: Math.min(20, screenWidth * 0.05),
+            paddingBottom: 12,
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            shadowColor: theme.colors.black,
+            shadowOffset: { width: 0, height: -2 },
+            shadowOpacity: 0.1,
+            shadowRadius: 8,
+            elevation: 8,
+            borderTopWidth: 1,
+            borderLeftWidth: 1,
+            borderRightWidth: 1,
+            borderColor: theme.colors.border,
+          }}
+        >
+          {/* Pricing Cards */}
+          <View
+            style={{
+              flexDirection: "row",
+              flexWrap: "wrap",
+              justifyContent:
+                currentPlan?.planItems.length === 1
+                  ? "center"
+                  : currentPlan?.planItems.length === 2
+                    ? "space-between"
+                    : "flex-start",
+              gap: 10,
+              marginBottom: 12,
+            }}
+          >
+            {currentPlan?.planItems.map((plan, idx) => {
+              const isSelected = selectedPlanItem === plan._id;
+              const isSingle = currentPlan.planItems.length === 1;
+              const isMultiRow = currentPlan.planItems.length > 2;
+              const isOddCount = currentPlan.planItems.length % 2 === 1;
+              const isLastOddCard =
+                isMultiRow && isOddCount && idx === currentPlan.planItems.length - 1;
+              const cardWidth = isSingle 
+                ? Math.min(180, screenWidth * 0.45)
+                : (screenWidth - Math.min(40, screenWidth * 0.1) * 2 - 10) / 2;
+
+              return (
+                <View
+                  key={idx}
+                  style={{
+                    width: isLastOddCard ? "100%" : cardWidth,
+                    alignItems: isLastOddCard ? "center" : "stretch",
+                    marginBottom: isMultiRow ? 2 : 0,
+                  }}
+                >
+                  <TouchableOpacity
+                    onPress={() => setSelectedPlanItem(plan._id)}
+                    activeOpacity={0.7}
+                    style={{
+                      width: cardWidth,
+                      flex: 0,
+                      backgroundColor: isSelected ? theme.colors.backgroundCardLight : theme.colors.background,
+                      borderWidth: isSelected ? 2 : 1.5,
+                      borderColor: isSelected ? theme.colors.secondPrimary : theme.colors.divider,
+                      borderRadius: 14,
+                      padding: 10,
+                      paddingVertical: 12,
+                      shadowColor: isSelected ? theme.colors.secondPrimary : theme.colors.dark,
+                      shadowOffset: { width: 0, height: 2 },
+                      shadowOpacity: isSelected ? 0.15 : 0.08,
+                      shadowRadius: isSelected ? 6 : 4,
+                      elevation: isSelected ? 4 : 2,
+                      transform: [{ scale: isSelected ? 1.02 : 1 }],
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        marginBottom: 6,
+                      }}
+                    >
+                      <View style={{ flex: 1 }}>
+                        <Text
+                          style={{
+                            fontSize: theme.fontSizes.small,
+                            fontWeight: theme.fontWeights.bold as "700",
+                            color: isDark ? theme.colors.textWhite : theme.colors.dark,
+                            marginBottom: 1,
+                          }}
+                        >
+                          {plan.duration} {plan.durationType}
+                        </Text>
+                        {plan.sessionCount != null && (
+                          <Text
+                            style={{
+                              fontSize: theme.fontSizes.small,
+                              color: theme.colors.textSecondary,
+                              fontWeight: theme.fontWeights.regular as "400",
+                            }}
+                          >
+                            {plan.sessionCount} sessions
+                          </Text>
+                        )}
+                      </View>
+                      <View
+                        style={{
+                          width: 20,
+                          height: 20,
+                          borderRadius: 10,
+                          backgroundColor: isSelected ? theme.colors.secondPrimary : theme.colors.background,
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderWidth: 2,
+                          borderColor: theme.colors.secondPrimary,
+                        }}
+                      >
+                        {isSelected && (
+                          <Ionicons name="checkmark" size={12} color={theme.colors.textWhite} />
+                        )}
+                      </View>
+                    </View>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "baseline",
+                        marginBottom: 6,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: theme.fontSizes.regularSmall,
+                          fontWeight: theme.fontWeights.bold as "700",
+                          color: isDark ? theme.colors.textWhite : theme.colors.secondPrimary,
+                          marginRight: 4,
+                        }}
+                      >
+                        ₹{plan.price}
+                      </Text>
+                    </View>
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        backgroundColor: isSelected ? theme.colors.background : theme.colors.backgroundSecondary,
+                        paddingHorizontal: 6,
+                        paddingVertical: 3,
+                        borderRadius: 6,
+                        alignSelf: "flex-start",
+                      }}
+                    >
+                      <Ionicons
+                        name={plan.isOnline ? "videocam" : "location"}
+                        size={15}
+                        color={isSelected ? theme.colors.secondPrimary : theme.colors.textSecondary}
+                        style={{ marginRight: 3 }}
+                      />
+                      <Text
+                        style={{
+                          fontSize: theme.fontSizes.small,
+                          color: isSelected ? theme.colors.secondPrimary : theme.colors.textSecondary,
+                          fontWeight: theme.fontWeights.medium as "500",
+                        }}
+                      >
+                        {plan.isOnline ? "Online" : "Offline"}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              );
+            })}
+          </View>
+
+          <TouchableOpacity
+            onPress={() => {
+              addingIntoToCart("plan");
+            }}
+            disabled={cartLoading}
+            style={{
+              backgroundColor: theme.colors.success,
+              borderRadius: 30,
+              paddingVertical: 14,
+              alignItems: "center",
+              flexDirection: "row",
+              justifyContent: "center",
+              shadowColor: theme.colors.success,
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 5,
+            }}
+          >
+            <Ionicons name="cart" size={22} color={theme.colors.textWhite} />
+            <Text
+              style={{
+                color: theme.colors.textWhite,
+                fontSize: theme.fontSizes.regular,
+                fontWeight: theme.fontWeights.bold as "700",
+                marginLeft: 8,
+              }}
+            >
+              {cartLoading ? "Adding..." : "Add to Cart"}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </Animated.View>
+    </>
+  );
+};
+
+export default PlansInfo;

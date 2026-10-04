@@ -14,6 +14,7 @@ interface CacheConfig {
 
 class APICache {
   private inFlightRequests: Map<string, Promise<any>> = new Map();
+  private memoryCache: Map<string, CacheEntry<any>> = new Map();
 
   /**
    * Get cached data or fetch fresh data
@@ -31,7 +32,6 @@ class APICache {
       // Check if request is already in flight (deduplication)
       const inFlightRequest = this.inFlightRequests.get(cacheKey);
       if (inFlightRequest) {
-        console.log(`🔄 [Cache] Deduplicating request for: ${cacheKey}`);
         return await inFlightRequest;
       }
 
@@ -39,28 +39,24 @@ class APICache {
       const cached = await this.getFromCache<T>(cacheKey);
 
       if (cached) {
-        const age = now - cached.timestamp;
         const isExpired = now > cached.expiresAt;
 
         if (!isExpired) {
           // Cache is fresh
-          console.log(`✅ [Cache] Fresh hit for: ${cacheKey} (age: ${Math.round(age / 1000)}s)`);
           return cached.data;
         }
 
         if (staleWhileRevalidate) {
           // Return stale data immediately, fetch fresh in background
-          console.log(`⚡ [Cache] Stale hit for: ${cacheKey}, returning stale + revalidating`);
           this.revalidateInBackground(cacheKey, fetchFn, config);
           return cached.data;
         }
       }
 
       // No cache or cache expired and no stale-while-revalidate
-      console.log(`❌ [Cache] Miss for: ${cacheKey}, fetching fresh data`);
       return await this.fetchAndCache(cacheKey, fetchFn, config);
     } catch (error) {
-      console.error(`[Cache] Error for ${cacheKey}:`, error);
+      console.error("Cache request failed");
       throw error;
     }
   }
@@ -102,11 +98,8 @@ class APICache {
   ): void {
     // Don't await, let it run in background
     this.fetchAndCache(cacheKey, fetchFn, config)
-      .then(() => {
-        console.log(`🔄 [Cache] Background revalidation completed for: ${cacheKey}`);
-      })
-      .catch((error) => {
-        console.error(`[Cache] Background revalidation failed for ${cacheKey}:`, error);
+      .catch(() => {
+        console.error("Cache background revalidation failed");
       });
   }
 
@@ -115,13 +108,19 @@ class APICache {
    */
   private async getFromCache<T>(cacheKey: string): Promise<CacheEntry<T> | null> {
     try {
+      const memoryEntry = this.memoryCache.get(cacheKey) as
+        | CacheEntry<T>
+        | undefined;
+      if (memoryEntry) return memoryEntry;
+
       const cached = await AsyncStorage.getItem(`cache:${cacheKey}`);
       if (!cached) return null;
 
       const entry: CacheEntry<T> = JSON.parse(cached);
+      this.memoryCache.set(cacheKey, entry);
       return entry;
-    } catch (error) {
-      console.error(`[Cache] Error reading cache for ${cacheKey}:`, error);
+    } catch {
+      console.error("Cache read failed");
       return null;
     }
   }
@@ -135,16 +134,27 @@ class APICache {
     ttl: number
   ): Promise<void> {
     try {
+      if (data === undefined || data === null || (Array.isArray(data) && data.length === 0)) {
+        return;
+      }
+
       const entry: CacheEntry<T> = {
         data,
         timestamp: Date.now(),
         expiresAt: Date.now() + ttl,
       };
 
+      if (this.memoryCache.size >= 50) {
+        const oldestKey = this.memoryCache.keys().next().value;
+        if (oldestKey) {
+          this.memoryCache.delete(oldestKey);
+        }
+      }
+
+      this.memoryCache.set(cacheKey, entry);
       await AsyncStorage.setItem(`cache:${cacheKey}`, JSON.stringify(entry));
-      console.log(`💾 [Cache] Saved: ${cacheKey} (TTL: ${Math.round(ttl / 1000)}s)`);
-    } catch (error) {
-      console.error(`[Cache] Error saving cache for ${cacheKey}:`, error);
+    } catch {
+      console.error("Cache save failed");
     }
   }
 
@@ -153,10 +163,10 @@ class APICache {
    */
   async clear(cacheKey: string): Promise<void> {
     try {
+      this.memoryCache.delete(cacheKey);
       await AsyncStorage.removeItem(`cache:${cacheKey}`);
-      console.log(`🗑️ [Cache] Cleared: ${cacheKey}`);
-    } catch (error) {
-      console.error(`[Cache] Error clearing cache for ${cacheKey}:`, error);
+    } catch {
+      console.error("Cache clear failed");
     }
   }
 
@@ -165,12 +175,12 @@ class APICache {
    */
   async clearAll(): Promise<void> {
     try {
+      this.memoryCache.clear();
       const keys = await AsyncStorage.getAllKeys();
       const cacheKeys = keys.filter(key => key.startsWith('cache:'));
       await AsyncStorage.multiRemove(cacheKeys);
-      console.log(`🗑️ [Cache] Cleared all cache entries (${cacheKeys.length} items)`);
-    } catch (error) {
-      console.error('[Cache] Error clearing all cache:', error);
+    } catch {
+      console.error('Cache clear-all failed');
     }
   }
 
@@ -194,8 +204,8 @@ class APICache {
         totalEntries: cacheKeys.length,
         totalSize,
       };
-    } catch (error) {
-      console.error('[Cache] Error getting cache stats:', error);
+    } catch {
+      console.error('Cache statistics lookup failed');
       return { totalEntries: 0, totalSize: 0 };
     }
   }

@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { Category } from "@/app/interfaces/ecommerceInterface";
-import { Product } from "@/app/interfaces/ecommerceInterface";
+import { Category } from "@/src/interfaces/ecommerceInterface";
+import { Product } from "@/src/interfaces/ecommerceInterface";
 // Define initial state
 interface CategoryProductState {
   categories: Category[];

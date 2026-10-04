@@ -1,22 +1,23 @@
+import { safeRouter } from "@/src/utils/safeRouter";
 import React, { useEffect, useMemo, useState } from "react";
 import { View, Text, Image, TouchableOpacity, Linking, ImageBackground, Alert, Platform } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
 import { useDispatch, useSelector } from "react-redux";
 import { ActivityIndicator } from "react-native-paper";
-import SmallHeader from "@/app/modules/SmallHeader";
-import BackHeader from "@/app/modules/BackHeader";
-import WorkoutSummaryCard from "@/app/Components/ActivePlans.tsx/ActivePlanHeaderAddOn";
+import SmallHeader from "@/src/modules/SmallHeader";
+import BackHeader from "@/src/modules/BackHeader";
+import WorkoutSummaryCard from "@/src/Components/ActivePlans.tsx/ActivePlanHeaderAddOn";
 import { MaterialIcons, FontAwesome5, FontAwesome, MaterialCommunityIcons, Ionicons } from "@expo/vector-icons";
-import CustomSnackbar from "@/app/modules/Snackbar";
-import { sessionService } from "@/app/services/sessionService";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+import CustomSnackbar from "@/src/modules/Snackbar";
+import { sessionService } from "@/src/services/sessionService";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 import { RootState } from "@/store";
-import { ActivePlans } from "@/app/interfaces/planInterface";
-import { Session } from "@/app/interfaces/sessionInterface";
-import SessionDetailsTabs from "@/app/Components/ActivePlans.tsx/SessionDetails";
+import { ActivePlans } from "@/src/interfaces/planInterface";
+import { Session } from "@/src/interfaces/sessionInterface";
+import SessionDetailsTabs from "@/src/Components/ActivePlans.tsx/SessionDetails";
 import { SafeAreaView } from "react-native-safe-area-context";
-import TrainerShimmer from "@/app/modules/Shimmer/TrainerShimmer";
-import * as FileSystem from "expo-file-system";
+import TrainerShimmer from "@/src/modules/Shimmer/TrainerShimmer";
+import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 
 const FullPlanDetails = () => {
@@ -735,7 +736,7 @@ const FullPlanDetails = () => {
             >
               <TouchableOpacity
                 onPress={() =>
-                  router.push({
+                  safeRouter.navigate({
                     pathname: "/dashboard/supportchat",
                     params: { planTitle: title, requestType: type === "plan" ? "session" : "service" },
                   })
@@ -1331,7 +1332,7 @@ const FullPlanDetails = () => {
               >
                 <TouchableOpacity
                   onPress={() =>
-                    router.push({
+                    safeRouter.navigate({
                       pathname: "/dashboard/supportchat",
                       params: { planTitle: title, requestType: type === "plan" ? "session" : "service" },
                     })

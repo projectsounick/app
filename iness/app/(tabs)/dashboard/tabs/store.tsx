@@ -1,24 +1,19 @@
-import React, { useMemo, useRef } from "react";
-import {
-  View,
- 
-  FlatList,
-} from "react-native";
+import React, { useCallback, useMemo } from "react";
 
 
-import {
-  SafeAreaFrameContext,
-  SafeAreaView,
-} from "react-native-safe-area-context";
+import { SafeAreaView } from "react-native-safe-area-context";
 import useFetchMultipleStoreDataHook from "@/hooks/useMultipleDataStoreHook";
 import { SliceKey } from "@/sliceRegistery";
-import { ecommerceService } from "@/app/services/ecom.service";
+import { ecommerceService } from "@/src/services/ecom.service";
 
-import StoreShimmer from "@/app/modules/Shimmer/StoreShimmer";
-import CategoryList from "@/app/Components/ecom/CategoryList";
-import GroupedProductDisplay from "@/app/Components/ecom/ProductList";
-import SmallHeader from "@/app/modules/SmallHeader";
-import { useGlobalTheme } from "@/app/Theme/ThemeContext";
+import StoreShimmer from "@/src/modules/Shimmer/StoreShimmer";
+import CategoryList from "@/src/Components/ecom/CategoryList";
+import GroupedProductDisplay from "@/src/Components/ecom/ProductList";
+import SmallHeader from "@/src/modules/SmallHeader";
+import { useGlobalTheme } from "@/src/Theme/ThemeContext";
+import CustomSnackbar from "@/src/modules/Snackbar";
+import { communityService } from "@/src/services/community.service";
+import { useFocusEffect } from "expo-router";
 
 //// Main functional component for the equipscreen ------------------------/
 
@@ -43,13 +38,16 @@ export default function EquipScreen() {
     ],
     []
   );
-  const { loading, setSnackbarMessage, setSnackbarVisible } =
+  const {
+    loading,
+    snackbarVisible,
+    snackbarMessage,
+    setSnackbarVisible,
+  } =
     useFetchMultipleStoreDataHook(configs, true, true); // Enable priority loading with cache
-  const components = [
-    { key: "CategoryList", component: <CategoryList /> },
-    { key: "GroupedProductDisplay", component: <GroupedProductDisplay /> },
-  ];
-
+  useFocusEffect(useCallback(() => {
+    void communityService.trackEngagement({ targetType: "store", kind: "view", source: "store_home" }).catch(() => undefined);
+  }, []));
   return (
     <SafeAreaView
       style={{ flex: 1, backgroundColor: theme.colors.background }}
@@ -60,18 +58,14 @@ export default function EquipScreen() {
       {loading ? (
         <StoreShimmer />
       ) : (
-        <FlatList
-          data={components}
-          keyExtractor={(item) => item.key}
-          renderItem={({ item }) => (
-            <View style={{ paddingHorizontal: 16 }}>
-              {item.component}
-            </View>
-          )}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 100 }}
-        />
+        <GroupedProductDisplay headerComponent={<CategoryList />} />
       )}
+      <CustomSnackbar
+        visible={snackbarVisible}
+        message={snackbarMessage}
+        onDismiss={() => setSnackbarVisible(false)}
+        bgColor={theme.colors.backgroundCard}
+      />
     </SafeAreaView>
   );
 }

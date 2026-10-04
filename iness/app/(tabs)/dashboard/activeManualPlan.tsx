@@ -14,20 +14,20 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useSelector } from "react-redux";
-import { ResizeMode, Video } from "expo-av";
+import { ResizeMode, Video } from "@/src/modules/AppVideo";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { SafeAreaView } from "react-native-safe-area-context";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import { RootState } from "@/store";
 import {
   WorkoutPlanInterface,
   EachexerciseItem,
-} from "@/app/interfaces/activeManualPlan";
-import NormalHeader from "@/app/modules/NormalHeader";
-import ImageViewerModal from "@/app/Modals/ImageViewerModal";
-import VideoViewerModal from "@/app/Modals/VideoViewerModal";
-import { useGlobalTheme, useTheme } from "@/app/Theme/ThemeContext";
+} from "@/src/interfaces/activeManualPlan";
+import NormalHeader from "@/src/modules/NormalHeader";
+import ImageViewerModal from "@/src/Modals/ImageViewerModal";
+import VideoViewerModal from "@/src/Modals/VideoViewerModal";
+import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 
 const dayConfigs = [
   { key: "sun", short: "Sun", full: "Sunday" },
