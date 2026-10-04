@@ -1,5 +1,6 @@
 # Ignore android completely
 iness/android
+iness/*.aab
 
 
 
