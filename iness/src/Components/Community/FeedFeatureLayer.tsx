@@ -4,6 +4,7 @@ import {
   ActivityIndicator,
   Alert,
   Animated,
+  Easing,
   FlatList,
   Image,
   Modal,
@@ -16,6 +17,7 @@ import {
   View,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as Haptics from "expo-haptics";
 
 import { useGlobalTheme } from "@/src/Theme/ThemeContext";
 import { communityService } from "@/src/services/community.service";
@@ -25,7 +27,7 @@ import { uploadToAzureFromExpo } from "@/utils/azureUtils";
 import { ResizeMode, Video } from "@/src/modules/AppVideo";
 import { FeedExtrasModal, StoryViewersModal } from "./FeedExtrasModal";
 
-export type FeedFilter = "explore" | "following" | "company" | "saved";
+export type FeedFilter = "explore" | "following" | "company" | "saved" | "workouts";
 export type StoryAudience = "public" | "close_friends";
 
 const STORY_STICKERS = [
@@ -123,6 +125,71 @@ export function FeedFeatureHeader({
   const [viewersVisible, setViewersVisible] = useState(false);
   const [viewersStoryId, setViewersStoryId] = useState("");
   const [storyIndex, setStoryIndex] = useState(0);
+  const [justSharedStory, setJustSharedStory] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const storySpinAnim = useRef(new Animated.Value(0)).current;
+  const storySuccessScale = useRef(new Animated.Value(1)).current;
+  const toastSlideAnim = useRef(new Animated.Value(-80)).current;
+
+  // Spin animation when story is uploading
+  useEffect(() => {
+    if (submittingStory) {
+      storySpinAnim.setValue(0);
+      const loop = Animated.loop(
+        Animated.timing(storySpinAnim, {
+          toValue: 1,
+          duration: 1100,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        })
+      );
+      loop.start();
+      return () => loop.stop();
+    } else {
+      storySpinAnim.setValue(0);
+    }
+  }, [submittingStory, storySpinAnim]);
+
+  const triggerStorySuccessAnimation = useCallback(() => {
+    try {
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch {}
+    setJustSharedStory(true);
+    setToastMessage("✨ Story shared with your community!");
+
+    // Scale pop animation
+    Animated.sequence([
+      Animated.spring(storySuccessScale, {
+        toValue: 1.25,
+        friction: 3,
+        useNativeDriver: true,
+      }),
+      Animated.spring(storySuccessScale, {
+        toValue: 1,
+        friction: 4,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Slide down toast
+    Animated.sequence([
+      Animated.timing(toastSlideAnim, {
+        toValue: 10,
+        duration: 350,
+        easing: Easing.out(Easing.back(1.5)),
+        useNativeDriver: true,
+      }),
+      Animated.delay(2600),
+      Animated.timing(toastSlideAnim, {
+        toValue: -80,
+        duration: 300,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setToastMessage(null);
+      setJustSharedStory(false);
+    });
+  }, [storySuccessScale, toastSlideAnim]);
 
   const loadHub = useCallback(async () => {
     if (!communityId) return;
@@ -192,7 +259,7 @@ export function FeedFeatureHeader({
       setStoryMedia(null);
       setStoryModal(false);
       await loadHub();
-      Alert.alert("Story Shared", "Your story is now visible to community members for 24 hours.");
+      triggerStorySuccessAnimation();
     } catch (error: any) {
       Alert.alert("Story not published", error?.message || "Please try again.");
     } finally {
@@ -380,14 +447,68 @@ export function FeedFeatureHeader({
       <View style={styles.feedTools}>
         <Text style={styles.feedToolsTitle}>Community</Text>
         <View style={styles.feedToolActions}>
-          <TouchableOpacity style={styles.feedToolButton} onPress={() => openFeedCenter("analytics")}>
-            <Ionicons name="analytics-outline" size={19} color={theme.colors.textSecondary} />
+          <TouchableOpacity
+            style={[
+              styles.savedPostsButton,
+              selectedFilter === "workouts" && styles.savedPostsButtonActive,
+            ]}
+            onPress={() => onFilterChange(selectedFilter === "workouts" ? "explore" : "workouts")}
+            activeOpacity={0.8}
+            accessibilityLabel="Workout posts"
+          >
+            <Ionicons
+              name={selectedFilter === "workouts" ? "barbell" : "barbell-outline"}
+              size={16}
+              color={selectedFilter === "workouts" ? "#FFFFFF" : theme.colors.secondPrimary}
+            />
+            <Text
+              style={[
+                styles.savedPostsButtonText,
+                selectedFilter === "workouts" && styles.savedPostsButtonTextActive,
+              ]}
+            >
+              Workouts
+            </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.feedToolButton} onPress={() => openFeedCenter("activity")}>
-            <Ionicons name="notifications-outline" size={19} color={theme.colors.textSecondary} />
+          <TouchableOpacity
+            style={[
+              styles.savedPostsButton,
+              selectedFilter === "saved" && styles.savedPostsButtonActive,
+            ]}
+            onPress={() => onFilterChange(selectedFilter === "saved" ? "explore" : "saved")}
+            activeOpacity={0.8}
+            accessibilityLabel="Saved posts"
+          >
+            <Ionicons
+              name={selectedFilter === "saved" ? "bookmark" : "bookmark-outline"}
+              size={16}
+              color={selectedFilter === "saved" ? "#FFFFFF" : theme.colors.secondPrimary}
+            />
+            <Text
+              style={[
+                styles.savedPostsButtonText,
+                selectedFilter === "saved" && styles.savedPostsButtonTextActive,
+              ]}
+            >
+              Saved
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
+      {toastMessage && (
+        <Animated.View
+          style={[
+            styles.storyToastContainer,
+            { transform: [{ translateY: toastSlideAnim }] },
+          ]}
+          pointerEvents="none"
+        >
+          <View style={styles.storyToastContent}>
+            <Ionicons name="sparkles" size={16} color="#FFD700" />
+            <Text style={styles.storyToastText}>{toastMessage}</Text>
+          </View>
+        </Animated.View>
+      )}
       <FlatList
         horizontal
         data={hub.stories || []}
@@ -398,6 +519,7 @@ export function FeedFeatureHeader({
           <View style={styles.storyItem}>
             <TouchableOpacity
               activeOpacity={0.8}
+              disabled={submittingStory}
               onPress={() => {
                 if (hasMyStory) {
                   void openStory(myStories[0]);
@@ -406,7 +528,29 @@ export function FeedFeatureHeader({
                 }
               }}
             >
-              <View style={[styles.storyRing, hasMyStory ? styles.storyRingActive : styles.storyRingMuted]}>
+              <Animated.View
+                style={[
+                  styles.storyRing,
+                  hasMyStory ? styles.storyRingActive : styles.storyRingMuted,
+                  submittingStory && styles.storyRingUploading,
+                  justSharedStory && styles.storyRingSuccess,
+                  {
+                    transform: [
+                      { scale: storySuccessScale },
+                      ...(submittingStory
+                        ? [
+                            {
+                              rotate: storySpinAnim.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: ["0deg", "360deg"],
+                              }),
+                            },
+                          ]
+                        : []),
+                    ],
+                  },
+                ]}
+              >
                 <View style={styles.storyAvatarInner}>
                   {currentUser?.profilePic ? (
                     <Image source={{ uri: currentUser.profilePic }} style={styles.storyAvatarImage} />
@@ -416,16 +560,29 @@ export function FeedFeatureHeader({
                     </Text>
                   )}
                 </View>
-              </View>
-              <TouchableOpacity
-                style={styles.addStoryBadge}
-                activeOpacity={0.85}
-                onPress={() => void pickStoryMedia()}
-              >
-                <Ionicons name="add" size={14} color="#FFF" />
-              </TouchableOpacity>
+              </Animated.View>
+
+              {submittingStory ? (
+                <View style={styles.storyUploadingBadge}>
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                </View>
+              ) : justSharedStory ? (
+                <View style={styles.storySuccessBadge}>
+                  <Ionicons name="checkmark" size={13} color="#FFFFFF" />
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={styles.addStoryBadge}
+                  activeOpacity={0.85}
+                  onPress={() => void pickStoryMedia()}
+                >
+                  <Ionicons name="add" size={14} color="#FFF" />
+                </TouchableOpacity>
+              )}
             </TouchableOpacity>
-            <Text numberOfLines={1} style={styles.storyName}>Your story</Text>
+            <Text numberOfLines={1} style={styles.storyName}>
+              {submittingStory ? "Posting…" : justSharedStory ? "Posted! ✓" : "Your story"}
+            </Text>
           </View>
         )}
         ListEmptyComponent={loading ? <ActivityIndicator style={styles.hubLoader} color={theme.colors.secondPrimary} /> : null}
@@ -538,6 +695,30 @@ export function FeedFeatureHeader({
         {searchValue ? <TouchableOpacity onPress={() => onSearchChange?.("")}><Ionicons name="close-circle" size={18} color={theme.colors.textMuted} /></TouchableOpacity> : null}
       </View>
 
+      {selectedFilter === "saved" || selectedFilter === "workouts" ? (
+        <View style={styles.savedFilterBanner}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+            <Ionicons
+              name={selectedFilter === "saved" ? "bookmark" : "barbell"}
+              size={15}
+              color={theme.colors.secondPrimary}
+            />
+            <Text style={styles.savedFilterBannerText}>
+              {selectedFilter === "saved"
+                ? "Showing Saved Posts"
+                : "Showing Workout & Progress Posts"}
+            </Text>
+          </View>
+          <TouchableOpacity
+            onPress={() => onFilterChange("explore")}
+            style={styles.savedFilterBannerClose}
+          >
+            <Text style={styles.savedFilterBannerCloseText}>Show all</Text>
+            <Ionicons name="close-circle" size={16} color={theme.colors.textMuted} />
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
       {activeChallenge ? (
         <TouchableOpacity
           style={styles.challengeCard}
@@ -611,60 +792,7 @@ export function FeedFeatureHeader({
         </ScrollView>
       </View>
 
-      {/* Feed Filters */}
-      <FlatList
-        horizontal
-        data={[
-          ["explore", "Explore", "compass-outline"],
-          ["following", "Following", "people-outline"],
-          ["company", "Company", "business-outline"],
-          ["saved", "Saved", "bookmark-outline"],
-        ]}
-        keyExtractor={(item) => item[0]}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.filterRail}
-        renderItem={({ item }) => {
-          const active = selectedFilter === item[0];
-          return (
-            <TouchableOpacity style={[styles.filterChip, active && styles.filterChipActive]} onPress={() => onFilterChange(item[0] as FeedFilter)}>
-              <Ionicons name={item[2] as any} size={15} color={active ? theme.colors.dark : theme.colors.textSecondary} />
-              <Text style={[styles.filterText, active && styles.filterTextActive]}>{item[1]}</Text>
-            </TouchableOpacity>
-          );
-        }}
-      />
 
-      {/* Feed Sorting Controls: Latest, Trending / Hot, Top Streaks */}
-      <View style={styles.sortRailContainer}>
-        <View style={styles.sortRail}>
-          {[
-            { id: "latest", label: "Latest", icon: "time-outline" },
-            { id: "trending", label: "Trending 🔥", icon: "flame-outline" },
-            { id: "top_streaks", label: "Top Streaks ⚡", icon: "trophy-outline" },
-          ].map((item) => {
-            const active = (selectedSort || "latest") === item.id;
-            return (
-              <TouchableOpacity
-                key={item.id}
-                activeOpacity={0.8}
-                style={[styles.sortChip, active && styles.sortChipActive]}
-                onPress={() => onSortChange?.(item.id as any)}
-              >
-                <Ionicons
-                  name={item.icon as any}
-                  size={13}
-                  color={active ? "#FFFFFF" : theme.colors.textSecondary}
-                />
-                <Text
-                  style={[styles.sortText, active && styles.sortTextActive]}
-                >
-                  {item.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </View>
 
       <Modal transparent visible={storyModal} animationType="fade" onRequestClose={() => setStoryModal(false)}>
         <View style={styles.modalOverlay}>
@@ -1092,9 +1220,68 @@ const makeStyles = (theme: any) => StyleSheet.create({
   feedToolsTitle: { color: theme.colors.text, fontFamily: theme.fonts.bold, fontSize: 19 },
   feedToolActions: { flexDirection: "row", gap: 8 },
   feedToolButton: { alignItems: "center", backgroundColor: theme.colors.backgroundSecondary, borderColor: theme.colors.border, borderRadius: 18, borderWidth: 1, height: 36, justifyContent: "center", width: 36 },
+  savedPostsButton: {
+    alignItems: "center",
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderColor: theme.colors.border,
+    borderRadius: 18,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: 6,
+    height: 36,
+    justifyContent: "center",
+    paddingHorizontal: 12,
+  },
+  savedPostsButtonActive: {
+    backgroundColor: theme.colors.secondPrimary,
+    borderColor: theme.colors.secondPrimary,
+  },
+  savedPostsButtonText: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bold,
+    fontSize: 12,
+  },
+  savedPostsButtonTextActive: {
+    color: "#FFFFFF",
+  },
+  savedFilterBanner: {
+    alignItems: "center",
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderColor: theme.colors.secondPrimary + "40",
+    borderRadius: 12,
+    borderWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginHorizontal: 16,
+    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  savedFilterBannerText: {
+    color: theme.colors.text,
+    fontFamily: theme.fonts.bold,
+    fontSize: 12,
+  },
+  savedFilterBannerClose: {
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 4,
+  },
+  savedFilterBannerCloseText: {
+    color: theme.colors.secondPrimary,
+    fontFamily: theme.fonts.medium,
+    fontSize: 11,
+  },
   storyRail: { gap: 12, paddingHorizontal: 16, paddingVertical: 14 },
   storyItem: { alignItems: "center", width: 72 },
   storyRing: { alignItems: "center", borderRadius: 34, height: 68, justifyContent: "center", width: 68, padding: 2.5 },
+  storyRingUploading: { borderColor: theme.colors.secondPrimary, borderWidth: 2.5, borderStyle: "dashed" },
+  storyRingSuccess: { borderColor: "#10B981", borderWidth: 3 },
+  storyUploadingBadge: { alignItems: "center", backgroundColor: theme.colors.secondPrimary, borderColor: theme.colors.background, borderRadius: 11, borderWidth: 2, bottom: -1, height: 22, justifyContent: "center", position: "absolute", right: -1, width: 22 },
+  storySuccessBadge: { alignItems: "center", backgroundColor: "#10B981", borderColor: theme.colors.background, borderRadius: 11, borderWidth: 2, bottom: -1, height: 22, justifyContent: "center", position: "absolute", right: -1, width: 22 },
+  storyToastContainer: { position: "absolute", top: 10, left: 16, right: 16, zIndex: 9999, alignItems: "center" },
+  storyToastContent: { flexDirection: "row", alignItems: "center", gap: 8, backgroundColor: "rgba(17, 24, 39, 0.94)", borderColor: "rgba(255, 215, 0, 0.35)", borderWidth: 1, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 10, shadowColor: "#000", shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.35, shadowRadius: 8, elevation: 8 },
+  storyToastText: { color: "#FFFFFF", fontFamily: theme.fonts.bold, fontSize: 13 },
   storyRingActive: { borderColor: theme.colors.secondPrimary, borderWidth: 2.5 },
   storyRingViewed: { borderColor: theme.colors.border, borderWidth: 1.5 },
   storyRingMuted: { borderColor: theme.colors.border, borderWidth: 1.5, borderStyle: "dashed" },

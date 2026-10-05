@@ -18,6 +18,7 @@ import {
   ScrollView,
   Animated,
   RefreshControl,
+  PanResponder,
 } from "react-native";
 let _commentLanguageFilter: any = null;
 const getCommentLanguageFilter = () => {
@@ -355,6 +356,158 @@ const FeedVideoPlayer = memo(function FeedVideoPlayer({
   );
 });
 
+export const FEED_REACTIONS = [
+  { id: "heart", emoji: "❤️", label: "Love", color: "#FF3040" },
+  { id: "fire", emoji: "🔥", label: "Fire", color: "#FF7A00" },
+  { id: "strong", emoji: "💪", label: "Strong", color: "#9747FF" },
+  { id: "clap", emoji: "👏", label: "Clap", color: "#FFD700" },
+  { id: "energy", emoji: "⚡", label: "Energy", color: "#00E5FF" },
+] as const;
+
+export const getWorkoutStats = (post: any) => {
+  const metadata = post?.metadata || {};
+  const stats: Array<{ icon: string; label: string; value: string; color: string }> = [];
+
+  const duration = metadata.duration || metadata.workoutDuration || metadata.time;
+  if (duration) {
+    const val = String(duration);
+    stats.push({
+      icon: "time-outline",
+      label: "Time",
+      value: val.includes("m") || val.includes("min") ? val : `${val}m`,
+      color: "#00E5FF",
+    });
+  }
+
+  const calories = metadata.calories || metadata.burnedCalories || metadata.kcal;
+  if (calories) {
+    const val = String(calories);
+    stats.push({
+      icon: "flame",
+      label: "Burn",
+      value: val.toLowerCase().includes("kcal") ? val : `${val} kcal`,
+      color: "#FF7A00",
+    });
+  }
+
+  const distanceOrSteps =
+    metadata.steps ||
+    metadata.distance ||
+    (metadata.metric && metadata.change ? `${metadata.metric}: ${metadata.change}` : metadata.metric);
+  if (distanceOrSteps) {
+    const isSteps = /step/i.test(String(distanceOrSteps));
+    stats.push({
+      icon: isSteps ? "footsteps" : "speedometer-outline",
+      label: isSteps ? "Steps" : "Distance",
+      value: String(distanceOrSteps),
+      color: "#10B981",
+    });
+  }
+
+  const streakOrIntensity = metadata.streak ? `${metadata.streak}d streak` : metadata.intensity;
+  if (streakOrIntensity) {
+    stats.push({
+      icon: "flash",
+      label: metadata.streak ? "Streak" : "Intensity",
+      value: String(streakOrIntensity),
+      color: "#FFD700",
+    });
+  }
+
+  return stats;
+};
+
+type BeforeAfterSplitSliderProps = {
+  beforeUri: string;
+  afterUri: string;
+  beforeLabel?: string;
+  afterLabel?: string;
+  onDoubleTap?: () => void;
+  styles: any;
+};
+
+const BeforeAfterSplitSlider = memo(function BeforeAfterSplitSlider({
+  beforeUri,
+  afterUri,
+  beforeLabel,
+  afterLabel,
+  onDoubleTap,
+  styles,
+}: BeforeAfterSplitSliderProps) {
+  const [sliderX, setSliderX] = useState(screenWidth * 0.5);
+  const sliderWidth = screenWidth;
+  const sliderHeight = Math.round(screenWidth * 1.15);
+
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dx) > 2,
+        onPanResponderGrant: () => {
+          try {
+            void Haptics.selectionAsync();
+          } catch {}
+        },
+        onPanResponderMove: (evt) => {
+          const x = evt.nativeEvent.locationX;
+          const clamped = Math.max(20, Math.min(sliderWidth - 20, x));
+          setSliderX(clamped);
+        },
+      }),
+    [sliderWidth]
+  );
+
+  return (
+    <Pressable onPress={onDoubleTap} style={[styles.beforeAfterWrapper, { height: sliderHeight }]}>
+      {/* Background layer: AFTER Image */}
+      <Image
+        source={{ uri: afterUri }}
+        style={[styles.beforeAfterBaseImage, { width: sliderWidth, height: sliderHeight }]}
+        resizeMode="cover"
+      />
+
+      {/* Foreground clipped layer: BEFORE Image */}
+      <View
+        style={[
+          styles.beforeClippedOverlay,
+          { width: sliderX, height: sliderHeight },
+        ]}
+      >
+        <Image
+          source={{ uri: beforeUri }}
+          style={[styles.beforeAfterBaseImage, { width: sliderWidth, height: sliderHeight }]}
+          resizeMode="cover"
+        />
+      </View>
+
+      {/* Interactive Divider Bar & Handle */}
+      <View
+        style={[styles.beforeAfterDividerBar, { left: sliderX - 18, height: sliderHeight }]}
+        {...panResponder.panHandlers}
+      >
+        <View style={styles.beforeAfterDividerLine} />
+        <View style={styles.beforeAfterHandlePill}>
+          <Ionicons name="swap-horizontal" size={17} color="#FFFFFF" />
+        </View>
+      </View>
+
+      {/* Floating Labels */}
+      <View style={styles.beforeBadgePill} pointerEvents="none">
+        <Text style={styles.beforeBadgePillText}>{beforeLabel || "BEFORE"}</Text>
+      </View>
+      <View style={styles.afterBadgePill} pointerEvents="none">
+        <Text style={styles.afterBadgePillText}>{afterLabel || "AFTER"}</Text>
+      </View>
+
+      {/* Helper drag prompt */}
+      <View style={styles.beforeAfterHintContainer} pointerEvents="none">
+        <Text style={styles.beforeAfterHintText}>◀ Drag to compare ▶</Text>
+      </View>
+    </Pressable>
+  );
+});
+
+
 const CommunityPosts = ({
   communityId,
   posts,
@@ -442,6 +595,23 @@ const CommunityPosts = ({
     null
   );
   const [selectedMemberProfile, setSelectedMemberProfile] = useState<MemberProfileData | null>(null);
+  const [activeReactionPostId, setActiveReactionPostId] = useState<string | null>(null);
+  const [transformationMode, setTransformationMode] = useState<Record<string, "slider" | "carousel">>({});
+  const reactionAnim = useRef(new Animated.Value(0)).current;
+
+  const handleLongPressLike = useCallback((postId: string) => {
+    try {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch {}
+    setActiveReactionPostId(postId);
+    reactionAnim.setValue(0);
+    Animated.spring(reactionAnim, {
+      toValue: 1,
+      friction: 5,
+      tension: 90,
+      useNativeDriver: true,
+    }).start();
+  }, [reactionAnim]);
 
   const handleUserPress = useCallback((user: any) => {
     if (!user) return;
@@ -1213,53 +1383,91 @@ const CommunityPosts = ({
     }
   };
 
-  const handleToggleLike = async (post: Post) => {
-    let { _id: postId, createdBy } = post;
+  const handleSelectReaction = useCallback(
+    async (post: Post, reactionId: string) => {
+      try {
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      } catch {}
+      setActiveReactionPostId(null);
 
+      const postId = post._id;
+      if (!postId) return;
+
+      const previousReaction = post.userReaction;
+      const isRemoving = previousReaction === reactionId;
+      const nextReaction = isRemoving ? null : reactionId;
+
+      setPosts((currentPosts: any[]) =>
+        currentPosts.map((p) => {
+          if (p._id !== postId) return p;
+          const counts = { ...(p.reactionCounts || {}) };
+          if (previousReaction && counts[previousReaction]) {
+            counts[previousReaction] = Math.max(0, counts[previousReaction] - 1);
+            if (counts[previousReaction] === 0) delete counts[previousReaction];
+          }
+          if (nextReaction) {
+            counts[nextReaction] = (counts[nextReaction] || 0) + 1;
+          }
+          const willBeLiked = !!nextReaction;
+          const wasLiked = !!p.likedByUser;
+          let newLikeCount = Number(p.likeCount) || 0;
+          if (willBeLiked && !wasLiked) newLikeCount += 1;
+          else if (!willBeLiked && wasLiked) newLikeCount = Math.max(0, newLikeCount - 1);
+
+          return {
+            ...p,
+            userReaction: nextReaction,
+            reactionCounts: counts,
+            likedByUser: willBeLiked,
+            likeCount: newLikeCount,
+          };
+        })
+      );
+
+      try {
+        await communityService.feedAction({
+          kind: "reaction",
+          postId,
+          value: nextReaction || previousReaction,
+          enabled: !isRemoving,
+        });
+
+        const loggedUser = await asyncStorageUtils.checkIfKeyExistsInAsyncStorage<any>("user");
+        if (!isRemoving && !post.likedByUser) {
+          void communityService
+            .togglePostLike(postId, {
+              reciverId: post.createdBy?._id || null,
+              senderId: loggedUser.exists ? loggedUser.data._id : null,
+            })
+            .catch(() => {});
+        } else if (isRemoving && post.likedByUser) {
+          void communityService
+            .togglePostLike(postId, {
+              reciverId: post.createdBy?._id || null,
+              senderId: loggedUser.exists ? loggedUser.data._id : null,
+            })
+            .catch(() => {});
+        }
+      } catch (err) {
+        console.warn("Reaction action failed:", err);
+      }
+    },
+    [setPosts]
+  );
+
+  const handleToggleLike = async (post: Post) => {
+    const postId = post._id;
     if (!postId) {
       alert("Some error has happened");
       return;
     }
 
-    if (likeLoadingMap[postId]) {
+    if (post.likedByUser || post.userReaction) {
+      await handleSelectReaction(post, post.userReaction || "heart");
       return;
     }
-    const loggedUser =
-      await asyncStorageUtils.checkIfKeyExistsInAsyncStorage("user");
-    const notificationData = {
-      reciverId: createdBy?._id || null,
-      senderId: loggedUser.exists ? loggedUser.data._id : null,
-    };
 
-    setLikeLoadingMap((prev) => ({ ...prev, [postId]: true }));
-
-    communityService
-      .togglePostLike(postId, notificationData)
-      .then((response) => {
-        if (!response?.success) {
-          throw new Error(response?.message || "Unable to update like");
-        }
-        setPosts((prevPosts: any) =>
-          prevPosts.map((p: any) =>
-            p._id === postId
-              ? {
-                  ...p,
-                  likedByUser: !p.likedByUser,
-                  likeCount: p.likedByUser
-                    ? Math.max(0, Number(p.likeCount) - 1 || 0)
-                    : (Number(p.likeCount) || 0) + 1,
-                }
-              : p
-          )
-        );
-      })
-      .catch((error) => {
-        console.error("Error toggling like:", error);
-        alert("Failed to toggle like. Please try again.");
-      })
-      .finally(() => {
-        setLikeLoadingMap((prev) => ({ ...prev, [postId]: false }));
-      });
+    await handleSelectReaction(post, "heart");
   };
   handleToggleLikeRef.current = handleToggleLike;
 
@@ -1413,62 +1621,97 @@ const CommunityPosts = ({
         (Array.isArray(post.hashtags) &&
           post.hashtags.some((t: string) => t.toLowerCase().includes("transform"))));
 
-    return (
-      <View style={styles.mediaContainer}>
-        {isTransformation ? (
-          <View style={styles.beforeAfterBar}>
+    const currentMode = transformationMode[postId] || (isTransformation ? "slider" : "carousel");
+    const workoutStats = getWorkoutStats(post);
+
+    if (isTransformation && currentMode === "slider") {
+      return (
+        <View style={styles.mediaContainer}>
+          <View style={styles.transformationHeaderRow}>
+            <View style={styles.transformationBadge}>
+              <Ionicons name="sparkles" size={13} color="#FF7A00" />
+              <Text style={styles.transformationBadgeText}>TRANSFORMATION</Text>
+            </View>
             <TouchableOpacity
-              activeOpacity={0.8}
-              style={[
-                styles.beforeAfterTab,
-                (activeMediaIndex[postId] || 0) === 0 && styles.beforeAfterTabActive,
-              ]}
-              onPress={() => {
-                setActiveMediaIndex((prev) => ({ ...prev, [postId]: 0 }));
-                mediaListRefs.current[postId]?.scrollToIndex({ index: 0, animated: true });
-              }}
+              style={styles.transformationToggleBtn}
+              onPress={() =>
+                setTransformationMode((prev) => ({
+                  ...prev,
+                  [postId]: "carousel",
+                }))
+              }
             >
-              <Ionicons
-                name="time-outline"
-                size={13}
-                color={(activeMediaIndex[postId] || 0) === 0 ? "#FFFFFF" : theme.colors.textSecondary}
-              />
-              <Text
-                style={[
-                  styles.beforeAfterTabText,
-                  (activeMediaIndex[postId] || 0) === 0 && styles.beforeAfterTabTextActive,
-                ]}
-              >
-                Before
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              style={[
-                styles.beforeAfterTab,
-                (activeMediaIndex[postId] || 0) === 1 && styles.beforeAfterTabActive,
-              ]}
-              onPress={() => {
-                setActiveMediaIndex((prev) => ({ ...prev, [postId]: 1 }));
-                mediaListRefs.current[postId]?.scrollToIndex({ index: 1, animated: true });
-              }}
-            >
-              <Ionicons
-                name="sparkles"
-                size={13}
-                color={(activeMediaIndex[postId] || 0) === 1 ? "#FFFFFF" : theme.colors.textSecondary}
-              />
-              <Text
-                style={[
-                  styles.beforeAfterTabText,
-                  (activeMediaIndex[postId] || 0) === 1 && styles.beforeAfterTabTextActive,
-                ]}
-              >
-                After
-              </Text>
+              <Ionicons name="images-outline" size={13} color={theme.colors.textSecondary} />
+              <Text style={styles.transformationToggleBtnText}>Carousel</Text>
             </TouchableOpacity>
           </View>
-        ) : null}
+
+          <BeforeAfterSplitSlider
+            beforeUri={media[0]}
+            afterUri={media[1]}
+            beforeLabel={post.metadata?.beforeLabel || "BEFORE"}
+            afterLabel={post.metadata?.afterLabel || "AFTER"}
+            onDoubleTap={() => handleMediaDoubleTap(post)}
+            styles={styles}
+          />
+
+          {workoutStats.length > 0 && (
+            <View style={styles.workoutStatOverlay} pointerEvents="box-none">
+              <View style={styles.workoutStatHeader}>
+                <Ionicons name="fitness" size={12} color="#00E5FF" />
+                <Text style={styles.workoutStatBrand}>INESS STATS</Text>
+              </View>
+              <View style={styles.workoutStatPillsRow}>
+                {workoutStats.map((stat, i) => (
+                  <View key={i} style={styles.workoutStatPill}>
+                    <Ionicons name={stat.icon as any} size={11} color={stat.color} />
+                    <Text style={styles.workoutStatPillText}>{stat.value}</Text>
+                  </View>
+                ))}
+              </View>
+            </View>
+          )}
+
+          {heartPopPostId === postId ? (
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                styles.heartPopOverlay,
+                {
+                  opacity: heartOpacity,
+                  transform: [{ scale: heartScale }],
+                },
+              ]}
+            >
+              <Ionicons name="heart" size={100} color="#FF3040" />
+            </Animated.View>
+          ) : null}
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.mediaContainer}>
+        {isTransformation && (
+          <View style={styles.transformationHeaderRow}>
+            <View style={styles.transformationBadge}>
+              <Ionicons name="sparkles" size={13} color="#FF7A00" />
+              <Text style={styles.transformationBadgeText}>TRANSFORMATION</Text>
+            </View>
+            <TouchableOpacity
+              style={styles.transformationToggleBtn}
+              onPress={() =>
+                setTransformationMode((prev) => ({
+                  ...prev,
+                  [postId]: "slider",
+                }))
+              }
+            >
+              <Ionicons name="swap-horizontal" size={13} color={theme.colors.textSecondary} />
+              <Text style={styles.transformationToggleBtnText}>Split Slider</Text>
+            </TouchableOpacity>
+          </View>
+        )}
         <FlatList
           ref={(ref) => {
             if (ref) mediaListRefs.current[postId] = ref;
@@ -1526,6 +1769,32 @@ const CommunityPosts = ({
             );
           }}
         />
+
+        {workoutStats.length > 0 && (
+          <View style={styles.workoutStatOverlay} pointerEvents="box-none">
+            <View style={styles.workoutStatHeader}>
+              <Ionicons name="fitness" size={12} color="#00E5FF" />
+              <Text style={styles.workoutStatBrand}>INESS STATS</Text>
+            </View>
+            <View style={styles.workoutStatPillsRow}>
+              {workoutStats.map((stat, i) => (
+                <View key={i} style={styles.workoutStatPill}>
+                  <Ionicons name={stat.icon as any} size={11} color={stat.color} />
+                  <Text style={styles.workoutStatPillText}>{stat.value}</Text>
+                </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {media.length > 1 && (
+          <View style={styles.carouselCounterBadge} pointerEvents="none">
+            <Text style={styles.carouselCounterText}>
+              {(activeMediaIndex[postId] || 0) + 1}/{media.length}
+            </Text>
+          </View>
+        )}
+
         {heartPopPostId === postId ? (
           <Animated.View
             pointerEvents="none"
@@ -1553,6 +1822,41 @@ const CommunityPosts = ({
             ))}
           </View>
         )}
+      </View>
+    );
+  };
+
+  const renderReactionsSummary = (post: any) => {
+    const counts = post.reactionCounts || {};
+    const reactionEntries = Object.entries(counts).filter(([_, count]) => Number(count) > 0);
+    const totalReactions = reactionEntries.reduce((sum, [_, count]) => sum + Number(count), 0);
+    const likeCount = Number(post.likeCount) || 0;
+    const displayTotal = Math.max(totalReactions, likeCount);
+
+    if (displayTotal === 0) return null;
+
+    const topReactions = FEED_REACTIONS.filter((r) => Number(counts[r.id]) > 0).slice(0, 3);
+
+    return (
+      <View style={styles.reactionsSummaryRow}>
+        {topReactions.length > 0 && (
+          <View style={styles.reactionsEmojiStack}>
+            {topReactions.map((r, idx) => (
+              <Text
+                key={r.id}
+                style={[
+                  styles.reactionStackEmoji,
+                  { zIndex: 3 - idx, marginLeft: idx > 0 ? -4 : 0 },
+                ]}
+              >
+                {r.emoji}
+              </Text>
+            ))}
+          </View>
+        )}
+        <Text style={styles.likesText}>
+          {displayTotal} {displayTotal === 1 ? "reaction" : "reactions"}
+        </Text>
       </View>
     );
   };
@@ -1639,19 +1943,63 @@ const CommunityPosts = ({
       {/* Media - Full width Instagram style */}
       {renderMedia(item)}
 
+      {/* Floating Reaction Picker Bar */}
+      {activeReactionPostId === item._id && (
+        <View style={styles.floatingReactionsContainer}>
+          <Pressable
+            style={styles.floatingReactionsBackdrop}
+            onPress={() => setActiveReactionPostId(null)}
+          />
+          <Animated.View
+            style={[
+              styles.floatingReactionsBar,
+              { transform: [{ scale: reactionAnim }] },
+            ]}
+          >
+            {FEED_REACTIONS.map((reaction) => {
+              const isSelected = item.userReaction === reaction.id;
+              return (
+                <TouchableOpacity
+                  key={reaction.id}
+                  activeOpacity={0.7}
+                  style={[
+                    styles.reactionPillItem,
+                    isSelected && styles.reactionPillItemSelected,
+                  ]}
+                  onPress={() => handleSelectReaction(item, reaction.id)}
+                >
+                  <Text style={styles.reactionEmojiText}>{reaction.emoji}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </Animated.View>
+        </View>
+      )}
+
       {/* Actions Row */}
       <View style={styles.actions}>
         <View style={styles.actionsLeft}>
           <TouchableOpacity 
             onPress={() => handleToggleLike(item)}
+            onLongPress={() => handleLongPressLike(item._id)}
+            delayLongPress={280}
             style={styles.actionButton}
             disabled={!!likeLoadingMap[item._id]}
+            accessibilityLabel="Like or react to post"
           >
-            <Ionicons
-              name={item.likedByUser ? "heart" : "heart-outline"}
-              size={28}
-              color={item.likedByUser ? "#FF3040" : (isDark ? theme.colors.textWhite : theme.colors.text)}
-            />
+            {item.userReaction && item.userReaction !== "heart" ? (
+              <View style={styles.userReactionPill}>
+                <Text style={styles.userReactionEmoji}>
+                  {FEED_REACTIONS.find((r) => r.id === item.userReaction)?.emoji || "❤️"}
+                </Text>
+              </View>
+            ) : (
+              <Ionicons
+                name={item.likedByUser ? "heart" : "heart-outline"}
+                size={28}
+                color={item.likedByUser ? "#FF3040" : (isDark ? theme.colors.textWhite : theme.colors.text)}
+              />
+            )}
           </TouchableOpacity>
           <TouchableOpacity 
             onPress={() => toggleCommentSection(item._id)}
@@ -1677,12 +2025,8 @@ const CommunityPosts = ({
         </TouchableOpacity>
       </View>
 
-      {/* Likes Count */}
-      {item.likeCount > 0 && (
-        <Text style={styles.likesText}>
-          {item.likeCount} {item.likeCount === 1 ? "like" : "likes"}
-        </Text>
-      )}
+      {/* Reactions & Likes summary */}
+      {renderReactionsSummary(item)}
 
       {/* View Comments */}
       {item.commentCount > 0 && (
@@ -1941,6 +2285,16 @@ const CommunityPosts = ({
     const matchesFilter =
       feedFilter === "saved"
         ? post.savedByUser
+        : feedFilter === "workouts"
+        ? (post.contentType === "workout" ||
+           post.contentType === "transformation" ||
+           post.contentType === "progress" ||
+           Boolean(
+             post.metadata?.duration ||
+             post.metadata?.calories ||
+             post.metadata?.steps ||
+             post.metadata?.metric
+           ))
         : feedFilter === "following"
         ? post.followedByUser
         : feedFilter === "company"
@@ -2050,6 +2404,7 @@ const CommunityPosts = ({
                 <Text style={styles.noPostText}>
                   {normalizedSearchQuery ? "No posts match your search" :
                     feedFilter === "saved" ? "No saved posts yet" :
+                    feedFilter === "workouts" ? "No workout posts yet" :
                     feedFilter === "following" ? "Follow members to build this feed" :
                     feedFilter === "company" ? "No company posts yet" :
                     "No posts available yet"}
@@ -2520,6 +2875,290 @@ const CommunityPosts = ({
 };
 
 const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
+  // Before & After Split Slider Styles
+  beforeAfterWrapper: {
+    position: "relative",
+    width: screenWidth,
+    overflow: "hidden",
+    backgroundColor: "#000000",
+  },
+  beforeAfterBaseImage: {
+    backgroundColor: "#000000",
+  },
+  beforeClippedOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    overflow: "hidden",
+    zIndex: 2,
+    borderRightWidth: 1.5,
+    borderRightColor: "rgba(255, 255, 255, 0.9)",
+  },
+  beforeAfterDividerBar: {
+    position: "absolute",
+    top: 0,
+    width: 36,
+    zIndex: 5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  beforeAfterDividerLine: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    width: 2,
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.6,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  beforeAfterHandlePill: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(17, 24, 39, 0.92)",
+    borderWidth: 2,
+    borderColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.45,
+    shadowRadius: 6,
+    elevation: 6,
+  },
+  beforeBadgePill: {
+    position: "absolute",
+    top: 14,
+    left: 14,
+    backgroundColor: "rgba(0, 0, 0, 0.68)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    zIndex: 4,
+  },
+  beforeBadgePillText: {
+    color: "#FFFFFF",
+    fontFamily: theme.fonts.bold,
+    fontSize: 10,
+    letterSpacing: 0.8,
+  },
+  afterBadgePill: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    backgroundColor: "rgba(0, 0, 0, 0.68)",
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    zIndex: 4,
+  },
+  afterBadgePillText: {
+    color: "#FFFFFF",
+    fontFamily: theme.fonts.bold,
+    fontSize: 10,
+    letterSpacing: 0.8,
+  },
+  beforeAfterHintContainer: {
+    position: "absolute",
+    bottom: 14,
+    alignSelf: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.65)",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 14,
+    zIndex: 4,
+  },
+  beforeAfterHintText: {
+    color: "rgba(255, 255, 255, 0.9)",
+    fontFamily: theme.fonts.medium,
+    fontSize: 10,
+  },
+  transformationHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    backgroundColor: theme.colors.background,
+  },
+  transformationBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+    backgroundColor: "rgba(255, 122, 0, 0.14)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255, 122, 0, 0.3)",
+  },
+  transformationBadgeText: {
+    color: "#FF7A00",
+    fontFamily: theme.fonts.bold,
+    fontSize: 10,
+    letterSpacing: 0.5,
+  },
+  transformationToggleBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: 8,
+    backgroundColor: theme.colors.backgroundSecondary,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  transformationToggleBtnText: {
+    color: theme.colors.textSecondary,
+    fontFamily: theme.fonts.medium,
+    fontSize: 11,
+  },
+
+  // Workout Stat Overlay Sticker
+  workoutStatOverlay: {
+    position: "absolute",
+    bottom: 14,
+    left: 14,
+    backgroundColor: "rgba(9, 14, 26, 0.82)",
+    borderColor: "rgba(255, 255, 255, 0.2)",
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    zIndex: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 6,
+    elevation: 5,
+  },
+  workoutStatHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    marginBottom: 4,
+  },
+  workoutStatBrand: {
+    color: "#00E5FF",
+    fontFamily: theme.fonts.bold,
+    fontSize: 9,
+    letterSpacing: 0.8,
+  },
+  workoutStatPillsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    flexWrap: "wrap",
+  },
+  workoutStatPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    paddingHorizontal: 7,
+    paddingVertical: 3,
+    borderRadius: 8,
+  },
+  workoutStatPillText: {
+    color: "#FFFFFF",
+    fontFamily: theme.fonts.bold,
+    fontSize: 11,
+  },
+
+  // Carousel Counter Badge
+  carouselCounterBadge: {
+    position: "absolute",
+    top: 14,
+    right: 14,
+    backgroundColor: "rgba(0, 0, 0, 0.65)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+    zIndex: 6,
+  },
+  carouselCounterText: {
+    color: "#FFFFFF",
+    fontFamily: theme.fonts.bold,
+    fontSize: 11,
+    letterSpacing: 0.5,
+  },
+
+  // Floating Reaction Bar Styles
+  floatingReactionsContainer: {
+    position: "relative",
+    zIndex: 90,
+  },
+  floatingReactionsBackdrop: {
+    position: "absolute",
+    top: -1200,
+    bottom: -1200,
+    left: -1200,
+    right: -1200,
+  },
+  floatingReactionsBar: {
+    position: "absolute",
+    bottom: 4,
+    left: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: isDark ? "#1F2937" : "#FFFFFF",
+    borderColor: theme.colors.border,
+    borderWidth: 1,
+    borderRadius: 26,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    gap: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.28,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 95,
+  },
+  reactionPillItem: {
+    paddingHorizontal: 7,
+    paddingVertical: 4,
+    borderRadius: 18,
+  },
+  reactionPillItemSelected: {
+    backgroundColor: theme.colors.primary + "30",
+    transform: [{ scale: 1.15 }],
+  },
+  reactionEmojiText: {
+    fontSize: 22,
+  },
+  userReactionPill: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: 28,
+    height: 28,
+  },
+  userReactionEmoji: {
+    fontSize: 24,
+  },
+  reactionsSummaryRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 16,
+    marginTop: 4,
+  },
+  reactionsEmojiStack: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  reactionStackEmoji: {
+    fontSize: 13,
+  },
+
   listContent: {
     paddingBottom: 100,
   },

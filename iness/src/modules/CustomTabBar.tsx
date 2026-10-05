@@ -54,7 +54,7 @@ export default function CustomTabBar({
     { name: "index", label: "Home", icon: "home-variant", route: "index" },
     { name: "train", label: "Train", icon: "fire", route: "train" },
     { name: "feed", label: "Feed", icon: "account-group", route: "feed" },
-    { name: "store", label: "Store", icon: "store", route: "store" },
+    { name: "ai", label: "AI Coach", icon: "robot-excited-outline", route: "ai" },
     { name: "manage", label: "Manage", icon: "shield-account", route: "manage" },
   ];
 

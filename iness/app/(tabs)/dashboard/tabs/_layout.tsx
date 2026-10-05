@@ -94,8 +94,18 @@ export default function DashboardLayout() {
           }}
         />
         <Tabs.Screen
+          name="ai"
+          options={{
+            tabBarLabel: "AI Coach",
+            tabBarIcon: ({ color }: any) => (
+              <MaterialCommunityIcons name="robot" size={28} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
           name="store"
           options={{
+            href: null,
             tabBarLabel: "Store",
             tabBarIcon: ({ color }: any) => (
               <MaterialCommunityIcons name="store" size={28} color={color} />

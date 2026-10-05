@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
+  Animated,
   Image,
   StyleSheet,
   Text,
@@ -8,6 +9,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import * as Haptics from "expo-haptics";
 
 import {
   CommunityDraftMediaItem,
@@ -59,11 +61,11 @@ const getUploadPresentation = (job: CommunityUploadJob) => {
       };
     case "completed":
       return {
-        badge: "Posted",
-        title: isVideo ? "Your clip is posted" : "Your post is live",
+        badge: "Posted 🎉",
+        title: isVideo ? "Your clip is live in feed" : "Your post is live in feed",
         meta: isVideo
-          ? "Playback optimization will keep running in the background."
-          : "Ready in the feed.",
+          ? "Shared with community. Optimization in background ✨"
+          : "Shared with your community ✨",
       };
     case "failed":
       return {
@@ -155,6 +157,52 @@ const CommunityUploadOverlay = ({
   const insets = useSafeAreaInsets();
   const primaryJob = getPrimaryJob(jobs);
 
+  const prevStatusRef = useRef(primaryJob?.status);
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const bounceAnim = useRef(new Animated.Value(1)).current;
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        friction: 6,
+        tension: 80,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 1,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [slideAnim, opacityAnim]);
+
+  useEffect(() => {
+    if (!primaryJob) return;
+    if (primaryJob.status === "completed" && prevStatusRef.current !== "completed") {
+      try {
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      } catch {}
+
+      Animated.sequence([
+        Animated.spring(bounceAnim, {
+          toValue: 1.07,
+          friction: 3,
+          tension: 110,
+          useNativeDriver: true,
+        }),
+        Animated.spring(bounceAnim, {
+          toValue: 1,
+          friction: 4,
+          tension: 80,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+    prevStatusRef.current = primaryJob.status;
+  }, [primaryJob, bounceAnim]);
+
   if (!primaryJob) {
     return null;
   }
@@ -206,7 +254,16 @@ const CommunityUploadOverlay = ({
         { bottom: Math.max(insets.bottom + 16, 28) },
       ]}
     >
-      <View style={styles.card}>
+      <Animated.View
+        style={[
+          styles.card,
+          {
+            transform: [{ translateY: slideAnim }, { scale: bounceAnim }],
+            opacity: opacityAnim,
+          },
+          primaryJob.status === "completed" && styles.cardCompleted,
+        ]}
+      >
         <View style={styles.previewSlot}>
           {renderMediaPreview(previewMedia, styles)}
         </View>
@@ -294,7 +351,7 @@ const CommunityUploadOverlay = ({
             </Text>
           ) : null}
         </View>
-      </View>
+      </Animated.View>
     </View>
   );
 };
@@ -322,6 +379,12 @@ const getStyles = (theme: any) =>
       shadowOffset: { width: 0, height: 8 },
       shadowOpacity: 0.16,
       shadowRadius: 18,
+    },
+    cardCompleted: {
+      borderColor: theme.colors.success,
+      shadowColor: theme.colors.success,
+      shadowOpacity: 0.28,
+      shadowRadius: 20,
     },
     previewSlot: {
       borderRadius: 14,
