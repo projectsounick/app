@@ -16,6 +16,7 @@ import {
   ScrollView,
   StatusBar,
   Dimensions,
+  Keyboard,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
@@ -165,8 +166,24 @@ export default function AiCoachTab() {
   const [quotaRemaining, setQuotaRemaining] = useState<number>(30);
   const [quotaLimit, setQuotaLimit] = useState<number>(30);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [isKeyboardVisible, setKeyboardVisible] = useState<boolean>(false);
 
   const flatListRef = useRef<FlatList>(null);
+  const bottomTabBarClearance = 60 + Math.max(insets.bottom, 8);
+
+  // Monitor keyboard to adjust input container clearance
+  useEffect(() => {
+    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+    const showSub = Keyboard.addListener(showEvent, () => setKeyboardVisible(true));
+    const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardVisible(false));
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   // Theme Colors (Purple & clean neutral palette - No harsh neon green)
   const colors = {
@@ -687,6 +704,7 @@ export default function AiCoachTab() {
         ) : messages.length === 0 ? (
           /* EMPTY STATE: CHATGPT-STYLE HERO + RECOMMENDED QUESTIONS */
           <ScrollView
+            style={{ flex: 1 }}
             contentContainerStyle={styles.emptyContainer}
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
@@ -698,7 +716,7 @@ export default function AiCoachTab() {
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
             >
-              <Ionicons name="sparkles" size={40} color="#FFFFFF" />
+              <Ionicons name="sparkles" size={32} color="#FFFFFF" />
             </LinearGradient>
 
             <Text style={[styles.emptyTitle, { color: colors.text }]}>
@@ -768,6 +786,7 @@ export default function AiCoachTab() {
           /* ACTIVE CONVERSATION: MESSAGES FLATLIST */
           <FlatList
             ref={flatListRef}
+            style={{ flex: 1 }}
             data={messages}
             keyExtractor={(item) => item._id}
             contentContainerStyle={[styles.messageList, { paddingBottom: 16 }]}
@@ -946,7 +965,12 @@ export default function AiCoachTab() {
             {
               backgroundColor: colors.bg,
               borderTopColor: colors.divider,
-              paddingBottom: Math.max(insets.bottom, 10),
+              marginBottom: isKeyboardVisible ? 0 : bottomTabBarClearance,
+              paddingBottom: isKeyboardVisible
+                ? Platform.OS === "ios"
+                  ? Math.max(insets.bottom, 8)
+                  : 8
+                : 8,
             },
           ]}
         >
@@ -1431,33 +1455,33 @@ const styles = StyleSheet.create({
   emptyContainer: {
     alignItems: "center",
     paddingHorizontal: 20,
-    paddingTop: 36,
-    paddingBottom: 24,
+    paddingTop: 16,
+    paddingBottom: 20,
   },
   heroBadge: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 16,
+    marginBottom: 12,
     shadowColor: "#9747FF",
-    shadowOffset: { width: 0, height: 6 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.35,
-    shadowRadius: 10,
-    elevation: 8,
+    shadowRadius: 8,
+    elevation: 6,
   },
   emptyTitle: {
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: "800",
     textAlign: "center",
-    marginBottom: 8,
+    marginBottom: 6,
   },
   emptySubtitle: {
     fontSize: 13,
     textAlign: "center",
-    lineHeight: 19,
-    marginBottom: 28,
+    lineHeight: 18,
+    marginBottom: 16,
     maxWidth: 320,
   },
   suggestionsContainer: {
