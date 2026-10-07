@@ -253,6 +253,9 @@ export default function AiCoachTab() {
       const res = await aiCoachService.getConversationMessages(convId);
       if (res.success && res.messages) {
         setMessages(res.messages);
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: false });
+        }, 80);
       }
     } catch (error) {
       console.error("loadMessages error:", error);
@@ -463,6 +466,10 @@ export default function AiCoachTab() {
     setAttachedFiles([]);
     setLoading(true);
 
+    setTimeout(() => {
+      flatListRef.current?.scrollToEnd({ animated: true });
+    }, 50);
+
     try {
       const response = await aiCoachService.sendMessage({
         conversationId: currentConversationId || undefined,
@@ -485,6 +492,10 @@ export default function AiCoachTab() {
           },
           response.modelMessage!,
         ]);
+
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: true });
+        }, 80);
 
         if (response.conversationId) {
           setCurrentConversationId(response.conversationId);
@@ -789,8 +800,14 @@ export default function AiCoachTab() {
             style={{ flex: 1 }}
             data={messages}
             keyExtractor={(item) => item._id}
-            contentContainerStyle={[styles.messageList, { paddingBottom: 16 }]}
+            contentContainerStyle={[styles.messageList, { paddingBottom: 20 }]}
             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+            onLayout={() => {
+              if (messages.length > 0) {
+                flatListRef.current?.scrollToEnd({ animated: false });
+              }
+            }}
+            showsVerticalScrollIndicator={true}
             renderItem={({ item }) => {
               const isUser = item.role === "user";
               const allItemAttachments =
@@ -1379,12 +1396,13 @@ const styles = StyleSheet.create({
   headerTitleContainer: {
     flex: 1,
     alignItems: "center",
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
   },
   headerTitleRow: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,
+    maxWidth: "100%",
   },
   headerAiBadge: {
     width: 20,
@@ -1392,11 +1410,12 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: "center",
     alignItems: "center",
+    flexShrink: 0,
   },
   headerTitle: {
     fontSize: 16,
     fontWeight: "700",
-    maxWidth: 200,
+    flexShrink: 1,
   },
   headerSubtitle: {
     fontSize: 11,
@@ -1424,6 +1443,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     gap: 8,
+    flexWrap: "wrap",
   },
   capsulePill: {
     flexDirection: "row",
@@ -1524,8 +1544,9 @@ const styles = StyleSheet.create({
     lineHeight: 16,
   },
   messageList: {
-    paddingHorizontal: 16,
-    paddingTop: 14,
+    paddingHorizontal: 14,
+    paddingTop: 12,
+    flexGrow: 1,
   },
   messageRow: {
     flexDirection: "row",
@@ -1548,8 +1569,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   bubble: {
-    maxWidth: "82%",
-    padding: 14,
+    maxWidth: "84%",
+    padding: 13,
     borderRadius: 18,
   },
   userBubble: {
@@ -1564,8 +1585,8 @@ const styles = StyleSheet.create({
     lineHeight: 21,
   },
   chatImage: {
-    width: 180,
-    height: 180,
+    width: Math.min(SCREEN_WIDTH * 0.62, 220),
+    height: Math.min(SCREEN_WIDTH * 0.62, 220),
     borderRadius: 12,
     backgroundColor: "#333",
   },
@@ -1576,7 +1597,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 10,
     gap: 8,
-    maxWidth: 240,
+    maxWidth: Math.min(SCREEN_WIDTH * 0.65, 240),
   },
   chatDocText: {
     fontSize: 12,
@@ -1626,6 +1647,7 @@ const styles = StyleSheet.create({
   attachmentTray: {
     flexDirection: "row",
     alignItems: "center",
+    flexWrap: "wrap",
     paddingHorizontal: 6,
     paddingTop: 4,
     paddingBottom: 8,
@@ -1671,7 +1693,7 @@ const styles = StyleSheet.create({
   },
   inputRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-end",
     gap: 8,
   },
   plusAttachBtn: {
@@ -1680,11 +1702,12 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: 2,
   },
   chatTextInput: {
     flex: 1,
     minHeight: 36,
-    maxHeight: 110,
+    maxHeight: 120,
     fontSize: 14,
     paddingHorizontal: 6,
     paddingVertical: 6,
@@ -1696,6 +1719,7 @@ const styles = StyleSheet.create({
     borderRadius: 17,
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: 2,
   },
   modalOverlay: {
     flex: 1,
