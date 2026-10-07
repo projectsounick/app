@@ -15,12 +15,15 @@ import {
   Alert,
   ScrollView,
   StatusBar,
+  Dimensions,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system";
+import * as Clipboard from "expo-clipboard";
+import * as Haptics from "expo-haptics";
 import { LinearGradient } from "expo-linear-gradient";
 import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 import {
@@ -31,6 +34,8 @@ import {
   AiAttachment,
 } from "@/src/services/aiCoach.service";
 
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
 interface LocalAttachment {
   uri: string;
   base64: string;
@@ -40,8 +45,16 @@ interface LocalAttachment {
   type: "image" | "document";
 }
 
-// Helper component to render formatted AI text (bullet points, bold text)
-function FormattedAiText({ content, textColor }: { content: string; textColor: string }) {
+// Formatted AI message text renderer
+function FormattedAiText({
+  content,
+  textColor,
+  accentColor,
+}: {
+  content: string;
+  textColor: string;
+  accentColor: string;
+}) {
   const lines = content.split("\n");
 
   return (
@@ -52,7 +65,10 @@ function FormattedAiText({ content, textColor }: { content: string; textColor: s
           return <View key={idx} style={{ height: 4 }} />;
         }
 
-        const isBullet = trimmed.startsWith("* ") || trimmed.startsWith("- ") || trimmed.startsWith("• ");
+        const isBullet =
+          trimmed.startsWith("* ") ||
+          trimmed.startsWith("- ") ||
+          trimmed.startsWith("• ");
         const isNumbered = /^\d+\.\s/.test(trimmed);
 
         const cleanText = isBullet
@@ -68,19 +84,47 @@ function FormattedAiText({ content, textColor }: { content: string; textColor: s
             key={idx}
             style={
               isBullet || isNumbered
-                ? { flexDirection: "row", alignItems: "flex-start", gap: 6, marginVertical: 1 }
+                ? {
+                    flexDirection: "row",
+                    alignItems: "flex-start",
+                    gap: 6,
+                    marginVertical: 1,
+                  }
                 : undefined
             }
           >
             {isBullet && (
-              <Text style={{ color: "#BDFF84", fontSize: 14, lineHeight: 20 }}>•</Text>
+              <Text
+                style={{
+                  color: accentColor,
+                  fontSize: 14,
+                  lineHeight: 20,
+                  fontWeight: "700",
+                }}
+              >
+                •
+              </Text>
             )}
             {isNumbered && (
-              <Text style={{ color: "#BDFF84", fontSize: 13, lineHeight: 20, fontWeight: "700" }}>
+              <Text
+                style={{
+                  color: accentColor,
+                  fontSize: 13,
+                  lineHeight: 20,
+                  fontWeight: "700",
+                }}
+              >
                 {trimmed.match(/^\d+\./)?.[0] || "•"}
               </Text>
             )}
-            <Text style={{ flex: isBullet || isNumbered ? 1 : undefined, fontSize: 14, lineHeight: 21, color: textColor }}>
+            <Text
+              style={{
+                flex: isBullet || isNumbered ? 1 : undefined,
+                fontSize: 14,
+                lineHeight: 22,
+                color: textColor,
+              }}
+            >
               {parts.map((part, pIdx) => {
                 if (part.startsWith("**") && part.endsWith("**")) {
                   return (
@@ -107,7 +151,7 @@ export default function AiCoachTab() {
   // State
   const [conversations, setConversations] = useState<AiConversation[]>([]);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
-  const [currentConversationTitle, setCurrentConversationTitle] = useState<string>("Iness AI Coach");
+  const [currentConversationTitle, setCurrentConversationTitle] = useState<string>("Iness AI");
   const [messages, setMessages] = useState<AiChatMessage[]>([]);
   const [inputText, setInputText] = useState<string>("");
   const [attachedFiles, setAttachedFiles] = useState<LocalAttachment[]>([]);
@@ -116,13 +160,15 @@ export default function AiCoachTab() {
   const [personalize, setPersonalize] = useState<boolean>(true);
   const [historyModalVisible, setHistoryModalVisible] = useState<boolean>(false);
   const [attachSheetVisible, setAttachSheetVisible] = useState<boolean>(false);
+  const [previewImageUri, setPreviewImageUri] = useState<string | null>(null);
   const [aiConfig, setAiConfig] = useState<AiConfigData | null>(null);
   const [quotaRemaining, setQuotaRemaining] = useState<number>(30);
   const [quotaLimit, setQuotaLimit] = useState<number>(30);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   const flatListRef = useRef<FlatList>(null);
 
-  // Dynamic Theme Colors
+  // Theme Colors (Purple & clean neutral palette - No harsh neon green)
   const colors = {
     bg: theme.colors.background,
     bgSecondary: theme.colors.backgroundSecondary,
@@ -132,13 +178,17 @@ export default function AiCoachTab() {
     textMuted: theme.colors.textMuted,
     border: theme.colors.border,
     divider: theme.colors.divider,
-    accentPrimary: "#BDFF84",
-    accentPurple: "#9747FF",
+    brandPurple: "#9747FF",
+    brandPurpleDark: "#7C3AED",
+    brandPurpleLight: isDark ? "rgba(151, 71, 255, 0.15)" : "rgba(151, 71, 255, 0.1)",
+    brandPurpleBorder: isDark ? "rgba(151, 71, 255, 0.35)" : "rgba(151, 71, 255, 0.25)",
     bubbleUser: "#9747FF",
-    inputBg: isDark ? "#22252B" : "#F0F1F5",
-    quotaPositiveBg: isDark ? "rgba(189, 255, 132, 0.15)" : "rgba(52, 168, 83, 0.12)",
-    quotaPositiveText: isDark ? "#BDFF84" : "#1B5E20",
-    badgeBg: isDark ? "rgba(151, 71, 255, 0.2)" : "rgba(151, 71, 255, 0.1)",
+    inputCardBg: isDark ? "#1C1F26" : "#FFFFFF",
+    inputBorder: isDark ? "#2D313D" : "#E2E5EC",
+    sendBtnBgDisabled: isDark ? "#282B34" : "#E5E7EB",
+    sendBtnIconDisabled: isDark ? "#555A66" : "#9CA3AF",
+    iconBtnBg: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)",
+    feedAddBtnBg: theme.colors.success || "#67C694",
   };
 
   // Load Initial Config and Conversations
@@ -166,11 +216,12 @@ export default function AiCoachTab() {
         setConversations(convsRes.data);
         const latest = convsRes.data[0];
         setCurrentConversationId(latest._id);
-        setCurrentConversationTitle(latest.title);
+        setCurrentConversationTitle(latest.title || "Iness AI");
         loadMessages(latest._id);
       } else {
         setConversations([]);
         setCurrentConversationId(null);
+        setCurrentConversationTitle("Iness AI");
         setMessages([]);
       }
     } catch (error) {
@@ -193,14 +244,16 @@ export default function AiCoachTab() {
 
   const handleSelectConversation = (conv: AiConversation) => {
     setCurrentConversationId(conv._id);
-    setCurrentConversationTitle(conv.title);
+    setCurrentConversationTitle(conv.title || "Iness AI");
     setHistoryModalVisible(false);
     loadMessages(conv._id);
   };
 
+  // New Chat handler (starts fresh empty state with recommended questions)
   const handleNewChat = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     setCurrentConversationId(null);
-    setCurrentConversationTitle("Iness AI Coach");
+    setCurrentConversationTitle("Iness AI");
     setMessages([]);
     setAttachedFiles([]);
     setInputText("");
@@ -224,8 +277,49 @@ export default function AiCoachTab() {
     ]);
   };
 
-  // Image Picker
-  const handlePickImage = async () => {
+  // Camera Picker
+  const handleTakePhoto = async () => {
+    setAttachSheetVisible(false);
+    if (attachedFiles.length >= 2) {
+      Alert.alert("Limit Reached", "You can attach a maximum of 2 items per message.");
+      return;
+    }
+
+    try {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission Needed", "Camera access is required to take photos.");
+        return;
+      }
+
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true,
+        quality: 0.7,
+        base64: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets[0]) {
+        const asset = result.assets[0];
+        if (asset.base64) {
+          const mimeType = asset.mimeType || "image/jpeg";
+          const newImg: LocalAttachment = {
+            uri: asset.uri,
+            base64: `data:${mimeType};base64,${asset.base64}`,
+            mimeType,
+            name: asset.fileName || `camera_${Date.now()}.jpg`,
+            size: asset.fileSize,
+            type: "image",
+          };
+          setAttachedFiles((prev) => [...prev, newImg].slice(0, 2));
+        }
+      }
+    } catch (err: any) {
+      Alert.alert("Error", "Could not capture photo: " + err.message);
+    }
+  };
+
+  // Gallery Picker
+  const handlePickGallery = async () => {
     setAttachSheetVisible(false);
     if (attachedFiles.length >= 2) {
       Alert.alert("Limit Reached", "You can attach a maximum of 2 items per message.");
@@ -280,7 +374,9 @@ export default function AiCoachTab() {
           encoding: "base64",
         });
 
-        const mimeType = asset.mimeType || (asset.name.endsWith(".pdf") ? "application/pdf" : "text/plain");
+        const mimeType =
+          asset.mimeType ||
+          (asset.name.endsWith(".pdf") ? "application/pdf" : "text/plain");
         const newDoc: LocalAttachment = {
           uri: asset.uri,
           base64: `data:${mimeType};base64,${rawBase64}`,
@@ -300,6 +396,18 @@ export default function AiCoachTab() {
     setAttachedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Copy AI response to clipboard
+  const handleCopyMessage = async (id: string, text: string) => {
+    try {
+      await Clipboard.setStringAsync(text);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+      setCopiedId(id);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch {
+      // ignore
+    }
+  };
+
   // Send Message
   const handleSendMessage = async (customPrompt?: string) => {
     const textToSend = customPrompt || inputText.trim();
@@ -312,6 +420,8 @@ export default function AiCoachTab() {
       );
       return;
     }
+
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
 
     const tempAttachments: AiAttachment[] = attachedFiles.map((f) => ({
       url: f.uri,
@@ -407,11 +517,31 @@ export default function AiCoachTab() {
     );
   };
 
-  const defaultSuggestions = aiConfig?.suggestedPrompts || [
-    "How is my 10-day workout and step progress?",
-    "Suggest a 15-minute quick full-body HIIT routine",
-    "Substitute barbell squats for lower back stiffness",
-    "Give me 3 high-protein snack ideas under 200 kcal",
+  const defaultSuggestions = [
+    {
+      icon: "dumbbell" as const,
+      title: "15-Minute HIIT Workout",
+      desc: "Quick full-body high-intensity routine",
+      prompt: "Suggest a 15-minute quick full-body HIIT routine for fat burn",
+    },
+    {
+      icon: "food-apple" as const,
+      title: "High-Protein Snack Ideas",
+      desc: "3 nutritious snacks under 200 kcal",
+      prompt: "Give me 3 high-protein snack ideas under 200 kcal with macros",
+    },
+    {
+      icon: "shield-alert" as const,
+      title: "Squat Swaps & Form",
+      desc: "Lower-back friendly knee-safe alternatives",
+      prompt: "Substitute barbell squats for lower back stiffness with safe form tips",
+    },
+    {
+      icon: "chart-line" as const,
+      title: "Review 10-Day Progress",
+      desc: "Analyze recent step, sleep, and workouts",
+      prompt: "How is my 10-day workout, step, and sleep progress looking?",
+    },
   ];
 
   return (
@@ -420,86 +550,128 @@ export default function AiCoachTab() {
 
       {/* TOP HEADER */}
       <View style={[styles.header, { borderBottomColor: colors.divider }]}>
+        {/* Left: Chat History Icon */}
         <TouchableOpacity
-          style={styles.iconBtn}
+          style={[styles.headerCircleBtn, { backgroundColor: colors.iconBtnBg }]}
           onPress={() => setHistoryModalVisible(true)}
+          activeOpacity={0.7}
           accessibilityLabel="Chat History"
         >
-          <MaterialCommunityIcons name="history" size={24} color={colors.text} />
-          {conversations.length > 0 && <View style={styles.historyBadgeDot} />}
+          <Ionicons name="time-outline" size={20} color={colors.text} />
+          {conversations.length > 0 && <View style={styles.historyDot} />}
         </TouchableOpacity>
 
+        {/* Center: AI Title (Purple branding, NO GREEN) */}
         <View style={styles.headerTitleContainer}>
           <View style={styles.headerTitleRow}>
-            <MaterialCommunityIcons name="robot" size={20} color={colors.accentPrimary} />
+            <LinearGradient
+              colors={["#9747FF", "#7C3AED"]}
+              style={styles.headerAiBadge}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Ionicons name="sparkles" size={13} color="#FFFFFF" />
+            </LinearGradient>
             <Text style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
               {currentConversationTitle}
             </Text>
           </View>
           <Text style={[styles.headerSubtitle, { color: colors.textSecondary }]}>
-            Iness AI • Powered by Gemini
+            Iness AI • Personalized Coach
           </Text>
         </View>
 
+        {/* Right: New Chat Button (Exactly like Feed Add Icon) */}
         <TouchableOpacity
-          style={[styles.newChatBtn, { backgroundColor: colors.badgeBg }]}
+          style={[
+            styles.feedAddButton,
+            { backgroundColor: colors.feedAddBtnBg },
+          ]}
           onPress={handleNewChat}
+          activeOpacity={0.8}
+          accessibilityRole="button"
           accessibilityLabel="New Chat"
+          accessibilityHint="Starts a new conversation"
         >
-          <MaterialCommunityIcons name="plus" size={18} color={isDark ? colors.accentPrimary : colors.accentPurple} />
-          <Text style={[styles.newChatText, { color: isDark ? colors.accentPrimary : colors.accentPurple }]}>
-            New
-          </Text>
+          <Ionicons name="add" size={24} color="#FFFFFF" />
         </TouchableOpacity>
       </View>
 
-      {/* SUB-HEADER: PERSONALIZE TOGGLE + DAILY QUOTA BADGE */}
-      <View style={[styles.subHeader, { backgroundColor: colors.bgSecondary, borderBottomColor: colors.divider }]}>
-        <View style={styles.toggleRow}>
-          <Switch
-            value={personalize}
-            onValueChange={setPersonalize}
-            trackColor={{ false: isDark ? "#3A3A3A" : "#D5D5D5", true: colors.accentPrimary }}
-            thumbColor={personalize ? "#121212" : "#FFF"}
-          />
-          <View style={styles.toggleTextCol}>
-            <View style={styles.toggleLabelRow}>
-              <MaterialCommunityIcons name="chart-timeline-variant" size={14} color={colors.accentPrimary} />
-              <Text style={[styles.toggleLabel, { color: colors.text }]}>
-                Personalize (10-Day Data)
-              </Text>
-            </View>
-            <Text style={[styles.toggleHint, { color: colors.textSecondary }]}>
-              {personalize ? "Uses your real steps, sleep, & workouts" : "General fitness mode"}
+      {/* SUB-HEADER: SLEEK CAPSULE BAR (PERSONALIZATION + QUOTA) */}
+      <View
+        style={[
+          styles.subHeader,
+          {
+            backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)",
+            borderBottomColor: colors.divider,
+          },
+        ]}
+      >
+        <View style={styles.subHeaderPillRow}>
+          {/* Personalize toggle pill */}
+          <View
+            style={[
+              styles.capsulePill,
+              {
+                backgroundColor: colors.bgCard,
+                borderColor: colors.border,
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="account-details-outline"
+              size={14}
+              color={personalize ? colors.brandPurple : colors.textMuted}
+            />
+            <Text style={[styles.capsulePillText, { color: colors.text }]}>
+              {personalize ? "10-Day Health Context" : "General Mode"}
+            </Text>
+            <Switch
+              value={personalize}
+              onValueChange={setPersonalize}
+              trackColor={{
+                false: isDark ? "#3A3A3A" : "#D5D5D5",
+                true: colors.brandPurple,
+              }}
+              thumbColor="#FFFFFF"
+              style={{ transform: [{ scaleX: 0.7 }, { scaleY: 0.7 }], marginLeft: 2 }}
+            />
+          </View>
+
+          {/* Daily Quota pill */}
+          <View
+            style={[
+              styles.capsulePill,
+              {
+                backgroundColor:
+                  quotaRemaining > 5
+                    ? colors.brandPurpleLight
+                    : "rgba(244, 67, 54, 0.12)",
+                borderColor:
+                  quotaRemaining > 5
+                    ? colors.brandPurpleBorder
+                    : "rgba(244, 67, 54, 0.3)",
+              },
+            ]}
+          >
+            <MaterialCommunityIcons
+              name="lightning-bolt"
+              size={13}
+              color={quotaRemaining > 5 ? colors.brandPurple : "#F44336"}
+            />
+            <Text
+              style={[
+                styles.quotaPillText,
+                { color: quotaRemaining > 5 ? colors.brandPurple : "#F44336" },
+              ]}
+            >
+              {quotaRemaining}/{quotaLimit} left
             </Text>
           </View>
         </View>
-
-        <View
-          style={[
-            styles.quotaBadge,
-            {
-              backgroundColor: quotaRemaining > 5 ? colors.quotaPositiveBg : "rgba(244, 67, 54, 0.12)",
-            },
-          ]}
-        >
-          <MaterialCommunityIcons
-            name="lightning-bolt"
-            size={13}
-            color={quotaRemaining > 5 ? colors.quotaPositiveText : "#F44336"}
-          />
-          <Text
-            style={[
-              styles.quotaText,
-              { color: quotaRemaining > 5 ? colors.quotaPositiveText : "#F44336" },
-            ]}
-          >
-            {quotaRemaining}/{quotaLimit} left
-          </Text>
-        </View>
       </View>
 
-      {/* CHAT MESSAGES OR STARTER CARDS */}
+      {/* MAIN CHAT CONTENT */}
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -507,59 +679,93 @@ export default function AiCoachTab() {
       >
         {initialLoading ? (
           <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color={colors.accentPrimary} />
+            <ActivityIndicator size="large" color={colors.brandPurple} />
             <Text style={[styles.loadingText, { color: colors.textSecondary }]}>
-              Starting Iness AI Coach...
+              Opening Iness AI...
             </Text>
           </View>
         ) : messages.length === 0 ? (
+          /* EMPTY STATE: CHATGPT-STYLE HERO + RECOMMENDED QUESTIONS */
           <ScrollView
             contentContainerStyle={styles.emptyContainer}
             keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
+            {/* Centered AI Emblem */}
             <LinearGradient
-              colors={isDark ? ["#411D6E", "#1F1335"] : ["#9747FF", "#6825C9"]}
+              colors={["#9747FF", "#6825C9"]}
               style={styles.heroBadge}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
             >
-              <MaterialCommunityIcons name="robot-excited" size={46} color="#BDFF84" />
+              <Ionicons name="sparkles" size={40} color="#FFFFFF" />
             </LinearGradient>
 
             <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              Your Personal AI Fitness Coach
+              What can I help you with today?
             </Text>
             <Text style={[styles.emptySubtitle, { color: colors.textSecondary }]}>
-              Ask about workout swaps, quick routines, nutrition, form checks, or attach a photo or medical/diet report PDF.
+              Ask about workout plans, macro nutrition, form checks, or attach meal photos and blood/diet report PDFs.
             </Text>
 
+            {/* Recommended Prompts Grid (Shown only at the beginning of a new chat) */}
             <View style={styles.suggestionsContainer}>
-              <Text style={[styles.suggestionsHeader, { color: colors.textSecondary }]}>
-                Quick Prompts:
+              <Text style={[styles.suggestionsHeader, { color: colors.textMuted }]}>
+                RECOMMENDED QUESTIONS
               </Text>
-              {defaultSuggestions.map((prompt, idx) => (
-                <TouchableOpacity
-                  key={idx}
-                  style={[
-                    styles.suggestionCard,
-                    {
-                      backgroundColor: colors.bgCard,
-                      borderColor: colors.border,
-                    },
-                  ]}
-                  onPress={() => handleSendMessage(prompt)}
-                >
-                  <MaterialCommunityIcons name="chat-question" size={18} color={colors.accentPrimary} />
-                  <Text
-                    style={[styles.suggestionText, { color: colors.text }]}
-                    numberOfLines={2}
+
+              <View style={styles.promptsGrid}>
+                {defaultSuggestions.map((item, idx) => (
+                  <TouchableOpacity
+                    key={idx}
+                    style={[
+                      styles.promptCard,
+                      {
+                        backgroundColor: colors.bgCard,
+                        borderColor: colors.border,
+                      },
+                    ]}
+                    activeOpacity={0.75}
+                    onPress={() => handleSendMessage(item.prompt)}
                   >
-                    {prompt}
-                  </Text>
-                  <MaterialCommunityIcons name="arrow-right" size={16} color={colors.textMuted} />
-                </TouchableOpacity>
-              ))}
+                    <View style={styles.promptCardHeader}>
+                      <View
+                        style={[
+                          styles.promptIconBox,
+                          { backgroundColor: colors.brandPurpleLight },
+                        ]}
+                      >
+                        <MaterialCommunityIcons
+                          name={item.icon}
+                          size={18}
+                          color={colors.brandPurple}
+                        />
+                      </View>
+                      <Ionicons
+                        name="arrow-forward"
+                        size={15}
+                        color={colors.textMuted}
+                      />
+                    </View>
+                    <Text
+                      style={[styles.promptTitle, { color: colors.text }]}
+                      numberOfLines={1}
+                    >
+                      {item.title}
+                    </Text>
+                    <Text
+                      style={[styles.promptDesc, { color: colors.textSecondary }]}
+                      numberOfLines={2}
+                    >
+                      {item.desc}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
           </ScrollView>
         ) : (
+          /* ACTIVE CONVERSATION: MESSAGES FLATLIST */
           <FlatList
             ref={flatListRef}
             data={messages}
@@ -568,18 +774,26 @@ export default function AiCoachTab() {
             onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
             renderItem={({ item }) => {
               const isUser = item.role === "user";
-              const allItemAttachments = item.attachments || (item.images || []).map((img: { url: string; mimeType?: string }) => ({
-                url: img.url,
-                mimeType: img.mimeType || "image/jpeg",
-                name: "photo.jpg",
-              }));
+              const allItemAttachments =
+                item.attachments ||
+                (item.images || []).map((img: { url: string; mimeType?: string }) => ({
+                  url: img.url,
+                  mimeType: img.mimeType || "image/jpeg",
+                  name: "photo.jpg",
+                }));
 
               return (
                 <View style={[styles.messageRow, isUser ? styles.userRow : styles.modelRow]}>
+                  {/* AI Avatar (Purple, NO GREEN) */}
                   {!isUser && (
-                    <View style={styles.aiAvatar}>
-                      <MaterialCommunityIcons name="robot" size={15} color="#000" />
-                    </View>
+                    <LinearGradient
+                      colors={["#9747FF", "#7C3AED"]}
+                      style={styles.aiAvatar}
+                      start={{ x: 0, y: 0 }}
+                      end={{ x: 1, y: 1 }}
+                    >
+                      <Ionicons name="sparkles" size={14} color="#FFFFFF" />
+                    </LinearGradient>
                   )}
 
                   <View
@@ -602,7 +816,19 @@ export default function AiCoachTab() {
                         {allItemAttachments.map((att: any, i: number) => {
                           const isImg = att.mimeType?.startsWith("image/");
                           if (isImg) {
-                            return <Image key={i} source={{ uri: att.url }} style={styles.chatImage} />;
+                            return (
+                              <TouchableOpacity
+                                key={i}
+                                activeOpacity={0.9}
+                                onPress={() => setPreviewImageUri(att.url)}
+                              >
+                                <Image
+                                  source={{ uri: att.url }}
+                                  style={styles.chatImage}
+                                  resizeMode="cover"
+                                />
+                              </TouchableOpacity>
+                            );
                           }
                           return (
                             <View
@@ -611,7 +837,7 @@ export default function AiCoachTab() {
                                 styles.chatDocPill,
                                 {
                                   backgroundColor: isUser
-                                    ? "rgba(255,255,255,0.18)"
+                                    ? "rgba(255,255,255,0.2)"
                                     : isDark
                                     ? "#1E1E28"
                                     : "#EFEFF4",
@@ -619,9 +845,9 @@ export default function AiCoachTab() {
                               ]}
                             >
                               <MaterialCommunityIcons
-                                name="file-document-outline"
-                                size={18}
-                                color={isUser ? "#FFF" : colors.accentPrimary}
+                                name="file-pdf-box"
+                                size={22}
+                                color="#F44336"
                               />
                               <Text
                                 style={[
@@ -630,7 +856,7 @@ export default function AiCoachTab() {
                                 ]}
                                 numberOfLines={1}
                               >
-                                {att.name || "Attached Document"}
+                                {att.name || "Attached PDF Document"}
                               </Text>
                             </View>
                           );
@@ -643,22 +869,39 @@ export default function AiCoachTab() {
                         {item.content}
                       </Text>
                     ) : (
-                      <FormattedAiText content={item.content} textColor={colors.text} />
+                      <FormattedAiText
+                        content={item.content}
+                        textColor={colors.text}
+                        accentColor={colors.brandPurple}
+                      />
                     )}
 
                     {/* AI Bubble Footer */}
                     {!isUser && (
                       <View style={[styles.aiFooter, { borderTopColor: colors.divider }]}>
                         <Text style={[styles.aiDisclaimerTiny, { color: colors.textMuted }]}>
-                          AI-generated for guidance
+                          Iness AI guidance
                         </Text>
-                        <TouchableOpacity
-                          onPress={() => handleReportMessage(item._id)}
-                          style={styles.flagBtn}
-                          accessibilityLabel="Report message"
-                        >
-                          <MaterialCommunityIcons name="flag-outline" size={14} color={colors.textMuted} />
-                        </TouchableOpacity>
+                        <View style={styles.aiActionBtnsRow}>
+                          <TouchableOpacity
+                            onPress={() => handleCopyMessage(item._id, item.content)}
+                            style={styles.actionIconBtn}
+                            accessibilityLabel="Copy response"
+                          >
+                            <Ionicons
+                              name={copiedId === item._id ? "checkmark" : "copy-outline"}
+                              size={14}
+                              color={copiedId === item._id ? colors.brandPurple : colors.textMuted}
+                            />
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => handleReportMessage(item._id)}
+                            style={styles.actionIconBtn}
+                            accessibilityLabel="Report response"
+                          >
+                            <Feather name="flag" size={13} color={colors.textMuted} />
+                          </TouchableOpacity>
+                        </View>
                       </View>
                     )}
                   </View>
@@ -668,9 +911,14 @@ export default function AiCoachTab() {
             ListFooterComponent={
               loading ? (
                 <View style={[styles.messageRow, styles.modelRow]}>
-                  <View style={styles.aiAvatar}>
-                    <MaterialCommunityIcons name="robot" size={15} color="#000" />
-                  </View>
+                  <LinearGradient
+                    colors={["#9747FF", "#7C3AED"]}
+                    style={styles.aiAvatar}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <Ionicons name="sparkles" size={14} color="#FFFFFF" />
+                  </LinearGradient>
                   <View
                     style={[
                       styles.bubble,
@@ -679,9 +927,9 @@ export default function AiCoachTab() {
                     ]}
                   >
                     <View style={styles.typingRow}>
-                      <ActivityIndicator size="small" color={colors.accentPrimary} />
+                      <ActivityIndicator size="small" color={colors.brandPurple} />
                       <Text style={[styles.typingText, { color: colors.textSecondary }]}>
-                        Iness AI is analyzing...
+                        Iness AI is thinking...
                       </Text>
                     </View>
                   </View>
@@ -691,118 +939,147 @@ export default function AiCoachTab() {
           />
         )}
 
-        {/* ATTACHED FILES PREVIEWS (BEFORE SENDING) */}
-        {attachedFiles.length > 0 && (
-          <View style={[styles.previewContainer, { backgroundColor: colors.bgSecondary }]}>
-            {attachedFiles.map((file, idx) => (
-              <View key={idx} style={styles.previewItem}>
-                {file.type === "image" ? (
-                  <Image source={{ uri: file.uri }} style={styles.previewImage} />
-                ) : (
-                  <View style={[styles.previewDocBox, { backgroundColor: colors.bgCard }]}>
-                    <MaterialCommunityIcons name="file-pdf-box" size={24} color="#F44336" />
-                    <Text style={[styles.previewDocName, { color: colors.text }]} numberOfLines={1}>
-                      {file.name}
-                    </Text>
-                  </View>
-                )}
-                <TouchableOpacity
-                  style={styles.removeImageBtn}
-                  onPress={() => handleRemoveAttachment(idx)}
-                >
-                  <MaterialCommunityIcons name="close" size={12} color="#FFF" />
-                </TouchableOpacity>
-              </View>
-            ))}
-            <Text style={[styles.previewCount, { color: colors.textSecondary }]}>
-              {attachedFiles.length}/2 attached
-            </Text>
-          </View>
-        )}
-
-        {/* INPUT BAR */}
+        {/* CHATGPT-STYLE INPUT BAR CONTAINER */}
         <View
           style={[
-            styles.inputBar,
+            styles.inputContainerOuter,
             {
-              backgroundColor: colors.bgSecondary,
+              backgroundColor: colors.bg,
               borderTopColor: colors.divider,
               paddingBottom: Math.max(insets.bottom, 10),
             },
           ]}
         >
-          <TouchableOpacity
+          {/* Main ChatGPT-style Capsule */}
+          <View
             style={[
-              styles.attachBtn,
+              styles.inputCapsule,
               {
-                backgroundColor: colors.bgCard,
-                opacity: attachedFiles.length >= 2 ? 0.4 : 1,
+                backgroundColor: colors.inputCardBg,
+                borderColor: colors.inputBorder,
               },
             ]}
-            onPress={() => setAttachSheetVisible(true)}
-            disabled={attachedFiles.length >= 2}
-            accessibilityLabel="Attach photo or document"
           >
-            <MaterialCommunityIcons
-              name="paperclip"
-              size={22}
-              color={isDark ? colors.accentPrimary : colors.accentPurple}
-            />
-          </TouchableOpacity>
-
-          <TextInput
-            style={[
-              styles.textInput,
-              {
-                backgroundColor: colors.inputBg,
-                color: colors.text,
-              },
-            ]}
-            placeholder={
-              quotaRemaining > 0
-                ? "Ask about workouts, form, or diet..."
-                : "Daily limit reached (30/30)"
-            }
-            placeholderTextColor={colors.textMuted}
-            value={inputText}
-            onChangeText={setInputText}
-            multiline
-            maxLength={1000}
-            editable={quotaRemaining > 0 && !loading}
-          />
-
-          <TouchableOpacity
-            style={[
-              styles.sendBtn,
-              {
-                backgroundColor:
-                  (!inputText.trim() && attachedFiles.length === 0) || loading || quotaRemaining <= 0
-                    ? isDark ? "#2A2D30" : "#D6D6DD"
-                    : colors.accentPrimary,
-              },
-            ]}
-            onPress={() => handleSendMessage()}
-            disabled={(!inputText.trim() && attachedFiles.length === 0) || loading || quotaRemaining <= 0}
-            accessibilityLabel="Send message"
-          >
-            {loading ? (
-              <ActivityIndicator size="small" color="#000" />
-            ) : (
-              <MaterialCommunityIcons
-                name="send"
-                size={20}
-                color={
-                  (!inputText.trim() && attachedFiles.length === 0) || quotaRemaining <= 0
-                    ? colors.textMuted
-                    : "#000"
-                }
-              />
+            {/* Attachment preview tray (if any file is selected) */}
+            {attachedFiles.length > 0 && (
+              <View style={styles.attachmentTray}>
+                {attachedFiles.map((file, idx) => (
+                  <View key={idx} style={styles.trayItem}>
+                    {file.type === "image" ? (
+                      <Image source={{ uri: file.uri }} style={styles.trayThumb} />
+                    ) : (
+                      <View
+                        style={[
+                          styles.trayDocBox,
+                          { backgroundColor: isDark ? "#282B34" : "#F3F4F6" },
+                        ]}
+                      >
+                        <MaterialCommunityIcons name="file-pdf-box" size={20} color="#F44336" />
+                        <Text
+                          style={[styles.trayDocName, { color: colors.text }]}
+                          numberOfLines={1}
+                        >
+                          {file.name}
+                        </Text>
+                      </View>
+                    )}
+                    <TouchableOpacity
+                      style={styles.removeTrayBtn}
+                      onPress={() => handleRemoveAttachment(idx)}
+                    >
+                      <Ionicons name="close" size={12} color="#FFFFFF" />
+                    </TouchableOpacity>
+                  </View>
+                ))}
+                <Text style={[styles.trayCount, { color: colors.textMuted }]}>
+                  {attachedFiles.length}/2
+                </Text>
+              </View>
             )}
-          </TouchableOpacity>
+
+            {/* Input Row */}
+            <View style={styles.inputRow}>
+              {/* Plus/Attachment Button */}
+              <TouchableOpacity
+                style={[
+                  styles.plusAttachBtn,
+                  {
+                    backgroundColor: isDark ? "#2A2E38" : "#F0F2F6",
+                    opacity: attachedFiles.length >= 2 ? 0.4 : 1,
+                  },
+                ]}
+                onPress={() => setAttachSheetVisible(true)}
+                disabled={attachedFiles.length >= 2}
+                accessibilityLabel="Attach photo or PDF"
+              >
+                <Ionicons
+                  name="add"
+                  size={20}
+                  color={isDark ? "#FFFFFF" : "#1F2937"}
+                />
+              </TouchableOpacity>
+
+              {/* Multiline TextInput */}
+              <TextInput
+                style={[
+                  styles.chatTextInput,
+                  { color: colors.text },
+                ]}
+                placeholder={
+                  quotaRemaining > 0
+                    ? "Message Iness AI..."
+                    : "Daily limit reached (30/30)"
+                }
+                placeholderTextColor={colors.textMuted}
+                value={inputText}
+                onChangeText={setInputText}
+                multiline
+                maxLength={1000}
+                editable={quotaRemaining > 0 && !loading}
+              />
+
+              {/* Circular Send Button (ChatGPT-style upward arrow) */}
+              <TouchableOpacity
+                style={[
+                  styles.sendArrowBtn,
+                  {
+                    backgroundColor:
+                      (!inputText.trim() && attachedFiles.length === 0) ||
+                      loading ||
+                      quotaRemaining <= 0
+                        ? colors.sendBtnBgDisabled
+                        : colors.brandPurple,
+                  },
+                ]}
+                onPress={() => handleSendMessage()}
+                disabled={
+                  (!inputText.trim() && attachedFiles.length === 0) ||
+                  loading ||
+                  quotaRemaining <= 0
+                }
+                accessibilityLabel="Send message"
+              >
+                {loading ? (
+                  <ActivityIndicator size="small" color="#FFFFFF" />
+                ) : (
+                  <Ionicons
+                    name="arrow-up"
+                    size={20}
+                    color={
+                      (!inputText.trim() && attachedFiles.length === 0) ||
+                      quotaRemaining <= 0
+                        ? colors.sendBtnIconDisabled
+                        : "#FFFFFF"
+                    }
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       </KeyboardAvoidingView>
 
-      {/* ATTACHMENT ACTION SHEET (IMAGE OR DOCUMENT) */}
+      {/* ATTACHMENT ACTION SHEET (CAMERA / GALLERY / PDF) */}
       <Modal
         visible={attachSheetVisible}
         animationType="fade"
@@ -810,7 +1087,7 @@ export default function AiCoachTab() {
         onRequestClose={() => setAttachSheetVisible(false)}
       >
         <TouchableOpacity
-          style={[styles.modalOverlay, { backgroundColor: "rgba(0,0,0,0.6)" }]}
+          style={styles.modalOverlay}
           activeOpacity={1}
           onPress={() => setAttachSheetVisible(false)}
         >
@@ -819,39 +1096,76 @@ export default function AiCoachTab() {
               styles.attachSheet,
               {
                 backgroundColor: colors.bg,
-                paddingBottom: Math.max(insets.bottom, 20),
+                paddingBottom: Math.max(insets.bottom, 24),
               },
             ]}
           >
-            <Text style={[styles.attachSheetTitle, { color: colors.text }]}>Add Attachment</Text>
+            <View style={styles.sheetHandle} />
+            <Text style={[styles.attachSheetTitle, { color: colors.text }]}>
+              Add to Conversation
+            </Text>
             <Text style={[styles.attachSheetSubtitle, { color: colors.textSecondary }]}>
-              Upload a meal/workout photo or medical/diet report PDF (max 2)
+              Attach meal/workout photos or medical/diet report PDFs (max 2 items)
             </Text>
 
             <View style={styles.attachOptionsRow}>
+              {/* Take Photo */}
               <TouchableOpacity
-                style={[styles.attachOptionBox, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
-                onPress={handlePickImage}
+                style={[
+                  styles.attachOptionBox,
+                  { backgroundColor: colors.bgCard, borderColor: colors.border },
+                ]}
+                onPress={handleTakePhoto}
               >
-                <View style={[styles.attachIconCircle, { backgroundColor: "rgba(189, 255, 132, 0.15)" }]}>
-                  <MaterialCommunityIcons name="camera" size={26} color="#BDFF84" />
-                </View>
-                <Text style={[styles.attachOptionTitle, { color: colors.text }]}>Upload Photo</Text>
+                <LinearGradient
+                  colors={["#9747FF", "#7C3AED"]}
+                  style={styles.attachIconCircle}
+                >
+                  <Ionicons name="camera" size={24} color="#FFFFFF" />
+                </LinearGradient>
+                <Text style={[styles.attachOptionTitle, { color: colors.text }]}>Camera</Text>
                 <Text style={[styles.attachOptionHint, { color: colors.textSecondary }]}>
-                  Meal, Gym Equipment, Posture
+                  Take photo
                 </Text>
               </TouchableOpacity>
 
+              {/* Gallery */}
               <TouchableOpacity
-                style={[styles.attachOptionBox, { backgroundColor: colors.bgCard, borderColor: colors.border }]}
+                style={[
+                  styles.attachOptionBox,
+                  { backgroundColor: colors.bgCard, borderColor: colors.border },
+                ]}
+                onPress={handlePickGallery}
+              >
+                <LinearGradient
+                  colors={["#3B82F6", "#2563EB"]}
+                  style={styles.attachIconCircle}
+                >
+                  <Ionicons name="images" size={24} color="#FFFFFF" />
+                </LinearGradient>
+                <Text style={[styles.attachOptionTitle, { color: colors.text }]}>Photos</Text>
+                <Text style={[styles.attachOptionHint, { color: colors.textSecondary }]}>
+                  From gallery
+                </Text>
+              </TouchableOpacity>
+
+              {/* Document / PDF */}
+              <TouchableOpacity
+                style={[
+                  styles.attachOptionBox,
+                  { backgroundColor: colors.bgCard, borderColor: colors.border },
+                ]}
                 onPress={handlePickDocument}
               >
-                <View style={[styles.attachIconCircle, { backgroundColor: "rgba(151, 71, 255, 0.15)" }]}>
-                  <MaterialCommunityIcons name="file-pdf-box" size={26} color="#9747FF" />
-                </View>
-                <Text style={[styles.attachOptionTitle, { color: colors.text }]}>Upload Document</Text>
+                <LinearGradient
+                  colors={["#EF4444", "#DC2626"]}
+                  style={styles.attachIconCircle}
+                >
+                  <Ionicons name="document-text" size={24} color="#FFFFFF" />
+                </LinearGradient>
+                <Text style={[styles.attachOptionTitle, { color: colors.text }]}>PDF Report</Text>
                 <Text style={[styles.attachOptionHint, { color: colors.textSecondary }]}>
-                  Blood Report, Diet Plan PDF
+                  Diet / Labs
                 </Text>
               </TouchableOpacity>
             </View>
@@ -859,14 +1173,14 @@ export default function AiCoachTab() {
         </TouchableOpacity>
       </Modal>
 
-      {/* CHAT HISTORY MODAL (DRAWER) */}
+      {/* CHAT HISTORY MODAL */}
       <Modal
         visible={historyModalVisible}
         animationType="slide"
         transparent={true}
         onRequestClose={() => setHistoryModalVisible(false)}
       >
-        <View style={[styles.modalOverlay, { backgroundColor: "rgba(0,0,0,0.65)" }]}>
+        <View style={styles.modalOverlay}>
           <View
             style={[
               styles.modalSheet,
@@ -876,33 +1190,43 @@ export default function AiCoachTab() {
               },
             ]}
           >
+            <View style={styles.sheetHandle} />
+
             {/* Modal Header */}
             <View style={[styles.modalHeader, { borderBottomColor: colors.divider }]}>
               <View style={styles.modalTitleRow}>
-                <MaterialCommunityIcons name="history" size={22} color={colors.accentPrimary} />
+                <Ionicons name="time-outline" size={22} color={colors.brandPurple} />
                 <Text style={[styles.modalTitle, { color: colors.text }]}>
                   Chat History
                 </Text>
               </View>
-              <TouchableOpacity onPress={() => setHistoryModalVisible(false)}>
-                <MaterialCommunityIcons name="close" size={24} color={colors.textSecondary} />
+              <TouchableOpacity
+                onPress={() => setHistoryModalVisible(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
               </TouchableOpacity>
             </View>
 
             {/* Start New Chat in Modal */}
             <TouchableOpacity
-              style={[styles.modalNewBtn, { backgroundColor: colors.accentPurple }]}
+              style={[styles.modalNewBtn, { backgroundColor: colors.brandPurple }]}
               onPress={handleNewChat}
             >
-              <MaterialCommunityIcons name="plus" size={20} color="#FFF" />
+              <Ionicons name="add" size={20} color="#FFFFFF" />
               <Text style={styles.modalNewBtnText}>Start New Conversation</Text>
             </TouchableOpacity>
 
             {/* List of past conversations */}
             {conversations.length === 0 ? (
               <View style={styles.modalEmpty}>
+                <MaterialCommunityIcons
+                  name="message-text-outline"
+                  size={42}
+                  color={colors.textMuted}
+                />
                 <Text style={[styles.modalEmptyText, { color: colors.textSecondary }]}>
-                  No past conversations yet.
+                  No past conversations yet
                 </Text>
               </View>
             ) : (
@@ -910,6 +1234,7 @@ export default function AiCoachTab() {
                 data={conversations}
                 keyExtractor={(item) => item._id}
                 contentContainerStyle={{ paddingVertical: 8 }}
+                showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => {
                   const isSelected = item._id === currentConversationId;
                   return (
@@ -918,11 +1243,11 @@ export default function AiCoachTab() {
                         styles.historyItem,
                         {
                           backgroundColor: isSelected
-                            ? isDark
-                              ? "rgba(151, 71, 255, 0.2)"
-                              : "#F0E7FF"
+                            ? colors.brandPurpleLight
                             : colors.bgCard,
-                          borderColor: isSelected ? colors.accentPurple : colors.border,
+                          borderColor: isSelected
+                            ? colors.brandPurple
+                            : colors.border,
                         },
                       ]}
                       onPress={() => handleSelectConversation(item)}
@@ -930,7 +1255,7 @@ export default function AiCoachTab() {
                       <MaterialCommunityIcons
                         name="message-text-outline"
                         size={20}
-                        color={isSelected ? colors.accentPrimary : colors.textMuted}
+                        color={isSelected ? colors.brandPurple : colors.textMuted}
                       />
                       <View style={{ flex: 1, marginLeft: 12 }}>
                         <Text
@@ -943,18 +1268,24 @@ export default function AiCoachTab() {
                           ]}
                           numberOfLines={1}
                         >
-                          {item.title}
+                          {item.title || "Untitled Conversation"}
                         </Text>
                         <Text style={[styles.historyDate, { color: colors.textMuted }]}>
-                          {new Date(item.lastMessageAt || item.createdAt).toLocaleDateString()}
+                          {new Date(
+                            item.lastMessageAt || item.createdAt
+                          ).toLocaleDateString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                          })}
                         </Text>
                       </View>
                       <TouchableOpacity
                         onPress={() => handleDeleteConversation(item._id)}
                         style={styles.deleteBtn}
+                        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                         accessibilityLabel="Delete chat"
                       >
-                        <MaterialCommunityIcons name="trash-can-outline" size={18} color="#F44336" />
+                        <Ionicons name="trash-outline" size={18} color="#F44336" />
                       </TouchableOpacity>
                     </TouchableOpacity>
                   );
@@ -962,6 +1293,30 @@ export default function AiCoachTab() {
               />
             )}
           </View>
+        </View>
+      </Modal>
+
+      {/* FULL-SCREEN IMAGE VIEWER MODAL */}
+      <Modal
+        visible={!!previewImageUri}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setPreviewImageUri(null)}
+      >
+        <View style={styles.fullImageOverlay}>
+          <TouchableOpacity
+            style={styles.closeFullImageBtn}
+            onPress={() => setPreviewImageUri(null)}
+          >
+            <Ionicons name="close" size={26} color="#FFFFFF" />
+          </TouchableOpacity>
+          {previewImageUri && (
+            <Image
+              source={{ uri: previewImageUri }}
+              style={styles.fullImage}
+              resizeMode="contain"
+            />
+          )}
         </View>
       </Modal>
     </SafeAreaView>
@@ -977,21 +1332,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingVertical: 10,
     borderBottomWidth: 1,
   },
-  iconBtn: {
-    padding: 6,
+  headerCircleBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    justifyContent: "center",
+    alignItems: "center",
     position: "relative",
   },
-  historyBadgeDot: {
+  historyDot: {
     position: "absolute",
     top: 6,
     right: 6,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#BDFF84",
+    width: 7,
+    height: 7,
+    borderRadius: 3.5,
+    backgroundColor: "#9747FF",
   },
   headerTitleContainer: {
     flex: 1,
@@ -1003,6 +1362,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
   },
+  headerAiBadge: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   headerTitle: {
     fontSize: 16,
     fontWeight: "700",
@@ -1013,57 +1379,42 @@ const styles = StyleSheet.create({
     marginTop: 2,
     fontWeight: "500",
   },
-  newChatBtn: {
-    flexDirection: "row",
+  feedAddButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    justifyContent: "center",
     alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 16,
-    gap: 4,
-  },
-  newChatText: {
-    fontSize: 12,
-    fontWeight: "600",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
   },
   subHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderBottomWidth: StyleSheet.hairlineWidth,
   },
-  toggleRow: {
+  subHeaderPillRow: {
     flexDirection: "row",
     alignItems: "center",
-    flex: 1,
+    justifyContent: "space-between",
+    gap: 8,
   },
-  toggleTextCol: {
-    marginLeft: 8,
-    flex: 1,
-  },
-  toggleLabelRow: {
+  capsulePill: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 20,
+    borderWidth: 1,
+    gap: 6,
   },
-  toggleLabel: {
-    fontSize: 12,
+  capsulePillText: {
+    fontSize: 11,
     fontWeight: "600",
   },
-  toggleHint: {
-    fontSize: 10,
-    marginTop: 1,
-  },
-  quotaBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 12,
-    gap: 3,
-  },
-  quotaText: {
+  quotaPillText: {
     fontSize: 11,
     fontWeight: "700",
   },
@@ -1079,25 +1430,25 @@ const styles = StyleSheet.create({
   },
   emptyContainer: {
     alignItems: "center",
-    paddingHorizontal: 24,
-    paddingTop: 32,
+    paddingHorizontal: 20,
+    paddingTop: 36,
     paddingBottom: 24,
   },
   heroBadge: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 76,
+    height: 76,
+    borderRadius: 38,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
     shadowColor: "#9747FF",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 8,
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "800",
     textAlign: "center",
     marginBottom: 8,
@@ -1105,37 +1456,52 @@ const styles = StyleSheet.create({
   emptySubtitle: {
     fontSize: 13,
     textAlign: "center",
-    lineHeight: 18,
-    marginBottom: 26,
+    lineHeight: 19,
+    marginBottom: 28,
+    maxWidth: 320,
   },
   suggestionsContainer: {
     width: "100%",
   },
   suggestionsHeader: {
-    fontSize: 12,
-    fontWeight: "600",
-    marginBottom: 10,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+    fontSize: 11,
+    fontWeight: "700",
+    marginBottom: 12,
+    letterSpacing: 0.8,
   },
-  suggestionCard: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 14,
-    borderRadius: 14,
-    marginBottom: 10,
-    borderWidth: 1,
+  promptsGrid: {
     gap: 10,
   },
-  suggestionText: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: "500",
-    lineHeight: 18,
+  promptCard: {
+    padding: 14,
+    borderRadius: 16,
+    borderWidth: 1,
+  },
+  promptCardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+  promptIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  promptTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  promptDesc: {
+    fontSize: 12,
+    lineHeight: 16,
   },
   messageList: {
     paddingHorizontal: 16,
-    paddingTop: 12,
+    paddingTop: 14,
   },
   messageRow: {
     flexDirection: "row",
@@ -1152,7 +1518,6 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: "#BDFF84",
     justifyContent: "center",
     alignItems: "center",
     marginRight: 8,
@@ -1172,22 +1537,22 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 21,
   },
   chatImage: {
-    width: 140,
-    height: 140,
+    width: 180,
+    height: 180,
     borderRadius: 12,
     backgroundColor: "#333",
   },
   chatDocPill: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-    borderRadius: 8,
-    gap: 6,
-    maxWidth: 220,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    gap: 8,
+    maxWidth: 240,
   },
   chatDocText: {
     fontSize: 12,
@@ -1203,12 +1568,16 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
   },
   aiDisclaimerTiny: {
-    fontSize: 9,
+    fontSize: 10,
     flex: 1,
   },
-  flagBtn: {
+  aiActionBtnsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  actionIconBtn: {
     padding: 4,
-    marginLeft: 6,
   },
   typingRow: {
     flexDirection: "row",
@@ -1219,84 +1588,109 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontStyle: "italic",
   },
-  previewContainer: {
+  inputContainerOuter: {
+    paddingHorizontal: 14,
+    paddingTop: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+  },
+  inputCapsule: {
+    borderRadius: 24,
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  attachmentTray: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    gap: 12,
+    paddingHorizontal: 6,
+    paddingTop: 4,
+    paddingBottom: 8,
+    gap: 10,
   },
-  previewItem: {
+  trayItem: {
     position: "relative",
   },
-  previewImage: {
-    width: 50,
-    height: 50,
+  trayThumb: {
+    width: 48,
+    height: 48,
     borderRadius: 8,
   },
-  previewDocBox: {
-    width: 80,
-    height: 50,
-    borderRadius: 8,
-    justifyContent: "center",
+  trayDocBox: {
+    flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 6,
+    maxWidth: 160,
   },
-  previewDocName: {
-    fontSize: 9,
-    marginTop: 2,
+  trayDocName: {
+    fontSize: 11,
+    fontWeight: "600",
+    flex: 1,
   },
-  removeImageBtn: {
+  removeTrayBtn: {
     position: "absolute",
     top: -5,
     right: -5,
-    backgroundColor: "#F44336",
+    backgroundColor: "#EF4444",
     width: 18,
     height: 18,
     borderRadius: 9,
     justifyContent: "center",
     alignItems: "center",
   },
-  previewCount: {
+  trayCount: {
     fontSize: 11,
     marginLeft: "auto",
+    paddingRight: 6,
   },
-  inputBar: {
+  inputRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
-    paddingTop: 8,
-    borderTopWidth: 1,
     gap: 8,
   },
-  attachBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  plusAttachBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     justifyContent: "center",
     alignItems: "center",
   },
-  textInput: {
+  chatTextInput: {
     flex: 1,
-    minHeight: 40,
-    maxHeight: 100,
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    minHeight: 36,
+    maxHeight: 110,
     fontSize: 14,
+    paddingHorizontal: 6,
+    paddingVertical: 6,
+    lineHeight: 20,
   },
-  sendBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  sendArrowBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     justifyContent: "center",
     alignItems: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.65)",
+    justifyContent: "flex-end",
   },
   attachSheet: {
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingTop: 12,
+  },
+  sheetHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "rgba(128,128,128,0.4)",
+    alignSelf: "center",
+    marginBottom: 16,
   },
   attachSheetTitle: {
     fontSize: 18,
@@ -1313,15 +1707,15 @@ const styles = StyleSheet.create({
   },
   attachOptionBox: {
     flex: 1,
-    padding: 16,
+    padding: 14,
     borderRadius: 16,
     borderWidth: 1,
     alignItems: "center",
   },
   attachIconCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 10,
@@ -1329,29 +1723,25 @@ const styles = StyleSheet.create({
   attachOptionTitle: {
     fontSize: 13,
     fontWeight: "700",
-    marginBottom: 3,
+    marginBottom: 2,
   },
   attachOptionHint: {
     fontSize: 10,
     textAlign: "center",
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "flex-end",
   },
   modalSheet: {
     height: "75%",
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 12,
   },
   modalHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingBottom: 16,
-    borderBottomWidth: 1,
+    borderBottomWidth: StyleSheet.hairlineWidth,
   },
   modalTitleRow: {
     flexDirection: "row",
@@ -1372,7 +1762,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   modalNewBtnText: {
-    color: "#FFF",
+    color: "#FFFFFF",
     fontWeight: "700",
     fontSize: 14,
   },
@@ -1380,6 +1770,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    gap: 8,
   },
   modalEmptyText: {
     fontSize: 14,
@@ -1388,7 +1779,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 12,
-    borderRadius: 12,
+    borderRadius: 14,
     marginBottom: 8,
     borderWidth: 1,
   },
@@ -1396,10 +1787,32 @@ const styles = StyleSheet.create({
     fontSize: 13,
   },
   historyDate: {
-    fontSize: 10,
+    fontSize: 11,
     marginTop: 2,
   },
   deleteBtn: {
     padding: 6,
+  },
+  fullImageOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.92)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  closeFullImageBtn: {
+    position: "absolute",
+    top: 50,
+    right: 20,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+  },
+  fullImage: {
+    width: SCREEN_WIDTH * 0.95,
+    height: "75%",
   },
 });
