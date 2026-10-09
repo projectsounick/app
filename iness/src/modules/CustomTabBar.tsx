@@ -33,9 +33,18 @@ export default function CustomTabBar({
     const showSub = Keyboard.addListener(showEvent, () => setKeyboardVisible(true));
     const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardVisible(false));
 
+    let androidWillShowSub: any;
+    let androidWillHideSub: any;
+    if (Platform.OS === "android") {
+      androidWillShowSub = Keyboard.addListener("keyboardWillShow", () => setKeyboardVisible(true));
+      androidWillHideSub = Keyboard.addListener("keyboardWillHide", () => setKeyboardVisible(false));
+    }
+
     return () => {
       showSub.remove();
       hideSub.remove();
+      androidWillShowSub?.remove();
+      androidWillHideSub?.remove();
     };
   }, []);
   

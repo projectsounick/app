@@ -171,19 +171,44 @@ export default function AiCoachTab() {
   const flatListRef = useRef<FlatList>(null);
   const bottomTabBarClearance = 60 + Math.max(insets.bottom, 8);
 
-  // Monitor keyboard to adjust input container clearance
+  // Monitor keyboard to adjust input container clearance and auto-scroll messages
   useEffect(() => {
-    const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
-    const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+    const onKeyboardShow = () => {
+      setKeyboardVisible(true);
+      if (messages.length > 0) {
+        setTimeout(() => {
+          flatListRef.current?.scrollToEnd({ animated: true });
+        }, 100);
+      }
+    };
 
-    const showSub = Keyboard.addListener(showEvent, () => setKeyboardVisible(true));
-    const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardVisible(false));
+    const onKeyboardHide = () => {
+      setKeyboardVisible(false);
+    };
+
+    const showSub = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
+      onKeyboardShow
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide",
+      onKeyboardHide
+    );
+
+    let willShowSub: any;
+    let willHideSub: any;
+    if (Platform.OS === "android") {
+      willShowSub = Keyboard.addListener("keyboardWillShow", onKeyboardShow);
+      willHideSub = Keyboard.addListener("keyboardWillHide", onKeyboardHide);
+    }
 
     return () => {
       showSub.remove();
       hideSub.remove();
+      willShowSub?.remove();
+      willHideSub?.remove();
     };
-  }, []);
+  }, [messages.length]);
 
   // Theme Colors (Purple & clean neutral palette - No harsh neon green)
   const colors = {
@@ -576,8 +601,13 @@ export default function AiCoachTab() {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.bg }]} edges={["top"]}>
       <StatusBar barStyle={isDark ? "light-content" : "dark-content"} />
 
-      {/* TOP HEADER */}
-      <View style={[styles.header, { borderBottomColor: colors.divider }]}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+      >
+        {/* TOP HEADER */}
+        <View style={[styles.header, { borderBottomColor: colors.divider }]}>
         {/* Left: Chat History Icon */}
         <TouchableOpacity
           style={[styles.headerCircleBtn, { backgroundColor: colors.iconBtnBg }]}
@@ -699,12 +729,6 @@ export default function AiCoachTab() {
         </View>
       </View>
 
-      {/* MAIN CHAT CONTENT */}
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
-      >
         {initialLoading ? (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color={colors.brandPurple} />
@@ -718,6 +742,7 @@ export default function AiCoachTab() {
             style={{ flex: 1 }}
             contentContainerStyle={styles.emptyContainer}
             keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={false}
           >
             {/* Centered AI Emblem */}
@@ -807,6 +832,8 @@ export default function AiCoachTab() {
                 flatListRef.current?.scrollToEnd({ animated: false });
               }
             }}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="on-drag"
             showsVerticalScrollIndicator={true}
             renderItem={({ item }) => {
               const isUser = item.role === "user";
@@ -983,11 +1010,7 @@ export default function AiCoachTab() {
               backgroundColor: colors.bg,
               borderTopColor: colors.divider,
               marginBottom: isKeyboardVisible ? 0 : bottomTabBarClearance,
-              paddingBottom: isKeyboardVisible
-                ? Platform.OS === "ios"
-                  ? Math.max(insets.bottom, 8)
-                  : 8
-                : 8,
+              paddingBottom: 8,
             },
           ]}
         >
@@ -1077,6 +1100,7 @@ export default function AiCoachTab() {
                 multiline
                 maxLength={1000}
                 editable={quotaRemaining > 0 && !loading}
+                textAlignVertical="center"
               />
 
               {/* Circular Send Button (ChatGPT-style upward arrow) */}
