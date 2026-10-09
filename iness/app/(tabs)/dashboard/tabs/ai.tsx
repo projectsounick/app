@@ -603,8 +603,8 @@ export default function AiCoachTab() {
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        keyboardVerticalOffset={0}
       >
         {/* TOP HEADER */}
         <View style={[styles.header, { borderBottomColor: colors.divider }]}>
@@ -1101,6 +1101,14 @@ export default function AiCoachTab() {
                 maxLength={1000}
                 editable={quotaRemaining > 0 && !loading}
                 textAlignVertical="center"
+                onFocus={() => {
+                  setKeyboardVisible(true);
+                  if (messages.length > 0) {
+                    setTimeout(() => {
+                      flatListRef.current?.scrollToEnd({ animated: true });
+                    }, 80);
+                  }
+                }}
               />
 
               {/* Circular Send Button (ChatGPT-style upward arrow) */}

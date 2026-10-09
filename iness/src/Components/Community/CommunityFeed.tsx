@@ -527,6 +527,8 @@ const CommunityPosts = ({
   const [loadingMore, setLoadingMore] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const isLoadingMoreRef = useRef(false);
+  const isFetchingPage1Ref = useRef(false);
+  const fetchRequestIdRef = useRef(0);
   const feedSearchQueryRef = useRef("");
   const isSearchMountedRef = useRef(false);
   const [visibleComments, setVisibleComments] = useState<
@@ -765,6 +767,7 @@ const CommunityPosts = ({
       append: boolean = false,
       searchParam?: string
     ) => {
+      const currentRequestId = ++fetchRequestIdRef.current;
       try {
         if (!communityId) {
           setPosts([]);
@@ -776,6 +779,7 @@ const CommunityPosts = ({
         if (append) {
           setLoadingMore(true);
         } else {
+          isFetchingPage1Ref.current = true;
           setIsLoading(true);
         }
 
@@ -792,6 +796,11 @@ const CommunityPosts = ({
           queryToUse ? queryToUse.trim() : undefined,
           feedSort
         );
+
+        if (currentRequestId !== fetchRequestIdRef.current && !append) {
+          // A newer refresh/fetch superseded this request; avoid overriding with stale data
+          return;
+        }
 
         if (response && response.success) {
           const incomingData = Array.isArray(response.data) ? response.data : [];
@@ -823,6 +832,9 @@ const CommunityPosts = ({
       } catch (error) {
         console.error("Error fetching posts:", error);
       } finally {
+        if (!append) {
+          isFetchingPage1Ref.current = false;
+        }
         setIsLoading(false);
         setLoadingMore(false);
         isLoadingMoreRef.current = false;
@@ -902,6 +914,7 @@ const CommunityPosts = ({
     setVisiblePostIds({});
     setPage(1);
     setHasMore(true);
+    lastSuccessfulFetchRef.current = null;
   }, [communityId]);
 
   useEffect(() => {
@@ -924,7 +937,7 @@ const CommunityPosts = ({
         };
       }
 
-      const fetchScope = `${communityId}:${showMyPosts}`;
+      const fetchScope = `${communityId}:${showMyPosts}:${feedSearchQueryRef.current || ""}:${feedSort}`;
       const lastFetch = lastSuccessfulFetchRef.current;
       const hasFreshData =
         lastFetch?.scope === fetchScope &&
@@ -940,7 +953,7 @@ const CommunityPosts = ({
       return () => {
         setActiveVideoKey(null);
       };
-    }, [communityId, showMyPosts, fetchPosts, setPosts])
+    }, [communityId, showMyPosts, fetchPosts, setPosts, feedSort])
   );
 
   const postsRef = useRef(posts);
@@ -997,19 +1010,33 @@ const CommunityPosts = ({
 
 
   const loadMorePosts = useCallback(() => {
-    if (isLoadingMoreRef.current || loadingMore || !hasMore || isLoading) {
+    if (
+      isLoadingMoreRef.current ||
+      loadingMore ||
+      !hasMore ||
+      isLoading ||
+      isFetchingPage1Ref.current ||
+      posts.length === 0
+    ) {
       return;
     }
     isLoadingMoreRef.current = true;
     fetchPosts(page + 1, true, feedSearchQueryRef.current);
-  }, [page, hasMore, loadingMore, isLoading, fetchPosts]);
+  }, [page, hasMore, loadingMore, isLoading, fetchPosts, posts.length]);
 
   const handleEndReached = useCallback(() => {
-    if (!hasMore || isLoading || loadingMore || isLoadingMoreRef.current) {
+    if (
+      !hasMore ||
+      isLoading ||
+      loadingMore ||
+      isLoadingMoreRef.current ||
+      isFetchingPage1Ref.current ||
+      posts.length === 0
+    ) {
       return;
     }
     loadMorePosts();
-  }, [hasMore, isLoading, loadingMore, loadMorePosts]);
+  }, [hasMore, isLoading, loadingMore, loadMorePosts, posts.length]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
