@@ -66,10 +66,16 @@ const policies = [
     email: "founder@iness.fitness",
   },
   {
-    title: "Changes to Policy",
-    icon: "file-document-edit-outline",
+    title: "AI Meal Logging & Nutrition Policy",
+    icon: "camera-iris",
     content:
-      "This policy may be updated from time to time. Users will be notified via in-app alerts. Continued use of the app constitutes acceptance of the updated policy.",
+      "When you use our AI Meal Logging and Nutrition Table scanner, food photos and nutrition label images are processed using AI computer vision solely to estimate calories, macronutrients, and maintain your personal meal diary. We do not use your private food photos for public advertising.",
+  },
+  {
+    title: "AI Nutrition & Health Disclaimer",
+    icon: "alert-decagram-outline",
+    content:
+      "Nutritional figures (calories, protein, carbs, fat, fiber) and health scores provided by Iness AI are algorithmic estimates for fitness and wellness tracking only. They do not constitute certified medical, dietetic, or clinical advice. Nutrition facts table OCR reads manufacturer-provided labels from packaging. Always consult a certified healthcare professional or clinical nutritionist for medical dietary needs.",
   },
   {
     title: "Changes to Policy",

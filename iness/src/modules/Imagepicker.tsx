@@ -18,6 +18,7 @@ import { userService } from "../services/user.service";
 import { transformatiomImageService } from "../services/transofmationImage.service";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import DietPlanBottomSheet from "@/src/Modals/PdfBottomSheet";
+import MealLogFlowModal from "@/src/Modals/MealLogFlowModal";
 import { setCalendarSheetOpen } from "@/Slices/componentOpenSlice";
 import { useDispatch } from "react-redux";
 import { createStreak } from "../services/streaks.service";
@@ -39,6 +40,8 @@ const ImagePickerButton: React.FC = () => {
   const [imageUploadLoader, setImageUploadLoader] = useState(false);
   const [captureTypeVisible, setCaptureTypeVisible] = useState(false);
   const [captureRequest, setCaptureRequest] = useState<CaptureRequest | null>(null);
+  const [mediaActionModalVisible, setMediaActionModalVisible] = useState(false);
+  const [mealLogModalVisible, setMealLogModalVisible] = useState(false);
 
   const [visible, setVisible] = useState(false);
   const onClose = () => setVisible(false);
@@ -236,7 +239,15 @@ const ImagePickerButton: React.FC = () => {
   };
 
   const subButtons = [
-    { key: "media", icon: "images", label: "Add transformation media", action: () => pickImage("gallery") },
+    {
+      key: "media",
+      icon: "camera",
+      label: "Log meal or upload media",
+      action: () => {
+        closeMenu();
+        setMediaActionModalVisible(true);
+      },
+    },
     {
       key: "calendar",
       icon: "calendar",
@@ -300,6 +311,91 @@ const ImagePickerButton: React.FC = () => {
       </TouchableOpacity>
 
       {visible && <DietPlanBottomSheet visible={visible} onClose={onClose} />}
+
+      {/* Media Chooser Modal: AI Meal Log vs Transformation Upload */}
+      <Modal
+        visible={mediaActionModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setMediaActionModalVisible(false)}
+        accessibilityViewIsModal
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          style={styles.captureBackdrop}
+          onPress={() => setMediaActionModalVisible(false)}
+        >
+          <View style={styles.captureSheet} onStartShouldSetResponder={() => true}>
+            <View style={styles.captureAccent} />
+            <View style={styles.captureHeader}>
+              <Ionicons name="camera" size={20} color={theme.colors.text} />
+              <Text style={styles.captureHeaderTitle}>Choose Action</Text>
+            </View>
+            <Text style={styles.captureSubtitle}>
+              Log a meal with AI nutrition analysis or upload transformation progress media.
+            </Text>
+
+            <View style={styles.captureButtons}>
+              {/* Option 1: AI Meal Log */}
+              <TouchableOpacity
+                style={[styles.capturePrimary, { backgroundColor: "#9747FF" }]}
+                activeOpacity={0.85}
+                onPress={() => {
+                  setMediaActionModalVisible(false);
+                  setMealLogModalVisible(true);
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="Log meal with AI"
+              >
+                <Ionicons name="sparkles" size={20} color="#FFF" />
+                <View style={{ flex: 1, marginLeft: 10 }}>
+                  <Text style={styles.capturePrimaryText}>Log Meal with AI</Text>
+                  <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11, marginTop: 2 }}>
+                    Scan plate for calories, protein, carbs & fat
+                  </Text>
+                </View>
+                <Ionicons name="arrow-forward" size={16} color="#FFF" />
+              </TouchableOpacity>
+
+              {/* Option 2: Transformation Media */}
+              <TouchableOpacity
+                style={styles.captureSecondary}
+                activeOpacity={0.85}
+                onPress={() => {
+                  setMediaActionModalVisible(false);
+                  pickImage("gallery");
+                }}
+                accessibilityRole="button"
+                accessibilityLabel="Upload transformation progress media"
+              >
+                <Ionicons name="images" size={20} color={theme.colors.text} />
+                <View style={{ flex: 1, marginLeft: 10 }}>
+                  <Text style={styles.captureSecondaryText}>Transformation Media</Text>
+                  <Text style={{ color: theme.colors.textSecondary, fontSize: 11, marginTop: 2 }}>
+                    Upload physique photos or progress video
+                  </Text>
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={theme.colors.textSecondary} />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              style={styles.captureCancel}
+              activeOpacity={0.85}
+              onPress={() => setMediaActionModalVisible(false)}
+            >
+              <Ionicons name="close" size={16} color={theme.colors.textSecondary} />
+              <Text style={styles.captureCancelText}>Cancel</Text>
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+      </Modal>
+
+      {/* AI Meal Log Flow Modal */}
+      <MealLogFlowModal
+        visible={mealLogModalVisible}
+        onClose={() => setMealLogModalVisible(false)}
+      />
 
       <Modal
         visible={captureTypeVisible}

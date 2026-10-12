@@ -32,6 +32,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import SmallHeader from "@/src/modules/SmallHeader";
 import FloatingOptions from "@/src/modules/ButtonSection";
 import HealthDashboard from "@/src/modules/HealthCards";
+import MealTrackingCard from "@/src/Components/Home/MealTrackingCard";
 
 import SessionCarousel from "@/src/Components/Home/SessionCards";
 import TestimonialsCarousel from "@/src/Components/Home/TestimonialsCarousel";
@@ -243,6 +244,14 @@ const YourComponent = () => {
         content: (
           <LoginJsxWrapper loginButton={false} backButton={false}>
             <SessionCarousel />
+          </LoginJsxWrapper>
+        ),
+      },
+      {
+        key: "meal-tracking",
+        content: (
+          <LoginJsxWrapper loginButton={false} backButton={false}>
+            <MealTrackingCard />
           </LoginJsxWrapper>
         ),
       },

@@ -27,24 +27,17 @@ export default function CustomTabBar({
   const [isKeyboardVisible, setKeyboardVisible] = useState(false);
 
   useEffect(() => {
+    // iOS: use "will" events for smoother pre-animation
+    // Android: use "did" events ("will" events don't fire on Android)
     const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
     const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
 
     const showSub = Keyboard.addListener(showEvent, () => setKeyboardVisible(true));
     const hideSub = Keyboard.addListener(hideEvent, () => setKeyboardVisible(false));
 
-    let androidWillShowSub: any;
-    let androidWillHideSub: any;
-    if (Platform.OS === "android") {
-      androidWillShowSub = Keyboard.addListener("keyboardWillShow", () => setKeyboardVisible(true));
-      androidWillHideSub = Keyboard.addListener("keyboardWillHide", () => setKeyboardVisible(false));
-    }
-
     return () => {
       showSub.remove();
       hideSub.remove();
-      androidWillShowSub?.remove();
-      androidWillHideSub?.remove();
     };
   }, []);
   

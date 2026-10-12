@@ -17,6 +17,7 @@ import {
   StatusBar,
   Dimensions,
   Keyboard,
+  Animated,
 } from "react-native";
 import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons, Feather } from "@expo/vector-icons";
@@ -171,21 +172,42 @@ export default function AiCoachTab() {
   const flatListRef = useRef<FlatList>(null);
   const bottomTabBarClearance = 60 + Math.max(insets.bottom, 8);
 
+  // Animated value for smooth keyboard-aware input positioning
+  const keyboardMarginAnim = useRef(new Animated.Value(bottomTabBarClearance)).current;
+
   // Monitor keyboard to adjust input container clearance and auto-scroll messages
   useEffect(() => {
-    const onKeyboardShow = () => {
+    const onKeyboardShow = (event: any) => {
+      const height = event?.endCoordinates?.height || 0;
       setKeyboardVisible(true);
+
+      // On Android with edge-to-edge, adjustResize is broken, so we manually
+      // animate the input container above the keyboard
+      const targetMargin = Platform.OS === "android" ? height : 0;
+      Animated.timing(keyboardMarginAnim, {
+        toValue: targetMargin,
+        duration: Platform.OS === "ios" ? (event?.duration || 250) : 200,
+        useNativeDriver: false,
+      }).start();
+
       if (messages.length > 0) {
         setTimeout(() => {
           flatListRef.current?.scrollToEnd({ animated: true });
-        }, 100);
+        }, 150);
       }
     };
 
     const onKeyboardHide = () => {
       setKeyboardVisible(false);
+      Animated.timing(keyboardMarginAnim, {
+        toValue: bottomTabBarClearance,
+        duration: Platform.OS === "ios" ? 250 : 200,
+        useNativeDriver: false,
+      }).start();
     };
 
+    // iOS: use "will" events for smoother pre-animation
+    // Android: use "did" events ("will" events don't fire on Android)
     const showSub = Keyboard.addListener(
       Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow",
       onKeyboardShow
@@ -195,20 +217,11 @@ export default function AiCoachTab() {
       onKeyboardHide
     );
 
-    let willShowSub: any;
-    let willHideSub: any;
-    if (Platform.OS === "android") {
-      willShowSub = Keyboard.addListener("keyboardWillShow", onKeyboardShow);
-      willHideSub = Keyboard.addListener("keyboardWillHide", onKeyboardHide);
-    }
-
     return () => {
       showSub.remove();
       hideSub.remove();
-      willShowSub?.remove();
-      willHideSub?.remove();
     };
-  }, [messages.length]);
+  }, [messages.length, bottomTabBarClearance]);
 
   // Theme Colors (Purple & clean neutral palette - No harsh neon green)
   const colors = {
@@ -1003,13 +1016,13 @@ export default function AiCoachTab() {
         )}
 
         {/* CHATGPT-STYLE INPUT BAR CONTAINER */}
-        <View
+        <Animated.View
           style={[
             styles.inputContainerOuter,
             {
               backgroundColor: colors.bg,
               borderTopColor: colors.divider,
-              marginBottom: isKeyboardVisible ? 0 : bottomTabBarClearance,
+              marginBottom: keyboardMarginAnim,
               paddingBottom: 8,
             },
           ]}
@@ -1072,7 +1085,10 @@ export default function AiCoachTab() {
                     opacity: attachedFiles.length >= 2 ? 0.4 : 1,
                   },
                 ]}
-                onPress={() => setAttachSheetVisible(true)}
+                onPress={() => {
+                  Keyboard.dismiss();
+                  setAttachSheetVisible(true);
+                }}
                 disabled={attachedFiles.length >= 2}
                 accessibilityLabel="Attach photo or PDF"
               >
@@ -1102,11 +1118,10 @@ export default function AiCoachTab() {
                 editable={quotaRemaining > 0 && !loading}
                 textAlignVertical="center"
                 onFocus={() => {
-                  setKeyboardVisible(true);
                   if (messages.length > 0) {
                     setTimeout(() => {
                       flatListRef.current?.scrollToEnd({ animated: true });
-                    }, 80);
+                    }, 150);
                   }
                 }}
               />
@@ -1149,7 +1164,7 @@ export default function AiCoachTab() {
               </TouchableOpacity>
             </View>
           </View>
-        </View>
+        </Animated.View>
       </KeyboardAvoidingView>
 
       {/* ATTACHMENT ACTION SHEET (CAMERA / GALLERY / PDF) */}
