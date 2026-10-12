@@ -66,6 +66,7 @@ export default function MealHistoryScreen() {
   const [streakData, setStreakData] = useState<UserStreakDataResponse | null>(null);
   const [badgesModalVisible, setBadgesModalVisible] = useState<boolean>(false);
   const [streakReminderEnabled, setStreakReminderEnabled] = useState<boolean>(true);
+  const [calendarSheetVisible, setCalendarSheetVisible] = useState<boolean>(false);
 
   useEffect(() => {
     AsyncStorage.getItem("@iness_meal_streak_reminder")
@@ -281,12 +282,25 @@ export default function MealHistoryScreen() {
         </View>
 
         <TouchableOpacity
-          style={[styles.addBtn, { backgroundColor: "#9747FF" }]}
-          onPress={() => setLogModalVisible(true)}
+          style={[
+            styles.calendarHeaderBtn,
+            {
+              backgroundColor: isDark
+                ? "rgba(151,71,255,0.18)"
+                : "rgba(151,71,255,0.1)",
+              borderColor: isDark
+                ? "rgba(151,71,255,0.35)"
+                : "rgba(151,71,255,0.22)",
+            },
+          ]}
+          onPress={() => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+            setCalendarSheetVisible(true);
+          }}
           activeOpacity={0.8}
-          accessibilityLabel="Log a new meal"
+          accessibilityLabel="Open calendar"
         >
-          <Ionicons name="add" size={22} color="#FFF" />
+          <Ionicons name="calendar-outline" size={20} color="#9747FF" />
         </TouchableOpacity>
       </View>
 
@@ -354,45 +368,6 @@ export default function MealHistoryScreen() {
               </LinearGradient>
             </TouchableOpacity>
 
-            {/* Interactive Calendar */}
-            <View
-              style={[
-                styles.calendarCard,
-                {
-                  backgroundColor: theme.colors.backgroundCard || theme.colors.backgroundSecondary,
-                  borderColor: theme.colors.border,
-                },
-              ]}
-            >
-              <Calendar
-                current={selectedDate}
-                onDayPress={(day: any) => {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-                  setSelectedDate(day.dateString);
-                }}
-                markedDates={markedDates}
-                theme={{
-                  calendarBackground: "transparent",
-                  textSectionTitleColor: theme.colors.textSecondary,
-                  selectedDayBackgroundColor: "#9747FF",
-                  selectedDayTextColor: "#ffffff",
-                  todayTextColor: "#9747FF",
-                  dayTextColor: theme.colors.text,
-                  textDisabledColor: theme.colors.textMuted,
-                  dotColor: "#9747FF",
-                  selectedDotColor: "#ffffff",
-                  arrowColor: "#9747FF",
-                  monthTextColor: theme.colors.text,
-                  indicatorColor: "#9747FF",
-                  textDayFontWeight: "600",
-                  textMonthFontWeight: "700",
-                  textDayHeaderFontWeight: "600",
-                  textDayFontSize: 14,
-                  textMonthFontSize: 16,
-                  textDayHeaderFontSize: 12,
-                }}
-              />
-            </View>
 
             {/* 📊 7-DAY MACRO & CALORIE TREND GRAPHS */}
             {trendsData && trendsData.dailySummaries && trendsData.dailySummaries.length > 0 && (
@@ -645,21 +620,31 @@ export default function MealHistoryScreen() {
               ]}
             >
               <View style={styles.summaryTopRow}>
-                <View>
-                  <Text style={[styles.summaryDateText, { color: theme.colors.text }]}>
-                    {selectedDate === getTodayStr()
-                      ? "Today's Nutrition"
-                      : new Date(selectedDate).toLocaleDateString(undefined, {
-                          weekday: "short",
-                          month: "short",
-                          day: "numeric",
-                        })}
-                  </Text>
+                <TouchableOpacity
+                  onPress={() => {
+                    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+                    setCalendarSheetVisible(true);
+                  }}
+                  activeOpacity={0.7}
+                  accessibilityLabel="Change date via calendar"
+                >
+                  <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                    <Text style={[styles.summaryDateText, { color: theme.colors.text }]}>
+                      {selectedDate === getTodayStr()
+                        ? "Today's Nutrition"
+                        : new Date(selectedDate).toLocaleDateString(undefined, {
+                            weekday: "short",
+                            month: "short",
+                            day: "numeric",
+                          })}
+                    </Text>
+                    <Ionicons name="calendar-outline" size={15} color="#9747FF" />
+                  </View>
                   <Text style={[styles.summaryMealsCount, { color: theme.colors.textSecondary }]}>
                     {selectedDayEntry.mealsCount}{" "}
                     {selectedDayEntry.mealsCount === 1 ? "meal" : "meals"} logged
                   </Text>
-                </View>
+                </TouchableOpacity>
 
                 {/* Calorie badge */}
                 <View style={styles.calorieBadge}>
@@ -928,6 +913,132 @@ export default function MealHistoryScreen() {
         </View>
       </Modal>
 
+      {/* 📅 CALENDAR BOTTOM SHEET MODAL */}
+      <Modal
+        visible={calendarSheetVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setCalendarSheetVisible(false)}
+      >
+        <TouchableOpacity
+          style={styles.calendarModalOverlay}
+          activeOpacity={1}
+          onPress={() => setCalendarSheetVisible(false)}
+        >
+          <TouchableOpacity
+            activeOpacity={1}
+            style={[
+              styles.calendarModalCard,
+              {
+                backgroundColor: theme.colors.background,
+                borderColor: theme.colors.border,
+                paddingBottom: Math.max(insets.bottom, 20) + 12,
+              },
+            ]}
+          >
+            {/* Modal Drag Handle */}
+            <View style={styles.modalDragHandle} />
+
+            {/* Modal Header */}
+            <View style={styles.calendarModalHeader}>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.calendarModalTitle, { color: theme.colors.text }]}>
+                  Select Date 📅
+                </Text>
+                <Text style={[styles.calendarModalSub, { color: theme.colors.textSecondary }]}>
+                  {selectedDate === getTodayStr()
+                    ? "Currently viewing today"
+                    : `Viewing ${new Date(selectedDate).toLocaleDateString(undefined, {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                      })}`}
+                </Text>
+              </View>
+              <TouchableOpacity
+                style={[
+                  styles.badgesCloseBtn,
+                  {
+                    backgroundColor: isDark
+                      ? "rgba(255,255,255,0.08)"
+                      : "rgba(0,0,0,0.05)",
+                  },
+                ]}
+                onPress={() => setCalendarSheetVisible(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close" size={18} color={theme.colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            {/* Quick jump to Today button if a past/future date is chosen */}
+            {selectedDate !== getTodayStr() && (
+              <TouchableOpacity
+                style={[
+                  styles.todayJumpBtn,
+                  {
+                    backgroundColor: isDark
+                      ? "rgba(151,71,255,0.16)"
+                      : "rgba(151,71,255,0.08)",
+                    borderColor: "rgba(151,71,255,0.3)",
+                  },
+                ]}
+                onPress={() => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+                  setSelectedDate(getTodayStr());
+                  setCalendarSheetVisible(false);
+                }}
+                activeOpacity={0.7}
+              >
+                <Ionicons name="today-outline" size={14} color="#9747FF" />
+                <Text style={styles.todayJumpBtnText}>Jump to Today</Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Calendar inside Bottom Sheet */}
+            <View
+              style={[
+                styles.sheetCalendarWrapper,
+                {
+                  backgroundColor: theme.colors.backgroundCard || theme.colors.backgroundSecondary,
+                  borderColor: theme.colors.border,
+                },
+              ]}
+            >
+              <Calendar
+                current={selectedDate}
+                onDayPress={(day: any) => {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+                  setSelectedDate(day.dateString);
+                  setCalendarSheetVisible(false);
+                }}
+                markedDates={markedDates}
+                theme={{
+                  calendarBackground: "transparent",
+                  textSectionTitleColor: theme.colors.textSecondary,
+                  selectedDayBackgroundColor: "#9747FF",
+                  selectedDayTextColor: "#ffffff",
+                  todayTextColor: "#9747FF",
+                  dayTextColor: theme.colors.text,
+                  textDisabledColor: theme.colors.textMuted,
+                  dotColor: "#9747FF",
+                  selectedDotColor: "#ffffff",
+                  arrowColor: "#9747FF",
+                  monthTextColor: theme.colors.text,
+                  indicatorColor: "#9747FF",
+                  textDayFontWeight: "600",
+                  textMonthFontWeight: "700",
+                  textDayHeaderFontWeight: "600",
+                  textDayFontSize: 14,
+                  textMonthFontSize: 16,
+                  textDayHeaderFontSize: 12,
+                }}
+              />
+            </View>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
+
       {/* 🏆 MILESTONE BADGES & MIDNIGHT STREAK REMINDERS MODAL */}
       <Modal
         visible={badgesModalVisible}
@@ -1149,6 +1260,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
   },
+  calendarHeaderBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   addBtn: {
     width: 36,
     height: 36,
@@ -1160,6 +1279,54 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 3,
+  },
+  calendarModalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.65)",
+    justifyContent: "flex-end",
+  },
+  calendarModalCard: {
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
+    borderWidth: 1,
+    paddingHorizontal: 18,
+    paddingTop: 10,
+  },
+  calendarModalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 12,
+  },
+  calendarModalTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+  },
+  calendarModalSub: {
+    fontSize: 12,
+    marginTop: 2,
+  },
+  todayJumpBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginBottom: 10,
+  },
+  todayJumpBtnText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#9747FF",
+  },
+  sheetCalendarWrapper: {
+    borderRadius: 20,
+    borderWidth: 1,
+    padding: 8,
+    overflow: "hidden",
   },
   listHeader: {
     paddingHorizontal: 16,
