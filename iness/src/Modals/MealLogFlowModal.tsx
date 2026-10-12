@@ -13,6 +13,7 @@ import {
   Dimensions,
   Platform,
   KeyboardAvoidingView,
+  AppState,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -54,6 +55,12 @@ export default function MealLogFlowModal({
   const [step, setStep] = useState<"capture" | "review">("capture");
   const [analyzing, setAnalyzing] = useState<boolean>(false);
   const [saving, setSaving] = useState<boolean>(false);
+
+  // Background Async Job State
+  const [activeJobId, setActiveJobId] = useState<string | null>(null);
+  const [isAnalyzingInBackground, setIsAnalyzingInBackground] = useState<boolean>(false);
+  const [analysisStepIndex, setAnalysisStepIndex] = useState<number>(0);
+  const pollTimerRef = React.useRef<any>(null);
 
   // Camera Mode: "food" (Plate estimation) or "label" (Packaged Nutrition Facts OCR)
   const [scanMode, setScanMode] = useState<"food" | "label">("food");
@@ -111,6 +118,199 @@ export default function MealLogFlowModal({
   const [recentMeals, setRecentMeals] = useState<any[]>([]);
   const [waterToAdd, setWaterToAdd] = useState<number>(0);
 
+  // Apply analyzed meal data to review step
+  const applyMealDataToReview = (data: MealAnalysisResult) => {
+    const initialCals = data.calories || 0;
+    const initialProt = data.protein || 0;
+    const initialCarbs = data.carbs || 0;
+    const initialFat = data.fat || 0;
+    const initialFib = data.fiber || 0;
+    const initialIngs = data.ingredients || [];
+
+    setBaseNutrition({
+      calories: initialCals,
+      protein: initialProt,
+      carbs: initialCarbs,
+      fat: initialFat,
+      fiber: initialFib,
+    });
+    setBaseIngredients(initialIngs);
+    setPortionMultiplier(1.0);
+
+    setMealName(data.mealName || "Nutritious Meal");
+    setMealType(data.mealType || "Lunch");
+    setCalories(initialCals);
+    setProtein(initialProt);
+    setCarbs(initialCarbs);
+    setFat(initialFat);
+    setFiber(initialFib);
+    setHealthScore(data.healthScore || 7.5);
+    setNutritionNotes(data.nutritionNotes || "");
+    setIngredients(initialIngs);
+    setDietaryTags(Array.isArray(data.dietaryTags) ? data.dietaryTags : []);
+    setAllergenAlerts(Array.isArray(data.allergenAlerts) ? data.allergenAlerts : []);
+
+    setAnalyzing(false);
+    setIsAnalyzingInBackground(false);
+    setActiveJobId(null);
+    setStep("review");
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+  };
+
+  // Animate dynamic status messages while analyzing
+  useEffect(() => {
+    let stepTimer: any = null;
+    if (analyzing) {
+      stepTimer = setInterval(() => {
+        setAnalysisStepIndex((prev) => (prev + 1) % 3);
+      }, 2800);
+    } else {
+      setAnalysisStepIndex(0);
+    }
+    return () => {
+      if (stepTimer) clearInterval(stepTimer);
+    };
+  }, [analyzing]);
+
+  // Optional: Send current analysis to background so user can navigate elsewhere
+  const handleSendToBackground = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    if (activeJobId) {
+      await AsyncStorage.setItem("@iness_active_meal_job_id", activeJobId);
+      if (imageUri) {
+        await AsyncStorage.setItem("@iness_active_meal_image_uri", imageUri);
+      }
+      eventBus.emit("meal-job-background-started", { jobId: activeJobId });
+    }
+    setAnalyzing(false);
+    setIsAnalyzingInBackground(true);
+    handleClose();
+  };
+
+  // Stop/Cancel current analysis and return to photo capture
+  const handleCancelAnalysis = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+    if (pollTimerRef.current) {
+      clearInterval(pollTimerRef.current);
+      pollTimerRef.current = null;
+    }
+    await AsyncStorage.removeItem("@iness_active_meal_job_id");
+    await AsyncStorage.removeItem("@iness_active_meal_image_uri");
+    setActiveJobId(null);
+    setAnalyzing(false);
+    setIsAnalyzingInBackground(false);
+  };
+
+  // Poll status of Azure Queue job (Foreground waiting by default)
+  const startPollingJob = (jobId: string) => {
+    if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+
+    let attempts = 0;
+    const maxAttempts = 60; // 60 * 2.0s = 120s
+
+    const poll = async () => {
+      attempts += 1;
+      try {
+        const res = await mealLogService.getMealAnalysisJobStatus(jobId);
+        if (res.success && res.status === "completed" && res.data) {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          pollTimerRef.current = null;
+          await AsyncStorage.removeItem("@iness_active_meal_job_id");
+          await AsyncStorage.removeItem("@iness_active_meal_image_uri");
+          applyMealDataToReview(res.data);
+          eventBus.emit("meal-job-completed", { jobId });
+        } else if (res.status === "failed") {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          pollTimerRef.current = null;
+          await AsyncStorage.removeItem("@iness_active_meal_job_id");
+          await AsyncStorage.removeItem("@iness_active_meal_image_uri");
+          setAnalyzing(false);
+          setIsAnalyzingInBackground(false);
+          setActiveJobId(null);
+          Alert.alert(
+            "Analysis Error",
+            res.error || "Meal analysis could not be completed. You can try again or enter details manually.",
+            [
+              { text: "Try Again", onPress: () => handleAnalyzeMeal() },
+              {
+                text: "Enter Manually",
+                onPress: () => {
+                  setMealName("Custom Meal");
+                  setStep("review");
+                },
+              },
+              { text: "Cancel", style: "cancel" },
+            ]
+          );
+        } else if (attempts >= maxAttempts) {
+          if (pollTimerRef.current) clearInterval(pollTimerRef.current);
+          pollTimerRef.current = null;
+          Alert.alert(
+            "Analysis Taking Longer",
+            "Iness AI is still analyzing your meal. Would you like to let it finish in the background or keep waiting?",
+            [
+              {
+                text: "Continue in Background",
+                onPress: () => handleSendToBackground(),
+              },
+              {
+                text: "Keep Waiting",
+                onPress: () => startPollingJob(jobId),
+              },
+              {
+                text: "Cancel",
+                style: "cancel",
+                onPress: () => handleCancelAnalysis(),
+              },
+            ]
+          );
+        }
+      } catch (e) {
+        // network hiccup, retry next interval
+      }
+    };
+
+    // Immediate initial check so fast results return without artificial delay
+    poll();
+    pollTimerRef.current = setInterval(poll, 2000);
+  };
+
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      if (nextState === "background" || nextState === "inactive") {
+        // If app goes to background while user is analyzing, preserve job so work isn't lost
+        if (analyzing && activeJobId) {
+          AsyncStorage.setItem("@iness_active_meal_job_id", activeJobId).catch(() => {});
+          if (imageUri) {
+            AsyncStorage.setItem("@iness_active_meal_image_uri", imageUri).catch(() => {});
+          }
+          setIsAnalyzingInBackground(true);
+        }
+      } else if (nextState === "active") {
+        AsyncStorage.getItem("@iness_active_meal_job_id")
+          .then(async (savedJobId) => {
+            if (savedJobId) {
+              const res = await mealLogService.getMealAnalysisJobStatus(savedJobId);
+              if (res.success && res.status === "completed" && res.data) {
+                await AsyncStorage.removeItem("@iness_active_meal_job_id");
+                await AsyncStorage.removeItem("@iness_active_meal_image_uri");
+                applyMealDataToReview(res.data);
+                eventBus.emit("meal-job-completed", { jobId: savedJobId });
+              }
+            }
+          })
+          .catch(() => {});
+      }
+    });
+
+    return () => {
+      subscription.remove();
+      if (pollTimerRef.current) {
+        clearInterval(pollTimerRef.current);
+      }
+    };
+  }, [analyzing, activeJobId, imageUri]);
+
   useEffect(() => {
     if (visible) {
       if (initialImageUri && initialBase64) {
@@ -120,6 +320,31 @@ export default function MealLogFlowModal({
       } else {
         resetState();
       }
+
+      // Check if user has an active background meal analysis job
+      AsyncStorage.getItem("@iness_active_meal_job_id")
+        .then(async (savedJobId) => {
+          if (savedJobId) {
+            const savedUri = await AsyncStorage.getItem("@iness_active_meal_image_uri");
+            if (savedUri) setImageUri(savedUri);
+            setActiveJobId(savedJobId);
+
+            // Immediate check!
+            const checkRes = await mealLogService.getMealAnalysisJobStatus(savedJobId);
+            if (checkRes.success && checkRes.status === "completed" && checkRes.data) {
+              await AsyncStorage.removeItem("@iness_active_meal_job_id");
+              await AsyncStorage.removeItem("@iness_active_meal_image_uri");
+              applyMealDataToReview(checkRes.data);
+              return;
+            }
+
+            // Still processing: show analyzing with options to wait or stay in background
+            setAnalyzing(true);
+            setIsAnalyzingInBackground(true);
+            startPollingJob(savedJobId);
+          }
+        })
+        .catch(() => {});
 
       // Check if user has previously accepted AI meal & camera policy
       AsyncStorage.getItem("@iness_meal_ai_consent_accepted")
@@ -248,7 +473,7 @@ export default function MealLogFlowModal({
     }
   };
 
-  // Analyze Meal Image with AI
+  // Analyze Meal Image with AI (Async Cloud Queue + Local Persistence)
   const handleAnalyzeMeal = async () => {
     if (!imageBase64) {
       Alert.alert("Photo Required", "Please take or choose a meal picture first.");
@@ -259,62 +484,68 @@ export default function MealLogFlowModal({
     setAnalyzing(true);
 
     try {
-      const response = await mealLogService.analyzeMeal({
+      // 1. Submit to Asynchronous Queue
+      const response = await mealLogService.analyzeMealAsync({
         base64Image: imageBase64,
         mimeType: "image/jpeg",
         hint: hint.trim(),
         scanMode,
       });
 
-      if (response.success && response.data) {
-        const data: MealAnalysisResult = response.data;
-        const initialCals = data.calories || 0;
-        const initialProt = data.protein || 0;
-        const initialCarbs = data.carbs || 0;
-        const initialFat = data.fat || 0;
-        const initialFib = data.fiber || 0;
-        const initialIngs = data.ingredients || [];
-
-        setBaseNutrition({
-          calories: initialCals,
-          protein: initialProt,
-          carbs: initialCarbs,
-          fat: initialFat,
-          fiber: initialFib,
-        });
-        setBaseIngredients(initialIngs);
-        setPortionMultiplier(1.0);
-
-        setMealName(data.mealName || "Nutritious Meal");
-        setMealType(data.mealType || "Lunch");
-        setCalories(initialCals);
-        setProtein(initialProt);
-        setCarbs(initialCarbs);
-        setFat(initialFat);
-        setFiber(initialFib);
-        setHealthScore(data.healthScore || 7.5);
-        setNutritionNotes(data.nutritionNotes || "");
-        setIngredients(initialIngs);
-        setDietaryTags(Array.isArray(data.dietaryTags) ? data.dietaryTags : []);
-        setAllergenAlerts(Array.isArray(data.allergenAlerts) ? data.allergenAlerts : []);
-
-        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-        setStep("review");
-      } else if (response.isLocked) {
+      if (response.isLocked) {
+        setAnalyzing(false);
         Alert.alert(
           "Under Maintenance 🛠️",
-          response.message || "Meal logging is currently undergoing maintenance. Please check back shortly.",
+          response.message ||
+            "Meal logging is currently undergoing maintenance. Please check back shortly.",
           [{ text: "OK", onPress: handleClose }]
         );
-      } else if (response.limitReached) {
+        return;
+      }
+
+      if (response.limitReached) {
+        setAnalyzing(false);
         Alert.alert("Daily Meal Limit Reached", response.message || "Daily limit reached.");
+        return;
+      }
+
+      if (response.success && response.jobId) {
+        const jobId = response.jobId;
+        setActiveJobId(jobId);
+        // Stay in foreground by default: polling checks in real-time
+        // User can optionally tap "Process in Background" anytime
+        startPollingJob(jobId);
+        return;
+      }
+
+      // Fallback: Synchronous analysis if queue did not return a jobId
+      const syncResp = await mealLogService.analyzeMeal({
+        base64Image: imageBase64,
+        mimeType: "image/jpeg",
+        hint: hint.trim(),
+        scanMode,
+      });
+
+      if (syncResp.success && syncResp.data) {
+        applyMealDataToReview(syncResp.data);
+      } else if (syncResp.isLocked) {
+        setAnalyzing(false);
+        Alert.alert(
+          "Under Maintenance 🛠️",
+          syncResp.message ||
+            "Meal logging is currently undergoing maintenance. Please check back shortly.",
+          [{ text: "OK", onPress: handleClose }]
+        );
+      } else if (syncResp.limitReached) {
+        setAnalyzing(false);
+        Alert.alert("Daily Meal Limit Reached", syncResp.message || "Daily limit reached.");
       } else {
-        Alert.alert("AI Analysis", response.message || "Could not analyze meal. Please try again.");
+        setAnalyzing(false);
+        Alert.alert("AI Analysis", syncResp.message || "Could not analyze meal. Please try again.");
       }
     } catch (err: any) {
-      Alert.alert("Analysis Failed", err.message || "An unexpected error occurred.");
-    } finally {
       setAnalyzing(false);
+      Alert.alert("Analysis Failed", err.message || "An unexpected error occurred.");
     }
   };
 
@@ -501,6 +732,11 @@ export default function MealLogFlowModal({
       });
 
       if (response.success) {
+        if (activeJobId) {
+          mealLogService.markJobReviewed(activeJobId).catch(() => {});
+        }
+        AsyncStorage.removeItem("@iness_active_meal_job_id").catch(() => {});
+        AsyncStorage.removeItem("@iness_active_meal_image_uri").catch(() => {});
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
         eventBus.emit("meal-logged", response.data);
         onMealSaved?.();
@@ -579,6 +815,29 @@ export default function MealLogFlowModal({
 
           <View style={{ width: 36 }} />
         </View>
+
+        {/* Background Processing Indicator Banner */}
+        {isAnalyzingInBackground && (
+          <TouchableOpacity
+            style={[
+              styles.bgProcessingBanner,
+              {
+                backgroundColor: isDark
+                  ? "rgba(151,71,255,0.18)"
+                  : "rgba(151,71,255,0.1)",
+                borderColor: "rgba(151,71,255,0.3)",
+              },
+            ]}
+            onPress={() => setAnalyzing(true)}
+            activeOpacity={0.8}
+          >
+            <ActivityIndicator size="small" color="#9747FF" />
+            <Text style={styles.bgProcessingBannerText}>
+              AI is analyzing your meal in background... Tap to view
+            </Text>
+            <Ionicons name="chevron-up" size={16} color="#9747FF" />
+          </TouchableOpacity>
+        )}
 
         <ScrollView
           style={{ flex: 1 }}
@@ -1547,59 +1806,167 @@ export default function MealLogFlowModal({
           )}
         </ScrollView>
 
-        {/* AI ANALYZING BOTTOM SHEET DIALOG */}
+        {/* AI ANALYZING COLLAPSIBLE BOTTOM SHEET DIALOG */}
         <Modal
           visible={analyzing}
           transparent={true}
-          animationType="fade"
-          onRequestClose={() => {}}
+          animationType="slide"
+          onRequestClose={() => {
+            Alert.alert(
+              "Meal Analysis in Progress",
+              "Would you like to continue in the background or cancel?",
+              [
+                { text: "Continue in Background", onPress: handleSendToBackground },
+                { text: "Cancel Analysis", style: "destructive", onPress: handleCancelAnalysis },
+                { text: "Stay Here", style: "cancel" },
+              ]
+            );
+          }}
         >
-          <View style={styles.analyzingOverlay}>
+          <View style={styles.sheetOverlay}>
             <View
               style={[
                 styles.analyzingCard,
                 {
                   backgroundColor: theme.colors.background,
                   borderColor: theme.colors.border,
+                  paddingBottom: Math.max(insets.bottom, 20) + 16,
                 },
               ]}
             >
+              {/* Drag Handle */}
+              <View style={styles.sheetHandlePill} />
+
+              {/* Header with Title and Cancel Button */}
+              <View style={styles.analyzingHeaderRow}>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.analyzingTitle, { color: theme.colors.text }]}>
+                    Analyzing Meal with AI...
+                  </Text>
+                  <Text style={[styles.analyzingSubtitle, { color: theme.colors.textSecondary }]}>
+                    Stay here to review immediately, or process in background
+                  </Text>
+                </View>
+                <TouchableOpacity
+                  style={[
+                    styles.analyzingCloseBtn,
+                    {
+                      backgroundColor: isDark
+                        ? "rgba(255,255,255,0.08)"
+                        : "rgba(0,0,0,0.05)",
+                    },
+                  ]}
+                  onPress={handleCancelAnalysis}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  accessibilityLabel="Cancel analysis"
+                >
+                  <Ionicons name="close" size={18} color={theme.colors.text} />
+                </TouchableOpacity>
+              </View>
+
               <LinearGradient
                 colors={["#9747FF", "#6825C9"]}
                 style={styles.analyzingEmblem}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
               >
-                <Ionicons name="sparkles" size={28} color="#FFF" />
+                <Ionicons name="sparkles" size={26} color="#FFF" />
               </LinearGradient>
-
-              <Text style={[styles.analyzingTitle, { color: theme.colors.text }]}>
-                Iness AI is Analyzing Your Meal...
-              </Text>
-              <Text style={[styles.analyzingSubtitle, { color: theme.colors.textSecondary }]}>
-                Detecting food items, estimating portion sizes, and computing calories, protein, carbs & fat.
-              </Text>
 
               <ActivityIndicator
                 size="large"
-                color="#9747FF"
-                style={{ marginVertical: 20 }}
+                color={theme.colors.success || "#67C694"}
+                style={{ marginVertical: 10 }}
               />
+
+              {/* Dynamic Status Progress Indicator */}
+              <View
+                style={[
+                  styles.analyzingStepBadge,
+                  {
+                    backgroundColor: isDark
+                      ? "rgba(103,198,148,0.14)"
+                      : "rgba(103,198,148,0.1)",
+                    borderColor: isDark
+                      ? "rgba(103,198,148,0.3)"
+                      : "rgba(103,198,148,0.22)",
+                  },
+                ]}
+              >
+                <Ionicons
+                  name="sync"
+                  size={14}
+                  color={theme.colors.success || "#67C694"}
+                />
+                <Text
+                  style={[
+                    styles.analyzingStepText,
+                    { color: theme.colors.success || "#67C694" },
+                  ]}
+                >
+                  {analysisStepIndex === 0
+                    ? "Identifying dish ingredients & items..."
+                    : analysisStepIndex === 1
+                    ? "Calculating portion calories & macros..."
+                    : "Finalizing health score & dietary attributes..."}
+                </Text>
+              </View>
 
               <View
                 style={[
                   styles.analyzingTipBox,
                   {
                     backgroundColor: isDark
-                      ? "rgba(151,71,255,0.1)"
-                      : "rgba(151,71,255,0.06)",
+                      ? "rgba(255,255,255,0.04)"
+                      : "rgba(0,0,0,0.03)",
+                    borderColor: theme.colors.border,
                   },
                 ]}
               >
-                <Ionicons name="bulb-outline" size={16} color="#9747FF" />
+                <Ionicons name="information-circle-outline" size={16} color={theme.colors.textMuted} />
                 <Text style={[styles.analyzingTipText, { color: theme.colors.textSecondary }]}>
-                  Consistency is key. Logging your meals helps Iness AI adapt your workout and recovery guidance!
+                  You can stay right here for instant review, or send this to the background to freely explore Iness while it finishes.
                 </Text>
+              </View>
+
+              {/* Action Buttons: Continue in Background + Cancel */}
+              <View style={styles.analyzingActionsRow}>
+                {/* Optional Process in Background Button */}
+                <TouchableOpacity
+                  style={[
+                    styles.minimizeBtn,
+                    {
+                      backgroundColor: theme.colors.success || "#67C694",
+                      borderColor: theme.colors.success || "#67C694",
+                    },
+                  ]}
+                  onPress={handleSendToBackground}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons name="cloud-download-outline" size={18} color="#FFF" />
+                  <Text style={[styles.minimizeBtnText, { color: "#FFF" }]}>
+                    Process in Background
+                  </Text>
+                </TouchableOpacity>
+
+                {/* Cancel Button */}
+                <TouchableOpacity
+                  style={[
+                    styles.cancelAnalysisBtn,
+                    {
+                      borderColor: theme.colors.border,
+                      backgroundColor: isDark
+                        ? "rgba(255,255,255,0.06)"
+                        : "rgba(0,0,0,0.04)",
+                    },
+                  ]}
+                  onPress={handleCancelAnalysis}
+                  activeOpacity={0.7}
+                >
+                  <Text style={[styles.cancelAnalysisBtnText, { color: theme.colors.textSecondary }]}>
+                    Cancel Analysis
+                  </Text>
+                </TouchableOpacity>
               </View>
             </View>
           </View>
@@ -2628,6 +2995,25 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
   },
+  bgProcessingBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    gap: 8,
+  },
+  bgProcessingBannerText: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#9747FF",
+  },
   analyzingOverlay: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.7)",
@@ -2636,11 +3022,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   analyzingCard: {
-    width: "100%",
-    maxWidth: 360,
-    borderRadius: 24,
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     borderWidth: 1,
-    padding: 24,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    alignItems: "center",
+  },
+  analyzingHeaderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "100%",
+    marginBottom: 14,
+  },
+  analyzingCloseBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: "center",
     alignItems: "center",
   },
   analyzingEmblem: {
@@ -2652,15 +3052,12 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   analyzingTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: "800",
-    textAlign: "center",
-    marginBottom: 6,
   },
   analyzingSubtitle: {
     fontSize: 12,
-    textAlign: "center",
-    lineHeight: 18,
+    marginTop: 2,
   },
   analyzingTipBox: {
     flexDirection: "row",
@@ -2668,11 +3065,58 @@ const styles = StyleSheet.create({
     gap: 8,
     padding: 12,
     borderRadius: 12,
+    borderWidth: 1,
+    width: "100%",
   },
   analyzingTipText: {
     fontSize: 11,
     lineHeight: 16,
     flex: 1,
+  },
+  analyzingStepBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    borderRadius: 20,
+    borderWidth: 1,
+    marginBottom: 12,
+  },
+  analyzingStepText: {
+    fontSize: 12,
+    fontWeight: "700",
+  },
+  analyzingActionsRow: {
+    width: "100%",
+    gap: 10,
+    marginTop: 14,
+  },
+  minimizeBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    width: "100%",
+    paddingVertical: 13,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  minimizeBtnText: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  cancelAnalysisBtn: {
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    paddingVertical: 11,
+    borderRadius: 14,
+    borderWidth: 1,
+  },
+  cancelAnalysisBtnText: {
+    fontSize: 13,
+    fontWeight: "600",
   },
   macroHeaderRow: {
     flexDirection: "row",

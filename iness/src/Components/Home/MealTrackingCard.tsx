@@ -5,6 +5,9 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
+  LayoutAnimation,
+  Platform,
+  UIManager,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -17,6 +20,7 @@ import {
 } from "../../services/mealLog.service";
 import MealLogFlowModal from "../../Modals/MealLogFlowModal";
 import MealMaintenanceBottomSheet from "../../Modals/MealMaintenanceBottomSheet";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import eventBus from "@/event";
 
 // Circular Progress Component using react-native-svg
@@ -102,6 +106,44 @@ const MealTrackingCard = memo(function MealTrackingCard() {
   const [loading, setLoading] = useState<boolean>(true);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [maintenanceVisible, setMaintenanceVisible] = useState<boolean>(false);
+  const [bgJobState, setBgJobState] = useState<"none" | "analyzing" | "ready">("none");
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(true);
+
+  const toggleCollapse = useCallback(() => {
+    if (Platform.OS === "android" && UIManager.setLayoutAnimationEnabledExperimental) {
+      UIManager.setLayoutAnimationEnabledExperimental(true);
+    }
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setIsCollapsed((prev) => !prev);
+  }, []);
+
+  const checkBgJobStatus = useCallback(async () => {
+    try {
+      const activeJobId = await AsyncStorage.getItem("@iness_active_meal_job_id");
+      if (activeJobId) {
+        const res = await mealLogService.getMealAnalysisJobStatus(activeJobId);
+        if (res.success && res.status === "completed") {
+          setBgJobState("ready");
+          setIsCollapsed(false);
+        } else if (res.status === "pending" || res.status === "processing") {
+          setBgJobState("analyzing");
+        } else {
+          setBgJobState("none");
+        }
+      } else {
+        // Also check if any recent completed unreviewed job on backend exists
+        const res = await mealLogService.getMealAnalysisJobStatus(undefined, true);
+        if (res.success && res.status === "completed" && !res.isReviewed) {
+          setBgJobState("ready");
+          setIsCollapsed(false);
+        } else {
+          setBgJobState("none");
+        }
+      }
+    } catch {
+      setBgJobState("none");
+    }
+  }, []);
 
   const handleOpenMealLogging = useCallback(() => {
     if (data?.isLocked) {
@@ -126,20 +168,31 @@ const MealTrackingCard = memo(function MealTrackingCard() {
 
   useEffect(() => {
     fetchDailyData();
+    checkBgJobStatus();
+
+    const interval = setInterval(() => {
+      checkBgJobStatus();
+    }, 4000);
 
     // Listen to real-time meal logged events from modal or quick action
     const onMealLogged = () => {
       fetchDailyData();
+      checkBgJobStatus();
     };
 
     eventBus.on("meal-logged", onMealLogged);
     eventBus.on("open-meal-logging", handleOpenMealLogging);
+    eventBus.on("meal-job-background-started", checkBgJobStatus);
+    eventBus.on("meal-job-completed", checkBgJobStatus);
 
     return () => {
+      clearInterval(interval);
       eventBus.off("meal-logged", onMealLogged);
       eventBus.off("open-meal-logging", handleOpenMealLogging);
+      eventBus.off("meal-job-background-started", checkBgJobStatus);
+      eventBus.off("meal-job-completed", checkBgJobStatus);
     };
-  }, [fetchDailyData, handleOpenMealLogging]);
+  }, [fetchDailyData, checkBgJobStatus, handleOpenMealLogging]);
 
   const dailyTotals = data?.dailyTotals || {
     calories: 0,
@@ -211,9 +264,9 @@ const MealTrackingCard = memo(function MealTrackingCard() {
           </View>
         </View>
 
-        {/* Right Action Icons: Calendar (History) + Arrow (Direct Log) */}
+        {/* Right Action Icons: Collapse Toggle + Arrow (Direct Log) */}
         <View style={styles.cardHeaderRight}>
-          {/* Calendar History Button */}
+          {/* Collapse / Expand Toggle Button */}
           <TouchableOpacity
             style={[
               styles.iconBtn,
@@ -223,16 +276,27 @@ const MealTrackingCard = memo(function MealTrackingCard() {
                   : "rgba(0,0,0,0.05)",
               },
             ]}
-            onPress={() => safeRouter.navigate("/dashboard/mealHistory" as any)}
+            onPress={toggleCollapse}
             activeOpacity={0.7}
-            accessibilityLabel="View Meal History Calendar"
+            accessibilityLabel={
+              isCollapsed
+                ? "Expand meal nutrition details"
+                : "Collapse meal nutrition details"
+            }
           >
-            <Ionicons name="calendar-outline" size={18} color={theme.colors.text} />
+            <Ionicons
+              name={isCollapsed ? "chevron-down" : "chevron-up"}
+              size={18}
+              color={theme.colors.text}
+            />
           </TouchableOpacity>
 
-          {/* Quick Arrow / Plus Action to Log Meal directly */}
+          {/* Quick Arrow Action to Log Meal directly (Green theme shade) */}
           <TouchableOpacity
-            style={[styles.arrowBtn, { backgroundColor: "#9747FF" }]}
+            style={[
+              styles.arrowBtn,
+              { backgroundColor: theme.colors.success || "#67C694" },
+            ]}
             onPress={handleOpenMealLogging}
             activeOpacity={0.8}
             accessibilityLabel="Log a meal with AI"
@@ -242,124 +306,206 @@ const MealTrackingCard = memo(function MealTrackingCard() {
         </View>
       </View>
 
-      {/* DAILY NUTRITION STREAK BADGE */}
-      <View
-        style={[
-          styles.streakBanner,
-          {
-            backgroundColor:
-              streak > 0
-                ? isDark
-                  ? "rgba(255, 107, 0, 0.12)"
-                  : "rgba(255, 107, 0, 0.08)"
-                : isDark
-                ? "rgba(255, 255, 255, 0.03)"
-                : "rgba(0, 0, 0, 0.02)",
-            borderColor:
-              streak > 0
-                ? "rgba(255, 107, 0, 0.28)"
-                : theme.colors.border,
-          },
-        ]}
-      >
-        <View style={styles.streakLeft}>
-          <Text style={styles.streakFlameIcon}>🔥</Text>
-          <View style={{ flex: 1 }}>
-            <Text
-              style={[
-                styles.streakTitleText,
-                { color: streak > 0 ? (isDark ? "#FFA756" : "#E65100") : theme.colors.text },
-              ]}
-            >
-              {streak > 0
-                ? `${streak}-Day Meal Logging Streak`
-                : "Start Your Meal Logging Streak"}
-            </Text>
-            <Text style={[styles.streakSubText, { color: theme.colors.textSecondary }]}>
-              {streak > 0
-                ? "Maintained by logging at least 1 meal before midnight"
-                : "Log a meal today before midnight to ignite your streak!"}
-            </Text>
-          </View>
-        </View>
-
-        {streak > 0 && (
-          <View style={styles.streakBadgeRight}>
-            <LinearGradient
-              colors={["#FF6B00", "#FF4500"]}
-              style={styles.streakNumberBadge}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-            >
-              <Text style={styles.streakNumberText}>{streak}</Text>
-              <Text style={styles.streakNumberLabel}>DAYS</Text>
-            </LinearGradient>
-          </View>
-        )}
-      </View>
-
-      {/* PILL BAR: REMAINING MEALS BADGE & CALORIE SUMMARY */}
-      <View
-        style={[
-          styles.statusPillBar,
-          {
-            backgroundColor: isDark
-              ? "rgba(255,255,255,0.03)"
-              : "rgba(0,0,0,0.02)",
-            borderColor: theme.colors.border,
-          },
-        ]}
-      >
-        <View style={styles.pillLeft}>
-          <MaterialCommunityIcons
-            name="silverware-fork-knife"
-            size={14}
-            color={remainingMeals > 0 ? "#9747FF" : "#F44336"}
-          />
-          <Text style={[styles.pillText, { color: theme.colors.text }]}>
-            {loggedCount}/{maxMeals} meals logged
+      {/* BACKGROUND ANALYSIS STATUS BANNER (shown when not collapsed or if active) */}
+      {!isCollapsed && bgJobState !== "none" && (
+        <TouchableOpacity
+          style={[
+            styles.bgAnalysisBanner,
+            {
+              backgroundColor:
+                bgJobState === "ready"
+                  ? isDark
+                    ? "rgba(16, 185, 129, 0.16)"
+                    : "rgba(16, 185, 129, 0.1)"
+                  : isDark
+                  ? "rgba(151, 71, 255, 0.16)"
+                  : "rgba(151, 71, 255, 0.09)",
+              borderColor:
+                bgJobState === "ready"
+                  ? "rgba(16, 185, 129, 0.35)"
+                  : "rgba(151, 71, 255, 0.3)",
+            },
+          ]}
+          onPress={() => setModalVisible(true)}
+          activeOpacity={0.8}
+        >
+          {bgJobState === "ready" ? (
+            <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+          ) : (
+            <ActivityIndicator size="small" color="#9747FF" />
+          )}
+          <Text
+            style={[
+              styles.bgAnalysisBannerText,
+              { color: bgJobState === "ready" ? "#10B981" : "#9747FF" },
+            ]}
+          >
+            {bgJobState === "ready"
+              ? "Meal Analysis Ready! Tap to review & save"
+              : "AI is analyzing meal in background... Tap to view"}
           </Text>
+          <Ionicons
+            name="chevron-forward"
+            size={14}
+            color={bgJobState === "ready" ? "#10B981" : "#9747FF"}
+          />
+        </TouchableOpacity>
+      )}
+
+      {/* EXPANDED CONTENT: STREAK & REMAINING MEALS PILL BAR */}
+      {!isCollapsed && (
+        <>
+          {/* DAILY NUTRITION STREAK BADGE */}
           <View
             style={[
-              styles.remainingTag,
+              styles.streakBanner,
               {
                 backgroundColor:
-                  remainingMeals > 0
+                  streak > 0
                     ? isDark
-                      ? "rgba(151,71,255,0.2)"
-                      : "rgba(151,71,255,0.12)"
-                    : "rgba(244,67,54,0.15)",
+                      ? "rgba(255, 107, 0, 0.12)"
+                      : "rgba(255, 107, 0, 0.08)"
+                    : isDark
+                    ? "rgba(255, 255, 255, 0.03)"
+                    : "rgba(0, 0, 0, 0.02)",
+                borderColor:
+                  streak > 0
+                    ? "rgba(255, 107, 0, 0.28)"
+                    : theme.colors.border,
               },
             ]}
           >
-            <Text
-              style={[
-                styles.remainingTagText,
-                { color: remainingMeals > 0 ? "#9747FF" : "#F44336" },
-              ]}
-            >
-              {remainingMeals > 0 ? `${remainingMeals} left` : "Limit reached"}
-            </Text>
-          </View>
-        </View>
+            <View style={styles.streakLeft}>
+              <Text style={styles.streakFlameIcon}>🔥</Text>
+              <View style={{ flex: 1 }}>
+                <Text
+                  style={[
+                    styles.streakTitleText,
+                    {
+                      color:
+                        streak > 0
+                          ? isDark
+                            ? "#FFA756"
+                            : "#E65100"
+                          : theme.colors.text,
+                    },
+                  ]}
+                >
+                  {streak > 0
+                    ? `${streak}-Day Meal Logging Streak`
+                    : "Start Your Meal Logging Streak"}
+                </Text>
+                <Text
+                  style={[
+                    styles.streakSubText,
+                    { color: theme.colors.textSecondary },
+                  ]}
+                >
+                  {streak > 0
+                    ? "Maintained by logging at least 1 meal before midnight"
+                    : "Log a meal today before midnight to ignite your streak!"}
+                </Text>
+              </View>
+            </View>
 
-        <View style={styles.pillRight}>
-          <Text style={[styles.calorieSmallText, { color: theme.colors.textSecondary }]}>
-            <Text style={{ fontWeight: "700", color: theme.colors.text }}>
-              {dailyTotals.calories}
-            </Text>
-            {" "}kcal logged today
-          </Text>
-        </View>
-      </View>
+            {streak > 0 && (
+              <View style={styles.streakBadgeRight}>
+                <LinearGradient
+                  colors={["#FF6B00", "#FF4500"]}
+                  style={styles.streakNumberBadge}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                >
+                  <Text style={styles.streakNumberText}>{streak}</Text>
+                  <Text style={styles.streakNumberLabel}>DAYS</Text>
+                </LinearGradient>
+              </View>
+            )}
+          </View>
+
+          {/* PILL BAR: REMAINING MEALS BADGE & CALORIE SUMMARY */}
+          <View
+            style={[
+              styles.statusPillBar,
+              {
+                backgroundColor: isDark
+                  ? "rgba(255,255,255,0.03)"
+                  : "rgba(0,0,0,0.02)",
+                borderColor: theme.colors.border,
+              },
+            ]}
+          >
+            <View style={styles.pillLeft}>
+              <MaterialCommunityIcons
+                name="silverware-fork-knife"
+                size={14}
+                color={
+                  remainingMeals > 0
+                    ? (theme.colors.success || "#67C694")
+                    : "#F44336"
+                }
+              />
+              <Text style={[styles.pillText, { color: theme.colors.text }]}>
+                {loggedCount}/{maxMeals} meals logged
+              </Text>
+              <View
+                style={[
+                  styles.remainingTag,
+                  {
+                    backgroundColor:
+                      remainingMeals > 0
+                        ? isDark
+                          ? "rgba(103,198,148,0.2)"
+                          : "rgba(103,198,148,0.12)"
+                        : "rgba(244,67,54,0.15)",
+                  },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.remainingTagText,
+                    {
+                      color:
+                        remainingMeals > 0
+                          ? (theme.colors.success || "#67C694")
+                          : "#F44336",
+                    },
+                  ]}
+                >
+                  {remainingMeals > 0
+                    ? `${remainingMeals} left`
+                    : "Limit reached"}
+                </Text>
+              </View>
+            </View>
+
+            <View style={styles.pillRight}>
+              <Text
+                style={[
+                  styles.calorieSmallText,
+                  { color: theme.colors.textSecondary },
+                ]}
+              >
+                <Text style={{ fontWeight: "700", color: theme.colors.text }}>
+                  {dailyTotals.calories}
+                </Text>{" "}
+                kcal logged today
+              </Text>
+            </View>
+          </View>
+        </>
+      )}
 
       {loading ? (
         <View style={styles.loadingBox}>
-          <ActivityIndicator size="small" color="#9747FF" />
+          <ActivityIndicator
+            size="small"
+            color={theme.colors.success || "#67C694"}
+          />
         </View>
       ) : (
         <>
-          {/* 4 CIRCULAR MACRO MARKS PROGRESS */}
+          {/* 4 CIRCULAR MACRO MARKS PROGRESS (Visible in both collapsed and expanded states) */}
           <View style={styles.macroCirclesRow}>
             {/* Protein */}
             <MacroCircleProgress
@@ -402,30 +548,59 @@ const MealTrackingCard = memo(function MealTrackingCard() {
             />
           </View>
 
-          {/* HELPFUL TEXT GUIDE */}
-          <TouchableOpacity
-            style={[
-              styles.guideBanner,
-              {
-                backgroundColor: isDark
-                  ? "rgba(151,71,255,0.08)"
-                  : "rgba(151,71,255,0.04)",
-                borderColor: isDark
-                  ? "rgba(151,71,255,0.2)"
-                  : "rgba(151,71,255,0.12)",
-              },
-            ]}
-            onPress={handleOpenMealLogging}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="sparkles" size={14} color="#9747FF" />
-            <Text style={[styles.guideText, { color: theme.colors.textSecondary }]}>
-              {loggedCount === 0
-                ? "No meals logged yet today. Tap the arrow to scan your first meal with AI!"
-                : `Great job! Tap to log meal ${loggedCount + 1} or view today's nutrition diary.`}
-            </Text>
-            <Ionicons name="chevron-forward" size={14} color="#9747FF" />
-          </TouchableOpacity>
+          {/* BOTTOM CALENDAR HISTORY BUTTON (Only visible when expanded) */}
+          {!isCollapsed && (
+            <TouchableOpacity
+              style={[
+                styles.calendarBottomBtn,
+                {
+                  backgroundColor: isDark
+                    ? "rgba(103, 198, 148, 0.08)"
+                    : "rgba(103, 198, 148, 0.08)",
+                  borderColor: isDark
+                    ? "rgba(103, 198, 148, 0.22)"
+                    : "rgba(103, 198, 148, 0.24)",
+                },
+              ]}
+              onPress={() =>
+                safeRouter.navigate("/dashboard/mealHistory" as any)
+              }
+              activeOpacity={0.7}
+              accessibilityLabel="View Meal History Calendar"
+            >
+              <View style={styles.calendarBottomLeft}>
+                <View
+                  style={[
+                    styles.calendarIconCircle,
+                    {
+                      backgroundColor: isDark
+                        ? "rgba(103, 198, 148, 0.18)"
+                        : "rgba(103, 198, 148, 0.14)",
+                    },
+                  ]}
+                >
+                  <Ionicons
+                    name="calendar-outline"
+                    size={15}
+                    color={theme.colors.success || "#67C694"}
+                  />
+                </View>
+                <Text
+                  style={[
+                    styles.calendarBottomText,
+                    { color: theme.colors.text },
+                  ]}
+                >
+                  View Meal History & Calendar
+                </Text>
+              </View>
+              <Ionicons
+                name="chevron-forward"
+                size={16}
+                color={theme.colors.success || "#67C694"}
+              />
+            </TouchableOpacity>
+          )}
         </>
       )}
 
@@ -499,7 +674,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#9747FF",
+    shadowColor: "#67C694",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -619,24 +794,52 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     letterSpacing: 0.5,
   },
-  guideBanner: {
+  calendarBottomBtn: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    justifyContent: "space-between",
     paddingHorizontal: 12,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: 14,
     borderWidth: 1,
-    marginTop: 14,
+    marginTop: 10,
   },
-  guideText: {
-    fontSize: 11,
-    lineHeight: 16,
+  calendarBottomLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
     flex: 1,
+  },
+  calendarIconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  calendarBottomText: {
+    fontSize: 12.5,
+    fontWeight: "700",
   },
   loadingBox: {
     paddingVertical: 24,
     justifyContent: "center",
     alignItems: "center",
+  },
+  bgAnalysisBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginTop: 10,
+    gap: 8,
+  },
+  bgAnalysisBannerText: {
+    flex: 1,
+    fontSize: 12,
+    fontWeight: "700",
   },
 });

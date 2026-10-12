@@ -326,20 +326,22 @@ const ImagePickerButton: React.FC = () => {
           onPress={() => setMediaActionModalVisible(false)}
         >
           <View style={styles.captureSheet} onStartShouldSetResponder={() => true}>
-            <View style={styles.captureAccent} />
+            <View style={styles.cleanDragHandle} />
             <View style={styles.captureHeader}>
-              <Ionicons name="camera" size={20} color={theme.colors.text} />
               <Text style={styles.captureHeaderTitle}>Choose Action</Text>
+              <TouchableOpacity
+                onPress={() => setMediaActionModalVisible(false)}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close" size={20} color={theme.colors.textSecondary} />
+              </TouchableOpacity>
             </View>
-            <Text style={styles.captureSubtitle}>
-              Log a meal with AI nutrition analysis or upload transformation progress media.
-            </Text>
 
             <View style={styles.captureButtons}>
               {/* Option 1: AI Meal Log */}
               <TouchableOpacity
-                style={[styles.capturePrimary, { backgroundColor: "#9747FF" }]}
-                activeOpacity={0.85}
+                style={styles.cleanOptionCard}
+                activeOpacity={0.7}
                 onPress={() => {
                   setMediaActionModalVisible(false);
                   setMealLogModalVisible(true);
@@ -347,20 +349,31 @@ const ImagePickerButton: React.FC = () => {
                 accessibilityRole="button"
                 accessibilityLabel="Log meal with AI"
               >
-                <Ionicons name="sparkles" size={20} color="#FFF" />
-                <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={styles.capturePrimaryText}>Log Meal with AI</Text>
-                  <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 11, marginTop: 2 }}>
-                    Scan plate for calories, protein, carbs & fat
+                <View
+                  style={[
+                    styles.cleanOptionIconBox,
+                    {
+                      backgroundColor: isDark
+                        ? "rgba(151,71,255,0.18)"
+                        : "rgba(151,71,255,0.1)",
+                    },
+                  ]}
+                >
+                  <Ionicons name="sparkles" size={20} color="#9747FF" />
+                </View>
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Text style={styles.cleanOptionTitle}>Log Meal with AI</Text>
+                  <Text style={styles.cleanOptionSub}>
+                    Scan plate or label for calories & macros
                   </Text>
                 </View>
-                <Ionicons name="arrow-forward" size={16} color="#FFF" />
+                <Ionicons name="chevron-forward" size={18} color={theme.colors.textSecondary} />
               </TouchableOpacity>
 
               {/* Option 2: Transformation Media */}
               <TouchableOpacity
-                style={styles.captureSecondary}
-                activeOpacity={0.85}
+                style={styles.cleanOptionCard}
+                activeOpacity={0.7}
                 onPress={() => {
                   setMediaActionModalVisible(false);
                   pickImage("gallery");
@@ -368,25 +381,27 @@ const ImagePickerButton: React.FC = () => {
                 accessibilityRole="button"
                 accessibilityLabel="Upload transformation progress media"
               >
-                <Ionicons name="images" size={20} color={theme.colors.text} />
-                <View style={{ flex: 1, marginLeft: 10 }}>
-                  <Text style={styles.captureSecondaryText}>Transformation Media</Text>
-                  <Text style={{ color: theme.colors.textSecondary, fontSize: 11, marginTop: 2 }}>
+                <View
+                  style={[
+                    styles.cleanOptionIconBox,
+                    {
+                      backgroundColor: isDark
+                        ? "rgba(255,255,255,0.08)"
+                        : "rgba(0,0,0,0.05)",
+                    },
+                  ]}
+                >
+                  <Ionicons name="images-outline" size={20} color={theme.colors.text} />
+                </View>
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Text style={styles.cleanOptionTitle}>Transformation Media</Text>
+                  <Text style={styles.cleanOptionSub}>
                     Upload physique photos or progress video
                   </Text>
                 </View>
-                <Ionicons name="chevron-forward" size={16} color={theme.colors.textSecondary} />
+                <Ionicons name="chevron-forward" size={18} color={theme.colors.textSecondary} />
               </TouchableOpacity>
             </View>
-
-            <TouchableOpacity
-              style={styles.captureCancel}
-              activeOpacity={0.85}
-              onPress={() => setMediaActionModalVisible(false)}
-            >
-              <Ionicons name="close" size={16} color={theme.colors.textSecondary} />
-              <Text style={styles.captureCancelText}>Cancel</Text>
-            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
@@ -410,52 +425,70 @@ const ImagePickerButton: React.FC = () => {
           onPress={cancelCaptureType}
         >
           <View style={styles.captureSheet} onStartShouldSetResponder={() => true}>
-            <View style={styles.captureAccent} />
+            <View style={styles.cleanDragHandle} />
             <View style={styles.captureHeader}>
-              <Ionicons name="camera" size={18} color={theme.colors.text} />
               <Text style={styles.captureHeaderTitle}>Capture Type</Text>
+              <TouchableOpacity
+                onPress={cancelCaptureType}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="close" size={20} color={theme.colors.textSecondary} />
+              </TouchableOpacity>
             </View>
-            <Text style={styles.captureSubtitle}>
-              Choose what you want to capture
-            </Text>
 
             <View style={styles.captureButtons}>
               <TouchableOpacity
-                style={styles.capturePrimary}
-                activeOpacity={0.85}
+                style={styles.cleanOptionCard}
+                activeOpacity={0.7}
                 onPress={() => resolveCaptureType("image")}
                 accessibilityRole="button"
                 accessibilityLabel="Choose photo"
               >
-                <Ionicons name="image" size={18} color={theme.colors.textWhite} />
-                <Text style={styles.capturePrimaryText}>Photo</Text>
-                <View style={styles.capturePrimaryLabel}>
-                  <Ionicons name="sparkles" size={14} color={theme.colors.textWhite} />
+                <View
+                  style={[
+                    styles.cleanOptionIconBox,
+                    {
+                      backgroundColor: isDark
+                        ? "rgba(151,71,255,0.18)"
+                        : "rgba(151,71,255,0.1)",
+                    },
+                  ]}
+                >
+                  <Ionicons name="image" size={20} color="#9747FF" />
                 </View>
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Text style={styles.cleanOptionTitle}>Photo</Text>
+                  <Text style={styles.cleanOptionSub}>Take or upload a still picture</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={theme.colors.textSecondary} />
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={styles.captureSecondary}
-                activeOpacity={0.85}
+                style={styles.cleanOptionCard}
+                activeOpacity={0.7}
                 onPress={() => resolveCaptureType("video")}
                 accessibilityRole="button"
                 accessibilityLabel="Choose video"
               >
-                <Ionicons name="videocam" size={18} color={theme.colors.text} />
-                <Text style={styles.captureSecondaryText}>Video</Text>
+                <View
+                  style={[
+                    styles.cleanOptionIconBox,
+                    {
+                      backgroundColor: isDark
+                        ? "rgba(255,255,255,0.08)"
+                        : "rgba(0,0,0,0.05)",
+                    },
+                  ]}
+                >
+                  <Ionicons name="videocam-outline" size={20} color={theme.colors.text} />
+                </View>
+                <View style={{ flex: 1, marginLeft: 12 }}>
+                  <Text style={styles.cleanOptionTitle}>Video</Text>
+                  <Text style={styles.cleanOptionSub}>Record or upload a short clip</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color={theme.colors.textSecondary} />
               </TouchableOpacity>
             </View>
-
-            <TouchableOpacity
-              style={styles.captureCancel}
-              activeOpacity={0.85}
-              onPress={cancelCaptureType}
-              accessibilityRole="button"
-              accessibilityLabel="Cancel media selection"
-            >
-              <Ionicons name="close" size={16} color={theme.colors.textSecondary} />
-              <Text style={styles.captureCancelText}>Cancel</Text>
-            </TouchableOpacity>
           </View>
         </TouchableOpacity>
       </Modal>
@@ -529,87 +562,53 @@ const getStyles = (theme: any, isDark: boolean) => StyleSheet.create({
           elevation: 12,
         }),
   },
-  captureAccent: {
-    height: 6,
-    borderRadius: 6,
-    backgroundColor: theme.colors.secondPrimary,
-    marginBottom: 14,
+  cleanDragHandle: {
+    width: 36,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.15)",
+    alignSelf: "center",
+    marginBottom: 12,
   },
   captureHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 8,
-    gap: 8 as any,
+    justifyContent: "space-between",
+    marginBottom: 16,
   },
   captureHeaderTitle: {
-    fontSize: theme.fontSizes.medium,
-    fontWeight: theme.fontWeights.bold as "700",
+    fontSize: 16,
+    fontWeight: "700",
     color: theme.colors.text,
-  },
-  captureSubtitle: {
-    fontSize: theme.fontSizes.regularSmall,
-    color: theme.colors.textSecondary,
-    marginBottom: 16,
   },
   captureButtons: {
     gap: 10 as any,
   },
-  capturePrimary: {
-    backgroundColor: theme.colors.success,
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    borderWidth: 1,
-    borderColor: isDark ? "rgba(255,255,255,0.12)" : "rgba(255,255,255,0.08)",
-  },
-  capturePrimaryText: {
-    color: theme.colors.textWhite,
-    fontSize: theme.fontSizes.regular,
-    fontWeight: theme.fontWeights.bold as "700",
-    marginLeft: 8,
-    flex: 1,
-  },
-  capturePrimaryLabel: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.2)",
-  },
-  captureSecondary: {
-    backgroundColor: theme.colors.backgroundSecondary,
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 14,
+  cleanOptionCard: {
+    backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.02)",
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
     borderColor: theme.colors.border,
   },
-  captureSecondaryText: {
-    color: theme.colors.text,
-    fontSize: theme.fontSizes.regular,
-    fontWeight: theme.fontWeights.medium as "500",
-    marginLeft: 8,
-  },
-  captureCancel: {
-    marginTop: 12,
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    flexDirection: "row",
+  cleanOptionIconBox: {
+    width: 38,
+    height: 38,
+    borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    backgroundColor: theme.colors.backgroundSecondary,
   },
-  captureCancelText: {
+  cleanOptionTitle: {
+    color: theme.colors.text,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  cleanOptionSub: {
     color: theme.colors.textSecondary,
-    fontSize: theme.fontSizes.regularSmall,
-    fontWeight: theme.fontWeights.medium as "500",
-    marginLeft: 6,
+    fontSize: 11,
+    marginTop: 2,
   },
 });

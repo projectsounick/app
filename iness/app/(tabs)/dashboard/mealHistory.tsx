@@ -155,7 +155,7 @@ export default function MealHistoryScreen() {
   Object.keys(historyData).forEach((dateKey) => {
     markedDates[dateKey] = {
       marked: true,
-      dotColor: "#9747FF",
+      dotColor: theme.colors.success || "#67C694",
     };
   });
 
@@ -163,7 +163,7 @@ export default function MealHistoryScreen() {
   markedDates[selectedDate] = {
     ...(markedDates[selectedDate] || {}),
     selected: true,
-    selectedColor: "#9747FF",
+    selectedColor: theme.colors.success || "#67C694",
     selectedTextColor: "#FFFFFF",
   };
 
@@ -276,32 +276,70 @@ export default function MealHistoryScreen() {
         </TouchableOpacity>
 
         <View style={styles.headerTitleBox}>
-          <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+          <Text style={[styles.headerTitle, { color: theme.colors.text }]} numberOfLines={1}>
             Nutrition Diary & History
           </Text>
         </View>
 
-        <TouchableOpacity
-          style={[
-            styles.calendarHeaderBtn,
-            {
-              backgroundColor: isDark
-                ? "rgba(151,71,255,0.18)"
-                : "rgba(151,71,255,0.1)",
-              borderColor: isDark
-                ? "rgba(151,71,255,0.35)"
-                : "rgba(151,71,255,0.22)",
-            },
-          ]}
-          onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-            setCalendarSheetVisible(true);
-          }}
-          activeOpacity={0.8}
-          accessibilityLabel="Open calendar"
-        >
-          <Ionicons name="calendar-outline" size={20} color="#9747FF" />
-        </TouchableOpacity>
+        <View style={styles.headerRightActions}>
+          {/* 🔥 Streak Counter Button - beside calendar, opens Habits & Streaks bottom sheet */}
+          <TouchableOpacity
+            style={[
+              styles.streakHeaderBtn,
+              {
+                backgroundColor: isDark
+                  ? "rgba(255, 107, 0, 0.16)"
+                  : "rgba(255, 107, 0, 0.1)",
+                borderColor: isDark
+                  ? "rgba(255, 107, 0, 0.35)"
+                  : "rgba(255, 107, 0, 0.25)",
+              },
+            ]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+              setBadgesModalVisible(true);
+            }}
+            activeOpacity={0.8}
+            accessibilityLabel={`Active streak: ${currentStreak} days. Tap to open habits and streak details.`}
+          >
+            <Text style={{ fontSize: 14 }}>🔥</Text>
+            <Text
+              style={[
+                styles.streakHeaderCount,
+                { color: isDark ? "#FFA756" : "#E65100" },
+              ]}
+            >
+              {currentStreak}
+            </Text>
+          </TouchableOpacity>
+
+          {/* 📅 Calendar Button (Green theme shade) */}
+          <TouchableOpacity
+            style={[
+              styles.calendarHeaderBtn,
+              {
+                backgroundColor: isDark
+                  ? "rgba(103, 198, 148, 0.16)"
+                  : "rgba(103, 198, 148, 0.12)",
+                borderColor: isDark
+                  ? "rgba(103, 198, 148, 0.35)"
+                  : "rgba(103, 198, 148, 0.25)",
+              },
+            ]}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+              setCalendarSheetVisible(true);
+            }}
+            activeOpacity={0.8}
+            accessibilityLabel="Open calendar"
+          >
+            <Ionicons
+              name="calendar-outline"
+              size={19}
+              color={theme.colors.success || "#67C694"}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       <FlatList
@@ -638,7 +676,11 @@ export default function MealHistoryScreen() {
                             day: "numeric",
                           })}
                     </Text>
-                    <Ionicons name="calendar-outline" size={15} color="#9747FF" />
+                    <Ionicons
+                      name="calendar-outline"
+                      size={15}
+                      color={theme.colors.success || "#67C694"}
+                    />
                   </View>
                   <Text style={[styles.summaryMealsCount, { color: theme.colors.textSecondary }]}>
                     {selectedDayEntry.mealsCount}{" "}
@@ -978,9 +1020,9 @@ export default function MealHistoryScreen() {
                   styles.todayJumpBtn,
                   {
                     backgroundColor: isDark
-                      ? "rgba(151,71,255,0.16)"
-                      : "rgba(151,71,255,0.08)",
-                    borderColor: "rgba(151,71,255,0.3)",
+                      ? "rgba(103, 198, 148, 0.16)"
+                      : "rgba(103, 198, 148, 0.08)",
+                    borderColor: "rgba(103, 198, 148, 0.3)",
                   },
                 ]}
                 onPress={() => {
@@ -990,8 +1032,19 @@ export default function MealHistoryScreen() {
                 }}
                 activeOpacity={0.7}
               >
-                <Ionicons name="today-outline" size={14} color="#9747FF" />
-                <Text style={styles.todayJumpBtnText}>Jump to Today</Text>
+                <Ionicons
+                  name="today-outline"
+                  size={14}
+                  color={theme.colors.success || "#67C694"}
+                />
+                <Text
+                  style={[
+                    styles.todayJumpBtnText,
+                    { color: theme.colors.success || "#67C694" },
+                  ]}
+                >
+                  Jump to Today
+                </Text>
               </TouchableOpacity>
             )}
 
@@ -1016,16 +1069,16 @@ export default function MealHistoryScreen() {
                 theme={{
                   calendarBackground: "transparent",
                   textSectionTitleColor: theme.colors.textSecondary,
-                  selectedDayBackgroundColor: "#9747FF",
+                  selectedDayBackgroundColor: theme.colors.success || "#67C694",
                   selectedDayTextColor: "#ffffff",
-                  todayTextColor: "#9747FF",
+                  todayTextColor: theme.colors.success || "#67C694",
                   dayTextColor: theme.colors.text,
                   textDisabledColor: theme.colors.textMuted,
-                  dotColor: "#9747FF",
+                  dotColor: theme.colors.success || "#67C694",
                   selectedDotColor: "#ffffff",
-                  arrowColor: "#9747FF",
+                  arrowColor: theme.colors.success || "#67C694",
                   monthTextColor: theme.colors.text,
-                  indicatorColor: "#9747FF",
+                  indicatorColor: theme.colors.success || "#67C694",
                   textDayFontWeight: "600",
                   textMonthFontWeight: "700",
                   textDayHeaderFontWeight: "600",
@@ -1254,11 +1307,29 @@ const styles = StyleSheet.create({
   },
   headerTitleBox: {
     flex: 1,
-    alignItems: "center",
+    marginHorizontal: 8,
   },
   headerTitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "700",
+  },
+  headerRightActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  streakHeaderBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 9,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: 1,
+    gap: 4,
+  },
+  streakHeaderCount: {
+    fontSize: 13,
+    fontWeight: "800",
   },
   calendarHeaderBtn: {
     width: 36,

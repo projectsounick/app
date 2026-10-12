@@ -129,7 +129,7 @@ export interface MealAnalysisResult {
 }
 
 export const mealLogService = {
-  // 1. Analyze Meal Image with Google Gemini
+  // 1. Analyze Meal Image with Google Gemini (Synchronous)
   analyzeMeal: async (params: {
     base64Image: string;
     mimeType?: string;
@@ -151,6 +151,82 @@ export const mealLogService = {
         success: false,
         message: error?.message || "Failed to analyze meal image. Please check your connection.",
       };
+    }
+  },
+
+  // 1b. Analyze Meal Image with Queue Background Processing (Asynchronous)
+  analyzeMealAsync: async (params: {
+    base64Image: string;
+    mimeType?: string;
+    hint?: string;
+    scanMode?: "food" | "label";
+  }): Promise<{
+    success: boolean;
+    async?: boolean;
+    jobId?: string;
+    status?: "pending" | "processing" | "completed" | "failed";
+    imageUrl?: string;
+    limitReached?: boolean;
+    isLocked?: boolean;
+    message?: string;
+  }> => {
+    try {
+      const response = await fetchWrapper.post(`${baseUrl}/meal-analyze`, {
+        ...params,
+        mode: "async",
+      });
+      return response;
+    } catch (error: any) {
+      console.error("mealLogService.analyzeMealAsync error:", error);
+      return {
+        success: false,
+        message: error?.message || "Failed to start async meal analysis. Please check your connection.",
+      };
+    }
+  },
+
+  // 1c. Poll or retrieve status of background meal analysis job
+  getMealAnalysisJobStatus: async (
+    jobId?: string,
+    latest?: boolean
+  ): Promise<{
+    success: boolean;
+    jobId?: string;
+    status?: "pending" | "processing" | "completed" | "failed";
+    data?: MealAnalysisResult;
+    imageUrl?: string;
+    isReviewed?: boolean;
+    error?: string;
+    message?: string;
+  }> => {
+    try {
+      const query = jobId
+        ? `?jobId=${encodeURIComponent(jobId)}`
+        : latest
+        ? "?latest=true"
+        : "";
+      const response = await fetchWrapper.get(`${baseUrl}/meal-analyze-status${query}`);
+      return response;
+    } catch (error: any) {
+      console.error("mealLogService.getMealAnalysisJobStatus error:", error);
+      return {
+        success: false,
+        status: "failed",
+        message: error?.message || "Failed to fetch job status",
+      };
+    }
+  },
+
+  // 1d. Mark background meal analysis job as reviewed
+  markJobReviewed: async (jobId: string): Promise<{ success: boolean }> => {
+    try {
+      const response = await fetchWrapper.put(
+        `${baseUrl}/meal-analyze-status?action=reviewed&jobId=${encodeURIComponent(jobId)}`,
+        {}
+      );
+      return response;
+    } catch {
+      return { success: false };
     }
   },
 
