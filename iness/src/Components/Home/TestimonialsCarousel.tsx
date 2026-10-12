@@ -1,5 +1,5 @@
 import { safeRouter } from "@/src/utils/safeRouter";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, memo } from "react";
 import {
   View,
   Text,
@@ -24,7 +24,7 @@ interface Testimonial {
   rating: number;
 }
 
-const TestimonialsCarousel = () => {
+const TestimonialsCarousel = memo(() => {
   const theme = useGlobalTheme();
   const { width } = useWindowDimensions();
   const { reduceMotion } = useDashboardActivity();
@@ -286,7 +286,7 @@ const TestimonialsCarousel = () => {
       {/* Dots - Removed */}
     </View>
   );
-};
+});
 
 const getStyles = (
   theme: any,

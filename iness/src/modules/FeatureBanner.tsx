@@ -1,5 +1,5 @@
 import { safeRouter } from "@/src/utils/safeRouter";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, memo } from "react";
 import {
   View,
   Text,
@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 import { useDashboardActivity } from "@/src/Components/Home/DashboardActivityContext";
 
-const FeatureBanner = () => {
+const FeatureBanner = memo(() => {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
   const { width } = useWindowDimensions();
@@ -177,7 +177,7 @@ const FeatureBanner = () => {
       </View>
     </TouchableOpacity>
   );
-};
+});
 
 const getStyles = (theme: any, isDark: boolean, compact: boolean) =>
   StyleSheet.create({

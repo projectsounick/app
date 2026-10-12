@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, memo } from "react";
 import {
   View,
   Text,
@@ -20,7 +20,7 @@ import MealMaintenanceBottomSheet from "../../Modals/MealMaintenanceBottomSheet"
 import eventBus from "@/event";
 
 // Circular Progress Component using react-native-svg
-function MacroCircleProgress({
+const MacroCircleProgress = memo(function MacroCircleProgress({
   label,
   value,
   target,
@@ -92,9 +92,9 @@ function MacroCircleProgress({
       </Text>
     </View>
   );
-}
+});
 
-export default function MealTrackingCard() {
+const MealTrackingCard = memo(function MealTrackingCard() {
   const theme = useGlobalTheme();
   const { isDark } = useTheme();
 
@@ -443,7 +443,9 @@ export default function MealTrackingCard() {
       />
     </View>
   );
-}
+});
+
+export default MealTrackingCard;
 
 const styles = StyleSheet.create({
   cardContainer: {

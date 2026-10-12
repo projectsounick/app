@@ -1,5 +1,5 @@
 import { safeRouter } from "@/src/utils/safeRouter";
-import React, { useRef, useEffect, useMemo, useState } from "react";
+import React, { useRef, useEffect, useMemo, useState, memo } from "react";
 import {
   View,
   Text,
@@ -38,7 +38,7 @@ const formatDateTime = (isoString: string) => {
   }
 };
 
-const UpcomingSessionsCard = () => {
+const UpcomingSessionsCard = memo(() => {
   const theme = useGlobalTheme();
   const { reduceMotion } = useDashboardActivity();
   const sessionsData = useSelector(
@@ -532,6 +532,6 @@ const UpcomingSessionsCard = () => {
       )}
     </View>
   );
-};
+});
 
 export default UpcomingSessionsCard;

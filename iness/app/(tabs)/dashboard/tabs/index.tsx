@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState, useRef } from "react";
-import { FlatList, Modal, View } from "react-native";
+import React, { useEffect, useMemo, useState, useRef, useCallback } from "react";
+import { FlatList, Modal, View, Platform } from "react-native";
 import { usePathname } from "expo-router";
 import { useGlobalTheme } from "@/src/Theme/ThemeContext";
 
@@ -281,6 +281,11 @@ const YourComponent = () => {
     return sections;
   }, [loggedUser, podCasts, showEmailPrompt]);
 
+  const renderSectionItem = useCallback(
+    ({ item }: { item: { key: string; content: React.ReactElement } }) => item.content,
+    []
+  );
+
   return (
     <DashboardActivityProvider>
       <SafeAreaView
@@ -310,10 +315,11 @@ const YourComponent = () => {
           style={{ flex: 1 }}
           data={homeSections}
           keyExtractor={(item) => item.key}
-          renderItem={({ item }) => item.content}
+          renderItem={renderSectionItem}
           initialNumToRender={4}
-          maxToRenderPerBatch={2}
-          windowSize={3}
+          maxToRenderPerBatch={3}
+          windowSize={7}
+          removeClippedSubviews={Platform.OS === "android"}
           contentContainerStyle={{
             paddingTop: 10,
             paddingBottom: 80 + Math.max(insets.bottom, 8),
