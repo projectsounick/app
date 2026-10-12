@@ -25,6 +25,7 @@ import { userService } from "@/src/services/user.service";
 import { asyncStorageUtils } from "@/utils/asyncStorageUtils";
 import { uploadToAzureFromExpo } from "@/utils/azureUtils";
 import { ResizeMode, Video } from "@/src/modules/AppVideo";
+import { Image as ExpoImage } from "expo-image";
 import { FeedExtrasModal, StoryViewersModal } from "./FeedExtrasModal";
 
 export type FeedFilter = "explore" | "following" | "company" | "saved" | "workouts";
@@ -553,7 +554,7 @@ export function FeedFeatureHeader({
               >
                 <View style={styles.storyAvatarInner}>
                   {currentUser?.profilePic ? (
-                    <Image source={{ uri: currentUser.profilePic }} style={styles.storyAvatarImage} />
+                    <ExpoImage source={{ uri: currentUser.profilePic }} style={styles.storyAvatarImage} contentFit="cover" allowDownscaling cachePolicy="memory-disk" />
                   ) : (
                     <Text style={styles.storyInitial}>
                       {currentUser?.name?.[0]?.toUpperCase() || "YOU"}
@@ -600,7 +601,7 @@ export function FeedFeatureHeader({
               <View style={[styles.storyRing, isViewed ? styles.storyRingViewed : styles.storyRingActive]}>
                 <View style={styles.storyAvatarInner}>
                   {item.createdBy?.profilePic ? (
-                    <Image source={{ uri: item.createdBy.profilePic }} style={styles.storyAvatarImage} />
+                    <ExpoImage source={{ uri: item.createdBy.profilePic }} style={styles.storyAvatarImage} contentFit="cover" allowDownscaling cachePolicy="memory-disk" />
                   ) : (
                     <Text style={styles.storyInitial}>
                       {item.createdBy?.name?.[0]?.toUpperCase() || "M"}
@@ -619,7 +620,7 @@ export function FeedFeatureHeader({
       {hub.highlights?.length ? (
         <View>
           <View style={styles.highlightHeader}><Text style={styles.highlightTitle}>Highlights</Text><TouchableOpacity onPress={() => openFeedCenter("archive")}><Text style={styles.highlightManage}>Manage</Text></TouchableOpacity></View>
-          <FlatList horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.highlightRail} data={hub.highlights} keyExtractor={(item: any) => item._id} renderItem={({ item }: any) => <TouchableOpacity style={styles.highlightItem} onPress={() => setSelectedStory({ ...item, _id: item.originalStoryId, isHighlight: true })}><View style={styles.highlightCircle}>{item.mediaUrl && item.mediaType === "image" ? <Image source={{ uri: item.mediaUrl }} style={styles.highlightImage} /> : <Ionicons name="star" size={22} color={theme.colors.secondPrimary} />}</View><Text numberOfLines={1} style={styles.highlightName}>{item.title}</Text></TouchableOpacity>} />
+          <FlatList horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.highlightRail} data={hub.highlights} keyExtractor={(item: any) => item._id} renderItem={({ item }: any) => <TouchableOpacity style={styles.highlightItem} onPress={() => setSelectedStory({ ...item, _id: item.originalStoryId, isHighlight: true })}><View style={styles.highlightCircle}>{item.mediaUrl && item.mediaType === "image" ? <ExpoImage source={{ uri: item.mediaUrl }} style={styles.highlightImage} contentFit="cover" allowDownscaling cachePolicy="memory-disk" /> : <Ionicons name="star" size={22} color={theme.colors.secondPrimary} />}</View><Text numberOfLines={1} style={styles.highlightName}>{item.title}</Text></TouchableOpacity>} />
         </View>
       ) : null}
 
@@ -646,7 +647,7 @@ export function FeedFeatureHeader({
               >
                 <View style={styles.topStreakAvatarContainer}>
                   {item.profilePic ? (
-                    <Image source={{ uri: item.profilePic }} style={styles.topStreakAvatar} />
+                    <ExpoImage source={{ uri: item.profilePic }} style={styles.topStreakAvatar} contentFit="cover" allowDownscaling cachePolicy="memory-disk" />
                   ) : (
                     <View style={styles.topStreakAvatarFallback}>
                       <Text style={styles.topStreakInitial}>
@@ -810,7 +811,7 @@ export function FeedFeatureHeader({
             {storyMedia ? (
               <View style={styles.storyMediaPreview}>
                 {storyMedia.type === "image" ? (
-                  <Image source={{ uri: storyMedia.uri }} style={styles.storyMediaImage} resizeMode="cover" />
+                  <ExpoImage source={{ uri: storyMedia.uri }} style={styles.storyMediaImage} contentFit="cover" allowDownscaling cachePolicy="memory-disk" />
                 ) : (
                   <View style={styles.storyVideoPreview}>
                     <Ionicons name="videocam" size={28} color={theme.colors.secondPrimary} />
@@ -925,7 +926,7 @@ export function FeedFeatureHeader({
               <View style={styles.storyViewerAuthor}>
                 <View style={styles.storyViewerAvatar}>
                   {selectedStory?.createdBy?.profilePic ? (
-                    <Image source={{ uri: selectedStory.createdBy.profilePic }} style={styles.storyViewerAvatarImg} />
+                    <ExpoImage source={{ uri: selectedStory.createdBy.profilePic }} style={styles.storyViewerAvatarImg} contentFit="cover" allowDownscaling cachePolicy="memory-disk" />
                   ) : (
                     <Text style={styles.storyInitial}>{selectedStory?.createdBy?.name?.[0]?.toUpperCase() || "I"}</Text>
                   )}
@@ -947,7 +948,7 @@ export function FeedFeatureHeader({
               onPressOut={resumeStoryProgress}
             >
               {selectedStory?.mediaUrl && selectedStory?.mediaType === "image" ? (
-                <Image source={{ uri: selectedStory.mediaUrl }} style={styles.storyViewerMedia} resizeMode="contain" />
+                <ExpoImage source={{ uri: selectedStory.mediaUrl }} style={styles.storyViewerMedia} contentFit="contain" allowDownscaling cachePolicy="memory-disk" />
               ) : null}
               {selectedStory?.mediaUrl && selectedStory?.mediaType === "video" ? (
                 <Video source={{ uri: selectedStory.mediaUrl }} style={styles.storyViewerMedia} useNativeControls shouldPlay isLooping resizeMode={ResizeMode.CONTAIN} />

@@ -30,6 +30,7 @@ const getCommentLanguageFilter = () => {
 };
 import { Ionicons } from "@expo/vector-icons";
 import { ResizeMode, Video } from "@/src/modules/AppVideo";
+import { Image as ExpoImage } from "expo-image";
 
 import * as Sharing from "expo-sharing";
 import * as Haptics from "expo-haptics";
@@ -199,10 +200,12 @@ const FeedVideoPlayer = memo(function FeedVideoPlayer({
       >
         {posterUri ? (
           <>
-            <Image
+            <ExpoImage
               source={{ uri: posterUri }}
               style={[styles.videoPosterImage, styles.videoPosterImageCover]}
-              resizeMode="cover"
+              contentFit="cover"
+              allowDownscaling
+              cachePolicy="memory-disk"
             />
             <View style={styles.videoPosterScrim} />
           </>
@@ -460,10 +463,12 @@ const BeforeAfterSplitSlider = memo(function BeforeAfterSplitSlider({
   return (
     <Pressable onPress={onDoubleTap} style={[styles.beforeAfterWrapper, { height: sliderHeight }]}>
       {/* Background layer: AFTER Image */}
-      <Image
+      <ExpoImage
         source={{ uri: afterUri }}
         style={[styles.beforeAfterBaseImage, { width: sliderWidth, height: sliderHeight }]}
-        resizeMode="cover"
+        contentFit="cover"
+        allowDownscaling
+        cachePolicy="memory-disk"
       />
 
       {/* Foreground clipped layer: BEFORE Image */}
@@ -473,10 +478,12 @@ const BeforeAfterSplitSlider = memo(function BeforeAfterSplitSlider({
           { width: sliderX, height: sliderHeight },
         ]}
       >
-        <Image
+        <ExpoImage
           source={{ uri: beforeUri }}
           style={[styles.beforeAfterBaseImage, { width: sliderWidth, height: sliderHeight }]}
-          resizeMode="cover"
+          contentFit="cover"
+          allowDownscaling
+          cachePolicy="memory-disk"
         />
       </View>
 
@@ -1781,9 +1788,11 @@ const CommunityPosts = ({
                     styles={styles}
                   />
                 ) : (
-                  <Image
+                  <ExpoImage
                     source={{ uri: mediaUrl }}
-                    resizeMode="cover"
+                    contentFit="cover"
+                    allowDownscaling
+                    cachePolicy="memory-disk"
                     style={styles.mediaImage}
                   />
                 )}
@@ -1903,10 +1912,12 @@ const CommunityPosts = ({
           accessibilityLabel={`View ${item.createdBy?.name || "member"}'s profile`}
         >
           {item.createdBy?.profilePic ? (
-            <Image
+            <ExpoImage
               source={{ uri: item.createdBy.profilePic }}
               style={styles.avatar}
-              resizeMode="cover"
+              contentFit="cover"
+              allowDownscaling
+              cachePolicy="memory-disk"
             />
           ) : (
             <View style={styles.avatarPlaceholder}>
@@ -2307,64 +2318,70 @@ const CommunityPosts = ({
   );
   };
 
-  const normalizedSearchQuery = feedSearchQuery.trim().replace(/^[@#]/, "").toLowerCase();
-  const filteredPosts = posts.filter((post) => {
-    const matchesFilter =
-      feedFilter === "saved"
-        ? post.savedByUser
-        : feedFilter === "workouts"
-        ? (post.contentType === "workout" ||
-           post.contentType === "transformation" ||
-           post.contentType === "progress" ||
-           Boolean(
-             post.metadata?.duration ||
-             post.metadata?.calories ||
-             post.metadata?.steps ||
-             post.metadata?.metric
-           ))
-        : feedFilter === "following"
-        ? post.followedByUser
-        : feedFilter === "company"
-        ? post.audience === "company"
-        : true;
-    if (!matchesFilter) return false;
-    if (!normalizedSearchQuery) return true;
+  const normalizedSearchQuery = useMemo(
+    () => feedSearchQuery.trim().replace(/^[@#]/, "").toLowerCase(),
+    [feedSearchQuery]
+  );
 
-    // Search author/people name thoroughly
-    const authorName = (
-      post.createdBy?.name ||
-      post.createdBy?.userName ||
-      post.createdBy?.username ||
-      post.createdByUser?.name ||
-      post.user?.name ||
-      post.author?.name ||
-      post.name ||
-      ""
-    ).toLowerCase();
+  const filteredPosts = useMemo(() => {
+    return posts.filter((post) => {
+      const matchesFilter =
+        feedFilter === "saved"
+          ? post.savedByUser
+          : feedFilter === "workouts"
+          ? (post.contentType === "workout" ||
+             post.contentType === "transformation" ||
+             post.contentType === "progress" ||
+             Boolean(
+               post.metadata?.duration ||
+               post.metadata?.calories ||
+               post.metadata?.steps ||
+               post.metadata?.metric
+             ))
+          : feedFilter === "following"
+          ? post.followedByUser
+          : feedFilter === "company"
+          ? post.audience === "company"
+          : true;
+      if (!matchesFilter) return false;
+      if (!normalizedSearchQuery) return true;
 
-    const nameMatches =
-      authorName.includes(normalizedSearchQuery) ||
-      (post.createdBy?.firstName &&
-        String(post.createdBy.firstName).toLowerCase().includes(normalizedSearchQuery)) ||
-      (post.createdBy?.lastName &&
-        String(post.createdBy.lastName).toLowerCase().includes(normalizedSearchQuery)) ||
-      (post.createdByUser?.userName &&
-        String(post.createdByUser.userName).toLowerCase().includes(normalizedSearchQuery));
+      // Search author/people name thoroughly
+      const authorName = (
+        post.createdBy?.name ||
+        post.createdBy?.userName ||
+        post.createdBy?.username ||
+        post.createdByUser?.name ||
+        post.user?.name ||
+        post.author?.name ||
+        post.name ||
+        ""
+      ).toLowerCase();
 
-    if (nameMatches) return true;
+      const nameMatches =
+        authorName.includes(normalizedSearchQuery) ||
+        (post.createdBy?.firstName &&
+          String(post.createdBy.firstName).toLowerCase().includes(normalizedSearchQuery)) ||
+        (post.createdBy?.lastName &&
+          String(post.createdBy.lastName).toLowerCase().includes(normalizedSearchQuery)) ||
+        (post.createdByUser?.userName &&
+          String(post.createdByUser.userName).toLowerCase().includes(normalizedSearchQuery));
 
-    const searchableText = [
-      post.text,
-      post.contentType,
-      ...(Array.isArray(post.hashtags) ? post.hashtags : []),
-      ...(Array.isArray(post.mentions) ? post.mentions : []),
-    ]
-      .filter(Boolean)
-      .join(" ")
-      .toLowerCase();
+      if (nameMatches) return true;
 
-    return searchableText.includes(normalizedSearchQuery);
-  });
+      const searchableText = [
+        post.text,
+        post.contentType,
+        ...(Array.isArray(post.hashtags) ? post.hashtags : []),
+        ...(Array.isArray(post.mentions) ? post.mentions : []),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(normalizedSearchQuery);
+    });
+  }, [posts, feedFilter, normalizedSearchQuery]);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.colors.background }}>
@@ -2389,10 +2406,10 @@ const CommunityPosts = ({
             }
             onViewableItemsChanged={onViewableItemsChanged}
             viewabilityConfig={FEED_VIEWABILITY_CONFIG}
-            initialNumToRender={4}
-            maxToRenderPerBatch={4}
-            windowSize={5}
-            removeClippedSubviews={Platform.OS === "android" ? false : true}
+            initialNumToRender={3}
+            maxToRenderPerBatch={3}
+            windowSize={7}
+            removeClippedSubviews={true}
             ListHeaderComponent={
               <FeedFeatureHeader
                 communityId={communityId}
@@ -2768,9 +2785,12 @@ const CommunityPosts = ({
                     <View style={styles.storyAuthorRow}>
                       <View style={styles.storyAuthorAvatar}>
                         {sharePostItem?.createdBy?.profilePic ? (
-                          <Image
+                          <ExpoImage
                             source={{ uri: sharePostItem.createdBy.profilePic }}
                             style={styles.storyAuthorAvatarImg}
+                            contentFit="cover"
+                            allowDownscaling
+                            cachePolicy="memory-disk"
                           />
                         ) : (
                           <Ionicons name="person" size={16} color="#FFF" />
@@ -2851,9 +2871,12 @@ const CommunityPosts = ({
                     <View style={styles.storyAuthorRow}>
                       <View style={styles.storyAuthorAvatar}>
                         {sharePostItem?.createdBy?.profilePic ? (
-                          <Image
+                          <ExpoImage
                             source={{ uri: sharePostItem.createdBy.profilePic }}
                             style={styles.storyAuthorAvatarImg}
+                            contentFit="cover"
+                            allowDownscaling
+                            cachePolicy="memory-disk"
                           />
                         ) : (
                           <Ionicons name="person" size={16} color="#FFF" />
