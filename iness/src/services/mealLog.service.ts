@@ -61,6 +61,7 @@ export interface DailyMealsResponse {
   dailyTotals: DailyMacroTotals;
   targets: DailyMacroTargets;
   streak?: number;
+  isLocked?: boolean;
 }
 
 export interface DaySummary {
@@ -138,6 +139,7 @@ export const mealLogService = {
     success: boolean;
     data?: MealAnalysisResult;
     limitReached?: boolean;
+    isLocked?: boolean;
     message?: string;
   }> => {
     try {
@@ -178,6 +180,7 @@ export const mealLogService = {
     remainingMeals?: number;
     maxMeals?: number;
     limitReached?: boolean;
+    isLocked?: boolean;
     message?: string;
   }> => {
     try {

@@ -16,6 +16,7 @@ import {
   DailyMealsResponse,
 } from "../../services/mealLog.service";
 import MealLogFlowModal from "../../Modals/MealLogFlowModal";
+import MealMaintenanceBottomSheet from "../../Modals/MealMaintenanceBottomSheet";
 import eventBus from "@/event";
 
 // Circular Progress Component using react-native-svg
@@ -100,6 +101,15 @@ export default function MealTrackingCard() {
   const [data, setData] = useState<DailyMealsResponse | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [modalVisible, setModalVisible] = useState<boolean>(false);
+  const [maintenanceVisible, setMaintenanceVisible] = useState<boolean>(false);
+
+  const handleOpenMealLogging = useCallback(() => {
+    if (data?.isLocked) {
+      setMaintenanceVisible(true);
+    } else {
+      setModalVisible(true);
+    }
+  }, [data?.isLocked]);
 
   const fetchDailyData = useCallback(async () => {
     try {
@@ -123,13 +133,13 @@ export default function MealTrackingCard() {
     };
 
     eventBus.on("meal-logged", onMealLogged);
-    eventBus.on("open-meal-logging", () => setModalVisible(true));
+    eventBus.on("open-meal-logging", handleOpenMealLogging);
 
     return () => {
       eventBus.off("meal-logged", onMealLogged);
-      eventBus.off("open-meal-logging");
+      eventBus.off("open-meal-logging", handleOpenMealLogging);
     };
-  }, [fetchDailyData]);
+  }, [fetchDailyData, handleOpenMealLogging]);
 
   const dailyTotals = data?.dailyTotals || {
     calories: 0,
@@ -177,9 +187,27 @@ export default function MealTrackingCard() {
             <Text style={[styles.cardTitle, { color: theme.colors.text }]}>
               Daily Nutrition & Macros
             </Text>
-            <Text style={[styles.cardSubtitle, { color: theme.colors.textSecondary }]}>
-              AI Meal Tracker • Resets midnight
-            </Text>
+            <View style={{ flexDirection: "row", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+              <Text style={[styles.cardSubtitle, { color: theme.colors.textSecondary }]}>
+                AI Meal Tracker • Resets midnight
+              </Text>
+              {data?.isLocked && (
+                <View
+                  style={{
+                    backgroundColor: isDark
+                      ? "rgba(245, 158, 11, 0.2)"
+                      : "rgba(245, 158, 11, 0.12)",
+                    paddingHorizontal: 6,
+                    paddingVertical: 1.5,
+                    borderRadius: 4,
+                  }}
+                >
+                  <Text style={{ fontSize: 9.5, fontWeight: "700", color: "#F59E0B" }}>
+                    MAINTENANCE
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
         </View>
 
@@ -205,7 +233,7 @@ export default function MealTrackingCard() {
           {/* Quick Arrow / Plus Action to Log Meal directly */}
           <TouchableOpacity
             style={[styles.arrowBtn, { backgroundColor: "#9747FF" }]}
-            onPress={() => setModalVisible(true)}
+            onPress={handleOpenMealLogging}
             activeOpacity={0.8}
             accessibilityLabel="Log a meal with AI"
           >
@@ -387,7 +415,7 @@ export default function MealTrackingCard() {
                   : "rgba(151,71,255,0.12)",
               },
             ]}
-            onPress={() => setModalVisible(true)}
+            onPress={handleOpenMealLogging}
             activeOpacity={0.7}
           >
             <Ionicons name="sparkles" size={14} color="#9747FF" />
@@ -406,6 +434,12 @@ export default function MealTrackingCard() {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         onMealSaved={fetchDailyData}
+      />
+
+      {/* MEAL MAINTENANCE BOTTOM SHEET */}
+      <MealMaintenanceBottomSheet
+        visible={maintenanceVisible}
+        onClose={() => setMaintenanceVisible(false)}
       />
     </View>
   );

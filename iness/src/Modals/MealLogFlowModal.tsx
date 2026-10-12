@@ -300,6 +300,12 @@ export default function MealLogFlowModal({
 
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
         setStep("review");
+      } else if (response.isLocked) {
+        Alert.alert(
+          "Under Maintenance 🛠️",
+          response.message || "Meal logging is currently undergoing maintenance. Please check back shortly.",
+          [{ text: "OK", onPress: handleClose }]
+        );
       } else if (response.limitReached) {
         Alert.alert("Daily Meal Limit Reached", response.message || "Daily limit reached.");
       } else {
@@ -502,6 +508,12 @@ export default function MealLogFlowModal({
           "Meal Logged! 🎉",
           `${mealName} saved successfully to your nutrition diary.`,
           [{ text: "Done", onPress: handleClose }]
+        );
+      } else if (response.isLocked) {
+        Alert.alert(
+          "Under Maintenance 🛠️",
+          response.message || "Meal logging is currently undergoing maintenance. Please check back shortly.",
+          [{ text: "OK", onPress: handleClose }]
         );
       } else if (response.limitReached) {
         Alert.alert("Daily Limit Reached", response.message || "Daily limit reached.");
