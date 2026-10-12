@@ -11,7 +11,8 @@ import {
   Platform,
 } from "react-native";
 
-import { Text, TouchableOpacity, Image } from "react-native";
+import { Text, TouchableOpacity } from "react-native";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather, Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
@@ -150,6 +151,9 @@ const withAnimatedHeader = (WrappedComponent: React.ComponentType<any>) => {
                   <Image
                     source={{ uri: userData.profilePic }}
                     style={{ width: 38, height: 38, borderRadius: 20 }}
+                    contentFit="cover"
+                    allowDownscaling
+                    cachePolicy="memory-disk"
                   />
                 ) : (
                   <Ionicons name="person" size={25} color={theme.colors.text} />

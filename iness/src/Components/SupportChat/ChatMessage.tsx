@@ -1,6 +1,7 @@
 import { safeRouter } from "@/src/utils/safeRouter";
 import React from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet, Linking } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Linking } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
 import { ChatMessageBubbleProps } from "@/src/interfaces/chatInterface";
@@ -139,7 +140,13 @@ const ChatMessage: React.FC<ChatMessageBubbleProps> = ({
               }}
             >
               {isImage ? (
-                <Image source={{ uri: fileUrl }} style={styles.attachmentImage} />
+                <Image
+                  source={{ uri: fileUrl }}
+                  style={styles.attachmentImage}
+                  contentFit="cover"
+                  allowDownscaling
+                  cachePolicy="memory-disk"
+                />
               ) : (
                 <View style={styles.fileAttachment}>
                   <Ionicons

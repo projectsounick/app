@@ -1,5 +1,6 @@
 import { safeRouter } from "@/src/utils/safeRouter";
-import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { Image } from "expo-image";
 import { Ionicons } from "@expo/vector-icons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useGlobalTheme, useTheme } from "@/src/Theme/ThemeContext";
@@ -84,7 +85,9 @@ export default function TransformationCard() {
                         <Image
                           source={{ uri: item.url }}
                           style={styles.thumbnailImage}
-                          resizeMode="cover"
+                          contentFit="cover"
+                          allowDownscaling
+                          cachePolicy="memory-disk"
                         />
                       )}
                     </View>

@@ -12,7 +12,7 @@ import {
   Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { Image } from "react-native";
+import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import AnimatedSubmitButton from "@/src/modules/AnimatedSubmitButton";
 import { PlanInterface } from "@/src/interfaces/planInterface";
@@ -301,7 +301,9 @@ const PlansInfo: React.FC<Props> = ({
                           height: 100,
                           borderRadius: 12,
                         }}
-                        resizeMode="cover"
+                        contentFit="cover"
+                        allowDownscaling
+                        cachePolicy="memory-disk"
                       />
                     </TouchableOpacity>
                   )
@@ -344,9 +346,11 @@ const PlansInfo: React.FC<Props> = ({
               style={{
                 width: "90%",
                 height: "70%",
-                resizeMode: "contain",
                 borderRadius: 12,
               }}
+              contentFit="contain"
+              allowDownscaling
+              cachePolicy="memory-disk"
             />
           ) : null}
         </View>

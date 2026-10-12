@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Text, ScrollView, Image } from "react-native";
+import { View, Text, ScrollView } from "react-native";
 import VideoCard from "@/src/modules/VideoCard";
 
 import SmallHeader from "@/src/modules/SmallHeader";
